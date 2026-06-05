@@ -91,8 +91,22 @@ body.art-hidden .col-right{display:none}
 .art-x:hover{color:var(--red)}
 .art-body{flex:1 1 auto;min-height:0;overflow-y:auto;padding:14px}
 .art-panel.hidden{display:none}
-.gphost{height:340px;background:var(--bg-card);border:1px solid var(--border-solid);border-radius:var(--radius-sm)}
-.legend{padding:9px 2px 0;font-size:.68rem;color:var(--text-muted);display:flex;flex-wrap:wrap;gap:8px}
+/* graph panel fills the artifact height so the mind-map scales adaptively */
+.art-panel[data-panel="graph"]:not(.hidden){display:flex;flex-direction:column;height:100%}
+.gpwrap{display:flex;flex-direction:column;flex:1 1 auto;min-height:0;gap:8px}
+.gptools{flex:0 0 auto;display:flex;align-items:center;gap:9px}
+.gpbtn{font-family:'Sora';font-size:.74rem;font-weight:600;padding:5px 12px;border:1px solid var(--border-solid);border-radius:50px;background:var(--bg-card);color:var(--accent);cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .15s}
+.gpbtn:hover{border-color:var(--accent)}.gpbtn:disabled{opacity:.5;cursor:default}
+.gpstep{font-size:.72rem;color:var(--text-muted);font-family:'Outfit';font-weight:600}
+.gphost{position:relative;flex:1 1 auto;min-height:240px;background:var(--bg-card);border:1px solid var(--border-solid);border-radius:var(--radius-sm);overflow:hidden}
+#art-graph{position:absolute;inset:0}
+.gpcap{position:absolute;left:10px;right:10px;top:10px;z-index:4;pointer-events:none;display:flex;justify-content:center}
+.gpcap .cap{background:rgba(15,43,91,.93);color:#fff;font-size:.78rem;font-weight:500;padding:6px 14px;border-radius:50px;box-shadow:0 6px 20px rgba(15,43,91,.28);max-width:92%;text-align:center;animation:capIn .32s ease both}
+@keyframes capIn{from{opacity:0;transform:translateY(-7px)}to{opacity:1;transform:none}}
+.pop-badge{position:absolute;z-index:5;pointer-events:none;display:flex;align-items:center;gap:5px;white-space:nowrap;font-size:.8rem;font-weight:700;color:#fff;background:rgba(232,114,74,.96);padding:5px 12px;border-radius:50px;box-shadow:0 8px 22px rgba(232,114,74,.45);will-change:transform,opacity;animation:popfloat 1.5s ease-out forwards}
+.pop-badge span{font-family:'Outfit'}
+@keyframes popfloat{0%{opacity:0;transform:translate(-50%,-45%) scale(.4)}16%{opacity:1;transform:translate(-50%,-118%) scale(1.16)}68%{opacity:1;transform:translate(-50%,-140%) scale(1)}100%{opacity:0;transform:translate(-50%,-178%) scale(.94)}}
+.legend{flex:0 0 auto;padding:0 2px;font-size:.68rem;color:var(--text-muted);display:flex;flex-wrap:wrap;gap:8px}
 .lg{display:inline-flex;align-items:center;gap:4px}.lg i{width:9px;height:9px;border-radius:2px;display:inline-block}
 .dz-card{background:var(--bg-card);border:1px solid var(--border-solid);border-radius:var(--radius-sm);padding:12px 14px}
 .dz-card .h{font-family:'Outfit';font-size:.95rem;font-weight:700;color:var(--red)}
@@ -188,6 +202,7 @@ const GROUPS={
   'drug-insufficient_data':{color:'#6B7280',label:'drug·no label'}, 'drug-emergency':{color:'#6B7280',label:'drug'}
 };
 let PATIENTS=[], CUR=-1, KEY='', PROVIDER='openai', ART_TAB='graph', _net=null;
+let _nodesDS=null,_edgesDS=null,_stages=[],_animTimers=[],_gpRO=null,_layout={};
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 function saveKey(){KEY=document.getElementById('apikey').value.trim();PROVIDER=document.getElementById('provider').value;
@@ -421,7 +436,10 @@ function renderArtifact(p){
   const legend=Object.values(GROUPS).map(g=>`<span class="lg"><i style="background:${g.color}"></i>${g.label}</span>`).join('');
   const body=document.getElementById('artBody');
   body.innerHTML=
-    `<div class="art-panel ${ART_TAB==='graph'?'':'hidden'}" data-panel="graph"><div class="gphost" id="art-graph"></div><div class="legend">${legend}</div></div>`+
+    `<div class="art-panel ${ART_TAB==='graph'?'':'hidden'}" data-panel="graph"><div class="gpwrap">`+
+      `<div class="gptools"><button class="gpbtn" id="replayBtn" onclick="playReasoning()">▶ Replay reasoning</button><span class="gpstep" id="gpStep"></span></div>`+
+      `<div class="gphost"><div id="art-graph"></div><div class="gpcap" id="gpCap"></div></div>`+
+      `<div class="legend">${legend}</div></div></div>`+
     `<div class="art-panel ${ART_TAB==='disease'?'':'hidden'}" data-panel="disease">${diseaseCardHtml(dm,b.openfda_loaded)}</div>`+
     `<div class="art-panel ${ART_TAB==='drugs'?'':'hidden'}" data-panel="drugs">${drugCardsHtml(res,dm)}</div>`;
   renderGraph(b.graph);
@@ -434,17 +452,115 @@ function artTab(name){
 }
 function renderGraph(g){
   const el=document.getElementById('art-graph');if(!el)return;
+  _clearAnim();
   if(typeof vis==='undefined'){el.innerHTML='<div class="placeholder">Graph library blocked (offline). See Disease / Drugs tabs.</div>';return;}
   const nodes=g.nodes.map(n=>({id:n.id,label:n.label,group:n.group,title:n.title||undefined}));
   const edges=g.edges.map(e=>({from:e.from,to:e.to,label:e.label||undefined,dashes:e.dashes||false,color:e.color?{color:e.color}:undefined}));
+  _stages=buildStages(nodes,edges);
+  // Build the FULL graph first to compute a stable layout, then freeze it. Revealing
+  // nodes against frozen coordinates means nothing reflows — only the camera moves,
+  // so a drug never gets "shaken off screen" when it pops.
+  _nodesDS=new vis.DataSet(nodes);_edgesDS=new vis.DataSet(edges);
   const groupOpts={};for(const k in GROUPS)groupOpts[k]={color:{background:GROUPS[k].color,border:GROUPS[k].color},font:{color:'#fff'}};
-  _net=new vis.Network(el,{nodes:new vis.DataSet(nodes),edges:new vis.DataSet(edges)},{
+  _net=new vis.Network(el,{nodes:_nodesDS,edges:_edgesDS},{
     nodes:{shape:'box',margin:7,font:{size:12,color:'#fff',face:'Sora'},borderWidth:0,widthConstraint:{maximum:125}},
     edges:{font:{size:9,color:'#6B7280',strokeWidth:3,strokeColor:'#fff'},color:{color:'#C5CEDB'},arrows:{to:{enabled:true,scaleFactor:.5}},smooth:{type:'cubicBezier'}},
-    groups:groupOpts,physics:{barnesHut:{gravitationalConstant:-6500,springLength:115,springConstant:.05},stabilization:{iterations:140}},
+    groups:groupOpts,physics:{barnesHut:{gravitationalConstant:-6500,springLength:115,springConstant:.05},stabilization:{iterations:200}},
     interaction:{hover:true,tooltipDelay:120}});
   _net.on('click',pr=>{if(pr.nodes.length&&pr.nodes[0].startsWith('drug:'))artTab('drugs');});
+  // adaptive scaling: refit the mind-map whenever its container changes size
+  if(_gpRO)_gpRO.disconnect();
+  _gpRO=new ResizeObserver(()=>{try{_net.setSize('100%','100%');_net.redraw();}catch(_){}});
+  _gpRO.observe(el);
+  let started=false;
+  const freezeAndPlay=()=>{
+    if(started)return;started=true;
+    try{_net.storePositions();}catch(_){}
+    _layout={};_nodesDS.get().forEach(n=>{if(n.x!=null)_layout[n.id]={x:n.x,y:n.y};});
+    try{_net.setOptions({physics:false});}catch(_){}
+    playReasoning();
+  };
+  _net.once('stabilizationIterationsDone',freezeAndPlay);
+  _animTimers.push(setTimeout(freezeAndPlay,1800)); // fallback if the event is missed
 }
+// ── reasoning playback: reveal stage by stage; camera glides to each drug then pops ──
+function playReasoning(){
+  if(!_net||!_stages.length||!_nodesDS)return;
+  _clearAnim();
+  _nodesDS.clear();_edgesDS.clear();
+  const btn=document.getElementById('replayBtn');if(btn)btn.disabled=true;
+  let t=0;
+  _stages.forEach((st,si)=>{
+    _animTimers.push(setTimeout(()=>_runStage(st,si),t));
+    t+=st.drug?1350:850;            // drug steps linger so each pop is clearly readable
+  });
+  _animTimers.push(setTimeout(_finishReplay,t+200));
+}
+function _runStage(st,si){
+  const stepEl=document.getElementById('gpStep'),capEl=document.getElementById('gpCap');
+  // place nodes at their frozen coordinates — no physics, no reflow
+  const ns=st.nodes.map(n=>{const p=_layout[n.id];return p?Object.assign({},n,{x:p.x,y:p.y}):n;});
+  try{_nodesDS.add(ns);_edgesDS.add(st.edges);}catch(_){}
+  if(stepEl)stepEl.textContent='step '+(si+1)+' / '+_stages.length;
+  _showCap(capEl,st.cap);
+  if(st.drug){
+    // camera glides to the drug and settles, THEN it pops (no global fit → no shake)
+    try{_net.focus(st.drug,{scale:1.15,animation:{duration:620,easingFunction:'easeInOutCubic'}});}catch(_){}
+    _animTimers.push(setTimeout(()=>_popDrug(st.drug),660));
+  }else{
+    try{_net.fit({animation:{duration:520,easingFunction:'easeInOutQuad'}});}catch(_){}
+  }
+}
+function _finishReplay(){
+  const btn=document.getElementById('replayBtn'),capEl=document.getElementById('gpCap');
+  if(btn)btn.disabled=false;if(capEl)capEl.innerHTML='';
+  try{_net.fit({animation:{duration:700,easingFunction:'easeInOutQuad'}});}catch(_){}
+}
+// ── reasoning animation: reveal the mind-map stage by stage, drugs pop last ──
+function _baseStage(group){
+  if(group==='patient')return 0;
+  if(group==='indication'||group==='flag')return 1;
+  if(group==='disease')return 2;
+  if(group==='pathology'||group==='symptom')return 3;
+  if(group==='target')return 4;
+  return 5; // drugs are placed individually below
+}
+function buildStages(nodes,edges){
+  const drugNodes=nodes.filter(n=>n.group&&n.group.indexOf('drug-')===0);
+  const ns={};
+  drugNodes.forEach((n,i)=>{ns[n.id]=5+i;});
+  nodes.forEach(n=>{if(!(n.id in ns))ns[n.id]=_baseStage(n.group);});
+  const last=5+Math.max(0,drugNodes.length-1);
+  const stages=[];for(let s=0;s<=last;s++)stages.push({nodes:[],edges:[],cap:'',drug:null});
+  nodes.forEach(n=>stages[ns[n.id]].nodes.push(n));
+  edges.forEach(e=>{const s=Math.max(ns[e.from]==null?0:ns[e.from],ns[e.to]==null?0:ns[e.to]);stages[s].edges.push(e);});
+  const labelOf=g=>{const n=nodes.find(x=>x.group===g);return n?n.label:'';};
+  stages[0].cap='👤 Patient presented';
+  if(stages[1])stages[1].cap='📋 Mapped to indication · '+(labelOf('indication')||'—');
+  if(stages[2])stages[2].cap='🧬 Disease world-model · '+(labelOf('disease')||'—');
+  if(stages[3])stages[3].cap='⚡ Pathophysiology — perturbations & symptoms';
+  if(stages[4])stages[4].cap='🎯 Treatment targets identified';
+  drugNodes.forEach((n,i)=>{stages[5+i].cap='💊 '+n.label+' · '+(n.group||'').replace('drug-','');stages[5+i].drug=n.id;});
+  return stages;
+}
+function _showCap(el,text){if(!el||!text)return;el.innerHTML='<div class="cap">'+esc(text)+'</div>';}
+function _popDrug(id){
+  const node=_nodesDS.get(id);if(!node)return;
+  const bg=(GROUPS[node.group]||{}).color||'#0F2B5B';
+  try{
+    _nodesDS.update({id,borderWidth:5,color:{background:bg,border:'#FFFFFF'},shadow:{enabled:true,color:'rgba(232,114,74,.95)',size:30,x:0,y:0}});
+    _animTimers.push(setTimeout(()=>{try{_nodesDS.update({id,borderWidth:0,color:{background:bg,border:bg},shadow:{enabled:false}});}catch(_){}},900));
+  }catch(_){}
+  try{
+    const pos=_net.getPositions([id])[id],dom=_net.canvasToDOM(pos),host=document.getElementById('art-graph');
+    const b=document.createElement('div');b.className='pop-badge';
+    b.innerHTML='💊 <span>'+esc(node.label)+'</span>';   // name the drug so the pop is unmistakable
+    b.style.left=dom.x+'px';b.style.top=dom.y+'px';host.appendChild(b);
+    _animTimers.push(setTimeout(()=>b.remove(),1500));
+  }catch(_){}
+}
+function _clearAnim(){_animTimers.forEach(clearTimeout);_animTimers=[];
+  document.querySelectorAll('#art-graph .pop-badge').forEach(b=>b.remove());} // drop orphaned pop badges
 // ── chat (stateless grounding) ──────────────────────────────────────────
 function ask(q){document.getElementById('chatInput').value=q;send();}
 function addMsg(cls,html){const b=document.getElementById('chat-box');const d=document.createElement('div');d.className=cls;d.innerHTML=html;b.appendChild(d);b.scrollTop=b.scrollHeight;return d;}
