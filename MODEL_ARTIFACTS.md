@@ -1,0 +1,28 @@
+# Model artifacts
+
+These local research artifacts are versioned with the implementation so a clone
+can reproduce the documented inference paths without retraining.
+
+| Artifact | Size | SHA-256 | Purpose |
+|---|---:|---|---|
+| `dka_intervention_jepa.pt` | 942 KiB | `fc0f4e3b1983bc0e9566d00d87394da5a20c4114b93cffb48f3b118b20943bc4` | Earlier action-conditioned DKA JEPA checkpoint. |
+| `dka_intervention_jepa_v4.pt` | 952 KiB | `71505038bed6ab2a78343abc080c01a6aaa0ed48d572e2bb7a2f227854cad7d7` | Route-aware insulin PK, potassium belief state, and hyperosmolar-risk checkpoint. |
+| `dka_symbolic_jepa_v5.pt` | 1.3 MiB | `f4767fec387af5093e59c4adf0eb6f53d9ce236d40741bdc48defd9ff4c79d27` | Symbolic-grounded checkpoint with direction, status, proof-path, and rule-proposal heads. |
+| `dka_real_world_adapter_v1.joblib` | 66 KiB | `f68f1604b679a240c6bf5fe9e8f1887b7831ccdd986ae04c804d9ca8d4956a4a` | Guarded factual residual adapter with ensemble uncertainty and state-wise fallback. |
+
+## Data boundary
+
+The repository does not include MIMIC parquet cohorts, fidelity JSONL files,
+patient-level out-of-fold CSV predictions, or candidate-rule files containing
+stay identifiers. Aggregate evaluation reports are included.
+
+The JEPA checkpoints were trained on the DKA simulator. The residual adapter was
+fitted on the local MIMIC-IV demo after patient-cross-fitted evaluation; it does
+not contain raw rows, but it has no untouched external validation set.
+
+## Safety boundary
+
+All artifacts are research-only and are not clinically validated. The residual
+adapter may correct factual forecasts under an observed treatment sequence. It
+must not be used to claim causal intervention effects. JEPA-generated rules stay
+in the candidate sandbox and cannot automatically modify active Osler rules.

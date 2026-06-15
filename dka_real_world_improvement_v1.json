@@ -1,0 +1,909 @@
+{
+  "experiment": "no-new-data real-world JEPA improvement",
+  "checkpoint": "dka_symbolic_jepa_v5.pt",
+  "cohort": "local MIMIC-IV demo cohort (not distributed)",
+  "evaluation": {
+    "type": "4-fold patient-stay cross-fitting",
+    "stays": 12,
+    "examples_with_core_state": 103,
+    "patient_leakage": false,
+    "hyperparameter_selection": "inner patient-group cross-validation"
+  },
+  "methods_tested": [
+    "treatment episode purity weighting",
+    "per-action propensity overlap weighting",
+    "propensity plus episode weighting",
+    "ridge real-world residual adapter",
+    "20-member patient-bootstrap adapter ensemble",
+    "temperature scaling",
+    "confidence and ensemble-agreement abstention"
+  ],
+  "numerical_all_windows": {
+    "persistence": {
+      "n": 561,
+      "normalized_mae": 0.29562
+    },
+    "base_jepa": {
+      "n": 561,
+      "normalized_mae": 0.52214
+    },
+    "adapter": {
+      "n": 561,
+      "normalized_mae": 0.4081
+    },
+    "ensemble_adapter": {
+      "n": 561,
+      "normalized_mae": 0.36295
+    },
+    "safe_hybrid": {
+      "n": 561,
+      "normalized_mae": 0.31605
+    },
+    "active_safe_hybrid": {
+      "n": 561,
+      "normalized_mae": 0.319
+    },
+    "per_state_mae": {
+      "G": {
+        "n": 44,
+        "persistence": 63.0,
+        "base_jepa": 145.784,
+        "ensemble_adapter": 57.1857,
+        "safe_hybrid": 68.1566,
+        "active_safe_hybrid": 59.3191
+      },
+      "pH": {
+        "n": 58,
+        "persistence": 0.0678,
+        "base_jepa": 0.0892,
+        "ensemble_adapter": 0.0924,
+        "safe_hybrid": 0.0678,
+        "active_safe_hybrid": 0.0678
+      },
+      "HCO3": {
+        "n": 43,
+        "persistence": 2.3488,
+        "base_jepa": 5.4721,
+        "ensemble_adapter": 3.1408,
+        "safe_hybrid": 3.223,
+        "active_safe_hybrid": 3.4055
+      },
+      "anion_gap": {
+        "n": 43,
+        "persistence": 2.9535,
+        "base_jepa": 3.2537,
+        "ensemble_adapter": 3.7268,
+        "safe_hybrid": 3.3675,
+        "active_safe_hybrid": 3.494
+      },
+      "Ke": {
+        "n": 48,
+        "persistence": 0.4125,
+        "base_jepa": 0.6623,
+        "ensemble_adapter": 0.5701,
+        "safe_hybrid": 0.4125,
+        "active_safe_hybrid": 0.4125
+      },
+      "MAP": {
+        "n": 101,
+        "persistence": 11.7426,
+        "base_jepa": 10.0654,
+        "ensemble_adapter": 11.6559,
+        "safe_hybrid": 12.5517,
+        "active_safe_hybrid": 11.7206
+      },
+      "Na": {
+        "n": 47,
+        "persistence": 3.1702,
+        "base_jepa": 8.5176,
+        "ensemble_adapter": 4.1539,
+        "safe_hybrid": 3.5683,
+        "active_safe_hybrid": 3.5891
+      },
+      "osmolality": {
+        "n": 45,
+        "persistence": 7.0642,
+        "base_jepa": 23.6758,
+        "ensemble_adapter": 7.3984,
+        "safe_hybrid": 7.2132,
+        "active_safe_hybrid": 7.2655
+      },
+      "creatinine": {
+        "n": 41,
+        "persistence": 0.3439,
+        "base_jepa": 0.3855,
+        "ensemble_adapter": 0.3672,
+        "safe_hybrid": 0.3439,
+        "active_safe_hybrid": 0.3439
+      },
+      "urine_output": {
+        "n": 91,
+        "persistence": 59.2775,
+        "base_jepa": 138.4659,
+        "ensemble_adapter": 93.1382,
+        "safe_hybrid": 59.2775,
+        "active_safe_hybrid": 68.9798
+      }
+    },
+    "adapter_vs_base_jepa": {
+      "normalized_mae_difference": -0.15981,
+      "bootstrap_95_ci": [
+        -0.184,
+        -0.13799
+      ]
+    },
+    "adapter_vs_persistence": {
+      "normalized_mae_difference": 0.06878,
+      "bootstrap_95_ci": [
+        0.01136,
+        0.16809
+      ]
+    },
+    "safe_hybrid_vs_base_jepa": {
+      "normalized_mae_difference": -0.20738,
+      "bootstrap_95_ci": [
+        -0.25839,
+        -0.17367
+      ]
+    },
+    "safe_hybrid_vs_persistence": {
+      "normalized_mae_difference": 0.02121,
+      "bootstrap_95_ci": [
+        -0.00913,
+        0.06315
+      ]
+    },
+    "active_safe_hybrid_vs_persistence": {
+      "normalized_mae_difference": 0.02459,
+      "bootstrap_95_ci": [
+        -0.00679,
+        0.07035
+      ]
+    }
+  },
+  "numerical_active_dka": {
+    "persistence": {
+      "n": 223,
+      "normalized_mae": 0.35789
+    },
+    "base_jepa": {
+      "n": 223,
+      "normalized_mae": 0.56781
+    },
+    "adapter": {
+      "n": 223,
+      "normalized_mae": 0.42439
+    },
+    "ensemble_adapter": {
+      "n": 223,
+      "normalized_mae": 0.37775
+    },
+    "safe_hybrid": {
+      "n": 223,
+      "normalized_mae": 0.34099
+    },
+    "active_safe_hybrid": {
+      "n": 223,
+      "normalized_mae": 0.34842
+    },
+    "per_state_mae": {
+      "G": {
+        "n": 17,
+        "persistence": 96.6471,
+        "base_jepa": 148.3214,
+        "ensemble_adapter": 45.6701,
+        "safe_hybrid": 70.0533,
+        "active_safe_hybrid": 47.1801
+      },
+      "pH": {
+        "n": 23,
+        "persistence": 0.0752,
+        "base_jepa": 0.0936,
+        "ensemble_adapter": 0.1013,
+        "safe_hybrid": 0.0752,
+        "active_safe_hybrid": 0.0752
+      },
+      "HCO3": {
+        "n": 16,
+        "persistence": 2.75,
+        "base_jepa": 5.2205,
+        "ensemble_adapter": 2.512,
+        "safe_hybrid": 2.665,
+        "active_safe_hybrid": 3.1553
+      },
+      "anion_gap": {
+        "n": 16,
+        "persistence": 3.25,
+        "base_jepa": 3.0388,
+        "ensemble_adapter": 3.5092,
+        "safe_hybrid": 2.871,
+        "active_safe_hybrid": 3.2109
+      },
+      "Ke": {
+        "n": 20,
+        "persistence": 0.44,
+        "base_jepa": 0.6896,
+        "ensemble_adapter": 0.6691,
+        "safe_hybrid": 0.44,
+        "active_safe_hybrid": 0.44
+      },
+      "MAP": {
+        "n": 41,
+        "persistence": 16.2683,
+        "base_jepa": 13.0363,
+        "ensemble_adapter": 13.3034,
+        "safe_hybrid": 14.8592,
+        "active_safe_hybrid": 12.8119
+      },
+      "Na": {
+        "n": 19,
+        "persistence": 4.1579,
+        "base_jepa": 9.8295,
+        "ensemble_adapter": 5.8455,
+        "safe_hybrid": 4.8286,
+        "active_safe_hybrid": 4.88
+      },
+      "osmolality": {
+        "n": 18,
+        "persistence": 9.534,
+        "base_jepa": 22.1216,
+        "ensemble_adapter": 8.6151,
+        "safe_hybrid": 9.3094,
+        "active_safe_hybrid": 9.4402
+      },
+      "creatinine": {
+        "n": 15,
+        "persistence": 0.34,
+        "base_jepa": 0.4819,
+        "ensemble_adapter": 0.3607,
+        "safe_hybrid": 0.34,
+        "active_safe_hybrid": 0.34
+      },
+      "urine_output": {
+        "n": 38,
+        "persistence": 56.4803,
+        "base_jepa": 150.3368,
+        "ensemble_adapter": 79.1594,
+        "safe_hybrid": 56.4803,
+        "active_safe_hybrid": 79.7149
+      }
+    },
+    "adapter_vs_base_jepa": {
+      "normalized_mae_difference": -0.18986,
+      "bootstrap_95_ci": [
+        -0.21723,
+        -0.16169
+      ]
+    },
+    "adapter_vs_persistence": {
+      "normalized_mae_difference": 0.02247,
+      "bootstrap_95_ci": [
+        -0.02452,
+        0.08896
+      ]
+    },
+    "safe_hybrid_vs_base_jepa": {
+      "normalized_mae_difference": -0.22873,
+      "bootstrap_95_ci": [
+        -0.27089,
+        -0.19834
+      ]
+    },
+    "safe_hybrid_vs_persistence": {
+      "normalized_mae_difference": -0.0164,
+      "bootstrap_95_ci": [
+        -0.05299,
+        0.01787
+      ]
+    },
+    "active_safe_hybrid_vs_persistence": {
+      "normalized_mae_difference": -0.00757,
+      "bootstrap_95_ci": [
+        -0.03699,
+        0.03431
+      ]
+    }
+  },
+  "weighting_ablation_all_windows": {
+    "persistence": {
+      "n": 561,
+      "normalized_mae": 0.29562
+    },
+    "base_jepa": {
+      "n": 561,
+      "normalized_mae": 0.52214
+    },
+    "ensemble_unweighted": {
+      "n": 561,
+      "normalized_mae": 0.37656
+    },
+    "ensemble_episode": {
+      "n": 561,
+      "normalized_mae": 0.36337
+    },
+    "ensemble_propensity": {
+      "n": 561,
+      "normalized_mae": 0.37299
+    },
+    "ensemble_combined": {
+      "n": 561,
+      "normalized_mae": 0.36726
+    }
+  },
+  "weighting_ablation_active_dka": {
+    "persistence": {
+      "n": 223,
+      "normalized_mae": 0.35789
+    },
+    "base_jepa": {
+      "n": 223,
+      "normalized_mae": 0.56781
+    },
+    "ensemble_unweighted": {
+      "n": 223,
+      "normalized_mae": 0.38101
+    },
+    "ensemble_episode": {
+      "n": 223,
+      "normalized_mae": 0.37124
+    },
+    "ensemble_propensity": {
+      "n": 223,
+      "normalized_mae": 0.37474
+    },
+    "ensemble_combined": {
+      "n": 223,
+      "normalized_mae": 0.38495
+    }
+  },
+  "symbolic_calibration": {
+    "all_before": {
+      "n": 561,
+      "accuracy": 0.508,
+      "mean_confidence": 0.9183,
+      "ece": 0.4103,
+      "brier": 0.8795
+    },
+    "all_after_temperature_scaling": {
+      "n": 561,
+      "accuracy": 0.508,
+      "mean_confidence": 0.4297,
+      "ece": 0.0783,
+      "brier": 0.6425
+    },
+    "changed_before": {
+      "n": 501,
+      "accuracy": 0.5509,
+      "mean_confidence": 0.9231,
+      "ece": 0.3722,
+      "brier": 0.8132
+    },
+    "changed_after_temperature_scaling": {
+      "n": 501,
+      "accuracy": 0.5509,
+      "mean_confidence": 0.4306,
+      "ece": 0.1203,
+      "brier": 0.6366
+    },
+    "abstention_changed_only": [
+      {
+        "threshold": 0.5,
+        "coverage": 0.0978,
+        "accepted": 49,
+        "accuracy": 0.6327,
+        "abstained": 452
+      },
+      {
+        "threshold": 0.6,
+        "coverage": 0.0,
+        "accepted": 0,
+        "accuracy": null,
+        "abstained": 501
+      },
+      {
+        "threshold": 0.7,
+        "coverage": 0.0,
+        "accepted": 0,
+        "accuracy": null,
+        "abstained": 501
+      },
+      {
+        "threshold": 0.8,
+        "coverage": 0.0,
+        "accepted": 0,
+        "accuracy": null,
+        "abstained": 501
+      },
+      {
+        "threshold": 0.9,
+        "coverage": 0.0,
+        "accepted": 0,
+        "accuracy": null,
+        "abstained": 501
+      }
+    ]
+  },
+  "ensemble_abstention_changed_only": [
+    {
+      "agreement_threshold": 0.5,
+      "coverage": 0.9683,
+      "n": 488,
+      "changed_direction_accuracy": 0.6066
+    },
+    {
+      "agreement_threshold": 0.6,
+      "coverage": 0.8631,
+      "n": 435,
+      "changed_direction_accuracy": 0.6299
+    },
+    {
+      "agreement_threshold": 0.7,
+      "coverage": 0.748,
+      "n": 377,
+      "changed_direction_accuracy": 0.6552
+    },
+    {
+      "agreement_threshold": 0.8,
+      "coverage": 0.6429,
+      "n": 324,
+      "changed_direction_accuracy": 0.6667
+    },
+    {
+      "agreement_threshold": 0.9,
+      "coverage": 0.5258,
+      "n": 265,
+      "changed_direction_accuracy": 0.7132
+    },
+    {
+      "agreement_threshold": 1.0,
+      "coverage": 0.3274,
+      "n": 165,
+      "changed_direction_accuracy": 0.7576
+    }
+  ],
+  "selected_configurations": [
+    {
+      "state": "G",
+      "weight_mode": "combined",
+      "alpha": 10.0,
+      "outer_folds_selected": 1
+    },
+    {
+      "state": "G",
+      "weight_mode": "propensity",
+      "alpha": 10.0,
+      "outer_folds_selected": 1
+    },
+    {
+      "state": "G",
+      "weight_mode": "unweighted",
+      "alpha": 10.0,
+      "outer_folds_selected": 2
+    },
+    {
+      "state": "HCO3",
+      "weight_mode": "combined",
+      "alpha": 100.0,
+      "outer_folds_selected": 3
+    },
+    {
+      "state": "HCO3",
+      "weight_mode": "unweighted",
+      "alpha": 0.1,
+      "outer_folds_selected": 1
+    },
+    {
+      "state": "Ke",
+      "weight_mode": "propensity",
+      "alpha": 100.0,
+      "outer_folds_selected": 3
+    },
+    {
+      "state": "Ke",
+      "weight_mode": "unweighted",
+      "alpha": 100.0,
+      "outer_folds_selected": 1
+    },
+    {
+      "state": "MAP",
+      "weight_mode": "combined",
+      "alpha": 100.0,
+      "outer_folds_selected": 3
+    },
+    {
+      "state": "MAP",
+      "weight_mode": "unweighted",
+      "alpha": 100.0,
+      "outer_folds_selected": 1
+    },
+    {
+      "state": "Na",
+      "weight_mode": "combined",
+      "alpha": 1.0,
+      "outer_folds_selected": 1
+    },
+    {
+      "state": "Na",
+      "weight_mode": "combined",
+      "alpha": 100.0,
+      "outer_folds_selected": 1
+    },
+    {
+      "state": "Na",
+      "weight_mode": "episode",
+      "alpha": 100.0,
+      "outer_folds_selected": 1
+    },
+    {
+      "state": "Na",
+      "weight_mode": "propensity",
+      "alpha": 100.0,
+      "outer_folds_selected": 1
+    },
+    {
+      "state": "anion_gap",
+      "weight_mode": "combined",
+      "alpha": 10.0,
+      "outer_folds_selected": 1
+    },
+    {
+      "state": "anion_gap",
+      "weight_mode": "combined",
+      "alpha": 100.0,
+      "outer_folds_selected": 1
+    },
+    {
+      "state": "anion_gap",
+      "weight_mode": "episode",
+      "alpha": 100.0,
+      "outer_folds_selected": 2
+    },
+    {
+      "state": "creatinine",
+      "weight_mode": "combined",
+      "alpha": 100.0,
+      "outer_folds_selected": 2
+    },
+    {
+      "state": "creatinine",
+      "weight_mode": "episode",
+      "alpha": 100.0,
+      "outer_folds_selected": 1
+    },
+    {
+      "state": "creatinine",
+      "weight_mode": "propensity",
+      "alpha": 100.0,
+      "outer_folds_selected": 1
+    },
+    {
+      "state": "osmolality",
+      "weight_mode": "combined",
+      "alpha": 100.0,
+      "outer_folds_selected": 4
+    },
+    {
+      "state": "pH",
+      "weight_mode": "propensity",
+      "alpha": 10.0,
+      "outer_folds_selected": 1
+    },
+    {
+      "state": "pH",
+      "weight_mode": "propensity",
+      "alpha": 100.0,
+      "outer_folds_selected": 2
+    },
+    {
+      "state": "pH",
+      "weight_mode": "unweighted",
+      "alpha": 100.0,
+      "outer_folds_selected": 1
+    },
+    {
+      "state": "urine_output",
+      "weight_mode": "combined",
+      "alpha": 100.0,
+      "outer_folds_selected": 2
+    },
+    {
+      "state": "urine_output",
+      "weight_mode": "propensity",
+      "alpha": 100.0,
+      "outer_folds_selected": 1
+    },
+    {
+      "state": "urine_output",
+      "weight_mode": "unweighted",
+      "alpha": 100.0,
+      "outer_folds_selected": 1
+    }
+  ],
+  "safe_hybrid_selected_configurations": [
+    {
+      "state": "G",
+      "method": "adapter",
+      "weight_mode": "combined",
+      "alpha": 10.0,
+      "outer_folds_selected": 1
+    },
+    {
+      "state": "G",
+      "method": "adapter",
+      "weight_mode": "propensity",
+      "alpha": 10.0,
+      "outer_folds_selected": 1
+    },
+    {
+      "state": "G",
+      "method": "adapter",
+      "weight_mode": "unweighted",
+      "alpha": 10.0,
+      "outer_folds_selected": 1
+    },
+    {
+      "state": "G",
+      "method": "persistence",
+      "weight_mode": null,
+      "alpha": null,
+      "outer_folds_selected": 1
+    },
+    {
+      "state": "HCO3",
+      "method": "adapter",
+      "weight_mode": "combined",
+      "alpha": 100.0,
+      "outer_folds_selected": 1
+    },
+    {
+      "state": "HCO3",
+      "method": "persistence",
+      "weight_mode": null,
+      "alpha": null,
+      "outer_folds_selected": 3
+    },
+    {
+      "state": "Ke",
+      "method": "persistence",
+      "weight_mode": null,
+      "alpha": null,
+      "outer_folds_selected": 4
+    },
+    {
+      "state": "MAP",
+      "method": "adapter",
+      "weight_mode": "combined",
+      "alpha": 100.0,
+      "outer_folds_selected": 1
+    },
+    {
+      "state": "MAP",
+      "method": "adapter",
+      "weight_mode": "unweighted",
+      "alpha": 100.0,
+      "outer_folds_selected": 1
+    },
+    {
+      "state": "MAP",
+      "method": "base_jepa",
+      "weight_mode": null,
+      "alpha": null,
+      "outer_folds_selected": 2
+    },
+    {
+      "state": "Na",
+      "method": "adapter",
+      "weight_mode": "propensity",
+      "alpha": 100.0,
+      "outer_folds_selected": 1
+    },
+    {
+      "state": "Na",
+      "method": "persistence",
+      "weight_mode": null,
+      "alpha": null,
+      "outer_folds_selected": 3
+    },
+    {
+      "state": "anion_gap",
+      "method": "adapter",
+      "weight_mode": "combined",
+      "alpha": 10.0,
+      "outer_folds_selected": 1
+    },
+    {
+      "state": "anion_gap",
+      "method": "base_jepa",
+      "weight_mode": null,
+      "alpha": null,
+      "outer_folds_selected": 1
+    },
+    {
+      "state": "anion_gap",
+      "method": "persistence",
+      "weight_mode": null,
+      "alpha": null,
+      "outer_folds_selected": 2
+    },
+    {
+      "state": "creatinine",
+      "method": "persistence",
+      "weight_mode": null,
+      "alpha": null,
+      "outer_folds_selected": 4
+    },
+    {
+      "state": "osmolality",
+      "method": "adapter",
+      "weight_mode": "combined",
+      "alpha": 100.0,
+      "outer_folds_selected": 1
+    },
+    {
+      "state": "osmolality",
+      "method": "persistence",
+      "weight_mode": null,
+      "alpha": null,
+      "outer_folds_selected": 3
+    },
+    {
+      "state": "pH",
+      "method": "persistence",
+      "weight_mode": null,
+      "alpha": null,
+      "outer_folds_selected": 4
+    },
+    {
+      "state": "urine_output",
+      "method": "persistence",
+      "weight_mode": null,
+      "alpha": null,
+      "outer_folds_selected": 4
+    }
+  ],
+  "active_safe_hybrid_selected_configurations": [
+    {
+      "state": "G",
+      "method": "adapter",
+      "weight_mode": "combined",
+      "alpha": 100.0,
+      "outer_folds_selected": 1
+    },
+    {
+      "state": "G",
+      "method": "adapter",
+      "weight_mode": "unweighted",
+      "alpha": 10.0,
+      "outer_folds_selected": 3
+    },
+    {
+      "state": "HCO3",
+      "method": "adapter",
+      "weight_mode": "combined",
+      "alpha": 100.0,
+      "outer_folds_selected": 1
+    },
+    {
+      "state": "HCO3",
+      "method": "persistence",
+      "weight_mode": null,
+      "alpha": null,
+      "outer_folds_selected": 3
+    },
+    {
+      "state": "Ke",
+      "method": "persistence",
+      "weight_mode": null,
+      "alpha": null,
+      "outer_folds_selected": 4
+    },
+    {
+      "state": "MAP",
+      "method": "adapter",
+      "weight_mode": "combined",
+      "alpha": 100.0,
+      "outer_folds_selected": 2
+    },
+    {
+      "state": "MAP",
+      "method": "adapter",
+      "weight_mode": "episode",
+      "alpha": 100.0,
+      "outer_folds_selected": 2
+    },
+    {
+      "state": "Na",
+      "method": "adapter",
+      "weight_mode": "propensity",
+      "alpha": 100.0,
+      "outer_folds_selected": 1
+    },
+    {
+      "state": "Na",
+      "method": "persistence",
+      "weight_mode": null,
+      "alpha": null,
+      "outer_folds_selected": 3
+    },
+    {
+      "state": "anion_gap",
+      "method": "adapter",
+      "weight_mode": "combined",
+      "alpha": 10.0,
+      "outer_folds_selected": 1
+    },
+    {
+      "state": "anion_gap",
+      "method": "base_jepa",
+      "weight_mode": null,
+      "alpha": null,
+      "outer_folds_selected": 3
+    },
+    {
+      "state": "creatinine",
+      "method": "persistence",
+      "weight_mode": null,
+      "alpha": null,
+      "outer_folds_selected": 4
+    },
+    {
+      "state": "osmolality",
+      "method": "adapter",
+      "weight_mode": "combined",
+      "alpha": 100.0,
+      "outer_folds_selected": 3
+    },
+    {
+      "state": "osmolality",
+      "method": "persistence",
+      "weight_mode": null,
+      "alpha": null,
+      "outer_folds_selected": 1
+    },
+    {
+      "state": "pH",
+      "method": "persistence",
+      "weight_mode": null,
+      "alpha": null,
+      "outer_folds_selected": 4
+    },
+    {
+      "state": "urine_output",
+      "method": "adapter",
+      "weight_mode": "propensity",
+      "alpha": 10.0,
+      "outer_folds_selected": 1
+    },
+    {
+      "state": "urine_output",
+      "method": "persistence",
+      "weight_mode": null,
+      "alpha": null,
+      "outer_folds_selected": 3
+    }
+  ],
+  "deployment_artifact": {
+    "path": "dka_real_world_adapter_v1.joblib",
+    "adapted_states": [
+      "G",
+      "pH",
+      "HCO3",
+      "anion_gap",
+      "Ke",
+      "MAP",
+      "Na",
+      "osmolality",
+      "creatinine",
+      "urine_output"
+    ],
+    "trained_on_all_demo_stays_after_evaluation": true,
+    "clinical_use_allowed": false
+  },
+  "limitations": [
+    "No new data were added; only 12 patient stays are available.",
+    "Propensity overlap cannot remove unmeasured confounding.",
+    "Most DKA episodes contain multiple simultaneous treatments.",
+    "Cross-fitted estimates remain high variance at this cohort size.",
+    "The deployment artifact has no untouched external validation set."
+  ]
+}
