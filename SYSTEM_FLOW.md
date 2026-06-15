@@ -36,6 +36,15 @@ tools, but every clinical decision still comes from the symbolic functions.
 
 ## Numerical JEPA-to-Osler Path
 
+The control loop is now explicitly neuro-symbolic and embodied: patient state is
+the environment observation, an intervention is the action, JEPA predicts the
+continuous future state, and `rules/active/dka_embodied.pl` decides whether the
+action is allowed, blocked, or requires a co-intervention. The grounded Prolog
+engine returns a proof tree for every conclusion and checks JEPA's predicted
+effect direction. `osler_jepa/validator.py` remains the differentiable mirror
+used during training; a regression test prevents it from drifting away from the
+human-owned Prolog rule pack.
+
 1. `dka_body.py` defines the continuous physiological state and transition rules.
    Each simulated patient has sampled body size, renal reserve, insulin response,
    stress drive, fluid response, vascular tone, potassium store, and endogenous

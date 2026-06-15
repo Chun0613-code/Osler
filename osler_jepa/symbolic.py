@@ -1,7 +1,8 @@
 """Symbolic supervision shared by the DKA JEPA and Osler validator.
 
 The neural model may predict transitions and propose observational rules. The
-active rule set remains owned by :mod:`osler_jepa.validator`.
+active rule set remains human-owned under ``rules/active``. The differentiable
+validator mirrors the Prolog effect rules for neural training.
 """
 
 from __future__ import annotations
@@ -108,7 +109,8 @@ def schema(state_keys, action_keys, ontology):
     return {
         "version": "1.0.0",
         "ownership": {
-            "active_rules": "Osler validator and human review",
+            "active_rules": "rules/active/dka_embodied.pl and human review",
+            "training_mirror": "osler_jepa.validator",
             "candidate_rules": "JEPA observational proposals only",
         },
         "state_variables": [

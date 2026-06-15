@@ -19,6 +19,7 @@ from dka_world_model import (
 from osler_jepa.actions import Intervention, TemporalActionEncoder
 from osler_jepa.ontology import OSLER_STATE_ONTOLOGY
 from osler_jepa.validator import OSLER_DKA_VALIDATOR
+from osler_jepa.embodied_logic import OSLER_DKA_PROLOG
 from osler_jepa.rule_sandbox import RuleSandbox
 from osler_jepa.rule_inducer import validate_candidates
 from osler_jepa.real_world_adapter import RealWorldAdapter
@@ -35,6 +36,48 @@ from reasoning_engine import mechanism_candidates
 
 
 class NumericalJEPATests(unittest.TestCase):
+    def test_prolog_blocks_insulin_during_critical_hypokalemia(self):
+        result = OSLER_DKA_PROLOG.evaluate(
+            state={"G": 480, "Ke": 2.8, "pH": 7.1},
+            proposed_action={"insulin_iv": 6.0},
+            applied_action={},
+            future={"G": 470.0},
+            baseline_future={"G": 480.0},
+        )
+        self.assertEqual(result["decision"], "block")
+        self.assertEqual(result["blocked_actions"][0]["action"], "insulin_iv")
+        self.assertIn("proofs", result["blocked_actions"][0])
+
+    def test_prolog_is_final_veto_after_symbolic_policy(self):
+        safe_action, trace = OSLER_DKA_PROLOG.gate(
+            {"G": 480, "Ke": 2.8, "pH": 6.9},
+            {"insulin_iv": 4.0, "kcl": 20.0},
+        )
+        self.assertEqual(safe_action[ACTION_INDEX["insulin_iv"]], 0.0)
+        self.assertTrue(any(item["type"] == "prolog_veto" for item in trace))
+
+    def test_prolog_requires_potassium_with_low_k_insulin(self):
+        result = OSLER_DKA_PROLOG.evaluate(
+            state={"G": 480, "Ke": 3.1, "pH": 7.1},
+            proposed_action={"insulin_iv": 6.0},
+            applied_action={"insulin_iv": 6.0, "kcl": 10.0},
+            future={"G": 430.0, "Ke": 3.2, "K_store": 90.0},
+            baseline_future={"G": 480.0, "Ke": 3.1, "K_store": 80.0},
+        )
+        self.assertEqual(result["decision"], "modify")
+        self.assertEqual(
+            result["required_cointerventions"][0]["action"], "kcl"
+        )
+        checks = {check["rule_id"]: check for check in result["effect_checks"]}
+        self.assertEqual(checks["iv_insulin_lowers_glucose"]["status"], "verified")
+        self.assertEqual(
+            checks["kcl_raises_total_body_store"]["status"], "verified"
+        )
+
+    def test_prolog_rule_pack_covers_differentiable_validator(self):
+        alignment = OSLER_DKA_PROLOG.validator_alignment(OSLER_DKA_VALIDATOR)
+        self.assertTrue(alignment["aligned"], alignment)
+
     def test_neutral_patient_profile_preserves_original_start(self):
         body = DKABody(profile=DKAPatientProfile())
         self.assertAlmostEqual(body.V, 12.0)
@@ -430,6 +473,11 @@ class NumericalJEPATests(unittest.TestCase):
             len(result["jepa_symbolic_transition"]["transitions"]), S_DIM
         )
         self.assertIn("osler_transition_validation", result)
+        self.assertIn("osler_prolog_reasoning", result)
+        self.assertIn(
+            result["osler_prolog_reasoning"]["decision"],
+            {"allow", "modify", "block"},
+        )
         self.assertIn(
             result["osler_transition_validation"]["status"],
             {"verified", "contradicted", "unexplained"},

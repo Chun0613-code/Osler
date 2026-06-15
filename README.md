@@ -53,6 +53,7 @@ Osler/
 ├── predict_dka_intervention.py Compare a proposed intervention with no treatment.
 ├── dka_osler.py             Symbolic shield, mechanism checks, reasoning trace.
 ├── osler_jepa/              Shared ontology, action schema, curriculum, validator.
+├── rules/active/dka_embodied.pl  Human-owned Prolog action/effect rules.
 ├── dka_*.py                 Calibration and real-data validation utilities.
 ├── SYSTEM_FLOW.md           Current symbolic and numerical JEPA flows.
 ├── OSLER_JEPA_ROADMAP.md    Target architecture, promotion gates, next build order.
@@ -127,6 +128,13 @@ be written to `rules/candidate/`; `rules/active/` is immutable during JEPA runs.
 `symbolic_real_test.py` splits MIMIC by patient stay before discovery and held-out
 testing. Passing that gate means retrospective reproducibility only, never a
 causal claim or automatic promotion into the live symbolic engine.
+
+`osler_jepa/embodied_logic.py` closes the embodied reasoning loop around JEPA.
+It converts patient state and interventions into grounded facts, executes the
+active Prolog-compatible rules, emits action preconditions and required
+co-interventions, validates predicted effect directions, and returns recursive
+proof trees. JEPA remains the continuous world model; Prolog remains the final
+logical explanation and veto layer.
 
 `real_world_improvement.py` tests episode and propensity weighting, a small
 real-world residual adapter, patient-bootstrap ensembles, temperature scaling,

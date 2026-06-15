@@ -27,6 +27,7 @@ from dka_world_model import (
     s2vec,
 )
 from osler_jepa.validator import OSLER_DKA_VALIDATOR
+from osler_jepa.embodied_logic import OSLER_DKA_PROLOG
 from osler_jepa.ontology import OSLER_STATE_ONTOLOGY
 from osler_jepa.symbolic import DIRECTION_NAMES, RULE_IDS, STATUS_NAMES
 
@@ -68,6 +69,13 @@ def predict(model, state, action, hours, device, apply_osler=False, history=None
         trace = []
         if apply_osler:
             step_action, trace = shield_route_aware(current_state, step_action)
+            step_action, prolog_trace = OSLER_DKA_PROLOG.gate(
+                current_state, step_action
+            )
+            trace = [
+                {"type": "symbolic_policy", "explanation": item}
+                for item in trace
+            ] + prolog_trace
         latent = model.predict_latent(
             latent,
             torch.as_tensor(
@@ -117,9 +125,19 @@ def compare(model, state, proposed_action, hours, device, input_warnings=None,
         key: round(treated_final[key] - untreated_final[key], 4)
         for key in STATE_KEYS
     }
-    mean_action = np.mean([a2vec(action) for action in applied_actions], axis=0)
+    mean_physical_action = np.mean(
+        [expand_action(action) for action in applied_actions], axis=0
+    )
+    mean_action = mean_physical_action / A_SCALE
     osler_validation = OSLER_DKA_VALIDATOR.validate(
         mean_action, treated_final, untreated_final
+    )
+    prolog_reasoning = OSLER_DKA_PROLOG.evaluate(
+        state=state,
+        proposed_action=proposed_action,
+        applied_action=mean_physical_action,
+        future=treated_final,
+        baseline_future=untreated_final,
     )
     history_tensor = None if history is None else torch.as_tensor(
         history, dtype=torch.float32, device=device
@@ -188,6 +206,7 @@ def compare(model, state, proposed_action, hours, device, input_warnings=None,
         "predicted_effect_at_final_horizon": effect,
         "jepa_symbolic_transition": symbolic_transition,
         "osler_transition_validation": osler_validation,
+        "osler_prolog_reasoning": prolog_reasoning,
     }
 
 
