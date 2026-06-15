@@ -61,6 +61,7 @@ from osler_jepa.shadow_cohort import (
     load_reconciliations,
 )
 from real_world_improvement import episode_features
+from real_world_power_analysis import required_stays_for_win
 from predict_dka_intervention import compare, predict
 from dka_fidelity_replay import init_body
 from dka_transition_extract import find_dka_onset
@@ -745,6 +746,28 @@ class NumericalJEPATests(unittest.TestCase):
         projected = project_residual(np.full(6, 1e6, dtype=np.float32))
         for index, value in enumerate(projected.values()):
             self.assertLessEqual(value, float(MAX_ABS_RATE[index]))
+
+    def test_greybox_residual_can_drive_synthetic_jepa_generator(self):
+        class Residual:
+            @staticmethod
+            def correction(observation, action):
+                return {"G": -20.0}
+
+        baseline = generate_branched_dataset(1, 1, seed=123)
+        corrected = generate_branched_dataset(
+            1, 1, seed=123, residual_model=Residual()
+        )
+        baseline_glucose = (
+            baseline["states"][:, :, 1, STATE_KEYS.index("G")] * 200.0 + 250.0
+        ).mean()
+        corrected_glucose = (
+            corrected["states"][:, :, 1, STATE_KEYS.index("G")] * 200.0 + 250.0
+        ).mean()
+        self.assertLess(corrected_glucose, baseline_glucose)
+
+    def test_power_analysis_refuses_wrong_signed_candidate(self):
+        self.assertIsNone(required_stays_for_win(mean_delta=0.02, sd_delta=0.1))
+        self.assertGreater(required_stays_for_win(mean_delta=-0.02, sd_delta=0.1), 0)
 
     def test_world_model_is_action_conditioned(self):
         torch.manual_seed(0)

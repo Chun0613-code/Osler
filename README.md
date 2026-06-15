@@ -96,12 +96,35 @@ python symbolic_real_test.py --checkpoint dka_symbolic_jepa_v5.pt \
 
 # No-new-data domain adaptation, calibration, and abstention experiment
 python real_world_improvement.py --checkpoint dka_symbolic_jepa_v5.pt \
-  --mimic dka_transitions_6h_demo_v4.parquet
+  --mimic dka_transitions_6h_demo_v4.parquet \
+  --output dka_real_world_hybrid_v2_report.json \
+  --artifact dka_real_world_adapter_v2.joblib \
+  --predictions dka_real_world_oof_predictions_v2.csv
 
 # Compile observed dose/route support and train the candidate grey-box residual
-python build_action_prior.py dka_transitions_6h.parquet \
+python build_action_prior.py dka_transitions_6h_demo_v4.parquet \
   --output dka_action_prior.json
-python train_greybox_residual.py dka_transitions_6h.parquet
+python train_greybox_residual.py dka_transitions_6h_demo_v4.parquet
+
+# Quantify whether any factual forecaster has enough stay-level power to beat
+# persistence; negative deltas are required before an N estimate is meaningful.
+python real_world_power_analysis.py \
+  --oof-predictions dka_real_world_oof_predictions_v2.csv \
+  --cohort dka_transitions_6h_demo_v4.parquet
+
+# Feed the candidate grey-box residual back into the synthetic simulator used to
+# train JEPA. This is a candidate research path, not a promotion shortcut.
+python train_intervention_jepa.py \
+  --greybox-residual dka_greybox_residual_candidate_v1.pt \
+  --action-prior dka_action_prior_demo_v1.json \
+  --mimic dka_transitions_6h_demo_v4.parquet \
+  --checkpoint dka_symbolic_jepa_greybox_candidate.pt
+
+# Produce a research-only what-if artifact that compares protocols inside the
+# grey-box simulator instead of scoring factual forecasts against persistence.
+python counterfactual_shadow_demo.py \
+  --trajectory-jsonl dka_fidelity_demo_v4.jsonl \
+  --greybox-residual dka_greybox_residual_candidate_v1.pt
 
 # Evaluate where persistence should become weaker
 python long_horizon_real_test.py trajectories.jsonl \
@@ -173,6 +196,22 @@ Total-body potassium, volume balance, insulin depots, dose mass balance, and
 osmotic injury remain hard-owned by the mechanism and cannot be written by the
 network. `train_greybox_residual.py` uses nested patient-group validation and
 always emits a candidate-only artifact with no causal or promotion authority.
+`train_intervention_jepa.py --greybox-residual ...` can then regenerate
+synthetic JEPA branches from `DKABody + residual`, closing the grey-box feedback
+loop. Reports must still pass the held-out persistence gate before any checkpoint
+can replace `dka_symbolic_jepa_v5.pt`.
+
+`real_world_power_analysis.py` is the promotion reality check. It averages
+errors within ICU stay, computes paired stay-level deltas versus persistence,
+and estimates the number of stays needed only when the observed candidate is
+already better than persistence. A positive delta is reported as wrong-signed,
+not underpowered.
+
+`counterfactual_shadow_demo.py` reframes JEPA/simulator value away from short
+factual forecasting. It emits a research-only what-if contract with explicit
+`decision_authority: false`, `clinical_dose_claim_allowed: false`, and
+`causal_claim_allowed: false`. The artifact is for explanation, safety shielding,
+and planning-simulator experiments; it does not enter live Osler ranking.
 
 Acute viability failures now use reversible severity-by-duration burdens rather
 than instant death at the first threshold crossing. Hyperosmolar injury remains a

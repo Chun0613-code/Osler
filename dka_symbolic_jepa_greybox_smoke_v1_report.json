@@ -1,0 +1,1823 @@
+{
+  "model": "Symbolic-grounded Osler intervention DKA JEPA",
+  "trained_at_unix": 1781564979,
+  "device": "mps",
+  "seed": 23,
+  "scenario_count": 80,
+  "protocols": [
+    "no_treatment",
+    "insulin",
+    "rapid_sc",
+    "basal_sc",
+    "fluids",
+    "potassium",
+    "insulin_fluids",
+    "full_protocol",
+    "bicarbonate",
+    "dextrose",
+    "randomized"
+  ],
+  "action_prior": {
+    "version": "1.0.0",
+    "source_rows": 252,
+    "source_stays": 15,
+    "action_keys": [
+      "insulin_iv",
+      "insulin_rapid_sc",
+      "insulin_intermediate_sc",
+      "insulin_basal_sc",
+      "fluids",
+      "kcl",
+      "bicarbonate",
+      "dextrose"
+    ],
+    "channels": {
+      "insulin_iv": {
+        "active_probability": 0.05853174603174603,
+        "positive_cells": 177,
+        "quantile_levels": [
+          0.05,
+          0.1,
+          0.25,
+          0.5,
+          0.75,
+          0.9,
+          0.95,
+          0.99
+        ],
+        "positive_quantiles": [
+          0.8841397166252136,
+          1.3704724311828613,
+          2.0016679763793945,
+          5.108998775482178,
+          8.006611824035645,
+          26.472732543945312,
+          31.38000450134277,
+          32.759254455566406
+        ]
+      },
+      "insulin_rapid_sc": {
+        "active_probability": 0.06283068783068783,
+        "positive_cells": 190,
+        "quantile_levels": [
+          0.05,
+          0.1,
+          0.25,
+          0.5,
+          0.75,
+          0.9,
+          0.95,
+          0.99
+        ],
+        "positive_quantiles": [
+          0.6666666865348816,
+          0.800000011920929,
+          1.8666666746139526,
+          3.7333333492279053,
+          7.733333110809326,
+          12.266666412353516,
+          15.40666627883911,
+          20.0
+        ]
+      },
+      "insulin_intermediate_sc": {
+        "active_probability": 0.0,
+        "positive_cells": 0,
+        "quantile_levels": [
+          0.05,
+          0.1,
+          0.25,
+          0.5,
+          0.75,
+          0.9,
+          0.95,
+          0.99
+        ],
+        "positive_quantiles": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "insulin_basal_sc": {
+        "active_probability": 0.004298941798941799,
+        "positive_cells": 13,
+        "quantile_levels": [
+          0.05,
+          0.1,
+          0.25,
+          0.5,
+          0.75,
+          0.9,
+          0.95,
+          0.99
+        ],
+        "positive_quantiles": [
+          4.133333206176758,
+          4.666666507720947,
+          6.666666507720947,
+          15.333333015441895,
+          17.33333396911621,
+          21.599999618530276,
+          22.66666603088379,
+          22.66666603088379
+        ]
+      },
+      "fluids": {
+        "active_probability": 0.8373015873015873,
+        "positive_cells": 2532,
+        "quantile_levels": [
+          0.05,
+          0.1,
+          0.25,
+          0.5,
+          0.75,
+          0.9,
+          0.95,
+          0.99
+        ],
+        "positive_quantiles": [
+          5.0,
+          5.0,
+          16.36818838119507,
+          44.068931579589844,
+          110.59830856323242,
+          210.59152221679688,
+          263.67721557617176,
+          379.18646240234375
+        ]
+      },
+      "kcl": {
+        "active_probability": 0.16534391534391535,
+        "positive_cells": 500,
+        "quantile_levels": [
+          0.05,
+          0.1,
+          0.25,
+          0.5,
+          0.75,
+          0.9,
+          0.95,
+          0.99
+        ],
+        "positive_quantiles": [
+          1.999328851699829,
+          2.0,
+          2.0211703777313232,
+          4.123825550079346,
+          11.644722700119019,
+          20.0,
+          20.0,
+          25.542936382293693
+        ]
+      },
+      "bicarbonate": {
+        "active_probability": 0.08697089947089948,
+        "positive_cells": 263,
+        "quantile_levels": [
+          0.05,
+          0.1,
+          0.25,
+          0.5,
+          0.75,
+          0.9,
+          0.95,
+          0.99
+        ],
+        "positive_quantiles": [
+          7.499780178070068,
+          7.499780178070068,
+          7.518796920776367,
+          22.5,
+          22.5,
+          30.0,
+          37.5,
+          97.1333358764648
+        ]
+      },
+      "dextrose": {
+        "active_probability": 0.5575396825396826,
+        "positive_cells": 1686,
+        "quantile_levels": [
+          0.05,
+          0.1,
+          0.25,
+          0.5,
+          0.75,
+          0.9,
+          0.95,
+          0.99
+        ],
+        "positive_quantiles": [
+          0.30000001192092896,
+          0.45818227529525757,
+          0.6969552785158157,
+          1.8512656688690186,
+          4.350751280784607,
+          7.8187971115112305,
+          10.376304149627686,
+          17.90645513534549
+        ]
+      }
+    },
+    "insulin_route_probability": [
+      0.4657894736842105,
+      0.5,
+      0.0,
+      0.03421052631578947
+    ],
+    "research_only": true
+  },
+  "state_ontology_version": "1.1.0",
+  "symbolic_interface": {
+    "version": "1.1.0",
+    "ownership": {
+      "active_rules": "rules/active/dka_embodied.pl and human review",
+      "training_compiler": "osler_jepa.validator",
+      "candidate_rules": "JEPA observational proposals only"
+    },
+    "state_variables": [
+      {
+        "model_name": "G",
+        "canonical": "metabolic.glucose"
+      },
+      {
+        "model_name": "pH",
+        "canonical": "metabolic.ph"
+      },
+      {
+        "model_name": "HCO3",
+        "canonical": "metabolic.bicarbonate"
+      },
+      {
+        "model_name": "anion_gap",
+        "canonical": "metabolic.anion_gap"
+      },
+      {
+        "model_name": "Ke",
+        "canonical": "electrolyte.potassium"
+      },
+      {
+        "model_name": "MAP",
+        "canonical": "cardiovascular.map"
+      },
+      {
+        "model_name": "V",
+        "canonical": "fluid.extracellular_volume"
+      },
+      {
+        "model_name": "I",
+        "canonical": "endocrine.insulin_signal"
+      },
+      {
+        "model_name": "Na",
+        "canonical": "electrolyte.sodium"
+      },
+      {
+        "model_name": "osmolality",
+        "canonical": "metabolic.effective_osmolality"
+      },
+      {
+        "model_name": "creatinine",
+        "canonical": "renal.creatinine"
+      },
+      {
+        "model_name": "urine_output",
+        "canonical": "renal.urine_output"
+      },
+      {
+        "model_name": "BHB",
+        "canonical": "metabolic.beta_hydroxybutyrate"
+      },
+      {
+        "model_name": "K_store",
+        "canonical": "electrolyte.total_body_potassium_store"
+      },
+      {
+        "model_name": "osmotic_injury",
+        "canonical": "neurologic.hyperosmolar_injury"
+      }
+    ],
+    "actions": [
+      "insulin_iv",
+      "insulin_rapid_sc",
+      "insulin_intermediate_sc",
+      "insulin_basal_sc",
+      "fluids",
+      "kcl",
+      "bicarbonate",
+      "dextrose"
+    ],
+    "directions": [
+      "decrease",
+      "stable",
+      "increase"
+    ],
+    "transition_status": [
+      "verified",
+      "contradicted",
+      "unexplained"
+    ],
+    "proof_paths": [
+      "iv_insulin_lowers_glucose",
+      "rapid_sc_insulin_lowers_glucose",
+      "iv_insulin_lowers_potassium_without_kcl",
+      "fluids_raise_map",
+      "fluids_raise_volume",
+      "kcl_raises_potassium_without_iv_insulin",
+      "kcl_raises_total_body_store",
+      "bicarbonate_raises_hco3",
+      "bicarbonate_raises_ph",
+      "dextrose_raises_glucose_without_iv_insulin"
+    ],
+    "temporal_constraints": {
+      "iv_insulin_lowers_glucose": {
+        "window_hours": [
+          0.0,
+          6.0
+        ],
+        "confidence": 0.95
+      },
+      "rapid_sc_insulin_lowers_glucose": {
+        "window_hours": [
+          0.5,
+          8.0
+        ],
+        "confidence": 0.9
+      },
+      "iv_insulin_lowers_potassium_without_kcl": {
+        "window_hours": [
+          0.25,
+          4.0
+        ],
+        "confidence": 0.85
+      },
+      "fluids_raise_map": {
+        "window_hours": [
+          0.0,
+          3.0
+        ],
+        "confidence": 0.8
+      },
+      "fluids_raise_volume": {
+        "window_hours": [
+          0.0,
+          3.0
+        ],
+        "confidence": 0.95
+      },
+      "kcl_raises_potassium_without_iv_insulin": {
+        "window_hours": [
+          0.5,
+          6.0
+        ],
+        "confidence": 0.8
+      },
+      "kcl_raises_total_body_store": {
+        "window_hours": [
+          0.0,
+          6.0
+        ],
+        "confidence": 0.95
+      },
+      "bicarbonate_raises_hco3": {
+        "window_hours": [
+          0.0,
+          4.0
+        ],
+        "confidence": 0.85
+      },
+      "bicarbonate_raises_ph": {
+        "window_hours": [
+          0.0,
+          4.0
+        ],
+        "confidence": 0.85
+      },
+      "dextrose_raises_glucose_without_iv_insulin": {
+        "window_hours": [
+          0.0,
+          2.0
+        ],
+        "confidence": 0.95
+      }
+    },
+    "candidate_rule_level": "observational_association"
+  },
+  "state_compiler": {
+    "type": "prolog_facts_plus_numeric_reference_residuals",
+    "symbolic_facts": [
+      "hyperglycemia",
+      "hypoglycemia",
+      "low_potassium",
+      "critical_hypokalemia",
+      "hyperkalemia",
+      "potassium_not_low",
+      "severe_acidosis",
+      "ketoacidosis_unresolved",
+      "severe_hypotension",
+      "hypovolemia",
+      "renal_dysfunction",
+      "oliguria",
+      "total_body_potassium_depletion",
+      "high_hyperosmolar_injury_burden"
+    ],
+    "state_variables": [
+      "G",
+      "pH",
+      "HCO3",
+      "anion_gap",
+      "Ke",
+      "MAP",
+      "V",
+      "I",
+      "Na",
+      "osmolality",
+      "creatinine",
+      "urine_output",
+      "BHB",
+      "K_store",
+      "osmotic_injury"
+    ],
+    "context_dim": 29,
+    "missingness": "facts_and_residuals_require_observed_input",
+    "rule_authority": "human_owned_active_prolog",
+    "symbolic_head_context": true,
+    "continuous_dynamics_authority": false
+  },
+  "world_model_objective": {
+    "name": "grounded_homeostatic_world_model",
+    "components": [
+      "future_state_truth",
+      "physiologic_burden_fidelity",
+      "intervention_effect_sensitivity",
+      "counterfactual_burden_ordering",
+      "heteroscedastic_uncertainty_calibration",
+      "prolog_contradiction_penalty"
+    ],
+    "viability_reward_source": "observed_or_simulated_outcome_only",
+    "prediction_error_is_clinical_reward": false,
+    "dynamics_optimization_enabled": false,
+    "persistence_gate": {
+      "passed": false,
+      "reasons": [
+        "viability dynamics were not requested"
+      ]
+    },
+    "disabled_reason": "held-out MIMIC persistence gate has not passed",
+    "uncertainty_head_trains_on_detached_dynamics": true,
+    "policy_optimization": false,
+    "clinical_authority": false
+  },
+  "simulator": {
+    "version": "temporal_causal_audit_dka_v6",
+    "patient_domain_randomization": [
+      "weight_kg",
+      "renal_reserve",
+      "insulin_sensitivity",
+      "counterregulatory_drive",
+      "fluid_retention",
+      "vascular_tone",
+      "potassium_store_scale",
+      "endogenous_insulin",
+      "baseline_sodium",
+      "baseline_creatinine"
+    ],
+    "branch_point_warmup_steps": [
+      0,
+      12
+    ],
+    "profile_parameters_are_research_priors": true,
+    "state_variables": [
+      "G",
+      "pH",
+      "HCO3",
+      "anion_gap",
+      "Ke",
+      "MAP",
+      "V",
+      "I",
+      "Na",
+      "osmolality",
+      "creatinine",
+      "urine_output",
+      "BHB",
+      "K_store",
+      "osmotic_injury"
+    ],
+    "actions": [
+      "insulin_iv",
+      "insulin_rapid_sc",
+      "insulin_intermediate_sc",
+      "insulin_basal_sc",
+      "fluids",
+      "kcl",
+      "bicarbonate",
+      "dextrose"
+    ],
+    "history_hours": 6.0,
+    "hidden_belief_states": [
+      "K_store",
+      "osmotic_injury"
+    ],
+    "observation_contract": {
+      "mask": "per-state observed indicator",
+      "age_hours": true,
+      "training_dropout_probability": 0.25,
+      "potassium_store_filter": "predict_update_gaussian_belief"
+    },
+    "time_intervals_hours": [
+      0.25,
+      0.5,
+      0.75,
+      1.0
+    ],
+    "insulin_pk": [
+      "iv",
+      "rapid_subcutaneous",
+      "intermediate_nph",
+      "basal"
+    ],
+    "calibration_audit": {
+      "protocols": {
+        "no_treatment": {
+          "mortality_rate": 0.325,
+          "death_causes": {
+            "hypokalemia (K<2.5)": 19,
+            "cumulative hyperosmolar injury": 7
+          },
+          "change_quantiles": {
+            "G": {
+              "p10": 20.0561,
+              "median": 152.5651,
+              "p90": 313.969
+            },
+            "HCO3": {
+              "p10": 0.2392,
+              "median": 4.7782,
+              "p90": 11.2273
+            },
+            "Ke": {
+              "p10": -2.0031,
+              "median": -1.0689,
+              "p90": -0.204
+            },
+            "MAP": {
+              "p10": -12.216,
+              "median": -8.4936,
+              "p90": -4.6123
+            },
+            "V": {
+              "p10": -3.1052,
+              "median": -2.1147,
+              "p90": -1.1728
+            },
+            "K_store": {
+              "p10": -27.6925,
+              "median": -13.5594,
+              "p90": -6.0064
+            },
+            "osmolality": {
+              "p10": 12.0106,
+              "median": 18.3639,
+              "p90": 29.8457
+            }
+          }
+        },
+        "insulin": {
+          "mortality_rate": 0.3625,
+          "death_causes": {
+            "hypokalemia (K<2.5)": 25,
+            "cumulative hyperosmolar injury": 4
+          },
+          "change_quantiles": {
+            "G": {
+              "p10": -159.877,
+              "median": -105.5948,
+              "p90": -32.9102
+            },
+            "HCO3": {
+              "p10": 6.917,
+              "median": 11.9944,
+              "p90": 17.7614
+            },
+            "Ke": {
+              "p10": -2.2167,
+              "median": -1.393,
+              "p90": -0.8507
+            },
+            "MAP": {
+              "p10": -9.1317,
+              "median": -6.3334,
+              "p90": -4.0286
+            },
+            "V": {
+              "p10": -2.3242,
+              "median": -1.5952,
+              "p90": -0.9768
+            },
+            "K_store": {
+              "p10": -17.6946,
+              "median": -9.8924,
+              "p90": -4.0425
+            },
+            "osmolality": {
+              "p10": 1.6172,
+              "median": 3.7105,
+              "p90": 8.1827
+            }
+          }
+        },
+        "rapid_sc": {
+          "mortality_rate": 0.3,
+          "death_causes": {
+            "hypokalemia (K<2.5)": 20,
+            "cumulative hyperosmolar injury": 4
+          },
+          "change_quantiles": {
+            "G": {
+              "p10": -64.7457,
+              "median": -6.7425,
+              "p90": 125.608
+            },
+            "HCO3": {
+              "p10": 5.621,
+              "median": 9.9051,
+              "p90": 14.7592
+            },
+            "Ke": {
+              "p10": -1.9789,
+              "median": -1.2217,
+              "p90": -0.5542
+            },
+            "MAP": {
+              "p10": -10.6032,
+              "median": -6.9699,
+              "p90": -4.1825
+            },
+            "V": {
+              "p10": -2.7096,
+              "median": -1.7631,
+              "p90": -1.0481
+            },
+            "K_store": {
+              "p10": -21.3891,
+              "median": -11.0209,
+              "p90": -4.432
+            },
+            "osmolality": {
+              "p10": 4.8384,
+              "median": 10.1452,
+              "p90": 16.5342
+            }
+          }
+        },
+        "basal_sc": {
+          "mortality_rate": 0.3125,
+          "death_causes": {
+            "hypokalemia (K<2.5)": 19,
+            "cumulative hyperosmolar injury": 6
+          },
+          "change_quantiles": {
+            "G": {
+              "p10": -11.1292,
+              "median": 65.7054,
+              "p90": 217.6802
+            },
+            "HCO3": {
+              "p10": 3.9182,
+              "median": 7.8194,
+              "p90": 12.9852
+            },
+            "Ke": {
+              "p10": -2.0036,
+              "median": -1.2104,
+              "p90": -0.4318
+            },
+            "MAP": {
+              "p10": -11.7472,
+              "median": -7.8803,
+              "p90": -4.462
+            },
+            "V": {
+              "p10": -2.9154,
+              "median": -1.9666,
+              "p90": -1.119
+            },
+            "K_store": {
+              "p10": -25.6893,
+              "median": -12.2039,
+              "p90": -5.3251
+            },
+            "osmolality": {
+              "p10": 9.6342,
+              "median": 14.106,
+              "p90": 21.8599
+            }
+          }
+        },
+        "fluids": {
+          "mortality_rate": 0.3375,
+          "death_causes": {
+            "hypokalemia (K<2.5)": 21,
+            "cumulative hyperosmolar injury": 6
+          },
+          "change_quantiles": {
+            "G": {
+              "p10": -38.7862,
+              "median": 62.8304,
+              "p90": 194.3385
+            },
+            "HCO3": {
+              "p10": -1.993,
+              "median": 1.7384,
+              "p90": 5.9921
+            },
+            "Ke": {
+              "p10": -2.1108,
+              "median": -1.2708,
+              "p90": -0.5417
+            },
+            "MAP": {
+              "p10": -6.2736,
+              "median": -3.0837,
+              "p90": -0.1384
+            },
+            "V": {
+              "p10": -1.5983,
+              "median": -0.8475,
+              "p90": -0.0181
+            },
+            "K_store": {
+              "p10": -26.4708,
+              "median": -12.7215,
+              "p90": -5.8107
+            },
+            "osmolality": {
+              "p10": 6.8775,
+              "median": 13.7894,
+              "p90": 21.4904
+            }
+          }
+        },
+        "potassium": {
+          "mortality_rate": 0.3125,
+          "death_causes": {
+            "hyperkalemia (K>7.0)": 17,
+            "cumulative hyperosmolar injury": 8
+          },
+          "change_quantiles": {
+            "G": {
+              "p10": 17.3732,
+              "median": 155.6275,
+              "p90": 359.4877
+            },
+            "HCO3": {
+              "p10": 0.1974,
+              "median": 5.0528,
+              "p90": 11.9278
+            },
+            "Ke": {
+              "p10": 1.0963,
+              "median": 2.444,
+              "p90": 4.0929
+            },
+            "MAP": {
+              "p10": -13.3451,
+              "median": -8.1468,
+              "p90": -4.7393
+            },
+            "V": {
+              "p10": -3.3286,
+              "median": -2.1383,
+              "p90": -1.1895
+            },
+            "K_store": {
+              "p10": 31.9789,
+              "median": 62.8191,
+              "p90": 90.7141
+            },
+            "osmolality": {
+              "p10": 12.2458,
+              "median": 18.9521,
+              "p90": 29.8457
+            }
+          }
+        },
+        "insulin_fluids": {
+          "mortality_rate": 0.45,
+          "death_causes": {
+            "hypokalemia (K<2.5)": 33,
+            "cumulative hyperosmolar injury": 3
+          },
+          "change_quantiles": {
+            "G": {
+              "p10": -217.7126,
+              "median": -153.3696,
+              "p90": -77.1243
+            },
+            "HCO3": {
+              "p10": 3.7894,
+              "median": 7.5881,
+              "p90": 13.3744
+            },
+            "Ke": {
+              "p10": -2.4463,
+              "median": -1.5524,
+              "p90": -1.0429
+            },
+            "MAP": {
+              "p10": -4.0043,
+              "median": -1.466,
+              "p90": 0.8332
+            },
+            "V": {
+              "p10": -0.9828,
+              "median": -0.4008,
+              "p90": 0.2773
+            },
+            "K_store": {
+              "p10": -16.9896,
+              "median": -9.4077,
+              "p90": -3.6243
+            },
+            "osmolality": {
+              "p10": -1.9849,
+              "median": 0.9319,
+              "p90": 3.8999
+            }
+          }
+        },
+        "full_protocol": {
+          "mortality_rate": 0.075,
+          "death_causes": {
+            "cumulative hyperosmolar injury": 6
+          },
+          "change_quantiles": {
+            "G": {
+              "p10": -228.8982,
+              "median": -176.2527,
+              "p90": -71.5816
+            },
+            "HCO3": {
+              "p10": 3.7173,
+              "median": 8.6107,
+              "p90": 15.5931
+            },
+            "Ke": {
+              "p10": -1.2191,
+              "median": -0.086,
+              "p90": 0.5974
+            },
+            "MAP": {
+              "p10": -5.5581,
+              "median": -1.3345,
+              "p90": 0.8695
+            },
+            "V": {
+              "p10": -1.3506,
+              "median": -0.3753,
+              "p90": 0.2896
+            },
+            "K_store": {
+              "p10": 21.4389,
+              "median": 33.587,
+              "p90": 44.8696
+            },
+            "osmolality": {
+              "p10": -1.5774,
+              "median": 1.5669,
+              "p90": 5.4586
+            }
+          }
+        },
+        "bicarbonate": {
+          "mortality_rate": 0.3375,
+          "death_causes": {
+            "hypokalemia (K<2.5)": 21,
+            "cumulative hyperosmolar injury": 6
+          },
+          "change_quantiles": {
+            "G": {
+              "p10": -12.664,
+              "median": 98.3619,
+              "p90": 217.8772
+            },
+            "HCO3": {
+              "p10": -1.5546,
+              "median": 3.1773,
+              "p90": 8.0217
+            },
+            "Ke": {
+              "p10": -2.0499,
+              "median": -1.2161,
+              "p90": -0.4356
+            },
+            "MAP": {
+              "p10": -8.0565,
+              "median": -4.9233,
+              "p90": -1.9273
+            },
+            "V": {
+              "p10": -2.1024,
+              "median": -1.2864,
+              "p90": -0.4809
+            },
+            "K_store": {
+              "p10": -27.169,
+              "median": -13.035,
+              "p90": -5.8936
+            },
+            "osmolality": {
+              "p10": 9.2788,
+              "median": 15.0833,
+              "p90": 23.6582
+            }
+          }
+        },
+        "dextrose": {
+          "mortality_rate": 0.4375,
+          "death_causes": {
+            "hypokalemia (K<2.5)": 31,
+            "cumulative hyperosmolar injury": 4
+          },
+          "change_quantiles": {
+            "G": {
+              "p10": 32.9505,
+              "median": 77.8134,
+              "p90": 241.6245
+            },
+            "HCO3": {
+              "p10": 6.1421,
+              "median": 11.0565,
+              "p90": 15.9408
+            },
+            "Ke": {
+              "p10": -2.5512,
+              "median": -1.5118,
+              "p90": -0.9306
+            },
+            "MAP": {
+              "p10": -9.5228,
+              "median": -6.2784,
+              "p90": -3.7804
+            },
+            "V": {
+              "p10": -2.3893,
+              "median": -1.6821,
+              "p90": -1.0715
+            },
+            "K_store": {
+              "p10": -23.7168,
+              "median": -13.4742,
+              "p90": -6.1809
+            },
+            "osmolality": {
+              "p10": 9.6326,
+              "median": 14.3467,
+              "p90": 23.2845
+            }
+          }
+        },
+        "randomized": {
+          "mortality_rate": 0.3125,
+          "death_causes": {
+            "hypokalemia (K<2.5)": 19,
+            "cumulative hyperosmolar injury": 6
+          },
+          "change_quantiles": {
+            "G": {
+              "p10": -5.3163,
+              "median": 94.3235,
+              "p90": 234.8776
+            },
+            "HCO3": {
+              "p10": 1.491,
+              "median": 6.1385,
+              "p90": 12.3717
+            },
+            "Ke": {
+              "p10": -1.8456,
+              "median": -1.0248,
+              "p90": -0.0533
+            },
+            "MAP": {
+              "p10": -10.566,
+              "median": -7.1155,
+              "p90": -4.1557
+            },
+            "V": {
+              "p10": -2.6293,
+              "median": -1.8217,
+              "p90": -1.0091
+            },
+            "K_store": {
+              "p10": -24.6073,
+              "median": -9.8009,
+              "p90": 1.8235
+            },
+            "osmolality": {
+              "p10": 7.9941,
+              "median": 16.455,
+              "p90": 24.3664
+            }
+          }
+        }
+      },
+      "mechanistic_direction_gates": {
+        "full_protocol_not_more_lethal_than_no_treatment": true,
+        "iv_insulin_reduces_glucose_vs_no_treatment": true,
+        "fluids_raise_map_vs_no_treatment": true,
+        "kcl_replenishes_store_vs_no_treatment": true
+      },
+      "all_direction_gates_pass": true,
+      "clinical_calibration_claim_allowed": false
+    },
+    "greybox_residual": {
+      "path": "dka_greybox_residual_candidate_v1.pt",
+      "schema": {
+        "residual_keys": [
+          "G",
+          "Ket",
+          "HCO3",
+          "Ke",
+          "Na",
+          "Cr"
+        ],
+        "forbidden_keys": [
+          "Ki",
+          "V",
+          "I",
+          "insulin_rapid_depot",
+          "insulin_intermediate_depot",
+          "insulin_basal_depot",
+          "osmotic_injury",
+          "critical_burdens"
+        ],
+        "max_abs_rate_per_hour": {
+          "G": 50.0,
+          "Ket": 1.5,
+          "HCO3": 2.0,
+          "Ke": 0.44999998807907104,
+          "Na": 1.0,
+          "Cr": 0.25
+        },
+        "candidate_only": true,
+        "causal_claim_allowed": false,
+        "source_cohort": "dka_transitions_maintenance.parquet",
+        "source_stays": 15,
+        "source_transitions": 112,
+        "promotion_allowed": false
+      },
+      "used_for_synthetic_training_data": true,
+      "candidate_only": true,
+      "clinical_or_causal_claim_allowed": false
+    }
+  },
+  "curriculum": [
+    {
+      "name": "state_grounding",
+      "end_fraction": 0.15,
+      "weights": {
+        "one_step_latent": 1.0,
+        "one_step_state": 1.2,
+        "rollout_state": 0.2,
+        "rollout_latent": 0.1,
+        "effect": 0.0,
+        "osler": 0.0,
+        "reconstruction": 0.4,
+        "anti_collapse": 0.25,
+        "risk": 0.05,
+        "direction": 0.15,
+        "symbolic_status": 0.05,
+        "proof_path": 0.05,
+        "rule_proposal": 0.0,
+        "contradiction": 0.0,
+        "action_contrastive": 0.0,
+        "world_truth": 0.0,
+        "viability": 0.0,
+        "intervention_sensitivity": 0.0,
+        "trajectory_consistency": 0.0,
+        "uncertainty_calibration": 0.02
+      }
+    },
+    {
+      "name": "disease_dynamics",
+      "end_fraction": 0.4,
+      "weights": {
+        "one_step_latent": 0.9,
+        "one_step_state": 1.0,
+        "rollout_state": 1.0,
+        "rollout_latent": 0.3,
+        "effect": 0.2,
+        "osler": 0.1,
+        "reconstruction": 0.25,
+        "anti_collapse": 0.2,
+        "risk": 0.1,
+        "direction": 0.25,
+        "symbolic_status": 0.15,
+        "proof_path": 0.12,
+        "rule_proposal": 0.15,
+        "contradiction": 0.05,
+        "action_contrastive": 0.05,
+        "world_truth": 0.0,
+        "viability": 0.0,
+        "intervention_sensitivity": 0.0,
+        "trajectory_consistency": 0.0,
+        "uncertainty_calibration": 0.03
+      }
+    },
+    {
+      "name": "treatment_effects",
+      "end_fraction": 0.7,
+      "weights": {
+        "one_step_latent": 0.8,
+        "one_step_state": 1.0,
+        "rollout_state": 1.4,
+        "rollout_latent": 0.4,
+        "effect": 1.0,
+        "osler": 0.5,
+        "reconstruction": 0.15,
+        "anti_collapse": 0.15,
+        "risk": 0.15,
+        "direction": 0.3,
+        "symbolic_status": 0.2,
+        "proof_path": 0.15,
+        "rule_proposal": 0.3,
+        "contradiction": 0.12,
+        "action_contrastive": 0.12,
+        "world_truth": 0.0,
+        "viability": 0.0,
+        "intervention_sensitivity": 0.0,
+        "trajectory_consistency": 0.0,
+        "uncertainty_calibration": 0.04
+      }
+    },
+    {
+      "name": "counterfactual_validation",
+      "end_fraction": 1.0,
+      "weights": {
+        "one_step_latent": 0.8,
+        "one_step_state": 1.0,
+        "rollout_state": 1.6,
+        "rollout_latent": 0.4,
+        "effect": 1.2,
+        "osler": 0.8,
+        "reconstruction": 0.15,
+        "anti_collapse": 0.15,
+        "risk": 0.15,
+        "direction": 0.35,
+        "symbolic_status": 0.25,
+        "proof_path": 0.2,
+        "rule_proposal": 0.4,
+        "contradiction": 0.2,
+        "action_contrastive": 0.2,
+        "world_truth": 0.0,
+        "viability": 0.0,
+        "intervention_sensitivity": 0.0,
+        "trajectory_consistency": 0.0,
+        "uncertainty_calibration": 0.05
+      }
+    }
+  ],
+  "sequence_length": 8,
+  "hours_predicted_range": [
+    2.0,
+    8.0
+  ],
+  "split_by_scenario": {
+    "train": 56,
+    "validation": 12,
+    "test": 12
+  },
+  "best_validation_loss": 2.7885255813598633,
+  "test": {
+    "factual_rollout_mae": {
+      "1_steps": {
+        "G": 173.264,
+        "pH": 0.0491,
+        "HCO3": 3.9076,
+        "anion_gap": 2.8399,
+        "Ke": 0.8285,
+        "MAP": 8.3854,
+        "V": 1.7369,
+        "I": 24.1629,
+        "Na": 5.8035,
+        "osmolality": 18.6954,
+        "creatinine": 0.5869,
+        "urine_output": 144.1308,
+        "BHB": 1.8407,
+        "K_store": 12.1904,
+        "osmotic_injury": 1.0359
+      },
+      "6_steps": {
+        "G": 174.034,
+        "pH": 0.0867,
+        "HCO3": 7.1208,
+        "anion_gap": 5.0863,
+        "Ke": 0.6033,
+        "MAP": 7.1,
+        "V": 1.5132,
+        "I": 20.8452,
+        "Na": 4.4787,
+        "osmolality": 15.302,
+        "creatinine": 0.6668,
+        "urine_output": 160.7834,
+        "BHB": 3.7598,
+        "K_store": 19.3588,
+        "osmotic_injury": 0.9197
+      },
+      "8_steps": {
+        "G": 171.3653,
+        "pH": 0.1011,
+        "HCO3": 7.7233,
+        "anion_gap": 5.2995,
+        "Ke": 0.6755,
+        "MAP": 6.7732,
+        "V": 1.5626,
+        "I": 24.2033,
+        "Na": 3.907,
+        "osmolality": 13.6587,
+        "creatinine": 0.7318,
+        "urine_output": 155.9949,
+        "BHB": 3.9732,
+        "K_store": 21.7037,
+        "osmotic_injury": 0.8601
+      }
+    },
+    "action_conditioning": {
+      "factual_normalized_mse_6h": 0.731426,
+      "shuffled_action_normalized_mse_6h": 0.850402,
+      "shuffled_minus_factual": 0.118976,
+      "uses_interventions": true
+    },
+    "counterfactual": {
+      "1_steps": {
+        "effect_mae": {
+          "G": 15.0123,
+          "pH": 0.0101,
+          "HCO3": 0.7547,
+          "anion_gap": 0.7223,
+          "Ke": 0.1486,
+          "MAP": 0.2186,
+          "V": 0.0546,
+          "I": 26.2623,
+          "Na": 0.0611,
+          "osmolality": 0.9945,
+          "creatinine": 0.0258,
+          "urine_output": 16.4201,
+          "BHB": 0.5446,
+          "K_store": 1.7447,
+          "osmotic_injury": 0.0345
+        },
+        "effect_sign_accuracy": 0.8159,
+        "sign_comparisons": 782
+      },
+      "6_steps": {
+        "effect_mae": {
+          "G": 91.4664,
+          "pH": 0.0458,
+          "HCO3": 3.7519,
+          "anion_gap": 3.358,
+          "Ke": 0.6068,
+          "MAP": 1.7406,
+          "V": 0.3058,
+          "I": 22.1576,
+          "Na": 0.3848,
+          "osmolality": 5.923,
+          "creatinine": 0.1701,
+          "urine_output": 90.2909,
+          "BHB": 2.5234,
+          "K_store": 10.196,
+          "osmotic_injury": 0.3218
+        },
+        "effect_sign_accuracy": 0.7207,
+        "sign_comparisons": 1167
+      },
+      "8_steps": {
+        "effect_mae": {
+          "G": 121.6228,
+          "pH": 0.0532,
+          "HCO3": 4.443,
+          "anion_gap": 3.7945,
+          "Ke": 0.7356,
+          "MAP": 2.4993,
+          "V": 0.4345,
+          "I": 25.7804,
+          "Na": 0.5326,
+          "osmolality": 7.6892,
+          "creatinine": 0.2544,
+          "urine_output": 107.438,
+          "BHB": 2.8667,
+          "K_store": 13.9046,
+          "osmotic_injury": 0.5343
+        },
+        "effect_sign_accuracy": 0.692,
+        "sign_comparisons": 1159
+      }
+    },
+    "osler_validator": {
+      "status_counts": {
+        "verified": 41,
+        "contradicted": 10,
+        "unexplained": 50
+      },
+      "verified_rate_when_explainable": 0.8039,
+      "rule_counts": {
+        "iv_insulin_lowers_glucose": {
+          "verified": 29,
+          "contradicted": 3
+        },
+        "kcl_raises_total_body_store": {
+          "verified": 24,
+          "contradicted": 0
+        },
+        "rapid_sc_insulin_lowers_glucose": {
+          "verified": 3,
+          "contradicted": 3
+        },
+        "kcl_raises_potassium_without_iv_insulin": {
+          "verified": 9,
+          "contradicted": 3
+        },
+        "iv_insulin_lowers_potassium_without_kcl": {
+          "verified": 2,
+          "contradicted": 1
+        }
+      },
+      "flag_transition_examples": [
+        {
+          "protocol": "full_protocol",
+          "initial_flags": [
+            "hyperglycemia",
+            "hypotension",
+            "hyperosmolarity",
+            "renal_dysfunction",
+            "ketonemia",
+            "total_body_potassium_depletion"
+          ],
+          "future_flags": [
+            "hyperglycemia",
+            "hyperosmolarity",
+            "renal_dysfunction",
+            "ketonemia"
+          ],
+          "status": "verified"
+        },
+        {
+          "protocol": "insulin",
+          "initial_flags": [
+            "hyperglycemia",
+            "hypotension",
+            "renal_dysfunction"
+          ],
+          "future_flags": [
+            "hyperglycemia",
+            "renal_dysfunction"
+          ],
+          "status": "verified"
+        },
+        {
+          "protocol": "rapid_sc",
+          "initial_flags": [
+            "hyperglycemia",
+            "hypotension",
+            "renal_dysfunction"
+          ],
+          "future_flags": [
+            "hyperglycemia",
+            "hypotension",
+            "renal_dysfunction"
+          ],
+          "status": "unexplained"
+        },
+        {
+          "protocol": "basal_sc",
+          "initial_flags": [
+            "hyperglycemia",
+            "hypotension",
+            "renal_dysfunction"
+          ],
+          "future_flags": [
+            "hyperglycemia",
+            "hypotension",
+            "renal_dysfunction"
+          ],
+          "status": "unexplained"
+        },
+        {
+          "protocol": "fluids",
+          "initial_flags": [
+            "hyperglycemia",
+            "hypotension",
+            "renal_dysfunction"
+          ],
+          "future_flags": [
+            "hyperglycemia",
+            "renal_dysfunction"
+          ],
+          "status": "unexplained"
+        },
+        {
+          "protocol": "insulin_fluids",
+          "initial_flags": [
+            "hyperglycemia",
+            "hypotension",
+            "renal_dysfunction"
+          ],
+          "future_flags": [
+            "hyperglycemia",
+            "renal_dysfunction"
+          ],
+          "status": "verified"
+        },
+        {
+          "protocol": "full_protocol",
+          "initial_flags": [
+            "hyperglycemia",
+            "hypotension",
+            "renal_dysfunction"
+          ],
+          "future_flags": [
+            "hyperglycemia",
+            "renal_dysfunction"
+          ],
+          "status": "verified"
+        },
+        {
+          "protocol": "bicarbonate",
+          "initial_flags": [
+            "hyperglycemia",
+            "hypotension",
+            "renal_dysfunction"
+          ],
+          "future_flags": [
+            "hyperglycemia",
+            "renal_dysfunction"
+          ],
+          "status": "unexplained"
+        }
+      ]
+    },
+    "symbolic_heads": {
+      "future_direction_accuracy_all": 0.8411,
+      "future_direction_accuracy_changed_only": 0.8621,
+      "rule_proposal_direction_accuracy_all": 0.7413,
+      "rule_proposal_direction_accuracy_changed_only": 0.8033,
+      "rule_proposal_by_state": {
+        "G": {
+          "n_changed": 92,
+          "direction_accuracy": 0.9348
+        },
+        "pH": {
+          "n_changed": 89,
+          "direction_accuracy": 0.6517
+        },
+        "HCO3": {
+          "n_changed": 91,
+          "direction_accuracy": 0.6484
+        },
+        "anion_gap": {
+          "n_changed": 90,
+          "direction_accuracy": 0.9889
+        },
+        "Ke": {
+          "n_changed": 98,
+          "direction_accuracy": 0.7755
+        },
+        "MAP": {
+          "n_changed": 82,
+          "direction_accuracy": 0.9878
+        },
+        "V": {
+          "n_changed": 91,
+          "direction_accuracy": 0.989
+        },
+        "I": {
+          "n_changed": 66,
+          "direction_accuracy": 1.0
+        },
+        "Na": {
+          "n_changed": 14,
+          "direction_accuracy": 0.0
+        },
+        "osmolality": {
+          "n_changed": 89,
+          "direction_accuracy": 0.9438
+        },
+        "creatinine": {
+          "n_changed": 74,
+          "direction_accuracy": 0.0
+        },
+        "urine_output": {
+          "n_changed": 90,
+          "direction_accuracy": 0.9333
+        },
+        "BHB": {
+          "n_changed": 90,
+          "direction_accuracy": 0.9889
+        },
+        "K_store": {
+          "n_changed": 72,
+          "direction_accuracy": 0.9583
+        },
+        "osmotic_injury": {
+          "n_changed": 31,
+          "direction_accuracy": 0.0
+        }
+      },
+      "status_accuracy": 0.52,
+      "status_by_class": {
+        "verified": {
+          "n": 50,
+          "accuracy": 0.98
+        },
+        "contradicted": {
+          "n": 0,
+          "accuracy": null
+        },
+        "unexplained": {
+          "n": 50,
+          "accuracy": 0.06
+        }
+      },
+      "proof_path": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      }
+    },
+    "death_risk": {
+      "brier": 0.224381,
+      "recall": 0.4815,
+      "specificity": 0.6667
+    },
+    "collapse": {
+      "mean_latent_std": 0.164512,
+      "min_latent_std": 0.056512,
+      "effective_rank": 4.055,
+      "active_dimensions_std_gt_0_01": 48,
+      "low_rank_physiology_warning": true,
+      "collapsed": false
+    }
+  },
+  "mimic_external_proxy": {
+    "available": true,
+    "rows_with_any_comparison": 154,
+    "rows_with_active_dka_comparison": 50,
+    "stays": 15,
+    "warning": "Factual check only: 15 stays; dose/time grids and prior history are present, but targets remain sparse and treatment selection is unadjusted.",
+    "data_adequacy": {
+      "rows": 252,
+      "complete_core_input_rows": 154,
+      "fully_observed_clinical_state_rows": 0,
+      "median_measurement_age_hours": {
+        "glucose": 2.358,
+        "ph": 2.125,
+        "bicarbonate": 2.442,
+        "anion_gap": 2.442,
+        "potassium": 2.442,
+        "map": 0.533,
+        "sodium": 2.542,
+        "osmolality": 2.775,
+        "creatinine": 2.517,
+        "urine_output": 0.967
+      },
+      "mean_anchor_state": {
+        "glucose": 178.03,
+        "ph": 7.343,
+        "bicarbonate": 18.287,
+        "anion_gap": 20.226,
+        "potassium": 4.185,
+        "map": 75.19,
+        "sodium": 136.899,
+        "osmolality": 297.833,
+        "creatinine": 2.412,
+        "urine_output": 114.033
+      },
+      "positive_action_rows": {
+        "insulin": 107,
+        "fluids": 227,
+        "kcl": 75,
+        "bicarbonate": 30,
+        "dextrose": 176
+      },
+      "has_exact_dose_and_timing": true,
+      "has_explicit_start_stop_events": true,
+      "has_pre_anchor_treatment_history": true,
+      "sufficient_for_causal_validation": false
+    },
+    "action_rate_support": {
+      "insulin_iv": {
+        "n_active_cells": 116,
+        "median": 3.9993,
+        "p95": 32.0755,
+        "max": 32.7593,
+        "training_max": 20.0,
+        "fraction_above_training_max": 0.1983
+      },
+      "insulin_rapid_sc": {
+        "n_active_cells": 119,
+        "median": 3.7333,
+        "p95": 15.3333,
+        "max": 20.0,
+        "training_max": 40.0,
+        "fraction_above_training_max": 0.0
+      },
+      "insulin_intermediate_sc": {
+        "n_active_cells": 0,
+        "median": null,
+        "p95": null,
+        "max": null,
+        "training_max": 40.0,
+        "fraction_above_training_max": null
+      },
+      "insulin_basal_sc": {
+        "n_active_cells": 8,
+        "median": 13.1667,
+        "p95": 16.8833,
+        "max": 17.0,
+        "training_max": 80.0,
+        "fraction_above_training_max": 0.0
+      },
+      "fluids": {
+        "n_active_cells": 1543,
+        "median": 60.0493,
+        "p95": 278.6639,
+        "max": 1159.2598,
+        "training_max": 500.0,
+        "fraction_above_training_max": 0.0091
+      },
+      "kcl": {
+        "n_active_cells": 368,
+        "median": 4.0816,
+        "p95": 20.701,
+        "max": 27.5331,
+        "training_max": 20.0,
+        "fraction_above_training_max": 0.0516
+      },
+      "bicarbonate": {
+        "n_active_cells": 179,
+        "median": 18.0,
+        "p95": 37.5,
+        "max": 150.0,
+        "training_max": 50.0,
+        "fraction_above_training_max": 0.0223
+      },
+      "dextrose": {
+        "n_active_cells": 1029,
+        "median": 2.5002,
+        "p95": 10.8948,
+        "max": 56.5901,
+        "training_max": 20.0,
+        "fraction_above_training_max": 0.0029
+      }
+    },
+    "mae": {
+      "glucose": {
+        "n": 72,
+        "jepa": 353.0343,
+        "persistence": 43.5
+      },
+      "ph": {
+        "n": 67,
+        "jepa": 0.0649,
+        "persistence": 0.0546
+      },
+      "bicarbonate": {
+        "n": 71,
+        "jepa": 4.7086,
+        "persistence": 2.4085
+      },
+      "anion_gap": {
+        "n": 71,
+        "jepa": 4.429,
+        "persistence": 3.4648
+      },
+      "potassium": {
+        "n": 75,
+        "jepa": 0.6651,
+        "persistence": 0.3853
+      },
+      "map": {
+        "n": 152,
+        "jepa": 9.3365,
+        "persistence": 10.5329
+      },
+      "sodium": {
+        "n": 74,
+        "jepa": 6.2565,
+        "persistence": 2.0135
+      },
+      "osmolality": {
+        "n": 73,
+        "jepa": 33.1884,
+        "persistence": 5.796
+      },
+      "creatinine": {
+        "n": 67,
+        "jepa": 1.0611,
+        "persistence": 0.3657
+      },
+      "urine_output": {
+        "n": 128,
+        "jepa": 247.7516,
+        "persistence": 53.7168
+      },
+      "BHB": {
+        "n": 0,
+        "jepa": null,
+        "persistence": null
+      }
+    },
+    "mae_active_dka": {
+      "glucose": {
+        "n": 22,
+        "jepa": 343.5604,
+        "persistence": 83.7727
+      },
+      "ph": {
+        "n": 16,
+        "jepa": 0.0782,
+        "persistence": 0.06
+      },
+      "bicarbonate": {
+        "n": 21,
+        "jepa": 5.0046,
+        "persistence": 3.2381
+      },
+      "anion_gap": {
+        "n": 21,
+        "jepa": 3.5237,
+        "persistence": 4.0476
+      },
+      "potassium": {
+        "n": 24,
+        "jepa": 0.5916,
+        "persistence": 0.5125
+      },
+      "map": {
+        "n": 49,
+        "jepa": 11.0254,
+        "persistence": 13.6531
+      },
+      "sodium": {
+        "n": 23,
+        "jepa": 6.3283,
+        "persistence": 2.1304
+      },
+      "osmolality": {
+        "n": 23,
+        "jepa": 30.652,
+        "persistence": 9.6787
+      },
+      "creatinine": {
+        "n": 21,
+        "jepa": 1.0095,
+        "persistence": 0.3381
+      },
+      "urine_output": {
+        "n": 42,
+        "jepa": 291.3963,
+        "persistence": 77.3929
+      },
+      "BHB": {
+        "n": 0,
+        "jepa": null,
+        "persistence": null
+      }
+    }
+  },
+  "training_seconds": 24.41,
+  "last_training_epoch": {
+    "total": 2.637594597680228,
+    "one_step_latent": 0.05522962872471128,
+    "one_step_state": 0.34240842717034475,
+    "rollout_state": 0.4084083139896393,
+    "rollout_latent": 0.07416365348867007,
+    "effect": 0.3016757773501532,
+    "osler": 0.047542166230934005,
+    "reconstruction": 0.3105893390519278,
+    "risk": 1.084027247769492,
+    "anti_collapse": 0.8442761131695339,
+    "direction": 0.6485753740583148,
+    "symbolic_status": 0.578291084085192,
+    "proof_path": 0.44284901448658537,
+    "rule_proposal": 0.7468932015555245,
+    "contradiction": 0.2794424763747624,
+    "action_contrastive": 4.0621028087376286e-05,
+    "world_truth": 0.40840831824711393,
+    "viability": 0.3590682787554605,
+    "intervention_sensitivity": 0.3160240352153778,
+    "trajectory_consistency": 1.1665170277867998,
+    "uncertainty_calibration": 0.3441418324198042,
+    "validation": 2.7885255813598633,
+    "epoch": 3,
+    "curriculum_stage": "counterfactual_validation"
+  }
+}

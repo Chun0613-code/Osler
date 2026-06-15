@@ -86,6 +86,61 @@ The factual 6/12/24-hour test found:
 Longer horizon is therefore useful as an evaluation axis, but it is not evidence
 that the current JEPA generally beats persistence.
 
+## Persistence Power Analysis
+
+`real_world_power_analysis.py` uses ICU stay as the unit of evidence. Transition
+rows are averaged within stay before computing paired deltas versus persistence.
+The report is saved as `dka_persistence_power_analysis_v1.json`.
+
+Key results:
+
+- Base JEPA is wrong-signed overall: normalized stay-level delta +0.2786.
+- Ensemble adapter is wrong-signed overall: +0.1208.
+- Safe hybrid is effectively persistence and slightly wrong-signed all-window:
+  +0.0086.
+- Active-only safe hybrid has a tiny favorable mean delta (-0.0045) but would
+  require roughly 976 stays at the observed effect/variance.
+- Base JEPA MAP is the only clear per-state favorable signal with a plausible
+  power number: delta -0.0356, estimated 42 stays required.
+- Active-safe glucose shows a small favorable delta (-0.0228), estimated 77 stays
+  required, but it did not pass the broader product gate.
+- Grey-box residual remains wrong-signed versus persistence on all residual
+  states. For glucose, grey-box improved mechanism simulation but still had
+  positive normalized delta versus persistence (+0.5064).
+
+This confirms that the current bottleneck is no longer an obvious missing model
+hook. In the demo cohort, factual promotion is limited by wrong-signed dense
+targets, small stay count, and observational treatment confounding.
+
+## Grey-Box JEPA Feedback Loop
+
+`train_intervention_jepa.py` now accepts `--greybox-residual`. When supplied,
+synthetic branches are generated from `DKABody + candidate residual` while the
+same action prior and symbolic losses remain active. The checkpoint metadata
+records the residual schema and marks it candidate-only.
+
+A smoke candidate was trained with 80 scenarios, sequence length 8, and 3 epochs:
+`dka_symbolic_jepa_greybox_smoke_v1.pt`. It proves the closed loop runs end to
+end, but it is not a replacement for v5. Its external MIMIC factual proxy still
+lost persistence on dense targets, including glucose 353.03 vs 43.50 and sodium
+6.26 vs 2.01. The current production/shadow checkpoint therefore remains v5.
+
+## Counterfactual Shadow Contract
+
+`counterfactual_shadow_demo.py` emits `dka_counterfactual_shadow_demo_v1.json`.
+It compares fixed research protocols against a no-treatment simulation baseline
+inside the candidate grey-box simulator. It explicitly sets:
+
+- `uses_persistence_as_judge: false`
+- `decision_authority: false`
+- `affects_live_recommendation: false`
+- `clinical_dose_claim_allowed: false`
+- `causal_claim_allowed: false`
+
+This is the right product framing for the current evidence level: counterfactual
+explanation, safety shielding, and planning-simulator research rather than a
+short-horizon factual forecaster that claims to beat persistence.
+
 ## Not Executed
 
 eICU/HiRID transfer pretraining was not run because those datasets are not present

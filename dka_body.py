@@ -247,7 +247,8 @@ class DKABody:
 
     # --- one integration substep (dt hours) ---------------------------------
     def _derivs(self, action, fluid_sodium_meq_l=NA_INFUSATE,
-                free_water_ml=0.0, nutrition_carbohydrate_g=0.0):
+                free_water_ml=0.0, nutrition_carbohydrate_g=0.0,
+                residual_correction=None):
         values = expand_action(action)
         insulin_iv = values[ACTION_INDEX["insulin_iv"]]
         insulin_rapid = values[ACTION_INDEX["insulin_rapid_sc"]]
@@ -372,9 +373,11 @@ class DKABody:
                     key: value for key, value in action.items()
                     if str(key).startswith("_")
                 })
-            correction = self.residual_model.correction(
-                self.observe(), residual_action
-            )
+            correction = residual_correction
+            if correction is None:
+                correction = self.residual_model.correction(
+                    self.observe(), residual_action
+                )
             for key in ("G", "Ket", "HCO3", "Ke", "Na", "Cr"):
                 derivatives[key] += float(correction.get(key, 0.0))
         return derivatives
@@ -395,6 +398,17 @@ class DKABody:
         )
         values = expand_action(action)
         h = dt / substeps
+        residual_correction = None
+        if self.residual_model is not None:
+            residual_action = dict(zip(ACTION_KEYS, values.astype(float).tolist()))
+            if isinstance(action, dict):
+                residual_action.update({
+                    key: value for key, value in action.items()
+                    if str(key).startswith("_")
+                })
+            residual_correction = self.residual_model.correction(
+                self.observe(), residual_action
+            )
         for _ in range(substeps):
             if not self.alive:
                 break
@@ -404,6 +418,7 @@ class DKABody:
                 fluid_sodium_meq_l=fluid_sodium_meq_l,
                 free_water_ml=free_water_ml,
                 nutrition_carbohydrate_g=nutrition_carbohydrate_g,
+                residual_correction=residual_correction,
             )
             self.G = max(0.0, self.G + d["G"] * h)
             self.I = max(0.0, self.I + d["I"] * h)

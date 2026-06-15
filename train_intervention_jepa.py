@@ -46,6 +46,7 @@ from osler_jepa.curriculum import STAGES, stage_for_epoch, weights_for_stage
 from osler_jepa.persistence_gate import load_persistence_gate
 from osler_jepa.action_prior import load_or_fit_action_prior
 from osler_jepa.actions import TREATMENT_EVENT_DIM, treatment_event_features
+from osler_jepa.greybox_residual import GreyBoxResidualRuntime
 from osler_jepa.ontology import OSLER_STATE_ONTOLOGY
 from osler_jepa.symbolic import (
     RULE_IDS,
@@ -145,8 +146,8 @@ def protocol_action(name, observation, intensity, rng, step=0, action_prior=None
     return action_prior.constrain(action) if action_prior is not None else action
 
 
-def prepare_base_body(rng, action_prior=None):
-    body = DKABody(rng=rng)
+def prepare_base_body(rng, action_prior=None, residual_model=None):
+    body = DKABody(rng=rng, residual_model=residual_model)
     observation = randomized_dka(body, rng)
     # Branch at different points in the treatment course, not only presentation.
     # This exposes the model to partially corrected glucose/acidosis and residual
@@ -185,7 +186,7 @@ def prepare_base_body(rng, action_prior=None):
 
 
 def generate_branched_dataset(n_scenarios=600, seq_len=12, seed=0,
-                              action_prior=None):
+                              action_prior=None, residual_model=None):
     rng = np.random.default_rng(seed)
     n_protocols = len(PROTOCOLS)
     states = np.zeros((n_scenarios, n_protocols, seq_len + 1, S_DIM), np.float32)
@@ -202,7 +203,7 @@ def generate_branched_dataset(n_scenarios=600, seq_len=12, seed=0,
 
     for scenario in range(n_scenarios):
         base_body, base_observation, base_history, base_durations = prepare_base_body(
-            rng, action_prior=action_prior
+            rng, action_prior=action_prior, residual_model=residual_model
         )
         scenario_deltas = rng.choice(
             np.array([0.25, 0.5, 0.75, 1.0], dtype=np.float32),
@@ -1358,6 +1359,13 @@ def main():
     parser.add_argument("--enable-viability-dynamics", action="store_true")
     parser.add_argument("--viability-gate-report")
     parser.add_argument("--action-prior")
+    parser.add_argument(
+        "--greybox-residual",
+        help=(
+            "Optional candidate residual ODE artifact. When provided, synthetic "
+            "training branches are generated from DKABody + residual dynamics."
+        ),
+    )
     args = parser.parse_args()
 
     gate = {
@@ -1385,9 +1393,13 @@ def main():
     )
     started = time.time()
     action_prior = load_or_fit_action_prior(args.action_prior, args.mimic)
+    residual_model = (
+        GreyBoxResidualRuntime.load(args.greybox_residual, device="cpu")
+        if args.greybox_residual else None
+    )
     dataset = generate_branched_dataset(
         args.scenarios, args.sequence_length, args.seed,
-        action_prior=action_prior,
+        action_prior=action_prior, residual_model=residual_model,
     )
     splits = split_scenarios(args.scenarios, args.seed)
     print(
@@ -1467,6 +1479,16 @@ def main():
                 "iv", "rapid_subcutaneous", "intermediate_nph", "basal",
             ],
             "calibration_audit": simulator_audit,
+            "greybox_residual": (
+                {
+                    "path": Path(args.greybox_residual).name,
+                    "schema": residual_model.schema(),
+                    "used_for_synthetic_training_data": True,
+                    "candidate_only": True,
+                    "clinical_or_causal_claim_allowed": False,
+                }
+                if residual_model is not None else None
+            ),
         },
         "curriculum": [
             {"name": stage.name, "end_fraction": stage.end_fraction,
