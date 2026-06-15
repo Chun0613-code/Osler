@@ -22,19 +22,17 @@ from dka_action_contract import (
     expand_action,
 )
 from osler_jepa.actions import TemporalActionEncoder
+from osler_jepa.actions import TREATMENT_EVENT_DIM, TREATMENT_EVENT_KEYS
 from osler_jepa.ontology import OSLER_STATE_ONTOLOGY
 from osler_jepa.symbolic import RULE_IDS, schema as symbolic_schema
+from dka_world_model_contract import STATE_KEYS as CONTRACT_STATE_KEYS
 
 
 SEED = 0
 np.random.seed(SEED)
 torch.manual_seed(SEED)
 
-STATE_KEYS = [
-    "G", "pH", "HCO3", "anion_gap", "Ke", "MAP", "V", "I",
-    "Na", "osmolality", "creatinine", "urine_output", "BHB",
-    "K_store", "osmotic_injury",
-]
+STATE_KEYS = list(CONTRACT_STATE_KEYS)
 S_MEAN = np.array(
     [250, 7.2, 15, 18, 4.2, 80, 13, 15.0, 138, 295, 1.2, 100, 4.0, 110, 2.0],
     dtype=np.float32,
@@ -240,6 +238,8 @@ class WorldModel(nn.Module):
     def __init__(self):
         super().__init__()
         self.AEnc = TemporalActionEncoder(A_DIM, ACTION_EMBED_DIM)
+        self.EventEnc = nn.Linear(TREATMENT_EVENT_DIM, ACTION_EMBED_DIM, bias=False)
+        nn.init.zeros_(self.EventEnc.weight)
         self.E = mlp(S_DIM, Z_DIM)
         self.HEnc = nn.Sequential(
             nn.Linear(H_DIM, 96, bias=False),
@@ -266,8 +266,13 @@ class WorldModel(nn.Module):
         for target, online in zip(self.Ebar.parameters(), self.E.parameters()):
             target.data.mul_(tau).add_(online.data, alpha=1.0 - tau)
 
-    def predict_latent(self, latent, action, delta_hours=DT, elapsed_hours=0.0):
+    def predict_latent(self, latent, action, delta_hours=DT, elapsed_hours=0.0,
+                       treatment_events=None):
         action_embedding = self.AEnc(action, delta_hours, elapsed_hours)
+        if treatment_events is not None:
+            action_embedding = action_embedding + self.EventEnc(
+                treatment_events.to(dtype=action.dtype)
+            )
         return self.P(torch.cat([latent, action_embedding], dim=-1))
 
     def encode_state(self, state, history=None, observation_mask=None,
@@ -293,17 +298,24 @@ class WorldModel(nn.Module):
         return latent
 
     def predict_step(self, state, action, delta_hours=DT, elapsed_hours=0.0,
-                     history=None, observation_mask=None, observation_age=None):
+                     history=None, observation_mask=None, observation_age=None,
+                     treatment_events=None):
         latent = self.encode_state(
             state, history, observation_mask, observation_age
         )
-        next_latent = self.predict_latent(latent, action, delta_hours, elapsed_hours)
+        next_latent = self.predict_latent(
+            latent, action, delta_hours, elapsed_hours, treatment_events
+        )
         return self.D(next_latent), self.R(next_latent).squeeze(-1), next_latent
 
     def symbolic_outputs(self, context_latent, action, delta_hours=DT,
-                         elapsed_hours=0.0):
+                         elapsed_hours=0.0, treatment_events=None):
         """Decode a transition into Osler-readable symbolic predictions."""
         action_embedding = self.AEnc(action, delta_hours, elapsed_hours)
+        if treatment_events is not None:
+            action_embedding = action_embedding + self.EventEnc(
+                treatment_events.to(dtype=action.dtype)
+            )
         features = torch.cat([context_latent, action_embedding], dim=-1)
         return {
             "direction_logits": self.DirectionHead(features).reshape(
@@ -317,7 +329,8 @@ class WorldModel(nn.Module):
         }
 
     def rollout(self, initial_state, action_sequence, initial_history=None,
-                observation_mask=None, observation_age=None, delta_hours=None):
+                observation_mask=None, observation_age=None, delta_hours=None,
+                treatment_events=None):
         """Open-loop rollout. action_sequence shape: [batch, time, A_DIM]."""
         latent = self.encode_state(
             initial_state, initial_history, observation_mask, observation_age
@@ -333,6 +346,9 @@ class WorldModel(nn.Module):
                 action_sequence[:, step],
                 delta_hours=step_delta,
                 elapsed_hours=elapsed,
+                treatment_events=self._rollout_event(
+                    treatment_events, step, action_sequence.shape[0], initial_state
+                ),
             )
             elapsed = elapsed + step_delta
             states.append(self.D(latent))
@@ -355,6 +371,19 @@ class WorldModel(nn.Module):
             return values.expand(batch_size)
         if values.ndim == 1:
             return values[step].expand(batch_size)
+        return values[:, step]
+
+    @staticmethod
+    def _rollout_event(treatment_events, step, batch_size, reference):
+        if treatment_events is None:
+            return None
+        values = torch.as_tensor(
+            treatment_events, dtype=reference.dtype, device=reference.device
+        )
+        if values.ndim == 1:
+            return values.expand(batch_size, -1)
+        if values.ndim == 2:
+            return values[step].expand(batch_size, -1)
         return values[:, step]
 
 
@@ -434,9 +463,10 @@ def save_checkpoint(model, path, metadata=None):
             "missing_value_imputation": "normalized_population_mean",
         },
         "action_encoder": {
-            "type": "route_formulation_channels_plus_delta_and_elapsed_time",
+            "type": "route_formulation_channels_plus_time_and_lifecycle_events",
             "embedding_dim": ACTION_EMBED_DIM,
             "insulin_channels": list(ACTION_KEYS[:4]),
+            "treatment_event_features": list(TREATMENT_EVENT_KEYS),
         },
         "symbolic_interface": symbolic_schema(
             STATE_KEYS, ACTION_KEYS, OSLER_STATE_ONTOLOGY
@@ -456,6 +486,11 @@ def load_checkpoint(path, device="cpu"):
             notes.append(
                 "The observation-context encoder is zero-initialized, so complete "
                 "fresh observations preserve legacy checkpoint behavior."
+            )
+        if "EventEnc.weight" in incompatible.missing_keys:
+            notes.append(
+                "The treatment-event encoder is zero-initialized, preserving "
+                "legacy rate-only checkpoint behavior."
             )
         if any("Head" in key for key in incompatible.missing_keys):
             notes.append("Legacy symbolic heads use their initialized weights.")

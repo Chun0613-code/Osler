@@ -14,6 +14,7 @@ import numpy as np
 import pandas as pd
 
 from dka_action_contract import ACTION_KEYS, INSULIN_KEYS
+from osler_jepa.actions import TREATMENT_EVENT_DIM
 
 ACTION_NAMES = ACTION_KEYS
 ACTION_UNITS = {
@@ -260,6 +261,56 @@ def action_rate_grid(events, start, hours, dt=0.5):
     return grid
 
 
+def treatment_event_records(events, start, hours):
+    """Return aggregate start/stop lifecycle events within a time window."""
+    start = pd.Timestamp(start)
+    end = start + pd.Timedelta(hours=hours)
+    records = []
+    for action in ACTION_NAMES:
+        selected = events[events["action"] == action]
+        active = int(((selected["starttime"] < start) & (selected["endtime"] > start)).sum())
+        if active:
+            records.append({
+                "hour": 0.0, "event_type": "start", "action": action,
+                "carried_in": True,
+            })
+        boundaries = {}
+        for event in selected.to_dict("records"):
+            event_start = pd.Timestamp(event["starttime"])
+            event_end = pd.Timestamp(event["endtime"])
+            if start <= event_start < end:
+                boundaries[event_start] = boundaries.get(event_start, 0) + 1
+            if start < event_end < end:
+                boundaries[event_end] = boundaries.get(event_end, 0) - 1
+        for timestamp, delta in sorted(boundaries.items()):
+            before = active
+            active = max(0, active + delta)
+            if before == 0 and active > 0:
+                event_type = "start"
+            elif before > 0 and active == 0:
+                event_type = "stop"
+            else:
+                continue
+            records.append({
+                "hour": round((timestamp - start).total_seconds() / 3600.0, 6),
+                "event_type": event_type,
+                "action": action,
+                "carried_in": False,
+            })
+    return sorted(records, key=lambda item: (item["hour"], item["action"], item["event_type"]))
+
+
+def treatment_event_grid(events, start, hours, dt=0.5):
+    """Map exact lifecycle records to start/stop event channels."""
+    cells = int(round(hours / dt))
+    grid = np.zeros((cells, TREATMENT_EVENT_DIM), dtype=np.float32)
+    for event in treatment_event_records(events, start, hours):
+        cell = min(cells - 1, max(0, int(float(event["hour"]) // dt)))
+        offset = 0 if event["event_type"] == "start" else len(ACTION_NAMES)
+        grid[cell, offset + ACTION_NAMES.index(event["action"])] = 1.0
+    return grid
+
+
 def action_window_summary(events, anchor, history_hours=6.0, future_hours=6.0, dt=0.5):
     history_start = anchor - pd.Timedelta(hours=history_hours)
     future_end = anchor + pd.Timedelta(hours=future_hours)
@@ -271,9 +322,23 @@ def action_window_summary(events, anchor, history_hours=6.0, future_hours=6.0, d
     ]
     history_grid = action_rate_grid(history_events, history_start, history_hours, dt)
     future_grid = action_rate_grid(future_events, anchor, future_hours, dt)
+    history_event_grid = treatment_event_grid(
+        history_events, history_start, history_hours, dt
+    )
+    future_event_grid = treatment_event_grid(
+        future_events, anchor, future_hours, dt
+    )
     output = {
         "history_action_grid": history_grid.tolist(),
         "future_action_grid": future_grid.tolist(),
+        "history_treatment_event_grid": history_event_grid.tolist(),
+        "future_treatment_event_grid": future_event_grid.tolist(),
+        "history_treatment_events": treatment_event_records(
+            history_events, history_start, history_hours
+        ),
+        "future_treatment_events": treatment_event_records(
+            future_events, anchor, future_hours
+        ),
     }
     for index, action in enumerate(ACTION_NAMES):
         output[f"hist_{action}_total"] = float(history_grid[:, index].sum() * dt)

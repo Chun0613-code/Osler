@@ -31,7 +31,12 @@ from dka_transition_extract import (
     pull_measurements as pull_measurements_v2,
     pull_stay_meta as pull_stay_meta_v2,
 )
-from mimic_action_history import ACTION_NAMES, action_rate_grid
+from mimic_action_history import (
+    ACTION_NAMES,
+    action_rate_grid,
+    treatment_event_grid,
+    treatment_event_records,
+)
 
 MIMIC_DIR = os.environ.get("MIMIC_DIR", "/path/to/mimic-iv")
 HOSP, ICU = os.path.join(MIMIC_DIR, "hosp"), os.path.join(MIMIC_DIR, "icu")
@@ -210,7 +215,13 @@ def main():
         history = sact[(sact["endtime"] >= onset - pd.Timedelta(hours=HISTORY_H))
                        & (sact["starttime"] < onset)]
         future_grid = action_rate_grid(future, onset, n_cells * DT, DT)
+        future_event_grid = treatment_event_grid(
+            future, onset, n_cells * DT, DT
+        )
         history_grid = action_rate_grid(
+            history, onset - pd.Timedelta(hours=HISTORY_H), HISTORY_H, DT
+        )
+        history_event_grid = treatment_event_grid(
             history, onset - pd.Timedelta(hours=HISTORY_H), HISTORY_H, DT
         )
         cover = {}
@@ -245,6 +256,14 @@ def main():
         out.append({
             "stay_id": int(sid), "init": init,
             "history_actions": history_list, "actions": actions_list,
+            "history_treatment_event_grid": history_event_grid.tolist(),
+            "treatment_event_grid": future_event_grid.tolist(),
+            "history_treatment_events": treatment_event_records(
+                history, onset - pd.Timedelta(hours=HISTORY_H), HISTORY_H
+            ),
+            "treatment_events": treatment_event_records(
+                future, onset, n_cells * DT
+            ),
             "labs": labs_list, "_cover": cover,
             "_provenance": {
                 "action_sources": sorted(sact["source"].dropna().unique().tolist()),

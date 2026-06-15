@@ -3,7 +3,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 import torch
+
+from dka_action_contract import ACTION_INDEX, INSULIN_KEYS
+from dka_world_model_contract import STATE_KEYS
+from osler_jepa.embodied_logic import parse_program
 
 
 @dataclass(frozen=True)
@@ -95,35 +100,61 @@ class OslerTransitionValidator:
         return {"status": status, "checks": checks, "effect": effect}
 
 
-OSLER_DKA_VALIDATOR = OslerTransitionValidator((
-    TransitionRule("iv_insulin_lowers_glucose", 0, "insulin_iv", 0, "G", -1,
-                   blocker_action_index=7, min_effect=0.001,
-                   rationale="Insulin increases glucose uptake and suppresses hepatic output."),
-    TransitionRule("rapid_sc_insulin_lowers_glucose", 1, "insulin_rapid_sc", 0, "G", -1,
-                   blocker_action_index=7, min_effect=0.0001,
-                   rationale="Rapid subcutaneous insulin is absorbed from a depot and lowers glucose."),
-    TransitionRule("iv_insulin_lowers_potassium_without_kcl", 0, "insulin_iv", 4, "Ke", -1,
-                   blocker_action_index=5, min_effect=0.0005,
-                   rationale="Insulin shifts extracellular potassium into cells."),
-    TransitionRule("fluids_raise_map", 4, "fluids", 5, "MAP", 1,
-                   min_effect=0.0005,
-                   rationale="Volume expansion raises effective circulating volume and MAP."),
-    TransitionRule("fluids_raise_volume", 4, "fluids", 6, "V", 1,
-                   min_effect=0.0005,
-                   rationale="Administered crystalloid increases extracellular volume."),
-    TransitionRule("kcl_raises_potassium_without_iv_insulin", 5, "kcl", 4, "Ke", 1,
-                   blocker_action_indices=(0, 1, 2, 3), min_effect=0.0005,
-                   rationale="Potassium chloride replaces extracellular and total-body potassium."),
-    TransitionRule("kcl_raises_total_body_store", 5, "kcl", 13, "K_store", 1,
-                   min_effect=0.0005,
-                   rationale="Potassium replacement replenishes the latent total-body reserve."),
-    TransitionRule("bicarbonate_raises_hco3", 6, "bicarbonate", 2, "HCO3", 1,
-                   min_effect=0.0005,
-                   rationale="Administered bicarbonate directly increases bicarbonate availability."),
-    TransitionRule("bicarbonate_raises_ph", 6, "bicarbonate", 1, "pH", 1,
-                   min_effect=0.0001,
-                   rationale="Higher bicarbonate raises pH under the simulator acid-base relation."),
-    TransitionRule("dextrose_raises_glucose_without_iv_insulin", 7, "dextrose", 0, "G", 1,
-                   blocker_action_indices=(0, 1, 2, 3), min_effect=0.0005,
-                   rationale="Administered dextrose supplies exogenous glucose."),
-))
+CONSTRAINT_SCALE = 1_000_000.0
+DEFAULT_RULE_PATH = (
+    Path(__file__).resolve().parents[1] / "rules" / "active" / "dka_embodied.pl"
+)
+
+
+def compile_transition_rules(rule_path=DEFAULT_RULE_PATH):
+    """Compile differentiable effect constraints from the active Prolog file."""
+    path = Path(rule_path)
+    clauses = parse_program(path.read_text(encoding="utf-8"))
+    expected = {
+        clause.head.arguments[3]: clause
+        for clause in clauses
+        if clause.head.predicate == "expected" and len(clause.head.arguments) == 4
+    }
+    declarations = {
+        clause.head.arguments[0]: clause.head.arguments[1:]
+        for clause in clauses
+        if clause.head.predicate == "training_constraint"
+        and len(clause.head.arguments) == 3
+    }
+    state_lookup = {name.lower(): (index, name) for index, name in enumerate(STATE_KEYS)}
+    rules = []
+    for rule_id, thresholds in declarations.items():
+        if rule_id not in expected:
+            raise ValueError(f"Training constraint has no expected/4 rule: {rule_id}")
+        clause = expected[rule_id]
+        action_name, state_atom, direction, _ = clause.head.arguments
+        if action_name not in ACTION_INDEX:
+            raise ValueError(f"Unknown action in active Prolog rule: {action_name}")
+        if state_atom not in state_lookup:
+            raise ValueError(f"Unknown state in active Prolog rule: {state_atom}")
+        blockers = []
+        for literal in clause.body:
+            if not literal.negated:
+                continue
+            if literal.atom.predicate == "requested" and literal.atom.arguments:
+                blockers.append(ACTION_INDEX[literal.atom.arguments[0]])
+            elif literal.atom.predicate == "insulin_requested":
+                blockers.extend(ACTION_INDEX[name] for name in INSULIN_KEYS)
+        state_index, state_name = state_lookup[state_atom]
+        rules.append(TransitionRule(
+            rule_id=rule_id,
+            action_index=ACTION_INDEX[action_name],
+            action_name=action_name,
+            state_index=state_index,
+            state_name=state_name,
+            expected_sign=1 if direction == "increase" else -1,
+            min_action=float(thresholds[0]) / CONSTRAINT_SCALE,
+            min_effect=float(thresholds[1]) / CONSTRAINT_SCALE,
+            blocker_action_indices=tuple(sorted(set(blockers))),
+            rationale=f"Compiled from active Prolog expected/4 rule {rule_id}.",
+            provenance=str(path),
+        ))
+    return tuple(rules)
+
+
+OSLER_DKA_VALIDATOR = OslerTransitionValidator(compile_transition_rules())

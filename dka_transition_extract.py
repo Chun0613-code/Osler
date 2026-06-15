@@ -358,7 +358,8 @@ def assemble_actions(anchors, actions):
     for anchor in anchors.itertuples():
         summary = action_window_summary(grouped.get(anchor.stay_id, empty), anchor.t)
         row = {
-            key: json.dumps(value) if key.endswith("_grid") else value
+            key: json.dumps(value)
+            if key.endswith("_grid") or key.endswith("_events") else value
             for key, value in summary.items()
         }
         for action in ACTION_NAMES:

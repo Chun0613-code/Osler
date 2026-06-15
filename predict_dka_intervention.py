@@ -28,6 +28,10 @@ from dka_world_model import (
     s2vec,
 )
 from osler_jepa.belief import PotassiumStoreBelief
+from osler_jepa.actions import (
+    TREATMENT_EVENT_KEYS,
+    treatment_event_features,
+)
 from osler_jepa.validator import OSLER_DKA_VALIDATOR
 from osler_jepa.embodied_logic import OSLER_DKA_PROLOG
 from osler_jepa.ontology import OSLER_STATE_ONTOLOGY
@@ -104,6 +108,10 @@ def predict(model, state, action, hours, device, apply_osler=False, history=None
                 {"type": "symbolic_policy", "explanation": item}
                 for item in trace
             ] + prolog_trace
+        event_vector = treatment_event_features(
+            [step_action], initial_action=previous_action
+        )[0]
+        physical_step_action = expand_action(step_action)
         latent = model.predict_latent(
             latent,
             torch.as_tensor(
@@ -111,6 +119,9 @@ def predict(model, state, action, hours, device, apply_osler=False, history=None
             ).unsqueeze(0),
             delta_hours=step_hours,
             elapsed_hours=elapsed_hours,
+            treatment_events=torch.as_tensor(
+                event_vector, dtype=torch.float32, device=device
+            ).unsqueeze(0),
         )
         applied_actions.append(step_action)
         normalized = model.D(latent)[0].cpu().numpy()
@@ -125,16 +136,23 @@ def predict(model, state, action, hours, device, apply_osler=False, history=None
         predicted.append(current_state)
         belief_history.append(belief.to_dict())
         death_probability.append(float(torch.sigmoid(model.R(latent))[0, 0]))
-        if trace or previous_action != step_action:
+        action_changed = previous_action is None or not np.allclose(
+            previous_action, physical_step_action
+        )
+        if trace or action_changed or event_vector.any():
             action_schedule.append({
                 "hours": round(elapsed_hours, 2),
                 "action": {
                     key: round(float(value), 4)
                     for key, value in zip(ACTION_KEYS, expand_action(step_action))
                 },
+                "treatment_events": [
+                    name for name, active in zip(TREATMENT_EVENT_KEYS, event_vector)
+                    if active > 0
+                ],
                 "trace": trace,
             })
-        previous_action = step_action
+        previous_action = physical_step_action
         elapsed_hours += step_hours
 
     sample_steps = sorted({0, min(5, steps - 1), steps - 1})
@@ -181,6 +199,7 @@ def compare(model, state, proposed_action, hours, device, input_warnings=None,
         weights=applied_durations,
     )
     mean_action = mean_physical_action / A_SCALE
+    lifecycle_summary = treatment_event_features(applied_actions).max(axis=0)
     osler_validation = OSLER_DKA_VALIDATOR.validate(
         mean_action, treated_final, untreated_final
     )
@@ -220,6 +239,9 @@ def compare(model, state, proposed_action, hours, device, input_warnings=None,
                 mean_action, dtype=torch.float32, device=device
             ).unsqueeze(0),
             delta_hours=effective_hours,
+            treatment_events=torch.as_tensor(
+                lifecycle_summary, dtype=torch.float32, device=device
+            ).unsqueeze(0),
         )
     direction_probability = symbolic["direction_logits"].softmax(dim=-1)[0]
     proposal_probability = symbolic["proposal_logits"].softmax(dim=-1)[0]

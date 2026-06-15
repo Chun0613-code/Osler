@@ -130,10 +130,12 @@ still produces 12/12 simulated deaths. The structural gap is smaller, not closed
 ### Phase 1: Complete the DKA Contract
 
 - Implemented: observation masks and measurement ages in the 15-state contract.
-- Implemented: irregular action intervals in training and rollout. Explicit EHR
-  start/stop event tokens remain to be added at extraction time.
+- Implemented: irregular action intervals plus explicit EHR start/stop lifecycle
+  events in extraction, training, rollout, and research inference.
 - Implemented: K-store predict-update belief with uncertainty. It is currently
   mechanistic plus JEPA-updated; patient-cohort calibration remains outstanding.
+- Implemented: differentiable direction constraints compile from active Prolog
+  `expected/4` and `training_constraint/3` declarations.
 - Calibrate potassium depletion and cumulative hyperosmolar injury on a larger
   patient-held-out cohort.
 - Obtain a larger MIMIC cohort; the 12-stay demo cannot identify causal treatment

@@ -45,3 +45,16 @@ expected(dextrose, g, increase, dextrose_raises_glucose_without_iv_insulin) :- a
 
 expected(insulin_intermediate_sc, g, decrease, intermediate_sc_insulin_lowers_glucose) :- allowed(insulin_intermediate_sc), not(requested(dextrose)).
 expected(insulin_basal_sc, g, decrease, basal_sc_insulin_lowers_glucose) :- allowed(insulin_basal_sc), not(requested(dextrose)).
+
+% Differentiable constraints are compiled from these declarations. Thresholds
+% are fixed-point values scaled by 1,000,000.
+training_constraint(iv_insulin_lowers_glucose, 50000, 1000).
+training_constraint(rapid_sc_insulin_lowers_glucose, 50000, 100).
+training_constraint(iv_insulin_lowers_potassium_without_kcl, 50000, 500).
+training_constraint(fluids_raise_map, 50000, 500).
+training_constraint(fluids_raise_volume, 50000, 500).
+training_constraint(kcl_raises_potassium_without_iv_insulin, 50000, 500).
+training_constraint(kcl_raises_total_body_store, 50000, 500).
+training_constraint(bicarbonate_raises_hco3, 50000, 500).
+training_constraint(bicarbonate_raises_ph, 50000, 100).
+training_constraint(dextrose_raises_glucose_without_iv_insulin, 50000, 500).

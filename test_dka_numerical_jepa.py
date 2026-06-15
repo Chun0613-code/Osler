@@ -17,9 +17,14 @@ from dka_world_model import (
     randomized_dka, s2vec, treatment_history_features,
 )
 from train_intervention_jepa import generate_branched_dataset
-from osler_jepa.actions import Intervention, TemporalActionEncoder
+from osler_jepa.actions import (
+    Intervention,
+    TREATMENT_EVENT_DIM,
+    TemporalActionEncoder,
+    treatment_event_features,
+)
 from osler_jepa.ontology import OSLER_STATE_ONTOLOGY
-from osler_jepa.validator import OSLER_DKA_VALIDATOR
+from osler_jepa.validator import OSLER_DKA_VALIDATOR, compile_transition_rules
 from osler_jepa.embodied_logic import OSLER_DKA_PROLOG
 from osler_jepa.belief import PotassiumStoreBelief
 from osler_jepa.rule_sandbox import RuleSandbox
@@ -31,6 +36,7 @@ from predict_dka_intervention import compare, predict
 from dka_fidelity_replay import init_body
 from mimic_action_history import (
     action_window_summary, deduplicate_events, normalize_events,
+    treatment_event_records,
 )
 
 sys.path.insert(0, str(Path(__file__).parent / "engine"))
@@ -82,6 +88,31 @@ class NumericalJEPATests(unittest.TestCase):
         self.assertTrue(set(np.unique(dataset["time_deltas"])).issubset(
             {0.0, 0.25, 0.5, 0.75, 1.0}
         ))
+        self.assertEqual(
+            dataset["action_events"].shape, (2, 11, 4, TREATMENT_EVENT_DIM)
+        )
+
+    def test_treatment_event_features_mark_start_and_stop(self):
+        sequence = np.zeros((3, A_DIM), dtype=np.float32)
+        sequence[0, ACTION_INDEX["insulin_iv"]] = 4.0
+        sequence[1, ACTION_INDEX["insulin_iv"]] = 6.0
+        events = treatment_event_features(sequence)
+        self.assertEqual(events[0, ACTION_INDEX["insulin_iv"]], 1.0)
+        self.assertEqual(events[1].sum(), 0.0)
+        self.assertEqual(
+            events[2, A_DIM + ACTION_INDEX["insulin_iv"]], 1.0
+        )
+
+    def test_zero_event_context_preserves_legacy_prediction(self):
+        model = WorldModel().eval()
+        latent = torch.zeros(1, model.P.latent_dim)
+        action = torch.zeros(1, A_DIM)
+        legacy = model.predict_latent(latent, action)
+        explicit = model.predict_latent(
+            latent, action,
+            treatment_events=torch.zeros(1, TREATMENT_EVENT_DIM),
+        )
+        self.assertTrue(torch.allclose(legacy, explicit))
 
     def test_potassium_store_belief_predicts_and_updates(self):
         state = {
@@ -136,6 +167,17 @@ class NumericalJEPATests(unittest.TestCase):
     def test_prolog_rule_pack_covers_differentiable_validator(self):
         alignment = OSLER_DKA_PROLOG.validator_alignment(OSLER_DKA_VALIDATOR)
         self.assertTrue(alignment["aligned"], alignment)
+
+    def test_differentiable_constraints_compile_from_active_prolog(self):
+        compiled = compile_transition_rules()
+        self.assertEqual(
+            [rule.rule_id for rule in compiled],
+            [rule.rule_id for rule in OSLER_DKA_VALIDATOR.rules],
+        )
+        self.assertTrue(all(
+            rule.provenance.endswith("rules/active/dka_embodied.pl")
+            for rule in compiled
+        ))
 
     def test_neutral_patient_profile_preserves_original_start(self):
         body = DKABody(profile=DKAPatientProfile())
@@ -375,6 +417,34 @@ class NumericalJEPATests(unittest.TestCase):
         summary = action_window_summary(events, anchor)
         self.assertGreater(summary["hist_dextrose_total"], 0.0)
         self.assertGreater(summary["act_fluids_total"], 0.0)
+        self.assertIn("future_treatment_event_grid", summary)
+
+    def test_mimic_events_preserve_carried_in_start_and_exact_stop(self):
+        anchor = pd.Timestamp("2026-01-01 12:00:00")
+        events = pd.DataFrame([{
+            "action": "insulin_iv",
+            "starttime": anchor - pd.Timedelta(minutes=15),
+            "endtime": anchor + pd.Timedelta(minutes=45),
+        }])
+        records = treatment_event_records(events, anchor, 2.0)
+        self.assertEqual(records[0]["event_type"], "start")
+        self.assertTrue(records[0]["carried_in"])
+        self.assertEqual(records[1]["event_type"], "stop")
+        self.assertEqual(records[1]["hour"], 0.75)
+
+    def test_overlapping_infusions_do_not_create_false_stop(self):
+        anchor = pd.Timestamp("2026-01-01 12:00:00")
+        events = pd.DataFrame([
+            {"action": "fluids", "starttime": anchor,
+             "endtime": anchor + pd.Timedelta(hours=1)},
+            {"action": "fluids", "starttime": anchor + pd.Timedelta(minutes=30),
+             "endtime": anchor + pd.Timedelta(hours=1.5)},
+        ])
+        records = treatment_event_records(events, anchor, 2.0)
+        self.assertEqual(
+            [(item["event_type"], item["hour"]) for item in records],
+            [("start", 0.0), ("stop", 1.5)],
+        )
 
     def test_mimic_normalizer_recognizes_nacl_lr_and_excludes_flushes(self):
         now = pd.Timestamp("2026-01-01 12:00:00")

@@ -4,8 +4,11 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 
+import numpy as np
 import torch
 import torch.nn as nn
+
+from dka_action_contract import ACTION_KEYS, expand_action
 
 
 VALID_ROUTES = {
@@ -14,6 +17,39 @@ VALID_ROUTES = {
 VALID_INSULIN_FORMULATIONS = {
     "regular", "rapid", "intermediate_nph", "basal", "unknown",
 }
+
+TREATMENT_EVENT_TYPES = ("start", "stop")
+TREATMENT_EVENT_KEYS = tuple(
+    f"{event_type}_{action}"
+    for event_type in TREATMENT_EVENT_TYPES
+    for action in ACTION_KEYS
+)
+TREATMENT_EVENT_DIM = len(TREATMENT_EVENT_KEYS)
+
+
+def treatment_event_features(actions, initial_action=None, threshold=1e-6):
+    """Encode explicit treatment lifecycle transitions for an action sequence.
+
+    The first half marks inactive-to-active starts and the second half marks
+    active-to-inactive stops. Rate changes while an infusion remains active stay
+    in the continuous action channels rather than being mislabeled as restarts.
+    """
+    values = np.asarray(actions, dtype=np.float32)
+    if values.ndim == 1:
+        values = values[None, :]
+    physical = np.asarray([expand_action(action) for action in values])
+    previous = expand_action(
+        np.zeros(len(ACTION_KEYS), dtype=np.float32)
+        if initial_action is None else initial_action
+    )
+    output = np.zeros((len(physical), TREATMENT_EVENT_DIM), dtype=np.float32)
+    for step, current in enumerate(physical):
+        was_active = previous > threshold
+        is_active = current > threshold
+        output[step, :len(ACTION_KEYS)] = (~was_active & is_active).astype(np.float32)
+        output[step, len(ACTION_KEYS):] = (was_active & ~is_active).astype(np.float32)
+        previous = current
+    return output
 
 
 @dataclass(frozen=True)

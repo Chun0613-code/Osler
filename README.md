@@ -124,6 +124,11 @@ is zero-initialized. Complete fresh observations therefore preserve their legacy
 behavior. A newly trained checkpoint is required before claiming improved
 performance from masks or measurement ages.
 
+Treatment timing is no longer represented only as a rate grid. MIMIC extraction
+now emits exact aggregate `start` and `stop` lifecycle records plus aligned event
+grids for every route-aware action. A zero-initialized event encoder adds those
+signals to JEPA dynamics while preserving old rate-only checkpoint behavior.
+
 `DKABody` now samples patient-level weight, renal reserve, insulin sensitivity,
 counter-regulatory drive, fluid retention, vascular tone, potassium stores, and
 endogenous insulin. Counterfactual branches may begin at presentation or after up
@@ -149,6 +154,11 @@ active Prolog-compatible rules, emits action preconditions and required
 co-interventions, validates predicted effect directions, and returns recursive
 proof trees. JEPA remains the continuous world model; Prolog remains the final
 logical explanation and veto layer.
+
+Differentiable direction constraints are compiled directly from
+`rules/active/dka_embodied.pl`. Each trainable `expected/4` rule has a fixed-point
+`training_constraint/3` declaration, so training and runtime reasoning cannot
+silently drift into separate hand-maintained rule tables.
 
 `real_world_improvement.py` tests episode and propensity weighting, a small
 real-world residual adapter, patient-bootstrap ensembles, temperature scaling,

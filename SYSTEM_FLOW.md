@@ -41,9 +41,8 @@ the environment observation, an intervention is the action, JEPA predicts the
 continuous future state, and `rules/active/dka_embodied.pl` decides whether the
 action is allowed, blocked, or requires a co-intervention. The grounded Prolog
 engine returns a proof tree for every conclusion and checks JEPA's predicted
-effect direction. `osler_jepa/validator.py` remains the differentiable mirror
-used during training; a regression test prevents it from drifting away from the
-human-owned Prolog rule pack.
+effect direction. `osler_jepa/validator.py` compiles the differentiable training
+constraints directly from the human-owned Prolog rule pack.
 
 Before state encoding, `observation_context()` creates a 15-variable value vector,
 observed mask, and measurement-age vector. Missing normalized values are imputed
@@ -54,6 +53,11 @@ runtime, `PotassiumStoreBelief` predicts the hidden reserve from KCl exposure an
 estimated renal loss, then updates it with the serum/pH proxy and JEPA estimate.
 Osler and Prolog consume the posterior belief and its provenance, not a fabricated
 laboratory value.
+
+The treatment stream contains both continuous dose/rate channels and explicit
+start/stop lifecycle channels. MIMIC intervals are converted into aggregate
+events that handle carried-in infusions and overlapping administrations without
+creating false stops. The event encoder is zero-compatible with older checkpoints.
 
 1. `dka_body.py` defines the continuous physiological state and transition rules.
    Each simulated patient has sampled body size, renal reserve, insulin response,
