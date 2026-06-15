@@ -20,6 +20,9 @@ STAGES = (
         "direction": 0.15, "symbolic_status": 0.05, "proof_path": 0.05,
         "rule_proposal": 0.0, "contradiction": 0.0,
         "action_contrastive": 0.0,
+        "world_truth": 0.0, "viability": 0.0,
+        "intervention_sensitivity": 0.0, "trajectory_consistency": 0.0,
+        "uncertainty_calibration": 0.02,
     }),
     CurriculumStage("disease_dynamics", 0.40, {
         "one_step_latent": 0.9, "one_step_state": 1.0, "rollout_state": 1.0,
@@ -28,6 +31,9 @@ STAGES = (
         "direction": 0.25, "symbolic_status": 0.15, "proof_path": 0.12,
         "rule_proposal": 0.15, "contradiction": 0.05,
         "action_contrastive": 0.05,
+        "world_truth": 0.0, "viability": 0.0,
+        "intervention_sensitivity": 0.0, "trajectory_consistency": 0.0,
+        "uncertainty_calibration": 0.03,
     }),
     CurriculumStage("treatment_effects", 0.70, {
         "one_step_latent": 0.8, "one_step_state": 1.0, "rollout_state": 1.4,
@@ -36,6 +42,9 @@ STAGES = (
         "direction": 0.3, "symbolic_status": 0.2, "proof_path": 0.15,
         "rule_proposal": 0.3, "contradiction": 0.12,
         "action_contrastive": 0.12,
+        "world_truth": 0.0, "viability": 0.0,
+        "intervention_sensitivity": 0.0, "trajectory_consistency": 0.0,
+        "uncertainty_calibration": 0.04,
     }),
     CurriculumStage("counterfactual_validation", 1.0, {
         "one_step_latent": 0.8, "one_step_state": 1.0, "rollout_state": 1.6,
@@ -44,6 +53,9 @@ STAGES = (
         "direction": 0.35, "symbolic_status": 0.25, "proof_path": 0.2,
         "rule_proposal": 0.4, "contradiction": 0.2,
         "action_contrastive": 0.2,
+        "world_truth": 0.0, "viability": 0.0,
+        "intervention_sensitivity": 0.0, "trajectory_consistency": 0.0,
+        "uncertainty_calibration": 0.05,
     }),
 )
 

@@ -18,6 +18,7 @@ from typing import Iterable
 
 from dka_action_contract import ACTION_KEYS, expand_action
 from osler_jepa.ontology import OSLER_STATE_ONTOLOGY
+from osler_jepa.state_compiler import ground_dka_facts
 
 
 _ATOM_RE = re.compile(r"^([a-z][a-z0-9_]*)\((.*)\)$")
@@ -171,43 +172,7 @@ class DkaEmbodiedLogic:
 
     @staticmethod
     def _state_facts(state: dict) -> set[Atom]:
-        get = lambda name, default: float(state.get(name, default))
-        facts = {Atom("patient_state_available")}
-        glucose = get("G", 140.0)
-        potassium = get("Ke", 4.0)
-        if glucose >= 250:
-            facts.add(Atom("hyperglycemia"))
-        if glucose < 70:
-            facts.add(Atom("hypoglycemia"))
-        if potassium < 3.3:
-            facts.add(Atom("low_potassium"))
-        if potassium < 3.0:
-            facts.add(Atom("critical_hypokalemia"))
-        if potassium > 5.5:
-            facts.add(Atom("hyperkalemia"))
-        if potassium >= 4.5:
-            facts.add(Atom("potassium_not_low"))
-        if get("pH", 7.4) < 7.0:
-            facts.add(Atom("severe_acidosis"))
-        if (
-            get("HCO3", 24.0) < 18.0
-            or get("anion_gap", 12.0) > 12.0
-            or get("BHB", 0.0) >= 1.0
-        ):
-            facts.add(Atom("ketoacidosis_unresolved"))
-        if get("MAP", 75.0) < 55.0:
-            facts.add(Atom("severe_hypotension"))
-        if get("V", 14.0) < 12.0:
-            facts.add(Atom("hypovolemia"))
-        if get("creatinine", 1.0) > 2.5:
-            facts.add(Atom("renal_dysfunction"))
-        if get("urine_output", 100.0) < 30.0:
-            facts.add(Atom("oliguria"))
-        if get("K_store", 120.0) < 80.0:
-            facts.add(Atom("total_body_potassium_depletion"))
-        if get("osmotic_injury", 0.0) >= 8.0:
-            facts.add(Atom("high_hyperosmolar_injury_burden"))
-        return facts
+        return {Atom(name) for name in ground_dka_facts(state)}
 
     @staticmethod
     def _action_facts(action) -> set[Atom]:

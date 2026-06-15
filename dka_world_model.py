@@ -24,6 +24,7 @@ from dka_action_contract import (
 from osler_jepa.actions import TemporalActionEncoder
 from osler_jepa.actions import TREATMENT_EVENT_DIM, TREATMENT_EVENT_KEYS
 from osler_jepa.ontology import OSLER_STATE_ONTOLOGY
+from osler_jepa.state_compiler import DkaStateCompiler
 from osler_jepa.symbolic import RULE_IDS, schema as symbolic_schema
 from dka_world_model_contract import STATE_KEYS as CONTRACT_STATE_KEYS
 
@@ -42,6 +43,9 @@ S_STD = np.array(
     dtype=np.float32,
 )
 S_DIM = len(STATE_KEYS)
+DKA_STATE_COMPILER = DkaStateCompiler(
+    STATE_KEYS, S_MEAN, S_STD, OSLER_STATE_ONTOLOGY
+)
 
 ACTION_KEYS = list(ROUTE_ACTION_KEYS)
 A_SCALE = ACTION_SCALE.copy()
@@ -237,6 +241,7 @@ class LatentPredictor(nn.Module):
 class WorldModel(nn.Module):
     def __init__(self):
         super().__init__()
+        self.uncertainty_trained = False
         self.AEnc = TemporalActionEncoder(A_DIM, ACTION_EMBED_DIM)
         self.EventEnc = nn.Linear(TREATMENT_EVENT_DIM, ACTION_EMBED_DIM, bias=False)
         nn.init.zeros_(self.EventEnc.weight)
@@ -260,6 +265,16 @@ class WorldModel(nn.Module):
         self.Ebar.load_state_dict(self.E.state_dict())
         for parameter in self.Ebar.parameters():
             parameter.requires_grad_(False)
+        # New modules are initialized after the full legacy v5 module sequence.
+        # This preserves the random initialization of every numerical dynamics
+        # layer for controlled ablations.
+        self.StateCompilerEnc = nn.Linear(
+            DKA_STATE_COMPILER.context_dim, Z_DIM, bias=False
+        )
+        nn.init.zeros_(self.StateCompilerEnc.weight)
+        self.U = mlp(Z_DIM, S_DIM, hidden=96)
+        nn.init.zeros_(self.U[-1].weight)
+        nn.init.zeros_(self.U[-1].bias)
 
     @torch.no_grad()
     def ema(self, tau=0.995):
@@ -276,7 +291,7 @@ class WorldModel(nn.Module):
         return self.P(torch.cat([latent, action_embedding], dim=-1))
 
     def encode_state(self, state, history=None, observation_mask=None,
-                     observation_age=None):
+                     observation_age=None, compiled_context=None):
         if observation_mask is None:
             observation_mask = torch.ones_like(state)
         if observation_age is None:
@@ -297,6 +312,13 @@ class WorldModel(nn.Module):
             latent = latent + self.HEnc(history)
         return latent
 
+    def encode_target_state(self, state):
+        return self.Ebar(state)
+
+    def uncertainty_logits(self, latent):
+        """Per-state log variance used only for calibrated self-critique."""
+        return self.U(latent)
+
     def predict_step(self, state, action, delta_hours=DT, elapsed_hours=0.0,
                      history=None, observation_mask=None, observation_age=None,
                      treatment_events=None):
@@ -309,8 +331,13 @@ class WorldModel(nn.Module):
         return self.D(next_latent), self.R(next_latent).squeeze(-1), next_latent
 
     def symbolic_outputs(self, context_latent, action, delta_hours=DT,
-                         elapsed_hours=0.0, treatment_events=None):
+                         elapsed_hours=0.0, treatment_events=None,
+                         compiled_context=None):
         """Decode a transition into Osler-readable symbolic predictions."""
+        if compiled_context is not None:
+            context_latent = context_latent + self.StateCompilerEnc(
+                compiled_context.to(dtype=context_latent.dtype)
+            )
         action_embedding = self.AEnc(action, delta_hours, elapsed_hours)
         if treatment_events is not None:
             action_embedding = action_embedding + self.EventEnc(
@@ -415,10 +442,10 @@ def train(model, states, actions, next_states, epochs=14, bs=256, device=None):
         for start in range(0, count, bs):
             index = permutation[start:start + bs]
             state, action, target_state = states[index], actions[index], next_states[index]
-            latent = model.E(state)
+            latent = model.encode_state(state)
             predicted_latent = model.predict_latent(latent, action)
             with torch.no_grad():
-                target_latent = model.Ebar(target_state)
+                target_latent = model.encode_target_state(target_state)
             loss = (
                 nn.functional.mse_loss(predicted_latent, target_latent)
                 + nn.functional.mse_loss(model.D(latent), state)
@@ -434,7 +461,9 @@ def train(model, states, actions, next_states, epochs=14, bs=256, device=None):
             batches += 1
         if (epoch + 1) % 2 == 0:
             with torch.no_grad():
-                latent_std = model.E(states[: min(2000, count)]).std(dim=0).mean()
+                latent_std = model.encode_state(
+                    states[: min(2000, count)]
+                ).std(dim=0).mean()
             print(
                 f"  ep {epoch + 1:2d} loss={total / max(batches, 1):.4f} "
                 f"z_std={float(latent_std):.3f}"
@@ -462,6 +491,12 @@ def save_checkpoint(model, path, metadata=None):
             "max_age_hours": MAX_OBSERVATION_AGE_HOURS,
             "missing_value_imputation": "normalized_population_mean",
         },
+        "state_compiler": DKA_STATE_COMPILER.schema(),
+        "uncertainty": {
+            "type": "heteroscedastic_log_variance",
+            "scope": "world_model_self_critique_only",
+            "clinical_authority": False,
+        },
         "action_encoder": {
             "type": "route_formulation_channels_plus_time_and_lifecycle_events",
             "embedding_dim": ACTION_EMBED_DIM,
@@ -480,6 +515,10 @@ def load_checkpoint(path, device="cpu"):
     payload = torch.load(Path(path), map_location=device, weights_only=False)
     model = WorldModel().to(device)
     incompatible = model.load_state_dict(payload["model_state"], strict=False)
+    model.uncertainty_trained = (
+        not any(key.startswith("U.") for key in incompatible.missing_keys)
+        and bool(payload.get("metadata", {}).get("world_model_objective"))
+    )
     if incompatible.missing_keys or incompatible.unexpected_keys:
         notes = []
         if "ObsEnc.weight" in incompatible.missing_keys:
@@ -491,6 +530,16 @@ def load_checkpoint(path, device="cpu"):
             notes.append(
                 "The treatment-event encoder is zero-initialized, preserving "
                 "legacy rate-only checkpoint behavior."
+            )
+        if "StateCompilerEnc.weight" in incompatible.missing_keys:
+            notes.append(
+                "The Prolog-state encoder is zero-initialized and conditions "
+                "symbolic heads only, preserving legacy numerical dynamics."
+            )
+        if any(key.startswith("U.") for key in incompatible.missing_keys):
+            notes.append(
+                "The uncertainty head is independent from state prediction and "
+                "must be calibrated before its output is interpreted."
             )
         if any("Head" in key for key in incompatible.missing_keys):
             notes.append("Legacy symbolic heads use their initialized weights.")

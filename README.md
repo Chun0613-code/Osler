@@ -58,6 +58,7 @@ Osler/
 ├── dka_*.py                 Calibration and real-data validation utilities.
 ├── SYSTEM_FLOW.md           Current symbolic and numerical JEPA flows.
 ├── OSLER_JEPA_ROADMAP.md    Target architecture, promotion gates, next build order.
+├── SYMBOLIC_JEPA_VIABILITY_AUDIT.md  Same-scale compiler/viability ablation.
 ├── requirements.txt
 └── README.md
 ```
@@ -110,6 +111,24 @@ and recency over the preceding six hours. Training branches the same patient int
 11 interventions, follows a four-stage curriculum, learns one-step through
 six-hour open-loop outcomes, and checks counterfactual effects, Osler mechanism
 consistency, action sensitivity, risk calibration, and latent collapse.
+
+Before neural encoding, `osler_jepa/state_compiler.py` converts each partial DKA
+observation into the same grounded facts consumed by active Prolog plus signed
+numeric residuals from physiologic reference ranges. Missing measurements cannot
+assert a fact or residual. A zero-initialized compiler encoder conditions the
+symbolic direction, proof, status, and rule-proposal heads without entering the
+continuous dynamics path. Old checkpoints and numerical predictions therefore
+retain their legacy behavior.
+
+Training now exposes a decomposed grounded homeostatic objective: future-state
+truth, physiologic-burden fidelity, intervention-effect sensitivity,
+counterfactual burden ordering, calibrated per-state uncertainty, and the
+existing Prolog contradiction penalty. The viability terms remain reported
+research audits with zero default dynamics weight because same-scale retraining
+regressed on the MIMIC persistence gate. Viability reward is computed only from
+the observed or simulated outcome. The model is therefore penalized for an
+optimistic but false recovery forecast; prediction surprise is a learning signal,
+not evidence that a treatment is clinically beneficial.
 
 The v5 runtime also has an explicit partial-observation contract. Every state is
 encoded as a value, observed/missing mask, and measurement age in hours. Rollouts

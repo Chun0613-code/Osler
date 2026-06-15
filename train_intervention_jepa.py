@@ -24,6 +24,7 @@ from dka_world_model import (
     A_DIM,
     ACTION_KEYS,
     A_SCALE,
+    DKA_STATE_COMPILER,
     DT,
     H_DIM,
     HISTORY_HOURS,
@@ -54,6 +55,7 @@ from osler_jepa.symbolic import (
     schema as symbolic_schema,
 )
 from osler_jepa.validator import OSLER_DKA_VALIDATOR
+from osler_jepa.viability import HomeostaticWorldModelObjective
 
 
 PROTOCOLS = (
@@ -82,6 +84,8 @@ BASE_ACTIONS = {
     "bicarbonate": expand_action([0, 250, 0, 50, 0]),
     "dextrose": expand_action([3, 100, 0, 0, 5]),
 }
+
+HOMEOSTATIC_OBJECTIVE = HomeostaticWorldModelObjective(DKA_STATE_COMPILER)
 
 
 def choose_device(requested):
@@ -362,7 +366,7 @@ def batch_losses(model, states, actions, action_events, histories, time_deltas,
         latent, flat_actions, flat_deltas, flat_elapsed, flat_action_events
     )
     with torch.no_grad():
-        target_latent = model.Ebar(target)
+        target_latent = model.encode_target_state(target)
 
     one_step_latent = masked_mean((predicted_latent - target_latent).square(), flat_valid)
     one_step_state = masked_mean((model.D(predicted_latent) - target).square(), flat_valid)
@@ -390,10 +394,16 @@ def batch_losses(model, states, actions, action_events, histories, time_deltas,
 
     rollout_state = masked_mean((predicted - states[:, :, 1:]).square(), valid)
     with torch.no_grad():
-        rollout_targets = model.Ebar(states[:, :, 1:].reshape(-1, S_DIM)).reshape_as(
-            rollout_latents
-        )
+        rollout_targets = model.encode_target_state(
+            states[:, :, 1:].reshape(-1, S_DIM)
+        ).reshape_as(rollout_latents)
     rollout_latent = masked_mean((rollout_latents - rollout_targets).square(), valid)
+    world_components = HOMEOSTATIC_OBJECTIVE.components(
+        predicted,
+        states[:, :, 1:],
+        model.uncertainty_logits(rollout_latents.detach()),
+        valid,
+    )
 
     death_target = 1.0 - alive
     positive = (death_target * valid).sum()
@@ -434,6 +444,9 @@ def batch_losses(model, states, actions, action_events, histories, time_deltas,
     ).reshape(
         batch, protocols, -1
     )
+    initial_compiled = DKA_STATE_COMPILER.tensor_context(
+        initial * initial_mask, initial_mask
+    ).reshape(batch, protocols, -1)
     direction_losses = []
     status_losses = []
     proof_losses = []
@@ -452,6 +465,9 @@ def batch_losses(model, states, actions, action_events, histories, time_deltas,
             action_exposure.reshape(-1, A_DIM),
             delta_hours=horizon_hours.reshape(-1),
             treatment_events=horizon_events.reshape(-1, TREATMENT_EVENT_DIM),
+            compiled_context=initial_compiled.reshape(
+                -1, initial_compiled.shape[-1]
+            ),
         )
         direction_logits = outputs["direction_logits"].reshape(
             batch, protocols, S_DIM, 3
@@ -532,6 +548,14 @@ def batch_losses(model, states, actions, action_events, histories, time_deltas,
         + weights["rule_proposal"] * rule_proposal
         + weights["contradiction"] * contradiction
         + weights["action_contrastive"] * action_contrastive
+        + weights["world_truth"] * world_components["world_truth"]
+        + weights["viability"] * world_components["viability"]
+        + weights["intervention_sensitivity"]
+        * world_components["intervention_sensitivity"]
+        + weights["trajectory_consistency"]
+        * world_components["trajectory_consistency"]
+        + weights["uncertainty_calibration"]
+        * world_components["uncertainty_calibration"]
     )
     return {
         "total": total,
@@ -550,6 +574,7 @@ def batch_losses(model, states, actions, action_events, histories, time_deltas,
         "rule_proposal": rule_proposal,
         "contradiction": contradiction,
         "action_contrastive": action_contrastive,
+        **world_components,
     }
 
 
@@ -634,6 +659,8 @@ def train_model(model, dataset, splits, epochs, batch_size, learning_rate, devic
                 f"epoch {epoch:03d}/{epochs} train={summary['total']:.4f} "
                 f"val={validation:.4f} roll={summary['rollout_state']:.4f} "
                 f"effect={summary['effect']:.4f} osler={summary['osler']:.4f} "
+                f"viability={summary['viability']:.4f} "
+                f"uncertainty={summary['uncertainty_calibration']:.4f} "
                 f"symbolic={summary['rule_proposal']:.4f} "
                 f"stage={stage.name}"
             )
@@ -1352,6 +1379,28 @@ def main():
         "symbolic_interface": symbolic_schema(
             STATE_KEYS, ACTION_KEYS, OSLER_STATE_ONTOLOGY
         ),
+        "state_compiler": DKA_STATE_COMPILER.schema(),
+        "world_model_objective": {
+            "name": "grounded_homeostatic_world_model",
+            "components": [
+                "future_state_truth",
+                "physiologic_burden_fidelity",
+                "intervention_effect_sensitivity",
+                "counterfactual_burden_ordering",
+                "heteroscedastic_uncertainty_calibration",
+                "prolog_contradiction_penalty",
+            ],
+            "viability_reward_source": "observed_or_simulated_outcome_only",
+            "prediction_error_is_clinical_reward": False,
+            "dynamics_optimization_enabled": False,
+            "disabled_reason": (
+                "same-scale simulator retraining regressed on the held-out "
+                "MIMIC persistence gate"
+            ),
+            "uncertainty_head_trains_on_detached_dynamics": True,
+            "policy_optimization": False,
+            "clinical_authority": False,
+        },
         "simulator": {
             "version": "temporal_causal_audit_dka_v6",
             "patient_domain_randomization": [

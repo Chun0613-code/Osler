@@ -16,6 +16,7 @@ from dka_osler import shield_route_aware
 from dka_action_contract import ACTION_INDEX, ACTION_KEYS, expand_action
 from dka_world_model import (
     A_DIM,
+    DKA_STATE_COMPILER,
     DT,
     S_MEAN,
     S_STD,
@@ -92,6 +93,7 @@ def predict(model, state, action, hours, device, apply_osler=False, history=None
     current_state = physical_state(initial_vector)
     current_state["K_store"] = round(belief.mean, 4)
     predicted, death_probability, belief_history = [], [], []
+    state_uncertainty = []
     action_schedule, applied_actions = [], []
     previous_action = None
     elapsed_hours = 0.0
@@ -134,6 +136,16 @@ def predict(model, state, action, hours, device, apply_osler=False, history=None
         )
         current_state["K_store"] = round(belief.mean, 4)
         predicted.append(current_state)
+        if model.uncertainty_trained:
+            normalized_std = torch.exp(
+                0.5 * model.uncertainty_logits(latent).clamp(-6.0, 4.0)
+            )[0].cpu().numpy()
+            state_uncertainty.append({
+                name: round(float(value), 4)
+                for name, value in zip(STATE_KEYS, normalized_std * S_STD)
+            })
+        else:
+            state_uncertainty.append(None)
         belief_history.append(belief.to_dict())
         death_probability.append(float(torch.sigmoid(model.R(latent))[0, 0]))
         action_changed = previous_action is None or not np.allclose(
@@ -163,6 +175,15 @@ def predict(model, state, action, hours, device, apply_osler=False, history=None
         "death_probability": round(death_probability[step], 6),
         "belief_states": {
             "total_body_potassium_store": belief_history[step],
+        },
+        "uncertainty": {
+            "status": (
+                "trained_research_only"
+                if model.uncertainty_trained
+                else "unavailable_for_legacy_or_uncalibrated_checkpoint"
+            ),
+            "one_standard_deviation": state_uncertainty[step],
+            "clinical_calibration": False,
         },
     } for step in sample_steps]
     return trajectory, action_schedule, applied_actions
@@ -222,6 +243,13 @@ def compare(model, state, proposed_action, hours, device, input_warnings=None,
         state, observation_age
     )
     symbolic_vector = s2vec(symbolic_state)
+    compiled_state = DKA_STATE_COMPILER.compile_mapping(
+        symbolic_state,
+        observed=[
+            name for name, is_observed in zip(STATE_KEYS, symbolic_mask)
+            if is_observed
+        ],
+    )
     with torch.no_grad():
         context_latent = model.encode_state(
             torch.as_tensor(
@@ -243,6 +271,11 @@ def compare(model, state, proposed_action, hours, device, input_warnings=None,
             delta_hours=effective_hours,
             treatment_events=torch.as_tensor(
                 lifecycle_summary, dtype=torch.float32, device=device
+            ).unsqueeze(0),
+            compiled_context=torch.as_tensor(
+                compiled_state.feature_vector,
+                dtype=torch.float32,
+                device=device,
             ).unsqueeze(0),
         )
     direction_probability = symbolic["direction_logits"].softmax(dim=-1)[0]
@@ -293,6 +326,16 @@ def compare(model, state, proposed_action, hours, device, input_warnings=None,
             "observed_mask": dict(zip(STATE_KEYS, symbolic_mask.astype(int).tolist())),
             "age_hours": dict(zip(STATE_KEYS, symbolic_age.tolist())),
             "potassium_store_prior": initial_belief.to_dict(),
+            "compiled_state": {
+                "facts": list(compiled_state.facts),
+                "numeric_reference_residuals": {
+                    name: round(float(value), 6)
+                    for name, value in zip(
+                        STATE_KEYS, compiled_state.residual_vector
+                    )
+                },
+                "rule_authority": "human_owned_active_prolog",
+            },
         },
         "osler_dynamic_action_schedule": action_schedule,
         "effective_action_summary": {

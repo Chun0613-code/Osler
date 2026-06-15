@@ -14,8 +14,8 @@ from dka_body import DKABody, DKAPatientProfile
 from dka_osler import shield, shield_full, shield_route_aware
 from dka_action_contract import ACTION_INDEX, expand_action
 from dka_world_model import (
-    A_DIM, H_DIM, S_DIM, STATE_KEYS, WorldModel, a2vec, observation_context,
-    randomized_dka, s2vec, treatment_history_features,
+    A_DIM, DKA_STATE_COMPILER, H_DIM, S_DIM, STATE_KEYS, WorldModel, a2vec,
+    observation_context, randomized_dka, s2vec, treatment_history_features,
 )
 from train_intervention_jepa import (
     generate_branched_dataset,
@@ -36,6 +36,8 @@ from osler_jepa.rule_inducer import validate_candidates
 from osler_jepa.real_world_adapter import RealWorldAdapter
 from osler_jepa.causal_evaluation import TargetTrialSpec, evaluate_trial
 from osler_jepa.symbolic import RULE_IDS, rule_supervision
+from osler_jepa.state_compiler import DKA_SYMBOLIC_FACT_KEYS, ground_dka_facts
+from osler_jepa.viability import HomeostaticWorldModelObjective
 from osler_jepa.shadow import (
     ShadowObserver,
     build_dka_shadow_state,
@@ -973,6 +975,113 @@ class NumericalJEPATests(unittest.TestCase):
         self.assertIn("hyperkalemia", flags)
         self.assertIn("hypotension", flags)
 
+    def test_state_compiler_is_shared_with_prolog_grounding(self):
+        state = {
+            "G": 480.0,
+            "pH": 6.95,
+            "HCO3": 8.0,
+            "anion_gap": 25.0,
+            "Ke": 2.8,
+            "MAP": 50.0,
+            "V": 11.0,
+            "K_store": 60.0,
+        }
+        compiled = DKA_STATE_COMPILER.compile_mapping(state)
+        grounded = ground_dka_facts(state)
+        prolog = {
+            atom.predicate for atom in OSLER_DKA_PROLOG._state_facts(state)
+        }
+        self.assertEqual(grounded, frozenset(prolog))
+        self.assertIn("critical_hypokalemia", compiled.facts)
+        self.assertIn("severe_acidosis", compiled.facts)
+        self.assertEqual(
+            len(compiled.symbolic_vector), len(DKA_SYMBOLIC_FACT_KEYS)
+        )
+        self.assertEqual(len(compiled.residual_vector), S_DIM)
+        self.assertGreater(compiled.residual_vector[STATE_KEYS.index("G")], 0)
+        self.assertLess(compiled.residual_vector[STATE_KEYS.index("pH")], 0)
+        tensor_context = DKA_STATE_COMPILER.tensor_context(
+            torch.from_numpy(s2vec(state)).reshape(1, -1)
+        )[0]
+        self.assertTrue(torch.equal(
+            tensor_context[:len(DKA_SYMBOLIC_FACT_KEYS)],
+            torch.from_numpy(compiled.symbolic_vector),
+        ))
+
+    def test_state_compiler_does_not_assert_unobserved_abnormality(self):
+        compiled = DKA_STATE_COMPILER.compile_mapping(
+            {"G": 500.0, "Ke": 2.5},
+            observed=("G",),
+        )
+        self.assertIn("hyperglycemia", compiled.facts)
+        self.assertNotIn("critical_hypokalemia", compiled.facts)
+        self.assertEqual(
+            compiled.residual_vector[STATE_KEYS.index("Ke")], 0.0
+        )
+
+    def test_zero_initialized_compiler_encoder_preserves_legacy_prediction(self):
+        model = WorldModel().eval()
+        state = torch.from_numpy(np.stack([
+            s2vec({"G": 480.0, "Ke": 5.5, "pH": 7.05}),
+            s2vec({"G": 90.0, "Ke": 4.0, "pH": 7.4}),
+        ])).float()
+        self.assertTrue(torch.allclose(model.encode_state(state), model.E(state)))
+        self.assertEqual(
+            model.uncertainty_logits(model.encode_state(state)).shape,
+            state.shape,
+        )
+
+    def test_compiler_context_cannot_change_continuous_dynamics(self):
+        model = WorldModel().eval()
+        state = torch.from_numpy(s2vec({
+            "G": 480.0, "Ke": 5.5, "pH": 7.05,
+        })).float().reshape(1, -1)
+        action = torch.zeros(1, A_DIM)
+        before = model.predict_step(state, action)[0]
+        with torch.no_grad():
+            model.StateCompilerEnc.weight.fill_(0.05)
+        after = model.predict_step(state, action)[0]
+        self.assertTrue(torch.equal(before, after))
+
+        latent = model.encode_state(state)
+        absent = model.symbolic_outputs(
+            latent, action,
+            compiled_context=torch.zeros(
+                1, DKA_STATE_COMPILER.context_dim
+            ),
+        )["direction_logits"]
+        present = model.symbolic_outputs(
+            latent, action,
+            compiled_context=torch.ones(
+                1, DKA_STATE_COMPILER.context_dim
+            ),
+        )["direction_logits"]
+        self.assertFalse(torch.allclose(absent, present))
+
+    def test_viability_reward_is_grounded_in_outcome_not_model_optimism(self):
+        objective = HomeostaticWorldModelObjective(DKA_STATE_COMPILER)
+        sick = torch.from_numpy(s2vec({
+            "G": 500.0, "pH": 6.9, "HCO3": 7.0, "anion_gap": 28.0,
+            "Ke": 6.2, "MAP": 48.0, "osmotic_injury": 9.0,
+        })).float().reshape(1, 1, 1, -1)
+        recovered = torch.from_numpy(s2vec({
+            "G": 160.0, "pH": 7.3, "HCO3": 20.0, "anion_gap": 14.0,
+            "Ke": 4.2, "MAP": 75.0, "osmotic_injury": 2.0,
+        })).float().reshape(1, 1, 1, -1)
+        valid = torch.ones(1, 1, 1)
+        exact = objective.components(
+            sick, sick, torch.zeros_like(sick), valid
+        )
+        optimistic = objective.components(
+            recovered, sick, torch.zeros_like(sick), valid
+        )
+        self.assertLess(float(exact["world_truth"]), float(optimistic["world_truth"]))
+        self.assertLess(float(exact["viability"]), float(optimistic["viability"]))
+        self.assertGreater(
+            float(objective.grounded_viability_reward(sick, recovered)),
+            0.0,
+        )
+
     def test_live_symbolic_matcher_uses_shared_ontology(self):
         drugs = {
             "insulin": {
@@ -1075,6 +1184,14 @@ class NumericalJEPATests(unittest.TestCase):
         )
         self.assertIn("osler_transition_validation", result)
         self.assertIn("osler_prolog_reasoning", result)
+        self.assertIn(
+            "hyperglycemia",
+            result["observation_contract"]["compiled_state"]["facts"],
+        )
+        self.assertEqual(
+            result["predicted_intervention_trajectory"][0]["uncertainty"]["status"],
+            "unavailable_for_legacy_or_uncalibrated_checkpoint",
+        )
         self.assertIn(
             result["osler_prolog_reasoning"]["decision"],
             {"allow", "modify", "block"},
