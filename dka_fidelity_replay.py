@@ -40,6 +40,7 @@ from dka_action_contract import ACTION_INDEX, ACTION_KEYS, expand_action
 DT = 0.5
 VAR2ATTR = {
     "glucose": "G", "pH": "pH", "HCO3": "HCO3", "K": "Ke",
+    "MAP": "MAP",
     "Na": "Na", "osmolality": "osmolality", "creatinine": "creatinine",
     "urine_output": "urine_output", "BHB": "BHB", "anion_gap": "anion_gap",
     "K_store": "K_store", "osmotic_injury": "osmotic_injury",

@@ -28,13 +28,16 @@ import pandas as pd
 from dka_transition_extract import (
     find_dka_onset as find_dka_onset_v2,
     pull_actions as pull_actions_v2,
+    pull_maintenance_events,
     pull_measurements as pull_measurements_v2,
     pull_stay_meta as pull_stay_meta_v2,
 )
 from mimic_action_history import (
     ACTION_NAMES,
+    MAINTENANCE_NAMES,
     action_rate_grid,
     fluid_sodium_grid,
+    maintenance_rate_grid,
     treatment_event_grid,
     treatment_event_records,
 )
@@ -67,6 +70,7 @@ LAB2SCHEMA = {"glucose": "glucose", "ph": "pH", "bicarbonate": "HCO3", "potassiu
 LAB2SCHEMA.update({
     "anion_gap": "anion_gap", "sodium": "Na", "osmolality": "osmolality",
     "creatinine": "creatinine", "urine_output": "urine_output", "BHB": "BHB",
+    "map": "MAP",
 })
 
 
@@ -171,6 +175,7 @@ def main():
     print("Pulling labs / actions / meta...")
     labs = pull_measurements_v2(c).rename(columns={"valuenum": "valuenum"})
     actions, _ = pull_actions_v2(c)
+    maintenance = pull_maintenance_events(c)
     meta_frame = pull_stay_meta_v2(c)
     meta = meta_frame.set_index("stay_id")
     onset_frame = find_dka_onset_v2(labs)
@@ -215,8 +220,23 @@ def main():
         future = sact[(sact["endtime"] >= onset) & (sact["starttime"] <= end)]
         history = sact[(sact["endtime"] >= onset - pd.Timedelta(hours=HISTORY_H))
                        & (sact["starttime"] < onset)]
+        smain = maintenance[
+            (maintenance["stay_id"] == sid)
+            & (maintenance["endtime"] >= onset - pd.Timedelta(hours=HISTORY_H))
+            & (maintenance["starttime"] <= end)
+        ]
+        future_maintenance = smain[
+            (smain["endtime"] >= onset) & (smain["starttime"] <= end)
+        ]
+        history_maintenance = smain[
+            (smain["endtime"] >= onset - pd.Timedelta(hours=HISTORY_H))
+            & (smain["starttime"] < onset)
+        ]
         future_grid = action_rate_grid(future, onset, n_cells * DT, DT)
         future_fluid_sodium = fluid_sodium_grid(future, onset, n_cells * DT, DT)
+        future_maintenance_grid = maintenance_rate_grid(
+            future_maintenance, onset, n_cells * DT, DT
+        )
         future_event_grid = treatment_event_grid(
             future, onset, n_cells * DT, DT
         )
@@ -225,6 +245,10 @@ def main():
         )
         history_fluid_sodium = fluid_sodium_grid(
             history, onset - pd.Timedelta(hours=HISTORY_H), HISTORY_H, DT
+        )
+        history_maintenance_grid = maintenance_rate_grid(
+            history_maintenance,
+            onset - pd.Timedelta(hours=HISTORY_H), HISTORY_H, DT,
         )
         history_event_grid = treatment_event_grid(
             history, onset - pd.Timedelta(hours=HISTORY_H), HISTORY_H, DT
@@ -242,6 +266,11 @@ def main():
                 row[a] = v
                 any_nz = any_nz or v > 0
             row["_fluid_sodium_meq_l"] = round(float(future_fluid_sodium[k]), 3)
+            for maintenance_index, name in enumerate(MAINTENANCE_NAMES):
+                value = round(float(future_maintenance_grid[k, maintenance_index]), 3)
+                row[f"_{name}_ml" if name != "carbohydrate" else
+                    "_nutrition_carbohydrate_g"] = value
+                any_nz = any_nz or value > 0
             if any_nz:
                 actions_list.append(row)
         history_list = []
@@ -250,6 +279,10 @@ def main():
             for action_index, action in enumerate(ACTION_NAMES):
                 row[action] = round(float(history_grid[k, action_index]), 3)
             row["_fluid_sodium_meq_l"] = round(float(history_fluid_sodium[k]), 3)
+            for maintenance_index, name in enumerate(MAINTENANCE_NAMES):
+                value = round(float(history_maintenance_grid[k, maintenance_index]), 3)
+                row[f"_{name}_ml" if name != "carbohydrate" else
+                    "_nutrition_carbohydrate_g"] = value
             history_list.append(row)
 
         # observed lab trajectory in window
@@ -274,6 +307,9 @@ def main():
             "labs": labs_list, "_cover": cover,
             "_provenance": {
                 "action_sources": sorted(sact["source"].dropna().unique().tolist()),
+                "maintenance_sources": sorted(
+                    smain["source"].dropna().unique().tolist()
+                ),
                 "history_hours": HISTORY_H,
                 "grid_hours": DT,
             },

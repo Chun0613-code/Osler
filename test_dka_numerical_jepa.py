@@ -40,6 +40,10 @@ from osler_jepa.state_compiler import DKA_SYMBOLIC_FACT_KEYS, ground_dka_facts
 from osler_jepa.viability import HomeostaticWorldModelObjective
 from osler_jepa.persistence_gate import evaluate_persistence_gate
 from osler_jepa.curriculum import STAGES, weights_for_stage
+from osler_jepa.action_prior import EmpiricalActionPrior
+from osler_jepa.greybox_residual import (
+    FORBIDDEN_KEYS, MAX_ABS_RATE, project_residual,
+)
 from osler_jepa.shadow import (
     ShadowObserver,
     build_dka_shadow_state,
@@ -62,6 +66,7 @@ from dka_fidelity_replay import init_body
 from dka_transition_extract import find_dka_onset
 from mimic_action_history import (
     action_window_summary, deduplicate_events, normalize_events,
+    maintenance_window_summary, normalize_maintenance_events,
     treatment_event_records,
 )
 
@@ -714,6 +719,33 @@ class NumericalJEPATests(unittest.TestCase):
         dextrose_water.step({"fluids": 500.0, "_fluid_sodium_meq_l": 0.0}, dt=1.0)
         self.assertGreater(saline.Na, dextrose_water.Na)
 
+    def test_free_water_dilutes_sodium_without_inheriting_iv_sodium(self):
+        untreated = DKABody()
+        free_water = DKABody()
+        untreated.step({}, dt=1.0)
+        free_water.step({"_free_water_ml": 500.0}, dt=1.0)
+        self.assertLess(free_water.Na, untreated.Na)
+
+    def test_greybox_residual_cannot_write_conserved_pools(self):
+        class Residual:
+            @staticmethod
+            def correction(observation, action):
+                return {"G": -10.0, "Ki": -1000.0, "V": 1000.0}
+
+        baseline = DKABody()
+        corrected = DKABody(residual_model=Residual())
+        baseline.step({}, dt=0.5, substeps=1)
+        corrected.step({}, dt=0.5, substeps=1)
+        self.assertLess(corrected.G, baseline.G)
+        self.assertAlmostEqual(corrected.Ki, baseline.Ki, places=4)
+        self.assertAlmostEqual(corrected.V, baseline.V, places=4)
+        self.assertIn("Ki", FORBIDDEN_KEYS)
+
+    def test_greybox_projection_enforces_rate_bounds(self):
+        projected = project_residual(np.full(6, 1e6, dtype=np.float32))
+        for index, value in enumerate(projected.values()):
+            self.assertLessEqual(value, float(MAX_ABS_RATE[index]))
+
     def test_world_model_is_action_conditioned(self):
         torch.manual_seed(0)
         model = WorldModel().eval()
@@ -862,6 +894,21 @@ class NumericalJEPATests(unittest.TestCase):
             )
             self.assertEqual(result["state"]["G"], 300.0)
             self.assertFalse(result["causal_intervention_claim_allowed"])
+            self.assertEqual(
+                result["state_selection"]["G"]["selected_source"],
+                "persistence",
+            )
+            unsupported = adapter.apply(
+                state,
+                np.zeros(S_DIM, dtype=np.float32),
+                np.zeros((48, A_DIM), dtype=np.float32),
+                horizon_hours=24.0,
+            )
+            self.assertFalse(unsupported["hybrid_contract"]["horizon_supported"])
+            self.assertIn(
+                "unsupported_horizon",
+                unsupported["state_selection"]["G"]["abstain_reasons"],
+            )
 
     def test_aipw_and_matching_recover_synthetic_treatment_effect(self):
         rng = np.random.default_rng(18)
@@ -1031,6 +1078,49 @@ class NumericalJEPATests(unittest.TestCase):
         self.assertEqual(event["action"], "bicarbonate")
         self.assertEqual(event["amount"], 50.0)
         self.assertEqual(event["timing_source"], "default_duration")
+
+    def test_ingredientevents_add_observed_maintenance_without_calorie_guessing(self):
+        now = pd.Timestamp("2026-01-01 12:00:00")
+        raw = pd.DataFrame([
+            {"stay_id": 1, "starttime": now, "endtime": now + pd.Timedelta(hours=1),
+             "ingredient_itemid": 227075, "input_label": "Free Water",
+             "amount": 200, "uom": "mL", "orderid": 1},
+            {"stay_id": 1, "starttime": now, "endtime": now + pd.Timedelta(hours=2),
+             "ingredient_itemid": 226221, "input_label": "Glucerna 1.2",
+             "amount": 120, "uom": "mL", "orderid": 2},
+            {"stay_id": 1, "starttime": now, "endtime": now + pd.Timedelta(hours=1),
+             "ingredient_itemid": 226060, "input_label": "Calories",
+             "amount": 300, "uom": "kcal", "orderid": 3},
+        ])
+        events = normalize_maintenance_events(raw)
+        self.assertEqual(set(events["maintenance"]), {"free_water", "enteral_nutrition"})
+        summary = maintenance_window_summary(events, now)
+        self.assertEqual(summary["act_free_water_total"], 200.0)
+        self.assertEqual(summary["act_enteral_nutrition_total"], 120.0)
+        self.assertEqual(summary["act_carbohydrate_total"], 0.0)
+
+    def test_empirical_action_prior_samples_observed_support(self):
+        grid = np.zeros((12, A_DIM), dtype=np.float32)
+        grid[:, ACTION_INDEX["fluids"]] = np.linspace(10, 120, 12)
+        grid[:4, ACTION_INDEX["insulin_iv"]] = 4.0
+        grid[4:8, ACTION_INDEX["insulin_rapid_sc"]] = 8.0
+        frame = pd.DataFrame({
+            "stay_id": [1, 2],
+            "future_action_grid": [json.dumps(grid.tolist()), json.dumps(grid.tolist())],
+        })
+        prior = EmpiricalActionPrior.fit(frame)
+        rng = np.random.default_rng(2)
+        for _ in range(50):
+            action = prior.sample(rng)
+            self.assertLessEqual(int((action[:4] > 0).sum()), 1)
+            constrained = prior.constrain(np.full(A_DIM, 1e6))
+            self.assertLessEqual(
+                constrained[ACTION_INDEX["fluids"]],
+                prior.payload["channels"]["fluids"]["positive_quantiles"][-1],
+            )
+            self.assertEqual(
+                constrained[ACTION_INDEX["insulin_intermediate_sc"]], 0.0
+            )
 
     def test_dka_onset_requires_evidence_in_one_temporal_window(self):
         start = pd.Timestamp("2026-01-01 00:00:00")

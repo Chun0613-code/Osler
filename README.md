@@ -43,9 +43,7 @@ Osler/
 │               reasoning_engine.py, patient_profile.py, drug_safety_gate.py,
 │               drug_identity.py, clinical_role.py, drug_profile.py, clinical_data.py
 │
-├── data/        All knowledge/data files (.json, .npz): drugs_pkpd.json (drug deltas),
-│               the organ state-models (heart.json, lung.json, …), and the rest of the
-│               legacy knowledge base.
+├── data/        Live knowledge files only: drugs_pkpd.json and retained organ models.
 │
 ├── dka_body.py              Numerical DKA physiology simulator.
 ├── dka_world_model.py       Action-conditioned JEPA world model + MPC.
@@ -99,6 +97,15 @@ python symbolic_real_test.py --checkpoint dka_symbolic_jepa_v5.pt \
 # No-new-data domain adaptation, calibration, and abstention experiment
 python real_world_improvement.py --checkpoint dka_symbolic_jepa_v5.pt \
   --mimic dka_transitions_6h_demo_v4.parquet
+
+# Compile observed dose/route support and train the candidate grey-box residual
+python build_action_prior.py dka_transitions_6h.parquet \
+  --output dka_action_prior.json
+python train_greybox_residual.py dka_transitions_6h.parquet
+
+# Evaluate where persistence should become weaker
+python long_horizon_real_test.py trajectories.jsonl \
+  --checkpoint dka_symbolic_jepa_v5.pt --horizons 6,12,24
 ```
 
 This JEPA reasons over 15 continuous physiological variables: glucose, pH,
@@ -148,6 +155,24 @@ Treatment timing is no longer represented only as a rate grid. MIMIC extraction
 now emits exact aggregate `start` and `stop` lifecycle records plus aligned event
 grids for every route-aware action. A zero-initialized event encoder adds those
 signals to JEPA dynamics while preserving old rate-only checkpoint behavior.
+`ingredientevents` now adds observed free water, oral intake, enteral nutrition,
+parenteral nutrition, and explicitly measured carbohydrate as a separate
+maintenance context grid. Calories are never reverse-engineered into glucose and
+unknown nutrition composition is not injected into the physiology.
+
+`osler_jepa/action_prior.py` compiles route probabilities, active-cell
+probabilities, and positive-dose quantiles from the extracted cohort. Randomized
+simulator branches and warm-up care can sample this prior instead of the old
+uniform hand-written dose grid. Explicit mechanism stress-test protocols remain,
+but their doses are clipped to observed support when a prior is supplied.
+
+`osler_jepa/greybox_residual.py` implements a small universal differential
+equation candidate around `DKABody`. The residual may correct only glucose,
+ketone, bicarbonate, serum potassium, sodium, and creatinine derivatives.
+Total-body potassium, volume balance, insulin depots, dose mass balance, and
+osmotic injury remain hard-owned by the mechanism and cannot be written by the
+network. `train_greybox_residual.py` uses nested patient-group validation and
+always emits a candidate-only artifact with no causal or promotion authority.
 
 Acute viability failures now use reversible severity-by-duration burdens rather
 than instant death at the first threshold crossing. Hyperosmolar injury remains a
@@ -247,6 +272,10 @@ and abstention without adding data. All reported predictions are patient-level
 out-of-fold. The generated `dka_real_world_adapter_v1.joblib` is exposed through
 `osler_jepa/real_world_adapter.py` only for factual forecasts under an observed
 treatment sequence; it is intentionally blocked from causal counterfactual use.
+The v2 artifact exposes a per-state selection contract. A learned state requires
+at least three of four outer folds to select the same method and lower out-of-fold
+MAE than persistence. Unsupported horizons, low ensemble agreement, unstable
+state selection, and unvalidated states explicitly abstain to persistence.
 See `REAL_WORLD_IMPROVEMENT_FINDINGS.md` for the ablation results.
 
 The June 2026 v4 checkpoint was trained on 1,000 patient scenarios. At six hours

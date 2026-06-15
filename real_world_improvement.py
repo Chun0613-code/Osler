@@ -707,11 +707,15 @@ def abstention_metrics(probabilities, labels, threshold):
     }
 
 
-def train_deployment_artifact(examples, data, output, seed=17):
+def train_deployment_artifact(examples, data, output, seed=17,
+                              safe_configurations=None, numerical_rows=None):
     indices = np.arange(len(examples))
     rng = np.random.default_rng(seed)
     artifact = {
-        "version": "1.0.0",
+        "version": "1.1.0",
+        "hybrid_contract_version": "1.0.0",
+        "supported_horizon_hours": 6.0,
+        "default_fallback": "persistence",
         "warning": (
             "Fitted on all available demo stays after cross-fitted evaluation; "
             "research use only, no causal or clinical claim."
@@ -737,16 +741,52 @@ def train_deployment_artifact(examples, data, output, seed=17):
         "calibration_scope": "MIMIC-IV demo factual directions",
     }
     for target_index in ADAPTED_STATE_INDICES:
-        method, mode, alpha = choose_safe_method(data, indices, target_index)
+        candidate_method, mode, alpha = choose_safe_method(
+            data, indices, target_index
+        )
+        state_name = STATE_KEYS[target_index]
+        votes = Counter()
+        for (selected_state, method_name, _, _), count in (
+            safe_configurations or Counter()
+        ).items():
+            if selected_state == state_name:
+                votes[method_name] += count
+        state_rows = [
+            row for row in (numerical_rows or [])
+            if row["target_index"] == target_index
+        ]
+        persistence_mae = np.mean([
+            abs(row["persistence"] - row["truth"]) for row in state_rows
+        ]) if state_rows else np.inf
+        hybrid_mae = np.mean([
+            abs(row["safe_hybrid"] - row["truth"]) for row in state_rows
+        ]) if state_rows else np.inf
+        fold_votes = int(votes.get(candidate_method, 0))
+        promoted = bool(
+            candidate_method != "persistence"
+            and fold_votes >= 3
+            and hybrid_mae < persistence_mae
+        )
+        method = candidate_method if promoted else "persistence"
+        if method == "persistence":
+            mode = alpha = None
         models = [] if method != "adapter" else fit_ensemble(
             data, indices, target_index, mode, alpha, rng
         )
-        artifact["models"][STATE_KEYS[target_index]] = {
+        artifact["models"][state_name] = {
             "target_index": target_index,
             "method": method,
+            "candidate_method": candidate_method,
             "mode": mode,
             "alpha": alpha,
             "members": models,
+            "promotion_gate": {
+                "passed": promoted or candidate_method == "persistence",
+                "required_outer_fold_votes": 3,
+                "candidate_outer_fold_votes": fold_votes,
+                "oof_persistence_mae": float(persistence_mae),
+                "oof_safe_hybrid_mae": float(hybrid_mae),
+            },
         }
     joblib.dump(artifact, output)
     return artifact
@@ -823,7 +863,9 @@ def main():
 
     data = arrays(examples)
     artifact = train_deployment_artifact(
-        examples, data, args.artifact, args.seed
+        examples, data, args.artifact, args.seed,
+        safe_configurations=result["safe_configurations"],
+        numerical_rows=rows,
     )
     configuration_summary = [
         {
@@ -856,8 +898,8 @@ def main():
     ]
     report = {
         "experiment": "no-new-data real-world JEPA improvement",
-        "checkpoint": str(Path(args.checkpoint).resolve()),
-        "cohort": str(Path(args.mimic).resolve()),
+        "checkpoint": Path(args.checkpoint).name,
+        "cohort": Path(args.mimic).name,
         "evaluation": {
             "type": "4-fold patient-stay cross-fitting",
             "stays": int(frame["stay_id"].nunique()),
@@ -888,13 +930,21 @@ def main():
         "safe_hybrid_selected_configurations": safe_configuration_summary,
         "active_safe_hybrid_selected_configurations": active_safe_configuration_summary,
         "deployment_artifact": {
-            "path": str(Path(args.artifact).resolve()),
+            "path": Path(args.artifact).name,
             "adapted_states": list(artifact["models"]),
+            "state_selection": {
+                name: {
+                    "method": specification["method"],
+                    "candidate_method": specification["candidate_method"],
+                    "promotion_gate": specification["promotion_gate"],
+                }
+                for name, specification in artifact["models"].items()
+            },
             "trained_on_all_demo_stays_after_evaluation": True,
             "clinical_use_allowed": False,
         },
         "limitations": [
-            "No new data were added; only 12 patient stays are available.",
+            f"No new patient source was added; only {frame['stay_id'].nunique()} stays are available.",
             "Propensity overlap cannot remove unmeasured confounding.",
             "Most DKA episodes contain multiple simultaneous treatments.",
             "Cross-fitted estimates remain high variance at this cohort size.",

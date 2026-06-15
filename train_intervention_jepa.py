@@ -44,6 +44,7 @@ from dka_world_model import (
 )
 from osler_jepa.curriculum import STAGES, stage_for_epoch, weights_for_stage
 from osler_jepa.persistence_gate import load_persistence_gate
+from osler_jepa.action_prior import load_or_fit_action_prior
 from osler_jepa.actions import TREATMENT_EVENT_DIM, treatment_event_features
 from osler_jepa.ontology import OSLER_STATE_ONTOLOGY
 from osler_jepa.symbolic import (
@@ -99,22 +100,25 @@ def choose_device(requested):
     return torch.device("cpu")
 
 
-def protocol_action(name, observation, intensity, rng, step=0):
+def protocol_action(name, observation, intensity, rng, step=0, action_prior=None):
     if name == "randomized":
-        action = np.zeros(A_DIM, dtype=np.float32)
-        insulin_channel = int(rng.integers(0, 5))
-        if insulin_channel < 4:
-            choices = (
-                [0.0, 2.0, 4.0, 6.0, 10.0, 20.0],
-                [0.0, 8.0, 16.0, 24.0],
-                [0.0, 20.0, 40.0],
-                [0.0, 20.0, 40.0, 60.0],
-            )[insulin_channel]
-            action[insulin_channel] = rng.choice(choices)
-        action[ACTION_INDEX["fluids"]] = rng.choice([0.0, 250.0, 500.0])
-        action[ACTION_INDEX["kcl"]] = rng.choice([0.0, 10.0, 20.0])
-        action[ACTION_INDEX["bicarbonate"]] = rng.choice([0.0, 0.0, 25.0, 50.0])
-        action[ACTION_INDEX["dextrose"]] = rng.choice([0.0, 0.0, 5.0, 10.0])
+        if action_prior is not None:
+            action = action_prior.sample(rng)
+        else:
+            action = np.zeros(A_DIM, dtype=np.float32)
+            insulin_channel = int(rng.integers(0, 5))
+            if insulin_channel < 4:
+                choices = (
+                    [0.0, 2.0, 4.0, 6.0, 10.0, 20.0],
+                    [0.0, 8.0, 16.0, 24.0],
+                    [0.0, 20.0, 40.0],
+                    [0.0, 20.0, 40.0, 60.0],
+                )[insulin_channel]
+                action[insulin_channel] = rng.choice(choices)
+            action[ACTION_INDEX["fluids"]] = rng.choice([0.0, 250.0, 500.0])
+            action[ACTION_INDEX["kcl"]] = rng.choice([0.0, 10.0, 20.0])
+            action[ACTION_INDEX["bicarbonate"]] = rng.choice([0.0, 0.0, 25.0, 50.0])
+            action[ACTION_INDEX["dextrose"]] = rng.choice([0.0, 0.0, 5.0, 10.0])
     else:
         action = BASE_ACTIONS[name] * intensity
         if name in {"rapid_sc", "basal_sc"} and step > 0:
@@ -137,11 +141,11 @@ def protocol_action(name, observation, intensity, rng, step=0):
     if observation["G"] > 350 and name != "dextrose":
         action[ACTION_INDEX["dextrose"]] = 0.0
 
-    upper = A_SCALE * 2.0
-    return np.clip(action, 0.0, upper)
+    action = np.clip(action, 0.0, A_SCALE * 2.0)
+    return action_prior.constrain(action) if action_prior is not None else action
 
 
-def prepare_base_body(rng):
+def prepare_base_body(rng, action_prior=None):
     body = DKABody(rng=rng)
     observation = randomized_dka(body, rng)
     # Branch at different points in the treatment course, not only presentation.
@@ -150,15 +154,18 @@ def prepare_base_body(rng):
     prior_actions = []
     prior_durations = []
     for _ in range(int(rng.integers(0, 13))):
-        warmup = np.zeros(A_DIM, dtype=np.float32)
-        route = int(rng.choice([0, 0, 0, 1, 2, 3]))
-        warmup[route] = float(rng.choice(
-            [0.0, 2.0, 4.0, 6.0, 10.0, 20.0] if route == 0 else
-            [0.0, 8.0, 16.0] if route == 1 else
-            [0.0, 20.0, 40.0]
-        ))
-        warmup[ACTION_INDEX["fluids"]] = float(rng.choice([0.0, 250.0, 500.0]))
-        warmup[ACTION_INDEX["kcl"]] = float(rng.choice([0.0, 0.0, 10.0, 20.0]))
+        if action_prior is not None:
+            warmup = action_prior.sample(rng)
+        else:
+            warmup = np.zeros(A_DIM, dtype=np.float32)
+            route = int(rng.choice([0, 0, 0, 1, 2, 3]))
+            warmup[route] = float(rng.choice(
+                [0.0, 2.0, 4.0, 6.0, 10.0, 20.0] if route == 0 else
+                [0.0, 8.0, 16.0] if route == 1 else
+                [0.0, 20.0, 40.0]
+            ))
+            warmup[ACTION_INDEX["fluids"]] = float(rng.choice([0.0, 250.0, 500.0]))
+            warmup[ACTION_INDEX["kcl"]] = float(rng.choice([0.0, 0.0, 10.0, 20.0]))
         if observation["Ke"] < 3.3:
             warmup[:4] = 0.0
             warmup[ACTION_INDEX["kcl"]] = 20.0
@@ -177,7 +184,8 @@ def prepare_base_body(rng):
     return body, observation, prior_actions, prior_durations
 
 
-def generate_branched_dataset(n_scenarios=600, seq_len=12, seed=0):
+def generate_branched_dataset(n_scenarios=600, seq_len=12, seed=0,
+                              action_prior=None):
     rng = np.random.default_rng(seed)
     n_protocols = len(PROTOCOLS)
     states = np.zeros((n_scenarios, n_protocols, seq_len + 1, S_DIM), np.float32)
@@ -193,7 +201,9 @@ def generate_branched_dataset(n_scenarios=600, seq_len=12, seed=0):
     death_causes_by_protocol = {protocol: {} for protocol in PROTOCOLS}
 
     for scenario in range(n_scenarios):
-        base_body, base_observation, base_history, base_durations = prepare_base_body(rng)
+        base_body, base_observation, base_history, base_durations = prepare_base_body(
+            rng, action_prior=action_prior
+        )
         scenario_deltas = rng.choice(
             np.array([0.25, 0.5, 0.75, 1.0], dtype=np.float32),
             size=seq_len,
@@ -211,7 +221,8 @@ def generate_branched_dataset(n_scenarios=600, seq_len=12, seed=0):
                     prior_actions, DT, HISTORY_HOURS, prior_durations
                 )
                 action = protocol_action(
-                    protocol, observation, intensities[protocol_index], rng, step
+                    protocol, observation, intensities[protocol_index], rng, step,
+                    action_prior=action_prior,
                 )
                 previous_action = prior_actions[-1] if prior_actions else None
                 action_events[scenario, protocol_index, step] = (
@@ -1346,6 +1357,7 @@ def main():
     parser.add_argument("--mimic", default="dka_transitions_6h.parquet")
     parser.add_argument("--enable-viability-dynamics", action="store_true")
     parser.add_argument("--viability-gate-report")
+    parser.add_argument("--action-prior")
     args = parser.parse_args()
 
     gate = {
@@ -1372,7 +1384,11 @@ def main():
         f"intervention branches x {args.sequence_length} steps"
     )
     started = time.time()
-    dataset = generate_branched_dataset(args.scenarios, args.sequence_length, args.seed)
+    action_prior = load_or_fit_action_prior(args.action_prior, args.mimic)
+    dataset = generate_branched_dataset(
+        args.scenarios, args.sequence_length, args.seed,
+        action_prior=action_prior,
+    )
     splits = split_scenarios(args.scenarios, args.seed)
     print(
         f"split by scenario: train={len(splits['train'])}, "
@@ -1396,6 +1412,7 @@ def main():
         "seed": args.seed,
         "scenario_count": args.scenarios,
         "protocols": list(PROTOCOLS),
+        "action_prior": action_prior.payload if action_prior is not None else None,
         "state_ontology_version": OSLER_STATE_ONTOLOGY.version,
         "symbolic_interface": symbolic_schema(
             STATE_KEYS, ACTION_KEYS, OSLER_STATE_ONTOLOGY

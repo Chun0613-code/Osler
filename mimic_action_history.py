@@ -17,6 +17,10 @@ from dka_action_contract import ACTION_KEYS, INSULIN_KEYS
 from osler_jepa.actions import TREATMENT_EVENT_DIM
 
 ACTION_NAMES = ACTION_KEYS
+MAINTENANCE_NAMES = (
+    "free_water", "oral_intake", "enteral_nutrition",
+    "parenteral_nutrition", "carbohydrate",
+)
 ACTION_UNITS = {
     **{name: "unit" for name in INSULIN_KEYS},
     "fluids": "ml",
@@ -249,6 +253,71 @@ def normalize_events(frame):
     return pd.DataFrame(rows, columns=columns)
 
 
+def normalize_maintenance_events(frame):
+    """Normalize observed nutrition/free-water ingredients without guessing dose.
+
+    Volumes remain contextual maintenance inputs. Only explicitly charted
+    glucose/carbohydrate mass is converted to grams; calories are never reverse
+    engineered into carbohydrate.
+    """
+    rows = []
+    for event in frame.to_dict("records"):
+        start = pd.to_datetime(event.get("starttime"), errors="coerce")
+        end = pd.to_datetime(event.get("endtime"), errors="coerce")
+        if pd.isna(start):
+            continue
+        if pd.isna(end) or end <= start:
+            end = start + pd.Timedelta(hours=0.5)
+        itemid = _integer(event.get("ingredient_itemid") or event.get("itemid"))
+        input_label = _text(event.get("input_label"))
+        amount = _number(event.get("amount"))
+        unit = _text(event.get("uom") or event.get("amountuom")).replace(" ", "")
+        if amount is None or amount <= 0:
+            continue
+        name = None
+        canonical_amount = amount
+        canonical_unit = "ml"
+        if itemid == 226221:
+            name = "enteral_nutrition"
+        elif itemid == 227079:
+            name = "parenteral_nutrition"
+        elif itemid == 227075:
+            if "free water" in input_label or "flush" in input_label:
+                name = "free_water"
+            elif "po intake" in input_label:
+                name = "oral_intake"
+        elif itemid in (220395, 220364):
+            if not any(token in input_label for token in ("tpn", "parenteral", "nutrition")):
+                continue
+            name = "carbohydrate"
+            canonical_unit = "g"
+            if unit in ("mg", "milligram", "milligrams"):
+                canonical_amount = amount / 1000.0
+            elif unit not in ("g", "gram", "grams", "gm"):
+                continue
+        if name is None:
+            continue
+        rows.append({
+            "subject_id": event.get("subject_id"),
+            "stay_id": event.get("stay_id"),
+            "starttime": start,
+            "endtime": end,
+            "maintenance": name,
+            "amount": float(canonical_amount),
+            "uom": canonical_unit,
+            "source": "ingredientevents",
+            "orderid": event.get("orderid"),
+            "input_label": input_label,
+            "dose_confidence": 1.0,
+            "timing_confidence": 1.0,
+        })
+    return pd.DataFrame(rows, columns=[
+        "subject_id", "stay_id", "starttime", "endtime", "maintenance",
+        "amount", "uom", "source", "orderid", "input_label",
+        "dose_confidence", "timing_confidence",
+    ])
+
+
 def deduplicate_events(frame, tolerance_minutes=20):
     """Prefer ICU inputevents when the same administration is also in eMAR."""
     if frame.empty or not {"inputevents", "emar"}.issubset(set(frame["source"])):
@@ -297,6 +366,54 @@ def action_rate_grid(events, start, hours, dt=0.5):
             if overlap:
                 grid[cell, action_index] += event["amount"] * overlap / full_duration / dt
     return grid
+
+
+def maintenance_rate_grid(events, start, hours, dt=0.5):
+    cells = int(round(hours / dt))
+    grid = np.zeros((cells, len(MAINTENANCE_NAMES)), dtype=np.float32)
+    end = start + pd.Timedelta(hours=hours)
+    for event in events.to_dict("records"):
+        event_start = max(pd.Timestamp(event["starttime"]), start)
+        event_end = min(pd.Timestamp(event["endtime"]), end)
+        if event_end <= event_start:
+            continue
+        full_duration = max(
+            (pd.Timestamp(event["endtime"]) - pd.Timestamp(event["starttime"])).total_seconds()
+            / 3600.0,
+            dt,
+        )
+        index = MAINTENANCE_NAMES.index(event["maintenance"])
+        for cell in range(cells):
+            lo = start + pd.Timedelta(hours=cell * dt)
+            hi = lo + pd.Timedelta(hours=dt)
+            overlap = max(0.0, (min(event_end, hi) - max(event_start, lo)).total_seconds() / 3600.0)
+            if overlap:
+                grid[cell, index] += float(event["amount"]) * overlap / full_duration / dt
+    return grid
+
+
+def maintenance_window_summary(events, anchor, history_hours=6.0,
+                               future_hours=6.0, dt=0.5):
+    history_start = anchor - pd.Timedelta(hours=history_hours)
+    future_end = anchor + pd.Timedelta(hours=future_hours)
+    history = events[
+        (events["endtime"] >= history_start) & (events["starttime"] < anchor)
+    ]
+    future = events[
+        (events["endtime"] >= anchor) & (events["starttime"] < future_end)
+    ]
+    history_grid = maintenance_rate_grid(history, history_start, history_hours, dt)
+    future_grid = maintenance_rate_grid(future, anchor, future_hours, dt)
+    output = {
+        "history_maintenance_grid": history_grid.tolist(),
+        "future_maintenance_grid": future_grid.tolist(),
+        "maintenance_sources": sorted(events["source"].dropna().unique().tolist())
+        if not events.empty else [],
+    }
+    for index, name in enumerate(MAINTENANCE_NAMES):
+        output[f"hist_{name}_total"] = float(history_grid[:, index].sum() * dt)
+        output[f"act_{name}_total"] = float(future_grid[:, index].sum() * dt)
+    return output
 
 
 def fluid_sodium_grid(events, start, hours, dt=0.5):

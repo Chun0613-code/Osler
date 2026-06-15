@@ -43,7 +43,7 @@ import math
 from dataclasses import asdict, dataclass
 import numpy as np
 
-from dka_action_contract import ACTION_INDEX, expand_action
+from dka_action_contract import ACTION_INDEX, ACTION_KEYS, expand_action
 
 # ---- setpoints / structural constants (objective facts) --------------------
 G_NORM, RENAL_G_THRESH = 100.0, 180.0     # mg/dL; kidney spills glucose above thresh
@@ -167,9 +167,10 @@ def estimate_potassium_store(ke, ph, creatinine=1.2, urine_output=100.0,
 
 
 class DKABody:
-    def __init__(self, rng=None, profile=None):
+    def __init__(self, rng=None, profile=None, residual_model=None):
         self.rng = rng or np.random.default_rng()
         self.profile = profile or DKAPatientProfile()
+        self.residual_model = residual_model
         self.reset()
 
     @property
@@ -245,7 +246,8 @@ class DKABody:
         return self.I / (self.I + effective_i50)
 
     # --- one integration substep (dt hours) ---------------------------------
-    def _derivs(self, action, fluid_sodium_meq_l=NA_INFUSATE):
+    def _derivs(self, action, fluid_sodium_meq_l=NA_INFUSATE,
+                free_water_ml=0.0, nutrition_carbohydrate_g=0.0):
         values = expand_action(action)
         insulin_iv = values[ACTION_INDEX["insulin_iv"]]
         insulin_rapid = values[ACTION_INDEX["insulin_rapid_sc"]]
@@ -267,11 +269,15 @@ class DKABody:
         osm_diuresis = K_OSM * glucosuria
         basal_urine = 0.0007 * self.profile.weight_kg * rf
         urine_l_hr = basal_urine + osm_diuresis
-        retained_fluid = fluid_ml / 1000.0 * self.profile.fluid_retention
+        retained_iv_fluid = fluid_ml / 1000.0 * self.profile.fluid_retention
+        retained_free_water = max(0.0, float(free_water_ml)) / 1000.0 * 0.85
+        retained_fluid = retained_iv_fluid + retained_free_water
         dV = retained_fluid - urine_l_hr - K_INSENS
         dil = dV / self.V   # fractional dilution applied to concentrations
 
-        dextrose_input = dextrose_g * 100.0 / self.V
+        dextrose_input = (
+            dextrose_g + max(0.0, float(nutrition_carbohydrate_g))
+        ) * 100.0 / self.V
         dG = prod + dextrose_input - uptake - glucosuria - self.G * dil
         weight_scale = 75.0 / self.profile.weight_kg
         rapid_absorbed = K_SC_RAPID_ABS * self.insulin_rapid_depot
@@ -311,7 +317,7 @@ class DKABody:
 
         # Sodium concentration follows solute and water balance. Bicarbonate is
         # administered as a sodium salt in this simplified IV action contract.
-        sodium_in = retained_fluid * float(fluid_sodium_meq_l) + bicarb
+        sodium_in = retained_iv_fluid * float(fluid_sodium_meq_l) + bicarb
         sodium_out = urine_l_hr * NA_URINE
         dNa = (sodium_in - sodium_out - self.Na * dV) / self.V
         # The mini-body does not explicitly model every urinary osmole or
@@ -349,7 +355,7 @@ class DKABody:
         recovery = K_OSM_INJURY_RECOVERY * self.osmotic_injury
         dOsmoticInjury = injury_input - recovery
 
-        return dict(
+        derivatives = dict(
             G=dG, I=dI, Ket=dKet, HCO3=dHCO3, Ke=dKe, Ki=dKi,
             V=dV, Na=dNa, Cr=dCr, urine_output_ml_hr=urine_l_hr * 1000.0,
             insulin_rapid_depot=dRapid,
@@ -359,6 +365,19 @@ class DKABody:
             counterregulatory_stress=dStress,
             renal_perfusion_state=dRenalPerfusion,
         )
+        if self.residual_model is not None:
+            residual_action = dict(zip(ACTION_KEYS, values.astype(float).tolist()))
+            if isinstance(action, dict):
+                residual_action.update({
+                    key: value for key, value in action.items()
+                    if str(key).startswith("_")
+                })
+            correction = self.residual_model.correction(
+                self.observe(), residual_action
+            )
+            for key in ("G", "Ket", "HCO3", "Ke", "Na", "Cr"):
+                derivatives[key] += float(correction.get(key, 0.0))
+        return derivatives
 
     def step(self, action, dt=0.5, substeps=30):
         """Advance physiology under a route-aware or legacy action vector."""
@@ -366,12 +385,26 @@ class DKABody:
             float(action.get("_fluid_sodium_meq_l", NA_INFUSATE))
             if isinstance(action, dict) else NA_INFUSATE
         )
+        free_water_ml = (
+            float(action.get("_free_water_ml", 0.0))
+            if isinstance(action, dict) else 0.0
+        )
+        nutrition_carbohydrate_g = (
+            float(action.get("_nutrition_carbohydrate_g", 0.0))
+            if isinstance(action, dict) else 0.0
+        )
         values = expand_action(action)
         h = dt / substeps
         for _ in range(substeps):
             if not self.alive:
                 break
-            d = self._derivs(values, fluid_sodium_meq_l=fluid_sodium_meq_l)
+            derivative_action = dict(action) if isinstance(action, dict) else values
+            d = self._derivs(
+                derivative_action,
+                fluid_sodium_meq_l=fluid_sodium_meq_l,
+                free_water_ml=free_water_ml,
+                nutrition_carbohydrate_g=nutrition_carbohydrate_g,
+            )
             self.G = max(0.0, self.G + d["G"] * h)
             self.I = max(0.0, self.I + d["I"] * h)
             self.Ket = max(0.0, self.Ket + d["Ket"] * h)

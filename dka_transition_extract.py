@@ -29,7 +29,8 @@ import numpy as np
 import pandas as pd
 
 from mimic_action_history import (
-    ACTION_NAMES, action_window_summary, deduplicate_events, normalize_events,
+    ACTION_NAMES, action_window_summary, deduplicate_events,
+    maintenance_window_summary, normalize_events, normalize_maintenance_events,
 )
 
 # ----------------------------------------------------------------------------
@@ -287,6 +288,31 @@ def pull_actions(c):
     return actions.sort_values(["stay_id", "starttime"]), vaso
 
 
+def pull_maintenance_events(c):
+    """Observed maintenance/nutrition inputs from ingredientevents."""
+    try:
+        raw = c.execute(f"""
+            SELECT g.subject_id, g.stay_id, g.starttime, g.endtime,
+                   g.itemid AS ingredient_itemid, g.amount,
+                   lower(g.amountuom) AS uom, g.orderid,
+                   di.label AS ingredient_label, parent.label AS input_label
+            FROM {f(ICU,'ingredientevents')} g
+            JOIN {f(ICU,'d_items')} di ON g.itemid = di.itemid
+            LEFT JOIN {f(ICU,'inputevents')} ie
+              ON g.stay_id = ie.stay_id AND g.orderid = ie.orderid
+            LEFT JOIN {f(ICU,'d_items')} parent ON ie.itemid = parent.itemid
+            WHERE g.itemid IN (226221, 227079, 227075, 220395)
+              AND lower(coalesce(g.statusdescription, 'finishedrunning'))
+                  NOT LIKE '%cancel%'
+        """).df()
+    except Exception as error:
+        print(f"WARNING: ingredientevents unavailable: {str(error)[:160]}")
+        return normalize_maintenance_events(pd.DataFrame())
+    return normalize_maintenance_events(raw).drop_duplicates(
+        ["stay_id", "orderid", "maintenance", "starttime", "amount"]
+    ).sort_values(["stay_id", "starttime"])
+
+
 def pull_stay_meta(c):
     df = c.execute(f"""
         SELECT i.subject_id, i.hadm_id, i.stay_id, i.intime, i.outtime, a.deathtime
@@ -404,13 +430,21 @@ def assemble_state(anchors, meas, suffix, when_col, direction, tol_h):
     return out
 
 
-def assemble_actions(anchors, actions):
+def assemble_actions(anchors, actions, maintenance=None):
     """Exact future action grids and six-hour pre-anchor treatment history."""
     rows = []
     grouped = {stay: frame for stay, frame in actions.groupby("stay_id")}
     empty = actions.iloc[0:0]
+    maintenance = normalize_maintenance_events(pd.DataFrame()) if maintenance is None else maintenance
+    maintenance_grouped = {
+        stay: frame for stay, frame in maintenance.groupby("stay_id")
+    }
+    empty_maintenance = maintenance.iloc[0:0]
     for anchor in anchors.itertuples():
         summary = action_window_summary(grouped.get(anchor.stay_id, empty), anchor.t)
+        summary.update(maintenance_window_summary(
+            maintenance_grouped.get(anchor.stay_id, empty_maintenance), anchor.t
+        ))
         row = {
             key: json.dumps(value) if isinstance(value, (dict, list)) else value
             for key, value in summary.items()
@@ -491,6 +525,7 @@ def main():
         if onsets.empty:
             return
     actions, vasopressors = pull_actions(c)
+    maintenance = pull_maintenance_events(c)
 
     print("Building anchors...")
     anchors = build_anchors(onsets, meta).reset_index(drop=True)
@@ -509,7 +544,7 @@ def main():
     st = assemble_state(anchors, meas, "_t", "t", "backward", LOOKBACK_H)
     sf = assemble_state(anchors.rename(columns={"t_plus": "t_plus"}), meas,
                         "_tp6", "t_plus", "nearest", TARGET_TOL_H)
-    ac = assemble_actions(anchors, actions)
+    ac = assemble_actions(anchors, actions, maintenance)
     oc = assemble_outcomes(anchors, vasopressors, meta)
 
     df = pd.concat([
@@ -564,6 +599,10 @@ def main():
         "has_exact_action_grids": "future_action_grid" in df,
         "has_treatment_lifecycle": "future_treatment_events" in df,
         "has_treatment_history": "history_action_grid" in df,
+        "has_maintenance_context": "future_maintenance_grid" in df,
+        "maintenance_event_count": int(maintenance[
+            maintenance["stay_id"].isin(onsets["stay_id"])
+        ].shape[0]),
         "evaluation_ready": not gate_failures,
         "causal_claim_allowed": False,
         "gate_failures": gate_failures,

@@ -61,7 +61,8 @@ class RealWorldAdapter:
         return apply_temperature(np.asarray(probabilities), temperature)
 
     def apply(self, state, base_normalized, normalized_action_sequence, history=None,
-              measurement_ages=None, active_dka=True, hours_since_onset=0.0):
+              measurement_ages=None, active_dka=True, hours_since_onset=0.0,
+              horizon_hours=6.0):
         feature = build_features(
             state, base_normalized, normalized_action_sequence, history,
             measurement_ages, active_dka, hours_since_onset,
@@ -69,8 +70,13 @@ class RealWorldAdapter:
         current_normalized = s2vec(state)
         current_physical = current_normalized * S_STD + S_MEAN
         base_physical = np.asarray(base_normalized) * S_STD + S_MEAN
-        adjusted = base_physical.copy()
+        adjusted = current_physical.copy()
         details = {}
+        supported_horizon = float(self.payload.get("supported_horizon_hours", 6.0))
+        horizon_supported = abs(float(horizon_hours) - supported_horizon) <= 0.25
+        agreement_gate = self.payload["symbolic_calibration"][
+            "recommended_min_ensemble_agreement"
+        ]
         for name, specification in self.payload["models"].items():
             index = int(specification["target_index"])
             method = specification["method"]
@@ -85,32 +91,62 @@ class RealWorldAdapter:
                     )[0]) * S_STD[index]
                     for member in specification["members"]
                 ])
-            adjusted[index] = values.mean()
+            candidate = float(values.mean())
             threshold = PHYSICAL_STABLE_THRESHOLDS[index]
             directions = np.where(
                 values - current_physical[index] < -threshold, 0,
                 np.where(values - current_physical[index] > threshold, 2, 1),
             )
             agreement = max(float(np.mean(directions == value)) for value in (0, 1, 2))
+            abstain_reasons = []
+            if not horizon_supported:
+                abstain_reasons.append("unsupported_horizon")
+            if method == "adapter" and agreement < agreement_gate:
+                abstain_reasons.append("ensemble_direction_disagreement")
+            abstain = bool(abstain_reasons)
+            selected_source = "persistence" if abstain else method
+            selected = current_physical[index] if abstain else candidate
+            adjusted[index] = selected
             details[name] = {
-                "source": method,
-                "prediction": round(float(adjusted[index]), 4),
+                "candidate_source": method,
+                "candidate_prediction": round(candidate, 4),
+                "selected_source": selected_source,
+                "selected_prediction": round(float(selected), 4),
+                "fallback_source": "persistence",
                 "ensemble_std": round(float(values.std()), 4),
                 "direction_agreement": round(agreement, 4),
-                "abstain": bool(
-                    method == "adapter"
-                    and agreement < self.payload["symbolic_calibration"][
-                        "recommended_min_ensemble_agreement"
-                    ]
-                ),
+                "abstain": abstain,
+                "abstain_reasons": abstain_reasons,
             }
+        for index, name in enumerate(STATE_KEYS):
+            if name not in details:
+                details[name] = {
+                    "candidate_source": "none",
+                    "candidate_prediction": None,
+                    "selected_source": "persistence",
+                    "selected_prediction": round(float(current_physical[index]), 4),
+                    "fallback_source": "persistence",
+                    "ensemble_std": None,
+                    "direction_agreement": None,
+                    "abstain": True,
+                    "abstain_reasons": ["state_not_validated"],
+                }
         return {
             "research_only": True,
             "forecast_type": "factual_observed-treatment forecast",
             "causal_intervention_claim_allowed": False,
+            "hybrid_contract": {
+                "version": self.payload.get("hybrid_contract_version", "1.0.0"),
+                "requested_horizon_hours": float(horizon_hours),
+                "supported_horizon_hours": supported_horizon,
+                "horizon_supported": horizon_supported,
+                "default_fallback": "persistence",
+                "selection_scope": "per_state",
+            },
             "state": {
                 name: round(float(adjusted[index]), 4)
                 for index, name in enumerate(STATE_KEYS)
             },
+            "state_selection": details,
             "adapter_details": details,
         }
