@@ -27,6 +27,7 @@ from dka_world_model import (
     DT,
     H_DIM,
     HISTORY_HOURS,
+    MAX_OBSERVATION_AGE_HOURS,
     S_DIM,
     S_MEAN,
     S_STD,
@@ -36,6 +37,7 @@ from dka_world_model import (
     randomized_dka,
     save_checkpoint,
     s2vec,
+    observation_context,
     treatment_history_features,
     vicreg,
 )
@@ -140,6 +142,7 @@ def prepare_base_body(rng):
     # This exposes the model to partially corrected glucose/acidosis and residual
     # treatment effects that resemble later EHR anchors.
     prior_actions = []
+    prior_durations = []
     for _ in range(int(rng.integers(0, 13))):
         warmup = np.zeros(A_DIM, dtype=np.float32)
         route = int(rng.choice([0, 0, 0, 1, 2, 3]))
@@ -159,11 +162,13 @@ def prepare_base_body(rng):
             warmup[ACTION_INDEX["dextrose"]] = float(rng.choice([5.0, 10.0]))
         observation, _, dead, _ = body.step(warmup, dt=DT)
         prior_actions.append(warmup.tolist())
+        prior_durations.append(DT)
         if dead:
             observation = randomized_dka(body, rng)
             prior_actions = []
+            prior_durations = []
             break
-    return body, observation, prior_actions
+    return body, observation, prior_actions, prior_durations
 
 
 def generate_branched_dataset(n_scenarios=600, seq_len=12, seed=0):
@@ -174,30 +179,40 @@ def generate_branched_dataset(n_scenarios=600, seq_len=12, seed=0):
     histories = np.zeros((n_scenarios, n_protocols, seq_len, H_DIM), np.float32)
     valid = np.zeros((n_scenarios, n_protocols, seq_len), np.float32)
     alive = np.zeros((n_scenarios, n_protocols, seq_len), np.float32)
+    time_deltas = np.zeros((n_scenarios, n_protocols, seq_len), np.float32)
     death_causes = {}
 
     for scenario in range(n_scenarios):
-        base_body, base_observation, base_history = prepare_base_body(rng)
+        base_body, base_observation, base_history, base_durations = prepare_base_body(rng)
+        scenario_deltas = rng.choice(
+            np.array([0.25, 0.5, 0.75, 1.0], dtype=np.float32),
+            size=seq_len,
+            p=[0.10, 0.65, 0.15, 0.10],
+        )
         intensities = rng.uniform(0.75, 1.25, size=(n_protocols, A_DIM)).astype(np.float32)
         for protocol_index, protocol in enumerate(PROTOCOLS):
             body = copy.deepcopy(base_body)
             observation = dict(base_observation)
             prior_actions = list(base_history)
+            prior_durations = list(base_durations)
             states[scenario, protocol_index, 0] = s2vec(observation)
             for step in range(seq_len):
                 histories[scenario, protocol_index, step] = treatment_history_features(
-                    prior_actions, DT, HISTORY_HOURS
+                    prior_actions, DT, HISTORY_HOURS, prior_durations
                 )
                 action = protocol_action(
                     protocol, observation, intensities[protocol_index], rng, step
                 )
-                next_observation, _, dead, info = body.step(action, dt=DT)
+                step_hours = float(scenario_deltas[step])
+                next_observation, _, dead, info = body.step(action, dt=step_hours)
                 actions[scenario, protocol_index, step] = a2vec(action)
+                time_deltas[scenario, protocol_index, step] = step_hours
                 states[scenario, protocol_index, step + 1] = s2vec(next_observation)
                 valid[scenario, protocol_index, step] = 1.0
                 alive[scenario, protocol_index, step] = 0.0 if dead else 1.0
                 observation = next_observation
                 prior_actions.append(action.tolist())
+                prior_durations.append(step_hours)
                 if dead:
                     cause = info.get("cause") or "unknown"
                     death_causes[cause] = death_causes.get(cause, 0) + 1
@@ -208,6 +223,7 @@ def generate_branched_dataset(n_scenarios=600, seq_len=12, seed=0):
         "states": states,
         "actions": actions,
         "histories": histories,
+        "time_deltas": time_deltas,
         "valid": valid,
         "alive": alive,
         "protocols": list(PROTOCOLS),
@@ -233,17 +249,51 @@ def masked_mean(values, mask):
     return (values * mask).sum() / mask.sum().clamp_min(1.0) / values.shape[-1]
 
 
-def batch_losses(model, states, actions, histories, valid, alive, weights=None):
+def _partial_observation_context(state, drop_probability):
+    if drop_probability <= 0:
+        return torch.ones_like(state), torch.zeros_like(state)
+    mask = (torch.rand_like(state) > drop_probability).to(state.dtype)
+    # Keep at least one directly observed variable in every state vector.
+    empty = mask.sum(dim=-1) == 0
+    if empty.any():
+        mask[empty, 0] = 1.0
+    measured_age = torch.rand_like(state) * 6.0
+    age = torch.where(
+        mask > 0,
+        measured_age,
+        torch.full_like(state, MAX_OBSERVATION_AGE_HOURS),
+    )
+    return mask, age
+
+
+def _time_weighted_exposure(actions, time_deltas, horizon):
+    durations = time_deltas[:, :, :horizon + 1]
+    weighted = actions[:, :, :horizon + 1] * durations.unsqueeze(-1)
+    return weighted.sum(dim=2) / durations.sum(dim=2).clamp_min(1e-6).unsqueeze(-1)
+
+
+def batch_losses(model, states, actions, histories, time_deltas, valid, alive,
+                 weights=None, observation_dropout=0.0):
     weights = weights or STAGES[-1].weights
     batch, protocols, steps, _ = actions.shape
     current = states[:, :, :-1].reshape(-1, S_DIM)
     target = states[:, :, 1:].reshape(-1, S_DIM)
     flat_actions = actions.reshape(-1, A_DIM)
     flat_histories = histories.reshape(-1, H_DIM)
+    flat_deltas = time_deltas.reshape(-1)
+    elapsed = torch.cumsum(time_deltas, dim=2) - time_deltas
+    flat_elapsed = elapsed.reshape(-1)
     flat_valid = valid.reshape(-1)
 
-    latent = model.encode_state(current, flat_histories)
-    predicted_latent = model.predict_latent(latent, flat_actions)
+    current_mask, current_age = _partial_observation_context(
+        current, observation_dropout
+    )
+    latent = model.encode_state(
+        current * current_mask, flat_histories, current_mask, current_age
+    )
+    predicted_latent = model.predict_latent(
+        latent, flat_actions, flat_deltas, flat_elapsed
+    )
     with torch.no_grad():
         target_latent = model.Ebar(target)
 
@@ -254,8 +304,14 @@ def batch_losses(model, states, actions, histories, valid, alive, weights=None):
     initial = states[:, :, 0].reshape(batch * protocols, S_DIM)
     action_sequences = actions.reshape(batch * protocols, steps, A_DIM)
     initial_history = histories[:, :, 0].reshape(batch * protocols, H_DIM)
+    initial_mask, initial_age = _partial_observation_context(
+        initial, observation_dropout
+    )
     predicted, risk_logits, rollout_latents = model.rollout(
-        initial, action_sequences, initial_history
+        initial * initial_mask, action_sequences, initial_history,
+        observation_mask=initial_mask,
+        observation_age=initial_age,
+        delta_hours=time_deltas.reshape(batch * protocols, steps),
     )
     predicted = predicted.reshape(batch, protocols, steps, S_DIM)
     risk_logits = risk_logits.reshape(batch, protocols, steps)
@@ -287,8 +343,12 @@ def batch_losses(model, states, actions, histories, valid, alive, weights=None):
         predicted_effect = predicted[:, 1:, horizon] - predicted[:, :1, horizon]
         true_effect = states[:, 1:, horizon + 1] - states[:, :1, horizon + 1]
         effect_losses.append(masked_mean((predicted_effect - true_effect).square(), pair_valid))
-        action_exposure = actions[:, 1:, :horizon + 1].mean(dim=2)
-        control_exposure = actions[:, :1, :horizon + 1].mean(dim=2)
+        action_exposure = _time_weighted_exposure(
+            actions[:, 1:], time_deltas[:, 1:], horizon
+        )
+        control_exposure = _time_weighted_exposure(
+            actions[:, :1], time_deltas[:, :1], horizon
+        )
         osler_losses.append(OSLER_DKA_VALIDATOR.consistency_loss(
             predicted_effect,
             action_exposure - control_exposure,
@@ -297,7 +357,9 @@ def batch_losses(model, states, actions, histories, valid, alive, weights=None):
     effect = torch.stack(effect_losses).mean()
     osler = torch.stack(osler_losses).mean()
 
-    initial_latent = model.encode_state(initial, initial_history).reshape(
+    initial_latent = model.encode_state(
+        initial * initial_mask, initial_history, initial_mask, initial_age
+    ).reshape(
         batch, protocols, -1
     )
     direction_losses = []
@@ -308,11 +370,14 @@ def batch_losses(model, states, actions, histories, valid, alive, weights=None):
     contrastive_losses = []
     for horizon in (0, min(5, steps - 1), steps - 1):
         horizon_valid = valid[:, :, horizon]
-        action_exposure = actions[:, :, :horizon + 1].mean(dim=2)
+        action_exposure = _time_weighted_exposure(
+            actions, time_deltas, horizon
+        )
+        horizon_hours = time_deltas[:, :, :horizon + 1].sum(dim=2)
         outputs = model.symbolic_outputs(
             initial_latent.reshape(-1, initial_latent.shape[-1]),
             action_exposure.reshape(-1, A_DIM),
-            delta_hours=(horizon + 1) * DT,
+            delta_hours=horizon_hours.reshape(-1),
         )
         direction_logits = outputs["direction_logits"].reshape(
             batch, protocols, S_DIM, 3
@@ -417,7 +482,9 @@ def batch_losses(model, states, actions, histories, valid, alive, weights=None):
 def tensor_batch(dataset, indices, device):
     return tuple(
         torch.as_tensor(dataset[key][indices], dtype=torch.float32, device=device)
-        for key in ("states", "actions", "histories", "valid", "alive")
+        for key in (
+            "states", "actions", "histories", "time_deltas", "valid", "alive"
+        )
     )
 
 
@@ -458,6 +525,7 @@ def train_model(model, dataset, splits, epochs, batch_size, learning_rate, devic
                 model,
                 *tensor_batch(dataset, selection, device),
                 weights=stage.weights,
+                observation_dropout=0.25,
             )
             optimizer.zero_grad(set_to_none=True)
             losses["total"].backward()
@@ -505,12 +573,15 @@ def predict_split(model, dataset, indices, device, batch_size=32):
     predictions, risks = [], []
     for start in range(0, len(indices), batch_size):
         selection = indices[start:start + batch_size]
-        states, actions, histories, _, _ = tensor_batch(dataset, selection, device)
+        states, actions, histories, time_deltas, _, _ = tensor_batch(
+            dataset, selection, device
+        )
         batch, protocols, steps, _ = actions.shape
         predicted, risk, _ = model.rollout(
             states[:, :, 0].reshape(batch * protocols, S_DIM),
             actions.reshape(batch * protocols, steps, A_DIM),
             histories[:, :, 0].reshape(batch * protocols, H_DIM),
+            delta_hours=time_deltas.reshape(batch * protocols, steps),
         )
         predictions.append(predicted.reshape(batch, protocols, steps, S_DIM).cpu().numpy())
         risks.append(torch.sigmoid(risk).reshape(batch, protocols, steps).cpu().numpy())
@@ -588,7 +659,7 @@ def counterfactual_metrics(prediction, states, valid):
     return report
 
 
-def osler_validator_audit(prediction, states, actions, valid):
+def osler_validator_audit(prediction, states, actions, time_deltas, valid):
     horizon = prediction.shape[2] - 1
     status_counts = {"verified": 0, "contradicted": 0, "unexplained": 0}
     rule_counts = {}
@@ -609,7 +680,11 @@ def osler_validator_audit(prediction, states, actions, valid):
                 STATE_KEYS,
                 (prediction[scenario, protocol, horizon] * S_STD + S_MEAN).tolist(),
             ))
-            action = actions[scenario, protocol, :horizon + 1].mean(axis=0)
+            durations = time_deltas[scenario, protocol, :horizon + 1]
+            action = (
+                actions[scenario, protocol, :horizon + 1]
+                * durations[:, None]
+            ).sum(axis=0) / max(float(durations.sum()), 1e-6)
             audit = OSLER_DKA_VALIDATOR.validate(action, future, baseline)
             status_counts[audit["status"]] += 1
             for check in audit["checks"]:
@@ -637,17 +712,22 @@ def osler_validator_audit(prediction, states, actions, valid):
 
 @torch.no_grad()
 def symbolic_head_metrics(model, dataset, indices, device):
-    states, actions, histories, valid, _ = tensor_batch(dataset, indices, device)
+    states, actions, histories, time_deltas, valid, _ = tensor_batch(
+        dataset, indices, device
+    )
     batch, protocols, steps, _ = actions.shape
     initial = states[:, :, 0]
     initial_latent = model.encode_state(
         initial.reshape(-1, S_DIM), histories[:, :, 0].reshape(-1, H_DIM)
     )
-    action_exposure = actions.mean(dim=2)
+    action_exposure = _time_weighted_exposure(
+        actions, time_deltas, actions.shape[2] - 1
+    )
+    total_hours = time_deltas.sum(dim=2)
     outputs = model.symbolic_outputs(
         initial_latent,
         action_exposure.reshape(-1, A_DIM),
-        delta_hours=steps * DT,
+        delta_hours=total_hours.reshape(-1),
     )
 
     direction_prediction = outputs["direction_logits"].argmax(dim=-1).reshape(
@@ -743,6 +823,7 @@ def evaluate_model(model, dataset, indices, device):
     states = dataset["states"][indices]
     actions = dataset["actions"][indices]
     histories = dataset["histories"][indices]
+    time_deltas = dataset["time_deltas"][indices]
     valid = dataset["valid"][indices]
     alive = dataset["alive"][indices]
     horizons = [0, min(5, prediction.shape[2] - 1), prediction.shape[2] - 1]
@@ -760,11 +841,15 @@ def evaluate_model(model, dataset, indices, device):
     shuffled = flat_actions[rng.permutation(len(flat_actions))]
     initial = states[:, :, 0].reshape(-1, S_DIM)
     initial_history = histories[:, :, 0].reshape(-1, H_DIM)
+    flat_time_deltas = time_deltas.reshape(-1, time_deltas.shape[2])
     with torch.no_grad():
         shuffled_prediction, _, _ = model.rollout(
             torch.as_tensor(initial, dtype=torch.float32, device=device),
             torch.as_tensor(shuffled, dtype=torch.float32, device=device),
             torch.as_tensor(initial_history, dtype=torch.float32, device=device),
+            delta_hours=torch.as_tensor(
+                flat_time_deltas, dtype=torch.float32, device=device
+            ),
         )
     shuffled_prediction = shuffled_prediction[:, -1].cpu().numpy().reshape(
         states.shape[0], states.shape[1], S_DIM
@@ -790,7 +875,7 @@ def evaluate_model(model, dataset, indices, device):
         },
         "counterfactual": counterfactual_metrics(prediction, states, valid),
         "osler_validator": osler_validator_audit(
-            prediction, states, actions, valid
+            prediction, states, actions, time_deltas, valid
         ),
         "symbolic_heads": symbolic_head_metrics(
             model, dataset, indices, device
@@ -852,9 +937,11 @@ def evaluate_mimic_proxy(model, path, device):
         if any(np.isnan(value) for value in (glucose, potassium, map_value, bicarbonate)):
             continue
         ph = row.get("ph_t")
+        ph_observed = not np.isnan(ph)
         if np.isnan(ph):
             ph = henderson(float(bicarbonate))
         anion_gap = row.get("anion_gap_t")
+        anion_gap_observed = not np.isnan(anion_gap)
         if np.isnan(anion_gap):
             anion_gap = S_MEAN[3]
         volume = np.clip((float(map_value) - 30.0) / 60.0 * 15.0, 5.0, 18.0)
@@ -864,20 +951,25 @@ def evaluate_mimic_proxy(model, path, device):
             "V": volume, "I": 1.0,
         }
         sodium = row.get("sodium_t", 138.0)
+        sodium_observed = not np.isnan(sodium)
         if np.isnan(sodium):
             sodium = 138.0
         creatinine = row.get("creatinine_t", 1.2)
+        creatinine_observed = not np.isnan(creatinine)
         if np.isnan(creatinine):
             creatinine = 1.2
         osmolality = row.get("osmolality_t", np.nan)
+        osmolality_observed = not np.isnan(osmolality)
         if np.isnan(osmolality):
             osmolality = row.get("osmolality_derived_t", np.nan)
         if np.isnan(osmolality):
             osmolality = 2.0 * float(sodium) + float(glucose) / 18.0
         urine_output = row.get("urine_output_t", 100.0)
+        urine_output_observed = not np.isnan(urine_output)
         if np.isnan(urine_output):
             urine_output = 100.0
         bhb = row.get("BHB_t", np.nan)
+        bhb_observed = not np.isnan(bhb)
         if np.isnan(bhb):
             bhb = max(0.0, float(anion_gap) - 12.0) * 0.75
         state.update({
@@ -893,6 +985,39 @@ def evaluate_mimic_proxy(model, path, device):
             )),
             "osmotic_injury": 0.0,
         })
+        reported_state = {
+            "G": float(glucose), "HCO3": float(bicarbonate),
+            "Ke": float(potassium), "MAP": float(map_value),
+        }
+        for observed, name, value in (
+            (ph_observed, "pH", ph),
+            (anion_gap_observed, "anion_gap", anion_gap),
+            (sodium_observed, "Na", sodium),
+            (osmolality_observed, "osmolality", osmolality),
+            (creatinine_observed, "creatinine", creatinine),
+            (urine_output_observed, "urine_output", urine_output),
+            (bhb_observed, "BHB", bhb),
+        ):
+            if observed:
+                reported_state[name] = float(value)
+        age_map = {
+            model_name: float(row[column])
+            for model_name, column in (
+                ("G", "glucose_age_hr"), ("pH", "ph_age_hr"),
+                ("HCO3", "bicarbonate_age_hr"),
+                ("anion_gap", "anion_gap_age_hr"),
+                ("Ke", "potassium_age_hr"), ("MAP", "map_age_hr"),
+                ("Na", "sodium_age_hr"),
+                ("osmolality", "osmolality_age_hr"),
+                ("creatinine", "creatinine_age_hr"),
+                ("urine_output", "urine_output_age_hr"),
+                ("BHB", "BHB_age_hr"),
+            )
+            if column in frame and not pd.isna(row.get(column))
+        }
+        _, observed_mask, observed_age = observation_context(
+            reported_state, age_map
+        )
         detailed_actions = "future_action_grid" in frame.columns
         if detailed_actions and isinstance(row.get("future_action_grid"), str):
             physical_sequence = np.asarray(
@@ -928,6 +1053,12 @@ def evaluate_mimic_proxy(model, path, device):
             torch.as_tensor(sequence, dtype=torch.float32, device=device).unsqueeze(0),
             None if history is None else torch.as_tensor(
                 history, dtype=torch.float32, device=device
+            ).unsqueeze(0),
+            observation_mask=torch.as_tensor(
+                observed_mask, dtype=torch.float32, device=device
+            ).unsqueeze(0),
+            observation_age=torch.as_tensor(
+                observed_age, dtype=torch.float32, device=device
             ).unsqueeze(0),
         )
         physical = predicted[0, -1].cpu().numpy() * S_STD + S_MEAN
@@ -1112,7 +1243,7 @@ def main():
             STATE_KEYS, ACTION_KEYS, OSLER_STATE_ONTOLOGY
         ),
         "simulator": {
-            "version": "route_pk_belief_risk_dka_v4",
+            "version": "irregular_time_partial_observation_dka_v5",
             "patient_domain_randomization": [
                 "weight_kg", "renal_reserve", "insulin_sensitivity",
                 "counterregulatory_drive", "fluid_retention",
@@ -1128,6 +1259,13 @@ def main():
             ],
             "history_hours": HISTORY_HOURS,
             "hidden_belief_states": ["K_store", "osmotic_injury"],
+            "observation_contract": {
+                "mask": "per-state observed indicator",
+                "age_hours": True,
+                "training_dropout_probability": 0.25,
+                "potassium_store_filter": "predict_update_gaussian_belief",
+            },
+            "time_intervals_hours": [0.25, 0.5, 0.75, 1.0],
             "insulin_pk": [
                 "iv", "rapid_subcutaneous", "intermediate_nph", "basal",
             ],
@@ -1138,7 +1276,10 @@ def main():
             for stage in STAGES
         ],
         "sequence_length": args.sequence_length,
-        "hours_predicted": args.sequence_length * DT,
+        "hours_predicted_range": [
+            args.sequence_length * 0.25,
+            args.sequence_length * 1.0,
+        ],
         "split_by_scenario": {name: len(value) for name, value in splits.items()},
         "best_validation_loss": best_validation,
         "test": test_report,

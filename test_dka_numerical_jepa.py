@@ -13,13 +13,15 @@ from dka_body import DKABody, DKAPatientProfile
 from dka_osler import shield, shield_full, shield_route_aware
 from dka_action_contract import ACTION_INDEX, expand_action
 from dka_world_model import (
-    A_DIM, H_DIM, S_DIM, WorldModel, a2vec, randomized_dka, s2vec,
-    treatment_history_features,
+    A_DIM, H_DIM, S_DIM, STATE_KEYS, WorldModel, a2vec, observation_context,
+    randomized_dka, s2vec, treatment_history_features,
 )
+from train_intervention_jepa import generate_branched_dataset
 from osler_jepa.actions import Intervention, TemporalActionEncoder
 from osler_jepa.ontology import OSLER_STATE_ONTOLOGY
 from osler_jepa.validator import OSLER_DKA_VALIDATOR
 from osler_jepa.embodied_logic import OSLER_DKA_PROLOG
+from osler_jepa.belief import PotassiumStoreBelief
 from osler_jepa.rule_sandbox import RuleSandbox
 from osler_jepa.rule_inducer import validate_candidates
 from osler_jepa.real_world_adapter import RealWorldAdapter
@@ -36,6 +38,63 @@ from reasoning_engine import mechanism_candidates
 
 
 class NumericalJEPATests(unittest.TestCase):
+    def test_observation_contract_marks_missing_and_stale_values(self):
+        _, mask, age = observation_context(
+            {"G": 420.0, "Ke": 4.8}, {"G": 1.5, "Ke": 0.25}
+        )
+        glucose = STATE_KEYS.index("G")
+        potassium = STATE_KEYS.index("Ke")
+        bicarbonate = STATE_KEYS.index("HCO3")
+        self.assertEqual(mask[glucose], 1.0)
+        self.assertEqual(mask[potassium], 1.0)
+        self.assertEqual(mask[bicarbonate], 0.0)
+        self.assertEqual(age[glucose], 1.5)
+        self.assertEqual(age[bicarbonate], 24.0)
+
+    def test_complete_observation_preserves_legacy_encoder_behavior(self):
+        model = WorldModel().eval()
+        state = torch.randn(3, S_DIM)
+        legacy = model.encode_state(state)
+        explicit = model.encode_state(
+            state, observation_mask=torch.ones_like(state),
+            observation_age=torch.zeros_like(state),
+        )
+        self.assertTrue(torch.allclose(legacy, explicit))
+
+    def test_irregular_rollout_passes_each_time_interval(self):
+        model = WorldModel().eval()
+        state = torch.zeros(1, S_DIM)
+        actions = torch.zeros(1, 3, A_DIM)
+        intervals = torch.tensor([[0.25, 0.75, 1.0]])
+        with patch.object(model, "predict_latent", wraps=model.predict_latent) as wrapped:
+            model.rollout(state, actions, delta_hours=intervals)
+        used = [float(call.kwargs["delta_hours"][0]) for call in wrapped.call_args_list]
+        elapsed = [float(call.kwargs["elapsed_hours"][0]) for call in wrapped.call_args_list]
+        self.assertEqual(used, [0.25, 0.75, 1.0])
+        self.assertEqual(elapsed, [0.0, 0.25, 1.0])
+
+    def test_counterfactual_branches_share_irregular_time_grid(self):
+        dataset = generate_branched_dataset(2, 4, seed=3)
+        self.assertEqual(dataset["time_deltas"].shape, (2, 11, 4))
+        self.assertTrue(np.all(
+            dataset["time_deltas"][:, :1] == dataset["time_deltas"]
+        ))
+        self.assertTrue(set(np.unique(dataset["time_deltas"])).issubset(
+            {0.0, 0.25, 0.5, 0.75, 1.0}
+        ))
+
+    def test_potassium_store_belief_predicts_and_updates(self):
+        state = {
+            "G": 480.0, "Ke": 3.4, "pH": 7.1,
+            "creatinine": 1.2, "urine_output": 150.0,
+        }
+        prior = PotassiumStoreBelief.from_state(state)
+        predicted = prior.predict({"kcl": 20.0}, state, 1.0)
+        posterior = predicted.update(state, model_estimate=90.0)
+        self.assertGreater(predicted.mean, prior.mean)
+        self.assertLess(posterior.variance, predicted.variance)
+        self.assertFalse(posterior.to_dict()["measured"])
+
     def test_prolog_blocks_insulin_during_critical_hypokalemia(self):
         result = OSLER_DKA_PROLOG.evaluate(
             state={"G": 480, "Ke": 2.8, "pH": 7.1},

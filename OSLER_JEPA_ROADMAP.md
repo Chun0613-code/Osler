@@ -58,6 +58,11 @@ The current DKA implementation now contains:
 8. `mimic_action_history.py`: a shared dose/unit normalizer that combines ICU
    `inputevents` with hospital `emar`/`emar_detail`, separates dextrose grams from
    carrier-fluid volume, and builds future and prior-treatment action grids.
+9. A partial-observation encoder supplies per-state masks and measurement ages.
+   Its zero initialization preserves old checkpoints for complete observations.
+10. Rollouts and counterfactual action exposure support irregular event intervals.
+11. `osler_jepa/belief.py` implements a transparent predict-update belief for the
+    latent total-body potassium reserve and reports posterior uncertainty.
 
 The current June 2026 v4 checkpoint was trained on 1,000 simulated patient
 profiles, each cloned into 11 intervention branches for 55 epochs. It predicts 15
@@ -124,9 +129,11 @@ still produces 12/12 simulated deaths. The structural gap is smaller, not closed
 
 ### Phase 1: Complete the DKA Contract
 
-- Add observation masks and calibrated uncertainty to the 15-state contract.
-- Replace grid-implied action continuity with explicit start/stop event encoding.
-- Replace the anchor-only K-store prior with a learned predict-update belief filter.
+- Implemented: observation masks and measurement ages in the 15-state contract.
+- Implemented: irregular action intervals in training and rollout. Explicit EHR
+  start/stop event tokens remain to be added at extraction time.
+- Implemented: K-store predict-update belief with uncertainty. It is currently
+  mechanistic plus JEPA-updated; patient-cohort calibration remains outstanding.
 - Calibrate potassium depletion and cumulative hyperosmolar injury on a larger
   patient-held-out cohort.
 - Obtain a larger MIMIC cohort; the 12-stay demo cannot identify causal treatment

@@ -4,6 +4,7 @@ from .actions import Intervention, TemporalActionEncoder
 from .ontology import OSLER_STATE_ONTOLOGY, StateOntology
 from .validator import OSLER_DKA_VALIDATOR, OslerTransitionValidator
 from .embodied_logic import DkaEmbodiedLogic, GroundProlog, OSLER_DKA_PROLOG
+from .belief import PotassiumStoreBelief
 
 __all__ = [
     "Intervention",
@@ -15,4 +16,5 @@ __all__ = [
     "DkaEmbodiedLogic",
     "GroundProlog",
     "OSLER_DKA_PROLOG",
+    "PotassiumStoreBelief",
 ]

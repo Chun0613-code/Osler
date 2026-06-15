@@ -45,6 +45,16 @@ effect direction. `osler_jepa/validator.py` remains the differentiable mirror
 used during training; a regression test prevents it from drifting away from the
 human-owned Prolog rule pack.
 
+Before state encoding, `observation_context()` creates a 15-variable value vector,
+observed mask, and measurement-age vector. Missing normalized values are imputed
+at the population mean but cannot masquerade as measurements because the mask and
+age are supplied to the zero-compatible observation encoder. JEPA rollouts consume
+the actual interval of each action event and accumulate elapsed time. During
+runtime, `PotassiumStoreBelief` predicts the hidden reserve from KCl exposure and
+estimated renal loss, then updates it with the serum/pH proxy and JEPA estimate.
+Osler and Prolog consume the posterior belief and its provenance, not a fabricated
+laboratory value.
+
 1. `dka_body.py` defines the continuous physiological state and transition rules.
    Each simulated patient has sampled body size, renal reserve, insulin response,
    stress drive, fluid response, vascular tone, potassium store, and endogenous

@@ -110,6 +110,20 @@ and recency over the preceding six hours. Training branches the same patient int
 six-hour open-loop outcomes, and checks counterfactual effects, Osler mechanism
 consistency, action sensitivity, risk calibration, and latent collapse.
 
+The v5 runtime also has an explicit partial-observation contract. Every state is
+encoded as a value, observed/missing mask, and measurement age in hours. Rollouts
+accept irregular time intervals rather than assuming every event is exactly 30
+minutes apart. Training applies 25% observation dropout while retaining the full
+future state as the supervision target. A predict-update
+`PotassiumStoreBelief` tracks the latent total-body potassium reserve, its
+uncertainty, documented KCl replacement, and estimated renal loss. The estimate
+is always labeled as a belief rather than a measured lab.
+
+Existing checkpoints remain loadable because the new observation-context encoder
+is zero-initialized. Complete fresh observations therefore preserve their legacy
+behavior. A newly trained checkpoint is required before claiming improved
+performance from masks or measurement ages.
+
 `DKABody` now samples patient-level weight, renal reserve, insulin sensitivity,
 counter-regulatory drive, fluid retention, vascular tone, potassium stores, and
 endogenous insulin. Counterfactual branches may begin at presentation or after up

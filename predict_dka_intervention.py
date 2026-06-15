@@ -24,8 +24,10 @@ from dka_world_model import (
     HISTORY_HOURS,
     a2vec,
     load_checkpoint,
+    observation_context,
     s2vec,
 )
+from osler_jepa.belief import PotassiumStoreBelief
 from osler_jepa.validator import OSLER_DKA_VALIDATOR
 from osler_jepa.embodied_logic import OSLER_DKA_PROLOG
 from osler_jepa.ontology import OSLER_STATE_ONTOLOGY
@@ -52,19 +54,45 @@ def physical_state(normalized):
 
 
 @torch.no_grad()
-def predict(model, state, action, hours, device, apply_osler=False, history=None):
-    steps = max(1, int(round(hours / DT)))
+def predict(model, state, action, hours, device, apply_osler=False, history=None,
+            observation_age=None, time_deltas=None):
+    if time_deltas is None:
+        time_deltas = [DT] * max(1, int(round(hours / DT)))
+    else:
+        time_deltas = [float(value) for value in time_deltas]
+        if not time_deltas or any(value <= 0 for value in time_deltas):
+            raise ValueError("time_deltas must contain positive intervals")
+    steps = len(time_deltas)
     history_tensor = None if history is None else torch.as_tensor(
         history, dtype=torch.float32, device=device
     ).unsqueeze(0)
-    latent = model.encode_state(
-        torch.as_tensor(s2vec(state), dtype=torch.float32, device=device).unsqueeze(0),
-        history_tensor,
+    belief = PotassiumStoreBelief.from_state(state)
+    model_state = dict(state)
+    model_state.setdefault("K_store", belief.mean)
+    initial_vector, observed_mask, observed_age = observation_context(
+        state, observation_age
     )
-    current_state = dict(state)
-    predicted, death_probability, action_schedule, applied_actions = [], [], [], []
+    initial_vector = s2vec(model_state)
+    latent = model.encode_state(
+        torch.as_tensor(
+            initial_vector, dtype=torch.float32, device=device
+        ).unsqueeze(0),
+        history_tensor,
+        torch.as_tensor(
+            observed_mask, dtype=torch.float32, device=device
+        ).unsqueeze(0),
+        torch.as_tensor(
+            observed_age, dtype=torch.float32, device=device
+        ).unsqueeze(0),
+    )
+    current_state = physical_state(initial_vector)
+    current_state["K_store"] = round(belief.mean, 4)
+    predicted, death_probability, belief_history = [], [], []
+    action_schedule, applied_actions = [], []
     previous_action = None
+    elapsed_hours = 0.0
     for step in range(steps):
+        step_hours = time_deltas[step]
         step_action = list(action)
         trace = []
         if apply_osler:
@@ -81,17 +109,25 @@ def predict(model, state, action, hours, device, apply_osler=False, history=None
             torch.as_tensor(
                 a2vec(step_action), dtype=torch.float32, device=device
             ).unsqueeze(0),
-            delta_hours=DT,
-            elapsed_hours=step * DT,
+            delta_hours=step_hours,
+            elapsed_hours=elapsed_hours,
         )
         applied_actions.append(step_action)
         normalized = model.D(latent)[0].cpu().numpy()
         current_state = physical_state(normalized)
+        belief = belief.step(
+            step_action,
+            current_state,
+            step_hours,
+            model_estimate=current_state.get("K_store"),
+        )
+        current_state["K_store"] = round(belief.mean, 4)
         predicted.append(current_state)
+        belief_history.append(belief.to_dict())
         death_probability.append(float(torch.sigmoid(model.R(latent))[0, 0]))
         if trace or previous_action != step_action:
             action_schedule.append({
-                "hours": round(step * DT, 2),
+                "hours": round(elapsed_hours, 2),
                 "action": {
                     key: round(float(value), 4)
                     for key, value in zip(ACTION_KEYS, expand_action(step_action))
@@ -99,25 +135,35 @@ def predict(model, state, action, hours, device, apply_osler=False, history=None
                 "trace": trace,
             })
         previous_action = step_action
+        elapsed_hours += step_hours
 
     sample_steps = sorted({0, min(5, steps - 1), steps - 1})
+    elapsed_at_step = np.cumsum(time_deltas)
     trajectory = [{
-        "hours": round((step + 1) * DT, 2),
+        "hours": round(float(elapsed_at_step[step]), 2),
         "state": predicted[step],
         "death_probability": round(death_probability[step], 6),
+        "belief_states": {
+            "total_body_potassium_store": belief_history[step],
+        },
     } for step in sample_steps]
     return trajectory, action_schedule, applied_actions
 
 
 def compare(model, state, proposed_action, hours, device, input_warnings=None,
-            history=None):
+            history=None, observation_age=None, time_deltas=None):
+    effective_hours = (
+        float(sum(time_deltas)) if time_deltas is not None else float(hours)
+    )
     intervention, action_schedule, applied_actions = predict(
         model, state, proposed_action, hours, device, apply_osler=True,
-        history=history,
+        history=history, observation_age=observation_age,
+        time_deltas=time_deltas,
     )
     untreated, _, _ = predict(
         model, state, np.zeros(A_DIM, dtype=np.float32), hours, device,
-        apply_osler=False, history=history,
+        apply_osler=False, history=history, observation_age=observation_age,
+        time_deltas=time_deltas,
     )
     treated_final = intervention[-1]["state"]
     untreated_final = untreated[-1]["state"]
@@ -125,8 +171,14 @@ def compare(model, state, proposed_action, hours, device, input_warnings=None,
         key: round(treated_final[key] - untreated_final[key], 4)
         for key in STATE_KEYS
     }
-    mean_physical_action = np.mean(
-        [expand_action(action) for action in applied_actions], axis=0
+    applied_durations = np.asarray(
+        time_deltas if time_deltas is not None else [DT] * len(applied_actions),
+        dtype=np.float32,
+    )
+    mean_physical_action = np.average(
+        np.asarray([expand_action(action) for action in applied_actions]),
+        axis=0,
+        weights=applied_durations,
     )
     mean_action = mean_physical_action / A_SCALE
     osler_validation = OSLER_DKA_VALIDATOR.validate(
@@ -142,19 +194,32 @@ def compare(model, state, proposed_action, hours, device, input_warnings=None,
     history_tensor = None if history is None else torch.as_tensor(
         history, dtype=torch.float32, device=device
     ).unsqueeze(0)
+    initial_belief = PotassiumStoreBelief.from_state(state)
+    symbolic_state = dict(state)
+    symbolic_state.setdefault("K_store", initial_belief.mean)
+    symbolic_vector, symbolic_mask, symbolic_age = observation_context(
+        state, observation_age
+    )
+    symbolic_vector = s2vec(symbolic_state)
     with torch.no_grad():
         context_latent = model.encode_state(
             torch.as_tensor(
-                s2vec(state), dtype=torch.float32, device=device
+                symbolic_vector, dtype=torch.float32, device=device
             ).unsqueeze(0),
             history_tensor,
+            torch.as_tensor(
+                symbolic_mask, dtype=torch.float32, device=device
+            ).unsqueeze(0),
+            torch.as_tensor(
+                symbolic_age, dtype=torch.float32, device=device
+            ).unsqueeze(0),
         )
         symbolic = model.symbolic_outputs(
             context_latent,
             torch.as_tensor(
                 mean_action, dtype=torch.float32, device=device
             ).unsqueeze(0),
-            delta_hours=hours,
+            delta_hours=effective_hours,
         )
     direction_probability = symbolic["direction_logits"].softmax(dim=-1)[0]
     proposal_probability = symbolic["proposal_logits"].softmax(dim=-1)[0]
@@ -187,7 +252,7 @@ def compare(model, state, proposed_action, hours, device, input_warnings=None,
             "intervention_effect_confidence": round(
                 float(proposal_probability[index, proposal_index]), 4
             ),
-            "time_window_hours": hours,
+            "time_window_hours": effective_hours,
         })
     return {
         "research_only": True,
@@ -200,6 +265,11 @@ def compare(model, state, proposed_action, hours, device, input_warnings=None,
         "prior_treatment_history_features": (
             history.tolist() if isinstance(history, np.ndarray) else history
         ),
+        "observation_contract": {
+            "observed_mask": dict(zip(STATE_KEYS, symbolic_mask.astype(int).tolist())),
+            "age_hours": dict(zip(STATE_KEYS, symbolic_age.tolist())),
+            "potassium_store_prior": initial_belief.to_dict(),
+        },
         "osler_dynamic_action_schedule": action_schedule,
         "predicted_intervention_trajectory": intervention,
         "predicted_no_treatment_trajectory": untreated,

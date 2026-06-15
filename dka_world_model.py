@@ -67,6 +67,7 @@ ACT_GRID = [
 ACTION_EMBED_DIM = 32
 HISTORY_HOURS = 6.0
 H_DIM = A_DIM * 2
+MAX_OBSERVATION_AGE_HOURS = 24.0
 
 Z_DIM = 48
 DT = 0.5
@@ -91,6 +92,26 @@ def s2vec(observation):
     return (values - S_MEAN) / S_STD
 
 
+def observation_context(observation, ages=None):
+    """Return normalized state, observed-value mask, and observation ages.
+
+    Missing values are imputed by ``s2vec`` but remain explicitly marked as
+    unobserved. Ages are hours since measurement and are clipped by the encoder.
+    """
+    ages = ages or {}
+    vector = s2vec(observation)
+    mask = np.array(
+        [1.0 if key in observation and observation[key] is not None else 0.0
+         for key in STATE_KEYS],
+        dtype=np.float32,
+    )
+    age = np.array([
+        float(ages.get(key, 0.0 if mask[index] else MAX_OBSERVATION_AGE_HOURS))
+        for index, key in enumerate(STATE_KEYS)
+    ], dtype=np.float32)
+    return vector, mask, np.clip(age, 0.0, MAX_OBSERVATION_AGE_HOURS)
+
+
 def vec2state(vector):
     values = np.asarray(vector, dtype=np.float32) * S_STD + S_MEAN
     return dict(zip(STATE_KEYS, values.tolist()))
@@ -104,8 +125,8 @@ def vec2action(vector):
     return (np.asarray(vector, dtype=np.float32) * A_SCALE).tolist()
 
 
-def treatment_history_features(actions, dt=DT,
-                               history_hours=HISTORY_HOURS):
+def treatment_history_features(actions, dt=DT, history_hours=HISTORY_HOURS,
+                               durations=None):
     """Encode prior physical action rates as exposure and recency features."""
     values = np.asarray(actions, dtype=np.float32)
     if values.size == 0:
@@ -117,15 +138,23 @@ def treatment_history_features(actions, dt=DT,
     padded = np.zeros((len(values), A_DIM), dtype=np.float32)
     padded[:, :min(values.shape[1], A_DIM)] = values[:, :A_DIM]
     normalized = padded / A_SCALE
-    max_steps = max(1, int(round(history_hours / dt)))
-    normalized = normalized[-max_steps:]
-    exposure = normalized.sum(axis=0) * dt / history_hours
+    if durations is None:
+        durations = np.full(len(normalized), float(dt), dtype=np.float32)
+    else:
+        durations = np.asarray(durations, dtype=np.float32).reshape(-1)
+        if len(durations) != len(normalized):
+            raise ValueError("Action history and duration history must align")
+    cumulative = np.cumsum(durations[::-1])
+    keep = max(1, int(np.searchsorted(cumulative, history_hours, side="left") + 1))
+    normalized = normalized[-keep:]
+    durations = durations[-keep:]
+    exposure = (normalized * durations[:, None]).sum(axis=0) / history_hours
     recency = np.ones(A_DIM, dtype=np.float32)
     for index in range(A_DIM):
         active = np.flatnonzero(normalized[:, index] > 1e-6)
         if len(active):
-            elapsed_steps = len(normalized) - 1 - int(active[-1])
-            recency[index] = min(1.0, elapsed_steps * dt / history_hours)
+            elapsed = durations[int(active[-1]) + 1:].sum()
+            recency[index] = min(1.0, elapsed / history_hours)
     return np.concatenate([exposure, recency]).astype(np.float32)
 
 
@@ -217,6 +246,8 @@ class WorldModel(nn.Module):
             nn.SiLU(),
             nn.Linear(96, Z_DIM, bias=False),
         )
+        self.ObsEnc = nn.Linear(S_DIM * 2, Z_DIM, bias=False)
+        nn.init.zeros_(self.ObsEnc.weight)
         self.P = LatentPredictor()
         self.D = mlp(Z_DIM, S_DIM)
         self.R = mlp(Z_DIM, 1, hidden=96)
@@ -239,15 +270,33 @@ class WorldModel(nn.Module):
         action_embedding = self.AEnc(action, delta_hours, elapsed_hours)
         return self.P(torch.cat([latent, action_embedding], dim=-1))
 
-    def encode_state(self, state, history=None):
+    def encode_state(self, state, history=None, observation_mask=None,
+                     observation_age=None):
+        if observation_mask is None:
+            observation_mask = torch.ones_like(state)
+        if observation_age is None:
+            observation_age = torch.zeros_like(state)
+        observation_mask = observation_mask.to(dtype=state.dtype)
+        observation_age = observation_age.to(dtype=state.dtype)
+        # ``state`` contains explicit imputations or belief estimates. Reliability
+        # is carried separately by mask and age; training code zeroes synthetically
+        # hidden ground truth before calling this method to prevent leakage.
         latent = self.E(state)
+        observation_features = torch.cat([
+            observation_mask - 1.0,
+            observation_age.clamp(0.0, MAX_OBSERVATION_AGE_HOURS)
+            / MAX_OBSERVATION_AGE_HOURS,
+        ], dim=-1)
+        latent = latent + self.ObsEnc(observation_features)
         if history is not None:
             latent = latent + self.HEnc(history)
         return latent
 
     def predict_step(self, state, action, delta_hours=DT, elapsed_hours=0.0,
-                     history=None):
-        latent = self.encode_state(state, history)
+                     history=None, observation_mask=None, observation_age=None):
+        latent = self.encode_state(
+            state, history, observation_mask, observation_age
+        )
         next_latent = self.predict_latent(latent, action, delta_hours, elapsed_hours)
         return self.D(next_latent), self.R(next_latent).squeeze(-1), next_latent
 
@@ -267,17 +316,25 @@ class WorldModel(nn.Module):
             ),
         }
 
-    def rollout(self, initial_state, action_sequence, initial_history=None):
+    def rollout(self, initial_state, action_sequence, initial_history=None,
+                observation_mask=None, observation_age=None, delta_hours=None):
         """Open-loop rollout. action_sequence shape: [batch, time, A_DIM]."""
-        latent = self.encode_state(initial_state, initial_history)
+        latent = self.encode_state(
+            initial_state, initial_history, observation_mask, observation_age
+        )
         states, risk_logits, latents = [], [], []
+        elapsed = initial_state.new_zeros(initial_state.shape[:-1])
         for step in range(action_sequence.shape[1]):
+            step_delta = self._rollout_delta(
+                delta_hours, step, action_sequence.shape[0], initial_state
+            )
             latent = self.predict_latent(
                 latent,
                 action_sequence[:, step],
-                delta_hours=DT,
-                elapsed_hours=step * DT,
+                delta_hours=step_delta,
+                elapsed_hours=elapsed,
             )
+            elapsed = elapsed + step_delta
             states.append(self.D(latent))
             risk_logits.append(self.R(latent).squeeze(-1))
             latents.append(latent)
@@ -286,6 +343,19 @@ class WorldModel(nn.Module):
             torch.stack(risk_logits, dim=1),
             torch.stack(latents, dim=1),
         )
+
+    @staticmethod
+    def _rollout_delta(delta_hours, step, batch_size, reference):
+        if delta_hours is None:
+            return reference.new_full((batch_size,), DT)
+        values = torch.as_tensor(
+            delta_hours, dtype=reference.dtype, device=reference.device
+        )
+        if values.ndim == 0:
+            return values.expand(batch_size)
+        if values.ndim == 1:
+            return values[step].expand(batch_size)
+        return values[:, step]
 
 
 def vicreg(latent, gamma=1.0):
@@ -358,6 +428,11 @@ def save_checkpoint(model, path, metadata=None):
                 *[f"recency_{name}" for name in ACTION_KEYS],
             ],
         },
+        "observation_contract": {
+            "features": ["value", "observed_mask", "age_hours"],
+            "max_age_hours": MAX_OBSERVATION_AGE_HOURS,
+            "missing_value_imputation": "normalized_population_mean",
+        },
         "action_encoder": {
             "type": "route_formulation_channels_plus_delta_and_elapsed_time",
             "embedding_dim": ACTION_EMBED_DIM,
@@ -376,10 +451,18 @@ def load_checkpoint(path, device="cpu"):
     model = WorldModel().to(device)
     incompatible = model.load_state_dict(payload["model_state"], strict=False)
     if incompatible.missing_keys or incompatible.unexpected_keys:
+        notes = []
+        if "ObsEnc.weight" in incompatible.missing_keys:
+            notes.append(
+                "The observation-context encoder is zero-initialized, so complete "
+                "fresh observations preserve legacy checkpoint behavior."
+            )
+        if any("Head" in key for key in incompatible.missing_keys):
+            notes.append("Legacy symbolic heads use their initialized weights.")
         payload["compatibility"] = {
             "missing_keys": list(incompatible.missing_keys),
             "unexpected_keys": list(incompatible.unexpected_keys),
-            "note": "Legacy checkpoints initialize new symbolic heads randomly.",
+            "notes": notes,
         }
     model.eval()
     return model, payload
