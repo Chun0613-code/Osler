@@ -126,6 +126,16 @@ def recommendation_fingerprint(result: Mapping[str, Any]) -> str:
     return hashlib.sha256(payload).hexdigest()
 
 
+def _file_sha256(path: Path) -> Optional[str]:
+    if not path.exists() or not path.is_file():
+        return None
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
 class ShadowObserver:
     """Run JEPA beside live Osler without returning decision authority."""
 
@@ -145,6 +155,7 @@ class ShadowObserver:
         self.audit_path = Path(audit_path) if audit_path else None
         self._runner = runner
         self._model = None
+        self._checkpoint_sha256 = None
 
     @classmethod
     def from_environment(cls) -> "ShadowObserver":
@@ -163,6 +174,8 @@ class ShadowObserver:
         )
 
     def _base_report(self, fingerprint: str) -> Dict[str, Any]:
+        if self.enabled and self._checkpoint_sha256 is None:
+            self._checkpoint_sha256 = _file_sha256(self.checkpoint)
         return {
             "schema_version": "1.1.0",
             "record_type": "shadow_forecast",
@@ -180,6 +193,7 @@ class ShadowObserver:
             "recommendation_integrity_verified": True,
             "checkpoint": {
                 "name": self.checkpoint.name,
+                "sha256": self._checkpoint_sha256 if self.enabled else None,
                 "device": self.device,
             },
         }

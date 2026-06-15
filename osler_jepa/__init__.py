@@ -26,8 +26,14 @@ from .shadow import (
 )
 from .shadow_outcomes import (
     load_shadow_forecast,
+    pseudonymize_subject,
     reconcile_from_ledger,
     reconcile_shadow_forecast,
+)
+from .shadow_cohort import (
+    evaluate_shadow_cohort,
+    evaluate_shadow_group,
+    load_reconciliations,
 )
 
 __all__ = [
@@ -51,6 +57,10 @@ __all__ = [
     "observe_live_recommendation",
     "recommendation_fingerprint",
     "load_shadow_forecast",
+    "pseudonymize_subject",
     "reconcile_from_ledger",
     "reconcile_shadow_forecast",
+    "evaluate_shadow_cohort",
+    "evaluate_shadow_group",
+    "load_reconciliations",
 ]

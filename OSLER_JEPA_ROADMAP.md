@@ -166,6 +166,9 @@ schema; do not mix diseases into one unvalidated latent space at the start.
 - Implemented: shadow outcome reconciliation against persistence. It requires
   action/horizon alignment, scores only measured future states, and quarantines
   every record for human review before any offline training use.
+- Implemented: checkpoint-specific, patient-grouped shadow cohort audits with
+  local HMAC pseudonyms, subject-cluster bootstrap intervals, state coverage, and
+  minimum-sample promotion gates. Passing remains retrospective evidence only.
 - Keep simulator and EHR provenance separate in training and reports.
 
 ### Phase 4: Connect to the Live Symbolic Engine

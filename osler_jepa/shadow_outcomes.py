@@ -7,7 +7,10 @@ promotes rules, or turns observational agreement into a causal claim.
 
 from __future__ import annotations
 
+import hashlib
+import hmac
 import json
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Mapping, Optional
@@ -16,6 +19,23 @@ from uuid import uuid4
 import numpy as np
 
 from osler_jepa.shadow import build_dka_shadow_state
+
+
+def pseudonymize_subject(
+    subject_key: Optional[str], salt: Optional[str] = None
+) -> Optional[str]:
+    """Create a stable local cohort key without storing the source identifier."""
+    if subject_key is None or not str(subject_key).strip():
+        return None
+    secret = salt or os.environ.get("OSLER_JEPA_LEDGER_SALT")
+    if not secret:
+        raise ValueError(
+            "OSLER_JEPA_LEDGER_SALT is required when a subject key is supplied"
+        )
+    message = f"osler-jepa-shadow-v1|{subject_key}".encode("utf-8")
+    return hmac.new(
+        str(secret).encode("utf-8"), message, hashlib.sha256
+    ).hexdigest()
 
 
 def _model_contracts():
@@ -179,9 +199,12 @@ def reconcile_shadow_forecast(
     candidate: Optional[str] = None,
     action_tolerance: float = 0.10,
     horizon_tolerance_hours: float = 1.0,
+    subject_key: Optional[str] = None,
+    subject_salt: Optional[str] = None,
 ) -> Dict[str, Any]:
     """Compare a stored factual forecast with later measured physiology."""
     observation = _select_observation(forecast, candidate)
+    subject_group_hash = pseudonymize_subject(subject_key, subject_salt)
     initial_state = (forecast.get("state_contract") or {}).get("state") or {}
     predicted_state = observation.get("predicted_final_state") or {}
     expected_action = observation.get("effective_action_summary")
@@ -226,6 +249,23 @@ def reconcile_shadow_forecast(
         "forecast_event_id": forecast.get("event_id"),
         "timestamp_utc": datetime.now(timezone.utc).isoformat(),
         "candidate": observation.get("candidate"),
+        "checkpoint": forecast.get("checkpoint"),
+        "subject_group_hash": subject_group_hash,
+        "privacy": {
+            "subject_identifier_stored": False,
+            "grouping_method": (
+                "hmac_sha256_local_salt" if subject_group_hash else "not_supplied"
+            ),
+        },
+        "forecast_provenance": {
+            "transition_validation_status": (
+                observation.get("transition_validation") or {}
+            ).get("status"),
+            "prolog_decision": (
+                observation.get("prolog_reasoning") or {}
+            ).get("decision"),
+            "symbolic_disagreement": bool(observation.get("disagreement")),
+        },
         "forecast_type": "factual_observed-treatment forecast",
         "research_only": True,
         "causal_claim_allowed": False,
@@ -370,7 +410,10 @@ def reconcile_shadow_forecast(
                 if changed_persistence else None
             ),
         },
-        "eligible_for_offline_training_review": len(common) >= 4,
+        "eligible_for_offline_training_review": (
+            len(common) >= 4 and subject_group_hash is not None
+        ),
+        "eligible_for_cohort_evaluation": subject_group_hash is not None,
         "review_gate": (
             "human_review_required_before any dataset inclusion, weight update, "
             "or rule-candidate generation"

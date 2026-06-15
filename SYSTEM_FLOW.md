@@ -157,6 +157,11 @@ authorize causal intervention claims.
    start/stop schedule match the forecast. It compares JEPA with persistence per measured state and
    records changed-state direction accuracy. Reconciliations are review evidence
    only: online learning, causal claims, and automatic rule promotion stay off.
+29. `osler_jepa/shadow_cohort.py` groups reconciliations by checkpoint digest and
+   candidate, averages repeated episodes within an HMAC-pseudonymized subject,
+   and bootstraps subjects rather than rows. Small cohorts, insufficient core-state
+   coverage, symbolic disagreement, or a confidence interval that crosses zero
+   fail the retrospective gate. Even a passing report cannot promote clinically.
 
 ## Highest-Value Improvements
 

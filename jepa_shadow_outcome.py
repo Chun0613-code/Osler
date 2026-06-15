@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 
 from osler_jepa.shadow_outcomes import reconcile_from_ledger
@@ -26,6 +27,10 @@ def main():
     parser.add_argument("--candidate")
     parser.add_argument("--output")
     parser.add_argument("--no-append", action="store_true")
+    parser.add_argument(
+        "--subject-key-env", default="OSLER_JEPA_SUBJECT_KEY",
+        help="Environment variable containing a local subject key; never stored.",
+    )
     args = parser.parse_args()
 
     record = reconcile_from_ledger(
@@ -36,6 +41,7 @@ def main():
         args.elapsed_hours,
         candidate=args.candidate,
         append=not args.no_append,
+        subject_key=os.environ.get(args.subject_key_env),
     )
     rendered = json.dumps(record, indent=2, allow_nan=False)
     if args.output:

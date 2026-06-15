@@ -43,8 +43,14 @@ from osler_jepa.shadow import (
 )
 from osler_jepa.shadow_outcomes import (
     load_shadow_forecast,
+    pseudonymize_subject,
     reconcile_from_ledger,
     reconcile_shadow_forecast,
+)
+from osler_jepa.shadow_cohort import (
+    evaluate_shadow_cohort,
+    evaluate_shadow_group,
+    load_reconciliations,
 )
 from real_world_improvement import episode_features
 from predict_dka_intervention import compare, predict
@@ -85,6 +91,33 @@ class NumericalJEPATests(unittest.TestCase):
                 "dose": {"patient_specific_allowed": False},
                 "final_answer": "symbolic result",
             }],
+        }
+
+    @staticmethod
+    def _cohort_record(index, subject, improvement=0.5):
+        per_state = {
+            state: {
+                "normalized_improvement_over_persistence": improvement,
+                "jepa_normalized_error": 0.25,
+                "persistence_normalized_error": 0.25 + improvement,
+            }
+            for state in ("G", "Ke", "HCO3", "MAP")
+        }
+        return {
+            "record_type": "shadow_outcome_reconciliation",
+            "reconciliation_id": f"reconciliation-{index}",
+            "forecast_event_id": f"forecast-{index}",
+            "candidate": "insulin",
+            "checkpoint": {"name": "jepa.pt", "sha256": "checkpoint-sha"},
+            "subject_group_hash": subject,
+            "status": "scored",
+            "summary": {
+                "normalized_improvement_over_persistence": improvement,
+                "jepa_changed_state_direction_accuracy": 0.8,
+            },
+            "per_state": per_state,
+            "terminal_outcome": {"brier_score": 0.05},
+            "forecast_provenance": {"symbolic_disagreement": False},
         }
 
     def test_dka_parser_and_shadow_state_preserve_measured_provenance(self):
@@ -264,6 +297,105 @@ class NumericalJEPATests(unittest.TestCase):
                 json.loads(lines[-1])["record_type"],
                 "shadow_outcome_reconciliation",
             )
+
+    def test_subject_pseudonym_is_stable_and_raw_key_is_not_stored(self):
+        first = pseudonymize_subject("patient-123", "local-secret")
+        second = pseudonymize_subject("patient-123", "local-secret")
+        other = pseudonymize_subject("patient-123", "different-secret")
+        self.assertEqual(first, second)
+        self.assertNotEqual(first, other)
+        self.assertNotIn("patient-123", first)
+        forecast = {
+            "record_type": "shadow_forecast", "status": "observed",
+            "event_id": "forecast-private",
+            "checkpoint": {"name": "jepa.pt", "sha256": "sha"},
+            "state_contract": {"state": {"G": 480.0}},
+            "observations": [{
+                "candidate": "insulin", "horizon_hours": 6.0,
+                "effective_action_summary": {"insulin_iv": 4.0},
+                "effective_action_schedule": [{
+                    "hours": 0.0, "action": {"insulin_iv": 4.0},
+                }],
+                "predicted_final_state": {"G": 300.0},
+            }],
+        }
+        record = reconcile_shadow_forecast(
+            forecast,
+            {"labs": {"glucose": 310.0}, "vitals": {}},
+            {"schedule": [{
+                "hours": 0.0, "action": {"insulin_iv": 4.0},
+            }]},
+            6.0,
+            subject_key="patient-123",
+            subject_salt="local-secret",
+        )
+        rendered = json.dumps(record)
+        self.assertNotIn("patient-123", rendered)
+        self.assertEqual(record["subject_group_hash"], first)
+        self.assertTrue(record["eligible_for_cohort_evaluation"])
+
+    def test_shadow_cohort_does_not_count_repeated_patient_as_independent(self):
+        records = [
+            self._cohort_record(index, "same-patient")
+            for index in range(100)
+        ]
+        report = evaluate_shadow_group(records, bootstrap_samples=100)
+        self.assertEqual(report["support"]["independent_subjects"], 1)
+        self.assertFalse(report["automated_retrospective_gate"]["passes"])
+        self.assertIn(
+            "too_few_independent_subjects",
+            report["automated_retrospective_gate"]["failures"],
+        )
+
+    def test_shadow_cohort_gate_can_pass_but_never_promotes_clinically(self):
+        records = [
+            self._cohort_record(index, f"patient-{index % 35}")
+            for index in range(60)
+        ]
+        report = evaluate_shadow_cohort(records, bootstrap_samples=200)
+        group = report["groups"]["checkpoint-sha::insulin"]
+        self.assertTrue(group["automated_retrospective_gate"]["passes"], group)
+        self.assertGreater(
+            group["overall"]["normalized_improvement_over_persistence"]
+            ["patient_cluster_bootstrap_95_ci"][0],
+            0.0,
+        )
+        self.assertFalse(group["clinical_promotion_allowed"])
+        self.assertFalse(group["causal_claim_allowed"])
+        self.assertFalse(group["online_weight_update_allowed"])
+
+    def test_shadow_cohort_rejects_core_state_hidden_by_overall_average(self):
+        records = [
+            self._cohort_record(index, f"patient-{index % 35}")
+            for index in range(60)
+        ]
+        for record in records:
+            potassium = record["per_state"]["Ke"]
+            potassium["normalized_improvement_over_persistence"] = -0.2
+            potassium["jepa_normalized_error"] = 0.7
+            potassium["persistence_normalized_error"] = 0.5
+        report = evaluate_shadow_group(records, bootstrap_samples=200)
+        self.assertFalse(report["automated_retrospective_gate"]["passes"])
+        self.assertIn(
+            "core_state_not_better_than_persistence:Ke",
+            report["automated_retrospective_gate"]["failures"],
+        )
+
+    def test_shadow_cohort_loader_deduplicates_reconciliation(self):
+        first = self._cohort_record(1, "patient-a", improvement=0.1)
+        second = self._cohort_record(1, "patient-a", improvement=0.7)
+        with tempfile.TemporaryDirectory() as directory:
+            ledger = Path(directory) / "shadow.jsonl"
+            ledger.write_text(
+                json.dumps(first) + "\n" + json.dumps(second) + "\n",
+                encoding="utf-8",
+            )
+            records = load_reconciliations(ledger)
+        self.assertEqual(len(records), 1)
+        self.assertEqual(
+            records[0]["summary"]["normalized_improvement_over_persistence"],
+            0.7,
+        )
 
     def test_shadow_observer_respects_symbolic_safety_block(self):
         def runner(**kwargs):

@@ -204,6 +204,24 @@ The action JSON must contain `{"schedule": [{"hours": 0, "action": {...}}]}`.
 Shadow ledgers contain physiological observations, remain local, and are ignored
 by Git through the repository-wide `*.jsonl` rule.
 
+For patient-grouped evaluation, set a local secret and a local subject key before
+reconciliation. The raw subject key is never written; the ledger stores only an
+HMAC-SHA256 group hash.
+
+```bash
+export OSLER_JEPA_LEDGER_SALT='local-secret-not-in-git'
+export OSLER_JEPA_SUBJECT_KEY='local-ehr-subject-key'
+python jepa_shadow_outcome.py ...
+python jepa_shadow_cohort.py --ledger /private/path/shadow.jsonl
+```
+
+The cohort report averages repeated episodes within each subject before running a
+patient-cluster bootstrap. Its automated retrospective gate requires at least 30
+independent subjects, 50 scored episodes, core-state coverage, changed-state
+direction accuracy, no symbolic disagreement, and a 95% confidence interval above
+persistence both overall and separately for glucose, potassium, bicarbonate, and
+MAP. Passing still does not authorize clinical promotion or online learning.
+
 `real_world_improvement.py` tests episode and propensity weighting, a small
 real-world residual adapter, patient-bootstrap ensembles, temperature scaling,
 and abstention without adding data. All reported predictions are patient-level
