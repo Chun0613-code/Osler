@@ -66,3 +66,16 @@ def stage_for_epoch(epoch: int, total_epochs: int) -> CurriculumStage:
         if fraction <= stage.end_fraction:
             return stage
     return STAGES[-1]
+
+
+def weights_for_stage(stage: CurriculumStage, viability_dynamics_enabled=False):
+    """Return stage weights while keeping dynamics constraints gated by evidence."""
+    weights = dict(stage.weights)
+    if viability_dynamics_enabled:
+        weights.update({
+            "world_truth": 0.15,
+            "viability": 0.10,
+            "intervention_sensitivity": 0.05,
+            "trajectory_consistency": 0.05,
+        })
+    return weights

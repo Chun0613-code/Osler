@@ -66,6 +66,7 @@ def init_body(init, history_actions=None):
             (float(init["MAP"]) - MAP_MIN) / (MAP_NORM - MAP_MIN), 0.1, 1.2
         )
         b.V = filling * b.volume_setpoint / b.profile.vascular_tone
+    b.renal_perfusion_state = b._instantaneous_renal_perfusion()
     prior_kcl = 0.0
     if history_actions:
         prior_kcl = sum(
@@ -82,6 +83,15 @@ def init_body(init, history_actions=None):
         b.Ket = max(0.0, float(init["anion_gap"]) - 12.0)
     elif init.get("BHB") is not None:
         b.Ket = max(0.0, float(init["BHB"]) / 0.75)
+    illness_fraction = max(
+        0.5,
+        min(1.5, (b.G - 180.0) / 300.0),
+        min(1.5, b.Ket / 12.0),
+        min(1.5, max(0.0, 7.35 - b.pH) / 0.35),
+    )
+    b.counterregulatory_stress = (
+        b.profile.counterregulatory_drive * illness_fraction
+    )
     # The concentration states above are observed at the anchor and must not be
     # replayed from an unknown pre-anchor state. Prior insulin is different: it
     # determines the hidden insulin signal still active at the anchor.

@@ -42,7 +42,8 @@ from dka_world_model import (
     treatment_history_features,
     vicreg,
 )
-from osler_jepa.curriculum import STAGES, stage_for_epoch
+from osler_jepa.curriculum import STAGES, stage_for_epoch, weights_for_stage
+from osler_jepa.persistence_gate import load_persistence_gate
 from osler_jepa.actions import TREATMENT_EVENT_DIM, treatment_event_features
 from osler_jepa.ontology import OSLER_STATE_ONTOLOGY
 from osler_jepa.symbolic import (
@@ -601,7 +602,8 @@ def validation_loss(model, dataset, indices, batch_size, device, weights=None):
     return float(np.mean(totals)) if totals else math.inf
 
 
-def train_model(model, dataset, splits, epochs, batch_size, learning_rate, device):
+def train_model(model, dataset, splits, epochs, batch_size, learning_rate, device,
+                viability_dynamics_enabled=False):
     optimizer = torch.optim.AdamW(
         [parameter for parameter in model.parameters() if parameter.requires_grad],
         lr=learning_rate,
@@ -616,6 +618,7 @@ def train_model(model, dataset, splits, epochs, batch_size, learning_rate, devic
 
     for epoch in range(1, epochs + 1):
         stage = stage_for_epoch(epoch, epochs)
+        stage_weights = weights_for_stage(stage, viability_dynamics_enabled)
         model.train()
         order = rng.permutation(splits["train"])
         epoch_parts = []
@@ -624,7 +627,7 @@ def train_model(model, dataset, splits, epochs, batch_size, learning_rate, devic
             losses = batch_losses(
                 model,
                 *tensor_batch(dataset, selection, device),
-                weights=stage.weights,
+                weights=stage_weights,
                 observation_dropout=0.25,
             )
             optimizer.zero_grad(set_to_none=True)
@@ -637,7 +640,7 @@ def train_model(model, dataset, splits, epochs, batch_size, learning_rate, devic
 
         validation = validation_loss(
             model, dataset, splits["validation"], batch_size, device,
-            weights=STAGES[-1].weights,
+            weights=weights_for_stage(STAGES[-1], viability_dynamics_enabled),
         )
         summary = {
             name: float(np.mean([part[name] for part in epoch_parts]))
@@ -1341,7 +1344,24 @@ def main():
     parser.add_argument("--checkpoint", default="dka_intervention_jepa.pt")
     parser.add_argument("--report", default="dka_intervention_jepa_report.json")
     parser.add_argument("--mimic", default="dka_transitions_6h.parquet")
+    parser.add_argument("--enable-viability-dynamics", action="store_true")
+    parser.add_argument("--viability-gate-report")
     args = parser.parse_args()
+
+    gate = {
+        "passed": False,
+        "reasons": ["viability dynamics were not requested"],
+    }
+    if args.enable_viability_dynamics:
+        if not args.viability_gate_report:
+            parser.error(
+                "--enable-viability-dynamics requires --viability-gate-report"
+            )
+        gate = load_persistence_gate(args.viability_gate_report)
+        if not gate["passed"]:
+            parser.error(
+                "viability dynamics gate failed: " + "; ".join(gate["reasons"])
+            )
 
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
@@ -1365,6 +1385,7 @@ def main():
     history, best_validation = train_model(
         model, dataset, splits, args.epochs, args.batch_size,
         args.learning_rate, device,
+        viability_dynamics_enabled=args.enable_viability_dynamics,
     )
     test_report = evaluate_model(model, dataset, splits["test"], device)
     mimic_report = evaluate_mimic_proxy(model, args.mimic, device)
@@ -1392,10 +1413,10 @@ def main():
             ],
             "viability_reward_source": "observed_or_simulated_outcome_only",
             "prediction_error_is_clinical_reward": False,
-            "dynamics_optimization_enabled": False,
-            "disabled_reason": (
-                "same-scale simulator retraining regressed on the held-out "
-                "MIMIC persistence gate"
+            "dynamics_optimization_enabled": args.enable_viability_dynamics,
+            "persistence_gate": gate,
+            "disabled_reason": None if args.enable_viability_dynamics else (
+                "held-out MIMIC persistence gate has not passed"
             ),
             "uncertainty_head_trains_on_detached_dynamics": True,
             "policy_optimization": False,
@@ -1432,7 +1453,7 @@ def main():
         },
         "curriculum": [
             {"name": stage.name, "end_fraction": stage.end_fraction,
-             "weights": stage.weights}
+             "weights": weights_for_stage(stage, args.enable_viability_dynamics)}
             for stage in STAGES
         ],
         "sequence_length": args.sequence_length,

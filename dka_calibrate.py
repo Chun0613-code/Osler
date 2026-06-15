@@ -12,7 +12,8 @@ On the 12-stay demo the folds are tiny and noisy (the point is the machinery + s
 the overfit gap). On full MIMIC (hundreds of DKA stays) the CV number is the real,
 non-overfit L0 calibration.
 
-Params fit: glucose (K_HEP, K_UPTAKE_INS) + K+ (K_K_INS, K_K_RENAL, K_K_BUF).
+Params fit: glucose (K_HEP, K_UPTAKE_INS) + K+ transcellular shift, buffer,
+and bounded urinary concentration.
 Acid-base held (pH/HCO3 already faithful).
 
 Run:  python dka_calibrate.py trajectories.jsonl [k]
@@ -25,12 +26,18 @@ from scipy.optimize import minimize
 import dka_body
 from dka_fidelity_replay import replay
 
-PARAMS = ["K_HEP", "K_UPTAKE_INS", "K_K_INS", "K_K_RENAL", "K_K_BUF"]
-BOUNDS = {"K_HEP": (20, 60), "K_UPTAKE_INS": (0.05, 0.30), "K_K_INS": (0.05, 0.40),
-          "K_K_RENAL": (0.01, 0.10), "K_K_BUF": (0.10, 0.60)}
+PARAMS = [
+    "K_HEP", "K_UPTAKE_INS", "K_K_INS", "K_K_BUF",
+    "K_URINE_K_BASE", "K_URINE_K_OSM",
+]
+BOUNDS = {
+    "K_HEP": (20, 60), "K_UPTAKE_INS": (0.05, 0.30),
+    "K_K_INS": (0.05, 0.40), "K_K_BUF": (0.10, 0.60),
+    "K_URINE_K_BASE": (2.0, 20.0), "K_URINE_K_OSM": (2.0, 25.0),
+}
 VARSCALE = {"glucose": 50.0, "HCO3": 3.0, "K": 0.5, "pH": 0.1}
 DEATH_PENALTY = 3.0
-X0 = np.array([40.0, 0.13, 0.15, 0.03, 0.25])   # sim defaults (starting point)
+X0 = np.array([40.0, 0.13, 0.15, 0.25, 8.0, 12.0])
 
 
 def set_params(x):

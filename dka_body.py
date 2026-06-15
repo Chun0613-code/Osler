@@ -12,11 +12,12 @@ State pools
   Ket  circulating ketoacid      (mEq/L)   -> drives anion gap
   HCO3 bicarbonate               (mEq/L)   -> with pCO2 gives pH
   Ke   plasma (extracellular) K+ (mEq/L)
-  Ki   intracellular K+ pool     (mEq/L-equiv, partition partner of Ke)
+  Ki   total-body K+ reserve     (mEq-equivalent; not a transcellular pool)
   V    extracellular fluid vol   (L)       -> gives MAP, renal perfusion
   Na   serum sodium               (mEq/L)   -> with glucose gives effective osmolality
   Cr   serum creatinine           (mg/dL)   -> lagging renal-perfusion marker
-  Ki   total-body potassium reserve proxy  (mEq-equivalent)
+  CRS  counter-regulatory stress (0..2; resolves over hours with treatment)
+  RPS  renal-perfusion state     (0..1; lags instantaneous MAP)
   OI   cumulative hyperosmolar injury      (dimensionless burden)
   D*   rapid/NPH/basal SC insulin depots   (U awaiting absorption)
 
@@ -30,7 +31,7 @@ event.
 
 Patient profiles vary weight, renal reserve, insulin sensitivity,
 counter-regulatory stress, fluid retention, vascular tone, and total-body K+.
-The neutral profile preserves the original equations; sampled profiles create
+The neutral profile is the reference patient; sampled profiles create
 patient-level response heterogeneity for world-model training.
 
 Constants are first-pass, tuned for QUALITATIVE correctness. Calibrating them
@@ -71,9 +72,12 @@ K_RENAL_KET = 0.02
 K_RENAL_HCO3 = 0.008  # weak renal bicarb regen (kidney can't outpace ongoing ketoacidosis)
 K_K_INS = 0.15        # insulin shifts K+ INTO cells  (calibrated down from 0.35)
 K_K_ACID = 0.30       # acidosis shifts K+ OUT of cells
-K_K_RENAL = 0.03      # renal K+ wasting (calibrated down from 0.06)
 K_K_BUF = 0.25        # plasma K+ buffered toward equilibrium by intracellular pool
 KI_REF = 140.0        # reference intracellular K+ store (buffer capacity scales w/ Ki/KI_REF)
+K_URINE_K_BASE = 8.0  # plausible urinary K concentration at low osmotic flow (mEq/L)
+K_URINE_K_OSM = 12.0  # additional urinary K concentration with osmotic diuresis
+K_STRESS_ADAPT = 0.35 # counter-regulatory stress approaches current illness drive / hr
+K_RENAL_PERF_ADAPT = 0.70  # renal perfusion approaches MAP target / hr
 K_OSM = 0.020         # osmotic diuresis per unit glucosuria
 K_INSENS = 0.06       # insensible fluid loss (L/hr)
 PCO2_FLOOR = 12.0     # respiratory compensation limit (Kussmaul fatigue)
@@ -100,7 +104,7 @@ class DKAPatientProfile:
     """Patient-level physiology used for simulator domain randomization.
 
     These are research priors, not clinical parameter estimates. The neutral
-    profile reproduces the original simulator; sampled profiles deliberately
+    profile supplies the reference physiology; sampled profiles deliberately
     create response heterogeneity that a deterministic average model cannot
     explain from one laboratory snapshot alone.
     """
@@ -189,6 +193,8 @@ class DKABody:
         self.V = 0.8 * self.volume_setpoint
         self.Na = self.profile.baseline_sodium
         self.Cr = self.profile.baseline_creatinine / self.profile.renal_reserve
+        self.counterregulatory_stress = self.profile.counterregulatory_drive
+        self.renal_perfusion_state = self._instantaneous_renal_perfusion()
         self.insulin_rapid_depot = 0.0
         self.insulin_intermediate_depot = 0.0
         self.insulin_basal_depot = 0.0
@@ -226,7 +232,11 @@ class DKABody:
 
     @property
     def renal_func(self):
-        # prerenal: clearance scales with perfusion (MAP)
+        # Renal clearance follows a lagged perfusion state. This avoids making
+        # filtration recover instantly after the first fluid bolus.
+        return max(0.0, min(1.0, self.renal_perfusion_state))
+
+    def _instantaneous_renal_perfusion(self):
         perfusion = (self.MAP - MAP_MIN) / (MAP_NORM - MAP_MIN)
         return max(0.0, min(1.0, perfusion * self.profile.renal_reserve))
 
@@ -235,7 +245,7 @@ class DKABody:
         return self.I / (self.I + effective_i50)
 
     # --- one integration substep (dt hours) ---------------------------------
-    def _derivs(self, action):
+    def _derivs(self, action, fluid_sodium_meq_l=NA_INFUSATE):
         values = expand_action(action)
         insulin_iv = values[ACTION_INDEX["insulin_iv"]]
         insulin_rapid = values[ACTION_INDEX["insulin_rapid_sc"]]
@@ -249,7 +259,7 @@ class DKABody:
         rf = self.renal_func
 
         # glucose mass balance
-        prod = K_HEP * self.profile.counterregulatory_drive * (1.0 - 0.5 * ie)
+        prod = K_HEP * self.counterregulatory_stress * (1.0 - 0.82 * ie)
         uptake = (K_UPTAKE_BASAL + K_UPTAKE_INS * ie) * self.G
         glucosuria = K_RENAL_G * max(0.0, self.G - RENAL_G_THRESH) * rf
 
@@ -275,7 +285,7 @@ class DKABody:
         dBasal = insulin_basal - basal_absorbed
 
         # ketoacid balance: production (insulin-suppressed) vs disposal (insulin-promoted)
-        kg = K_KETO * self.profile.counterregulatory_drive * (1.0 - ie)
+        kg = K_KETO * self.counterregulatory_stress * (1.0 - ie)
         kl = (K_KETCLEAR_BASAL + K_KETCLEAR_INS * ie) * self.Ket + K_RENAL_KET * self.Ket * rf
         dKet = kg - kl - self.Ket * dil
 
@@ -285,22 +295,23 @@ class DKABody:
                  + K_RENAL_HCO3 * (HCO3_NORM - self.HCO3) * rf
                  - self.HCO3 * dil)
 
-        # potassium: insulin pushes IN, acidosis pushes OUT, kidney wastes it,
-        # and the intracellular pool BUFFERS plasma toward equilibrium (capacity ~ Ki)
+        # Potassium uses two distinct concepts. Serum K changes with
+        # transcellular shifts, while Ki is a total-body reserve changed only by
+        # true intake/output. Insulin therefore cannot destroy potassium mass.
         acid_drive = max(0.0, 7.4 - self.pH)
         shift_in = K_K_INS * ie * self.Ke
         shift_out = K_K_ACID * acid_drive * (self.Ki / 120.0)
-        renal_k = K_K_RENAL * self.Ke * rf * (1.0 + 6.0 * osm_diuresis)
+        urinary_k_concentration = K_URINE_K_BASE + K_URINE_K_OSM * min(1.0, osm_diuresis)
+        renal_k_loss = urine_l_hr * urinary_k_concentration * rf
+        renal_k_serum = renal_k_loss / max(self.V, 1.0)
         buf = K_K_BUF * (KE_NORM - self.Ke) * (self.Ki / KI_REF)   # restoring force
-        dKe = -shift_in + shift_out + 0.55 * kcl / self.V - renal_k + buf - self.Ke * dil
-        # total-body (intracellular) K+ depletes with osmotic diuresis -> buffer fades
-        dKi = (shift_in - shift_out - 0.1 * buf
-               - K_K_RENAL * 8.0 * osm_diuresis * self.Ki
-               + 0.45 * kcl)
+        dKe = (-shift_in + shift_out + 0.55 * kcl / self.V
+               - renal_k_serum + buf - self.Ke * dil)
+        dKi = kcl - renal_k_loss
 
         # Sodium concentration follows solute and water balance. Bicarbonate is
         # administered as a sodium salt in this simplified IV action contract.
-        sodium_in = retained_fluid * NA_INFUSATE + bicarb
+        sodium_in = retained_fluid * float(fluid_sodium_meq_l) + bicarb
         sodium_out = urine_l_hr * NA_URINE
         dNa = (sodium_in - sodium_out - self.Na * dV) / self.V
         # The mini-body does not explicitly model every urinary osmole or
@@ -313,6 +324,22 @@ class DKABody:
             1.0 + 1.8 * (1.0 - rf)
         )
         dCr = K_CR_ADAPT * (cr_target - self.Cr) - self.Cr * dil
+
+        # Stress and renal perfusion are hidden dynamic state, not immutable
+        # patient traits. Acidosis, ketosis, hyperglycemia and hypovolemia raise
+        # stress; insulin and restoration of volume let it resolve gradually.
+        illness_drive = (
+            0.20
+            + 0.45 * min(1.5, max(0.0, self.G - 180.0) / 300.0)
+            + 0.55 * min(1.5, self.Ket / 12.0)
+            + 0.45 * min(1.5, max(0.0, 7.35 - self.pH) / 0.35)
+            + 0.35 * min(1.5, max(0.0, self.volume_setpoint - self.V)
+                         / (0.25 * self.volume_setpoint))
+        )
+        stress_target = self.profile.counterregulatory_drive * illness_drive * (1.0 - 0.35 * ie)
+        dStress = K_STRESS_ADAPT * (stress_target - self.counterregulatory_stress)
+        perfusion_target = self._instantaneous_renal_perfusion()
+        dRenalPerfusion = K_RENAL_PERF_ADAPT * (perfusion_target - self.renal_perfusion_state)
 
         # Neurologic hyperosmolar risk depends on severity and duration. It is
         # accumulated rather than triggered by one instantaneous threshold crossing.
@@ -329,16 +356,22 @@ class DKABody:
             insulin_intermediate_depot=dIntermediate,
             insulin_basal_depot=dBasal,
             osmotic_injury=dOsmoticInjury,
+            counterregulatory_stress=dStress,
+            renal_perfusion_state=dRenalPerfusion,
         )
 
     def step(self, action, dt=0.5, substeps=30):
         """Advance physiology under a route-aware or legacy action vector."""
+        fluid_sodium_meq_l = (
+            float(action.get("_fluid_sodium_meq_l", NA_INFUSATE))
+            if isinstance(action, dict) else NA_INFUSATE
+        )
         values = expand_action(action)
         h = dt / substeps
         for _ in range(substeps):
             if not self.alive:
                 break
-            d = self._derivs(values)
+            d = self._derivs(values, fluid_sodium_meq_l=fluid_sodium_meq_l)
             self.G = max(0.0, self.G + d["G"] * h)
             self.I = max(0.0, self.I + d["I"] * h)
             self.Ket = max(0.0, self.Ket + d["Ket"] * h)
@@ -360,6 +393,14 @@ class DKABody:
             )
             self.osmotic_injury = max(
                 0.0, self.osmotic_injury + d["osmotic_injury"] * h
+            )
+            self.counterregulatory_stress = max(
+                0.05, min(2.5, self.counterregulatory_stress
+                          + d["counterregulatory_stress"] * h)
+            )
+            self.renal_perfusion_state = max(
+                0.0, min(1.0, self.renal_perfusion_state
+                         + d["renal_perfusion_state"] * h)
             )
             self.urine_output_ml_hr = max(0.0, d["urine_output_ml_hr"])
             self.t += h
@@ -415,6 +456,8 @@ class DKABody:
             urine_output=self.urine_output_ml_hr,
             BHB=self.beta_hydroxybutyrate,
             K_store=self.Ki,
+            counterregulatory_stress=self.counterregulatory_stress,
+            renal_perfusion_state=self.renal_perfusion_state,
             osmotic_injury=self.osmotic_injury,
             critical_burden=max(self.critical_burdens.values(), default=0.0),
             critical_burdens=dict(self.critical_burdens),

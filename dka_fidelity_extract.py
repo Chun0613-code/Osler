@@ -34,6 +34,7 @@ from dka_transition_extract import (
 from mimic_action_history import (
     ACTION_NAMES,
     action_rate_grid,
+    fluid_sodium_grid,
     treatment_event_grid,
     treatment_event_records,
 )
@@ -215,10 +216,14 @@ def main():
         history = sact[(sact["endtime"] >= onset - pd.Timedelta(hours=HISTORY_H))
                        & (sact["starttime"] < onset)]
         future_grid = action_rate_grid(future, onset, n_cells * DT, DT)
+        future_fluid_sodium = fluid_sodium_grid(future, onset, n_cells * DT, DT)
         future_event_grid = treatment_event_grid(
             future, onset, n_cells * DT, DT
         )
         history_grid = action_rate_grid(
+            history, onset - pd.Timedelta(hours=HISTORY_H), HISTORY_H, DT
+        )
+        history_fluid_sodium = fluid_sodium_grid(
             history, onset - pd.Timedelta(hours=HISTORY_H), HISTORY_H, DT
         )
         history_event_grid = treatment_event_grid(
@@ -236,6 +241,7 @@ def main():
                 v = round(float(future_grid[k, action_index]), 3)
                 row[a] = v
                 any_nz = any_nz or v > 0
+            row["_fluid_sodium_meq_l"] = round(float(future_fluid_sodium[k]), 3)
             if any_nz:
                 actions_list.append(row)
         history_list = []
@@ -243,6 +249,7 @@ def main():
             row = {"t": round(-HISTORY_H + k * DT, 3)}
             for action_index, action in enumerate(ACTION_NAMES):
                 row[action] = round(float(history_grid[k, action_index]), 3)
+            row["_fluid_sodium_meq_l"] = round(float(history_fluid_sodium[k]), 3)
             history_list.append(row)
 
         # observed lab trajectory in window

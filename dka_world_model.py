@@ -181,6 +181,10 @@ def randomized_dka(body, rng=None, randomize_profile=True):
         body.profile.baseline_creatinine / body.profile.renal_reserve
         * rng.uniform(0.9, 2.0), 0.4, 5.0,
     ))
+    body.counterregulatory_stress = float(
+        body.profile.counterregulatory_drive * rng.uniform(0.9, 1.35)
+    )
+    body.renal_perfusion_state = body._instantaneous_renal_perfusion()
     body.urine_output_ml_hr = float(rng.uniform(10.0, 250.0))
     body.osmotic_injury = float(rng.uniform(0.0, 4.0))
     body.t = 0.0

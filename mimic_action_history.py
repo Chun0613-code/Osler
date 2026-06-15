@@ -33,6 +33,11 @@ def _number(value):
     return float(match.group()) if match else None
 
 
+def _integer(value):
+    number = _number(value)
+    return int(number) if number is not None else 0
+
+
 def _text(*values):
     return " ".join(str(value or "") for value in values).lower()
 
@@ -110,8 +115,24 @@ def dextrose_fraction(label):
     return None
 
 
+def fluid_sodium_concentration(label):
+    """Approximate sodium concentration for common crystalloid carriers."""
+    text = _text(label).replace(" ", "")
+    if any(token in text for token in ("d5w", "d10w", "d20w", "sterilewater")):
+        return 0.0
+    if any(token in text for token in ("1/2ns", "0.45%", "halfnormal")):
+        return 77.0
+    if any(token in text for token in ("lactatedringer", "ringer's", "ringer")) or text == "lr":
+        return 130.0
+    if any(token in text for token in ("plasma-lyte", "plasmalyte")):
+        return 140.0
+    if any(token in text for token in ("normalsaline", "0.9%", "sodiumchloride", "nacl")) or text == "ns":
+        return 154.0
+    return 140.0
+
+
 def canonical_amount(action, amount, uom, label, duration_hours=None,
-                     rate=None, rate_uom=None):
+                     rate=None, rate_uom=None, itemid=None):
     """Return total canonical amount for one event, or None if unsafe to infer."""
     amount = _number(amount)
     rate = _number(rate)
@@ -136,6 +157,10 @@ def canonical_amount(action, amount, uom, label, duration_hours=None,
     elif action in ("kcl", "bicarbonate"):
         if "mmol" in unit or "meq" in unit or unit == "":
             return amount
+        # MIMIC item 227533 is sodium bicarbonate 8.4% (1 mEq/mL).
+        # KCl bolus carrier volume is deliberately not converted to mEq.
+        if action == "bicarbonate" and _integer(itemid) == 227533 and "ml" in unit:
+            return amount
     elif action == "dextrose":
         if unit in ("g", "gram", "grams") or "gm" in unit:
             return amount
@@ -158,6 +183,7 @@ def normalize_events(frame):
         if pd.isna(end) or end < start:
             end = start
         duration = max((end - start).total_seconds() / 3600.0, 0.0)
+        duration_is_exact = bool(duration > 0.0)
         label = _text(event.get("label"), event.get("product_description"))
         for action in classify_actions(label):
             if action == "insulin":
@@ -184,6 +210,7 @@ def normalize_events(frame):
                 effective_duration,
                 event.get("rate"),
                 event.get("rate_uom"),
+                event.get("itemid"),
             )
             if total is None or not np.isfinite(total) or total <= 0:
                 continue
@@ -203,10 +230,21 @@ def normalize_events(frame):
                 "source": event.get("source", "unknown"),
                 "route": event.get("route"),
                 "original_label": label,
+                "itemid": event.get("itemid"),
+                "orderid": event.get("orderid"),
+                "timing_source": "recorded_interval" if duration_is_exact else "default_duration",
+                "timing_confidence": 1.0 if duration_is_exact else 0.5,
+                "dose_source": "recorded_amount" if _number(event.get("amount")) is not None else "rate_x_duration",
+                "dose_confidence": 1.0 if _number(event.get("amount")) is not None else 0.75,
+                "fluid_sodium_meq_l": (
+                    fluid_sodium_concentration(label) if action == "fluids" else np.nan
+                ),
             })
     columns = [
         "subject_id", "stay_id", "starttime", "endtime", "action",
-        "amount", "uom", "source", "route", "original_label",
+        "amount", "uom", "source", "route", "original_label", "itemid",
+        "orderid", "timing_source", "timing_confidence", "dose_source",
+        "dose_confidence", "fluid_sodium_meq_l",
     ]
     return pd.DataFrame(rows, columns=columns)
 
@@ -259,6 +297,55 @@ def action_rate_grid(events, start, hours, dt=0.5):
             if overlap:
                 grid[cell, action_index] += event["amount"] * overlap / full_duration / dt
     return grid
+
+
+def fluid_sodium_grid(events, start, hours, dt=0.5):
+    """Volume-weighted fluid sodium concentration for each action cell."""
+    cells = int(round(hours / dt))
+    sodium_mass = np.zeros(cells, dtype=np.float32)
+    fluid_volume = np.zeros(cells, dtype=np.float32)
+    end = start + pd.Timedelta(hours=hours)
+    for event in events[events["action"] == "fluids"].to_dict("records"):
+        event_start = max(pd.Timestamp(event["starttime"]), start)
+        event_end = min(pd.Timestamp(event["endtime"]), end)
+        if event_end <= event_start:
+            event_end = min(event_start + pd.Timedelta(hours=dt), end)
+        full_duration = max(
+            (pd.Timestamp(event["endtime"]) - pd.Timestamp(event["starttime"])).total_seconds()
+            / 3600.0,
+            dt,
+        )
+        concentration = float(event.get("fluid_sodium_meq_l", 140.0))
+        for cell in range(cells):
+            lo = start + pd.Timedelta(hours=cell * dt)
+            hi = lo + pd.Timedelta(hours=dt)
+            overlap = max(0.0, (min(event_end, hi) - max(event_start, lo)).total_seconds() / 3600.0)
+            if overlap:
+                volume = float(event["amount"]) * overlap / full_duration
+                fluid_volume[cell] += volume
+                sodium_mass[cell] += volume * concentration
+    return np.divide(
+        sodium_mass,
+        fluid_volume,
+        out=np.full(cells, 140.0, dtype=np.float32),
+        where=fluid_volume > 0,
+    )
+
+
+def action_quality_summary(events):
+    if events.empty:
+        return {
+            "event_count": 0,
+            "exact_timing_fraction": 0.0,
+            "high_confidence_dose_fraction": 0.0,
+            "sources": [],
+        }
+    return {
+        "event_count": int(len(events)),
+        "exact_timing_fraction": float((events["timing_source"] == "recorded_interval").mean()),
+        "high_confidence_dose_fraction": float((events["dose_confidence"] >= 0.75).mean()),
+        "sources": sorted(events["source"].dropna().astype(str).unique().tolist()),
+    }
 
 
 def treatment_event_records(events, start, hours):
@@ -339,6 +426,14 @@ def action_window_summary(events, anchor, history_hours=6.0, future_hours=6.0, d
         "future_treatment_events": treatment_event_records(
             future_events, anchor, future_hours
         ),
+        "history_fluid_sodium_grid": fluid_sodium_grid(
+            history_events, history_start, history_hours, dt
+        ).tolist(),
+        "future_fluid_sodium_grid": fluid_sodium_grid(
+            future_events, anchor, future_hours, dt
+        ).tolist(),
+        "history_action_quality": action_quality_summary(history_events),
+        "future_action_quality": action_quality_summary(future_events),
     }
     for index, action in enumerate(ACTION_NAMES):
         output[f"hist_{action}_total"] = float(history_grid[:, index].sum() * dt)

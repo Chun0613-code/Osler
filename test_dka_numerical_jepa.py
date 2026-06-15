@@ -38,6 +38,8 @@ from osler_jepa.causal_evaluation import TargetTrialSpec, evaluate_trial
 from osler_jepa.symbolic import RULE_IDS, rule_supervision
 from osler_jepa.state_compiler import DKA_SYMBOLIC_FACT_KEYS, ground_dka_facts
 from osler_jepa.viability import HomeostaticWorldModelObjective
+from osler_jepa.persistence_gate import evaluate_persistence_gate
+from osler_jepa.curriculum import STAGES, weights_for_stage
 from osler_jepa.shadow import (
     ShadowObserver,
     build_dka_shadow_state,
@@ -57,6 +59,7 @@ from osler_jepa.shadow_cohort import (
 from real_world_improvement import episode_features
 from predict_dka_intervention import compare, predict
 from dka_fidelity_replay import init_body
+from dka_transition_extract import find_dka_onset
 from mimic_action_history import (
     action_window_summary, deduplicate_events, normalize_events,
     treatment_event_records,
@@ -680,6 +683,37 @@ class NumericalJEPATests(unittest.TestCase):
         replaced.step([0, 0, 20, 0, 0], dt=1.0)
         self.assertGreater(replaced.Ki, untreated.Ki)
 
+    def test_insulin_shift_does_not_destroy_total_body_potassium(self):
+        treated = DKABody()
+        untreated = DKABody()
+        treated.step({"insulin_iv": 8.0}, dt=1.0)
+        untreated.step({}, dt=1.0)
+        self.assertLess(treated.Ke, untreated.Ke)
+        self.assertAlmostEqual(treated.Ki, untreated.Ki, delta=2.0)
+
+    def test_osmotic_potassium_loss_is_bounded_by_urine_flow(self):
+        body = DKABody()
+        body.G = 900.0
+        initial_store = body.Ki
+        body.step({}, dt=1.0)
+        self.assertGreater(body.Ki, initial_store - 30.0)
+        self.assertLess(body.Ki, initial_store)
+
+    def test_effective_treatment_resolves_counterregulatory_stress(self):
+        body = DKABody()
+        initial_stress = body.counterregulatory_stress
+        for _ in range(12):
+            body.step({"insulin_iv": 6.0, "fluids": 500.0, "kcl": 10.0}, dt=0.5)
+        self.assertTrue(body.alive)
+        self.assertLess(body.counterregulatory_stress, initial_stress)
+
+    def test_fluid_sodium_metadata_changes_sodium_trajectory(self):
+        saline = DKABody()
+        dextrose_water = DKABody()
+        saline.step({"fluids": 500.0, "_fluid_sodium_meq_l": 154.0}, dt=1.0)
+        dextrose_water.step({"fluids": 500.0, "_fluid_sodium_meq_l": 0.0}, dt=1.0)
+        self.assertGreater(saline.Na, dextrose_water.Na)
+
     def test_world_model_is_action_conditioned(self):
         torch.manual_seed(0)
         model = WorldModel().eval()
@@ -702,6 +736,30 @@ class NumericalJEPATests(unittest.TestCase):
         self.assertEqual(outputs["status_logits"].shape, (2, 3))
         self.assertEqual(outputs["proof_logits"].shape, (2, len(RULE_IDS)))
         self.assertEqual(outputs["proposal_logits"].shape, (2, S_DIM, 3))
+
+    def test_current_v5_report_fails_persistence_gate(self):
+        report = json.loads(Path("dka_symbolic_jepa_v5_report.json").read_text())
+        gate = evaluate_persistence_gate(report)
+        self.assertFalse(gate["passed"])
+        self.assertTrue(any("glucose" in reason for reason in gate["reasons"]))
+
+    def test_persistence_gate_enables_dynamics_weights_only_after_pass(self):
+        metrics = {
+            name: {"n": 40, "jepa": 0.8, "persistence": 1.0}
+            for name in ("glucose", "potassium", "bicarbonate", "map")
+        }
+        gate = evaluate_persistence_gate({
+            "stays": 40,
+            "data_adequacy": {
+                "has_exact_dose_and_timing": True,
+                "has_explicit_start_stop_events": True,
+                "has_pre_anchor_treatment_history": True,
+            },
+            "mae_active_dka": metrics,
+        })
+        self.assertTrue(gate["passed"])
+        self.assertEqual(weights_for_stage(STAGES[-1], False)["viability"], 0.0)
+        self.assertGreater(weights_for_stage(STAGES[-1], True)["viability"], 0.0)
 
     def test_symbolic_supervision_marks_rule_contradictions(self):
         action = torch.zeros(1, 1, A_DIM)
@@ -892,6 +950,8 @@ class NumericalJEPATests(unittest.TestCase):
         self.assertGreater(summary["hist_dextrose_total"], 0.0)
         self.assertGreater(summary["act_fluids_total"], 0.0)
         self.assertIn("future_treatment_event_grid", summary)
+        self.assertEqual(summary["future_fluid_sodium_grid"][0], 154.0)
+        self.assertEqual(summary["future_action_quality"]["exact_timing_fraction"], 1.0)
 
     def test_mimic_events_preserve_carried_in_start_and_exact_stop(self):
         anchor = pd.Timestamp("2026-01-01 12:00:00")
@@ -949,6 +1009,46 @@ class NumericalJEPATests(unittest.TestCase):
         self.assertEqual(events.iloc[0]["action"], "insulin_basal_sc")
         self.assertEqual(events.iloc[0]["endtime"] - events.iloc[0]["starttime"],
                          pd.Timedelta(hours=0.5))
+
+    def test_mimic_normalizer_does_not_treat_kcl_carrier_ml_as_meq(self):
+        now = pd.Timestamp("2026-01-01 12:00:00")
+        raw = pd.DataFrame([{
+            "stay_id": 1, "starttime": now,
+            "endtime": now + pd.Timedelta(hours=1),
+            "label": "KCL (Bolus)", "itemid": 227521,
+            "amount": 50, "uom": "mL", "source": "inputevents",
+        }])
+        self.assertTrue(normalize_events(raw).empty)
+
+    def test_mimic_normalizer_converts_bicarbonate_amp_ml_to_meq(self):
+        now = pd.Timestamp("2026-01-01 12:00:00")
+        raw = pd.DataFrame([{
+            "stay_id": 1, "starttime": now, "endtime": now,
+            "label": "Sodium Bicarbonate 8.4%", "itemid": 227533,
+            "amount": 50, "uom": "mL", "source": "inputevents",
+        }])
+        event = normalize_events(raw).iloc[0]
+        self.assertEqual(event["action"], "bicarbonate")
+        self.assertEqual(event["amount"], 50.0)
+        self.assertEqual(event["timing_source"], "default_duration")
+
+    def test_dka_onset_requires_evidence_in_one_temporal_window(self):
+        start = pd.Timestamp("2026-01-01 00:00:00")
+        measurements = pd.DataFrame([
+            {"stay_id": 1, "charttime": start, "var": "glucose", "valuenum": 300},
+            {"stay_id": 1, "charttime": start + pd.Timedelta(hours=2),
+             "var": "bicarbonate", "valuenum": 12},
+            {"stay_id": 1, "charttime": start + pd.Timedelta(hours=3),
+             "var": "anion_gap", "valuenum": 20},
+            {"stay_id": 2, "charttime": start, "var": "glucose", "valuenum": 300},
+            {"stay_id": 2, "charttime": start + pd.Timedelta(hours=8),
+             "var": "bicarbonate", "valuenum": 12},
+            {"stay_id": 2, "charttime": start + pd.Timedelta(hours=9),
+             "var": "anion_gap", "valuenum": 20},
+        ])
+        onsets = find_dka_onset(measurements, cooccur_hours=4.0)
+        self.assertEqual(onsets["stay_id"].tolist(), [1])
+        self.assertLessEqual(onsets.iloc[0]["onset_evidence_span_hours"], 4.0)
 
     def test_fidelity_replay_uses_prior_insulin_and_observed_map(self):
         body = init_body(
