@@ -24,6 +24,11 @@ from .shadow import (
     observe_live_recommendation,
     recommendation_fingerprint,
 )
+from .shadow_outcomes import (
+    load_shadow_forecast,
+    reconcile_from_ledger,
+    reconcile_shadow_forecast,
+)
 
 __all__ = [
     "Intervention",
@@ -45,4 +50,7 @@ __all__ = [
     "build_dka_shadow_state",
     "observe_live_recommendation",
     "recommendation_fingerprint",
+    "load_shadow_forecast",
+    "reconcile_from_ledger",
+    "reconcile_shadow_forecast",
 ]

@@ -295,6 +295,10 @@ def compare(model, state, proposed_action, hours, device, input_warnings=None,
             "potassium_store_prior": initial_belief.to_dict(),
         },
         "osler_dynamic_action_schedule": action_schedule,
+        "effective_action_summary": {
+            key: round(float(value), 6)
+            for key, value in zip(ACTION_KEYS, mean_physical_action)
+        },
         "predicted_intervention_trajectory": intervention,
         "predicted_no_treatment_trajectory": untreated,
         "predicted_effect_at_final_horizon": effect,

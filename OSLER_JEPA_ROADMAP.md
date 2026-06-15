@@ -163,6 +163,9 @@ schema; do not mix diseases into one unvalidated latent space at the start.
 - Implemented: fail-closed live Osler shadow mode. It observes only completed
   symbolic-approved DKA candidates, verifies recommendation fingerprints before
   and after JEPA inference, and has no ranking, dosing, or veto authority.
+- Implemented: shadow outcome reconciliation against persistence. It requires
+  action/horizon alignment, scores only measured future states, and quarantines
+  every record for human review before any offline training use.
 - Keep simulator and EHR provenance separate in training and reports.
 
 ### Phase 4: Connect to the Live Symbolic Engine

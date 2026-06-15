@@ -164,7 +164,8 @@ class ShadowObserver:
 
     def _base_report(self, fingerprint: str) -> Dict[str, Any]:
         return {
-            "schema_version": "1.0.0",
+            "schema_version": "1.1.0",
+            "record_type": "shadow_forecast",
             "event_id": str(uuid4()),
             "timestamp_utc": datetime.now(timezone.utc).isoformat(),
             "mode": "shadow",
@@ -220,12 +221,20 @@ class ShadowObserver:
         untreated_risk = untreated[-1].get("death_probability") if untreated else None
         validation = comparison.get("osler_transition_validation") or {}
         prolog = comparison.get("osler_prolog_reasoning") or {}
+        final_state = treated[-1].get("state", {}) if treated else {}
         return {
             "candidate": candidate.get("drug"),
             "symbolic_safety_decision": (candidate.get("safety") or {}).get("decision"),
             "research_probe_action": action,
             "probe_is_clinical_dose": False,
             "horizon_hours": self.horizon_hours,
+            "predicted_final_state": final_state,
+            "effective_action_summary": comparison.get(
+                "effective_action_summary", action
+            ),
+            "effective_action_schedule": comparison.get(
+                "osler_dynamic_action_schedule", []
+            ),
             "predicted_effect": comparison.get("predicted_effect_at_final_horizon", {}),
             "predicted_risk": {
                 "intervention": treated_risk,
@@ -237,6 +246,7 @@ class ShadowObserver:
                 validation.get("status") == "contradicted"
                 or prolog.get("decision") in {"block", "modify"}
             ),
+            "outcome_reconciliation_pending": True,
         }
 
     def _write_audit(self, report: Dict[str, Any]) -> None:

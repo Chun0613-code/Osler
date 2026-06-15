@@ -1,5 +1,6 @@
 import unittest
 from unittest.mock import patch
+import json
 import sys
 import tempfile
 from pathlib import Path
@@ -39,6 +40,11 @@ from osler_jepa.shadow import (
     ShadowObserver,
     build_dka_shadow_state,
     recommendation_fingerprint,
+)
+from osler_jepa.shadow_outcomes import (
+    load_shadow_forecast,
+    reconcile_from_ledger,
+    reconcile_shadow_forecast,
 )
 from real_world_improvement import episode_features
 from predict_dka_intervention import compare, predict
@@ -101,7 +107,9 @@ class NumericalJEPATests(unittest.TestCase):
             return {
                 "predicted_effect_at_final_horizon": {"G": -80.0},
                 "predicted_intervention_trajectory": [
-                    {"death_probability": 0.1}
+                    {"death_probability": 0.1, "state": {
+                        "G": 300.0, "Ke": 4.6, "HCO3": 12.0, "MAP": 74.0,
+                    }}
                 ],
                 "predicted_no_treatment_trajectory": [
                     {"death_probability": 0.2}
@@ -111,6 +119,7 @@ class NumericalJEPATests(unittest.TestCase):
                 "jepa_symbolic_transition": {
                     "transitions": [{"time_window_hours": 6.0}]
                 },
+                "effective_action_summary": {"insulin_iv": 4.0},
             }
 
         report = ShadowObserver(enabled=True, runner=runner).observe(
@@ -122,6 +131,139 @@ class NumericalJEPATests(unittest.TestCase):
         self.assertTrue(report["recommendation_integrity_verified"])
         self.assertEqual(before, recommendation_fingerprint(result))
         self.assertEqual(report["observations"][0]["predicted_effect"]["G"], -80.0)
+        self.assertEqual(
+            report["observations"][0]["predicted_final_state"]["G"], 300.0
+        )
+
+    def test_shadow_outcome_scores_jepa_against_persistence(self):
+        forecast = {
+            "record_type": "shadow_forecast", "status": "observed",
+            "event_id": "forecast-1",
+            "state_contract": {"state": {
+                "G": 480.0, "Ke": 5.2, "HCO3": 8.0, "MAP": 70.0,
+            }},
+            "observations": [{
+                "candidate": "insulin", "horizon_hours": 6.0,
+                "effective_action_summary": {"insulin_iv": 4.0},
+                "effective_action_schedule": [{
+                    "hours": 0.0, "action": {"insulin_iv": 4.0},
+                }],
+                "predicted_risk": {"intervention": 0.2},
+                "predicted_final_state": {
+                    "G": 300.0, "Ke": 4.5, "HCO3": 13.0, "MAP": 76.0,
+                },
+            }],
+        }
+        future = {
+            "vitals": {"map": 75.0},
+            "labs": {
+                "glucose": 310.0, "potassium": 4.6, "bicarbonate": 12.5,
+            },
+            "outcome": {"alive": True},
+        }
+        record = reconcile_shadow_forecast(
+            forecast, future,
+            {"schedule": [{
+                "hours": 0.0, "action": {"insulin_iv": 4.0},
+            }]},
+            6.0,
+        )
+        self.assertEqual(record["status"], "scored")
+        self.assertEqual(record["summary"]["winner"], "jepa")
+        self.assertGreater(
+            record["summary"]["normalized_improvement_over_persistence"], 0
+        )
+        self.assertFalse(record["online_weight_update_allowed"])
+        self.assertFalse(record["automatic_rule_promotion_allowed"])
+        self.assertFalse(record["causal_claim_allowed"])
+        self.assertEqual(record["terminal_outcome"]["brier_score"], 0.04)
+
+    def test_shadow_outcome_rejects_action_mismatch(self):
+        forecast = {
+            "record_type": "shadow_forecast", "status": "observed",
+            "event_id": "forecast-2",
+            "state_contract": {"state": {"G": 480.0}},
+            "observations": [{
+                "candidate": "insulin", "horizon_hours": 6.0,
+                "effective_action_summary": {"insulin_iv": 4.0},
+                "effective_action_schedule": [{
+                    "hours": 0.0, "action": {"insulin_iv": 4.0},
+                }],
+                "predicted_final_state": {"G": 300.0},
+            }],
+        }
+        record = reconcile_shadow_forecast(
+            forecast,
+            {"vitals": {}, "labs": {"glucose": 310.0}},
+            {"schedule": [{"hours": 0.0, "action": {}}]},
+            6.0,
+        )
+        self.assertEqual(record["status"], "action_mismatch")
+        self.assertNotIn("summary", record)
+
+    def test_shadow_outcome_rejects_same_mean_with_different_timing(self):
+        forecast = {
+            "record_type": "shadow_forecast", "status": "observed",
+            "event_id": "forecast-timing",
+            "state_contract": {"state": {"G": 480.0}},
+            "observations": [{
+                "candidate": "insulin", "horizon_hours": 6.0,
+                "effective_action_summary": {"insulin_iv": 4.0},
+                "effective_action_schedule": [{
+                    "hours": 0.0, "action": {"insulin_iv": 4.0},
+                }],
+                "predicted_final_state": {"G": 300.0},
+            }],
+        }
+        same_mean_different_timing = {"schedule": [
+            {"hours": 0.0, "action": {}},
+            {"hours": 3.0, "action": {"insulin_iv": 8.0}},
+        ]}
+        record = reconcile_shadow_forecast(
+            forecast,
+            {"labs": {"glucose": 310.0}, "vitals": {}},
+            same_mean_different_timing,
+            6.0,
+        )
+        self.assertTrue(record["action_alignment"]["matches"])
+        self.assertEqual(record["status"], "action_timing_mismatch")
+        self.assertNotIn("summary", record)
+
+    def test_shadow_ledger_round_trip_appends_reconciliation(self):
+        forecast = {
+            "record_type": "shadow_forecast", "status": "observed",
+            "event_id": "forecast-ledger",
+            "state_contract": {"state": {"G": 480.0}},
+            "observations": [{
+                "candidate": "insulin", "horizon_hours": 6.0,
+                "effective_action_summary": {"insulin_iv": 4.0},
+                "effective_action_schedule": [{
+                    "hours": 0.0, "action": {"insulin_iv": 4.0},
+                }],
+                "predicted_final_state": {"G": 300.0},
+            }],
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            ledger = Path(directory) / "shadow.jsonl"
+            ledger.write_text(json.dumps(forecast) + "\n", encoding="utf-8")
+            loaded = load_shadow_forecast(ledger, "forecast-ledger")
+            self.assertEqual(loaded["event_id"], "forecast-ledger")
+            record = reconcile_from_ledger(
+                ledger,
+                "forecast-ledger",
+                {"labs": {"glucose": 310.0}, "vitals": {}},
+                {"schedule": [{
+                    "hours": 0.0, "action": {"insulin_iv": 4.0},
+                }]},
+                6.0,
+            )
+            self.assertEqual(record["status"], "scored")
+            lines = ledger.read_text(encoding="utf-8").splitlines()
+            self.assertEqual(len(lines), 2)
+            self.assertEqual(
+                json.loads(lines[-1])["record_type"],
+                "shadow_outcome_reconciliation",
+            )
 
     def test_shadow_observer_respects_symbolic_safety_block(self):
         def runner(**kwargs):

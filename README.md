@@ -182,6 +182,27 @@ state fields match the DKA contract and the symbolic safety gate already allows 
 mapped candidate. It writes results under `jepa_shadow`, verifies that the live
 recommendation fingerprint did not change, and carries no dosing, ranking, veto,
 or causal authority. `OSLER_JEPA_SHADOW_LOG` optionally records JSONL audits.
+Later measured physiology can be reconciled with a stored forecast using
+`jepa_shadow_outcome.py`. Scoring is allowed only when the observed treatment
+start/stop schedule, mean exposure, and elapsed time match the forecast contract.
+It reports state-wise JEPA
+error versus persistence and changed-state direction accuracy, but never performs
+an online weight update, automatic rule promotion, or causal attribution. If a
+terminal outcome is supplied, the predicted death risk is scored with a Brier
+score; it is not interpreted as calibrated from a single case.
+
+```bash
+python jepa_shadow_outcome.py \
+  --ledger /private/path/shadow.jsonl \
+  --event-id FORECAST_EVENT_ID \
+  --future-json future_observation.json \
+  --actual-action-json actual_treatment_schedule.json \
+  --elapsed-hours 6
+```
+
+The action JSON must contain `{"schedule": [{"hours": 0, "action": {...}}]}`.
+Shadow ledgers contain physiological observations, remain local, and are ignored
+by Git through the repository-wide `*.jsonl` rule.
 
 `real_world_improvement.py` tests episode and propensity weighting, a small
 real-world residual adapter, patient-bootstrap ensembles, temperature scaling,

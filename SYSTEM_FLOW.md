@@ -152,6 +152,11 @@ authorize causal intervention claims.
    output cannot rerank drugs, authorize a dose, bypass Prolog, or make a causal
    claim. Enable it with `OSLER_JEPA_SHADOW=1`; optionally set
    `OSLER_JEPA_CHECKPOINT`, `OSLER_JEPA_DEVICE`, and `OSLER_JEPA_SHADOW_LOG`.
+28. `osler_jepa/shadow_outcomes.py` closes the observational audit loop. A later
+   outcome is scored only when its elapsed time, mean action exposure, and exact
+   start/stop schedule match the forecast. It compares JEPA with persistence per measured state and
+   records changed-state direction accuracy. Reconciliations are review evidence
+   only: online learning, causal claims, and automatic rule promotion stay off.
 
 ## Highest-Value Improvements
 
