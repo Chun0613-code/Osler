@@ -238,8 +238,14 @@ def analyze_stream_llm(fields, drugs_pkpd, clinical, text=None, api_key=None,
         return
     if run.disease_model is None:
         run.get_disease_model()
+    jepa_shadow = agent.attach_jepa_shadow(run.canon, run.fields, run.result)
+    if jepa_shadow.get("enabled"):
+        yield {"type": "step", "icon": "JEPA",
+               "title": f"JEPA shadow · {jepa_shadow.get('status')}",
+               "detail": "read-only observation; symbolic ranking unchanged"}
     graph = agent.build_graph(run.result, run.disease_model, run.targets)
     yield {"type": "final", "bundle": {
         "indication": run.canon, "parser": getattr(run, "parser", "llm"),
         "fields": run.fields, "result": run.result, "disease_model": run.disease_model,
-        "graph": graph, "openfda_loaded": run.openfda_loaded, "orchestration": prov}}
+        "graph": graph, "openfda_loaded": run.openfda_loaded,
+        "jepa_shadow": jepa_shadow, "orchestration": prov}}

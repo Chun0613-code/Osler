@@ -35,6 +35,11 @@ from osler_jepa.rule_inducer import validate_candidates
 from osler_jepa.real_world_adapter import RealWorldAdapter
 from osler_jepa.causal_evaluation import TargetTrialSpec, evaluate_trial
 from osler_jepa.symbolic import RULE_IDS, rule_supervision
+from osler_jepa.shadow import (
+    ShadowObserver,
+    build_dka_shadow_state,
+    recommendation_fingerprint,
+)
 from real_world_improvement import episode_features
 from predict_dka_intervention import compare, predict
 from dka_fidelity_replay import init_body
@@ -44,10 +49,104 @@ from mimic_action_history import (
 )
 
 sys.path.insert(0, str(Path(__file__).parent / "engine"))
+sys.path.insert(0, str(Path(__file__).parent / "demo"))
 from reasoning_engine import mechanism_candidates
+import case_parser
 
 
 class NumericalJEPATests(unittest.TestCase):
+    @staticmethod
+    def _shadow_fields():
+        return {
+            "vitals": {"sbp": 96, "dbp": 58},
+            "labs": {
+                "glucose": 480, "potassium": 5.2,
+                "bicarbonate": 8, "anion_gap": 24,
+                "sodium": 134, "creatinine": 1.4,
+            },
+        }
+
+    @staticmethod
+    def _shadow_result(decision="ok"):
+        return {
+            "target_states": ["blood glucose elevation down"],
+            "indication": "hyperglycemia",
+            "candidates": [{
+                "drug": "insulin", "mechanism_score": 0.3,
+                "clinical_role": {"rank_priority": 0},
+                "matched_targets": [],
+                "safety": {"decision": decision, "reasons": []},
+                "dose": {"patient_specific_allowed": False},
+                "final_answer": "symbolic result",
+            }],
+        }
+
+    def test_dka_parser_and_shadow_state_preserve_measured_provenance(self):
+        parsed = case_parser.parse_rules(
+            "34F DKA glucose 480, pH 7.08, HCO3 8, anion gap 24, "
+            "K 5.2, Na 134, creatinine 1.4, urine output 75, BP 96/58"
+        )
+        contract = build_dka_shadow_state(parsed)
+        self.assertTrue(contract["complete_enough"], contract)
+        self.assertAlmostEqual(contract["state"]["MAP"], 70.6667, places=3)
+        self.assertEqual(contract["provenance"]["G"], "measured_lab")
+        self.assertEqual(contract["provenance"]["MAP"], "derived_from_sbp_dbp")
+
+    def test_shadow_observer_cannot_modify_symbolic_recommendation(self):
+        result = self._shadow_result()
+        before = recommendation_fingerprint(result)
+
+        def runner(**kwargs):
+            self.assertEqual(kwargs["action"], {"insulin_iv": 4.0})
+            return {
+                "predicted_effect_at_final_horizon": {"G": -80.0},
+                "predicted_intervention_trajectory": [
+                    {"death_probability": 0.1}
+                ],
+                "predicted_no_treatment_trajectory": [
+                    {"death_probability": 0.2}
+                ],
+                "osler_transition_validation": {"status": "verified"},
+                "osler_prolog_reasoning": {"decision": "allow"},
+                "jepa_symbolic_transition": {
+                    "transitions": [{"time_window_hours": 6.0}]
+                },
+            }
+
+        report = ShadowObserver(enabled=True, runner=runner).observe(
+            "hyperglycemia", self._shadow_fields(), result
+        )
+        self.assertEqual(report["status"], "observed")
+        self.assertFalse(report["decision_authority"])
+        self.assertFalse(report["affects_live_recommendation"])
+        self.assertTrue(report["recommendation_integrity_verified"])
+        self.assertEqual(before, recommendation_fingerprint(result))
+        self.assertEqual(report["observations"][0]["predicted_effect"]["G"], -80.0)
+
+    def test_shadow_observer_respects_symbolic_safety_block(self):
+        def runner(**kwargs):
+            self.fail("blocked symbolic candidate must not reach JEPA")
+
+        report = ShadowObserver(enabled=True, runner=runner).observe(
+            "hyperglycemia", self._shadow_fields(), self._shadow_result("avoid")
+        )
+        self.assertEqual(report["status"], "no_eligible_actions")
+        self.assertEqual(
+            report["skipped_candidates"][0]["reason"],
+            "not_allowed_by_symbolic_safety_gate",
+        )
+
+    def test_shadow_observer_fails_closed_on_inference_error(self):
+        def runner(**kwargs):
+            raise RuntimeError("synthetic failure")
+
+        report = ShadowObserver(enabled=True, runner=runner).observe(
+            "hyperglycemia", self._shadow_fields(), self._shadow_result()
+        )
+        self.assertEqual(report["status"], "error")
+        self.assertTrue(report["recommendation_integrity_verified"])
+        self.assertFalse(report["decision_authority"])
+
     def test_observation_contract_marks_missing_and_stale_values(self):
         _, mask, age = observation_context(
             {"G": 420.0, "Ke": 4.8}, {"G": 1.5, "Ke": 0.25}

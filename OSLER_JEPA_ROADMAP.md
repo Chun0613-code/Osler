@@ -160,6 +160,9 @@ schema; do not mix diseases into one unvalidated latent space at the start.
 - Implemented as a research audit: patient-stay cross-fitted AIPW, propensity
   matching, overlap, balance, and clustered bootstrap uncertainty. Current demo
   data fail time alignment and balance requirements, so causal claims stay off.
+- Implemented: fail-closed live Osler shadow mode. It observes only completed
+  symbolic-approved DKA candidates, verifies recommendation fingerprints before
+  and after JEPA inference, and has no ranking, dosing, or veto authority.
 - Keep simulator and EHR provenance separate in training and reports.
 
 ### Phase 4: Connect to the Live Symbolic Engine

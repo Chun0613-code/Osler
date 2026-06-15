@@ -176,6 +176,13 @@ clustered bootstrap intervals. It always emits `causal_claim_allowed: false`.
 On the current 12-stay demo, treatment assignment is not aligned to time zero,
 concurrent treatment is common, and matched balance remains inadequate.
 
+The live demo can run JEPA as a read-only DKA shadow observer with
+`OSLER_JEPA_SHADOW=1`. The observer runs only when the indication and required
+state fields match the DKA contract and the symbolic safety gate already allows a
+mapped candidate. It writes results under `jepa_shadow`, verifies that the live
+recommendation fingerprint did not change, and carries no dosing, ranking, veto,
+or causal authority. `OSLER_JEPA_SHADOW_LOG` optionally records JSONL audits.
+
 `real_world_improvement.py` tests episode and propensity weighting, a small
 real-world residual adapter, patient-bootstrap ensembles, temperature scaling,
 and abstention without adding data. All reported predictions are patient-level

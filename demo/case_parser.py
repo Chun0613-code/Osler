@@ -26,8 +26,9 @@ _LLM_SYSTEM = (
     "with these keys: age (int|null), sex ('M'|'F'|null), weight_kg (number|null), "
     "egfr (number|null), hepatic_status ('normal'|'mild'|'moderate'|'severe'), "
     "allergies (string[]), current_medications (string[]), symptoms (string[]), "
-    "vitals (object with optional sbp, heart_rate, spo2 numbers), "
-    "labs (object with optional potassium number), "
+    "vitals (object with optional sbp, dbp, map, heart_rate, spo2 numbers), "
+    "labs (object with optional glucose, ph, bicarbonate, anion_gap, potassium, "
+    "sodium, osmolality, creatinine, urine_output, beta_hydroxybutyrate numbers), "
     "indication (string: the primary clinical problem to treat). "
     "Use lowercase for drug/allergy/symptom names. No prose, no code fences."
 )
@@ -58,11 +59,21 @@ _AGE_SEX = re.compile(r"\b(\d{1,3})\s*[- ]?\s*(?:y/?o|yo|year[s]?[- ]?old|岁)?\
 _AGE = re.compile(r"\b(\d{1,3})\s*(?:y/?o|yo|year[s]?[- ]?old|岁)\b", re.I)
 _BP = re.compile(r"\b(?:bp|blood pressure)\s*[:=]?\s*(\d{2,3})\s*/\s*(\d{2,3})", re.I)
 _SBP = re.compile(r"\bsbp\s*[:=]?\s*(\d{2,3})", re.I)
+_MAP = re.compile(r"\b(?:map|mean arterial pressure)\s*[:=]?\s*(\d{2,3}(?:\.\d+)?)", re.I)
 _HR = re.compile(r"\b(?:hr|heart rate|pulse)\s*[:=]?\s*(\d{2,3})", re.I)
 _SPO2 = re.compile(r"\b(?:spo2|sao2|o2 sat|sat)\s*[:=]?\s*(\d{2,3})", re.I)
 _EGFR = re.compile(r"\b(?:egfr|gfr)\s*[:=]?\s*(\d{1,3})", re.I)
 _WT = re.compile(r"\b(\d{2,3})\s*kg\b", re.I)
 _K = re.compile(r"\b(?:k\+?|potassium)\s*[:=]?\s*(\d(?:\.\d)?)", re.I)
+_GLUCOSE = re.compile(r"\b(?:glucose|blood sugar|bg)\s*[:=]?\s*(\d{2,4}(?:\.\d+)?)", re.I)
+_PH = re.compile(r"\bpH\s*[:=]?\s*(\d(?:\.\d+)?)", re.I)
+_HCO3 = re.compile(r"\b(?:hco3|bicarb(?:onate)?)\s*[:=]?\s*(\d{1,2}(?:\.\d+)?)", re.I)
+_ANION_GAP = re.compile(r"\b(?:anion gap|ag)\s*[:=]?\s*(\d{1,2}(?:\.\d+)?)", re.I)
+_NA = re.compile(r"\b(?:na\+?|sodium)\s*[:=]?\s*(\d{2,3}(?:\.\d+)?)", re.I)
+_CREATININE = re.compile(r"\b(?:creatinine|cr)\s*[:=]?\s*(\d{1,2}(?:\.\d+)?)", re.I)
+_URINE = re.compile(r"\b(?:urine output|uo)\s*[:=]?\s*(\d{1,4}(?:\.\d+)?)", re.I)
+_BHB = re.compile(r"\b(?:beta[- ]hydroxybutyrate|bhb)\s*[:=]?\s*(\d{1,2}(?:\.\d+)?)", re.I)
+_OSM = re.compile(r"\b(?:osmolality|osm)\s*[:=]?\s*(\d{2,3}(?:\.\d+)?)", re.I)
 
 
 def _after(text: str, *keywords: str) -> list:
@@ -102,14 +113,26 @@ def parse_rules(text: str) -> Dict:
         d["egfr"] = float(_EGFR.search(t).group(1))
     if _BP.search(t):
         d["vitals"]["sbp"] = float(_BP.search(t).group(1))
+        d["vitals"]["dbp"] = float(_BP.search(t).group(2))
     elif _SBP.search(t):
         d["vitals"]["sbp"] = float(_SBP.search(t).group(1))
+    if _MAP.search(t):
+        d["vitals"]["map"] = float(_MAP.search(t).group(1))
     if _HR.search(t):
         d["vitals"]["heart_rate"] = float(_HR.search(t).group(1))
     if _SPO2.search(t):
         d["vitals"]["spo2"] = float(_SPO2.search(t).group(1))
     if _K.search(t):
         d["labs"]["potassium"] = float(_K.search(t).group(1))
+    for regex, name in (
+        (_GLUCOSE, "glucose"), (_PH, "ph"), (_HCO3, "bicarbonate"),
+        (_ANION_GAP, "anion_gap"), (_NA, "sodium"),
+        (_CREATININE, "creatinine"), (_URINE, "urine_output"),
+        (_BHB, "beta_hydroxybutyrate"), (_OSM, "osmolality"),
+    ):
+        match = regex.search(t)
+        if match:
+            d["labs"][name] = float(match.group(1))
 
     d["allergies"] = _after(t, "allergies", "allergic to", "allergy")
     d["current_medications"] = _after(t, "current medications", "medications", "meds",

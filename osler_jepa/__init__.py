@@ -18,6 +18,12 @@ from .causal_evaluation import (
     TargetTrialSpec,
     evaluate_target_trials,
 )
+from .shadow import (
+    ShadowObserver,
+    build_dka_shadow_state,
+    observe_live_recommendation,
+    recommendation_fingerprint,
+)
 
 __all__ = [
     "Intervention",
@@ -35,4 +41,8 @@ __all__ = [
     "PotassiumStoreBelief",
     "TargetTrialSpec",
     "evaluate_target_trials",
+    "ShadowObserver",
+    "build_dka_shadow_state",
+    "observe_live_recommendation",
+    "recommendation_fingerprint",
 ]

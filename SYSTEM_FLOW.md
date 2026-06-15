@@ -144,7 +144,14 @@ authorize causal intervention claims.
 26. The rebuilt MIMIC-IV demo has 12 DKA stays and 187 transitions. It confirms
     exact route-aware extraction works. V4 beats persistence for active-DKA anion
     gap and MAP, but not glucose or the remaining targets. DKABody replay still
-    produces 12/12 simulated deaths, so real-data fine-tuning remains blocked.
+   produces 12/12 simulated deaths, so real-data fine-tuning remains blocked.
+27. `osler_jepa/shadow.py` can attach the DKA JEPA to the completed live Osler
+   bundle in read-only shadow mode. It fingerprints protected recommendation
+   fields before and after inference, accepts only symbolic-approved candidates,
+   and fails closed on missing state, checkpoint, or inference errors. Shadow
+   output cannot rerank drugs, authorize a dose, bypass Prolog, or make a causal
+   claim. Enable it with `OSLER_JEPA_SHADOW=1`; optionally set
+   `OSLER_JEPA_CHECKPOINT`, `OSLER_JEPA_DEVICE`, and `OSLER_JEPA_SHADOW_LOG`.
 
 ## Highest-Value Improvements
 
