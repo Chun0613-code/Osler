@@ -52,6 +52,7 @@ Osler/
 ├── train_intervention_jepa.py  Branched counterfactual multi-horizon trainer.
 ├── predict_dka_intervention.py Compare a proposed intervention with no treatment.
 ├── dka_osler.py             Symbolic shield, mechanism checks, reasoning trace.
+├── dka_causal_evaluation.py Matched-control and AIPW confounding audit.
 ├── osler_jepa/              Shared ontology, action schema, curriculum, validator.
 ├── rules/active/dka_embodied.pl  Human-owned Prolog action/effect rules.
 ├── dka_*.py                 Calibration and real-data validation utilities.
@@ -129,6 +130,12 @@ now emits exact aggregate `start` and `stop` lifecycle records plus aligned even
 grids for every route-aware action. A zero-initialized event encoder adds those
 signals to JEPA dynamics while preserving old rate-only checkpoint behavior.
 
+Acute viability failures now use reversible severity-by-duration burdens rather
+than instant death at the first threshold crossing. Hyperosmolar injury remains a
+separate cumulative process. Every training report includes protocol mortality,
+causes, response quantiles, and mechanistic direction gates. These are simulator
+sanity checks, not clinical mortality calibration.
+
 `DKABody` now samples patient-level weight, renal reserve, insulin sensitivity,
 counter-regulatory drive, fluid retention, vascular tone, potassium stores, and
 endogenous insulin. Counterfactual branches may begin at presentation or after up
@@ -159,6 +166,15 @@ Differentiable direction constraints are compiled directly from
 `rules/active/dka_embodied.pl`. Each trainable `expected/4` rule has a fixed-point
 `training_constraint/3` declaration, so training and runtime reasoning cannot
 silently drift into separate hand-maintained rule tables.
+`temporal_constraint/4` adds an effect window and confidence to the same active
+rule source. Constraints and proof labels are inactive outside their declared
+window, and confidence weights differentiable penalties.
+
+`dka_causal_evaluation.py` defines six-hour target-trial diagnostics, patient-stay
+cross-fitted AIPW, propensity-caliper matched controls, balance, overlap, and
+clustered bootstrap intervals. It always emits `causal_claim_allowed: false`.
+On the current 12-stay demo, treatment assignment is not aligned to time zero,
+concurrent treatment is common, and matched balance remains inadequate.
 
 `real_world_improvement.py` tests episode and propensity weighting, a small
 real-world residual adapter, patient-bootstrap ensembles, temperature scaling,

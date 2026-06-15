@@ -201,7 +201,8 @@ def compare(model, state, proposed_action, hours, device, input_warnings=None,
     mean_action = mean_physical_action / A_SCALE
     lifecycle_summary = treatment_event_features(applied_actions).max(axis=0)
     osler_validation = OSLER_DKA_VALIDATOR.validate(
-        mean_action, treated_final, untreated_final
+        mean_action, treated_final, untreated_final,
+        horizon_hours=effective_hours,
     )
     prolog_reasoning = OSLER_DKA_PROLOG.evaluate(
         state=state,
@@ -209,6 +210,7 @@ def compare(model, state, proposed_action, hours, device, input_warnings=None,
         applied_action=mean_physical_action,
         future=treated_final,
         baseline_future=untreated_final,
+        elapsed_hours=effective_hours,
     )
     history_tensor = None if history is None else torch.as_tensor(
         history, dtype=torch.float32, device=device

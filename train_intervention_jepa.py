@@ -185,6 +185,7 @@ def generate_branched_dataset(n_scenarios=600, seq_len=12, seed=0):
     alive = np.zeros((n_scenarios, n_protocols, seq_len), np.float32)
     time_deltas = np.zeros((n_scenarios, n_protocols, seq_len), np.float32)
     death_causes = {}
+    death_causes_by_protocol = {protocol: {} for protocol in PROTOCOLS}
 
     for scenario in range(n_scenarios):
         base_body, base_observation, base_history, base_durations = prepare_base_body(rng)
@@ -226,6 +227,8 @@ def generate_branched_dataset(n_scenarios=600, seq_len=12, seed=0):
                 if dead:
                     cause = info.get("cause") or "unknown"
                     death_causes[cause] = death_causes.get(cause, 0) + 1
+                    protocol_causes = death_causes_by_protocol[protocol]
+                    protocol_causes[cause] = protocol_causes.get(cause, 0) + 1
                     states[scenario, protocol_index, step + 1:] = s2vec(observation)
                     break
 
@@ -239,6 +242,58 @@ def generate_branched_dataset(n_scenarios=600, seq_len=12, seed=0):
         "alive": alive,
         "protocols": list(PROTOCOLS),
         "death_causes": death_causes,
+        "death_causes_by_protocol": death_causes_by_protocol,
+    }
+
+
+def simulator_calibration_audit(dataset):
+    """Summarize mortality and intervention-response magnitude by protocol."""
+    physical = dataset["states"] * S_STD + S_MEAN
+    initial = physical[:, :, 0]
+    final = physical[:, :, -1]
+    alive = dataset["alive"][:, :, -1]
+    state_indices = {
+        name: STATE_KEYS.index(name)
+        for name in ("G", "HCO3", "Ke", "MAP", "V", "K_store", "osmolality")
+    }
+    protocol_report = {}
+    for protocol_index, protocol in enumerate(PROTOCOLS):
+        changes = final[:, protocol_index] - initial[:, protocol_index]
+        protocol_report[protocol] = {
+            "mortality_rate": round(float((1.0 - alive[:, protocol_index]).mean()), 6),
+            "death_causes": dataset["death_causes_by_protocol"][protocol],
+            "change_quantiles": {
+                name: {
+                    "p10": round(float(np.quantile(changes[:, index], 0.10)), 4),
+                    "median": round(float(np.quantile(changes[:, index], 0.50)), 4),
+                    "p90": round(float(np.quantile(changes[:, index], 0.90)), 4),
+                }
+                for name, index in state_indices.items()
+            },
+        }
+    median = lambda protocol, state: protocol_report[protocol][
+        "change_quantiles"
+    ][state]["median"]
+    gates = {
+        "full_protocol_not_more_lethal_than_no_treatment": (
+            protocol_report["full_protocol"]["mortality_rate"]
+            <= protocol_report["no_treatment"]["mortality_rate"]
+        ),
+        "iv_insulin_reduces_glucose_vs_no_treatment": (
+            median("insulin", "G") < median("no_treatment", "G")
+        ),
+        "fluids_raise_map_vs_no_treatment": (
+            median("fluids", "MAP") > median("no_treatment", "MAP")
+        ),
+        "kcl_replenishes_store_vs_no_treatment": (
+            median("potassium", "K_store") > median("no_treatment", "K_store")
+        ),
+    }
+    return {
+        "protocols": protocol_report,
+        "mechanistic_direction_gates": gates,
+        "all_direction_gates_pass": bool(all(gates.values())),
+        "clinical_calibration_claim_allowed": False,
     }
 
 
@@ -369,6 +424,7 @@ def batch_losses(model, states, actions, action_events, histories, time_deltas,
             predicted_effect,
             action_exposure - control_exposure,
             pair_valid,
+            horizon_hours=time_deltas[:, 1:, :horizon + 1].sum(dim=2),
         ))
     effect = torch.stack(effect_losses).mean()
     osler = torch.stack(osler_losses).mean()
@@ -420,7 +476,7 @@ def batch_losses(model, states, actions, action_events, histories, time_deltas,
         ))
 
         status_label, proof_label = rule_supervision(
-            true_effect, action_difference, pair_valid
+            true_effect, action_difference, pair_valid, horizon_hours[:, 1:]
         )
         status_logits = outputs["status_logits"].reshape(
             batch, protocols, 3
@@ -435,7 +491,7 @@ def batch_losses(model, states, actions, action_events, histories, time_deltas,
             proof_logits, proof_label, pair_valid
         ))
         contradiction_losses.append(contradiction_penalty(
-            proposal_logits, action_difference, pair_valid
+            proposal_logits, action_difference, pair_valid, horizon_hours[:, 1:]
         ))
 
         predicted_effect = predicted[:, 1:, horizon] - predicted[:, :1, horizon]
@@ -707,7 +763,12 @@ def osler_validator_audit(prediction, states, actions, time_deltas, valid):
                 actions[scenario, protocol, :horizon + 1]
                 * durations[:, None]
             ).sum(axis=0) / max(float(durations.sum()), 1e-6)
-            audit = OSLER_DKA_VALIDATOR.validate(action, future, baseline)
+            audit = OSLER_DKA_VALIDATOR.validate(
+                action, future, baseline,
+                horizon_hours=float(
+                    time_deltas[scenario, protocol, :horizon + 1].sum()
+                ),
+            )
             status_counts[audit["status"]] += 1
             for check in audit["checks"]:
                 counts = rule_counts.setdefault(
@@ -773,7 +834,7 @@ def symbolic_head_metrics(model, dataset, indices, device):
     proposal_changed = proposal_mask & (proposal_truth != 1)
 
     status_truth, proof_truth = rule_supervision(
-        true_effect, action_difference, pair_valid
+        true_effect, action_difference, pair_valid, total_hours[:, 1:]
     )
     status_prediction = outputs["status_logits"].argmax(dim=-1).reshape(
         batch, protocols
@@ -1271,6 +1332,7 @@ def main():
         f"validation={len(splits['validation'])}, test={len(splits['test'])}"
     )
     print(f"simulated deaths by cause: {dataset['death_causes']}")
+    simulator_audit = simulator_calibration_audit(dataset)
 
     model = WorldModel()
     history, best_validation = train_model(
@@ -1291,7 +1353,7 @@ def main():
             STATE_KEYS, ACTION_KEYS, OSLER_STATE_ONTOLOGY
         ),
         "simulator": {
-            "version": "irregular_time_partial_observation_dka_v5",
+            "version": "temporal_causal_audit_dka_v6",
             "patient_domain_randomization": [
                 "weight_kg", "renal_reserve", "insulin_sensitivity",
                 "counterregulatory_drive", "fluid_retention",
@@ -1317,6 +1379,7 @@ def main():
             "insulin_pk": [
                 "iv", "rapid_subcutaneous", "intermediate_nph", "basal",
             ],
+            "calibration_audit": simulator_audit,
         },
         "curriculum": [
             {"name": stage.name, "end_fraction": stage.end_fraction,

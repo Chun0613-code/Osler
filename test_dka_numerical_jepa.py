@@ -16,7 +16,10 @@ from dka_world_model import (
     A_DIM, H_DIM, S_DIM, STATE_KEYS, WorldModel, a2vec, observation_context,
     randomized_dka, s2vec, treatment_history_features,
 )
-from train_intervention_jepa import generate_branched_dataset
+from train_intervention_jepa import (
+    generate_branched_dataset,
+    simulator_calibration_audit,
+)
 from osler_jepa.actions import (
     Intervention,
     TREATMENT_EVENT_DIM,
@@ -30,6 +33,7 @@ from osler_jepa.belief import PotassiumStoreBelief
 from osler_jepa.rule_sandbox import RuleSandbox
 from osler_jepa.rule_inducer import validate_candidates
 from osler_jepa.real_world_adapter import RealWorldAdapter
+from osler_jepa.causal_evaluation import TargetTrialSpec, evaluate_trial
 from osler_jepa.symbolic import RULE_IDS, rule_supervision
 from real_world_improvement import episode_features
 from predict_dka_intervention import compare, predict
@@ -91,6 +95,16 @@ class NumericalJEPATests(unittest.TestCase):
         self.assertEqual(
             dataset["action_events"].shape, (2, 11, 4, TREATMENT_EVENT_DIM)
         )
+
+    def test_simulator_audit_reports_mortality_and_response_gates(self):
+        dataset = generate_branched_dataset(12, 4, seed=11)
+        audit = simulator_calibration_audit(dataset)
+        self.assertIn("full_protocol", audit["protocols"])
+        self.assertIn(
+            "iv_insulin_reduces_glucose_vs_no_treatment",
+            audit["mechanistic_direction_gates"],
+        )
+        self.assertFalse(audit["clinical_calibration_claim_allowed"])
 
     def test_treatment_event_features_mark_start_and_stop(self):
         sequence = np.zeros((3, A_DIM), dtype=np.float32)
@@ -178,6 +192,37 @@ class NumericalJEPATests(unittest.TestCase):
             rule.provenance.endswith("rules/active/dka_embodied.pl")
             for rule in compiled
         ))
+        self.assertTrue(all(0.0 < rule.confidence <= 1.0 for rule in compiled))
+        self.assertTrue(all(rule.max_hours > rule.min_hours for rule in compiled))
+
+    def test_temporal_constraint_only_penalizes_inside_effect_window(self):
+        action = torch.zeros(1, 1, A_DIM)
+        action[..., ACTION_INDEX["dextrose"]] = 1.0
+        wrong = torch.zeros(1, 1, S_DIM)
+        wrong[..., STATE_KEYS.index("G")] = -0.1
+        inside = OSLER_DKA_VALIDATOR.consistency_loss(
+            wrong, action, horizon_hours=torch.tensor([[1.0]])
+        )
+        outside = OSLER_DKA_VALIDATOR.consistency_loss(
+            wrong, action, horizon_hours=torch.tensor([[3.0]])
+        )
+        self.assertGreater(float(inside), 0.0)
+        self.assertEqual(float(outside), 0.0)
+
+    def test_prolog_defers_effect_check_outside_time_window(self):
+        result = OSLER_DKA_PROLOG.evaluate(
+            state={"G": 100.0, "Ke": 4.0, "pH": 7.2},
+            proposed_action={"dextrose": 10.0},
+            applied_action={"dextrose": 10.0},
+            future={"G": 120.0},
+            baseline_future={"G": 100.0},
+            elapsed_hours=3.0,
+        )
+        self.assertFalse(result["effect_checks"])
+        self.assertEqual(
+            result["deferred_effect_checks"][0]["status"],
+            "outside_time_window",
+        )
 
     def test_neutral_patient_profile_preserves_original_start(self):
         body = DKABody(profile=DKAPatientProfile())
@@ -229,6 +274,29 @@ class NumericalJEPATests(unittest.TestCase):
                 break
         self.assertFalse(body.alive)
         self.assertEqual(body.death_cause, "cumulative hyperosmolar injury")
+
+    def test_critical_viability_crossing_requires_sustained_burden(self):
+        body = DKABody()
+        body.HCO3 = 1.0
+        body._check_death(0.1)
+        self.assertTrue(body.alive)
+        self.assertGreater(body.observe()["critical_burden"], 0.0)
+        for _ in range(20):
+            body._check_death(0.1)
+            if not body.alive:
+                break
+        self.assertFalse(body.alive)
+        self.assertEqual(body.death_cause, "acidosis (pH<6.8)")
+
+    def test_critical_burden_recovers_after_transient_crossing(self):
+        body = DKABody()
+        body.HCO3 = 1.0
+        body._check_death(0.1)
+        peak = body.observe()["critical_burden"]
+        body.HCO3 = 24.0
+        body._check_death(0.5)
+        self.assertLess(body.observe()["critical_burden"], peak)
+        self.assertTrue(body.alive)
 
     def test_kcl_replenishes_total_body_potassium_store(self):
         untreated = DKABody()
@@ -361,6 +429,37 @@ class NumericalJEPATests(unittest.TestCase):
             )
             self.assertEqual(result["state"]["G"], 300.0)
             self.assertFalse(result["causal_intervention_claim_allowed"])
+
+    def test_aipw_and_matching_recover_synthetic_treatment_effect(self):
+        rng = np.random.default_rng(18)
+        count = 300
+        severity = rng.normal(size=count)
+        probability = 1.0 / (1.0 + np.exp(-severity))
+        treatment = rng.binomial(1, probability)
+        baseline = 300.0 + 30.0 * severity
+        change = -40.0 * treatment + 12.0 * severity + rng.normal(0, 5, count)
+        frame = pd.DataFrame({
+            "stay_id": np.arange(count),
+            "glucose_t": baseline,
+            "glucose_age_hr": rng.uniform(0, 2, count),
+            "glucose_tp6": baseline + change,
+            "act_insulin": treatment,
+            "act_fluids": rng.binomial(1, 0.2, count),
+        })
+        report = evaluate_trial(
+            frame,
+            TargetTrialSpec(
+                "synthetic", "act_insulin", "glucose_tp6", "glucose_t"
+            ),
+            bootstrap_samples=100,
+        )
+        self.assertTrue(report["available"])
+        self.assertLess(report["aipw_ate"]["estimate"], -30.0)
+        self.assertGreater(report["aipw_ate"]["estimate"], -50.0)
+        self.assertEqual(
+            report["propensity_matched_att"]["same_stay_matches"], 0
+        )
+        self.assertFalse(report["causal_claim_allowed"])
 
     def test_low_potassium_blocks_insulin(self):
         safe, trace = shield(

@@ -14,6 +14,10 @@ from .validator import (
 )
 from .embodied_logic import DkaEmbodiedLogic, GroundProlog, OSLER_DKA_PROLOG
 from .belief import PotassiumStoreBelief
+from .causal_evaluation import (
+    TargetTrialSpec,
+    evaluate_target_trials,
+)
 
 __all__ = [
     "Intervention",
@@ -29,4 +33,6 @@ __all__ = [
     "GroundProlog",
     "OSLER_DKA_PROLOG",
     "PotassiumStoreBelief",
+    "TargetTrialSpec",
+    "evaluate_target_trials",
 ]

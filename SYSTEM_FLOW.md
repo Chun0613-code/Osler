@@ -59,6 +59,17 @@ start/stop lifecycle channels. MIMIC intervals are converted into aggregate
 events that handle carried-in infusions and overlapping administrations without
 creating false stops. The event encoder is zero-compatible with older checkpoints.
 
+Active effect rules also carry temporal windows and confidence in
+`temporal_constraint/4`. The same metadata controls differentiable loss,
+symbolic proof supervision, runtime validation, and deferred checks outside the
+effect window.
+
+Simulator terminal events use reversible critical burdens for pH, potassium,
+MAP, and glucose. Protocol mortality and response quantiles are emitted as
+calibration diagnostics. `dka_causal_evaluation.py` is a separate EHR audit path:
+it performs grouped AIPW and matched-control analyses but cannot promote rules or
+authorize causal intervention claims.
+
 1. `dka_body.py` defines the continuous physiological state and transition rules.
    Each simulated patient has sampled body size, renal reserve, insulin response,
    stress drive, fluid response, vascular tone, potassium store, and endogenous

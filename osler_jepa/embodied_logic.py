@@ -156,6 +156,18 @@ class DkaEmbodiedLogic:
             "dka_embodied.pl"
         ))
         self.engine = GroundProlog.from_file(self.rule_path)
+        self.temporal_constraints = {
+            clause.head.arguments[0]: {
+                "window_hours": [
+                    float(clause.head.arguments[1]) / 60.0,
+                    float(clause.head.arguments[2]) / 60.0,
+                ],
+                "confidence": float(clause.head.arguments[3]) / 1_000_000.0,
+            }
+            for clause in self.engine.clauses
+            if clause.head.predicate == "temporal_constraint"
+            and len(clause.head.arguments) == 4
+        }
 
     @staticmethod
     def _state_facts(state: dict) -> set[Atom]:
@@ -249,7 +261,8 @@ class DkaEmbodiedLogic:
         return values.tolist(), trace
 
     def evaluate(self, state: dict, proposed_action, applied_action,
-                 future: dict, baseline_future: dict) -> dict:
+                 future: dict, baseline_future: dict,
+                 elapsed_hours: float | None = None) -> dict:
         proposal_facts, proposal_proofs = self._run(state, proposed_action)
         applied_facts, applied_proofs = self._run(state, applied_action)
 
@@ -272,8 +285,25 @@ class DkaEmbodiedLogic:
         }
         effect_names = {name.lower(): name for name in effect}
         checks = []
+        deferred = []
         for atom in expected_atoms:
             action_name, state_name, direction, rule_id = atom.arguments
+            temporal = self.temporal_constraints.get(rule_id, {
+                "window_hours": [0.0, 24.0], "confidence": 1.0,
+            })
+            if elapsed_hours is not None and not (
+                temporal["window_hours"][0]
+                <= float(elapsed_hours)
+                <= temporal["window_hours"][1]
+            ):
+                deferred.append({
+                    "rule_id": rule_id,
+                    "action": action_name,
+                    "expected_direction": direction,
+                    **temporal,
+                    "status": "outside_time_window",
+                })
+                continue
             model_state_name = effect_names.get(state_name.lower())
             if model_state_name is None:
                 continue
@@ -288,6 +318,7 @@ class DkaEmbodiedLogic:
                 "expected_direction": direction,
                 "observed_effect": round(observed, 6),
                 "status": status,
+                **temporal,
                 "proof": self.engine.proof(atom, applied_proofs),
             })
 
@@ -332,6 +363,7 @@ class DkaEmbodiedLogic:
                 ],
             } for action_name, atoms in sorted(required_by_action.items())],
             "effect_checks": checks,
+            "deferred_effect_checks": deferred,
             "research_only": True,
         }
 

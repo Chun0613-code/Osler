@@ -136,8 +136,12 @@ still produces 12/12 simulated deaths. The structural gap is smaller, not closed
   mechanistic plus JEPA-updated; patient-cohort calibration remains outstanding.
 - Implemented: differentiable direction constraints compile from active Prolog
   `expected/4` and `training_constraint/3` declarations.
-- Calibrate potassium depletion and cumulative hyperosmolar injury on a larger
-  patient-held-out cohort.
+- Implemented: temporal windows and confidence compile from active Prolog
+  `temporal_constraint/4` declarations.
+- Implemented: reversible severity-duration burdens replace instant terminal
+  events, and protocol mortality/response audits run with every training job.
+- Outstanding: calibrate potassium depletion, acute burdens, and cumulative
+  hyperosmolar injury on a larger patient-held-out cohort.
 - Obtain a larger MIMIC cohort; the 12-stay demo cannot identify causal treatment
   effects or support JEPA fine-tuning.
 
@@ -153,6 +157,9 @@ schema; do not mix diseases into one unvalidated latent space at the start.
 - Model missingness and irregular observation intervals explicitly.
 - Correct treatment-selection bias with propensity or doubly robust estimation.
 - Evaluate against matched controls and patient/hospital-held-out baselines.
+- Implemented as a research audit: patient-stay cross-fitted AIPW, propensity
+  matching, overlap, balance, and clustered bootstrap uncertainty. Current demo
+  data fail time alignment and balance requirements, so causal claims stay off.
 - Keep simulator and EHR provenance separate in training and reports.
 
 ### Phase 4: Connect to the Live Symbolic Engine
@@ -161,3 +168,7 @@ The live drug ranker may call a promoted JEPA only to simulate and compare candi
 actions already allowed by Osler. JEPA cannot introduce a drug, bypass a safety
 veto, or supply an unvalidated dose. Osler remains the final explanation and veto
 layer.
+
+Active Prolog effect rules now include temporal windows and confidence metadata.
+Runtime checks defer conclusions outside the declared window. Full probabilistic
+inference over uncertain patient facts remains future work.

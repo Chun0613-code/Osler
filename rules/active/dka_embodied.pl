@@ -58,3 +58,17 @@ training_constraint(kcl_raises_total_body_store, 50000, 500).
 training_constraint(bicarbonate_raises_hco3, 50000, 500).
 training_constraint(bicarbonate_raises_ph, 50000, 100).
 training_constraint(dextrose_raises_glucose_without_iv_insulin, 50000, 500).
+
+% rule_id, earliest minute, latest minute, confidence parts-per-million.
+temporal_constraint(iv_insulin_lowers_glucose, 0, 360, 950000).
+temporal_constraint(rapid_sc_insulin_lowers_glucose, 30, 480, 900000).
+temporal_constraint(iv_insulin_lowers_potassium_without_kcl, 15, 240, 850000).
+temporal_constraint(fluids_raise_map, 0, 180, 800000).
+temporal_constraint(fluids_raise_volume, 0, 180, 950000).
+temporal_constraint(kcl_raises_potassium_without_iv_insulin, 30, 360, 800000).
+temporal_constraint(kcl_raises_total_body_store, 0, 360, 950000).
+temporal_constraint(bicarbonate_raises_hco3, 0, 240, 850000).
+temporal_constraint(bicarbonate_raises_ph, 0, 240, 850000).
+temporal_constraint(dextrose_raises_glucose_without_iv_insulin, 0, 120, 950000).
+temporal_constraint(intermediate_sc_insulin_lowers_glucose, 60, 720, 850000).
+temporal_constraint(basal_sc_insulin_lowers_glucose, 120, 1440, 800000).

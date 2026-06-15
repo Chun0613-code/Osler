@@ -24,7 +24,9 @@ Actions (administration RATES, held over the decision step)
   IV insulin, rapid-SC insulin, intermediate/NPH insulin, basal insulin,
   fluids, KCl, bicarbonate, and dextrose.
 
-Death = leaving the viability kernel (pH, K+, MAP, glucose bounds).
+Death requires sustained severity outside the viability kernel. Brief numerical
+crossings accumulate a reversible burden rather than causing an instant terminal
+event.
 
 Patient profiles vary weight, renal reserve, insulin sensitivity,
 counter-regulatory stress, fluid retention, vascular tone, and total-body K+.
@@ -80,6 +82,17 @@ NA_URINE = 100.0      # effective urinary osmole concentration (mEq/L equivalent
 K_CR_ADAPT = 0.25     # creatinine approaches perfusion-dependent target per hour
 K_OSM_INJURY_RECOVERY = 0.12
 OSM_INJURY_DEATH = 12.0
+CRITICAL_BURDEN_DEATH = 1.0
+CRITICAL_BURDEN_RECOVERY = 0.75
+
+CRITICAL_LIMITS = {
+    "acidosis (pH<6.8)": ("below", 6.8, 0.20),
+    "hypokalemia (K<2.5)": ("below", 2.5, 0.50),
+    "hyperkalemia (K>7.0)": ("above", 7.0, 1.00),
+    "circulatory collapse (MAP<40)": ("below", 40.0, 15.0),
+    "hypoglycemia (G<40)": ("below", 40.0, 20.0),
+    "extreme hyperglycemia (G>1400)": ("above", 1400.0, 300.0),
+}
 
 
 @dataclass(frozen=True)
@@ -180,6 +193,9 @@ class DKABody:
         self.insulin_intermediate_depot = 0.0
         self.insulin_basal_depot = 0.0
         self.osmotic_injury = 0.0
+        self.critical_burdens = {
+            cause: 0.0 for cause in CRITICAL_LIMITS
+        }
         self.urine_output_ml_hr = 0.0
         self.t = 0.0
         self.alive = True
@@ -347,24 +363,49 @@ class DKABody:
             )
             self.urine_output_ml_hr = max(0.0, d["urine_output_ml_hr"])
             self.t += h
-            self._check_death()
+            self._check_death(h)
         return self.observe(), self.reward(), (not self.alive), {"cause": self.death_cause}
 
-    def _check_death(self):
-        if self.pH < 6.8:
-            self.alive, self.death_cause = False, "acidosis (pH<6.8)"
-        elif self.Ke < 2.5:
-            self.alive, self.death_cause = False, "hypokalemia (K<2.5)"
-        elif self.Ke > 7.0:
-            self.alive, self.death_cause = False, "hyperkalemia (K>7.0)"
-        elif self.MAP < 40.0:
-            self.alive, self.death_cause = False, "circulatory collapse (MAP<40)"
-        elif self.G < 40.0:
-            self.alive, self.death_cause = False, "hypoglycemia (G<40)"
-        elif self.G > 1400.0:
-            self.alive, self.death_cause = False, "extreme hyperglycemia (G>1400)"
-        elif self.osmotic_injury > OSM_INJURY_DEATH:
+    def _check_death(self, dt):
+        """Accumulate duration-sensitive critical physiology burden.
+
+        A brief threshold crossing is not equivalent to sustained organ failure.
+        Burden grows with severity and decays after the variable returns to the
+        viability region. These are simulator calibration priors, not clinical
+        mortality thresholds.
+        """
+        values = {
+            "acidosis (pH<6.8)": self.pH,
+            "hypokalemia (K<2.5)": self.Ke,
+            "hyperkalemia (K>7.0)": self.Ke,
+            "circulatory collapse (MAP<40)": self.MAP,
+            "hypoglycemia (G<40)": self.G,
+            "extreme hyperglycemia (G>1400)": self.G,
+        }
+        for cause, (direction, threshold, scale) in CRITICAL_LIMITS.items():
+            value = values[cause]
+            excess = (
+                max(0.0, threshold - value)
+                if direction == "below" else max(0.0, value - threshold)
+            )
+            burden = self.critical_burdens[cause]
+            if excess > 0.0:
+                severity = excess / scale
+                burden += (0.35 + severity) * dt
+            else:
+                burden = max(0.0, burden - CRITICAL_BURDEN_RECOVERY * dt)
+            self.critical_burdens[cause] = burden
+
+        if self.osmotic_injury > OSM_INJURY_DEATH:
             self.alive, self.death_cause = False, "cumulative hyperosmolar injury"
+            return
+        lethal = [
+            (burden, cause) for cause, burden in self.critical_burdens.items()
+            if burden >= CRITICAL_BURDEN_DEATH
+        ]
+        if lethal:
+            _, self.death_cause = max(lethal)
+            self.alive = False
 
     def observe(self):
         return dict(
@@ -375,6 +416,8 @@ class DKABody:
             BHB=self.beta_hydroxybutyrate,
             K_store=self.Ki,
             osmotic_injury=self.osmotic_injury,
+            critical_burden=max(self.critical_burdens.values(), default=0.0),
+            critical_burdens=dict(self.critical_burdens),
             insulin_rapid_depot=self.insulin_rapid_depot,
             insulin_intermediate_depot=self.insulin_intermediate_depot,
             insulin_basal_depot=self.insulin_basal_depot,
