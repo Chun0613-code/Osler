@@ -17,6 +17,13 @@ from drug_safety_gate import evaluate
 from drug_identity import canonicalize_drug_name, dedupe_to_canonical, CANONICAL
 from clinical_role import assign_clinical_role
 
+try:
+    from osler_jepa.ontology import OSLER_STATE_ONTOLOGY
+except ModuleNotFoundError:
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+    from osler_jepa.ontology import OSLER_STATE_ONTOLOGY
+
 _ETYPE_WEIGHT = {"primary": 1.0, "derived": 0.5, "symptom_relief": 0.3, "": 0.4}
 
 _HERE = Path(__file__).parent
@@ -30,6 +37,11 @@ _ETYPE = {"primary": 0, "derived": 1, "symptom_relief": 2, "": 3}
 def _load(p): return json.loads((_DATA / p).read_text(encoding="utf-8", errors="replace"))
 def _arrow(direction): return "\u2193" if direction == "low" else "\u2191"
 def _friendly(v): return v.replace("_", " ")
+
+
+def _canonical_variable(name: str) -> str:
+    canonical = OSLER_STATE_ONTOLOGY.canonicalize(name)
+    return canonical or str(name).strip().lower().replace(" ", "_").replace("-", "_")
 
 
 def _eff_direction(e): return e.get("direction") or ("low" if e.get("max_delta", 0) < 0 else "high")
@@ -53,11 +65,14 @@ def mechanism_candidates(targets: List[Dict], drugs_pkpd: Dict[str, Any]) -> Lis
         score = 0.0
         for eff in d.get("state_effects", []):
             md = eff.get("max_delta", 0.0)
+            effect_state = _canonical_variable(eff["variable"])
             for t in targets:
-                if eff["variable"] == t["variable"] and eff["organ"] in (t["organ"], "*") \
+                target_state = _canonical_variable(t["variable"])
+                if effect_state == target_state and eff["organ"] in (t["organ"], "*") \
                    and md != 0 and ((md < 0) == (t["direction"] == "low")):
                     etype = eff.get("effect_type", "primary")
                     matched.append({"target": f"{_friendly(t['variable'])} {_arrow(t['direction'])}",
+                                    "canonical_state": target_state,
                                     "effect_type": etype})
                     score += abs(md) * _ETYPE_WEIGHT.get(etype, 0.4)
         if matched:
@@ -168,7 +183,10 @@ def recommend(patient: PatientProfile, target: Union[Dict, List[Dict]], indicati
 
 if __name__ == "__main__":
     drugs_pkpd = _load("drugs_pkpd.json")["drugs"]
-    clinical = _load("drug_clinical_data.json")["drugs"]
+    clinical_path = _DATA / "drug_clinical_data.json"
+    if not clinical_path.exists():
+        clinical_path = _HERE.parent / "demo" / "demo_clinical_data.json"
+    clinical = json.loads(clinical_path.read_text(encoding="utf-8"))["drugs"]
     acs_targets = [
         {"organ": "heart", "variable": "myocardial_oxygen_demand", "direction": "low"},
         {"organ": "blood", "variable": "platelet_aggregation", "direction": "low"},

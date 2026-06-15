@@ -2,13 +2,13 @@
 case_targets.py — bridge from a clinical indication to the physiological target
 states that the pharmacology reasoning engine (reasoning_engine.recommend) needs.
 
-A "target" is {organ, variable, direction} expressed in the SAME state-variable
-vocabulary that drugs use in drugs_pkpd.json (state_effects). reasoning_engine
-matches a drug when its state_effect has the same `variable`, a compatible
-`organ` (the drug's organ, or "*"), and the opposite-of-disease direction.
+A "target" is {organ, variable, direction}. The reasoning engine maps target and
+drug-effect variables through the shared Osler state ontology, then requires a
+compatible `organ` (the drug's organ, or "*") and the requested direction.
 
-⚠️ Variable names below are aligned BY HAND to the names that actually appear in
-drugs_pkpd.json. Matching is exact-string; a typo here silently yields no drugs.
+Variable names below are aligned to drugs_pkpd.json. Unknown names remain
+normalized strings, so schema validation should still reject typos before a
+scenario is promoted.
 Run `py case_targets.py` to self-check every indication produces >=1 candidate.
 """
 from __future__ import annotations
@@ -197,6 +197,9 @@ def targets_for(indication: str) -> Tuple[List[Dict], str, str]:
 
 if __name__ == "__main__":
     # Self-check: every indication must produce >=1 candidate drug.
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "engine"))
     import reasoning_engine as RE
     drugs = RE._load("drugs_pkpd.json")["drugs"]
     print(f"Checking {len(INDICATIONS)} indications against {len(drugs)} drugs...\n")

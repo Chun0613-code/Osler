@@ -99,4 +99,4 @@ add an allergy and the verdicts change.
 | `sample_cases.json` | 5 preset cases |
 | `demo_clinical_data.json` | Illustrative (non-clinical) label data so the safety gate + dose path demonstrate |
 
-See `../ARCHITECTURE_REVIEW.md` for the full algorithm review of the wider codebase.
+See `../SYSTEM_FLOW.md` for the current symbolic and JEPA-to-Osler execution paths.
