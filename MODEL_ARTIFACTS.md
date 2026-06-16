@@ -18,6 +18,12 @@ The repository does not include MIMIC parquet cohorts, fidelity JSONL files,
 patient-level out-of-fold CSV predictions, or candidate-rule files containing
 stay identifiers. Aggregate evaluation reports are included.
 
+PhysioNet/CinC Challenge 2019 PSV files and generated `physionet2019_cache.npz`
+are local-only patient data artifacts and are ignored by git. The local
+`physionet2019_icu_jepa.pt` checkpoint is also ignored by default; the committed
+`physionet2019_icu_jepa_report.json` records aggregate, non-identified training
+metrics for the general ICU pretraining path.
+
 The JEPA checkpoints were trained on the DKA simulator. The residual adapter was
 fitted on the local MIMIC-IV demo after patient-cross-fitted evaluation; it does
 not contain raw rows, but it has no untouched external validation set.

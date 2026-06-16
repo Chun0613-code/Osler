@@ -52,6 +52,7 @@ Osler/
 ├── dka_osler.py             Symbolic shield, mechanism checks, reasoning trace.
 ├── dka_causal_evaluation.py Matched-control and AIPW confounding audit.
 ├── osler_jepa/              Shared ontology, action schema, curriculum, validator.
+├── physionet2019_pretrain.py  General ICU self-supervised JEPA pretraining.
 ├── rules/active/dka_embodied.pl  Human-owned Prolog action/effect rules.
 ├── dka_*.py                 Calibration and real-data validation utilities.
 ├── SYSTEM_FLOW.md           Current symbolic and numerical JEPA flows.
@@ -170,6 +171,31 @@ python symbolic_real_test.py \
 python long_horizon_real_test.py trajectories.jsonl \
   --checkpoint dka_symbolic_jepa_v5.pt --horizons 6,12,24
 ```
+
+### PhysioNet 2019 ICU pretraining
+
+The PhysioNet/CinC Challenge 2019 PSV files can now be used for a separate
+general ICU state-dynamics JEPA:
+
+```bash
+python physionet2019_pretrain.py \
+  --data-root /Users/chunyouchang/mimic/physionet.org/files/challenge-2019/1.0.0/training \
+  --rebuild-cache \
+  --max-transitions-per-split 100000 \
+  --epochs 5 \
+  --batch-size 1024 \
+  --cache physionet2019_cache.npz \
+  --checkpoint physionet2019_icu_jepa.pt \
+  --report physionet2019_icu_jepa_report.json
+```
+
+This path learns from hourly ICU vitals/labs, explicit observation masks,
+measurement ages, static demographics, irregular time deltas, and future
+`SepsisLabel`. It is intentionally not wired into the DKA intervention model
+because the Challenge 2019 data has no explicit DKA treatment action channels
+such as insulin route, KCl, fluids, bicarbonate, or dextrose. Its allowed role is
+generic ICU encoder/world-model pretraining and representation research. It may
+not replace `dka_symbolic_jepa_v5.pt` or support counterfactual treatment claims.
 
 This JEPA reasons over 15 continuous physiological variables: glucose, pH,
 bicarbonate, anion gap, potassium, MAP, volume, insulin, sodium, effective

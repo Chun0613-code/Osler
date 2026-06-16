@@ -1,0 +1,570 @@
+{
+  "dataset": {
+    "cache": "physionet2019_cache.npz",
+    "dynamic_features": [
+      "HR",
+      "O2Sat",
+      "Temp",
+      "SBP",
+      "MAP",
+      "DBP",
+      "Resp",
+      "EtCO2",
+      "BaseExcess",
+      "HCO3",
+      "FiO2",
+      "pH",
+      "PaCO2",
+      "SaO2",
+      "AST",
+      "BUN",
+      "Alkalinephos",
+      "Calcium",
+      "Chloride",
+      "Creatinine",
+      "Bilirubin_direct",
+      "Glucose",
+      "Lactate",
+      "Magnesium",
+      "Phosphate",
+      "Potassium",
+      "Bilirubin_total",
+      "TroponinI",
+      "Hct",
+      "Hgb",
+      "PTT",
+      "WBC",
+      "Fibrinogen",
+      "Platelets"
+    ],
+    "static_features": [
+      "Age",
+      "Gender",
+      "Unit1",
+      "Unit2",
+      "HospAdmTime"
+    ],
+    "splits": {
+      "train": {
+        "transitions": 100000,
+        "direct_observation_density": 0.203121,
+        "future_target_density": 0.198614,
+        "sepsis_positive_rate": 0.01916
+      },
+      "validation": {
+        "transitions": 100000,
+        "direct_observation_density": 0.203454,
+        "future_target_density": 0.198776,
+        "sepsis_positive_rate": 0.01916
+      },
+      "test": {
+        "transitions": 100000,
+        "direct_observation_density": 0.201181,
+        "future_target_density": 0.196125,
+        "sepsis_positive_rate": 0.01916
+      }
+    },
+    "intervention_claim_allowed": false,
+    "intended_use": "general ICU state-dynamics pretraining only"
+  },
+  "metadata": {
+    "data_root": "/Users/chunyouchang/mimic/physionet.org/files/challenge-2019/1.0.0/training",
+    "cache": "physionet2019_cache.npz",
+    "patients_seen_cap": null,
+    "max_transitions_per_split": 100000,
+    "horizon_hours": 6,
+    "epochs": 5,
+    "batch_size": 1024,
+    "seed": 2026,
+    "elapsed_seconds": 51.316
+  },
+  "training_history": [
+    {
+      "total": 0.7850435333592551,
+      "state": 0.654302312403309,
+      "latent": 0.028258980042776282,
+      "reconstruction": 0.2569255503464718,
+      "risk": 0.11641415375836041,
+      "anti_collapse": 0.8147785894724787,
+      "validation": 0.7180015651547179,
+      "epoch": 1
+    },
+    {
+      "total": 0.6833663698361845,
+      "state": 0.597631250717202,
+      "latent": 0.018349370310957333,
+      "reconstruction": 0.10937424072501611,
+      "risk": 0.08785470867795604,
+      "anti_collapse": 0.808627972189261,
+      "validation": 0.6951151301666182,
+      "epoch": 2
+    },
+    {
+      "total": 0.6610531490676257,
+      "state": 0.5831077831740282,
+      "latent": 0.01866829543545538,
+      "reconstruction": 0.0813089766140495,
+      "risk": 0.08505030386910147,
+      "anti_collapse": 0.7955788957829378,
+      "validation": 0.6830751853329795,
+      "epoch": 3
+    },
+    {
+      "total": 0.6449042814118522,
+      "state": 0.5711007069568245,
+      "latent": 0.019222062499243384,
+      "reconstruction": 0.06560516346017925,
+      "risk": 0.08334598317742348,
+      "anti_collapse": 0.789133105959211,
+      "validation": 0.6777509122478719,
+      "epoch": 4
+    },
+    {
+      "total": 0.6357547774606821,
+      "state": 0.5634437179078862,
+      "latent": 0.019999332440902993,
+      "reconstruction": 0.05895555376702426,
+      "risk": 0.08222072347238356,
+      "anti_collapse": 0.7870086626130708,
+      "validation": 0.6756220575498075,
+      "epoch": 5
+    }
+  ],
+  "validation": {
+    "masked_state_mse": 0.599365,
+    "per_feature_physical_mae": {
+      "HR": {
+        "model_mae": 8.1073,
+        "persistence_mae": 8.3307,
+        "beats_persistence": true,
+        "observed_targets": 91754
+      },
+      "O2Sat": {
+        "model_mae": 1.753,
+        "persistence_mae": 1.8209,
+        "beats_persistence": true,
+        "observed_targets": 88612
+      },
+      "Temp": {
+        "model_mae": 0.4208,
+        "persistence_mae": 0.4925,
+        "beats_persistence": true,
+        "observed_targets": 33286
+      },
+      "SBP": {
+        "model_mae": 13.7135,
+        "persistence_mae": 15.0217,
+        "beats_persistence": true,
+        "observed_targets": 86706
+      },
+      "MAP": {
+        "model_mae": 9.3464,
+        "persistence_mae": 10.3676,
+        "beats_persistence": true,
+        "observed_targets": 89185
+      },
+      "DBP": {
+        "model_mae": 7.7789,
+        "persistence_mae": 8.5914,
+        "beats_persistence": true,
+        "observed_targets": 71447
+      },
+      "Resp": {
+        "model_mae": 3.2735,
+        "persistence_mae": 3.6368,
+        "beats_persistence": true,
+        "observed_targets": 86648
+      },
+      "EtCO2": {
+        "model_mae": 3.9896,
+        "persistence_mae": 3.4983,
+        "beats_persistence": false,
+        "observed_targets": 3341
+      },
+      "BaseExcess": {
+        "model_mae": 2.1368,
+        "persistence_mae": 2.2672,
+        "beats_persistence": true,
+        "observed_targets": 4838
+      },
+      "HCO3": {
+        "model_mae": 2.1854,
+        "persistence_mae": 2.2796,
+        "beats_persistence": true,
+        "observed_targets": 3986
+      },
+      "FiO2": {
+        "model_mae": 0.0999,
+        "persistence_mae": 0.0908,
+        "beats_persistence": false,
+        "observed_targets": 7837
+      },
+      "pH": {
+        "model_mae": 0.0448,
+        "persistence_mae": 0.0489,
+        "beats_persistence": true,
+        "observed_targets": 6005
+      },
+      "PaCO2": {
+        "model_mae": 5.2992,
+        "persistence_mae": 5.679,
+        "beats_persistence": true,
+        "observed_targets": 4612
+      },
+      "SaO2": {
+        "model_mae": 7.058,
+        "persistence_mae": 7.4706,
+        "beats_persistence": true,
+        "observed_targets": 2813
+      },
+      "AST": {
+        "model_mae": 320.6306,
+        "persistence_mae": 246.0182,
+        "beats_persistence": false,
+        "observed_targets": 1327
+      },
+      "BUN": {
+        "model_mae": 6.8219,
+        "persistence_mae": 6.4154,
+        "beats_persistence": false,
+        "observed_targets": 6616
+      },
+      "Alkalinephos": {
+        "model_mae": 58.7941,
+        "persistence_mae": 38.928,
+        "beats_persistence": false,
+        "observed_targets": 1317
+      },
+      "Calcium": {
+        "model_mae": 1.1153,
+        "persistence_mae": 1.1872,
+        "beats_persistence": true,
+        "observed_targets": 5469
+      },
+      "Chloride": {
+        "model_mae": 2.8502,
+        "persistence_mae": 2.8918,
+        "beats_persistence": true,
+        "observed_targets": 4249
+      },
+      "Creatinine": {
+        "model_mae": 0.6246,
+        "persistence_mae": 0.5084,
+        "beats_persistence": false,
+        "observed_targets": 5854
+      },
+      "Bilirubin_direct": {
+        "model_mae": 1.5838,
+        "persistence_mae": 1.4211,
+        "beats_persistence": false,
+        "observed_targets": 153
+      },
+      "Glucose": {
+        "model_mae": 30.0787,
+        "persistence_mae": 34.8632,
+        "beats_persistence": true,
+        "observed_targets": 16326
+      },
+      "Lactate": {
+        "model_mae": 1.0795,
+        "persistence_mae": 1.0809,
+        "beats_persistence": true,
+        "observed_targets": 2165
+      },
+      "Magnesium": {
+        "model_mae": 0.2421,
+        "persistence_mae": 0.2771,
+        "beats_persistence": true,
+        "observed_targets": 6259
+      },
+      "Phosphate": {
+        "model_mae": 0.8155,
+        "persistence_mae": 0.8257,
+        "beats_persistence": true,
+        "observed_targets": 3956
+      },
+      "Potassium": {
+        "model_mae": 0.3781,
+        "persistence_mae": 0.4394,
+        "beats_persistence": true,
+        "observed_targets": 8701
+      },
+      "Bilirubin_total": {
+        "model_mae": 1.4049,
+        "persistence_mae": 1.0846,
+        "beats_persistence": false,
+        "observed_targets": 1224
+      },
+      "TroponinI": {
+        "model_mae": 9.7671,
+        "persistence_mae": 6.0258,
+        "beats_persistence": false,
+        "observed_targets": 799
+      },
+      "Hct": {
+        "model_mae": 2.8577,
+        "persistence_mae": 3.1027,
+        "beats_persistence": true,
+        "observed_targets": 8404
+      },
+      "Hgb": {
+        "model_mae": 1.0088,
+        "persistence_mae": 1.1163,
+        "beats_persistence": true,
+        "observed_targets": 7071
+      },
+      "PTT": {
+        "model_mae": 13.8679,
+        "persistence_mae": 13.8708,
+        "beats_persistence": true,
+        "observed_targets": 2502
+      },
+      "WBC": {
+        "model_mae": 3.0136,
+        "persistence_mae": 2.8845,
+        "beats_persistence": false,
+        "observed_targets": 6182
+      },
+      "Fibrinogen": {
+        "model_mae": 109.0626,
+        "persistence_mae": 88.8292,
+        "beats_persistence": false,
+        "observed_targets": 535
+      },
+      "Platelets": {
+        "model_mae": 44.0672,
+        "persistence_mae": 41.1392,
+        "beats_persistence": false,
+        "observed_targets": 5658
+      }
+    },
+    "latent_collapse": {
+      "mean_latent_std": 0.212518,
+      "min_latent_std": 0.173811,
+      "effective_rank": 23.071,
+      "active_dimensions_std_gt_0_01": 48,
+      "collapsed": false
+    }
+  },
+  "test": {
+    "masked_state_mse": 0.605828,
+    "per_feature_physical_mae": {
+      "HR": {
+        "model_mae": 8.2952,
+        "persistence_mae": 8.4882,
+        "beats_persistence": true,
+        "observed_targets": 91704
+      },
+      "O2Sat": {
+        "model_mae": 1.7712,
+        "persistence_mae": 1.8528,
+        "beats_persistence": true,
+        "observed_targets": 88124
+      },
+      "Temp": {
+        "model_mae": 0.4325,
+        "persistence_mae": 0.498,
+        "beats_persistence": true,
+        "observed_targets": 33464
+      },
+      "SBP": {
+        "model_mae": 13.8433,
+        "persistence_mae": 14.9976,
+        "beats_persistence": true,
+        "observed_targets": 85914
+      },
+      "MAP": {
+        "model_mae": 9.4334,
+        "persistence_mae": 10.4268,
+        "beats_persistence": true,
+        "observed_targets": 88752
+      },
+      "DBP": {
+        "model_mae": 7.8793,
+        "persistence_mae": 8.7273,
+        "beats_persistence": true,
+        "observed_targets": 68437
+      },
+      "Resp": {
+        "model_mae": 3.2558,
+        "persistence_mae": 3.5894,
+        "beats_persistence": true,
+        "observed_targets": 86276
+      },
+      "EtCO2": {
+        "model_mae": 4.0363,
+        "persistence_mae": 3.5123,
+        "beats_persistence": false,
+        "observed_targets": 3296
+      },
+      "BaseExcess": {
+        "model_mae": 2.1368,
+        "persistence_mae": 2.2521,
+        "beats_persistence": true,
+        "observed_targets": 4249
+      },
+      "HCO3": {
+        "model_mae": 2.149,
+        "persistence_mae": 2.2472,
+        "beats_persistence": true,
+        "observed_targets": 3954
+      },
+      "FiO2": {
+        "model_mae": 0.1037,
+        "persistence_mae": 0.0967,
+        "beats_persistence": false,
+        "observed_targets": 7071
+      },
+      "pH": {
+        "model_mae": 0.045,
+        "persistence_mae": 0.0495,
+        "beats_persistence": true,
+        "observed_targets": 5554
+      },
+      "PaCO2": {
+        "model_mae": 5.347,
+        "persistence_mae": 5.722,
+        "beats_persistence": true,
+        "observed_targets": 4359
+      },
+      "SaO2": {
+        "model_mae": 6.3603,
+        "persistence_mae": 6.9883,
+        "beats_persistence": true,
+        "observed_targets": 2664
+      },
+      "AST": {
+        "model_mae": 290.0063,
+        "persistence_mae": 234.3044,
+        "beats_persistence": false,
+        "observed_targets": 1363
+      },
+      "BUN": {
+        "model_mae": 6.773,
+        "persistence_mae": 6.2422,
+        "beats_persistence": false,
+        "observed_targets": 6408
+      },
+      "Alkalinephos": {
+        "model_mae": 45.0888,
+        "persistence_mae": 33.6022,
+        "beats_persistence": false,
+        "observed_targets": 1345
+      },
+      "Calcium": {
+        "model_mae": 1.1679,
+        "persistence_mae": 1.2495,
+        "beats_persistence": true,
+        "observed_targets": 5494
+      },
+      "Chloride": {
+        "model_mae": 2.9077,
+        "persistence_mae": 2.9613,
+        "beats_persistence": true,
+        "observed_targets": 4184
+      },
+      "Creatinine": {
+        "model_mae": 0.5636,
+        "persistence_mae": 0.4449,
+        "beats_persistence": false,
+        "observed_targets": 5750
+      },
+      "Bilirubin_direct": {
+        "model_mae": 1.699,
+        "persistence_mae": 1.53,
+        "beats_persistence": false,
+        "observed_targets": 189
+      },
+      "Glucose": {
+        "model_mae": 29.7517,
+        "persistence_mae": 34.5768,
+        "beats_persistence": true,
+        "observed_targets": 16144
+      },
+      "Lactate": {
+        "model_mae": 1.0971,
+        "persistence_mae": 1.2174,
+        "beats_persistence": true,
+        "observed_targets": 2050
+      },
+      "Magnesium": {
+        "model_mae": 0.2415,
+        "persistence_mae": 0.2735,
+        "beats_persistence": true,
+        "observed_targets": 6090
+      },
+      "Phosphate": {
+        "model_mae": 0.7757,
+        "persistence_mae": 0.7901,
+        "beats_persistence": true,
+        "observed_targets": 3865
+      },
+      "Potassium": {
+        "model_mae": 0.3875,
+        "persistence_mae": 0.4446,
+        "beats_persistence": true,
+        "observed_targets": 8554
+      },
+      "Bilirubin_total": {
+        "model_mae": 1.5929,
+        "persistence_mae": 1.2686,
+        "beats_persistence": false,
+        "observed_targets": 1234
+      },
+      "TroponinI": {
+        "model_mae": 9.2323,
+        "persistence_mae": 5.7973,
+        "beats_persistence": false,
+        "observed_targets": 737
+      },
+      "Hct": {
+        "model_mae": 2.8251,
+        "persistence_mae": 3.0719,
+        "beats_persistence": true,
+        "observed_targets": 8139
+      },
+      "Hgb": {
+        "model_mae": 1.0008,
+        "persistence_mae": 1.0998,
+        "beats_persistence": true,
+        "observed_targets": 6807
+      },
+      "PTT": {
+        "model_mae": 13.9702,
+        "persistence_mae": 14.3442,
+        "beats_persistence": true,
+        "observed_targets": 2565
+      },
+      "WBC": {
+        "model_mae": 2.9297,
+        "persistence_mae": 2.9073,
+        "beats_persistence": false,
+        "observed_targets": 5957
+      },
+      "Fibrinogen": {
+        "model_mae": 108.3133,
+        "persistence_mae": 87.2007,
+        "beats_persistence": false,
+        "observed_targets": 587
+      },
+      "Platelets": {
+        "model_mae": 43.8014,
+        "persistence_mae": 40.6074,
+        "beats_persistence": false,
+        "observed_targets": 5544
+      }
+    },
+    "latent_collapse": {
+      "mean_latent_std": 0.213926,
+      "min_latent_std": 0.17782,
+      "effective_rank": 23.037,
+      "active_dimensions_std_gt_0_01": 48,
+      "collapsed": false
+    }
+  },
+  "promotion_boundary": {
+    "may_initialize_or_pretrain_generic_encoder": true,
+    "may_replace_dka_intervention_checkpoint": false,
+    "reason": "PhysioNet 2019 has no explicit DKA treatment action channels."
+  }
+}
