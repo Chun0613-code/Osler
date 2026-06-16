@@ -1,0 +1,69 @@
+{
+  "experiment": "physionet2019_feature_aligned_dka_encoder_init",
+  "source_checkpoint": {
+    "path": "physionet2019_icu_jepa.pt",
+    "sha256": "e453ab3f5e1bac6df6d4bb5dc2dcad22c516a25ad476a16595664484aa66c9e7",
+    "metadata": {
+      "data_root": "/Users/chunyouchang/mimic/physionet.org/files/challenge-2019/1.0.0/training",
+      "cache": "physionet2019_cache.npz",
+      "patients_seen_cap": null,
+      "max_transitions_per_split": 100000,
+      "horizon_hours": 6,
+      "epochs": 5,
+      "batch_size": 1024,
+      "seed": 2026,
+      "elapsed_seconds": 51.316,
+      "intervention_claim_allowed": false,
+      "counterfactual_claim_allowed": false,
+      "intended_use": "general ICU state-dynamics pretraining only"
+    }
+  },
+  "output_checkpoint": "dka_physionet_encoder_init.pt",
+  "seed": 2026,
+  "transfer": {
+    "mapped_features": {
+      "G": "Glucose",
+      "pH": "pH",
+      "HCO3": "HCO3",
+      "Ke": "Potassium",
+      "MAP": "MAP",
+      "creatinine": "Creatinine"
+    },
+    "unmapped_dka_features": [
+      "anion_gap",
+      "V",
+      "I",
+      "Na",
+      "osmolality",
+      "urine_output",
+      "BHB",
+      "K_store",
+      "osmotic_injury"
+    ],
+    "copied_encoder_layers": [
+      "2.weight",
+      "2.bias",
+      "3.weight",
+      "3.bias",
+      "5.weight",
+      "5.bias"
+    ],
+    "copied_first_layer_bias": true,
+    "copied_target_encoder_from_online_encoder": true
+  },
+  "latent_audit_on_randomized_dka_states": {
+    "samples": 512,
+    "mean_latent_std": 0.140372,
+    "min_latent_std": 0.080787,
+    "effective_rank": 9.62,
+    "active_dimensions_std_gt_0_01": 48,
+    "collapsed": false
+  },
+  "promotion_boundary": {
+    "may_start_controlled_dka_training_experiment": true,
+    "may_replace_dka_symbolic_jepa_v5": false,
+    "counterfactual_claim_allowed": false,
+    "clinical_claim_allowed": false,
+    "reason": "PhysioNet 2019 has no explicit DKA treatment action channels; this checkpoint only seeds overlapping state-encoder weights."
+  }
+}

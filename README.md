@@ -58,6 +58,7 @@ Osler/
 ├── SYSTEM_FLOW.md           Current symbolic and numerical JEPA flows.
 ├── OSLER_JEPA_ROADMAP.md    Target architecture, promotion gates, next build order.
 ├── SYMBOLIC_JEPA_VIABILITY_AUDIT.md  Same-scale compiler/viability ablation.
+├── PHYSIONET2019_PRETRAINING_FINDINGS.md  Real ICU pretraining result and boundary.
 ├── requirements.txt
 └── README.md
 ```
@@ -196,6 +197,31 @@ because the Challenge 2019 data has no explicit DKA treatment action channels
 such as insulin route, KCl, fluids, bicarbonate, or dextrose. Its allowed role is
 generic ICU encoder/world-model pretraining and representation research. It may
 not replace `dka_symbolic_jepa_v5.pt` or support counterfactual treatment claims.
+See `PHYSIONET2019_PRETRAINING_FINDINGS.md` for the phase-closure interpretation.
+
+If you want to test whether this real-ICU representation helps DKA training, use
+the controlled feature-aligned transfer path. It seeds only overlapping state
+features (`Glucose`, `pH`, `HCO3`, `Potassium`, `MAP`, `Creatinine`) and still
+requires the same persistence and symbolic gates as any other candidate:
+
+```bash
+python physionet2019_dka_transfer.py \
+  --physionet-checkpoint physionet2019_icu_jepa.pt \
+  --output dka_physionet_encoder_init.pt \
+  --report dka_physionet_encoder_init_report.json
+
+python train_intervention_jepa.py \
+  --init-checkpoint dka_physionet_encoder_init.pt \
+  --scenarios 1000 \
+  --sequence-length 12 \
+  --epochs 55 \
+  --batch-size 12 \
+  --checkpoint dka_physionet_transfer_candidate.pt \
+  --report dka_physionet_transfer_candidate_report.json \
+  --greybox-residual dka_greybox_residual_candidate_v1.pt \
+  --action-prior dka_action_prior_demo_v1.json \
+  --mimic dka_transitions_6h_demo_v4.parquet
+```
 
 This JEPA reasons over 15 continuous physiological variables: glucose, pH,
 bicarbonate, anion gap, potassium, MAP, volume, insulin, sodium, effective

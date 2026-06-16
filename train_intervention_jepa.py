@@ -35,6 +35,7 @@ from dka_world_model import (
     STATE_KEYS,
     WorldModel,
     a2vec,
+    load_checkpoint,
     randomized_dka,
     save_checkpoint,
     s2vec,
@@ -1356,6 +1357,13 @@ def main():
     parser.add_argument("--checkpoint", default="dka_intervention_jepa.pt")
     parser.add_argument("--report", default="dka_intervention_jepa_report.json")
     parser.add_argument("--mimic", default="dka_transitions_6h.parquet")
+    parser.add_argument(
+        "--init-checkpoint",
+        help=(
+            "Optional full DKA WorldModel checkpoint used only as training "
+            "initialization. It does not imply promotion over the runtime model."
+        ),
+    )
     parser.add_argument("--enable-viability-dynamics", action="store_true")
     parser.add_argument("--viability-gate-report")
     parser.add_argument("--action-prior")
@@ -1409,7 +1417,11 @@ def main():
     print(f"simulated deaths by cause: {dataset['death_causes']}")
     simulator_audit = simulator_calibration_audit(dataset)
 
-    model = WorldModel()
+    if args.init_checkpoint:
+        model, init_payload = load_checkpoint(args.init_checkpoint, device="cpu")
+    else:
+        model = WorldModel()
+        init_payload = {}
     history, best_validation = train_model(
         model, dataset, splits, args.epochs, args.batch_size,
         args.learning_rate, device,
@@ -1422,6 +1434,14 @@ def main():
         "trained_at_unix": int(time.time()),
         "device": str(device),
         "seed": args.seed,
+        "initial_checkpoint": (
+            {
+                "path": args.init_checkpoint,
+                "metadata": init_payload.get("metadata", {}),
+                "runtime_promotion_implied": False,
+            }
+            if args.init_checkpoint else None
+        ),
         "scenario_count": args.scenarios,
         "protocols": list(PROTOCOLS),
         "action_prior": action_prior.payload if action_prior is not None else None,

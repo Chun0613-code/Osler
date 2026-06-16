@@ -24,6 +24,12 @@ are local-only patient data artifacts and are ignored by git. The local
 `physionet2019_icu_jepa_report.json` records aggregate, non-identified training
 metrics for the general ICU pretraining path.
 
+`dka_physionet_encoder_init.pt` is a local-only candidate initialization
+checkpoint. It contains feature-aligned encoder transfer from the PhysioNet ICU
+JEPA into a fresh DKA WorldModel, but it is not a promoted DKA checkpoint. The
+committed `dka_physionet_encoder_init_report.json` records the transfer map and
+promotion boundary.
+
 The JEPA checkpoints were trained on the DKA simulator. The residual adapter was
 fitted on the local MIMIC-IV demo after patient-cross-fitted evaluation; it does
 not contain raw rows, but it has no untouched external validation set.
