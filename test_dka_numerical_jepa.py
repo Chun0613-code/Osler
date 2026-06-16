@@ -10,7 +10,7 @@ import pandas as pd
 import torch
 import joblib
 
-from dka_body import DKABody, DKAPatientProfile
+from dka_body import DKABody, DKAPatientProfile, OSM_INJURY_DEATH
 from dka_osler import shield, shield_full, shield_route_aware
 from dka_action_contract import ACTION_INDEX, expand_action
 from dka_world_model import (
@@ -649,19 +649,17 @@ class NumericalJEPATests(unittest.TestCase):
         basal.step(expand_action({}), dt=4.0)
         self.assertGreater(basal.I, start)
 
-    def test_hyperosmolar_injury_is_time_dependent(self):
+    def test_hyperosmolar_injury_is_reported_burden_not_terminal_trigger(self):
         body = DKABody()
         body.G = 800.0
         body.Na = 170.0
         body.step([0, 0, 0, 0, 0], dt=0.5)
         self.assertTrue(body.alive)
         self.assertGreater(body.osmotic_injury, 0.0)
-        for _ in range(12):
-            body.step([0, 0, 0, 0, 0], dt=0.5)
-            if not body.alive:
-                break
-        self.assertFalse(body.alive)
-        self.assertEqual(body.death_cause, "cumulative hyperosmolar injury")
+        body.osmotic_injury = OSM_INJURY_DEATH + 1.0
+        body._check_death(0.5)
+        self.assertTrue(body.alive)
+        self.assertIsNone(body.death_cause)
 
     def test_critical_viability_crossing_requires_sustained_burden(self):
         body = DKABody()
@@ -686,6 +684,18 @@ class NumericalJEPATests(unittest.TestCase):
         self.assertLess(body.observe()["critical_burden"], peak)
         self.assertTrue(body.alive)
 
+    def test_extreme_hyperglycemia_is_reported_burden_not_terminal_trigger(self):
+        body = DKABody()
+        body.G = 1600.0
+        for _ in range(20):
+            body._check_death(0.1)
+        self.assertTrue(body.alive)
+        self.assertIsNone(body.death_cause)
+        self.assertGreater(
+            body.critical_burdens["extreme hyperglycemia (G>1400)"],
+            0.0,
+        )
+
     def test_kcl_replenishes_total_body_potassium_store(self):
         untreated = DKABody()
         replaced = DKABody()
@@ -700,6 +710,18 @@ class NumericalJEPATests(unittest.TestCase):
         untreated.step({}, dt=1.0)
         self.assertLess(treated.Ke, untreated.Ke)
         self.assertAlmostEqual(treated.Ki, untreated.Ki, delta=2.0)
+
+    def test_acidemia_masks_total_body_potassium_depletion_in_serum(self):
+        acidotic = DKABody()
+        neutral = DKABody()
+        acidotic.HCO3 = 6.0
+        neutral.HCO3 = 24.0
+        acidotic.Ke = neutral.Ke = 4.2
+        acidotic.Ki = neutral.Ki = 100.0
+        self.assertGreater(
+            acidotic._derivs({})["Ke"],
+            neutral._derivs({})["Ke"],
+        )
 
     def test_osmotic_potassium_loss_is_bounded_by_urine_flow(self):
         body = DKABody()

@@ -15,7 +15,8 @@ from pathlib import Path
 import numpy as np
 
 from dka_action_contract import ACTION_KEYS, expand_action
-from dka_body import CRITICAL_LIMITS, OSM_INJURY_DEATH
+from dka_body import CRITICAL_LIMITS, OSM_INJURY_DEATH, OSMOTIC_INJURY_TERMINAL
+from dka_body import NON_TERMINAL_CRITICAL_CAUSES
 from dka_fidelity_replay import DT, VAR2ATTR, init_body
 
 
@@ -260,10 +261,13 @@ def main():
     result = {
         "audit": "DKABody viability falsification from real replay trajectories",
         "trajectory_source": Path(args.trajectories).name,
+        "osmotic_injury_terminal": OSMOTIC_INJURY_TERMINAL,
+        "non_terminal_reported_burden_causes": sorted(NON_TERMINAL_CRITICAL_CAUSES),
         "greybox_can_edit_these": ["G", "Ket", "HCO3", "Ke", "Na", "Cr"],
-        "death_drivers_are_hard_mechanisms": [
-            "volume_map", "osmotic_injury", "potassium_mass",
-        ],
+        "terminal_death_drivers_are_hard_mechanisms": [
+            "volume_map", "potassium_mass",
+        ] + (["osmotic_injury"] if OSMOTIC_INJURY_TERMINAL else []),
+        "reported_burden_only": [] if OSMOTIC_INJURY_TERMINAL else ["osmotic_injury"],
         "summary": summarize(cases),
         "cases": cases,
         "conclusion": (

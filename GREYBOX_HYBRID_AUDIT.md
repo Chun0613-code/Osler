@@ -211,6 +211,61 @@ Repair backlog:
 The next simulator work should repair these owning equations directly instead of
 expanding the grey-box residual write set.
 
+## Potassium-First Mechanism Repair
+
+The v1 audit had an important ordering clue:
+
+| Event | Hypokalemia | Cumulative hyperosmolar injury |
+| --- | ---: | ---: |
+| First threshold crossing | 7 | 4 |
+| Final death cause | 5 | 6 |
+
+Potassium crossed first more often, while osmotic injury killed slightly more
+often. That makes potassium the likely front-edge failure rather than just a
+parallel backlog item.
+
+The repair deliberately does not fit the 16 replay trajectories. Instead,
+`DKABody` now encodes sourced physiology:
+
+- serum K is pH-corrected because DKA acidemia can mask total-body depletion;
+- insulin shifts K intracellularly but weakens near critical hypokalemia;
+- total-body K store changes only through KCl intake and renal K loss;
+- cumulative osmotic injury is a reported burden, not an uncalibrated death
+  trigger;
+- extreme hyperglycemia is also a reported burden, with terminal failure routed
+  through acidosis, MAP/volume, potassium, or another sourced organ-failure
+  mechanism.
+
+The post-repair replay artifact is `dka_viability_falsification_audit_v2.json`:
+
+- 16 replay trajectories
+- 7 simulated deaths, down from 11
+- 7/7 deaths falsified by later real observations
+- 0 cumulative hyperosmolar-injury deaths, down from 6
+- 1 hypokalemia death, down from 5
+- Terminal hard-mechanism owners: 5 `potassium_mass`, 2 `volume_map`
+- Remaining death causes: 4 hyperkalemia, 1 hypokalemia, 2 circulatory collapse
+
+This is not a promotion result. It is a localization result. The potassium repair
+removed most low-K false deaths and exposed a downstream volume/glucose blow-up
+regime. The next owning equations are volume/MAP transfer, glucose
+production/clearance under captured treatment, and the remaining potassium
+mass/shift behavior. The audit should remain a regression test, but making all
+16 cases survive is not the success criterion.
+
+Mechanism-source notes:
+
+- [MSD Manual Professional](https://www.msdmanuals.com/professional/endocrine-and-metabolic-disorders/diabetes-mellitus-and-hypoglycemia/acute-complications-of-diabetes-mellitus)
+  notes that DKA hyperglycemia causes osmotic diuresis with fluid/electrolyte
+  loss; potassium may be normal or elevated despite a total-body deficit;
+  insulin drives potassium into cells; and insulin is held when serum potassium
+  is below 3.3 mEq/L.
+- NCBI Bookshelf's [Hyperkalemia](https://www.ncbi.nlm.nih.gov/books/NBK470284/)
+  and [Hypokalemia](https://www.ncbi.nlm.nih.gov/books/NBK482465/) reviews
+  describe predominantly intracellular potassium stores, insulin-driven
+  intracellular shift, increased renal K excretion with urine flow, and the
+  unreliability of serum potassium as a total body store measurement.
+
 ## Not Executed
 
 eICU/HiRID transfer pretraining was not run because those datasets are not present

@@ -18,7 +18,7 @@ State pools
   Cr   serum creatinine           (mg/dL)   -> lagging renal-perfusion marker
   CRS  counter-regulatory stress (0..2; resolves over hours with treatment)
   RPS  renal-perfusion state     (0..1; lags instantaneous MAP)
-  OI   cumulative hyperosmolar injury      (dimensionless burden)
+  OI   cumulative hyperosmolar burden      (dimensionless; reported, not terminal)
   D*   rapid/NPH/basal SC insulin depots   (U awaiting absorption)
 
 Actions (administration RATES, held over the decision step)
@@ -71,9 +71,13 @@ K_KETCLEAR_INS = 0.45 # insulin promotes ketone disposal (regenerates HCO3)
 K_RENAL_KET = 0.02
 K_RENAL_HCO3 = 0.008  # weak renal bicarb regen (kidney can't outpace ongoing ketoacidosis)
 K_K_INS = 0.15        # insulin shifts K+ INTO cells  (calibrated down from 0.35)
-K_K_ACID = 0.30       # acidosis shifts K+ OUT of cells
 K_K_BUF = 0.25        # plasma K+ buffered toward equilibrium by intracellular pool
 KI_REF = 140.0        # reference intracellular K+ store (buffer capacity scales w/ Ki/KI_REF)
+K_PH_SHIFT_PER_0_1 = 0.60  # acidemia raises apparent serum K; correction lowers it
+K_STORE_DEFICIT_KE_DROP = 1.10
+K_INS_SHIFT_FLOOR = 2.8    # insulin shift weakens near critical hypokalemia
+K_RENAL_K_SERUM_FRACTION = 0.35
+K_KCL_SERUM_FRACTION = 0.55
 K_URINE_K_BASE = 8.0  # plausible urinary K concentration at low osmotic flow (mEq/L)
 K_URINE_K_OSM = 12.0  # additional urinary K concentration with osmotic diuresis
 K_STRESS_ADAPT = 0.35 # counter-regulatory stress approaches current illness drive / hr
@@ -86,6 +90,7 @@ NA_URINE = 100.0      # effective urinary osmole concentration (mEq/L equivalent
 K_CR_ADAPT = 0.25     # creatinine approaches perfusion-dependent target per hour
 K_OSM_INJURY_RECOVERY = 0.12
 OSM_INJURY_DEATH = 12.0
+OSMOTIC_INJURY_TERMINAL = False
 CRITICAL_BURDEN_DEATH = 1.0
 CRITICAL_BURDEN_RECOVERY = 0.75
 
@@ -96,6 +101,13 @@ CRITICAL_LIMITS = {
     "circulatory collapse (MAP<40)": ("below", 40.0, 15.0),
     "hypoglycemia (G<40)": ("below", 40.0, 20.0),
     "extreme hyperglycemia (G>1400)": ("above", 1400.0, 300.0),
+}
+NON_TERMINAL_CRITICAL_CAUSES = {
+    # Hyperglycemia is the driver of osmotic diuresis and hyperosmolar burden,
+    # but without calibrated mortality data it should not be an independent
+    # death switch. Terminal failure should arrive through acidosis, MAP, K, or
+    # another sourced organ-failure mechanism.
+    "extreme hyperglycemia (G>1400)",
 }
 
 
@@ -145,6 +157,16 @@ def henderson(hco3):
     return 6.1 + math.log10(hco3 / (0.03 * pco2))
 
 
+def potassium_ph_shift(ph):
+    """Serum K displacement from acid-base status.
+
+    This is a mechanistic prior, not a patient-specific estimate. DKA commonly
+    presents with normal/high serum K despite total-body depletion because
+    acidemia shifts K outward; insulin and alkalemia move it back into cells.
+    """
+    return K_PH_SHIFT_PER_0_1 * float(np.clip((7.40 - float(ph)) / 0.10, -1.5, 3.0))
+
+
 def estimate_potassium_store(ke, ph, creatinine=1.2, urine_output=100.0,
                              prior_kcl_meq=0.0):
     """Mechanistic prior for latent total-body potassium reserve.
@@ -155,7 +177,8 @@ def estimate_potassium_store(ke, ph, creatinine=1.2, urine_output=100.0,
     exposed as a belief estimate rather than presented as a measured lab value.
     """
     acid_deficit = max(0.0, 7.35 - float(ph))
-    low_serum_penalty = 18.0 * max(0.0, 4.0 - float(ke))
+    ph_corrected_ke = float(ke) - potassium_ph_shift(ph)
+    low_serum_penalty = 18.0 * max(0.0, 4.0 - ph_corrected_ke)
     urine_penalty = 0.04 * max(0.0, float(urine_output) - 100.0)
     renal_retention = 4.0 * max(0.0, float(creatinine) - 1.2)
     replacement = 0.45 * max(0.0, float(prior_kcl_meq))
@@ -302,17 +325,24 @@ class DKABody:
                  + K_RENAL_HCO3 * (HCO3_NORM - self.HCO3) * rf
                  - self.HCO3 * dil)
 
-        # Potassium uses two distinct concepts. Serum K changes with
-        # transcellular shifts, while Ki is a total-body reserve changed only by
-        # true intake/output. Insulin therefore cannot destroy potassium mass.
-        acid_drive = max(0.0, 7.4 - self.pH)
-        shift_in = K_K_INS * ie * self.Ke
-        shift_out = K_K_ACID * acid_drive * (self.Ki / 120.0)
+        # Potassium uses two distinct concepts. Serum K follows acid-base and
+        # insulin-driven transcellular shifts, while Ki is a total-body reserve
+        # changed only by true intake/output. The serum target is pH-corrected:
+        # acidemia can mask depletion, and alkalemia/insulin can unmask it.
+        store_ratio = float(np.clip(self.Ki / KI_REF, 0.25, 1.35))
+        store_deficit = max(0.0, (KI_REF - self.Ki) / KI_REF)
+        k_equilibrium = (
+            KE_NORM
+            + potassium_ph_shift(self.pH)
+            - K_STORE_DEFICIT_KE_DROP * store_deficit
+        )
+        k_equilibrium = float(np.clip(k_equilibrium, 1.8, 7.2))
+        shift_in = K_K_INS * ie * max(0.0, self.Ke - K_INS_SHIFT_FLOOR) * store_ratio
         urinary_k_concentration = K_URINE_K_BASE + K_URINE_K_OSM * min(1.0, osm_diuresis)
         renal_k_loss = urine_l_hr * urinary_k_concentration * rf
-        renal_k_serum = renal_k_loss / max(self.V, 1.0)
-        buf = K_K_BUF * (KE_NORM - self.Ke) * (self.Ki / KI_REF)   # restoring force
-        dKe = (-shift_in + shift_out + 0.55 * kcl / self.V
+        renal_k_serum = K_RENAL_K_SERUM_FRACTION * renal_k_loss / max(self.V, 1.0)
+        buf = K_K_BUF * (k_equilibrium - self.Ke)
+        dKe = (-shift_in + K_KCL_SERUM_FRACTION * kcl / self.V
                - renal_k_serum + buf - self.Ke * dil)
         dKi = kcl - renal_k_loss
 
@@ -349,7 +379,7 @@ class DKABody:
         dRenalPerfusion = K_RENAL_PERF_ADAPT * (perfusion_target - self.renal_perfusion_state)
 
         # Neurologic hyperosmolar risk depends on severity and duration. It is
-        # accumulated rather than triggered by one instantaneous threshold crossing.
+        # accumulated as a burden, not used as an uncalibrated terminal trigger.
         osm_excess = max(0.0, (self.effective_osmolality - 320.0) / 20.0)
         glucose_excess = max(0.0, (self.G - 800.0) / 300.0)
         injury_input = osm_excess ** 2 + glucose_excess ** 2
@@ -485,12 +515,13 @@ class DKABody:
                 burden = max(0.0, burden - CRITICAL_BURDEN_RECOVERY * dt)
             self.critical_burdens[cause] = burden
 
-        if self.osmotic_injury > OSM_INJURY_DEATH:
+        if OSMOTIC_INJURY_TERMINAL and self.osmotic_injury > OSM_INJURY_DEATH:
             self.alive, self.death_cause = False, "cumulative hyperosmolar injury"
             return
         lethal = [
             (burden, cause) for cause, burden in self.critical_burdens.items()
             if burden >= CRITICAL_BURDEN_DEATH
+            and cause not in NON_TERMINAL_CRITICAL_CAUSES
         ]
         if lethal:
             _, self.death_cause = max(lethal)
