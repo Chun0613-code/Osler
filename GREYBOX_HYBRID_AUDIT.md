@@ -236,7 +236,7 @@ The repair deliberately does not fit the 16 replay trajectories. Instead,
   through acidosis, MAP/volume, potassium, or another sourced organ-failure
   mechanism.
 
-The post-repair replay artifact is `dka_viability_falsification_audit_v2.json`:
+The first post-repair replay artifact is `dka_viability_falsification_audit_v2.json`:
 
 - 16 replay trajectories
 - 7 simulated deaths, down from 11
@@ -265,6 +265,52 @@ Mechanism-source notes:
   describe predominantly intracellular potassium stores, insulin-driven
   intracellular shift, increased renal K excretion with urine flow, and the
   unreliability of serum potassium as a total body store measurement.
+
+## Glucose/Volume Coupling Repair
+
+The v2 audit exposed a second non-physiologic feedback loop: glucose rose into
+the thousands, extracellular volume collapsed toward the numerical floor, and
+serum potassium or MAP then became the terminal label. That was not a new
+clinical death mechanism; it was a simplified concentration model amplifying
+solute inputs through an unrealistically tiny distribution volume.
+
+The v3 repair adds architecture-level safeguards:
+
+- glucose, dextrose, bicarbonate, serum K, and dilution use effective
+  distribution volumes rather than `V=1 L` at the lower numerical bound;
+- osmotic diuresis is capped by renal perfusion and current volume reserve;
+- extreme hyperglycemia remains a burden signal, with terminal failure routed
+  through sourced organ-failure mechanisms;
+- audit output now flags likely coverage-limited falsifications, such as no
+  captured insulin followed by later metabolic improvement, or no captured KCl
+  followed by later potassium recovery.
+
+The v3 replay artifact is `dka_viability_falsification_audit_v3.json`:
+
+- 16 replay trajectories
+- 4 simulated deaths, down from 11 in v1 and 7 in v2
+- 3/4 deaths falsified by later observations
+- 2/4 deaths flagged as coverage-limited falsifications
+- Death causes: 3 acidosis, 1 hypokalemia
+- Hard-mechanism owners: 3 `acid_base`, 1 `potassium_mass`
+- Coverage flags: 1 no captured insulin despite later metabolic improvement,
+  1 no captured KCl despite later potassium recovery
+
+Fidelity replay moved in the right direction:
+
+| Variable | v2 MAE | v3 MAE |
+| --- | ---: | ---: |
+| Glucose | 571.74 | 264.39 |
+| K | 1.19 | 0.61 |
+| MAP | 15.36 | 12.72 |
+| Urine output | 937.27 | 198.58 |
+| HCO3 | 15.09 | 5.92 |
+| Anion gap | 18.64 | 7.53 |
+
+This still does not make JEPA a promoted factual forecaster. It says the
+simulator's hard-mechanism failures are now more localized: remaining work is
+acid-base calibration on treatment-observed windows, better treatment capture,
+and one residual potassium/KCl case.
 
 ## Not Executed
 

@@ -135,7 +135,7 @@ python counterfactual_shadow_demo.py \
 # Trace real-survived simulated deaths to the hard mechanism that failed first.
 python dka_viability_falsification_audit.py \
   /tmp/dka_maintenance_trajectories.jsonl \
-  --output dka_viability_falsification_audit_v2.json
+  --output dka_viability_falsification_audit_v3.json
 
 # Evaluate where persistence should become weaker
 python long_horizon_real_test.py trajectories.jsonl \
@@ -245,10 +245,12 @@ potassium follows a pH-corrected equilibrium plus insulin-driven intracellular
 shift, while `K_store` remains conserved except for true KCl intake and renal
 loss. Cumulative osmotic injury and extreme hyperglycemia are reported burden
 signals, not independent terminal death switches. The post-repair audit
-(`dka_viability_falsification_audit_v2.json`) reduces simulated deaths from
-11/16 to 7/16, removes osmotic-injury deaths, and reduces hypokalemia deaths from
-5 to 1. The remaining falsifications are potassium and volume/MAP failures, so
-the simulator is better localized but not clinically calibrated.
+(`dka_viability_falsification_audit_v3.json`) reduces simulated deaths from
+11/16 to 4/16, removes osmotic-injury deaths, and reduces hypokalemia deaths from
+5 to 1. The v3 replay also bounds glucose/diuresis/volume blow-up with effective
+distribution volumes and renal/volume-guarded urine flow. Two of the four
+remaining deaths are coverage-limited falsifications, so the simulator is better
+localized but not clinically calibrated.
 
 Acute viability failures now use reversible severity-by-duration burdens rather
 than instant death at the first threshold crossing. Hyperosmolar injury remains a

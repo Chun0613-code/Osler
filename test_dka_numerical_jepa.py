@@ -67,7 +67,9 @@ from real_world_improvement import episode_features
 from real_world_power_analysis import required_stays_for_win
 from predict_dka_intervention import compare, predict
 from dka_fidelity_replay import init_body
-from dka_viability_falsification_audit import classify_death_cause, threshold_excess
+from dka_viability_falsification_audit import (
+    classify_death_cause, coverage_artifact_reasons, threshold_excess,
+)
 from dka_transition_extract import find_dka_onset
 from mimic_action_history import (
     action_window_summary, deduplicate_events, normalize_events,
@@ -731,6 +733,28 @@ class NumericalJEPATests(unittest.TestCase):
         self.assertGreater(body.Ki, initial_store - 30.0)
         self.assertLess(body.Ki, initial_store)
 
+    def test_osmotic_diuresis_is_volume_guarded(self):
+        body = DKABody()
+        body.G = 2000.0
+        body.V = 0.25 * body.volume_setpoint
+        body.step({}, dt=1.0)
+        self.assertLess(body.urine_output_ml_hr, 200.0)
+        self.assertGreater(body.V, 0.20 * body.volume_setpoint)
+
+    def test_low_volume_dextrose_uses_effective_distribution_volume(self):
+        body = DKABody()
+        body.V = 1.0
+        body.G = 300.0
+        body.step({"dextrose": 20.0}, dt=1.0)
+        self.assertLess(body.G, 700.0)
+
+    def test_low_volume_bicarbonate_does_not_create_extreme_alkalemia(self):
+        body = DKABody()
+        body.V = 1.0
+        body.HCO3 = 8.0
+        body.step({"bicarbonate": 50.0}, dt=1.0)
+        self.assertLess(body.pH, 7.7)
+
     def test_effective_treatment_resolves_counterregulatory_stress(self):
         body = DKABody()
         initial_stress = body.counterregulatory_stress
@@ -821,6 +845,16 @@ class NumericalJEPATests(unittest.TestCase):
             threshold_excess("cumulative hyperosmolar injury", observation),
             0.75,
         )
+
+    def test_viability_audit_flags_unobserved_insulin_rescue(self):
+        trajectory = {"_cover": {"insulin_iv": 0, "insulin_rapid_sc": 0}}
+        reasons = coverage_artifact_reasons(
+            trajectory,
+            "acidosis (pH<6.8)",
+            {"G": 950.0, "HCO3": 1.0, "anion_gap": 50.0},
+            [{"t": 1.0, "var": "glucose", "value": 120.0}],
+        )
+        self.assertIn("no_captured_insulin_but_later_metabolism_improves", reasons)
 
     def test_power_analysis_refuses_wrong_signed_candidate(self):
         self.assertIsNone(required_stays_for_win(mean_delta=0.02, sd_delta=0.1))

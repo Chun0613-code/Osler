@@ -68,6 +68,14 @@ REPAIR_BACKLOG = {
         "Add a patient-level potassium-store correction using survived hypokalemia replays as constraints.",
         "Do not let grey-box residual directly write total-body K; repair the mass equation itself.",
     ],
+    "acid_base": [
+        "Do not tune pH/HCO3 from no-insulin captured stays; first audit treatment coverage.",
+        "Use BHB/anion-gap paired labs to calibrate ketone-HCO3 coupling only when therapy is observed.",
+    ],
+    "glucose_osmotic": [
+        "Audit hidden insulin/dextrose coverage before changing hepatic production constants.",
+        "Constrain glucose, renal loss, and volume coupling with distribution-volume safeguards.",
+    ],
 }
 
 
@@ -122,6 +130,49 @@ def observed_labs_after(trajectory, death_time):
                 "value": float(lab["value"]),
             })
     return sorted(labs, key=lambda item: item["t"])
+
+
+def future_lab_values(future_labs, var):
+    return [float(lab["value"]) for lab in future_labs if lab.get("var") == var]
+
+
+def coverage_artifact_reasons(trajectory, death_cause, death_snapshot, future_labs):
+    """Flag falsifications that are more likely unobserved treatment than dynamics.
+
+    These flags do not excuse a bad replay; they prevent tuning mechanism
+    constants to compensate for missing actions in the observed grid.
+    """
+    reasons = []
+    coverage = trajectory.get("_cover", {})
+    insulin_coverage = sum(int(coverage.get(name, 0)) for name in (
+        "insulin_iv", "insulin_rapid_sc", "insulin_intermediate_sc",
+        "insulin_basal_sc", "insulin",
+    ))
+    kcl_coverage = int(coverage.get("kcl", 0))
+    fluid_coverage = int(coverage.get("fluids", 0))
+    if future_labs:
+        future_glucose = future_lab_values(future_labs, "glucose")
+        future_hco3 = future_lab_values(future_labs, "HCO3")
+        future_ag = future_lab_values(future_labs, "anion_gap")
+        future_k = future_lab_values(future_labs, "K")
+        future_map = future_lab_values(future_labs, "MAP")
+        if insulin_coverage == 0 and (
+            (future_glucose and min(future_glucose) < death_snapshot.get("G", 0.0) - 150.0)
+            or (future_hco3 and max(future_hco3) > death_snapshot.get("HCO3", 0.0) + 4.0)
+            or (future_ag and min(future_ag) < death_snapshot.get("anion_gap", 0.0) - 6.0)
+        ):
+            reasons.append("no_captured_insulin_but_later_metabolism_improves")
+        if death_cause == "hypokalemia (K<2.5)" and kcl_coverage == 0 and (
+            future_k and max(future_k) > death_snapshot.get("Ke", 0.0) + 0.4
+        ):
+            reasons.append("no_captured_kcl_but_later_potassium_recovers")
+        if death_cause == "circulatory collapse (MAP<40)" and (
+            fluid_coverage == 0 or (
+                future_map and max(future_map) > death_snapshot.get("MAP", 0.0) + 15.0
+            )
+        ):
+            reasons.append("possible_unobserved_volume_or_vaso_support")
+    return reasons
 
 
 def action_totals(actions, stop_time=None):
@@ -181,6 +232,10 @@ def audit_trajectory(trajectory):
     future_labs = observed_labs_after(trajectory, death_time)
     death_cause = None if body.alive else body.death_cause
     subsystem = classify_death_cause(death_cause)
+    death_snapshot = compact_observation(body.observe())
+    coverage_reasons = coverage_artifact_reasons(
+        trajectory, death_cause, death_snapshot, future_labs
+    )
     last_observed_lab_time = max(
         [float(lab.get("t", 0.0)) for lab in trajectory.get("labs", [])] + [0.0]
     )
@@ -197,10 +252,12 @@ def audit_trajectory(trajectory):
         ),
         "first_threshold_crossings": first_crossings,
         "first_osmolar_risk": first_osmolar_risk,
-        "death_snapshot": compact_observation(body.observe()),
+        "death_snapshot": death_snapshot,
         "predeath_curve_tail": curve[-6:],
         "observed_labs_after_death_count": len(future_labs),
         "observed_labs_after_death_sample": future_labs[:8],
+        "coverage_artifact_reasons": coverage_reasons,
+        "coverage_limited_falsification": bool(coverage_reasons),
         "action_totals_to_death_or_end": action_totals(
             trajectory.get("actions", []), stop_time=death_time
         ),
@@ -213,6 +270,9 @@ def summarize(cases):
     deaths = [case for case in cases if not case["simulated_alive"]]
     cause_counts = Counter(case["simulated_death_cause"] for case in deaths)
     subsystem_counts = Counter(case["hard_mechanism_subsystem"] for case in deaths)
+    coverage_reasons = Counter()
+    for case in deaths:
+        coverage_reasons.update(case.get("coverage_artifact_reasons", []))
     first_crossing_counts = Counter()
     for case in deaths:
         if not case["first_threshold_crossings"]:
@@ -237,6 +297,10 @@ def summarize(cases):
         ),
         "death_causes": dict(cause_counts),
         "hard_mechanism_subsystems": dict(subsystem_counts),
+        "coverage_limited_death_count": sum(
+            bool(case.get("coverage_limited_falsification")) for case in deaths
+        ),
+        "coverage_artifact_reasons": dict(coverage_reasons),
         "first_threshold_crossing_counts": dict(first_crossing_counts),
         "repair_backlog": backlog,
     }
