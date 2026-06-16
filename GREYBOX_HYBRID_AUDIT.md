@@ -177,6 +177,40 @@ This architecture succeeds at preventing self-confident wrong departures. It
 does not prove factual superiority over persistence and therefore remains a
 research guard, not a promoted forecaster.
 
+## Viability Falsification Audit
+
+`dka_viability_falsification_audit.py` replays real trajectories and treats every
+case with later observed measurements after simulated death as a falsification of
+the owning viability equation. On `/tmp/dka_maintenance_trajectories.jsonl`, the
+audit produced `dka_viability_falsification_audit_v1.json`:
+
+- 16 replay trajectories
+- 11 simulated deaths
+- 11/11 deaths falsified by later real observations
+- Death causes: 6 cumulative hyperosmolar injury, 5 hypokalemia
+- Hard-mechanism owners: 6 `osmotic_injury`, 5 `potassium_mass`
+- First threshold crossings: 7 hypokalemia, 4 cumulative hyperosmolar injury
+
+This matters because the constrained grey-box residual can write glucose, ketone,
+bicarbonate, serum potassium, sodium, and creatinine derivatives only. It is
+intentionally forbidden from writing total-body potassium, volume/MAP balance,
+insulin depots, dose mass balance, or cumulative osmotic injury. The residual can
+therefore improve visible concentrations while still leaving the fatal replay
+error in untouched hard mechanisms.
+
+Repair backlog:
+
+- `osmotic_injury`: separate instantaneous osmolality from injury burden, audit
+  sodium/free-water balance, and use real-survived high-osmolality stays as
+  negative death labels for the injury threshold.
+- `potassium_mass`: trace serum potassium collapse into renal loss, insulin and
+  acidosis shift, KCl retention, and patient-level total-store initialization.
+- `volume_map`: remains on the owner list for future falsifications even though
+  this demo replay's first deaths were osmotic and potassium failures.
+
+The next simulator work should repair these owning equations directly instead of
+expanding the grey-box residual write set.
+
 ## Not Executed
 
 eICU/HiRID transfer pretraining was not run because those datasets are not present

@@ -132,6 +132,11 @@ python counterfactual_shadow_demo.py \
   --trajectory-jsonl dka_fidelity_demo_v4.jsonl \
   --greybox-residual dka_greybox_residual_candidate_v1.pt
 
+# Trace real-survived simulated deaths to the hard mechanism that failed first.
+python dka_viability_falsification_audit.py \
+  /tmp/dka_maintenance_trajectories.jsonl \
+  --output dka_viability_falsification_audit_v1.json
+
 # Evaluate where persistence should become weaker
 python long_horizon_real_test.py trajectories.jsonl \
   --checkpoint dka_symbolic_jepa_v5.pt --horizons 6,12,24
@@ -227,6 +232,13 @@ factual forecasting. It emits a research-only what-if contract with explicit
 `decision_authority: false`, `clinical_dose_claim_allowed: false`, and
 `causal_claim_allowed: false`. The artifact is for explanation, safety shielding,
 and planning-simulator experiments; it does not enter live Osler ranking.
+
+`dka_viability_falsification_audit.py` treats each real trajectory that survives
+past simulated death as a direct falsification of the simulator's hard viability
+mechanism. The maintenance-enriched demo replay produced 11/16 simulated deaths;
+all 11 had later real observations. Six were owned by cumulative hyperosmolar
+injury and five by potassium-mass failure. Those equations, not the grey-box
+residual write set, are the next structural repair targets.
 
 Acute viability failures now use reversible severity-by-duration burdens rather
 than instant death at the first threshold crossing. Hyperosmolar injury remains a

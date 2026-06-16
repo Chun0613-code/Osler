@@ -67,6 +67,7 @@ from real_world_improvement import episode_features
 from real_world_power_analysis import required_stays_for_win
 from predict_dka_intervention import compare, predict
 from dka_fidelity_replay import init_body
+from dka_viability_falsification_audit import classify_death_cause, threshold_excess
 from dka_transition_extract import find_dka_onset
 from mimic_action_history import (
     action_window_summary, deduplicate_events, normalize_events,
@@ -767,6 +768,37 @@ class NumericalJEPATests(unittest.TestCase):
             corrected["states"][:, :, 1, STATE_KEYS.index("G")] * 200.0 + 250.0
         ).mean()
         self.assertLess(corrected_glucose, baseline_glucose)
+
+    def test_viability_audit_maps_fatal_thresholds_to_hard_mechanisms(self):
+        self.assertEqual(
+            classify_death_cause("cumulative hyperosmolar injury"),
+            "osmotic_injury",
+        )
+        self.assertEqual(
+            classify_death_cause("hypokalemia (K<2.5)"),
+            "potassium_mass",
+        )
+        self.assertEqual(
+            classify_death_cause("circulatory collapse (MAP<40)"),
+            "volume_map",
+        )
+
+    def test_viability_audit_measures_threshold_excess(self):
+        observation = {
+            "G": 250.0,
+            "pH": 7.1,
+            "Ke": 2.2,
+            "MAP": 55.0,
+            "osmotic_injury": 12.75,
+        }
+        self.assertAlmostEqual(
+            threshold_excess("hypokalemia (K<2.5)", observation),
+            0.3,
+        )
+        self.assertAlmostEqual(
+            threshold_excess("cumulative hyperosmolar injury", observation),
+            0.75,
+        )
 
     def test_power_analysis_refuses_wrong_signed_candidate(self):
         self.assertIsNone(required_stays_for_win(mean_delta=0.02, sd_delta=0.1))
