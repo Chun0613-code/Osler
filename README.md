@@ -154,6 +154,17 @@ python symbolic_real_test.py \
   --checkpoint dka_symbolic_jepa_v6_candidate.pt \
   --mimic dka_transitions_6h_demo_v4.parquet \
   --output dka_symbolic_real_test_v6_candidate.json
+python train_intervention_jepa.py \
+  --scenarios 1000 --sequence-length 12 --epochs 55 --batch-size 12 \
+  --checkpoint dka_symbolic_jepa_v6_full_candidate.pt \
+  --report dka_symbolic_jepa_v6_full_candidate_report.json \
+  --greybox-residual dka_greybox_residual_candidate_v1.pt \
+  --action-prior dka_action_prior_demo_v1.json \
+  --mimic dka_transitions_6h_demo_v4.parquet
+python symbolic_real_test.py \
+  --checkpoint dka_symbolic_jepa_v6_full_candidate.pt \
+  --mimic dka_transitions_6h_demo_v4.parquet \
+  --output dka_symbolic_real_test_v6_full_candidate.json
 
 # Evaluate where persistence should become weaker
 python long_horizon_real_test.py trajectories.jsonl \
@@ -280,6 +291,13 @@ trained from the repaired simulator plus the candidate grey-box residual. It
 improves simulator-held-out counterfactual effect-sign accuracy (`0.9388` at six
 steps) and has active 48/48 latent dimensions, but it still loses persistence on
 most MIMIC factual targets. It does not replace `dka_symbolic_jepa_v5.pt`.
+
+The full-budget v6 experiment repeats v5's 1,000-scenario, 55-epoch training
+budget. It also remains candidate-only. `dka_v5_vs_v6_full_candidate_comparison.json`
+records the closing decision: v6 full does not promote over v5 because it still
+fails the external persistence gate and is worse than v5 on glucose, HCO3,
+osmolality, creatinine, sodium, and anion gap. The runtime/shadow checkpoint
+remains `dka_symbolic_jepa_v5.pt`.
 
 Acute viability failures now use reversible severity-by-duration burdens rather
 than instant death at the first threshold crossing. Hyperosmolar injury remains a

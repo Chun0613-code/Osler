@@ -344,7 +344,10 @@ cohort, not more hand-tuned equations.
 
 ## V6 Candidate Integration
 
-The repaired simulator was fed back into JEPA as a candidate-only integration:
+The repaired simulator was fed back into JEPA twice: first as a small smoke
+candidate, then as the one full-budget closing experiment.
+
+Small candidate command:
 
 ```bash
 python train_intervention_jepa.py \
@@ -356,7 +359,7 @@ python train_intervention_jepa.py \
   --mimic dka_transitions_6h_demo_v4.parquet
 ```
 
-Simulator-held-out candidate metrics:
+Small candidate simulator-held-out metrics:
 
 - six-step counterfactual effect-sign accuracy: `0.9388`
 - six-step factual normalized MSE: `0.134703`
@@ -375,6 +378,60 @@ External MIMIC proxy still rejects factual promotion:
 Conclusion: v6 is useful as a candidate research artifact for counterfactual and
 simulator-side experiments. It does not replace v5 for shadow/advisory runtime,
 and it does not change the no-causal-claim boundary.
+
+## Full-Budget V6 Closing Experiment
+
+One full retrain was run with the same budget shape as v5: 1,000 scenarios,
+sequence length 12, and 55 epochs. This was the last planned simulator-to-JEPA
+integration check.
+
+```bash
+python train_intervention_jepa.py \
+  --scenarios 1000 --sequence-length 12 --epochs 55 --batch-size 12 \
+  --checkpoint dka_symbolic_jepa_v6_full_candidate.pt \
+  --report dka_symbolic_jepa_v6_full_candidate_report.json \
+  --greybox-residual dka_greybox_residual_candidate_v1.pt \
+  --action-prior dka_action_prior_demo_v1.json \
+  --mimic dka_transitions_6h_demo_v4.parquet
+python symbolic_real_test.py \
+  --checkpoint dka_symbolic_jepa_v6_full_candidate.pt \
+  --mimic dka_transitions_6h_demo_v4.parquet \
+  --output dka_symbolic_real_test_v6_full_candidate.json
+```
+
+Result: do not promote v6 over v5.
+
+V6 full improved some local external targets but did not pass the factual
+persistence gate and did not clearly beat v5:
+
+| Target | v5 JEPA | v6 full JEPA | Persistence | Decision |
+| --- | ---: | ---: | ---: | --- |
+| Glucose | 145.78 | 315.91 | 63.00 | worse |
+| pH | 0.0976 | 0.0940 | 0.0585 | v6 slightly better than v5, still loses persistence |
+| HCO3 | 5.47 | 10.69 | 2.35 | worse |
+| Anion gap | 3.25 | 3.44 | 2.95 | worse |
+| Potassium | 0.66 | 0.58 | 0.41 | v6 better than v5, still loses persistence |
+| MAP | 10.07 | 9.63 | 11.74 | v6 wins |
+| Sodium | 8.52 | 9.53 | 3.17 | worse |
+| Osmolality | 23.68 | 34.08 | 7.06 | worse |
+| Creatinine | 0.38 | 0.77 | 0.33 | worse |
+| Urine output | 133.41 | 117.48 | 54.43 | v6 better than v5, still loses persistence |
+
+Simulator-side metrics were healthy but not enough to justify replacement:
+
+- v5 six-step counterfactual sign accuracy: `0.9783`
+- v6 full six-step counterfactual sign accuracy: `0.9639`
+- v5 effective latent rank: `13.338`
+- v6 full effective latent rank: `10.854`
+- v6 full active latent dimensions: `48/48`
+- v6 full changed-only external symbolic direction accuracy: `0.6786`
+- rules proposed/promoted: `0/0`
+
+Closing conclusion: repaired simulator fidelity improved the simulator itself,
+but under a fair JEPA training budget it did not create a better advisory
+checkpoint than v5. The current runtime/shadow model remains
+`dka_symbolic_jepa_v5.pt`. Further gains require better treatment capture or a
+larger causal-grade cohort, not another simulator micro-adjustment.
 
 ## Not Executed
 

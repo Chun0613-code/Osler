@@ -9,6 +9,7 @@ can reproduce the documented inference paths without retraining.
 | `dka_intervention_jepa_v4.pt` | 952 KiB | `71505038bed6ab2a78343abc080c01a6aaa0ed48d572e2bb7a2f227854cad7d7` | Route-aware insulin PK, potassium belief state, and hyperosmolar-risk checkpoint. |
 | `dka_symbolic_jepa_v5.pt` | 1.3 MiB | `f4767fec387af5093e59c4adf0eb6f53d9ce236d40741bdc48defd9ff4c79d27` | Symbolic-grounded checkpoint with direction, status, proof-path, and rule-proposal heads. |
 | `dka_symbolic_jepa_v6_candidate.pt` | 1.4 MiB | `febba04985aa3fd878bd61a2223f7af69931c92bbc930bb88c336e4337ba2c73` | Candidate-only checkpoint trained from repaired DKABody plus grey-box residual; not promoted over v5. |
+| `dka_symbolic_jepa_v6_full_candidate.pt` | 1.4 MiB | `ae885f6ac7a01c1866e0cf327895a2e7776a41422247b3e152e1dff95e1355ae` | Full-budget 1,000-scenario/55-epoch v6 candidate; rejected for runtime promotion versus v5. |
 | `dka_real_world_adapter_v1.joblib` | 66 KiB | `f68f1604b679a240c6bf5fe9e8f1887b7831ccdd986ae04c804d9ca8d4956a4a` | Guarded factual residual adapter with ensemble uncertainty and state-wise fallback. |
 
 ## Data boundary
