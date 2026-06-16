@@ -156,6 +156,12 @@ def coverage_artifact_reasons(trajectory, death_cause, death_snapshot, future_la
         future_ag = future_lab_values(future_labs, "anion_gap")
         future_k = future_lab_values(future_labs, "K")
         future_map = future_lab_values(future_labs, "MAP")
+        if (
+            death_cause == "acidosis (pH<6.8)"
+            and insulin_coverage == 0
+            and future_labs
+        ):
+            reasons.append("no_captured_insulin_for_falsified_acidosis_death")
         if insulin_coverage == 0 and (
             (future_glucose and min(future_glucose) < death_snapshot.get("G", 0.0) - 150.0)
             or (future_hco3 and max(future_hco3) > death_snapshot.get("HCO3", 0.0) + 4.0)

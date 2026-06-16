@@ -135,7 +135,25 @@ python counterfactual_shadow_demo.py \
 # Trace real-survived simulated deaths to the hard mechanism that failed first.
 python dka_viability_falsification_audit.py \
   /tmp/dka_maintenance_trajectories.jsonl \
-  --output dka_viability_falsification_audit_v3.json
+  --output dka_viability_falsification_audit_v4.json
+
+# Audit numerical floors/ceilings separately from physiology.
+python dka_numeric_artifact_audit.py \
+  /tmp/dka_maintenance_trajectories.jsonl \
+  --output dka_numeric_artifact_audit_v1.json
+
+# Candidate-only integration: repaired DKABody + grey-box residual -> JEPA.
+python train_intervention_jepa.py \
+  --scenarios 200 --sequence-length 8 --epochs 8 --batch-size 10 \
+  --checkpoint dka_symbolic_jepa_v6_candidate.pt \
+  --report dka_symbolic_jepa_v6_candidate_report.json \
+  --greybox-residual dka_greybox_residual_candidate_v1.pt \
+  --action-prior dka_action_prior_demo_v1.json \
+  --mimic dka_transitions_6h_demo_v4.parquet
+python symbolic_real_test.py \
+  --checkpoint dka_symbolic_jepa_v6_candidate.pt \
+  --mimic dka_transitions_6h_demo_v4.parquet \
+  --output dka_symbolic_real_test_v6_candidate.json
 
 # Evaluate where persistence should become weaker
 python long_horizon_real_test.py trajectories.jsonl \
@@ -245,12 +263,23 @@ potassium follows a pH-corrected equilibrium plus insulin-driven intracellular
 shift, while `K_store` remains conserved except for true KCl intake and renal
 loss. Cumulative osmotic injury and extreme hyperglycemia are reported burden
 signals, not independent terminal death switches. The post-repair audit
-(`dka_viability_falsification_audit_v3.json`) reduces simulated deaths from
+(`dka_viability_falsification_audit_v4.json`) reduces simulated deaths from
 11/16 to 4/16, removes osmotic-injury deaths, and reduces hypokalemia deaths from
 5 to 1. The v3 replay also bounds glucose/diuresis/volume blow-up with effective
-distribution volumes and renal/volume-guarded urine flow. Two of the four
-remaining deaths are coverage-limited falsifications, so the simulator is better
-localized but not clinically calibrated.
+distribution volumes and renal/volume-guarded urine flow. Three of the four
+remaining deaths are coverage-limited or not falsified by later observations, so
+the simulator is better localized but not clinically calibrated.
+
+`dka_numeric_artifact_audit.py` keeps numerical artifacts separate from
+physiology. On the maintenance replay it found no remaining `V`, `HCO3`, `Ke`, or
+`Cr` floor hits. The remaining notable bound hit is `Na` ceiling, which feeds a
+non-terminal osmotic burden with a clipped hourly sodium rate.
+
+`dka_symbolic_jepa_v6_candidate.pt` is a candidate-only integration checkpoint
+trained from the repaired simulator plus the candidate grey-box residual. It
+improves simulator-held-out counterfactual effect-sign accuracy (`0.9388` at six
+steps) and has active 48/48 latent dimensions, but it still loses persistence on
+most MIMIC factual targets. It does not replace `dka_symbolic_jepa_v5.pt`.
 
 Acute viability failures now use reversible severity-by-duration burdens rather
 than instant death at the first threshold crossing. Hyperosmolar injury remains a

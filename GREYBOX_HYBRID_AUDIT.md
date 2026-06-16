@@ -312,6 +312,70 @@ simulator's hard-mechanism failures are now more localized: remaining work is
 acid-base calibration on treatment-observed windows, better treatment capture,
 and one residual potassium/KCl case.
 
+## Numeric Artifact Audit And Stop Criterion
+
+`dka_numeric_artifact_audit.py` now separates numerical implementation artifacts
+from physiology. The audit records each floor/ceiling, whether the clamped state
+can enter a denominator or terminal pathway, and whether the bound is hit during
+maintenance replay.
+
+`dka_numeric_artifact_audit_v1.json` found:
+
+- no remaining `V.floor`, `HCO3.floor`, `Ke.floor`, or `Cr.floor` hits;
+- `Na.ceiling` hit 6 times, but sodium is rate-clipped and only feeds
+  non-terminal osmotic burden;
+- `osmotic_injury.floor` hits are reporting-floor zeros, not terminal dynamics;
+- `counterregulatory_stress` and `renal_perfusion_state` ceiling hits are hidden
+  bounded-drive states, not concentration denominators.
+
+The acid-base audit was also tightened. `dka_viability_falsification_audit_v4.json`
+keeps the same 4/16 simulated deaths as v3, but 3/4 are now explicitly
+coverage-limited:
+
+- 2 acidosis deaths have no captured insulin in a falsified trajectory;
+- 1 hypokalemia death has no captured KCl but later potassium recovery;
+- the remaining acidosis death has no later observation after simulated death and
+  is not a falsification.
+
+That satisfies the demo-data stopping criterion for hard-mechanism repair:
+remaining deaths are either coverage-limited or not falsified by later
+observations. Further reduction now requires better treatment capture or a larger
+cohort, not more hand-tuned equations.
+
+## V6 Candidate Integration
+
+The repaired simulator was fed back into JEPA as a candidate-only integration:
+
+```bash
+python train_intervention_jepa.py \
+  --scenarios 200 --sequence-length 8 --epochs 8 --batch-size 10 \
+  --checkpoint dka_symbolic_jepa_v6_candidate.pt \
+  --report dka_symbolic_jepa_v6_candidate_report.json \
+  --greybox-residual dka_greybox_residual_candidate_v1.pt \
+  --action-prior dka_action_prior_demo_v1.json \
+  --mimic dka_transitions_6h_demo_v4.parquet
+```
+
+Simulator-held-out candidate metrics:
+
+- six-step counterfactual effect-sign accuracy: `0.9388`
+- six-step factual normalized MSE: `0.134703`
+- shuffled-action MSE: `0.59499`, so the candidate uses interventions
+- Osler verified rate when explainable: `0.9932`
+- active latent dimensions: `48/48`
+
+External MIMIC proxy still rejects factual promotion:
+
+- changed-only symbolic factual direction accuracy: `0.6071`
+- rules proposed/promoted: `0/0`
+- glucose MAE: JEPA `380.96` vs persistence `63.0`
+- MAP remains the main factual win: JEPA `11.48` vs persistence `11.74`
+- active-DKA anion gap is close: JEPA `3.14` vs persistence `3.25`
+
+Conclusion: v6 is useful as a candidate research artifact for counterfactual and
+simulator-side experiments. It does not replace v5 for shadow/advisory runtime,
+and it does not change the no-causal-claim boundary.
+
 ## Not Executed
 
 eICU/HiRID transfer pretraining was not run because those datasets are not present

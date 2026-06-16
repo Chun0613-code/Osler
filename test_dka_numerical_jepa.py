@@ -70,6 +70,7 @@ from dka_fidelity_replay import init_body
 from dka_viability_falsification_audit import (
     classify_death_cause, coverage_artifact_reasons, threshold_excess,
 )
+from dka_numeric_artifact_audit import BOUND_REGISTRY, DENOMINATOR_GUARDS
 from dka_transition_extract import find_dka_onset
 from mimic_action_history import (
     action_window_summary, deduplicate_events, normalize_events,
@@ -763,6 +764,20 @@ class NumericalJEPATests(unittest.TestCase):
         self.assertTrue(body.alive)
         self.assertLess(body.counterregulatory_stress, initial_stress)
 
+    def test_insulin_clears_ketones_and_improves_bicarbonate(self):
+        body = DKABody()
+        body.G = 500.0
+        body.HCO3 = 8.0
+        body.Ket = 16.0
+        start = body.observe()
+        for _ in range(8):
+            body.step({"insulin_iv": 6.0, "fluids": 250.0, "kcl": 10.0}, dt=0.5)
+        end = body.observe()
+        self.assertTrue(body.alive)
+        self.assertLess(end["BHB"], start["BHB"])
+        self.assertGreater(end["HCO3"], start["HCO3"])
+        self.assertGreater(end["pH"], start["pH"])
+
     def test_fluid_sodium_metadata_changes_sodium_trajectory(self):
         saline = DKABody()
         dextrose_water = DKABody()
@@ -855,6 +870,17 @@ class NumericalJEPATests(unittest.TestCase):
             [{"t": 1.0, "var": "glucose", "value": 120.0}],
         )
         self.assertIn("no_captured_insulin_but_later_metabolism_improves", reasons)
+
+    def test_numeric_artifact_audit_tracks_volume_denominator_guards(self):
+        self.assertEqual(BOUND_REGISTRY["V"]["floor"], 1.0)
+        self.assertEqual(
+            DENOMINATOR_GUARDS["concentration_volume"]["status"],
+            "protected",
+        )
+        self.assertEqual(
+            DENOMINATOR_GUARDS["sodium_balance_volume"]["status"],
+            "bounded_not_distribution_protected",
+        )
 
     def test_power_analysis_refuses_wrong_signed_candidate(self):
         self.assertIsNone(required_stays_for_win(mean_delta=0.02, sd_delta=0.1))
