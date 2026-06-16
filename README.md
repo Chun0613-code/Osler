@@ -223,6 +223,9 @@ python train_intervention_jepa.py \
   --mimic dka_transitions_6h_demo_v4.parquet
 ```
 
+The full-budget transfer candidate was tested and rejected for runtime
+promotion; see `dka_v5_vs_physionet_transfer_comparison.json`.
+
 This JEPA reasons over 15 continuous physiological variables: glucose, pH,
 bicarbonate, anion gap, potassium, MAP, volume, insulin, sodium, effective
 osmolality, creatinine, urine output, beta-hydroxybutyrate, latent total-body

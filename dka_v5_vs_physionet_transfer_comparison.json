@@ -1,0 +1,135 @@
+{
+  "experiment": "full-budget PhysioNet encoder transfer candidate vs v5",
+  "budget": {
+    "scenarios": 1000,
+    "sequence_length": 12,
+    "epochs": 55,
+    "initial_checkpoint": "dka_physionet_encoder_init.pt"
+  },
+  "candidate": "dka_physionet_transfer_candidate.pt",
+  "baseline": "dka_symbolic_jepa_v5.pt",
+  "decision": "do_not_promote_physionet_transfer_over_v5",
+  "reason": "Feature-aligned ICU pretraining improves simulator-side symbolic and counterfactual metrics, but it still fails the external MIMIC factual persistence gate on glucose, potassium, bicarbonate, sodium, osmolality, creatinine, and urine output.",
+  "simulator_side": {
+    "transfer_collapse": {
+      "mean_latent_std": 0.348473,
+      "min_latent_std": 0.19025,
+      "effective_rank": 10.204,
+      "active_dimensions_std_gt_0_01": 48,
+      "low_rank_physiology_warning": false,
+      "collapsed": false
+    },
+    "transfer_counterfactual_sign_accuracy_6_steps": 0.9655,
+    "v5_counterfactual_sign_accuracy_6_steps": 0.9783,
+    "transfer_action_conditioning": {
+      "factual_normalized_mse_6h": 0.079729,
+      "shuffled_action_normalized_mse_6h": 0.682631,
+      "shuffled_minus_factual": 0.602902,
+      "uses_interventions": true
+    }
+  },
+  "external_symbolic": {
+    "v5": {
+      "factual_direction_accuracy_all": 0.5625,
+      "factual_direction_accuracy_changed_only": 0.6429,
+      "direction_comparisons": 32,
+      "changed_direction_comparisons": 28,
+      "mean_proposal_confidence": 0.9372,
+      "interpretation": "Observational factual-direction check; it is not a causal effect test."
+    },
+    "physionet_transfer": {
+      "factual_direction_accuracy_all": 0.5938,
+      "factual_direction_accuracy_changed_only": 0.6786,
+      "direction_comparisons": 32,
+      "changed_direction_comparisons": 28,
+      "mean_proposal_confidence": 0.9398,
+      "interpretation": "Observational factual-direction check; it is not a causal effect test."
+    }
+  },
+  "candidate_rule_gate": {
+    "proposed": 0,
+    "retrospectively_validated": 0,
+    "active_rule_conflicts": 0,
+    "automatically_promoted_to_active": 0,
+    "candidate_file": "/Users/chunyouchang/Desktop/llm_project/medical_jepa/rules/candidate/symbolic_real_test_1781612023.json"
+  },
+  "mimic_active_dka_mae": {
+    "glucose": {
+      "v5_jepa": 148.3214,
+      "physionet_transfer_jepa": 295.2941,
+      "persistence": 96.6471,
+      "transfer_beats_persistence": false,
+      "transfer_beats_v5": false
+    },
+    "ph": {
+      "v5_jepa": 0.087,
+      "physionet_transfer_jepa": 0.0614,
+      "persistence": 0.06,
+      "transfer_beats_persistence": false,
+      "transfer_beats_v5": true
+    },
+    "bicarbonate": {
+      "v5_jepa": 5.2205,
+      "physionet_transfer_jepa": 10.7297,
+      "persistence": 2.75,
+      "transfer_beats_persistence": false,
+      "transfer_beats_v5": false
+    },
+    "anion_gap": {
+      "v5_jepa": 3.0388,
+      "physionet_transfer_jepa": 3.1598,
+      "persistence": 3.25,
+      "transfer_beats_persistence": true,
+      "transfer_beats_v5": false
+    },
+    "potassium": {
+      "v5_jepa": 0.6896,
+      "physionet_transfer_jepa": 0.7243,
+      "persistence": 0.44,
+      "transfer_beats_persistence": false,
+      "transfer_beats_v5": false
+    },
+    "map": {
+      "v5_jepa": 13.0363,
+      "physionet_transfer_jepa": 11.2647,
+      "persistence": 16.2683,
+      "transfer_beats_persistence": true,
+      "transfer_beats_v5": true
+    },
+    "sodium": {
+      "v5_jepa": 9.8295,
+      "physionet_transfer_jepa": 11.6591,
+      "persistence": 4.1579,
+      "transfer_beats_persistence": false,
+      "transfer_beats_v5": false
+    },
+    "osmolality": {
+      "v5_jepa": 22.1216,
+      "physionet_transfer_jepa": 34.7291,
+      "persistence": 9.534,
+      "transfer_beats_persistence": false,
+      "transfer_beats_v5": false
+    },
+    "creatinine": {
+      "v5_jepa": 0.4819,
+      "physionet_transfer_jepa": 0.7017,
+      "persistence": 0.34,
+      "transfer_beats_persistence": false,
+      "transfer_beats_v5": false
+    },
+    "urine_output": {
+      "v5_jepa": 144.9714,
+      "physionet_transfer_jepa": 152.7371,
+      "persistence": 53.7868,
+      "transfer_beats_persistence": false,
+      "transfer_beats_v5": false
+    }
+  },
+  "promotion_gate": {
+    "passes_persistence_gate": false,
+    "rules_promoted": 0,
+    "clinical_or_causal_claim_allowed": false,
+    "runtime_replacement_for_v5": false
+  },
+  "interpretation": "The large PhysioNet ICU result remains valuable evidence that JEPA can learn factual ICU physiology at scale. Direct feature-aligned transfer into the DKA intervention model, however, does not solve the DKA demo persistence failure. The missing ingredient remains action-conditioned, causal-grade DKA data rather than generic ICU encoder weights."
+}

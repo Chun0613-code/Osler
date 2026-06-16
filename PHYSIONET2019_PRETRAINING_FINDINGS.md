@@ -86,3 +86,39 @@ All other DKA-specific states, including `anion_gap`, `V`, `I`, `Na`,
 `osmolality`, `urine_output`, `BHB`, `K_store`, and `osmotic_injury`, must remain
 randomly initialized or simulator-trained. No transfer experiment may bypass the
 same persistence, symbolic, and safety gates used for v5/v6.
+
+## Transfer Experiment Result
+
+The feature-aligned transfer experiment was run at the same full candidate
+budget used for the v6 closing experiment:
+
+- 1,000 simulated DKA scenarios
+- 12-step branches
+- 55 epochs
+- Grey-box residual enabled
+- Demo action prior enabled
+- Initial checkpoint: `dka_physionet_encoder_init.pt`
+
+Result: do not promote.
+
+| Active-DKA Target | v5 JEPA | PhysioNet Transfer | Persistence | Transfer Result |
+|---|---:|---:|---:|---|
+| Glucose | 148.3214 | 295.2941 | 96.6471 | loses to v5 and persistence |
+| Potassium | 0.6896 | 0.7243 | 0.4400 | loses to v5 and persistence |
+| MAP | 13.0363 | 11.2647 | 16.2683 | wins |
+| Anion gap | 3.0388 | 3.1598 | 3.2500 | wins persistence, loses v5 |
+| pH | 0.0870 | 0.0614 | 0.0600 | near persistence, wins v5 |
+| Bicarbonate | 5.2205 | 10.7297 | 2.7500 | loses |
+
+The simulator-side metrics remained strong: 6-step counterfactual sign accuracy
+was `0.9655`, action shuffling worsened MSE by `0.602902`, and the latent space
+did not collapse. The external MIMIC factual gate still failed for the dense DKA
+targets that matter most.
+
+Interpretation:
+
+> Generic ICU pretraining proves that JEPA can learn factual physiology at
+> scale, but direct feature-aligned encoder transfer does not solve the DKA
+> intervention/persistence failure. The remaining bottleneck is still
+> action-conditioned, causal-grade DKA data rather than generic ICU encoder
+> weights.

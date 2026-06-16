@@ -30,6 +30,12 @@ JEPA into a fresh DKA WorldModel, but it is not a promoted DKA checkpoint. The
 committed `dka_physionet_encoder_init_report.json` records the transfer map and
 promotion boundary.
 
+`dka_physionet_transfer_candidate.pt` is also local-only. It was trained at the
+full 1,000-scenario/55-epoch candidate budget and rejected for runtime
+promotion. The committed `dka_v5_vs_physionet_transfer_comparison.json` and
+`dka_symbolic_real_test_physionet_transfer_candidate.json` record the aggregate
+evaluation.
+
 The JEPA checkpoints were trained on the DKA simulator. The residual adapter was
 fitted on the local MIMIC-IV demo after patient-cross-fitted evaluation; it does
 not contain raw rows, but it has no untouched external validation set.
