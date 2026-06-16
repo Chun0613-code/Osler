@@ -44,6 +44,9 @@ from osler_jepa.action_prior import EmpiricalActionPrior
 from osler_jepa.greybox_residual import (
     FORBIDDEN_KEYS, MAX_ABS_RATE, project_residual,
 )
+from osler_jepa.anchored_residual import (
+    AnchoredResidualConfig, AnchoredResidualGate, prolog_direction_gate,
+)
 from osler_jepa.shadow import (
     ShadowObserver,
     build_dka_shadow_state,
@@ -768,6 +771,46 @@ class NumericalJEPATests(unittest.TestCase):
     def test_power_analysis_refuses_wrong_signed_candidate(self):
         self.assertIsNone(required_stays_for_win(mean_delta=0.02, sd_delta=0.1))
         self.assertGreater(required_stays_for_win(mean_delta=-0.02, sd_delta=0.1), 0)
+
+    def test_anchored_residual_requires_prolog_direction(self):
+        gate = AnchoredResidualGate(AnchoredResidualConfig(supported_horizon_hours=1.0))
+        action = np.zeros(A_DIM, dtype=np.float32)
+        decision = gate.select(
+            STATE_KEYS.index("G"), 300.0, 250.0, action,
+            direction_agreement=1.0,
+        )
+        self.assertFalse(decision["allowed_to_leave_persistence"])
+        self.assertEqual(decision["selected_prediction"], 300.0)
+        self.assertIn("no_active_prolog_direction", decision["abstain_reasons"])
+
+    def test_anchored_residual_blocks_prolog_contradiction(self):
+        gate = AnchoredResidualGate(AnchoredResidualConfig(supported_horizon_hours=1.0))
+        action = np.zeros(A_DIM, dtype=np.float32)
+        action[ACTION_INDEX["fluids"]] = 0.5
+        direction = prolog_direction_gate(
+            STATE_KEYS.index("MAP"), action, horizon_hours=1.0
+        )
+        self.assertEqual(direction["allowed_sign"], 1)
+        decision = gate.select(
+            STATE_KEYS.index("MAP"), 70.0, 60.0, action,
+            direction_agreement=1.0, horizon_hours=1.0,
+        )
+        self.assertFalse(decision["allowed_to_leave_persistence"])
+        self.assertEqual(decision["selected_prediction"], 70.0)
+        self.assertIn("candidate_direction_contradicts_prolog", decision["abstain_reasons"])
+
+    def test_anchored_residual_shrinks_rule_consistent_move(self):
+        gate = AnchoredResidualGate(AnchoredResidualConfig(supported_horizon_hours=1.0))
+        action = np.zeros(A_DIM, dtype=np.float32)
+        action[ACTION_INDEX["fluids"]] = 0.5
+        decision = gate.select(
+            STATE_KEYS.index("MAP"), 70.0, 90.0, action,
+            direction_agreement=1.0, horizon_hours=1.0,
+        )
+        self.assertTrue(decision["allowed_to_leave_persistence"])
+        self.assertGreater(decision["selected_prediction"], 70.0)
+        self.assertLess(decision["selected_prediction"], 90.0)
+        self.assertEqual(decision["selected_source"], "anchored_residual")
 
     def test_world_model_is_action_conditioned(self):
         torch.manual_seed(0)

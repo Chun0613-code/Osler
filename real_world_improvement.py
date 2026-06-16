@@ -643,6 +643,7 @@ def run_crossfit(examples, seed=17):
                 if not np.isfinite(truth):
                     continue
                 numerical_rows.append({
+                    "row_index": int(examples[index]["row_index"]),
                     "stay_id": int(data["groups"][index]),
                     "active_dka": bool(data["active"][index]),
                     "target_index": target_index,
@@ -664,6 +665,9 @@ def run_crossfit(examples, seed=17):
                     },
                     "ensemble_std": float(ensemble_std[local]),
                     "ensemble_direction_agreement": float(agreement[local]),
+                    "action_exposure": json.dumps(
+                        data["actions"][index].astype(float).tolist()
+                    ),
                 })
 
         for index in outer_test:

@@ -141,6 +141,42 @@ This is the right product framing for the current evidence level: counterfactual
 explanation, safety shielding, and planning-simulator research rather than a
 short-horizon factual forecaster that claims to beat persistence.
 
+## Persistence-Anchored Residual Gate
+
+`osler_jepa/anchored_residual.py` implements the layer-two architecture that
+turns persistence from an opponent into the safety anchor:
+
+```text
+selected = persistence + shrink * clipped(candidate - persistence)
+```
+
+The residual can be non-zero only when:
+
+- the candidate residual is larger than the per-state stability threshold,
+- an active Prolog-derived transition rule supports the same direction,
+- the candidate source has sufficient direction agreement,
+- the horizon matches the supported contract.
+
+Prolog's role is permission, direction, explanation, and safety. It does not
+try to improve numeric magnitude.
+
+Patient-held-out result in `dka_anchored_residual_hybrid_v1.json`:
+
+- `base_jepa` was allowed to leave persistence 0/889 times because it has no
+  ensemble agreement signal. This reduces its normalized MAE from 0.5639 back to
+  persistence at 0.2670.
+- `ensemble_adapter` was allowed to leave persistence only 15/889 times
+  (1.69%). Its normalized MAE moved from 0.3959 to 0.2674, essentially the
+  persistence safety floor at 0.2670.
+- Dense-core normalized MAE moved from persistence 0.2207 to anchored ensemble
+  0.2203, a tiny signal but not promotion evidence.
+- Most abstentions were due to `no_active_prolog_direction`; this is expected
+  because the gate is intentionally narrow and temporal.
+
+This architecture succeeds at preventing self-confident wrong departures. It
+does not prove factual superiority over persistence and therefore remains a
+research guard, not a promoted forecaster.
+
 ## Not Executed
 
 eICU/HiRID transfer pretraining was not run because those datasets are not present

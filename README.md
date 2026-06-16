@@ -112,6 +112,12 @@ python real_world_power_analysis.py \
   --oof-predictions dka_real_world_oof_predictions_v2.csv \
   --cohort dka_transitions_6h_demo_v4.parquet
 
+# Turn persistence into the runtime anchor. Candidate residuals may leave it
+# only when the direction is Prolog-supported and ensemble agreement is high.
+python anchored_residual_hybrid.py \
+  --checkpoint dka_symbolic_jepa_v5.pt \
+  --mimic dka_transitions_6h_demo_v4.parquet
+
 # Feed the candidate grey-box residual back into the synthetic simulator used to
 # train JEPA. This is a candidate research path, not a promotion shortcut.
 python train_intervention_jepa.py \
@@ -206,6 +212,15 @@ errors within ICU stay, computes paired stay-level deltas versus persistence,
 and estimates the number of stays needed only when the observed candidate is
 already better than persistence. A positive delta is reported as wrong-signed,
 not underpowered.
+
+`osler_jepa/anchored_residual.py` changes the runtime shape of layer-two factual
+forecasting. Persistence becomes the anchor rather than the opponent. A candidate
+forecast is converted into a residual, clipped, and shrunk. The residual is
+applied only when an active Prolog-derived transition rule supports the same
+direction and the candidate source has sufficient agreement. Prolog decides
+whether the model may leave the anchor and which direction is explainable; it
+does not estimate the numeric effect size. `anchored_residual_hybrid.py` evaluates
+this contract on patient-held-out rows.
 
 `counterfactual_shadow_demo.py` reframes JEPA/simulator value away from short
 factual forecasting. It emits a research-only what-if contract with explicit

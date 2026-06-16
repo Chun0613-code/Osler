@@ -14,6 +14,11 @@ from .validator import (
 )
 from .embodied_logic import DkaEmbodiedLogic, GroundProlog, OSLER_DKA_PROLOG
 from .belief import PotassiumStoreBelief
+from .anchored_residual import (
+    AnchoredResidualConfig,
+    AnchoredResidualGate,
+    prolog_direction_gate,
+)
 from .causal_evaluation import (
     TargetTrialSpec,
     evaluate_target_trials,
@@ -50,6 +55,9 @@ __all__ = [
     "GroundProlog",
     "OSLER_DKA_PROLOG",
     "PotassiumStoreBelief",
+    "AnchoredResidualConfig",
+    "AnchoredResidualGate",
+    "prolog_direction_gate",
     "TargetTrialSpec",
     "evaluate_target_trials",
     "ShadowObserver",
