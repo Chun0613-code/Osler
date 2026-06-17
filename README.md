@@ -59,6 +59,7 @@ Osler/
 ├── OSLER_JEPA_ROADMAP.md    Target architecture, promotion gates, next build order.
 ├── SYMBOLIC_JEPA_VIABILITY_AUDIT.md  Same-scale compiler/viability ablation.
 ├── PHYSIONET2019_PRETRAINING_FINDINGS.md  Real ICU pretraining result and boundary.
+├── PHYSIONET_DKABODY_CALIBRATION_FINDINGS.md  PhysioNet simulator-prior calibration.
 ├── requirements.txt
 └── README.md
 ```
@@ -225,6 +226,31 @@ python train_intervention_jepa.py \
 
 The full-budget transfer candidate was tested and rejected for runtime
 promotion; see `dka_v5_vs_physionet_transfer_comparison.json`.
+
+### PhysioNet 2019 DKABody calibration
+
+PhysioNet 2019 can also calibrate the simulator "textbook" without claiming
+treatment effects:
+
+```bash
+python physionet2019_calibrate_dkabody.py \
+  --output physionet2019_dkabody_calibration.json
+
+python physionet2019_dkabody_calibration_audit.py \
+  --calibration physionet2019_dkabody_calibration.json \
+  --output physionet2019_dkabody_calibration_audit.json
+
+python train_intervention_jepa.py \
+  --physionet-calibration physionet2019_dkabody_calibration.json \
+  --checkpoint dka_physionet_calibrated_candidate.pt \
+  --report dka_physionet_calibrated_candidate_report.json
+```
+
+The calibration artifact covers DKA-like presentation distribution, observable
+patient-variability proxies, action-unobserved drift targets, and measurement
+mask/age realism. The drift target is explicitly not a clean no-treatment causal
+estimate because Challenge 2019 has no medication channels. See
+`PHYSIONET_DKABODY_CALIBRATION_FINDINGS.md`.
 
 This JEPA reasons over 15 continuous physiological variables: glucose, pH,
 bicarbonate, anion gap, potassium, MAP, volume, insulin, sodium, effective

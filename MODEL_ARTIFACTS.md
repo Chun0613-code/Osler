@@ -36,6 +36,13 @@ promotion. The committed `dka_v5_vs_physionet_transfer_comparison.json` and
 `dka_symbolic_real_test_physionet_transfer_candidate.json` record the aggregate
 evaluation.
 
+`physionet2019_dkabody_calibration.json` and
+`physionet2019_dkabody_calibration_audit.json` are aggregate simulator-prior
+artifacts. They contain no patient rows or identifiers. They calibrate DKABody
+presentation priors, observable heterogeneity proxies, action-unobserved drift
+targets, and measurement masks/ages. The drift section is not a no-treatment
+causal estimate because PhysioNet 2019 has no medication action channels.
+
 The JEPA checkpoints were trained on the DKA simulator. The residual adapter was
 fitted on the local MIMIC-IV demo after patient-cross-fitted evaluation; it does
 not contain raw rows, but it has no untouched external validation set.

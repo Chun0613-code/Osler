@@ -60,6 +60,7 @@ from osler_jepa.symbolic import (
 )
 from osler_jepa.validator import OSLER_DKA_VALIDATOR
 from osler_jepa.viability import HomeostaticWorldModelObjective
+from dka_physionet_calibration import PhysioNetDkaCalibration
 
 
 PROTOCOLS = (
@@ -147,9 +148,17 @@ def protocol_action(name, observation, intensity, rng, step=0, action_prior=None
     return action_prior.constrain(action) if action_prior is not None else action
 
 
-def prepare_base_body(rng, action_prior=None, residual_model=None):
-    body = DKABody(rng=rng, residual_model=residual_model)
-    observation = randomized_dka(body, rng)
+def prepare_base_body(rng, action_prior=None, residual_model=None,
+                      physionet_calibration=None):
+    profile = (
+        physionet_calibration.sample_profile(rng)
+        if physionet_calibration is not None else None
+    )
+    body = DKABody(rng=rng, profile=profile, residual_model=residual_model)
+    observation = (
+        physionet_calibration.apply_presentation(body, rng)
+        if physionet_calibration is not None else randomized_dka(body, rng)
+    )
     # Branch at different points in the treatment course, not only presentation.
     # This exposes the model to partially corrected glucose/acidosis and residual
     # treatment effects that resemble later EHR anchors.
@@ -187,7 +196,8 @@ def prepare_base_body(rng, action_prior=None, residual_model=None):
 
 
 def generate_branched_dataset(n_scenarios=600, seq_len=12, seed=0,
-                              action_prior=None, residual_model=None):
+                              action_prior=None, residual_model=None,
+                              physionet_calibration=None):
     rng = np.random.default_rng(seed)
     n_protocols = len(PROTOCOLS)
     states = np.zeros((n_scenarios, n_protocols, seq_len + 1, S_DIM), np.float32)
@@ -204,7 +214,8 @@ def generate_branched_dataset(n_scenarios=600, seq_len=12, seed=0,
 
     for scenario in range(n_scenarios):
         base_body, base_observation, base_history, base_durations = prepare_base_body(
-            rng, action_prior=action_prior, residual_model=residual_model
+            rng, action_prior=action_prior, residual_model=residual_model,
+            physionet_calibration=physionet_calibration,
         )
         scenario_deltas = rng.choice(
             np.array([0.25, 0.5, 0.75, 1.0], dtype=np.float32),
@@ -333,15 +344,34 @@ def masked_mean(values, mask):
     return (values * mask).sum() / mask.sum().clamp_min(1.0) / values.shape[-1]
 
 
-def _partial_observation_context(state, drop_probability):
-    if drop_probability <= 0:
+def _partial_observation_context(state, drop_probability, observation_model=None):
+    if drop_probability <= 0 and observation_model is None:
         return torch.ones_like(state), torch.zeros_like(state)
-    mask = (torch.rand_like(state) > drop_probability).to(state.dtype)
+    if observation_model is None:
+        mask = (torch.rand_like(state) > drop_probability).to(state.dtype)
+        measured_age = torch.rand_like(state) * 6.0
+    else:
+        probabilities = torch.as_tensor(
+            observation_model["probabilities"],
+            dtype=state.dtype,
+            device=state.device,
+        ).reshape(1, -1)
+        probabilities = probabilities.expand_as(state)
+        if drop_probability > 0:
+            probabilities = probabilities * (1.0 - drop_probability)
+        mask = (torch.rand_like(state) < probabilities.clamp(0.01, 1.0)).to(
+            state.dtype
+        )
+        age_p90 = torch.as_tensor(
+            observation_model["age_p90_hours"],
+            dtype=state.dtype,
+            device=state.device,
+        ).reshape(1, -1).expand_as(state)
+        measured_age = torch.rand_like(state) * age_p90.clamp(1.0, MAX_OBSERVATION_AGE_HOURS)
     # Keep at least one directly observed variable in every state vector.
     empty = mask.sum(dim=-1) == 0
     if empty.any():
         mask[empty, 0] = 1.0
-    measured_age = torch.rand_like(state) * 6.0
     age = torch.where(
         mask > 0,
         measured_age,
@@ -357,7 +387,8 @@ def _time_weighted_exposure(actions, time_deltas, horizon):
 
 
 def batch_losses(model, states, actions, action_events, histories, time_deltas,
-                 valid, alive, weights=None, observation_dropout=0.0):
+                 valid, alive, weights=None, observation_dropout=0.0,
+                 observation_model=None):
     weights = weights or STAGES[-1].weights
     batch, protocols, steps, _ = actions.shape
     current = states[:, :, :-1].reshape(-1, S_DIM)
@@ -371,7 +402,7 @@ def batch_losses(model, states, actions, action_events, histories, time_deltas,
     flat_valid = valid.reshape(-1)
 
     current_mask, current_age = _partial_observation_context(
-        current, observation_dropout
+        current, observation_dropout, observation_model
     )
     latent = model.encode_state(
         current * current_mask, flat_histories, current_mask, current_age
@@ -393,7 +424,7 @@ def batch_losses(model, states, actions, action_events, histories, time_deltas,
     )
     initial_history = histories[:, :, 0].reshape(batch * protocols, H_DIM)
     initial_mask, initial_age = _partial_observation_context(
-        initial, observation_dropout
+        initial, observation_dropout, observation_model
     )
     predicted, risk_logits, rollout_latents = model.rollout(
         initial * initial_mask, action_sequences, initial_history,
@@ -603,20 +634,22 @@ def tensor_batch(dataset, indices, device):
 
 
 @torch.no_grad()
-def validation_loss(model, dataset, indices, batch_size, device, weights=None):
+def validation_loss(model, dataset, indices, batch_size, device, weights=None,
+                    observation_model=None):
     model.eval()
     totals = []
     for start in range(0, len(indices), batch_size):
         selection = indices[start:start + batch_size]
         losses = batch_losses(
-            model, *tensor_batch(dataset, selection, device), weights=weights
+            model, *tensor_batch(dataset, selection, device), weights=weights,
+            observation_model=observation_model,
         )
         totals.append(float(losses["total"]))
     return float(np.mean(totals)) if totals else math.inf
 
 
 def train_model(model, dataset, splits, epochs, batch_size, learning_rate, device,
-                viability_dynamics_enabled=False):
+                viability_dynamics_enabled=False, observation_model=None):
     optimizer = torch.optim.AdamW(
         [parameter for parameter in model.parameters() if parameter.requires_grad],
         lr=learning_rate,
@@ -642,6 +675,7 @@ def train_model(model, dataset, splits, epochs, batch_size, learning_rate, devic
                 *tensor_batch(dataset, selection, device),
                 weights=stage_weights,
                 observation_dropout=0.25,
+                observation_model=observation_model,
             )
             optimizer.zero_grad(set_to_none=True)
             losses["total"].backward()
@@ -654,6 +688,7 @@ def train_model(model, dataset, splits, epochs, batch_size, learning_rate, devic
         validation = validation_loss(
             model, dataset, splits["validation"], batch_size, device,
             weights=weights_for_stage(STAGES[-1], viability_dynamics_enabled),
+            observation_model=observation_model,
         )
         summary = {
             name: float(np.mean([part[name] for part in epoch_parts]))
@@ -1374,6 +1409,15 @@ def main():
             "training branches are generated from DKABody + residual dynamics."
         ),
     )
+    parser.add_argument(
+        "--physionet-calibration",
+        help=(
+            "Optional aggregate PhysioNet 2019 calibration JSON. When provided, "
+            "synthetic DKABody presentations, observable patient-variability "
+            "proxies, and observation masks/ages are sampled from this artifact. "
+            "It does not provide treatment-effect supervision."
+        ),
+    )
     args = parser.parse_args()
 
     gate = {
@@ -1405,9 +1449,17 @@ def main():
         GreyBoxResidualRuntime.load(args.greybox_residual, device="cpu")
         if args.greybox_residual else None
     )
+    physionet_calibration = PhysioNetDkaCalibration.load(
+        args.physionet_calibration
+    )
+    observation_model = (
+        physionet_calibration.observation_model_for_state_keys()
+        if physionet_calibration is not None else None
+    )
     dataset = generate_branched_dataset(
         args.scenarios, args.sequence_length, args.seed,
         action_prior=action_prior, residual_model=residual_model,
+        physionet_calibration=physionet_calibration,
     )
     splits = split_scenarios(args.scenarios, args.seed)
     print(
@@ -1426,6 +1478,7 @@ def main():
         model, dataset, splits, args.epochs, args.batch_size,
         args.learning_rate, device,
         viability_dynamics_enabled=args.enable_viability_dynamics,
+        observation_model=observation_model,
     )
     test_report = evaluate_model(model, dataset, splits["test"], device)
     mimic_report = evaluate_mimic_proxy(model, args.mimic, device)
@@ -1508,6 +1561,24 @@ def main():
                     "clinical_or_causal_claim_allowed": False,
                 }
                 if residual_model is not None else None
+            ),
+            "physionet_calibration": (
+                {
+                    "path": Path(args.physionet_calibration).name,
+                    "patients_scanned": physionet_calibration.payload.get(
+                        "patients_scanned"
+                    ),
+                    "presentation_records": physionet_calibration.payload[
+                        "presentation_model"
+                    ]["selection"],
+                    "uses_presentation_prior": True,
+                    "uses_patient_variability_proxies": True,
+                    "uses_measurement_model": True,
+                    "uses_action_unobserved_drift_as_target_only": True,
+                    "treatment_effect_claim_allowed": False,
+                    "causal_no_treatment_claim_allowed": False,
+                }
+                if physionet_calibration is not None else None
             ),
         },
         "curriculum": [
