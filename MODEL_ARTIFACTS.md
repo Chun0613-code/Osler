@@ -46,11 +46,22 @@ causal estimate because PhysioNet 2019 has no medication action channels.
 `dka_physionet_calibrated_candidate.pt` is local-only. It was trained at the
 full 1,000-scenario/55-epoch candidate budget using the PhysioNet DKABody
 calibration artifact plus the existing grey-box residual and action prior. The
-full checkpoint was rejected for runtime promotion, but it produced a partial
-active-DKA persistence win on glucose, pH, anion gap, and MAP. Aggregate reports
-are committed as `dka_physionet_calibrated_candidate_report.json`,
+full checkpoint was rejected for runtime promotion. Its glucose point estimate
+improved, but simulator factual MSE, counterfactual sign accuracy, latent rank,
+and external symbolic changed-only accuracy regressed. Aggregate reports are
+committed as `dka_physionet_calibrated_candidate_report.json`,
 `dka_symbolic_real_test_physionet_calibrated_candidate.json`, and
 `dka_v5_vs_physionet_calibrated_comparison.json`.
+
+`dka_physionet_presentation_only_candidate.pt` is local-only. It was trained at
+the same full candidate budget with PhysioNet presentation/profile priors while
+disabling the real ICU measurement mask/age model. This ablation improved
+glucose, latent rank, simulator factual MSE, and counterfactual sign accuracy
+relative to the full calibrated candidate, but it still failed promotion gates
+for potassium, bicarbonate, and external symbolic direction accuracy. Aggregate
+reports are committed as `dka_physionet_presentation_only_candidate_report.json`,
+`dka_symbolic_real_test_physionet_presentation_only_candidate.json`, and
+`dka_physionet_calibration_ablation_comparison.json`.
 
 The JEPA checkpoints were trained on the DKA simulator. The residual adapter was
 fitted on the local MIMIC-IV demo after patient-cross-fitted evaluation; it does

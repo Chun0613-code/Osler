@@ -1,0 +1,166 @@
+{
+  "experiment": "PhysioNet DKABody calibration ablation: presentation/profile only vs full measurement model",
+  "budget": {
+    "scenarios": 1000,
+    "sequence_length": 12,
+    "epochs": 55,
+    "shared_calibration": "physionet2019_dkabody_calibration.json",
+    "greybox_residual": "dka_greybox_residual_candidate_v1.pt",
+    "action_prior": "dka_action_prior_demo_v1.json"
+  },
+  "arms": {
+    "full_calibration": {
+      "checkpoint": "dka_physionet_calibrated_candidate.pt",
+      "uses_measurement_model": true,
+      "collapse": {
+        "mean_latent_std": 0.424199,
+        "min_latent_std": 0.226887,
+        "effective_rank": 6.055,
+        "active_dimensions_std_gt_0_01": 48,
+        "low_rank_physiology_warning": true,
+        "collapsed": false
+      },
+      "factual_mse_6h": 1.115254,
+      "counterfactual_sign_accuracy_6_steps": 0.8437,
+      "external_symbolic_changed_only": 0.6071
+    },
+    "presentation_only": {
+      "checkpoint": "dka_physionet_presentation_only_candidate.pt",
+      "uses_measurement_model": false,
+      "measurement_model_disabled_for_ablation": true,
+      "collapse": {
+        "mean_latent_std": 0.323949,
+        "min_latent_std": 0.198181,
+        "effective_rank": 9.344,
+        "active_dimensions_std_gt_0_01": 48,
+        "low_rank_physiology_warning": false,
+        "collapsed": false
+      },
+      "factual_mse_6h": 0.479113,
+      "counterfactual_sign_accuracy_6_steps": 0.8806,
+      "external_symbolic_changed_only": 0.5357
+    }
+  },
+  "active_dka_mae": {
+    "glucose": {
+      "n": 17,
+      "v5_jepa": 148.3214,
+      "full_calibrated_jepa": 94.4103,
+      "presentation_only_jepa": 81.8959,
+      "persistence": 96.6471,
+      "presentation_only_beats_persistence": true,
+      "presentation_only_beats_full_calibration": true,
+      "presentation_only_beats_v5": true
+    },
+    "ph": {
+      "n": 11,
+      "v5_jepa": 0.087,
+      "full_calibrated_jepa": 0.0575,
+      "presentation_only_jepa": 0.0471,
+      "persistence": 0.06,
+      "presentation_only_beats_persistence": true,
+      "presentation_only_beats_full_calibration": true,
+      "presentation_only_beats_v5": true
+    },
+    "bicarbonate": {
+      "n": 16,
+      "v5_jepa": 5.2205,
+      "full_calibrated_jepa": 6.4371,
+      "presentation_only_jepa": 7.1248,
+      "persistence": 2.75,
+      "presentation_only_beats_persistence": false,
+      "presentation_only_beats_full_calibration": false,
+      "presentation_only_beats_v5": false
+    },
+    "anion_gap": {
+      "n": 16,
+      "v5_jepa": 3.0388,
+      "full_calibrated_jepa": 3.229,
+      "presentation_only_jepa": 3.2485,
+      "persistence": 3.25,
+      "presentation_only_beats_persistence": true,
+      "presentation_only_beats_full_calibration": false,
+      "presentation_only_beats_v5": false
+    },
+    "potassium": {
+      "n": 20,
+      "v5_jepa": 0.6896,
+      "full_calibrated_jepa": 0.9137,
+      "presentation_only_jepa": 0.8133,
+      "persistence": 0.44,
+      "presentation_only_beats_persistence": false,
+      "presentation_only_beats_full_calibration": true,
+      "presentation_only_beats_v5": false
+    },
+    "map": {
+      "n": 41,
+      "v5_jepa": 13.0363,
+      "full_calibrated_jepa": 9.8653,
+      "presentation_only_jepa": 12.4726,
+      "persistence": 16.2683,
+      "presentation_only_beats_persistence": true,
+      "presentation_only_beats_full_calibration": false,
+      "presentation_only_beats_v5": true
+    },
+    "sodium": {
+      "n": 19,
+      "v5_jepa": 9.8295,
+      "full_calibrated_jepa": 5.9171,
+      "presentation_only_jepa": 6.0646,
+      "persistence": 4.1579,
+      "presentation_only_beats_persistence": false,
+      "presentation_only_beats_full_calibration": false,
+      "presentation_only_beats_v5": true
+    },
+    "osmolality": {
+      "n": 18,
+      "v5_jepa": 22.1216,
+      "full_calibrated_jepa": 11.6501,
+      "presentation_only_jepa": 12.5782,
+      "persistence": 9.534,
+      "presentation_only_beats_persistence": false,
+      "presentation_only_beats_full_calibration": false,
+      "presentation_only_beats_v5": true
+    },
+    "creatinine": {
+      "n": 15,
+      "v5_jepa": 0.4819,
+      "full_calibrated_jepa": 6.0188,
+      "presentation_only_jepa": 5.9658,
+      "persistence": 0.34,
+      "presentation_only_beats_persistence": false,
+      "presentation_only_beats_full_calibration": true,
+      "presentation_only_beats_v5": false
+    },
+    "urine_output": {
+      "n": 34,
+      "v5_jepa": 144.9714,
+      "full_calibrated_jepa": 86.8858,
+      "presentation_only_jepa": 84.126,
+      "persistence": 53.7868,
+      "presentation_only_beats_persistence": false,
+      "presentation_only_beats_full_calibration": true,
+      "presentation_only_beats_v5": true
+    }
+  },
+  "decision": "do_not_promote_any_calibrated_checkpoint",
+  "ablation_result": "Presentation/profile calibration is the useful component for glucose and simulator fit. The full PhysioNet measurement mask/age model worsens low-rank warning, factual MSE, and counterfactual accuracy, consistent with regression-to-prior under heavy missingness.",
+  "promotion_gate": {
+    "presentation_only_passes_full_persistence_gate": false,
+    "presentation_only_partial_state_signal_states": [
+      "glucose",
+      "ph",
+      "anion_gap",
+      "map"
+    ],
+    "full_calibration_partial_state_signal_states": [
+      "glucose",
+      "ph",
+      "anion_gap",
+      "map"
+    ],
+    "clinical_or_causal_claim_allowed": false,
+    "runtime_replacement_for_v5": false
+  },
+  "next_recommendation": "Keep presentation/profile priors. Do not train with the full real missingness model as-is. If measurement realism is needed, introduce it gradually or strengthen anti-collapse before re-testing."
+}

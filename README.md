@@ -244,6 +244,14 @@ python train_intervention_jepa.py \
   --physionet-calibration physionet2019_dkabody_calibration.json \
   --checkpoint dka_physionet_calibrated_candidate.pt \
   --report dka_physionet_calibrated_candidate_report.json
+
+# Ablation: keep calibrated presentation/profile priors, but disable the real
+# ICU measurement mask/age model.
+python train_intervention_jepa.py \
+  --physionet-calibration physionet2019_dkabody_calibration.json \
+  --disable-physionet-measurement-model \
+  --checkpoint dka_physionet_presentation_only_candidate.pt \
+  --report dka_physionet_presentation_only_candidate_report.json
 ```
 
 The calibration artifact covers DKA-like presentation distribution, observable
@@ -252,10 +260,17 @@ mask/age realism. The drift target is explicitly not a clean no-treatment causal
 estimate because Challenge 2019 has no medication channels. See
 `PHYSIONET_DKABODY_CALIBRATION_FINDINGS.md`.
 
-The full-budget calibrated candidate was tested. It was not promoted as a full
-runtime replacement, but it was the first DKA candidate in this series to beat
-active-DKA persistence on glucose. See
-`dka_v5_vs_physionet_calibrated_comparison.json`.
+The full-budget calibrated candidate was tested and rejected for runtime
+promotion. Its active-DKA glucose point estimate beat persistence, but the
+bottom-line dynamics regressed: low-rank physiology warning, worse simulator
+factual MSE, worse counterfactual sign accuracy, and weaker external symbolic
+changed-only accuracy. The presentation-only ablation kept the glucose benefit
+and improved rank/MSE/counterfactual metrics relative to full calibration,
+supporting the conclusion that presentation/profile priors are useful while the
+full real missingness model is unsafe as-is. It also remains candidate-only
+because potassium, bicarbonate, and external symbolic direction accuracy still
+fail the promotion gate. See `dka_v5_vs_physionet_calibrated_comparison.json`
+and `dka_physionet_calibration_ablation_comparison.json`.
 
 This JEPA reasons over 15 continuous physiological variables: glucose, pH,
 bicarbonate, anion gap, potassium, MAP, volume, insulin, sodium, effective

@@ -114,8 +114,8 @@ the v6 and PhysioNet-transfer closing experiments:
 
 Result: do not promote the full checkpoint over v5.
 
-The result is not a flat failure. It is the first DKA candidate in this series to
-beat persistence on active-DKA glucose:
+The result initially looked promising because it was the first DKA candidate in
+this series to beat persistence on active-DKA glucose:
 
 | Active-DKA Target | v5 JEPA | PhysioNet-Calibrated | Persistence | Result |
 |---|---:|---:|---:|---|
@@ -127,20 +127,63 @@ beat persistence on active-DKA glucose:
 | Bicarbonate | 5.2205 | 6.4371 | 2.7500 | loses |
 | Creatinine | 0.4819 | 6.0188 | 0.3400 | loses |
 
-Simulator-side counterfactual sign accuracy at 6 steps was `0.8437`, below v5
-and v6. The latent space did not collapse, but effective rank was only `6.055`,
-which is a low-rank warning.
+However, the bottom-line metrics reveal this as a warning result rather than a
+runtime improvement. Simulator-side counterfactual sign accuracy at 6 steps was
+only `0.8437`, below v5 and v6. Factual normalized MSE at 6h was `1.115254`,
+far worse than v5. The latent space did not formally collapse, but effective
+rank was only `6.055`, triggering `low_rank_physiology_warning: true`.
 
 Interpretation:
 
-> PhysioNet calibration changed the evidence in the right direction for glucose,
-> pH, anion gap, and MAP, but it did not produce a safe full-model replacement.
-> The strongest likely contribution is the real measurement mask/age model and
-> more realistic presentations. The remaining failures still point to unresolved
-> treated dynamics, especially potassium and bicarbonate.
+> PhysioNet calibration changed the glucose point estimate, but the full
+> measurement-mask version regressed on dynamics and representation quality. The
+> glucose win is therefore not sufficient evidence of a better treatment world
+> model.
 
 The committed comparison report is
 `dka_v5_vs_physionet_calibrated_comparison.json`.
+
+## Presentation-Only Ablation
+
+The full calibration bundled presentation/profile priors with a real ICU
+measurement mask/age model. To separate the useful component from the harmful
+one, a second full-budget arm was run with the same presentation/profile priors
+but with the measurement model disabled:
+
+```bash
+python train_intervention_jepa.py \
+  --physionet-calibration physionet2019_dkabody_calibration.json \
+  --disable-physionet-measurement-model \
+  --scenarios 1000 \
+  --sequence-length 12 \
+  --epochs 55
+```
+
+This ablation supports the hypothesis that presentation/profile calibration is
+useful, while the full real missingness model induces regression-to-prior.
+
+| Metric | Full Calibration | Presentation Only | Direction |
+|---|---:|---:|---|
+| Effective latent rank | 6.055 | 9.344 | improves |
+| Low-rank warning | true | false | improves |
+| Simulator factual MSE 6h | 1.115254 | 0.479113 | improves |
+| Counterfactual sign accuracy 6h | 0.8437 | 0.8806 | improves |
+| Active-DKA glucose MAE | 94.4103 | 81.8959 | improves |
+| Active-DKA potassium MAE | 0.9137 | 0.8133 | improves but still loses persistence |
+| External symbolic changed-only | 0.6071 | 0.5357 | worsens |
+
+Interpretation:
+
+> The glucose improvement survives without the real measurement model and becomes
+> stronger. The representation and simulator-side dynamics also recover
+> substantially. Therefore the good part is likely the calibrated
+> presentation/profile prior. The heavy real missingness model is not safe to use
+> as-is because it pushes the model toward averaging under sparse observations.
+
+Even presentation-only is not promotable: potassium, bicarbonate, sodium,
+osmolality, creatinine, and urine output still fail persistence, and external
+symbolic direction accuracy worsens. The committed ablation report is
+`dka_physionet_calibration_ablation_comparison.json`.
 
 ## Boundary
 

@@ -1418,6 +1418,15 @@ def main():
             "It does not provide treatment-effect supervision."
         ),
     )
+    parser.add_argument(
+        "--disable-physionet-measurement-model",
+        action="store_true",
+        help=(
+            "Ablation flag: keep PhysioNet presentation/profile priors but use "
+            "the default synthetic observation dropout instead of the real ICU "
+            "mask/age model."
+        ),
+    )
     args = parser.parse_args()
 
     gate = {
@@ -1454,7 +1463,10 @@ def main():
     )
     observation_model = (
         physionet_calibration.observation_model_for_state_keys()
-        if physionet_calibration is not None else None
+        if (
+            physionet_calibration is not None
+            and not args.disable_physionet_measurement_model
+        ) else None
     )
     dataset = generate_branched_dataset(
         args.scenarios, args.sequence_length, args.seed,
@@ -1573,8 +1585,12 @@ def main():
                     ]["selection"],
                     "uses_presentation_prior": True,
                     "uses_patient_variability_proxies": True,
-                    "uses_measurement_model": True,
-                    "uses_action_unobserved_drift_as_target_only": True,
+                    "uses_measurement_model": observation_model is not None,
+                    "measurement_model_disabled_for_ablation": (
+                        args.disable_physionet_measurement_model
+                    ),
+                    "uses_action_unobserved_drift_as_training_target": False,
+                    "action_unobserved_drift_is_review_only": True,
                     "treatment_effect_claim_allowed": False,
                     "causal_no_treatment_claim_allowed": False,
                 }
