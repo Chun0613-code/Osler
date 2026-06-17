@@ -185,6 +185,36 @@ osmolality, creatinine, and urine output still fail persistence, and external
 symbolic direction accuracy worsens. The committed ablation report is
 `dka_physionet_calibration_ablation_comparison.json`.
 
+## Buffer Hypothesis Audit
+
+A follow-up audit tested whether the remaining persistence failures could be
+explained by DKABody being too jumpy or under-buffered for blood-buffered
+variables such as HCO3 and serum potassium.
+
+The audit compares PhysioNet action-unobserved factual dynamics with DKABody
+no-action trajectories. It is not a treatment-effect calibration target because
+PhysioNet 2019 has no medication action channels.
+
+Key one-hour results:
+
+| Feature | Sim/PhysioNet p90 abs-delta ratio | Autocorr gap, sim - PhysioNet | Mean-reversion beta gap, sim - PhysioNet |
+|---|---:|---:|---:|
+| HCO3 | 0.621 | +0.071 | -0.065 |
+| Potassium | 0.452 | +0.105 | +0.061 |
+| pH | 0.113 | +0.272 | -0.315 |
+| Glucose | 0.478 | +0.135 | -0.180 |
+
+Interpretation:
+
+> The audit does not support the simple under-buffering story. DKABody no-action
+> is not more volatile or less autocorrelated than PhysioNet for HCO3 or
+> potassium. The stronger signal is a recovery mismatch: PhysioNet
+> action-unobserved HCO3, pH, and glucose tend to move toward setpoint, while
+> DKABody no-action does not. That points more to missing observed
+> treatment/recovery dynamics than to passive blood buffering alone.
+
+The committed aggregate report is `dka_buffer_hypothesis_audit.json`.
+
 ## Boundary
 
 Allowed:

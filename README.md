@@ -252,6 +252,11 @@ python train_intervention_jepa.py \
   --disable-physionet-measurement-model \
   --checkpoint dka_physionet_presentation_only_candidate.pt \
   --report dka_physionet_presentation_only_candidate_report.json
+
+# Test whether DKABody is too jumpy / under-buffered versus real ICU dynamics.
+python dka_buffer_hypothesis_audit.py \
+  --calibration physionet2019_dkabody_calibration.json \
+  --output dka_buffer_hypothesis_audit.json
 ```
 
 The calibration artifact covers DKA-like presentation distribution, observable
@@ -271,6 +276,15 @@ full real missingness model is unsafe as-is. It also remains candidate-only
 because potassium, bicarbonate, and external symbolic direction accuracy still
 fail the promotion gate. See `dka_v5_vs_physionet_calibrated_comparison.json`
 and `dka_physionet_calibration_ablation_comparison.json`.
+
+The buffer hypothesis audit tests whether DKABody no-action trajectories are
+more volatile or less autocorrelated than action-unobserved PhysioNet ICU
+dynamics for HCO3 and potassium. The current report does not support that simple
+under-buffering story. Instead, it finds a recovery/mean-reversion mismatch for
+HCO3, pH, and glucose: real action-unobserved ICU trajectories move toward
+setpoint while DKABody no-action dynamics do not. This points to missing
+observed treatment/recovery dynamics, not a justified runtime change to passive
+buffer constants.
 
 This JEPA reasons over 15 continuous physiological variables: glucose, pH,
 bicarbonate, anion gap, potassium, MAP, volume, insulin, sodium, effective
