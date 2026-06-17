@@ -43,6 +43,15 @@ presentation priors, observable heterogeneity proxies, action-unobserved drift
 targets, and measurement masks/ages. The drift section is not a no-treatment
 causal estimate because PhysioNet 2019 has no medication action channels.
 
+`dka_physionet_calibrated_candidate.pt` is local-only. It was trained at the
+full 1,000-scenario/55-epoch candidate budget using the PhysioNet DKABody
+calibration artifact plus the existing grey-box residual and action prior. The
+full checkpoint was rejected for runtime promotion, but it produced a partial
+active-DKA persistence win on glucose, pH, anion gap, and MAP. Aggregate reports
+are committed as `dka_physionet_calibrated_candidate_report.json`,
+`dka_symbolic_real_test_physionet_calibrated_candidate.json`, and
+`dka_v5_vs_physionet_calibrated_comparison.json`.
+
 The JEPA checkpoints were trained on the DKA simulator. The residual adapter was
 fitted on the local MIMIC-IV demo after patient-cross-fitted evaluation; it does
 not contain raw rows, but it has no untouched external validation set.

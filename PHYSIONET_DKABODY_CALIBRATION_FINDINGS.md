@@ -100,6 +100,48 @@ When enabled, synthetic DKABody branches use:
 
 The default training path remains unchanged unless the flag is provided.
 
+## Full-Budget Candidate Result
+
+The calibrated simulator was tested at the same full candidate budget used for
+the v6 and PhysioNet-transfer closing experiments:
+
+- 1,000 simulated DKA scenarios
+- 12-step branches
+- 55 epochs
+- Grey-box residual enabled
+- Demo action prior enabled
+- PhysioNet-calibrated presentation/profile/mask-age model enabled
+
+Result: do not promote the full checkpoint over v5.
+
+The result is not a flat failure. It is the first DKA candidate in this series to
+beat persistence on active-DKA glucose:
+
+| Active-DKA Target | v5 JEPA | PhysioNet-Calibrated | Persistence | Result |
+|---|---:|---:|---:|---|
+| Glucose | 148.3214 | 94.4103 | 96.6471 | small win |
+| pH | 0.0870 | 0.0575 | 0.0600 | small win |
+| Anion gap | 3.0388 | 3.2290 | 3.2500 | tiny win vs persistence |
+| MAP | 13.0363 | 9.8653 | 16.2683 | clear win |
+| Potassium | 0.6896 | 0.9137 | 0.4400 | loses |
+| Bicarbonate | 5.2205 | 6.4371 | 2.7500 | loses |
+| Creatinine | 0.4819 | 6.0188 | 0.3400 | loses |
+
+Simulator-side counterfactual sign accuracy at 6 steps was `0.8437`, below v5
+and v6. The latent space did not collapse, but effective rank was only `6.055`,
+which is a low-rank warning.
+
+Interpretation:
+
+> PhysioNet calibration changed the evidence in the right direction for glucose,
+> pH, anion gap, and MAP, but it did not produce a safe full-model replacement.
+> The strongest likely contribution is the real measurement mask/age model and
+> more realistic presentations. The remaining failures still point to unresolved
+> treated dynamics, especially potassium and bicarbonate.
+
+The committed comparison report is
+`dka_v5_vs_physionet_calibrated_comparison.json`.
+
 ## Boundary
 
 Allowed:

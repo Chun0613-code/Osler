@@ -252,6 +252,11 @@ mask/age realism. The drift target is explicitly not a clean no-treatment causal
 estimate because Challenge 2019 has no medication channels. See
 `PHYSIONET_DKABODY_CALIBRATION_FINDINGS.md`.
 
+The full-budget calibrated candidate was tested. It was not promoted as a full
+runtime replacement, but it was the first DKA candidate in this series to beat
+active-DKA persistence on glucose. See
+`dka_v5_vs_physionet_calibrated_comparison.json`.
+
 This JEPA reasons over 15 continuous physiological variables: glucose, pH,
 bicarbonate, anion gap, potassium, MAP, volume, insulin, sodium, effective
 osmolality, creatinine, urine output, beta-hydroxybutyrate, latent total-body
