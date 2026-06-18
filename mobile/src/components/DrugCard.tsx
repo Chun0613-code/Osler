@@ -35,15 +35,16 @@ interface Props {
   mechanismOnly?: boolean;
   /** disease world-model, for the disease-source citation */
   disease?: DiseaseModel | null;
+  /** when provided, render a "Prescribe" CTA (hidden for avoid/block) */
+  onPrescribe?: (candidate: DrugCandidate) => void;
 }
 
-export default function DrugCard({ candidate: c, rank, highlighted, mechanismOnly, disease }: Props) {
+export default function DrugCard({ candidate: c, rank, highlighted, mechanismOnly, disease, onPrescribe }: Props) {
   const [showMech, setShowMech] = useState(false);
   const safety = colorForSafety(c.safety?.decision);
   const reasons = (c.safety?.reasons ?? []).filter((r) => r.message);
-  const isBad = ['avoid', 'block'].includes(
-    (c.safety?.decision ?? '').toLowerCase(),
-  );
+  const decision = (c.safety?.decision ?? '').toLowerCase();
+  const isBad = ['avoid', 'block'].includes(decision);
 
   const toggleMech = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -93,6 +94,17 @@ export default function DrugCard({ candidate: c, rank, highlighted, mechanismOnl
               : 'blocked by safety gate / validation'}
           </Text>
         </View>
+      )}
+
+      {onPrescribe && !isBad && (
+        <Pressable
+          style={[styles.rxBtn, decision === 'caution' && styles.rxBtnCaution]}
+          onPress={() => onPrescribe(c)}
+          accessibilityRole="button"
+          accessibilityLabel={`Prescribe ${c.drug}`}>
+          <Ionicons name="create-outline" size={16} color="#FFFFFF" />
+          <Text style={styles.rxBtnText}>Prescribe</Text>
+        </Pressable>
       )}
 
       {!!c.rationale && <Text style={styles.rationale}>{c.rationale}</Text>}
@@ -273,6 +285,24 @@ const styles = StyleSheet.create({
     lineHeight: 21,
     color: colors.textSecondary,
     marginTop: spacing.sm,
+  },
+  rxBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    backgroundColor: colors.green,
+    borderRadius: radius.pill,
+    paddingVertical: 11,
+    marginTop: spacing.md,
+  },
+  rxBtnCaution: {
+    backgroundColor: colors.amber,
+  },
+  rxBtnText: {
+    fontFamily: fonts.bodySemiBold,
+    fontSize: 14,
+    color: '#FFFFFF',
   },
   reasons: {
     marginTop: spacing.sm,

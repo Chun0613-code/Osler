@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>Prescribe</title>
+<!--
+  prescribe_embed.html — the prescribe step, loaded inside the mobile app's WebView
+  (src/app/prescribe.tsx) from this Flask backend. Served by GET /prescribe-embed?rx_id=…
+
+  Two branches, decided by /api/prescribe/context:
+    • mode "mock"   → a local review/sign form (no Photon credentials). Fully usable
+                      offline; mirrors the certified workflow so the demo always flows.
+    • mode "photon" → mounts Photon Elements (<photon-client> + <photon-prescribe-workflow>),
+                      the same certified UI behind Doximity Prescribe. Scaffolded below;
+                      wired up in Phase 0 once sandbox keys + a test provider exist.
+
+  On completion/cancel we postMessage back to React Native, which routes to the
+  Prescriptions tab. Same native code path serves both branches.
+-->
+<style>
+  :root{
+    --navy:#0F2B5B; --bg:#F8F9FC; --card:#FFFFFF; --border:#E2E7F0;
+    --text:#0F2B5B; --text2:#4A5A7A; --muted:#8C9BB5;
+    --green:#059669; --amber:#D97706; --red:#DC2626; --teal:#0D9488;
+  }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased; padding:16px;
+  }
+  .wrap{ max-width:520px; margin:0 auto; }
+  .head{ display:flex; align-items:center; gap:10px; margin-bottom:4px; }
+  .drug{ font-size:22px; font-weight:700; text-transform:capitalize; }
+  .pill{ font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase;
+         color:#fff; padding:3px 9px; border-radius:50px; }
+  .role{ color:var(--text2); font-size:13px; margin:2px 0 10px; }
+  .rationale{ background:#EEF1F7; border:1px solid var(--border); border-radius:9px;
+              padding:10px 12px; font-size:13px; line-height:19px; color:var(--text2);
+              margin-bottom:16px; }
+  label{ display:block; font-size:11px; font-weight:700; letter-spacing:.5px;
+         text-transform:uppercase; color:var(--muted); margin:14px 0 6px; }
+  input,textarea,select{
+    width:100%; font:inherit; font-size:15px; color:var(--text); background:var(--card);
+    border:1px solid var(--border); border-radius:9px; padding:11px 12px; outline:none;
+  }
+  input:focus,textarea:focus,select:focus{ border-color:var(--navy); }
+  textarea{ min-height:64px; resize:vertical; line-height:21px; }
+  .row{ display:flex; gap:10px; }
+  .row > div{ flex:1; }
+  .hint{ font-size:11.5px; color:var(--muted); margin-top:5px; }
+  .actions{ margin-top:22px; display:flex; gap:10px; }
+  button{ font:inherit; font-weight:600; border:none; border-radius:50px; padding:13px 18px;
+          cursor:pointer; }
+  .send{ flex:1; background:var(--green); color:#fff; font-size:15px; }
+  .send:disabled{ opacity:.5; }
+  .cancel{ background:#EEF1F7; color:var(--text2); }
+  .err{ color:var(--red); font-size:13px; margin-top:12px; min-height:18px; }
+  .note{ font-size:11.5px; color:var(--muted); font-style:italic; margin-top:18px;
+         line-height:17px; }
+  .loading{ color:var(--muted); text-align:center; margin-top:40px; }
+  #photon-mount{ margin-top:8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="app"><div class="loading">Loading prescription…</div></div>
+</div>
+
+<script>
+  // ── helpers ──────────────────────────────────────────────────────────────
+  var SAFETY_COLOR = { ok:"#059669", caution:"#D97706", adjust:"#0D9488",
+                       avoid:"#DC2626", block:"#DC2626" };
+  // Sandbox pharmacies for the mock branch (Photon supplies the real picker).
+  var MOCK_PHARMACIES = [
+    { id:"ph_cvs_1234",  name:"CVS Pharmacy #1234 — 123 Main St" },
+    { id:"ph_wag_0567",  name:"Walgreens #567 — 88 Oak Ave" },
+    { id:"ph_hosp_out",  name:"Hospital Outpatient Pharmacy" },
+    { id:"ph_rite_0210", name:"Rite Aid #210 — 45 Elm St" }
+  ];
+
+  function rnPost(obj){
+    try { if (window.ReactNativeWebView) window.ReactNativeWebView.postMessage(JSON.stringify(obj)); }
+    catch (e) {}
+  }
+  function qs(name){
+    var m = new RegExp("[?&]" + name + "=([^&]*)").exec(window.location.search);
+    return m ? decodeURIComponent(m[1]) : "";
+  }
+  function el(html){ var d = document.createElement("div"); d.innerHTML = html.trim(); return d.firstChild; }
+  function esc(s){ return (s == null ? "" : String(s)).replace(/[&<>"]/g, function(c){
+    return ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" })[c]; }); }
+
+  var RX_ID = qs("rx_id");
+
+  // ── boot ─────────────────────────────────────────────────────────────────
+  fetch("/api/prescribe/context?rx_id=" + encodeURIComponent(RX_ID))
+    .then(function(r){ if(!r.ok) throw new Error("context " + r.status); return r.json(); })
+    .then(function(ctx){ ctx.mode === "photon" ? renderPhoton(ctx) : renderMock(ctx); })
+    .catch(function(e){
+      document.getElementById("app").innerHTML =
+        '<div class="err">Could not load prescription: ' + esc(e.message) + "</div>";
+    });
+
+  function headerHtml(ctx){
+    var color = SAFETY_COLOR[(ctx.safety_decision||"ok").toLowerCase()] || "#6B7280";
+    return '' +
+      '<div class="head">' +
+        '<div class="drug">' + esc(ctx.drug) + "</div>" +
+        '<span class="pill" style="background:' + color + '">' + esc(ctx.safety_decision||"ok") + "</span>" +
+      "</div>" +
+      (ctx.clinical_role ? '<div class="role">' + esc(ctx.clinical_role) + "</div>" : "") +
+      (ctx.rationale ? '<div class="rationale">' + esc(ctx.rationale) + "</div>" : "");
+  }
+
+  // ── MOCK branch: local review / sign / send ───────────────────────────────
+  function renderMock(ctx){
+    var pharmacyOpts = MOCK_PHARMACIES.map(function(p){
+      return '<option value="' + p.id + '" data-name="' + esc(p.name) + '">' + esc(p.name) + "</option>";
+    }).join("");
+
+    document.getElementById("app").innerHTML =
+      headerHtml(ctx) +
+      '<label>Sig — directions (confirm / edit)</label>' +
+      '<textarea id="sig" placeholder="e.g. Take 1 tablet by mouth once daily">' + esc(ctx.sig_prefill) + "</textarea>" +
+      '<div class="hint">Pre-filled from the FDA label text; the prescriber confirms the structured directions.</div>' +
+      '<div class="row">' +
+        '<div><label>Quantity</label><input id="qty" type="number" inputmode="numeric" min="1" value="30" /></div>' +
+        '<div><label>Unit</label><input id="unit" type="text" value="tablet" /></div>' +
+      "</div>" +
+      '<div class="row">' +
+        '<div><label>Days supply</label><input id="days" type="number" inputmode="numeric" min="1" value="30" /></div>' +
+        '<div><label>Refills</label><input id="refills" type="number" inputmode="numeric" min="0" value="0" /></div>' +
+      "</div>" +
+      '<label>Pharmacy</label><select id="pharmacy">' + pharmacyOpts + "</select>" +
+      '<div class="actions">' +
+        '<button class="cancel" id="cancel">Cancel</button>' +
+        '<button class="send" id="send">Sign &amp; Send</button>' +
+      "</div>" +
+      '<div class="err" id="err"></div>' +
+      '<div class="note">Sandbox demo — no prescription is transmitted to a real pharmacy. ' +
+        "A licensed clinician's signature is required for any real prescription.</div>";
+
+    document.getElementById("cancel").onclick = function(){ rnPost({ type:"cancel" }); };
+    document.getElementById("send").onclick = function(){ submitMock(ctx); };
+  }
+
+  function submitMock(ctx){
+    var btn = document.getElementById("send");
+    var errEl = document.getElementById("err");
+    var sig = document.getElementById("sig").value.trim();
+    if (!sig){ errEl.textContent = "Directions (sig) are required."; return; }
+    var sel = document.getElementById("pharmacy");
+    var opt = sel.options[sel.selectedIndex];
+    var body = {
+      rx_id: RX_ID,
+      sig: sig,
+      dispense_quantity: parseFloat(document.getElementById("qty").value) || null,
+      dispense_unit: document.getElementById("unit").value.trim() || null,
+      days_supply: parseInt(document.getElementById("days").value, 10) || null,
+      refills: parseInt(document.getElementById("refills").value, 10) || 0,
+      pharmacy: { id: sel.value, name: opt ? opt.getAttribute("data-name") : sel.value }
+    };
+    btn.disabled = true; btn.textContent = "Sending…"; errEl.textContent = "";
+    fetch("/api/prescribe/complete", {
+      method:"POST", headers:{ "content-type":"application/json" }, body: JSON.stringify(body)
+    })
+    .then(function(r){ if(!r.ok) return r.json().then(function(j){ throw new Error(j.error||("HTTP "+r.status)); }); return r.json(); })
+    .then(function(rec){ rnPost({ type:"done", rx_id: RX_ID, record: rec }); })
+    .catch(function(e){
+      btn.disabled = false; btn.textContent = "Sign & Send";
+      errEl.textContent = e.message;
+    });
+  }
+
+  // ── PHOTON branch: certified Elements workflow ────────────────────────────
+  // Scaffold — completed in Phase 0 with real sandbox keys + a test provider.
+  // Photon Elements are web components: a <photon-client> auth/config container wraps
+  // a <photon-prescribe-workflow> bound to the synced patientId. On order placement the
+  // workflow emits an event; we forward the ids to /api/prescribe/complete and postMessage.
+  // Docs: https://docs.photon.health/docs/elements
+  function renderPhoton(ctx){
+    var p = ctx.photon || {};
+    if (!p.spaClientId || !p.orgId){
+      document.getElementById("app").innerHTML = headerHtml(ctx) +
+        '<div class="err">Photon Elements need PHOTON_SPA_CLIENT_ID and PHOTON_ORG_ID ' +
+        '(SPA Client ID + Organization ID from the Neutron App › Developers).</div>' +
+        '<div class="actions"><button class="cancel" id="cancel">Cancel</button></div>';
+      document.getElementById("cancel").onclick = function(){ rnPost({ type:"cancel" }); };
+      return;
+    }
+    document.getElementById("app").innerHTML =
+      headerHtml(ctx) +
+      '<div id="photon-mount"></div>' +
+      '<div class="actions"><button class="cancel" id="cancel">Cancel</button></div>' +
+      '<div class="note">Photon ' + esc(p.env) + ' — patient ' + esc(p.patientId || "—") + ". " +
+        "Confirm dose, pick a pharmacy and sign in the workflow above.</div>";
+    document.getElementById("cancel").onclick = function(){ rnPost({ type:"cancel" }); };
+
+    var s = document.createElement("script");
+    s.type = "module";
+    // ESM build of the web components; esm.sh resolves the package's module entry.
+    s.src = "https://esm.sh/@photonhealth/elements";
+    s.onload = function(){ mountPhoton(p); };
+    s.onerror = function(){
+      document.getElementById("photon-mount").innerHTML =
+        '<div class="err">Could not load Photon Elements (offline / CDN blocked).</div>';
+    };
+    document.head.appendChild(s);
+  }
+
+  function mountPhoton(p){
+    // <photon-client> authenticates the provider (SPA client id + org). dev-mode="true"
+    // points Elements at the Neutron sandbox; auto-login triggers the provider sign-in.
+    // redirect-uri must be whitelisted as the "Clinical Web App URL" in onboarding/settings.
+    var client = document.createElement("photon-client");
+    client.setAttribute("id", p.spaClientId);
+    client.setAttribute("org", p.orgId);
+    if (p.devMode) client.setAttribute("dev-mode", "true");
+    client.setAttribute("auto-login", "true");
+    client.setAttribute("redirect-uri", window.location.origin);
+
+    var wf = document.createElement("photon-prescribe-workflow");
+    if (p.patientId) wf.setAttribute("patient-id", p.patientId);
+    wf.setAttribute("enable-order", "true");
+    wf.setAttribute("enable-send-to-patient", "true");
+    wf.setAttribute("enable-local-pickup", "true");
+    wf.setAttribute("enable-coverage-check", "true");
+    wf.setAttribute("enable-med-history", "true");
+    client.appendChild(wf);
+    document.getElementById("photon-mount").appendChild(client);
+
+    // Order placed → record Photon's order id on our Rx, then close back to the app.
+    document.addEventListener("photon-order-created", function(e){
+      var order = ((e && e.detail) || {}).order || {};
+      fetch("/api/prescribe/complete", {
+        method:"POST", headers:{ "content-type":"application/json" },
+        body: JSON.stringify({ rx_id: RX_ID, sig: "", refills: 0, pharmacy: null,
+          photon_order_id: order.id || null })
+      }).finally(function(){ rnPost({ type:"done", rx_id: RX_ID }); });
+    });
+    // Prescription created without an order (send-to-patient) → capture its id too.
+    document.addEventListener("photon-prescriptions-created", function(e){
+      var list = ((e && e.detail) || {}).prescriptions || [];
+      if (list[0]) fetch("/api/prescribe/complete", {
+        method:"POST", headers:{ "content-type":"application/json" },
+        body: JSON.stringify({ rx_id: RX_ID, sig: "", refills: 0, pharmacy: null,
+          photon_prescription_id: list[0].id || null })
+      });
+    });
+  }
+</script>
+</body>
+</html>

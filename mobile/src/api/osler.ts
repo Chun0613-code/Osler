@@ -209,6 +209,70 @@ export async function chat(
   });
 }
 
+// ── e-prescribing (Photon sandbox / mock) ────────────────────────────────
+// The symbolic engine recommends a drug; the clinician reviews & signs the actual
+// prescription in a WebView (Photon's certified UI, or a local mock). Photon sends it
+// to the pharmacy — we never transmit to a pharmacy directly.
+
+export interface PrescribeStartResponse {
+  rx_id: string;
+  mode: 'mock' | 'photon';
+  /** mock mode: open at `${API_BASE}${embed_path}` in a WebView */
+  embed_path: string;
+  /** photon mode: Photon hosted prescribe page — open in the SYSTEM browser */
+  photon_url?: string;
+}
+
+export interface Prescription {
+  rx_id: string;
+  patient_id: string;
+  drug: string;
+  clinical_role?: string | null;
+  safety_decision?: string;
+  sig?: string;
+  dispense_quantity?: number | null;
+  dispense_unit?: string | null;
+  days_supply?: number | null;
+  refills?: number;
+  pharmacy?: { id: string; name: string } | null;
+  status: 'draft' | 'sent' | 'filled' | 'error';
+  mode?: 'mock' | 'photon';
+  est_price?: number | null;
+  source_rationale?: string | null;
+}
+
+export interface PrescriptionsResponse {
+  prescriptions: Prescription[];
+  photon: boolean;
+  env: string;
+}
+
+/** Begin an Rx for a recommended drug. Throws (HTTP 400) if the safety gate blocks it. */
+export async function startPrescription(
+  patientId: string,
+  drug: string,
+): Promise<PrescribeStartResponse> {
+  return post<PrescribeStartResponse>('/api/prescribe/start', {
+    patient_id: patientId,
+    drug,
+  });
+}
+
+export async function getPrescriptions(
+  patientId: string,
+): Promise<PrescriptionsResponse> {
+  const r = await fetch(
+    `${API_BASE}/api/prescriptions?patient_id=${encodeURIComponent(patientId)}`,
+  );
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  return (await r.json()) as PrescriptionsResponse;
+}
+
+/** Mark an Rx submitted — called after the provider returns from Photon's hosted page. */
+export async function completePrescription(rxId: string): Promise<Prescription> {
+  return post<Prescription>('/api/prescribe/complete', { rx_id: rxId, refills: 0 });
+}
+
 /**
  * v2 (not used yet): live streaming of /api/analyze_stream (NDJSON, one JSON
  * object per line: {type:"step"|"error"|"final"}). Implement with Expo SDK 52+

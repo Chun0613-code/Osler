@@ -67,6 +67,13 @@ export default function RootLayout() {
           }}
         />
         <Tabs.Screen
+          name="prescriptions"
+          options={{
+            title: 'Rx',
+            tabBarIcon: ({ color, size }) => <Ionicons name="receipt-outline" color={color} size={size} />,
+          }}
+        />
+        <Tabs.Screen
           name="chat"
           options={{
             title: 'Chat',
@@ -80,6 +87,8 @@ export default function RootLayout() {
             tabBarIcon: ({ color, size }) => <Ionicons name="settings-outline" color={color} size={size} />,
           }}
         />
+        {/* Pushed from Reasoning → not a tab; href:null hides the tab-bar button. */}
+        <Tabs.Screen name="prescribe" options={{ href: null, title: 'Prescribe' }} />
       </Tabs>
     </AppProvider>
   );

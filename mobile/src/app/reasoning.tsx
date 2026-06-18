@@ -168,6 +168,12 @@ export default function ReasoningScreen() {
               highlighted={pulseDrug === item.drug?.toLowerCase()}
               mechanismOnly={!!bundle?.result?.mechanism_only}
               disease={bundle?.disease_model}
+              onPrescribe={(cand) =>
+                router.push({
+                  pathname: '/prescribe',
+                  params: { drug: cand.drug, patientId: current?.id ?? '' },
+                })
+              }
             />
           )}
           ListEmptyComponent={

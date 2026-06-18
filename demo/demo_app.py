@@ -16,6 +16,7 @@ Without a key it still runs: rule-based parsing + reasoning graph (chat degraded
 """
 from __future__ import annotations
 import sys
+import os
 import json
 from pathlib import Path
 
@@ -25,12 +26,32 @@ for _p in (_ROOT / "engine", _ROOT):
     if str(_p) not in sys.path:
         sys.path.insert(0, str(_p))
 
+
+def _load_dotenv(path: Path) -> None:
+    """Minimal .env loader (no dependency): KEY=VALUE lines → os.environ. Lets you keep
+    Photon sandbox creds in demo/.env instead of re-exporting them in every shell. Runs
+    before photon_client is imported (it reads os.environ at import time). An already-set
+    real env var wins over the file (setdefault)."""
+    if not path.exists():
+        return
+    for raw in path.read_text(encoding="utf-8").splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, val = line.partition("=")
+        os.environ.setdefault(key.strip(), val.strip().strip('"').strip("'"))
+
+
+_load_dotenv(Path(__file__).parent / ".env")
+
 from flask import Flask, request, jsonify, Response
 
 import reasoning_engine as RE
 import case_targets
 import agent
 import llm_client
+import prescription
+import photon_client
 
 _HERE = Path(__file__).parent
 app = Flask(__name__)
@@ -184,7 +205,89 @@ def api_chat():
     return jsonify({"reply": text, "ok": ok})
 
 
+# ── e-prescribing (Photon sandbox / mock) ─────────────────────────────────────
+# The symbolic engine recommended the drug; here a clinician reviews, edits the sig,
+# picks a pharmacy and SIGNS — in Photon's certified workflow, or a local mock when no
+# sandbox credentials are set. Prescription state lives in prescription._RX (in-memory,
+# like _CACHE): a demo session starts fresh.
+
+
+@app.route("/api/prescribe/start", methods=["POST"])
+def api_prescribe_start():
+    """Begin an Rx for {patient_id, drug} from the cached analysis bundle. Returns the
+    embed path the mobile WebView opens to review/sign. Safety gate may 400."""
+    d = request.get_json(force=True) or {}
+    pid = d.get("patient_id")
+    bundle = _CACHE.get(pid)
+    if not bundle:
+        return jsonify({"error": "Analyze this case first (no cached result on server)."}), 400
+    try:
+        rec = prescription.start(pid, d.get("drug") or "", bundle)
+    except prescription.RxError as e:
+        return jsonify({"error": e.message}), 400
+    resp = {"rx_id": rec["rx_id"], "mode": rec["mode"],
+            "embed_path": f"/prescribe-embed?rx_id={rec['rx_id']}"}
+    if rec.get("photon_prescribe_url"):
+        resp["photon_url"] = rec["photon_prescribe_url"]  # open in the system browser
+    return jsonify(resp)
+
+
+@app.route("/prescribe-embed")
+def prescribe_embed():
+    """The review/sign page rendered inside the mobile WebView (mock or Photon Elements)."""
+    return Response((_HERE / "prescribe_embed.html").read_text(encoding="utf-8"),
+                    mimetype="text/html")
+
+
+@app.route("/api/prescribe/context")
+def api_prescribe_context():
+    """Everything the embed page needs to render (drug, prefilled sig, mode, Photon config)."""
+    try:
+        return jsonify(prescription.context(request.args.get("rx_id") or ""))
+    except prescription.RxError as e:
+        return jsonify({"error": e.message}), 404
+
+
+@app.route("/api/prescribe/complete", methods=["POST"])
+def api_prescribe_complete():
+    """Clinician signed & sent: finalize the prescription record."""
+    d = request.get_json(force=True) or {}
+    try:
+        rec = prescription.complete(
+            d.get("rx_id") or "",
+            sig=d.get("sig") or "",
+            dispense_quantity=d.get("dispense_quantity"),
+            dispense_unit=d.get("dispense_unit"),
+            days_supply=d.get("days_supply"),
+            refills=d.get("refills") or 0,
+            pharmacy=d.get("pharmacy"),
+            photon_prescription_id=d.get("photon_prescription_id"),
+            photon_order_id=d.get("photon_order_id"))
+    except prescription.RxError as e:
+        return jsonify({"error": e.message}), 400
+    return jsonify(rec)
+
+
+@app.route("/api/photon/webhook", methods=["POST"])
+def api_photon_webhook():
+    """Photon Order/Prescription events advance an Rx's status. Production must verify
+    the webhook signature; the sandbox demo accepts and best-effort matches by order id."""
+    event = request.get_json(force=True, silent=True) or {}
+    updated = prescription.apply_webhook(event)
+    return jsonify({"ok": True, "matched": bool(updated)})
+
+
+@app.route("/api/prescriptions")
+def api_prescriptions():
+    """List a patient's prescriptions (newest first) for the Prescriptions tab."""
+    pid = request.args.get("patient_id") or ""
+    return jsonify({"prescriptions": prescription.list_for(pid),
+                    "photon": photon_client.is_enabled(),
+                    "env": photon_client.env_label()})
+
+
 if __name__ == "__main__":
     print(f"[demo] drugs={len(DRUGS_PKPD)} clinical={len(CLINICAL)} cases={len(SAMPLE_CASES)} "
-          f"env_llm={'on' if llm_client.available() else 'off'}")
+          f"env_llm={'on' if llm_client.available() else 'off'} "
+          f"photon={'on (' + photon_client.env_label() + ')' if photon_client.is_enabled() else 'mock'}")
     app.run(debug=True, port=5000)
