@@ -29,7 +29,76 @@ belief filters = hidden-state inference
 candidate sandbox = slow, reviewable self-learning
 ```
 
+## Strategic Positioning
+
+This roadmap is infrastructure work to run in parallel with credentialed data
+access. It is not a substitute for dose/time-resolved real DKA cohorts.
+
+The current bottleneck remains treated real-world dynamics. Prior audits showed
+that the Prolog-to-JEPA interface is not the limiting factor: better symbolic
+grounding can make rule proposals cleaner, but it cannot promote a checkpoint
+from the same small, confounded demo cohort. Therefore:
+
+- LTC and generalized belief filters are the first no-new-data experiments
+  because they touch dynamics and hidden-state inference.
+- ILP, LNN, NDRE, and DreamCoder are kept as rule-discovery infrastructure to
+  harden the system while credentialing proceeds.
+- None of these methods can bypass persistence, counterfactual, symbolic, or
+  causal-readiness gates.
+
 ## Keep: Directly Useful Methods
+
+### Liquid Time-Constant Networks
+
+**Attach to:** `dka_world_model.py`, `train_intervention_jepa.py`
+
+LTCs are the most actionable numerical-model candidate because the project
+already has irregular intervals, measurement ages, and partial observations. It
+also touches the dynamics path directly, unlike rule-discovery infrastructure.
+
+First implementation target:
+
+- Add an optional continuous-time residual cell behind a research flag.
+- Feed it elapsed time, observation mask, measurement age, and action embedding.
+- Compare against v5 with the same promotion gates: latent rank,
+  counterfactual sign accuracy, action sensitivity, changed-only accuracy, and
+  persistence.
+
+Promotion boundary:
+
+- LTC is a candidate dynamics module, not a shortcut around real-data gates.
+- If it improves glucose by averaging while rank/counterfactual metrics regress,
+  reject it like the full PhysioNet measurement model.
+
+### Generalized Predict-Update Belief Filters
+
+**Attach to:** `osler_jepa/belief.py`, `dka_world_model.py`,
+`train_intervention_jepa.py`
+
+The potassium-store belief filter is the current miniature version of Osler's
+individualized hidden-state inference. This deserves its own build item because
+it is closest to the long-term vision: infer what the patient cannot directly
+state from labs, actions, missingness, and physiology.
+
+First implementation target:
+
+- Generalize the existing `PotassiumStoreBelief` pattern into typed
+  predict-update filters for additional latent states.
+- Candidate hidden states:
+  - acid-base buffer reserve,
+  - insulin sensitivity / effective insulin action,
+  - sodium-water balance,
+  - renal reserve / filtration state.
+- Each filter must report mean, uncertainty, source, and whether it is measured
+  or inferred.
+- JEPA may consume belief means and uncertainty, but Osler explanations must
+  preserve provenance.
+
+Promotion boundary:
+
+- Hidden-state beliefs are research estimates, not measured labs.
+- A belief filter may improve personalization and counterfactual simulation.
+- It may not authorize a treatment or override observed patient values.
 
 ### ILP / FOIL
 
@@ -58,6 +127,8 @@ Promotion boundary:
 - ILP may improve candidate discovery.
 - ILP must not write to `rules/active/`.
 - ILP must not claim treatment causality from confounded EHR records.
+- On the current demo cohort, ILP is expected to produce cleaner candidates, not
+  a nonzero promotion count.
 
 ### Logical Neural Networks
 
@@ -78,6 +149,8 @@ Promotion boundary:
 
 - LNN constraints may shape JEPA training.
 - A neuralized rule may not become an active safety rule without human review.
+- LNN improves alignment and auditability; it is not expected to solve the
+  treated-dynamics bottleneck by itself.
 
 ### NDRE / Neural Logic Machines
 
@@ -99,27 +172,6 @@ Promotion boundary:
 
 - Extracted rules are review evidence.
 - They cannot bypass active Prolog, safety gates, or persistence gates.
-
-### Liquid Time-Constant Networks
-
-**Attach to:** `dka_world_model.py`, `train_intervention_jepa.py`
-
-LTCs are the most actionable numerical-model candidate because the project
-already has irregular intervals, measurement ages, and partial observations.
-
-First implementation target:
-
-- Add an optional continuous-time residual cell behind a research flag.
-- Feed it elapsed time, observation mask, measurement age, and action embedding.
-- Compare against v5 with the same promotion gates: latent rank,
-  counterfactual sign accuracy, action sensitivity, changed-only accuracy, and
-  persistence.
-
-Promotion boundary:
-
-- LTC is a candidate dynamics module, not a shortcut around real-data gates.
-- If it improves glucose by averaging while rank/counterfactual metrics regress,
-  reject it like the full PhysioNet measurement model.
 
 ### DreamCoder
 
@@ -220,26 +272,31 @@ not implementation targets:
 
 ## First Build Order
 
-1. **Formalize candidate-rule learning as ILP.**
-   Extend `osler_jepa/rule_inducer.py` with explicit positives, negatives,
-   cointervention facts, and patient-held-out support.
-
-2. **Upgrade validator constraints in an LNN-compatible way.**
-   Preserve Prolog as the source of truth while expanding differentiable
-   conjunction, negation, temporal windows, and confidence handling.
-
-3. **Run one LTC dynamics candidate.**
+1. **Run one LTC dynamics candidate.**
    Add it behind a research flag and compare it against v5, persistence, and the
    PhysioNet calibration ablations. Reject it if low-rank or counterfactual
    metrics regress.
 
-4. **Add a candidate rule-library growth experiment.**
-   Keep DreamCoder-style abstractions under `rules/candidate/`; no live rule
-   modification.
+2. **Generalize predict-update belief filters.**
+   Extend `osler_jepa/belief.py` from K-store only to additional hidden states
+   such as acid-base buffer reserve, insulin sensitivity, sodium-water balance,
+   and renal reserve. Keep every belief explicitly marked as inferred.
 
-5. **Make the active-inference objective explicit.**
+3. **Make the active-inference objective explicit.**
    Express planning as expected risk + uncertainty + symbolic target distance,
    under Osler veto.
+
+4. **Formalize candidate-rule learning as ILP.**
+   Extend `osler_jepa/rule_inducer.py` with explicit positives, negatives,
+   cointervention facts, and patient-held-out support.
+
+5. **Upgrade validator constraints in an LNN-compatible way.**
+   Preserve Prolog as the source of truth while expanding differentiable
+   conjunction, negation, temporal windows, and confidence handling.
+
+6. **Add a candidate rule-library growth experiment.**
+   Keep DreamCoder-style abstractions under `rules/candidate/`; no live rule
+   modification.
 
 ## Non-Negotiable Safety Boundaries
 
@@ -254,7 +311,10 @@ not implementation targets:
 ## Current Decision
 
 The next practical research move is not to add every classic method. It is to
-turn the current ad hoc candidate-rule loop into a principled ILP/LNN-backed
-sandbox, then test a single continuous-time dynamics candidate for JEPA. Active
-Inference should be used as the organizing language for belief, prediction,
-surprise, and planning, not as permission to bypass Osler's safety authority.
+test one continuous-time dynamics candidate and generalize the hidden-state
+belief filters while credentialed data access proceeds. ILP/LNN/DreamCoder then
+harden the candidate-rule loop so that, once larger dose/time-resolved cohorts
+arrive, the system can discover and quarantine symbolic hypotheses cleanly.
+Active Inference should be used as the organizing language for belief,
+prediction, surprise, and planning, not as permission to bypass Osler's safety
+authority.

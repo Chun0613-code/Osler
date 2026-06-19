@@ -185,9 +185,12 @@ inference over uncertain patient facts remains future work.
 ## Research Method Integration
 
 The current research reading list has been narrowed to methods that attach
-directly to existing Osler-JEPA modules: ILP/FOIL for candidate rule induction,
-Logical Neural Networks for differentiable rule constraints, Liquid
-Time-Constant Networks for irregular continuous-time dynamics, DreamCoder-style
-library growth for candidate mechanisms, and Active Inference as the unifying
-belief/planning frame. See `RESEARCH_INTEGRATION_ROADMAP.md` for the exact
-module mapping, build order, and safety boundaries.
+directly to existing Osler-JEPA modules. The build order now prioritizes methods
+that touch the real bottleneck first: Liquid Time-Constant Networks for
+irregular continuous-time dynamics, generalized predict-update belief filters
+for hidden-state inference, and Active Inference as the planning frame. ILP/FOIL,
+Logical Neural Networks, NDRE, and DreamCoder-style library growth remain
+important rule-discovery infrastructure, but they run in parallel with
+credentialed data access and do not replace the need for dose/time-resolved real
+cohorts. See `RESEARCH_INTEGRATION_ROADMAP.md` for the exact module mapping,
+build order, and safety boundaries.
