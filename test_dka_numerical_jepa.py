@@ -590,15 +590,28 @@ class NumericalJEPATests(unittest.TestCase):
             "insulin_sensitivity",
             baseline_mae={"G": 100.0, "BHB": 2.0},
             candidate_mae={"G": 92.0, "BHB": 1.8},
+            placebo_mae={"G": 96.0, "BHB": 1.95},
             targets=("G", "BHB"),
         )
         self.assertTrue(gate["passed"])
+        self.assertTrue(gate["placebo_control_present"])
+        self.assertGreater(gate["mean_placebo_margin"], 0.0)
         self.assertFalse(gate["clinical_claim_allowed"])
+
+        no_placebo = downstream_observable_gate(
+            "insulin_sensitivity",
+            baseline_mae={"G": 100.0},
+            candidate_mae={"G": 92.0},
+            targets=("G",),
+        )
+        self.assertFalse(no_placebo["passed"])
+        self.assertFalse(no_placebo["placebo_control_present"])
 
         failed = downstream_observable_gate(
             "insulin_sensitivity",
             baseline_mae={"G": 100.0},
             candidate_mae={"G": 101.0},
+            placebo_mae={"G": 100.0},
             targets=("G",),
         )
         self.assertFalse(failed["passed"])

@@ -60,10 +60,15 @@ First implementation target:
 
 - Implemented entry point: `WorldModel(dynamics_cell="ltc")` and
   `train_intervention_jepa.py --dynamics-cell ltc`.
+- Apples-to-apples evaluation must lock the current keeper calibration:
+  - baseline: PhysioNet presentation/profile priors with the measurement model
+    disabled, using `residual_mlp`;
+  - candidate: the exact same presentation-only setup, using `ltc`;
+  - only the dynamics cell may change.
 - Feed it elapsed time, observation mask, measurement age, and action embedding.
-- Compare against v5 with the same promotion gates: latent rank,
-  counterfactual sign accuracy, action sensitivity, changed-only accuracy, and
-  persistence.
+- Compare against the presentation-only residual-MLP baseline with the same
+  promotion gates: latent rank, counterfactual sign accuracy, action
+  sensitivity, changed-only accuracy, and persistence.
 
 Promotion boundary:
 
@@ -86,6 +91,9 @@ First implementation target:
 - Implemented entry point: `infer_hidden_beliefs(state)` returns typed
   research-only beliefs, and `downstream_observable_gate(...)` validates each
   unmeasured belief by held-out improvement on measurable downstream variables.
+- The downstream gate requires a capacity-matched placebo belief. The candidate
+  belief must beat both the no-belief baseline and the placebo, so improvement
+  cannot be credited merely to added model capacity.
 - Candidate hidden states:
   - acid-base buffer reserve,
   - insulin sensitivity / effective insulin action,
@@ -102,8 +110,9 @@ Promotion boundary:
 - A belief filter may improve personalization and counterfactual simulation.
 - It may not authorize a treatment or override observed patient values.
 - A hidden belief is kept only if it improves held-out prediction of measurable
-  downstream targets. Direct hidden-state accuracy claims are forbidden because
-  these states are not directly observed.
+  downstream targets over both baseline and a capacity-matched placebo. Direct
+  hidden-state accuracy claims are forbidden because these states are not
+  directly observed.
 
 ### ILP / FOIL
 
@@ -278,14 +287,19 @@ not implementation targets:
 ## First Build Order
 
 1. **Run one LTC dynamics candidate.**
-   Add it behind a research flag and compare it against v5, persistence, and the
-   PhysioNet calibration ablations. Reject it if low-rank or counterfactual
-   metrics regress.
+   Completed as an apples-to-apples presentation-only experiment: residual MLP
+   baseline versus LTC, with calibration fixed and only the dynamics cell
+   changed. LTC was not collapsed and slightly improved simulator
+   MSE/action-sensitivity, but it failed active-DKA glucose against persistence
+   and did not improve 6h counterfactual or external symbolic changed-only
+   gates. Keep it rejected unless a future treated cohort changes the evidence.
 
 2. **Generalize predict-update belief filters.**
    Extend `osler_jepa/belief.py` from K-store only to additional hidden states
    such as acid-base buffer reserve, insulin sensitivity, sodium-water balance,
-   and renal reserve. Keep every belief explicitly marked as inferred.
+   and renal reserve. Keep every belief explicitly marked as inferred, and keep
+   it only if it beats both the no-belief baseline and a capacity-matched
+   placebo belief on downstream observable targets.
 
 3. **Make the active-inference objective explicit.**
    Express planning as expected risk + uncertainty + symbolic target distance,
@@ -315,10 +329,12 @@ not implementation targets:
 
 ## Current Decision
 
-The next practical research move is not to add every classic method. It is to
-test one continuous-time dynamics candidate and generalize the hidden-state
-belief filters while credentialed data access proceeds. ILP/LNN/DreamCoder then
-harden the candidate-rule loop so that, once larger dose/time-resolved cohorts
+The next practical research move is not to add every classic method. The
+continuous-time dynamics candidate has been tested and rejected under fixed
+calibration, so the remaining no-new-data work is to validate generalized
+hidden-state belief filters while credentialed data access proceeds.
+ILP/LNN/DreamCoder then harden the candidate-rule loop so that, once larger
+dose/time-resolved cohorts
 arrive, the system can discover and quarantine symbolic hypotheses cleanly.
 Active Inference should be used as the organizing language for belief,
 prediction, surprise, and planning, not as permission to bypass Osler's safety

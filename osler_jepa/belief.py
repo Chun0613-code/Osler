@@ -160,10 +160,12 @@ def downstream_gate_spec(targets):
         "type": "downstream_observable_prediction_improvement",
         "targets": list(targets),
         "direct_hidden_state_accuracy_claim_allowed": False,
+        "requires_capacity_matched_placebo": True,
         "promotion_rule": (
             "Keep this belief only if adding it improves held-out prediction of "
-            "its observable downstream targets without worsening collapse, "
-            "counterfactual, or calibration gates."
+            "its observable downstream targets more than a capacity-matched "
+            "placebo belief, without worsening collapse, counterfactual, or "
+            "calibration gates."
         ),
     }
 
@@ -173,13 +175,17 @@ def downstream_observable_gate(
     baseline_mae,
     candidate_mae,
     targets,
+    placebo_mae=None,
     min_relative_improvement=0.02,
+    min_placebo_margin=0.01,
     max_relative_worsening=0.005,
 ):
     """Gate an unmeasured belief by observable downstream prediction value."""
 
+    placebo_mae = placebo_mae or {}
     target_reports = {}
     usable_improvements = []
+    usable_placebo_margins = []
     for target in targets:
         base = baseline_mae.get(target)
         candidate = candidate_mae.get(target)
@@ -187,26 +193,52 @@ def downstream_observable_gate(
             target_reports[target] = {
                 "baseline_mae": base,
                 "candidate_mae": candidate,
+                "placebo_mae": placebo_mae.get(target),
                 "relative_improvement": None,
+                "placebo_margin": None,
                 "usable": False,
             }
             continue
         improvement = (float(base) - float(candidate)) / float(base)
         usable_improvements.append(improvement)
+        placebo = placebo_mae.get(target)
+        placebo_margin = None
+        if placebo is not None and np.isfinite(placebo) and float(placebo) > 0:
+            placebo_margin = (float(placebo) - float(candidate)) / float(placebo)
+            usable_placebo_margins.append(placebo_margin)
         target_reports[target] = {
             "baseline_mae": round(float(base), 6),
             "candidate_mae": round(float(candidate), 6),
+            "placebo_mae": (
+                round(float(placebo), 6)
+                if placebo is not None and np.isfinite(placebo) else None
+            ),
             "relative_improvement": round(float(improvement), 6),
+            "placebo_margin": (
+                round(float(placebo_margin), 6)
+                if placebo_margin is not None else None
+            ),
             "usable": True,
         }
     mean_improvement = (
         float(np.mean(usable_improvements)) if usable_improvements else None
     )
     worst = float(np.min(usable_improvements)) if usable_improvements else None
+    mean_placebo_margin = (
+        float(np.mean(usable_placebo_margins))
+        if usable_placebo_margins else None
+    )
+    worst_placebo_margin = (
+        float(np.min(usable_placebo_margins))
+        if usable_placebo_margins else None
+    )
     passed = bool(
         usable_improvements
         and mean_improvement >= float(min_relative_improvement)
         and worst >= -float(max_relative_worsening)
+        and usable_placebo_margins
+        and mean_placebo_margin >= float(min_placebo_margin)
+        and worst_placebo_margin >= -float(max_relative_worsening)
     )
     return {
         "belief": belief_name,
@@ -217,7 +249,17 @@ def downstream_observable_gate(
         "worst_relative_improvement": (
             round(worst, 6) if worst is not None else None
         ),
+        "mean_placebo_margin": (
+            round(mean_placebo_margin, 6)
+            if mean_placebo_margin is not None else None
+        ),
+        "worst_placebo_margin": (
+            round(worst_placebo_margin, 6)
+            if worst_placebo_margin is not None else None
+        ),
         "targets": target_reports,
+        "requires_capacity_matched_placebo": True,
+        "placebo_control_present": bool(usable_placebo_margins),
         "direct_hidden_state_accuracy_claim_allowed": False,
         "clinical_claim_allowed": False,
     }

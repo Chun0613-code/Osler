@@ -166,16 +166,23 @@ python train_intervention_jepa.py \
   --action-prior dka_action_prior_demo_v1.json \
   --mimic dka_transitions_6h_demo_v4.parquet
 
-# Research-only continuous-time candidate dynamics. This is an LTC ablation
-# entry point, not a runtime promotion shortcut.
+# Research-only continuous-time candidate dynamics. Compare it only against the
+# presentation-only residual-MLP baseline, so calibration is fixed and only the
+# dynamics cell changes.
 python train_intervention_jepa.py \
+  --physionet-calibration physionet2019_dkabody_calibration.json \
+  --disable-physionet-measurement-model \
   --dynamics-cell ltc \
-  --checkpoint dka_ltc_candidate.pt \
-  --report dka_ltc_candidate_report.json
+  --scenarios 1000 --sequence-length 12 --epochs 55 --batch-size 12 \
+  --checkpoint dka_physionet_presentation_only_ltc_candidate.pt \
+  --report dka_physionet_presentation_only_ltc_candidate_report.json \
+  --greybox-residual dka_greybox_residual_candidate_v1.pt \
+  --action-prior dka_action_prior_demo_v1.json \
+  --mimic dka_transitions_6h_demo_v4.parquet
 python symbolic_real_test.py \
-  --checkpoint dka_symbolic_jepa_v6_full_candidate.pt \
+  --checkpoint dka_physionet_presentation_only_ltc_candidate.pt \
   --mimic dka_transitions_6h_demo_v4.parquet \
-  --output dka_symbolic_real_test_v6_full_candidate.json
+  --output dka_symbolic_real_test_physionet_presentation_only_ltc_candidate.json
 
 # Evaluate where persistence should become weaker
 python long_horizon_real_test.py trajectories.jsonl \
@@ -284,6 +291,13 @@ full real missingness model is unsafe as-is. It also remains candidate-only
 because potassium, bicarbonate, and external symbolic direction accuracy still
 fail the promotion gate. See `dka_v5_vs_physionet_calibrated_comparison.json`
 and `dka_physionet_calibration_ablation_comparison.json`.
+
+The apples-to-apples LTC experiment kept the same presentation-only calibration
+and changed only the dynamics cell. LTC stayed non-collapsed and slightly
+improved simulator MSE/action sensitivity, but it failed active-DKA glucose
+against persistence and did not improve 6h counterfactual sign accuracy or
+external symbolic changed-only accuracy. The LTC checkpoint is rejected for
+promotion. See `dka_physionet_presentation_only_ltc_comparison.json`.
 
 The buffer hypothesis audit tests whether DKABody no-action trajectories are
 more volatile or less autocorrelated than action-unobserved PhysioNet ICU

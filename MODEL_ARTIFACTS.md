@@ -63,6 +63,17 @@ reports are committed as `dka_physionet_presentation_only_candidate_report.json`
 `dka_symbolic_real_test_physionet_presentation_only_candidate.json`, and
 `dka_physionet_calibration_ablation_comparison.json`.
 
+`dka_physionet_presentation_only_ltc_candidate.pt` is local-only. It was trained
+with the same presentation-only calibration budget as
+`dka_physionet_presentation_only_candidate.pt`, changing only the dynamics cell
+from the residual MLP to LTC. It was rejected for promotion: it remained
+non-collapsed and slightly improved simulator MSE/action sensitivity, but failed
+active-DKA glucose versus persistence and did not improve external symbolic
+changed-only accuracy. Aggregate reports are committed as
+`dka_physionet_presentation_only_ltc_candidate_report.json`,
+`dka_symbolic_real_test_physionet_presentation_only_ltc_candidate.json`, and
+`dka_physionet_presentation_only_ltc_comparison.json`.
+
 `dka_buffer_hypothesis_audit.json` is an aggregate simulator-integrity report.
 It contains no patient rows or identifiers. It tests whether DKABody no-action
 trajectories are too volatile or under-buffered versus PhysioNet 2019

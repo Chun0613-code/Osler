@@ -1,0 +1,262 @@
+{
+  "baseline": {
+    "action_conditioning": {
+      "factual_normalized_mse_6h": 0.479113,
+      "shuffled_action_normalized_mse_6h": 0.933877,
+      "shuffled_minus_factual": 0.454763
+    },
+    "active_dka_mae": {
+      "anion_gap": {
+        "beats_persistence": true,
+        "jepa": 3.2485,
+        "n": 16,
+        "persistence": 3.25
+      },
+      "bicarbonate": {
+        "beats_persistence": false,
+        "jepa": 7.1248,
+        "n": 16,
+        "persistence": 2.75
+      },
+      "creatinine": {
+        "beats_persistence": false,
+        "jepa": 5.9658,
+        "n": 15,
+        "persistence": 0.34
+      },
+      "glucose": {
+        "beats_persistence": true,
+        "jepa": 81.8959,
+        "n": 17,
+        "persistence": 96.6471
+      },
+      "map": {
+        "beats_persistence": true,
+        "jepa": 12.4726,
+        "n": 41,
+        "persistence": 16.2683
+      },
+      "osmolality": {
+        "beats_persistence": false,
+        "jepa": 12.5782,
+        "n": 18,
+        "persistence": 9.534
+      },
+      "ph": {
+        "beats_persistence": true,
+        "jepa": 0.0471,
+        "n": 11,
+        "persistence": 0.06
+      },
+      "potassium": {
+        "beats_persistence": false,
+        "jepa": 0.8133,
+        "n": 20,
+        "persistence": 0.44
+      },
+      "sodium": {
+        "beats_persistence": false,
+        "jepa": 6.0646,
+        "n": 19,
+        "persistence": 4.1579
+      },
+      "urine_output": {
+        "beats_persistence": false,
+        "jepa": 84.126,
+        "n": 34,
+        "persistence": 53.7868
+      }
+    },
+    "checkpoint": "dka_physionet_presentation_only_candidate.pt",
+    "collapse": {
+      "active_dimensions": null,
+      "collapsed": false,
+      "effective_rank": 9.344,
+      "low_rank_physiology_warning": false,
+      "mean_latent_std": 0.323949,
+      "min_latent_std": 0.198181
+    },
+    "counterfactual": {
+      "12_steps_sign_accuracy": 0.8706,
+      "1_steps_sign_accuracy": 0.8411,
+      "6_steps_sign_accuracy": 0.8806
+    },
+    "dynamics_cell": "residual_mlp",
+    "external_symbolic": {
+      "changed_direction_comparisons": 28,
+      "direction_comparisons": 32,
+      "factual_direction_accuracy_all": 0.4688,
+      "factual_direction_accuracy_changed_only": 0.5357,
+      "mean_proposal_confidence": 0.8693
+    },
+    "report": "dka_physionet_presentation_only_candidate_report.json",
+    "symbolic_real_test": "dka_symbolic_real_test_physionet_presentation_only_candidate.json"
+  },
+  "candidate": {
+    "action_conditioning": {
+      "factual_normalized_mse_6h": 0.464397,
+      "shuffled_action_normalized_mse_6h": 0.922243,
+      "shuffled_minus_factual": 0.457847
+    },
+    "active_dka_mae": {
+      "anion_gap": {
+        "beats_persistence": false,
+        "jepa": 4.2045,
+        "n": 16,
+        "persistence": 3.25
+      },
+      "bicarbonate": {
+        "beats_persistence": false,
+        "jepa": 6.5935,
+        "n": 16,
+        "persistence": 2.75
+      },
+      "creatinine": {
+        "beats_persistence": false,
+        "jepa": 5.2141,
+        "n": 15,
+        "persistence": 0.34
+      },
+      "glucose": {
+        "beats_persistence": false,
+        "jepa": 103.2699,
+        "n": 17,
+        "persistence": 96.6471
+      },
+      "map": {
+        "beats_persistence": true,
+        "jepa": 11.3127,
+        "n": 41,
+        "persistence": 16.2683
+      },
+      "osmolality": {
+        "beats_persistence": false,
+        "jepa": 13.9136,
+        "n": 18,
+        "persistence": 9.534
+      },
+      "ph": {
+        "beats_persistence": true,
+        "jepa": 0.0516,
+        "n": 11,
+        "persistence": 0.06
+      },
+      "potassium": {
+        "beats_persistence": false,
+        "jepa": 0.8101,
+        "n": 20,
+        "persistence": 0.44
+      },
+      "sodium": {
+        "beats_persistence": false,
+        "jepa": 6.0171,
+        "n": 19,
+        "persistence": 4.1579
+      },
+      "urine_output": {
+        "beats_persistence": false,
+        "jepa": 88.6344,
+        "n": 34,
+        "persistence": 53.7868
+      }
+    },
+    "checkpoint": "dka_physionet_presentation_only_ltc_candidate.pt",
+    "collapse": {
+      "active_dimensions": null,
+      "collapsed": false,
+      "effective_rank": 9.002,
+      "low_rank_physiology_warning": false,
+      "mean_latent_std": 0.325152,
+      "min_latent_std": 0.201412
+    },
+    "counterfactual": {
+      "12_steps_sign_accuracy": 0.875,
+      "1_steps_sign_accuracy": 0.8474,
+      "6_steps_sign_accuracy": 0.8791
+    },
+    "dynamics_cell": "ltc",
+    "external_symbolic": {
+      "changed_direction_comparisons": 28,
+      "direction_comparisons": 32,
+      "factual_direction_accuracy_all": 0.4688,
+      "factual_direction_accuracy_changed_only": 0.5357,
+      "mean_proposal_confidence": 0.8665
+    },
+    "report": "dka_physionet_presentation_only_ltc_candidate_report.json",
+    "symbolic_real_test": "dka_symbolic_real_test_physionet_presentation_only_ltc_candidate.json"
+  },
+  "comparison_type": "apples_to_apples_single_variable_change",
+  "decision": "reject_ltc_candidate_keep_presentation_only_residual_mlp_baseline",
+  "decision_reasons": [
+    "LTC was evaluated apples-to-apples: presentation-only calibration with measurement model disabled; only dynamics_cell changed.",
+    "LTC is not collapsed and slightly improves simulator MSE/action sensitivity, so the implementation is viable.",
+    "LTC fails the active-DKA glucose persistence gate while the residual MLP baseline passes it.",
+    "LTC does not improve 6h counterfactual sign accuracy or external symbolic changed-only accuracy.",
+    "No runtime promotion, no active-rule promotion, and no causal treatment claim are allowed from this candidate."
+  ],
+  "experiment": "presentation_only_residual_mlp_vs_presentation_only_ltc",
+  "locked_settings": {
+    "action_prior": "dka_action_prior_demo_v1.json",
+    "batch_size": 12,
+    "epochs": 55,
+    "greybox_residual": "dka_greybox_residual_candidate_v1.pt",
+    "measurement_model": "disabled",
+    "mimic_proxy": "dka_transitions_6h_demo_v4.parquet",
+    "only_changed_variable": "dynamics_cell",
+    "physionet_calibration": "physionet2019_dkabody_calibration.json",
+    "scenarios": 1000,
+    "sequence_length": 12
+  },
+  "promotion_gates": [
+    {
+      "baseline_effective_rank": 9.344,
+      "candidate_effective_rank": 9.002,
+      "gate": "latent_rank",
+      "interpretation": "Candidate is not collapsed, but rank is slightly lower than baseline.",
+      "passed": true
+    },
+    {
+      "baseline": 0.479113,
+      "candidate": 0.464397,
+      "gate": "simulator_factual_mse_6h",
+      "interpretation": "Candidate slightly improves held-out simulator MSE.",
+      "passed": true
+    },
+    {
+      "baseline": 0.454763,
+      "candidate": 0.457847,
+      "gate": "action_sensitivity",
+      "interpretation": "Candidate slightly improves shuffled-action separation.",
+      "passed": true
+    },
+    {
+      "baseline": 0.8806,
+      "candidate": 0.8791,
+      "gate": "counterfactual_sign_accuracy_6h",
+      "interpretation": "Candidate does not improve 6h counterfactual sign accuracy.",
+      "passed": false
+    },
+    {
+      "baseline": 0.8706,
+      "candidate": 0.875,
+      "gate": "counterfactual_sign_accuracy_12h",
+      "interpretation": "Candidate improves 12h sign accuracy slightly but not enough to offset real-proxy regression.",
+      "passed": true
+    },
+    {
+      "baseline": 0.5357,
+      "candidate": 0.5357,
+      "gate": "external_symbolic_changed_only",
+      "interpretation": "Candidate ties baseline changed-only accuracy; no gain.",
+      "passed": false
+    },
+    {
+      "baseline_jepa": 81.8959,
+      "candidate_jepa": 103.2699,
+      "gate": "active_dka_glucose_vs_persistence",
+      "interpretation": "Baseline beats persistence on active-DKA glucose; LTC candidate loses to persistence.",
+      "passed": false,
+      "persistence": 96.6471
+    }
+  ]
+}

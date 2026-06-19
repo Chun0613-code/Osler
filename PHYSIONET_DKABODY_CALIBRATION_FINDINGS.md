@@ -185,6 +185,39 @@ osmolality, creatinine, and urine output still fail persistence, and external
 symbolic direction accuracy worsens. The committed ablation report is
 `dka_physionet_calibration_ablation_comparison.json`.
 
+## Presentation-Only LTC Candidate
+
+The continuous-time candidate was run as an apples-to-apples dynamics test:
+PhysioNet presentation/profile priors were enabled, the real ICU measurement
+model was disabled, and the only intended change was
+`dynamics_cell = "ltc"` instead of the presentation-only residual MLP baseline.
+
+| Gate | Presentation-Only Residual MLP | Presentation-Only LTC | Result |
+|---|---:|---:|---|
+| Effective latent rank | 9.344 | 9.002 | both safe; LTC slightly lower |
+| Low-rank warning | false | false | pass |
+| Simulator factual MSE 6h | 0.479113 | 0.464397 | LTC slightly better |
+| Action sensitivity, shuffled - factual | 0.454763 | 0.457847 | LTC slightly better |
+| Counterfactual sign accuracy 6h | 0.8806 | 0.8791 | LTC no better |
+| Counterfactual sign accuracy 12h | 0.8706 | 0.8750 | LTC slightly better |
+| External symbolic changed-only | 0.5357 | 0.5357 | tie |
+| Active-DKA glucose MAE | 81.8959 | 103.2699 | LTC loses persistence |
+| Active-DKA glucose persistence | 96.6471 | 96.6471 | fixed comparator |
+
+Decision: reject the LTC checkpoint and keep the presentation-only residual MLP
+baseline as the current calibration ablation keeper.
+
+Interpretation:
+
+> LTC is viable as an implementation: it does not collapse and it slightly
+> improves simulator-side factual/action-conditioning metrics. But the gains do
+> not survive the real-proxy promotion gates. The candidate loses the active-DKA
+> glucose persistence win that made presentation-only interesting, and it adds no
+> external symbolic changed-only signal. It remains research-only.
+
+The committed comparison report is
+`dka_physionet_presentation_only_ltc_comparison.json`.
+
 ## Buffer Hypothesis Audit
 
 A follow-up audit tested whether the remaining persistence failures could be
