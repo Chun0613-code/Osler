@@ -273,6 +273,94 @@ export async function completePrescription(rxId: string): Promise<Prescription> 
   return post<Prescription>('/api/prescribe/complete', { rx_id: rxId, refills: 0 });
 }
 
+// ── provider OAuth (native Sign & Send) ──────────────────────────────────────
+// A clinician logs in once (system browser, PKCE) so the backend can sign prescriptions
+// under their authorized identity. The whole flow runs on the backend; the device only
+// learns connected:true/false and triggers the browser hop.
+
+export interface PhotonStatus {
+  connected: boolean;
+  /** false when PHOTON_SPA_CLIENT_ID isn't configured — Connect is unavailable */
+  enabled: boolean;
+  env: string;
+  provider: { name?: string | null; email?: string | null } | null;
+}
+
+/** Is a provider signed in? */
+export async function getPhotonStatus(): Promise<PhotonStatus> {
+  const r = await fetch(`${API_BASE}/api/photon/oauth/status`);
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  return (await r.json()) as PhotonStatus;
+}
+
+/** Ask the backend for the Neutron authorize URL to open in the system browser.
+ * `returnUrl` is the app deep link Neutron bounces back to after login. */
+export async function getPhotonAuthorizeUrl(returnUrl: string): Promise<string> {
+  const r = await fetch(
+    `${API_BASE}/api/photon/oauth/start?return=${encodeURIComponent(returnUrl)}`,
+  );
+  const j = (await r.json()) as { authorize_url?: string; error?: string };
+  if (!r.ok || !j.authorize_url) throw new Error(j.error ?? `HTTP ${r.status}`);
+  return j.authorize_url;
+}
+
+export async function disconnectPhoton(): Promise<void> {
+  await post('/api/photon/oauth/disconnect', {});
+}
+
+// ── native prescribe options + sign ──────────────────────────────────────────
+
+export interface MedOption {
+  treatment_id: string;
+  name: string;
+  strength?: string | null;
+  form?: string | null;
+}
+
+export interface PrescribeDefaults {
+  treatment_id: string | null;
+  sig: string;
+  dispense_quantity: number;
+  dispense_unit: string;
+  days_supply: number;
+  refills: number;
+}
+
+export interface PrescribeOptions {
+  rx_id: string;
+  drug: string;
+  clinical_role?: string | null;
+  rationale?: string | null;
+  candidates: MedOption[];
+  default: PrescribeDefaults;
+}
+
+/** Catalog choices + prefilled defaults for the native review screen. */
+export async function getPrescribeOptions(rxId: string): Promise<PrescribeOptions> {
+  const r = await fetch(
+    `${API_BASE}/api/prescribe/options?rx_id=${encodeURIComponent(rxId)}`,
+  );
+  const j = await r.json();
+  if (!r.ok) throw new Error((j as { error?: string }).error ?? `HTTP ${r.status}`);
+  return j as PrescribeOptions;
+}
+
+export interface SignRequest {
+  rx_id: string;
+  treatment_id: string;
+  sig: string;
+  dispense_quantity: number;
+  dispense_unit: string;
+  days_supply: number;
+  refills: number;
+}
+
+/** Provider Sign & Send → createPrescription→createOrder on the backend.
+ * Throws 401 (connect Photon first) / 502 (Photon rejected) with a message. */
+export async function signPrescription(req: SignRequest): Promise<Prescription> {
+  return post<Prescription>('/api/prescribe/sign', req);
+}
+
 /**
  * v2 (not used yet): live streaming of /api/analyze_stream (NDJSON, one JSON
  * object per line: {type:"step"|"error"|"final"}). Implement with Expo SDK 52+

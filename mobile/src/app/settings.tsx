@@ -2,8 +2,12 @@
  * Settings — LLM provider/key (persisted via expo-secure-store through
  * AppContext.setLlm), backend info, and an About blurb.
  */
-import React, { useEffect, useRef, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
+import * as Linking from 'expo-linking';
+import * as WebBrowser from 'expo-web-browser';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
+  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -14,7 +18,14 @@ import {
   View,
 } from 'react-native';
 
-import { API_BASE, type LlmSettings } from '@/api/osler';
+import {
+  API_BASE,
+  disconnectPhoton,
+  getPhotonAuthorizeUrl,
+  getPhotonStatus,
+  type LlmSettings,
+  type PhotonStatus,
+} from '@/api/osler';
 import { useApp } from '@/state/AppContext';
 import { colors, fonts, radius, shadow, spacing } from '@/theme/tokens';
 
@@ -31,6 +42,62 @@ export default function SettingsScreen() {
   const [apiKey, setApiKey] = useState(llm.apiKey ?? '');
   const [saved, setSaved] = useState(false);
   const savedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // ── Photon e-prescribing connection ──────────────────────────────────────
+  const [photon, setPhoton] = useState<PhotonStatus | null>(null);
+  const [photonBusy, setPhotonBusy] = useState(false);
+  const [photonError, setPhotonError] = useState<string | null>(null);
+
+  const refreshPhoton = useCallback(async () => {
+    try {
+      setPhoton(await getPhotonStatus());
+    } catch {
+      setPhoton(null); // backend unreachable — treat as unknown, hide the card
+    }
+  }, []);
+
+  // Refresh on focus so returning from the OAuth browser reflects the new state.
+  useFocusEffect(
+    useCallback(() => {
+      refreshPhoton();
+    }, [refreshPhoton]),
+  );
+
+  const connectPhoton = async () => {
+    setPhotonError(null);
+    setPhotonBusy(true);
+    try {
+      // Deep link Neutron bounces back to; the backend appends ?photon=connected|error.
+      const returnUrl = Linking.createURL('photon-connected');
+      const authorizeUrl = await getPhotonAuthorizeUrl(returnUrl);
+      const result = await WebBrowser.openAuthSessionAsync(authorizeUrl, returnUrl);
+      if (result.type === 'success' && result.url) {
+        const { queryParams } = Linking.parse(result.url);
+        if (queryParams?.photon === 'error') {
+          setPhotonError(String(queryParams.msg ?? 'Photon login failed.'));
+        }
+      }
+      // 'cancel'/'dismiss' → user backed out; status refresh below reflects reality.
+      await refreshPhoton();
+    } catch (e) {
+      setPhotonError(e instanceof Error ? e.message : 'Could not start Photon login.');
+    } finally {
+      setPhotonBusy(false);
+    }
+  };
+
+  const handleDisconnect = async () => {
+    setPhotonBusy(true);
+    setPhotonError(null);
+    try {
+      await disconnectPhoton();
+    } catch {
+      // non-fatal
+    } finally {
+      await refreshPhoton();
+      setPhotonBusy(false);
+    }
+  };
 
   // Sync local form once the persisted settings finish loading.
   useEffect(() => {
@@ -111,6 +178,68 @@ export default function SettingsScreen() {
             to a notice.
           </Text>
         </View>
+
+        {/* ── Photon (e-prescribing) ──────────────────────────── */}
+        {photon?.enabled && (
+          <>
+            <Text style={styles.sectionLabel}>PHOTON · E-PRESCRIBING ({photon.env})</Text>
+            <View style={styles.card}>
+              <View style={styles.statusRow}>
+                <View
+                  style={[
+                    styles.statusDot,
+                    { backgroundColor: photon.connected ? colors.green : colors.textMuted },
+                  ]}
+                />
+                <Text style={styles.statusText}>
+                  {photon.connected
+                    ? `Connected${photon.provider?.name ? ` · ${photon.provider.name}` : ''}`
+                    : 'Not connected'}
+                </Text>
+              </View>
+              {photon.connected && photon.provider?.email ? (
+                <Text style={styles.note}>{photon.provider.email}</Text>
+              ) : null}
+
+              {photon.connected ? (
+                <Pressable
+                  accessibilityRole="button"
+                  disabled={photonBusy}
+                  onPress={handleDisconnect}
+                  style={({ pressed }) => [styles.outlineButton, pressed && { opacity: 0.85 }]}>
+                  {photonBusy ? (
+                    <ActivityIndicator color={colors.accent} />
+                  ) : (
+                    <Text style={styles.outlineButtonText}>Disconnect</Text>
+                  )}
+                </Pressable>
+              ) : (
+                <Pressable
+                  accessibilityRole="button"
+                  disabled={photonBusy}
+                  onPress={connectPhoton}
+                  style={({ pressed }) => [
+                    styles.saveButton,
+                    styles.selfStart,
+                    pressed && { opacity: 0.85 },
+                  ]}>
+                  {photonBusy ? (
+                    <ActivityIndicator color="#FFFFFF" />
+                  ) : (
+                    <Text style={styles.saveButtonText}>Connect Photon</Text>
+                  )}
+                </Pressable>
+              )}
+
+              {photonError ? <Text style={styles.errorNote}>{photonError}</Text> : null}
+              <Text style={styles.note}>
+                Sign in once with your Neutron prescriber account so the symbolic
+                engine&apos;s picks can be signed &amp; sent natively. Login opens in your
+                system browser (embedded login is blocked).
+              </Text>
+            </View>
+          </>
+        )}
 
         {/* ── Backend ─────────────────────────────────────────── */}
         <Text style={styles.sectionLabel}>BACKEND</Text>
@@ -211,8 +340,10 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     paddingHorizontal: 28,
     minHeight: 44,
+    alignItems: 'center',
     justifyContent: 'center',
   },
+  selfStart: { alignSelf: 'flex-start' },
   saveButtonText: {
     fontFamily: fonts.bodySemiBold,
     fontSize: 14,
@@ -222,6 +353,42 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bodyMedium,
     fontSize: 13,
     color: colors.green,
+  },
+  statusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  statusDot: {
+    width: 9,
+    height: 9,
+    borderRadius: 4.5,
+  },
+  statusText: {
+    fontFamily: fonts.bodySemiBold,
+    fontSize: 14,
+    color: colors.text,
+  },
+  outlineButton: {
+    borderWidth: 1,
+    borderColor: colors.accent,
+    borderRadius: radius.pill,
+    paddingHorizontal: 28,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'flex-start',
+  },
+  outlineButtonText: {
+    fontFamily: fonts.bodySemiBold,
+    fontSize: 14,
+    color: colors.accent,
+  },
+  errorNote: {
+    fontFamily: fonts.body,
+    fontSize: 12.5,
+    lineHeight: 18,
+    color: colors.red,
   },
   note: {
     fontFamily: fonts.body,

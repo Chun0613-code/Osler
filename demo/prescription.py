@@ -150,6 +150,110 @@ def start(patient_id: str, drug: str, bundle: Dict[str, Any]) -> Dict[str, Any]:
     return record
 
 
+# ── native Sign & Send (provider-token path) ─────────────────────────────────
+# The catalog search ranks combination products oddly (e.g. "Zegerid With Magnesium
+# Hydroxide (… Omeprazole 40 mg …)" outranks plain omeprazole), so we re-rank toward the
+# single-ingredient generic before offering a default treatment to sign.
+def _ingredient_count(name: str) -> int:
+    """Rough active-ingredient count from a Photon catalog name (each strength = one ' mg'
+    / ' mcg' / ' unit' token)."""
+    n = name.lower()
+    return max(1, sum(n.count(u) for u in (" mg", " mcg", " unit", " %")))
+
+
+def _rank_candidates(drug: str, meds: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Order catalog hits so a plain generic of `drug` sorts first (fewest ingredients,
+    name actually starts with the drug, shortest)."""
+    d = (drug or "").strip().lower()
+
+    def score(m: Dict[str, Any]) -> tuple:
+        name = (m.get("name") or "")
+        nl = name.lower()
+        combo = (_ingredient_count(name) - 1) * 10
+        if " with " in nl or "/" in nl:
+            combo += 15
+        starts = 0 if nl.startswith(d) else 5
+        absent = 0 if d in nl else 100
+        return (absent, combo, starts, len(name))
+
+    return sorted(meds, key=score)
+
+
+def _dispense_unit_for_form(form: Optional[str]) -> str:
+    """A sane default Photon dispenseUnit from the dosage form (clinician can edit)."""
+    f = (form or "").lower()
+    if any(k in f for k in ("tablet", "capsule", "patch", "suppository", "lozenge")):
+        return "Each"
+    if any(k in f for k in ("solution", "suspension", "syrup", "liquid", "drops", "/ml", " ml")):
+        return "Milliliter"
+    if any(k in f for k in ("cream", "ointment", "gel", "powder")):
+        return "Gram"
+    return "Each"
+
+
+def options(rx_id: str) -> Dict[str, Any]:
+    """Catalog choices + prefilled defaults for the native review screen. Uses the M2M
+    token (search is read-only); signing later uses the provider token."""
+    rec = _RX.get(rx_id)
+    if not rec:
+        raise RxError("Unknown prescription.")
+    drug = rec["drug"] or ""
+    # Fetch wide (20) then rank: the catalog buries single-ingredient generics behind
+    # combination products, so a small `first` would default to a combo. Offer the top 10.
+    meds = _rank_candidates(drug, PH.search_medications(drug, 20))[:10]
+    candidates = [{"treatment_id": m.get("id"), "name": m.get("name"),
+                   "strength": m.get("strength"), "form": m.get("form")} for m in meds]
+    best = candidates[0] if candidates else None
+    return {
+        "rx_id": rx_id,
+        "drug": drug,
+        "clinical_role": rec.get("clinical_role"),
+        "rationale": rec.get("source_rationale"),
+        "candidates": candidates,
+        "default": {
+            "treatment_id": best["treatment_id"] if best else None,
+            "sig": rec.get("sig") or "Take as directed.",
+            "dispense_quantity": 30,
+            "dispense_unit": _dispense_unit_for_form(best["form"]) if best else "Each",
+            "days_supply": 30,
+            "refills": 0,
+        },
+    }
+
+
+def sign(rx_id: str, *, provider_token: str, treatment_id: str, sig: str,
+         dispense_quantity: float, dispense_unit: str, days_supply: int,
+         refills: int, address: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
+    """Provider's in-app Sign & Send: createPrescription → createOrder under the provider
+    token, then finalize the local record. Re-checks the safety gate as defense in depth.
+    Raises RxError on a gate/input problem; lets Photon transport errors propagate."""
+    rec = _RX.get(rx_id)
+    if not rec:
+        raise RxError("Unknown prescription.")
+    if (rec.get("safety_decision") or "").lower() in BLOCKING_DECISIONS:
+        raise RxError(f"Safety gate blocks prescribing {rec.get('drug')}.")
+    if (rec.get("drug") or "").strip().lower() in CONTROLLED:
+        raise RxError(f"{rec.get('drug')} is a controlled substance — not available in the demo.")
+    if not treatment_id:
+        raise RxError("Pick a medication to prescribe.")
+    patient_id = rec.get("photon_patient_id")
+    if not patient_id:
+        raise RxError("Patient is not synced to Photon — re-open this prescription.")
+
+    rx_photon_id = PH.create_prescription(
+        patient_id=patient_id, treatment_id=treatment_id, sig=sig,
+        dispense_quantity=float(dispense_quantity), dispense_unit=dispense_unit,
+        days_supply=int(days_supply), refills=int(refills), token=provider_token)
+    order_id = PH.create_order(
+        patient_id=patient_id, prescription_id=rx_photon_id,
+        address=address, token=provider_token)
+
+    return complete(rx_id, sig=sig, dispense_quantity=float(dispense_quantity),
+                    dispense_unit=dispense_unit, days_supply=int(days_supply),
+                    refills=int(refills), pharmacy=None,
+                    photon_prescription_id=rx_photon_id, photon_order_id=order_id)
+
+
 def context(rx_id: str) -> Dict[str, Any]:
     """Everything the embed page needs to render the prescribe UI (mock or Photon)."""
     rec = _RX.get(rx_id)

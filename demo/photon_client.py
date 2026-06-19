@@ -93,10 +93,15 @@ def get_token() -> Optional[str]:
     return tok
 
 
-def graphql(query: str, variables: dict) -> dict:
-    """POST a GraphQL operation with the bearer token. Raises on transport or
-    GraphQL-level errors."""
-    token = get_token()
+def graphql(query: str, variables: dict, token: Optional[str] = None) -> dict:
+    """POST a GraphQL operation with a bearer token. Raises on transport or
+    GraphQL-level errors.
+
+    `token` lets a caller supply a PROVIDER (user) access token — required for
+    createPrescription, whose prescriber is derived from the authenticated user
+    (the backend M2M token deliberately lacks `write:prescription`). When omitted,
+    the cached M2M token is used (patient sync, catalog search)."""
+    token = token or get_token()
     if not token:
         raise RuntimeError("Photon is not configured (no client credentials).")
     resp = _post_json(GRAPHQL_URL, {"query": query, "variables": variables},
@@ -176,14 +181,16 @@ def search_medications(name: str, first: int = 8) -> list:
 # createPrescription has NO prescriberId arg — the prescriber is derived from the
 # authenticated context. The clinician's in-app "Sign & Send" is the authorizing action.
 # Valid for NON-controlled drugs; controlled substances legally require EPCS two-factor.
+# Photon deprecated `refillsAllowed` — a prescription now declares total `fillsAllowed`
+# (the initial fill + the refills), so fillsAllowed = refills + 1.
 _CREATE_RX = """
 mutation oslerCreateRx($patientId: ID!, $treatmentId: ID!, $dispenseQuantity: Float!,
-                       $dispenseUnit: String!, $daysSupply: Int!, $refillsAllowed: Int!,
+                       $dispenseUnit: String!, $daysSupply: Int!, $fillsAllowed: Int!,
                        $instructions: String!) {
   createPrescription(patientId: $patientId, treatmentId: $treatmentId,
                      dispenseQuantity: $dispenseQuantity, dispenseUnit: $dispenseUnit,
-                     daysSupply: $daysSupply, refillsAllowed: $refillsAllowed,
-                     fillsAllowed: 1, instructions: $instructions) { id }
+                     daysSupply: $daysSupply,
+                     fillsAllowed: $fillsAllowed, instructions: $instructions) { id }
 }
 """
 
@@ -202,23 +209,28 @@ _DEMO_ADDRESS = {"street1": "123 Main St", "city": "Washington", "state": "DC",
 
 def create_prescription(*, patient_id: str, treatment_id: str, sig: str,
                         dispense_quantity: float, dispense_unit: str,
-                        days_supply: int, refills: int) -> str:
-    """Create a prescription (the clinician's in-app sign authorizes this). Returns rx id."""
+                        days_supply: int, refills: int,
+                        token: Optional[str] = None) -> str:
+    """Create a prescription (the clinician's in-app sign authorizes this). Returns rx id.
+    `token` MUST be a provider access token carrying `write:prescription`; the M2M
+    token lacks that scope and Photon rejects it with MISSING_PERMISSIONS."""
     data = graphql(_CREATE_RX, {
         "patientId": patient_id, "treatmentId": treatment_id,
         "dispenseQuantity": float(dispense_quantity), "dispenseUnit": dispense_unit,
-        "daysSupply": int(days_supply), "refillsAllowed": int(refills),
+        "daysSupply": int(days_supply), "fillsAllowed": int(refills) + 1,
         "instructions": sig,
-    })
+    }, token=token)
     return data["createPrescription"]["id"]
 
 
 def create_order(*, patient_id: str, prescription_id: str,
-                 address: Optional[dict] = None) -> str:
+                 address: Optional[dict] = None,
+                 token: Optional[str] = None) -> str:
     """Place the order (pharmacyId omitted → Photon routes to the optimal pharmacy).
-    Returns order id."""
+    Returns order id. Pass the provider token so the order is attributed to the same
+    authenticated clinician who signed the prescription."""
     data = graphql(_CREATE_ORDER, {
         "patientId": patient_id, "prescriptionId": prescription_id,
         "address": address or _DEMO_ADDRESS,
-    })
+    }, token=token)
     return data["createOrder"]["id"]

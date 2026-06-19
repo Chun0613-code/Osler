@@ -18,6 +18,7 @@ from __future__ import annotations
 import sys
 import os
 import json
+import urllib.parse
 from pathlib import Path
 
 # This demo (demo/) reuses the pharmacology engine in engine/ and data in data/.
@@ -44,7 +45,7 @@ def _load_dotenv(path: Path) -> None:
 
 _load_dotenv(Path(__file__).parent / ".env")
 
-from flask import Flask, request, jsonify, Response
+from flask import Flask, request, jsonify, Response, redirect
 
 import reasoning_engine as RE
 import case_targets
@@ -52,6 +53,7 @@ import agent
 import llm_client
 import prescription
 import photon_client
+import photon_oauth
 
 _HERE = Path(__file__).parent
 app = Flask(__name__)
@@ -78,6 +80,11 @@ _CACHE: dict[str, dict] = {}
 
 @app.route("/")
 def index():
+    # The Photon OAuth redirect lands here (the redirect_uri is the bare whitelisted origin
+    # http://127.0.0.1:5000). When Auth0 appends ?code&state, finish the login; otherwise
+    # serve the normal demo page.
+    if request.args.get("code") and request.args.get("state"):
+        return _handle_oauth_callback()
     return Response((_HERE / "case_demo.html").read_text(encoding="utf-8"), mimetype="text/html")
 
 
@@ -286,8 +293,118 @@ def api_prescriptions():
                     "env": photon_client.env_label()})
 
 
+# ── provider OAuth (native Sign & Send) ───────────────────────────────────────
+# A clinician logs in ONCE so the app can sign prescriptions under their authorized
+# identity (the M2M token can't — it lacks write:prescription). The whole dance runs
+# here on the backend; the device only ever learns connected:true/false. See photon_oauth.
+
+def _deep_link(url: str, **params) -> str:
+    """Append query params to an app deep link (e.g. oslianrx://photon-connected)."""
+    parts = urllib.parse.urlparse(url)
+    q = dict(urllib.parse.parse_qsl(parts.query))
+    q.update(params)
+    return urllib.parse.urlunparse(parts._replace(query=urllib.parse.urlencode(q)))
+
+
+@app.route("/api/photon/oauth/start")
+def api_oauth_start():
+    """Return the Neutron authorize URL the app opens in the system browser. `return` is
+    the app deep link we bounce back to after the callback."""
+    if not photon_oauth.is_enabled():
+        return jsonify({"error": "Photon SPA client id is not configured."}), 400
+    return_url = request.args.get("return") or "oslianrx://photon-connected"
+    try:
+        return jsonify({"authorize_url": photon_oauth.build_authorize_url(return_url)})
+    except Exception as e:  # noqa: BLE001
+        return jsonify({"error": str(e)}), 500
+
+
+def _handle_oauth_callback():
+    """Exchange the authorization code for a provider token, then 302 back into the app via
+    its deep link (carrying ?photon=connected|error). Shared by the root route (the redirect
+    target — a bare whitelisted origin) and the explicit /api/photon/oauth/callback path."""
+    state = request.args.get("state") or ""
+    pend = photon_oauth.consume_state(state)
+    if not pend:
+        # No matching state → can't safely bounce to an app; show a plain page.
+        return Response("<h3>Photon login: unknown or expired session. Please retry "
+                        "from the app.</h3>", mimetype="text/html", status=400)
+    return_url = pend["return_url"]
+    err = request.args.get("error")
+    if err:
+        desc = request.args.get("error_description") or err
+        return redirect(_deep_link(return_url, photon="error", msg=desc))
+    code = request.args.get("code") or ""
+    try:
+        photon_oauth.exchange_code(code, pend["verifier"])
+    except Exception as e:  # noqa: BLE001
+        print(f"[oauth] token exchange FAILED: {e}", flush=True)
+        return redirect(_deep_link(return_url, photon="error", msg=str(e)))
+    st = photon_oauth.status()
+    print(f"[oauth] CONNECTED provider={st.get('provider')} "
+          f"can_prescribe={st.get('can_prescribe')} scopes={st.get('scopes')!r}", flush=True)
+    return redirect(_deep_link(return_url, photon="connected"))
+
+
+@app.route("/api/photon/oauth/callback")
+def api_oauth_callback():
+    """Neutron redirects here after login (when the full path is whitelisted)."""
+    return _handle_oauth_callback()
+
+
+@app.route("/api/photon/oauth/status")
+def api_oauth_status():
+    """Is a provider connected (for the Settings UI)?"""
+    return jsonify(photon_oauth.status())
+
+
+@app.route("/api/photon/oauth/disconnect", methods=["POST"])
+def api_oauth_disconnect():
+    photon_oauth.disconnect()
+    return jsonify({"ok": True})
+
+
+# ── native prescribe (options + Sign & Send) ──────────────────────────────────
+@app.route("/api/prescribe/options")
+def api_prescribe_options():
+    """Catalog choices + prefilled defaults for the native review screen."""
+    try:
+        return jsonify(prescription.options(request.args.get("rx_id") or ""))
+    except prescription.RxError as e:
+        return jsonify({"error": e.message}), 404
+
+
+@app.route("/api/prescribe/sign", methods=["POST"])
+def api_prescribe_sign():
+    """Provider's in-app Sign & Send: createPrescription → createOrder under the provider
+    token. 401 if no provider is connected; 502 if Photon rejects the write."""
+    token = photon_oauth.provider_token()
+    if not token:
+        return jsonify({"error": "Connect Photon in Settings first (no provider signed in)."}), 401
+    d = request.get_json(force=True) or {}
+    try:
+        rec = prescription.sign(
+            d.get("rx_id") or "", provider_token=token,
+            treatment_id=d.get("treatment_id") or "",
+            sig=d.get("sig") or "",
+            dispense_quantity=d.get("dispense_quantity") or 0,
+            dispense_unit=d.get("dispense_unit") or "Each",
+            days_supply=d.get("days_supply") or 0,
+            refills=d.get("refills") or 0)
+    except prescription.RxError as e:
+        print(f"[sign] gate/input error: {e.message}", flush=True)
+        return jsonify({"error": e.message}), 400
+    except RuntimeError as e:  # Photon GraphQL/transport error
+        print(f"[sign] Photon error: {e}", flush=True)
+        return jsonify({"error": str(e)}), 502
+    print(f"[sign] OK drug={rec.get('drug')} rx={rec.get('photon_prescription_id')} "
+          f"order={rec.get('photon_order_id')}", flush=True)
+    return jsonify(rec)
+
+
 if __name__ == "__main__":
     print(f"[demo] drugs={len(DRUGS_PKPD)} clinical={len(CLINICAL)} cases={len(SAMPLE_CASES)} "
           f"env_llm={'on' if llm_client.available() else 'off'} "
-          f"photon={'on (' + photon_client.env_label() + ')' if photon_client.is_enabled() else 'mock'}")
+          f"photon={'on (' + photon_client.env_label() + ')' if photon_client.is_enabled() else 'mock'} "
+          f"provider_oauth={'ready' if photon_oauth.is_enabled() else 'off'}")
     app.run(debug=True, port=5000)
