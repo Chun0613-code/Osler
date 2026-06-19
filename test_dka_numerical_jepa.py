@@ -15,7 +15,8 @@ from dka_osler import shield, shield_full, shield_route_aware
 from dka_action_contract import ACTION_INDEX, expand_action
 from dka_world_model import (
     A_DIM, DKA_STATE_COMPILER, H_DIM, S_DIM, STATE_KEYS, WorldModel, a2vec,
-    observation_context, randomized_dka, s2vec, treatment_history_features,
+    load_checkpoint, observation_context, randomized_dka, save_checkpoint, s2vec,
+    treatment_history_features,
 )
 from train_intervention_jepa import (
     generate_branched_dataset,
@@ -30,7 +31,11 @@ from osler_jepa.actions import (
 from osler_jepa.ontology import OSLER_STATE_ONTOLOGY
 from osler_jepa.validator import OSLER_DKA_VALIDATOR, compile_transition_rules
 from osler_jepa.embodied_logic import OSLER_DKA_PROLOG
-from osler_jepa.belief import PotassiumStoreBelief
+from osler_jepa.belief import (
+    PotassiumStoreBelief,
+    downstream_observable_gate,
+    infer_hidden_beliefs,
+)
 from osler_jepa.rule_sandbox import RuleSandbox
 from osler_jepa.rule_inducer import validate_candidates
 from osler_jepa.real_world_adapter import RealWorldAdapter
@@ -519,6 +524,36 @@ class NumericalJEPATests(unittest.TestCase):
         )
         self.assertTrue(torch.allclose(legacy, explicit))
 
+    def test_ltc_dynamics_cell_is_candidate_only_and_time_sensitive(self):
+        model = WorldModel(dynamics_cell="ltc").eval()
+        self.assertEqual(model.dynamics_cell, "ltc")
+        self.assertTrue(model.P.continuous_time)
+        state = torch.zeros(2, S_DIM)
+        action = torch.zeros(2, A_DIM)
+        latent = model.encode_state(state)
+        short = model.predict_latent(latent, action, delta_hours=0.25)
+        long = model.predict_latent(latent, action, delta_hours=1.0)
+        self.assertFalse(torch.allclose(short, long))
+        predicted, _, latents = model.rollout(
+            state,
+            torch.zeros(2, 3, A_DIM),
+            delta_hours=torch.tensor([[0.25, 0.5, 1.0], [0.25, 0.5, 1.0]]),
+        )
+        self.assertEqual(predicted.shape, (2, 3, S_DIM))
+        self.assertEqual(latents.shape[-1], model.P.latent_dim)
+
+    def test_ltc_checkpoint_roundtrip_preserves_dynamics_cell(self):
+        model = WorldModel(dynamics_cell="ltc").eval()
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "ltc.pt"
+            save_checkpoint(model, path, metadata={
+                "model_architecture": {"dynamics_cell": "ltc"}
+            })
+            loaded, payload = load_checkpoint(path)
+        self.assertEqual(loaded.dynamics_cell, "ltc")
+        self.assertEqual(payload["dynamics"]["cell"], "ltc")
+        self.assertFalse(payload["dynamics"]["runtime_promotion_implied"])
+
     def test_potassium_store_belief_predicts_and_updates(self):
         state = {
             "G": 480.0, "Ke": 3.4, "pH": 7.1,
@@ -530,6 +565,43 @@ class NumericalJEPATests(unittest.TestCase):
         self.assertGreater(predicted.mean, prior.mean)
         self.assertLess(posterior.variance, predicted.variance)
         self.assertFalse(posterior.to_dict()["measured"])
+
+    def test_generalized_hidden_beliefs_require_downstream_gate(self):
+        state = {
+            "G": 480.0, "pH": 7.1, "HCO3": 8.0, "anion_gap": 24.0,
+            "Ke": 3.4, "MAP": 70.0, "Na": 132.0,
+            "osmolality": 292.0, "creatinine": 1.8,
+            "urine_output": 40.0, "I": 6.0,
+        }
+        beliefs = infer_hidden_beliefs(state)
+        self.assertIn("acid_base_buffer_reserve", beliefs)
+        self.assertIn("insulin_sensitivity", beliefs)
+        for belief in beliefs.values():
+            payload = belief.to_dict()
+            self.assertFalse(payload["measured"])
+            self.assertFalse(
+                payload["validation_gate"][
+                    "direct_hidden_state_accuracy_claim_allowed"
+                ]
+            )
+            self.assertTrue(payload["validation_gate"]["targets"])
+
+        gate = downstream_observable_gate(
+            "insulin_sensitivity",
+            baseline_mae={"G": 100.0, "BHB": 2.0},
+            candidate_mae={"G": 92.0, "BHB": 1.8},
+            targets=("G", "BHB"),
+        )
+        self.assertTrue(gate["passed"])
+        self.assertFalse(gate["clinical_claim_allowed"])
+
+        failed = downstream_observable_gate(
+            "insulin_sensitivity",
+            baseline_mae={"G": 100.0},
+            candidate_mae={"G": 101.0},
+            targets=("G",),
+        )
+        self.assertFalse(failed["passed"])
 
     def test_prolog_blocks_insulin_during_critical_hypokalemia(self):
         result = OSLER_DKA_PROLOG.evaluate(

@@ -165,6 +165,13 @@ python train_intervention_jepa.py \
   --greybox-residual dka_greybox_residual_candidate_v1.pt \
   --action-prior dka_action_prior_demo_v1.json \
   --mimic dka_transitions_6h_demo_v4.parquet
+
+# Research-only continuous-time candidate dynamics. This is an LTC ablation
+# entry point, not a runtime promotion shortcut.
+python train_intervention_jepa.py \
+  --dynamics-cell ltc \
+  --checkpoint dka_ltc_candidate.pt \
+  --report dka_ltc_candidate_report.json
 python symbolic_real_test.py \
   --checkpoint dka_symbolic_jepa_v6_full_candidate.pt \
   --mimic dka_transitions_6h_demo_v4.parquet \

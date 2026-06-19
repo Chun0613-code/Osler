@@ -236,15 +236,59 @@ class LatentPredictor(nn.Module):
         self.delta = mlp(latent_dim + action_dim, latent_dim)
         self.residual_scale = nn.Parameter(torch.tensor(0.1))
 
-    def forward(self, latent_and_action):
+    def forward(self, latent_and_action, delta_hours=None):
         latent = latent_and_action[..., :self.latent_dim]
         delta = self.delta(latent_and_action)
         return latent + torch.tanh(self.residual_scale) * delta
 
 
-class WorldModel(nn.Module):
-    def __init__(self):
+class LiquidTimeConstantPredictor(nn.Module):
+    """Continuous-time candidate latent dynamics with learned time constants.
+
+    This is a research-only alternative to the residual MLP predictor. It is
+    designed for irregular intervals: the same latent/action drive is integrated
+    with a bounded ``1 - exp(-dt / tau)`` update, so short and long intervals can
+    produce different-sized residual moves without changing the rest of the JEPA
+    contract.
+    """
+
+    continuous_time = True
+
+    def __init__(self, latent_dim=Z_DIM, action_dim=ACTION_EMBED_DIM):
         super().__init__()
+        self.latent_dim = latent_dim
+        self.delta = mlp(latent_dim + action_dim, latent_dim)
+        self.tau = nn.Sequential(
+            nn.Linear(latent_dim + action_dim, 128),
+            nn.SiLU(),
+            nn.Linear(128, latent_dim),
+        )
+        self.residual_scale = nn.Parameter(torch.tensor(0.1))
+
+    def forward(self, latent_and_action, delta_hours=None):
+        latent = latent_and_action[..., :self.latent_dim]
+        drive = self.delta(latent_and_action)
+        tau = torch.nn.functional.softplus(self.tau(latent_and_action)) + 0.05
+        if delta_hours is None:
+            dt = latent.new_full(latent.shape[:-1], DT)
+        else:
+            dt = torch.as_tensor(
+                delta_hours, dtype=latent.dtype, device=latent.device
+            )
+            if dt.ndim == 0:
+                dt = dt.expand(latent.shape[:-1])
+        while dt.ndim < latent.ndim:
+            dt = dt.unsqueeze(-1)
+        alpha = 1.0 - torch.exp(-dt.clamp_min(0.0) / tau)
+        return latent + alpha * torch.tanh(self.residual_scale) * drive
+
+
+class WorldModel(nn.Module):
+    def __init__(self, dynamics_cell="residual_mlp"):
+        super().__init__()
+        if dynamics_cell not in {"residual_mlp", "ltc"}:
+            raise ValueError(f"Unsupported dynamics cell: {dynamics_cell}")
+        self.dynamics_cell = dynamics_cell
         self.uncertainty_trained = False
         self.AEnc = TemporalActionEncoder(A_DIM, ACTION_EMBED_DIM)
         self.EventEnc = nn.Linear(TREATMENT_EVENT_DIM, ACTION_EMBED_DIM, bias=False)
@@ -257,7 +301,10 @@ class WorldModel(nn.Module):
         )
         self.ObsEnc = nn.Linear(S_DIM * 2, Z_DIM, bias=False)
         nn.init.zeros_(self.ObsEnc.weight)
-        self.P = LatentPredictor()
+        self.P = (
+            LiquidTimeConstantPredictor()
+            if dynamics_cell == "ltc" else LatentPredictor()
+        )
         self.D = mlp(Z_DIM, S_DIM)
         self.R = mlp(Z_DIM, 1, hidden=96)
         symbolic_dim = Z_DIM + ACTION_EMBED_DIM
@@ -292,7 +339,10 @@ class WorldModel(nn.Module):
             action_embedding = action_embedding + self.EventEnc(
                 treatment_events.to(dtype=action.dtype)
             )
-        return self.P(torch.cat([latent, action_embedding], dim=-1))
+        return self.P(
+            torch.cat([latent, action_embedding], dim=-1),
+            delta_hours=delta_hours,
+        )
 
     def encode_state(self, state, history=None, observation_mask=None,
                      observation_age=None, compiled_context=None):
@@ -507,6 +557,11 @@ def save_checkpoint(model, path, metadata=None):
             "insulin_channels": list(ACTION_KEYS[:4]),
             "treatment_event_features": list(TREATMENT_EVENT_KEYS),
         },
+        "dynamics": {
+            "cell": getattr(model, "dynamics_cell", "residual_mlp"),
+            "ltc_candidate_only": getattr(model, "dynamics_cell", "residual_mlp") == "ltc",
+            "runtime_promotion_implied": False,
+        },
         "symbolic_interface": symbolic_schema(
             STATE_KEYS, ACTION_KEYS, OSLER_STATE_ONTOLOGY
         ),
@@ -517,7 +572,14 @@ def save_checkpoint(model, path, metadata=None):
 
 def load_checkpoint(path, device="cpu"):
     payload = torch.load(Path(path), map_location=device, weights_only=False)
-    model = WorldModel().to(device)
+    dynamics_cell = (
+        payload.get("dynamics", {}).get("cell")
+        or payload.get("metadata", {}).get("model_architecture", {}).get(
+            "dynamics_cell"
+        )
+        or "residual_mlp"
+    )
+    model = WorldModel(dynamics_cell=dynamics_cell).to(device)
     incompatible = model.load_state_dict(payload["model_state"], strict=False)
     model.uncertainty_trained = (
         not any(key.startswith("U.") for key in incompatible.missing_keys)

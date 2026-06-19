@@ -13,7 +13,12 @@ from .validator import (
     compile_transition_rules,
 )
 from .embodied_logic import DkaEmbodiedLogic, GroundProlog, OSLER_DKA_PROLOG
-from .belief import PotassiumStoreBelief
+from .belief import (
+    HiddenStateBelief,
+    PotassiumStoreBelief,
+    downstream_observable_gate,
+    infer_hidden_beliefs,
+)
 from .anchored_residual import (
     AnchoredResidualConfig,
     AnchoredResidualGate,
@@ -54,7 +59,10 @@ __all__ = [
     "DkaEmbodiedLogic",
     "GroundProlog",
     "OSLER_DKA_PROLOG",
+    "HiddenStateBelief",
     "PotassiumStoreBelief",
+    "downstream_observable_gate",
+    "infer_hidden_beliefs",
     "AnchoredResidualConfig",
     "AnchoredResidualGate",
     "prolog_direction_gate",

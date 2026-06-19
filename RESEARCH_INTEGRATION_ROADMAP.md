@@ -58,7 +58,8 @@ also touches the dynamics path directly, unlike rule-discovery infrastructure.
 
 First implementation target:
 
-- Add an optional continuous-time residual cell behind a research flag.
+- Implemented entry point: `WorldModel(dynamics_cell="ltc")` and
+  `train_intervention_jepa.py --dynamics-cell ltc`.
 - Feed it elapsed time, observation mask, measurement age, and action embedding.
 - Compare against v5 with the same promotion gates: latent rank,
   counterfactual sign accuracy, action sensitivity, changed-only accuracy, and
@@ -82,8 +83,9 @@ state from labs, actions, missingness, and physiology.
 
 First implementation target:
 
-- Generalize the existing `PotassiumStoreBelief` pattern into typed
-  predict-update filters for additional latent states.
+- Implemented entry point: `infer_hidden_beliefs(state)` returns typed
+  research-only beliefs, and `downstream_observable_gate(...)` validates each
+  unmeasured belief by held-out improvement on measurable downstream variables.
 - Candidate hidden states:
   - acid-base buffer reserve,
   - insulin sensitivity / effective insulin action,
@@ -99,6 +101,9 @@ Promotion boundary:
 - Hidden-state beliefs are research estimates, not measured labs.
 - A belief filter may improve personalization and counterfactual simulation.
 - It may not authorize a treatment or override observed patient values.
+- A hidden belief is kept only if it improves held-out prediction of measurable
+  downstream targets. Direct hidden-state accuracy claims are forbidden because
+  these states are not directly observed.
 
 ### ILP / FOIL
 

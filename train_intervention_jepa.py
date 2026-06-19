@@ -1427,7 +1427,22 @@ def main():
             "mask/age model."
         ),
     )
+    parser.add_argument(
+        "--dynamics-cell",
+        choices=("residual_mlp", "ltc"),
+        default="residual_mlp",
+        help=(
+            "Research-only latent dynamics cell. 'ltc' enables a Liquid "
+            "Time-Constant candidate and does not imply runtime promotion."
+        ),
+    )
     args = parser.parse_args()
+
+    if args.init_checkpoint and args.dynamics_cell != "residual_mlp":
+        parser.error(
+            "--dynamics-cell ltc cannot be combined with --init-checkpoint "
+            "until an explicit transfer mapping is implemented"
+        )
 
     gate = {
         "passed": False,
@@ -1484,7 +1499,7 @@ def main():
     if args.init_checkpoint:
         model, init_payload = load_checkpoint(args.init_checkpoint, device="cpu")
     else:
-        model = WorldModel()
+        model = WorldModel(dynamics_cell=args.dynamics_cell)
         init_payload = {}
     history, best_validation = train_model(
         model, dataset, splits, args.epochs, args.batch_size,
@@ -1535,6 +1550,11 @@ def main():
             "uncertainty_head_trains_on_detached_dynamics": True,
             "policy_optimization": False,
             "clinical_authority": False,
+        },
+        "model_architecture": {
+            "dynamics_cell": args.dynamics_cell,
+            "ltc_candidate_only": args.dynamics_cell == "ltc",
+            "runtime_promotion_implied": False,
         },
         "simulator": {
             "version": "temporal_causal_audit_dka_v6",
