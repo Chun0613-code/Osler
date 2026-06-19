@@ -181,3 +181,13 @@ layer.
 Active Prolog effect rules now include temporal windows and confidence metadata.
 Runtime checks defer conclusions outside the declared window. Full probabilistic
 inference over uncertain patient facts remains future work.
+
+## Research Method Integration
+
+The current research reading list has been narrowed to methods that attach
+directly to existing Osler-JEPA modules: ILP/FOIL for candidate rule induction,
+Logical Neural Networks for differentiable rule constraints, Liquid
+Time-Constant Networks for irregular continuous-time dynamics, DreamCoder-style
+library growth for candidate mechanisms, and Active Inference as the unifying
+belief/planning frame. See `RESEARCH_INTEGRATION_ROADMAP.md` for the exact
+module mapping, build order, and safety boundaries.

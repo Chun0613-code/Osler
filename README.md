@@ -60,6 +60,7 @@ Osler/
 ├── SYMBOLIC_JEPA_VIABILITY_AUDIT.md  Same-scale compiler/viability ablation.
 ├── PHYSIONET2019_PRETRAINING_FINDINGS.md  Real ICU pretraining result and boundary.
 ├── PHYSIONET_DKABODY_CALIBRATION_FINDINGS.md  PhysioNet simulator-prior calibration.
+├── RESEARCH_INTEGRATION_ROADMAP.md  ILP/LNN/LTC/DreamCoder/active-inference integration plan.
 ├── requirements.txt
 └── README.md
 ```
