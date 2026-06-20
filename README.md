@@ -55,6 +55,7 @@ Osler/
 ├── physionet2019_pretrain.py  General ICU self-supervised JEPA pretraining.
 ├── eicu_demo_pretrain.py      eICU demo ICU state pretraining adapter.
 ├── eicu_demo_action_audit.py  eICU treatment-table to DKA action coverage audit.
+├── eicu_dka_transition_extract.py  eICU observed-treatment DKA transition cohort.
 ├── rules/active/dka_embodied.pl  Human-owned Prolog action/effect rules.
 ├── dka_*.py                 Calibration and real-data validation utilities.
 ├── SYSTEM_FLOW.md           Current symbolic and numerical JEPA flows.
@@ -62,6 +63,7 @@ Osler/
 ├── SYMBOLIC_JEPA_VIABILITY_AUDIT.md  Same-scale compiler/viability ablation.
 ├── PHYSIONET2019_PRETRAINING_FINDINGS.md  Real ICU pretraining result and boundary.
 ├── PHYSIONET_DKABODY_CALIBRATION_FINDINGS.md  PhysioNet simulator-prior calibration.
+├── EICU_DKA_TRANSITION_FINDINGS.md  Open observed-treatment eICU DKA proxy result.
 ├── RESEARCH_INTEGRATION_ROADMAP.md  ILP/LNN/LTC/DreamCoder/active-inference integration plan.
 ├── requirements.txt
 └── README.md
@@ -245,8 +247,33 @@ python eicu_demo_action_audit.py \
 
 The demo audit found 304 DKA-like stays and 3,635 mapped action rows in the
 -6h/+24h DKA anchor window, making eICU demo the first open cross-hospital
-treated DKA cohort scaffold in this project. It is still an aggregate coverage
-audit, not an action-conditioned JEPA checkpoint. See
+treated DKA cohort scaffold in this project. The follow-up transition extractor
+turns that scaffold into the same observed-treatment factual contract used by
+the MIMIC proxy evaluator:
+
+```bash
+python eicu_dka_transition_extract.py \
+  --data-root physionet.org/files/eicu-crd-demo/2.0.1 \
+  --output eicu_dka_transitions_6h_demo.parquet \
+  --report eicu_dka_transition_report.json
+
+python evaluate_dka_mimic.py \
+  --checkpoint dka_symbolic_jepa_v5.pt \
+  --mimic eicu_dka_transitions_6h_demo.parquet \
+  --output eicu_dka_v5_evaluation.json
+
+python symbolic_real_test.py \
+  --checkpoint dka_symbolic_jepa_v5.pt \
+  --mimic eicu_dka_transitions_6h_demo.parquet \
+  --output eicu_dka_symbolic_real_test_v5.json
+```
+
+The eICU demo transition run produced 259 evaluable DKA-like stays, 2,762
+6-hour transitions, and 367 active-DKA windows. Observed support clears the
+reference power gate for `fluids -> MAP` and barely clears it for
+`insulin -> glucose`; `KCl -> potassium` remains underpowered after target-pair
+filtering. This is still an observational factual proxy, not a causal treatment
+effect test or a checkpoint promotion. See `EICU_DKA_TRANSITION_FINDINGS.md` and
 `EICU_DEMO_PRETRAINING_FINDINGS.md`.
 
 If you want to test whether this real-ICU representation helps DKA training, use
