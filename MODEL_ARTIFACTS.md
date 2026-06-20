@@ -24,6 +24,13 @@ are local-only patient data artifacts and are ignored by git. The local
 `physionet2019_icu_jepa_report.json` records aggregate, non-identified training
 metrics for the general ICU pretraining path.
 
+PhysioNet eICU demo CSV files under `physionet.org/`, generated
+`eicu_demo_cache.npz`, and local `eicu_demo_icu_jepa.pt` are also local-only.
+The committed `eicu_demo_icu_jepa_report.json` records aggregate generic ICU
+pretraining metrics. The committed `eicu_demo_action_audit.json` records
+aggregate treatment-table coverage for DKA-relevant action channels and contains
+no raw rows or patient identifiers.
+
 `dka_physionet_encoder_init.pt` is a local-only candidate initialization
 checkpoint. It contains feature-aligned encoder transfer from the PhysioNet ICU
 JEPA into a fresh DKA WorldModel, but it is not a promoted DKA checkpoint. The

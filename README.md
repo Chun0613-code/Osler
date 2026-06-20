@@ -53,6 +53,8 @@ Osler/
 ├── dka_causal_evaluation.py Matched-control and AIPW confounding audit.
 ├── osler_jepa/              Shared ontology, action schema, curriculum, validator.
 ├── physionet2019_pretrain.py  General ICU self-supervised JEPA pretraining.
+├── eicu_demo_pretrain.py      eICU demo ICU state pretraining adapter.
+├── eicu_demo_action_audit.py  eICU treatment-table to DKA action coverage audit.
 ├── rules/active/dka_embodied.pl  Human-owned Prolog action/effect rules.
 ├── dka_*.py                 Calibration and real-data validation utilities.
 ├── SYSTEM_FLOW.md           Current symbolic and numerical JEPA flows.
@@ -214,6 +216,38 @@ such as insulin route, KCl, fluids, bicarbonate, or dextrose. Its allowed role i
 generic ICU encoder/world-model pretraining and representation research. It may
 not replace `dka_symbolic_jepa_v5.pt` or support counterfactual treatment claims.
 See `PHYSIONET2019_PRETRAINING_FINDINGS.md` for the phase-closure interpretation.
+
+### eICU demo ICU pretraining and treatment audit
+
+The eICU Collaborative Research Database Demo can be adapted into the same
+generic ICU state-dynamics contract:
+
+```bash
+python eicu_demo_pretrain.py \
+  --data-root physionet.org/files/eicu-crd-demo/2.0.1 \
+  --rebuild-cache \
+  --max-transitions-per-split 30000 \
+  --epochs 8 \
+  --cache eicu_demo_cache.npz \
+  --checkpoint eicu_demo_icu_jepa.pt \
+  --report eicu_demo_icu_jepa_report.json
+```
+
+This generic pretraining run does not consume treatment tables, so it cannot
+make action-conditioned or counterfactual claims. The separate action audit maps
+`medication`, `infusiondrug`, and `treatment` rows into the DKA action contract:
+
+```bash
+python eicu_demo_action_audit.py \
+  --data-root physionet.org/files/eicu-crd-demo/2.0.1 \
+  --output eicu_demo_action_audit.json
+```
+
+The demo audit found 304 DKA-like stays and 3,635 mapped action rows in the
+-6h/+24h DKA anchor window, making eICU demo the first open cross-hospital
+treated DKA cohort scaffold in this project. It is still an aggregate coverage
+audit, not an action-conditioned JEPA checkpoint. See
+`EICU_DEMO_PRETRAINING_FINDINGS.md`.
 
 If you want to test whether this real-ICU representation helps DKA training, use
 the controlled feature-aligned transfer path. It seeds only overlapping state

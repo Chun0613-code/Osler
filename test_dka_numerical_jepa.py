@@ -82,6 +82,7 @@ from mimic_action_history import (
     maintenance_window_summary, normalize_maintenance_events,
     treatment_event_records,
 )
+from eicu_demo_action_audit import classify_eicu_action
 
 sys.path.insert(0, str(Path(__file__).parent / "engine"))
 sys.path.insert(0, str(Path(__file__).parent / "demo"))
@@ -511,6 +512,30 @@ class NumericalJEPATests(unittest.TestCase):
         self.assertEqual(events[1].sum(), 0.0)
         self.assertEqual(
             events[2, A_DIM + ACTION_INDEX["insulin_iv"]], 1.0
+        )
+
+    def test_eicu_action_labels_map_to_dka_channels(self):
+        self.assertEqual(
+            classify_eicu_action(
+                "regular insulin infusion", route="IV", source="medication"
+            ),
+            ("insulin_iv",),
+        )
+        self.assertEqual(
+            classify_eicu_action(
+                "LANTUS insulin glargine", route="SC", source="medication"
+            ),
+            ("insulin_basal_sc",),
+        )
+        self.assertIn(
+            "kcl",
+            classify_eicu_action(
+                "potassium chloride 20 mEq IV", route="IV", source="medication"
+            ),
+        )
+        self.assertEqual(
+            set(classify_eicu_action("D5 normal saline infusion", route="IV")),
+            {"fluids", "dextrose"},
         )
 
     def test_zero_event_context_preserves_legacy_prediction(self):
