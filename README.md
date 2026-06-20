@@ -56,6 +56,7 @@ Osler/
 ├── eicu_demo_pretrain.py      eICU demo ICU state pretraining adapter.
 ├── eicu_demo_action_audit.py  eICU treatment-table to DKA action coverage audit.
 ├── eicu_dka_transition_extract.py  eICU observed-treatment DKA transition cohort.
+├── eicu_dka_per_target_ensemble.py  eICU patient-held-out target selector.
 ├── rules/active/dka_embodied.pl  Human-owned Prolog action/effect rules.
 ├── dka_*.py                 Calibration and real-data validation utilities.
 ├── SYSTEM_FLOW.md           Current symbolic and numerical JEPA flows.
@@ -266,6 +267,12 @@ python symbolic_real_test.py \
   --checkpoint dka_symbolic_jepa_v5.pt \
   --mimic eicu_dka_transitions_6h_demo.parquet \
   --output eicu_dka_symbolic_real_test_v5.json
+
+python eicu_dka_per_target_ensemble.py \
+  --cohort eicu_dka_transitions_6h_demo.parquet \
+  --v5-checkpoint dka_symbolic_jepa_v5.pt \
+  --presentation-checkpoint dka_physionet_presentation_only_candidate.pt \
+  --output eicu_dka_per_target_ensemble.json
 ```
 
 The eICU demo transition run produced 259 evaluable DKA-like stays, 2,762
@@ -273,7 +280,9 @@ The eICU demo transition run produced 259 evaluable DKA-like stays, 2,762
 reference power gate for `fluids -> MAP` and barely clears it for
 `insulin -> glucose`; `KCl -> potassium` remains underpowered after target-pair
 filtering. This is still an observational factual proxy, not a causal treatment
-effect test or a checkpoint promotion. See `EICU_DKA_TRANSITION_FINDINGS.md` and
+effect test or a checkpoint promotion. The patient-held-out per-target ensemble
+found a real glucose signal but did not pass the active-DKA bootstrap gate as a
+whole. See `EICU_DKA_TRANSITION_FINDINGS.md` and
 `EICU_DEMO_PRETRAINING_FINDINGS.md`.
 
 If you want to test whether this real-ICU representation helps DKA training, use

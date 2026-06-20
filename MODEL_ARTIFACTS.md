@@ -36,9 +36,9 @@ the observed-treatment eICU demo DKA-like transition cohort used for factual
 proxy evaluation. Committed aggregate reports include
 `eicu_dka_transition_report.json`, `eicu_dka_v5_evaluation.json`,
 `eicu_dka_physionet_presentation_only_evaluation.json`,
-`eicu_dka_real_proxy_comparison.json`, and
-`eicu_dka_symbolic_real_test_v5.json`. These reports contain cohort-level counts
-and metrics only; raw rows, timestamps, and patient identifiers are not
+`eicu_dka_real_proxy_comparison.json`, `eicu_dka_symbolic_real_test_v5.json`,
+and `eicu_dka_per_target_ensemble.json`. These reports contain cohort-level
+counts and metrics only; raw rows, timestamps, and patient identifiers are not
 versioned.
 
 `dka_physionet_encoder_init.pt` is a local-only candidate initialization
