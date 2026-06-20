@@ -57,6 +57,7 @@ Osler/
 ├── eicu_demo_action_audit.py  eICU treatment-table to DKA action coverage audit.
 ├── eicu_dka_transition_extract.py  eICU observed-treatment DKA transition cohort.
 ├── eicu_dka_per_target_ensemble.py  eICU patient-held-out target selector.
+├── mimiciii_demo_dka_transition_extract.py  MIMIC-III demo DKA-like transition cohort.
 ├── rules/active/dka_embodied.pl  Human-owned Prolog action/effect rules.
 ├── dka_*.py                 Calibration and real-data validation utilities.
 ├── SYSTEM_FLOW.md           Current symbolic and numerical JEPA flows.
@@ -65,6 +66,7 @@ Osler/
 ├── PHYSIONET2019_PRETRAINING_FINDINGS.md  Real ICU pretraining result and boundary.
 ├── PHYSIONET_DKABODY_CALIBRATION_FINDINGS.md  PhysioNet simulator-prior calibration.
 ├── EICU_DKA_TRANSITION_FINDINGS.md  Open observed-treatment eICU DKA proxy result.
+├── MIMICIII_DKA_TRANSITION_FINDINGS.md  MIMIC-III demo schema/power smoke result.
 ├── RESEARCH_INTEGRATION_ROADMAP.md  ILP/LNN/LTC/DreamCoder/active-inference integration plan.
 ├── requirements.txt
 └── README.md
@@ -311,6 +313,46 @@ python train_intervention_jepa.py \
 
 The full-budget transfer candidate was tested and rejected for runtime
 promotion; see `dka_v5_vs_physionet_transfer_comparison.json`.
+
+### MIMIC-III demo observed-treatment DKA-like schema test
+
+The PhysioNet MIMIC-III Clinical Database Demo v1.4 can also be mapped into the
+observed-treatment 6-hour DKA proxy schema. The demo has no ICD-confirmed DKA
+stays in the local files, so this path is a schema and power smoke test rather
+than a diagnosis-confirmed DKA validation cohort.
+
+```bash
+python mimiciii_demo_dka_transition_extract.py \
+  --data-root physionet.org/files/mimiciii-demo/1.4 \
+  --output mimiciii_dka_transitions_6h_demo.parquet \
+  --report mimiciii_dka_transition_report.json
+
+python evaluate_dka_mimic.py \
+  --checkpoint dka_symbolic_jepa_v5.pt \
+  --mimic mimiciii_dka_transitions_6h_demo.parquet \
+  --output mimiciii_dka_v5_evaluation.json
+
+python evaluate_dka_mimic.py \
+  --checkpoint dka_physionet_presentation_only_candidate.pt \
+  --mimic mimiciii_dka_transitions_6h_demo.parquet \
+  --output mimiciii_dka_presentation_only_evaluation.json
+
+python symbolic_real_test.py \
+  --checkpoint dka_symbolic_jepa_v5.pt \
+  --mimic mimiciii_dka_transitions_6h_demo.parquet \
+  --output mimiciii_dka_symbolic_real_test_v5.json
+```
+
+The MIMIC-III demo run found 42 lab-defined DKA-like stays before filtering, 0
+ICD-confirmed DKA stays, 40 evaluable stays, 482 transitions, and 66 active-DKA
+windows. Action grids, treatment lifecycle events, and pre-anchor history are
+present, but action-target support remains below the prior reference gates for
+`fluids -> MAP`, `insulin -> glucose`, and `KCl -> potassium`. V5 only beats
+persistence for all-window MAP and active-DKA bicarbonate as point estimates;
+the PhysioNet presentation-only candidate has only small active-DKA point wins
+for pH, potassium, and sodium. This does not support checkpoint promotion,
+causal claims, or clinical claims. See `MIMICIII_DKA_TRANSITION_FINDINGS.md` and
+`mimiciii_dka_real_proxy_comparison.json`.
 
 ### PhysioNet 2019 DKABody calibration
 

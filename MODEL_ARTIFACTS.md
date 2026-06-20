@@ -41,6 +41,17 @@ and `eicu_dka_per_target_ensemble.json`. These reports contain cohort-level
 counts and metrics only; raw rows, timestamps, and patient identifiers are not
 versioned.
 
+`mimiciii_dka_transitions_6h_demo.parquet` is local-only and ignored by git. It
+is the observed-treatment MIMIC-III demo lab-defined DKA-like transition cohort
+used for schema and factual proxy smoke testing. Committed aggregate reports
+include `mimiciii_dka_transition_report.json`, `mimiciii_dka_v5_evaluation.json`,
+`mimiciii_dka_presentation_only_evaluation.json`,
+`mimiciii_dka_symbolic_real_test_v5.json`, and
+`mimiciii_dka_real_proxy_comparison.json`. These reports contain cohort-level
+counts and metrics only; raw rows, timestamps, and patient identifiers are not
+versioned. The local demo has 0 ICD-confirmed DKA stays, so this artifact must
+not be used for checkpoint promotion or clinical claims.
+
 `dka_physionet_encoder_init.pt` is a local-only candidate initialization
 checkpoint. It contains feature-aligned encoder transfer from the PhysioNet ICU
 JEPA into a fresh DKA WorldModel, but it is not a promoted DKA checkpoint. The
