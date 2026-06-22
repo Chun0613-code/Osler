@@ -12,6 +12,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -45,13 +46,15 @@ function TypingBubble() {
 
 export default function ChatScreen() {
   const router = useRouter();
-  const { current, appendChat, llm } = useApp();
+  const { patients, current, currentId, selectPatient, appendChat, llm } = useApp();
   const [input, setInput] = useState('');
-  const [sending, setSending] = useState(false);
+  const [sendingForId, setSendingForId] = useState<string | null>(null);
   const [showSettingsHint, setShowSettingsHint] = useState(false);
   const [bannerDismissed, setBannerDismissed] = useState(false);
   const listRef = useRef<FlatList<ChatMessage>>(null);
 
+  const sending = sendingForId === current?.id;
+  const isSendingAny = sendingForId !== null;
   const chatLen = current?.chat.length ?? 0;
   useEffect(() => {
     if (chatLen > 0) {
@@ -80,30 +83,31 @@ export default function ChatScreen() {
   const send = useCallback(
     async (text: string) => {
       const content = text.trim();
-      if (!content || !current || sending) return;
+      if (!content || !current || isSendingAny) return;
+      const patient = current;
       setInput('');
-      setSending(true);
+      setSendingForId(patient.id);
       const userMsg: ChatMessage = { role: 'user', content };
-      appendChat(current.id, userMsg);
+      appendChat(patient.id, userMsg);
       try {
         const res = await chat(
-          current.id,
-          [...current.chat, userMsg],
-          current.bundle,
+          patient.id,
+          [...patient.chat, userMsg],
+          patient.bundle,
           llm,
         );
-        appendChat(current.id, { role: 'assistant', content: res.reply });
+        appendChat(patient.id, { role: 'assistant', content: res.reply });
         if (res.ok === false) setShowSettingsHint(true);
       } catch (e) {
-        appendChat(current.id, {
+        appendChat(patient.id, {
           role: 'assistant',
           content: `Could not reach the backend (${e instanceof Error ? e.message : 'network error'}). Is \`python demo/demo_app.py\` running?`,
         });
       } finally {
-        setSending(false);
+        setSendingForId(null);
       }
     },
-    [current, sending, appendChat, llm],
+    [current, isSendingAny, appendChat, llm],
   );
 
   if (!current) {
@@ -159,6 +163,53 @@ export default function ChatScreen() {
         keyboardShouldPersistTaps="handled"
         ListHeaderComponent={
           <View style={styles.listHeader}>
+            <View style={styles.patientSelector}>
+              <Text style={styles.sectionLabel}>CHAT WITH</Text>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.patientScroll}
+                keyboardShouldPersistTaps="handled">
+                {patients.map((patient, index) => {
+                  const active = patient.id === currentId;
+                  const result = patient.bundle.result;
+                  const drugCount = result.candidates.length;
+                  const unreadHint = patient.chat.length > 0 ? `${patient.chat.length}` : 'New';
+                  return (
+                    <Pressable
+                      key={patient.id}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: active, disabled: isSendingAny && !active }}
+                      disabled={isSendingAny && !active}
+                      onPress={() => selectPatient(patient.id)}
+                      style={({ pressed }) => [
+                        styles.patientPill,
+                        active && styles.patientPillActive,
+                        isSendingAny && !active && { opacity: 0.55 },
+                        pressed && { opacity: 0.88 },
+                      ]}>
+                      <View style={[styles.patientIndex, active && styles.patientIndexActive]}>
+                        <Text style={[styles.patientIndexText, active && styles.patientIndexTextActive]}>
+                          {index + 1}
+                        </Text>
+                      </View>
+                      <View style={styles.patientPillBody}>
+                        <Text
+                          style={[styles.patientTitle, active && styles.patientTitleActive]}
+                          numberOfLines={1}>
+                          {patient.title}
+                        </Text>
+                        <Text
+                          style={[styles.patientMeta, active && styles.patientMetaActive]}
+                          numberOfLines={1}>
+                          {drugCount} drug{drugCount === 1 ? '' : 's'} · {unreadHint}
+                        </Text>
+                      </View>
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+            </View>
             <TraceCard steps={current.bundle.trace} />
             {showChips && (
               <View style={styles.chips}>
@@ -196,17 +247,17 @@ export default function ChatScreen() {
           placeholderTextColor={colors.textMuted}
           returnKeyType="send"
           onSubmitEditing={() => send(input)}
-          editable={!sending}
+          editable={!isSendingAny}
           multiline={false}
         />
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Send message"
           onPress={() => send(input)}
-          disabled={sending || !input.trim()}
+          disabled={isSendingAny || !input.trim()}
           style={({ pressed }) => [
             styles.sendButton,
-            (sending || !input.trim()) && { opacity: 0.5 },
+            (isSendingAny || !input.trim()) && { opacity: 0.5 },
             pressed && { opacity: 0.8 },
           ]}>
           <Ionicons name="send" size={18} color="#FFFFFF" />
@@ -279,6 +330,77 @@ const styles = StyleSheet.create({
   listHeader: {
     marginBottom: spacing.sm,
     gap: spacing.md,
+  },
+  patientSelector: {
+    gap: spacing.xs,
+  },
+  sectionLabel: {
+    fontFamily: fonts.heading,
+    fontSize: 11,
+    color: colors.textMuted,
+    textTransform: 'uppercase',
+  },
+  patientScroll: {
+    gap: spacing.sm,
+    paddingRight: spacing.lg,
+  },
+  patientPill: {
+    width: 246,
+    minHeight: 68,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: colors.bgCard,
+    borderWidth: 1,
+    borderColor: colors.borderSolid,
+    borderRadius: radius.card,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    ...shadow.sm,
+  },
+  patientPillActive: {
+    borderColor: colors.accent,
+    backgroundColor: colors.accent,
+  },
+  patientIndex: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.accentLight,
+  },
+  patientIndexActive: {
+    backgroundColor: '#FFFFFF',
+  },
+  patientIndexText: {
+    fontFamily: fonts.bodySemiBold,
+    fontSize: 13,
+    color: colors.accent,
+  },
+  patientIndexTextActive: {
+    color: colors.accent,
+  },
+  patientPillBody: {
+    flex: 1,
+    minWidth: 0,
+  },
+  patientTitle: {
+    fontFamily: fonts.bodySemiBold,
+    fontSize: 13.5,
+    color: colors.accent,
+  },
+  patientTitleActive: {
+    color: '#FFFFFF',
+  },
+  patientMeta: {
+    fontFamily: fonts.body,
+    fontSize: 11.5,
+    color: colors.textMuted,
+    marginTop: 2,
+  },
+  patientMetaActive: {
+    color: '#DCE6F7',
   },
   chips: {
     flexDirection: 'row',

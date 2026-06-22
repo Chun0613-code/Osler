@@ -8,6 +8,7 @@ import * as WebBrowser from 'expo-web-browser';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -257,9 +258,11 @@ export default function SettingsScreen() {
         {/* ── About ───────────────────────────────────────────── */}
         <Text style={styles.sectionLabel}>ABOUT</Text>
         <View style={styles.card}>
-          <Text style={styles.aboutTitle}>
-            Oslian<Text style={{ color: colors.orange }}>·Rx</Text>
-          </Text>
+          <Image
+            source={require('../../assets/images/oslian-mark.png')}
+            resizeMode="contain"
+            style={styles.aboutLogo}
+          />
           <Text style={styles.note}>
             Oslian·Rx — clinician-facing drug recommendation demo. The symbolic
             engine makes every recommendation; the LLM only parses cases and
@@ -406,9 +409,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.text,
   },
-  aboutTitle: {
-    fontFamily: fonts.headingBold,
-    fontSize: 17,
-    color: colors.accent,
+  aboutLogo: {
+    width: 52,
+    height: 52,
+    marginBottom: spacing.xs,
   },
 });

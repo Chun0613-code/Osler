@@ -193,14 +193,24 @@ def _dispense_unit_for_form(form: Optional[str]) -> str:
 
 def options(rx_id: str) -> Dict[str, Any]:
     """Catalog choices + prefilled defaults for the native review screen. Uses the M2M
-    token (search is read-only); signing later uses the provider token."""
+    token (search is read-only); signing later uses the provider token. In mock/offline
+    mode, return editable defaults instead of failing the review screen."""
     rec = _RX.get(rx_id)
     if not rec:
         raise RxError("Unknown prescription.")
     drug = rec["drug"] or ""
     # Fetch wide (20) then rank: the catalog buries single-ingredient generics behind
     # combination products, so a small `first` would default to a combo. Offer the top 10.
-    meds = _rank_candidates(drug, PH.search_medications(drug, 20))[:10]
+    catalog_error = None
+    meds: List[Dict[str, Any]] = []
+    if PH.is_enabled():
+        try:
+            meds = _rank_candidates(drug, PH.search_medications(drug, 20))[:10]
+        except Exception as e:  # noqa: BLE001 - keep the clinician review screen usable
+            catalog_error = str(e)
+            print(f"[prescribe] Photon catalog search failed, using manual defaults: {e}")
+    else:
+        catalog_error = "Photon is not configured; manual mock defaults are shown."
     candidates = [{"treatment_id": m.get("id"), "name": m.get("name"),
                    "strength": m.get("strength"), "form": m.get("form")} for m in meds]
     best = candidates[0] if candidates else None
@@ -209,6 +219,7 @@ def options(rx_id: str) -> Dict[str, Any]:
         "drug": drug,
         "clinical_role": rec.get("clinical_role"),
         "rationale": rec.get("source_rationale"),
+        "catalog_error": catalog_error,
         "candidates": candidates,
         "default": {
             "treatment_id": best["treatment_id"] if best else None,

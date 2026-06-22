@@ -36,8 +36,11 @@ def _find_config(explicit: str | None = None) -> Path:
     here = Path(__file__).parent
     candidates = [
         here / "nexus_config.json",
+        here / "data" / "nexus_config.json",
         here.parent / "nexus_config.json",
+        here.parent / "data" / "nexus_config.json",
         Path("nexus_config.json"),
+        Path("data") / "nexus_config.json",
     ]
     for c in candidates:
         if c.exists():
@@ -906,7 +909,7 @@ def load_checkpoint(path: str, cfg: NexusConfig | None = None) -> NexusRLAgent:
             f"  Config:     {cfg.disease_names}\n"
             f"Delete the checkpoint and retrain, or align your config."
         )
-    saved_nf = int(d["n_features"][0])
+    saved_nf = int(d["n_features"][0]) if "n_features" in d.files else int(d["W1"].shape[0])
     if saved_nf != cfg.N_FEATURES:
         raise ValueError(
             f"Checkpoint feature dim {saved_nf} ≠ config feature dim {cfg.N_FEATURES}.\n"

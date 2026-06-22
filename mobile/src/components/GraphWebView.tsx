@@ -14,6 +14,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { WebView, type WebViewMessageEvent } from 'react-native-webview';
 
+import visNetworkAsset from '@/assets/vendor/vis-network.min.txt';
 import type { GraphEdge, GraphNode } from '@/api/osler';
 import { colors, fonts, spacing } from '@/theme/tokens';
 
@@ -27,10 +28,7 @@ let visJsCache: string | null = null;
 
 async function loadVisJs(): Promise<string> {
   if (visJsCache) return visJsCache;
-  const asset = Asset.fromModule(
-    // Vendored vis-network standalone UMD (treated as an asset via metro assetExts)
-    require('@/assets/vendor/vis-network.min.txt'),
-  );
+  const asset = Asset.fromModule(visNetworkAsset);
   await asset.downloadAsync();
   const js = await FileSystem.readAsStringAsync(asset.localUri!);
   visJsCache = js;

@@ -6,6 +6,7 @@ import { useRouter } from 'expo-router';
 import React from 'react';
 import {
   FlatList,
+  Image,
   Pressable,
   StyleSheet,
   Text,
@@ -32,10 +33,11 @@ export default function PatientsScreen() {
         contentContainerStyle={styles.listContent}
         ListHeaderComponent={
           <View style={styles.header}>
-            <Text style={styles.logo}>
-              Osl<Text style={styles.logoOrange}>ian</Text>
-            </Text>
-            <Text style={styles.tagline}>Drug Recommendation Agent</Text>
+            <Image
+              source={require('../../assets/images/oslian-mark.png')}
+              resizeMode="contain"
+              style={styles.logoImage}
+            />
             {patients.length > 0 && (
               <Text style={styles.sectionLabel}>ANALYZED PATIENTS</Text>
             )}
@@ -124,20 +126,10 @@ const styles = StyleSheet.create({
   header: {
     marginBottom: spacing.md,
   },
-  logo: {
-    fontFamily: fonts.headingBold,
-    fontSize: 28,
-    color: colors.accent,
-    letterSpacing: -0.5,
-  },
-  logoOrange: {
-    color: colors.orange,
-  },
-  tagline: {
-    fontFamily: fonts.body,
-    fontSize: 13,
-    color: colors.textMuted,
-    marginTop: 2,
+  logoImage: {
+    width: 64,
+    height: 64,
+    marginBottom: spacing.sm,
   },
   sectionLabel: {
     fontFamily: fonts.heading,

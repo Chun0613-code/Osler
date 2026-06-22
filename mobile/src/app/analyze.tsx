@@ -1,9 +1,9 @@
 /**
- * Analyze screen — mirrors the web demo's import-case box: preset chips,
- * free-text case notes, openFDA toggle, and a navy agent-trace overlay that
- * plays placeholder steps while /api/analyze runs, then the real trace.
+ * Analyze screen — preset cases, structured case fields, compact notes,
+ * openFDA toggle, and a navy agent-trace overlay that plays placeholder
+ * steps while /api/analyze runs, then the real trace.
  */
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -39,6 +39,296 @@ const PLACEHOLDER_STEPS: TraceStep[] = [
 
 const PLACEHOLDER_MS = 900;
 const REAL_STEP_MS = 250;
+const SEX_OPTIONS = ['M', 'F', 'Other'] as const;
+
+type ExternalPayload = Record<string, unknown>;
+type SexOption = '' | (typeof SEX_OPTIONS)[number];
+type ManualCaseFields = {
+  indication: string;
+  age: string;
+  sex: SexOption;
+  weightKg: string;
+  egfr: string;
+  allergies: string;
+  meds: string;
+};
+
+const EMPTY_MANUAL_FIELDS: ManualCaseFields = {
+  indication: '',
+  age: '',
+  sex: '',
+  weightKg: '',
+  egfr: '',
+  allergies: '',
+  meds: '',
+};
+
+function asObject(value: unknown): ExternalPayload | null {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? (value as ExternalPayload)
+    : null;
+}
+
+function firstString(value: unknown): string | undefined {
+  if (Array.isArray(value)) return firstString(value[0]);
+  return typeof value === 'string' && value.trim() ? value.trim() : undefined;
+}
+
+function toNumber(value: unknown): number | undefined {
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  if (typeof value === 'string' && value.trim()) {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed)) return parsed;
+  }
+  return undefined;
+}
+
+function toStringArray(value: unknown): string[] {
+  if (!value) return [];
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => {
+        if (typeof item === 'string') return item;
+        const obj = asObject(item);
+        return firstString(obj?.name) ?? firstString(obj?.text) ?? firstString(obj?.display);
+      })
+      .filter((item): item is string => !!item);
+  }
+  if (typeof value === 'string') {
+    return value.split(/[;,]/).map((item) => item.trim()).filter(Boolean);
+  }
+  return [];
+}
+
+function splitListText(value: string): string[] | undefined {
+  const items = value.split(/[;,]/).map((item) => item.trim()).filter(Boolean);
+  return items.length ? items : undefined;
+}
+
+function mapRecord(value: unknown): Record<string, number> | undefined {
+  const obj = asObject(value);
+  if (!obj) return undefined;
+  const out: Record<string, number> = {};
+  Object.entries(obj).forEach(([key, raw]) => {
+    const n = toNumber(raw);
+    if (n != null) out[key] = n;
+  });
+  return Object.keys(out).length ? out : undefined;
+}
+
+function ageFromBirthDate(value: unknown): number | undefined {
+  const text = firstString(value);
+  if (!text) return undefined;
+  const birth = new Date(text);
+  if (Number.isNaN(birth.getTime())) return undefined;
+  const now = new Date();
+  let age = now.getFullYear() - birth.getFullYear();
+  const beforeBirthday =
+    now.getMonth() < birth.getMonth() ||
+    (now.getMonth() === birth.getMonth() && now.getDate() < birth.getDate());
+  if (beforeBirthday) age -= 1;
+  return age >= 0 && age < 130 ? age : undefined;
+}
+
+function displayFromCode(value: unknown): string | undefined {
+  const obj = asObject(value);
+  if (!obj) return firstString(value);
+  const coding = Array.isArray(obj.coding) ? asObject(obj.coding[0]) : null;
+  return firstString(obj.text) ?? firstString(coding?.display) ?? firstString(coding?.code);
+}
+
+function normalizeObservationName(name: string): string {
+  const key = name.trim().toLowerCase();
+  if (key.includes('systolic')) return 'sbp';
+  if (key.includes('diastolic')) return 'dbp';
+  if (key.includes('heart rate') || key === 'hr') return 'heart_rate';
+  if (key.includes('oxygen') || key.includes('spo2') || key.includes('sat')) return 'spo2';
+  if (key.includes('temperature') || key === 'temp') return 'temp';
+  if (key.includes('potassium')) return 'potassium';
+  if (key.includes('creatinine')) return 'creatinine';
+  if (key.includes('glucose')) return 'glucose';
+  return key.replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+}
+
+function extractFhirBundle(payload: ExternalPayload): Partial<SampleCase> | null {
+  if (payload.resourceType !== 'Bundle' || !Array.isArray(payload.entry)) return null;
+  const resources = payload.entry
+    .map((entry) => asObject(asObject(entry)?.resource))
+    .filter((resource): resource is ExternalPayload => !!resource);
+  const patient = resources.find((resource) => resource.resourceType === 'Patient');
+  const conditions = resources
+    .filter((resource) => resource.resourceType === 'Condition')
+    .map((resource) => displayFromCode(resource.code))
+    .filter((item): item is string => !!item);
+  const allergies = resources
+    .filter((resource) => resource.resourceType === 'AllergyIntolerance')
+    .map((resource) => displayFromCode(resource.code))
+    .filter((item): item is string => !!item);
+  const meds = resources
+    .filter((resource) => resource.resourceType === 'MedicationStatement' || resource.resourceType === 'MedicationRequest')
+    .map((resource) => displayFromCode(resource.medicationCodeableConcept))
+    .filter((item): item is string => !!item);
+  const vitals: Record<string, number> = {};
+  const labs: Record<string, number> = {};
+
+  resources
+    .filter((resource) => resource.resourceType === 'Observation')
+    .forEach((resource) => {
+      const name = displayFromCode(resource.code);
+      const value = toNumber(asObject(resource.valueQuantity)?.value ?? resource.valueInteger ?? resource.valueDecimal);
+      if (!name || value == null) return;
+      const category = JSON.stringify(resource.category ?? '').toLowerCase();
+      const bucket = category.includes('laboratory') ? labs : vitals;
+      bucket[normalizeObservationName(name)] = value;
+    });
+
+  const patientObj = asObject(patient);
+  const name = Array.isArray(patientObj?.name) ? asObject(patientObj.name[0]) : null;
+  const given = Array.isArray(name?.given) ? firstString(name.given[0]) : undefined;
+  const family = firstString(name?.family);
+  const titleName = [given, family].filter(Boolean).join(' ');
+
+  return {
+    id: firstString(patientObj?.id) ?? firstString(payload.id),
+    title: titleName || undefined,
+    age: ageFromBirthDate(patientObj?.birthDate),
+    sex: firstString(patientObj?.gender)?.slice(0, 1).toUpperCase(),
+    indication: conditions[0],
+    conditions,
+    allergies,
+    current_medications: meds,
+    vitals: Object.keys(vitals).length ? vitals : undefined,
+    labs: Object.keys(labs).length ? labs : undefined,
+  };
+}
+
+function decodePayload(raw: string): ExternalPayload {
+  const candidates = [raw, decodeURIComponent(raw)];
+  if (typeof globalThis.atob === 'function') {
+    const padded = raw.replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(raw.length / 4) * 4, '=');
+    try {
+      candidates.push(globalThis.atob(padded));
+    } catch {
+      // ignore non-base64 payloads
+    }
+  }
+  for (const candidate of candidates) {
+    try {
+      const parsed = JSON.parse(candidate);
+      const obj = asObject(parsed);
+      if (obj) return obj;
+    } catch {
+      // keep trying candidate formats
+    }
+  }
+  throw new Error('Patient payload must be JSON.');
+}
+
+function normalizePatientPayload(payload: ExternalPayload): SampleCase {
+  const fhir = extractFhirBundle(payload);
+  const root = asObject(payload.case) ?? asObject(payload.patientData) ?? payload;
+  const patient = asObject(root.patient) ?? root;
+  const fhirOrEmpty = fhir ?? {};
+  const id =
+    firstString(root.id) ??
+    firstString(patient.id) ??
+    firstString(patient.mrn) ??
+    firstString(patient.external_id) ??
+    fhirOrEmpty.id ??
+    `external-${Date.now()}`;
+  const age =
+    toNumber(root.age) ??
+    toNumber(patient.age) ??
+    ageFromBirthDate(root.birthDate ?? patient.birthDate ?? patient.dob) ??
+    fhirOrEmpty.age;
+  const sex =
+    firstString(root.sex) ??
+    firstString(patient.sex) ??
+    firstString(root.gender) ??
+    firstString(patient.gender) ??
+    fhirOrEmpty.sex;
+  const indication =
+    firstString(root.indication) ??
+    firstString(root.diagnosis) ??
+    firstString(root.chief_complaint) ??
+    firstString(root.reason) ??
+    firstString(root.problem) ??
+    fhirOrEmpty.indication ??
+    '';
+  const fallbackTitle =
+    [age != null ? `${age}${sex ? sex.slice(0, 1).toUpperCase() : ''}` : null, indication]
+      .filter(Boolean)
+      .join(' · ') || 'Imported patient';
+  const title =
+    firstString(root.title) ||
+    firstString(patient.title) ||
+    firstString(patient.name) ||
+    fhirOrEmpty.title ||
+    fallbackTitle;
+  const renal = asObject(root.renal);
+
+  return {
+    id,
+    title,
+    indication,
+    age,
+    sex,
+    weight_kg: toNumber(root.weight_kg ?? root.weightKg ?? patient.weight_kg ?? patient.weightKg),
+    egfr: toNumber(root.egfr ?? root.eGFR ?? renal?.egfr ?? patient.egfr),
+    hepatic_status: firstString(root.hepatic_status ?? root.hepaticStatus ?? patient.hepatic_status),
+    allergies: toStringArray(root.allergies ?? patient.allergies).concat(fhirOrEmpty.allergies ?? []),
+    current_medications: toStringArray(root.current_medications ?? root.medications ?? root.meds ?? patient.medications).concat(
+      fhirOrEmpty.current_medications ?? [],
+    ),
+    conditions: toStringArray(root.conditions ?? root.problems ?? patient.conditions).concat(fhirOrEmpty.conditions ?? []),
+    symptoms: toStringArray(root.symptoms ?? root.complaints ?? patient.symptoms),
+    vitals: mapRecord(root.vitals ?? root.vitalSigns ?? patient.vitals) ?? fhirOrEmpty.vitals,
+    labs: mapRecord(root.labs ?? root.laboratory ?? patient.labs) ?? fhirOrEmpty.labs,
+  };
+}
+
+function caseToManualFields(c: SampleCase): ManualCaseFields {
+  const sex = c.sex?.trim();
+  const normalizedSex: SexOption =
+    sex === 'M' || sex === 'F' || sex === 'Other' ? sex : sex ? 'Other' : '';
+
+  return {
+    indication: c.indication ?? '',
+    age: c.age != null ? String(c.age) : '',
+    sex: normalizedSex,
+    weightKg: c.weight_kg != null ? String(c.weight_kg) : '',
+    egfr: c.egfr != null ? String(c.egfr) : '',
+    allergies: c.allergies?.join(', ') ?? '',
+    meds: c.current_medications?.join(', ') ?? '',
+  };
+}
+
+function buildManualCaseFields(fields: ManualCaseFields): Partial<SampleCase> {
+  const out: Partial<SampleCase> = {};
+  const indication = fields.indication.trim();
+  if (indication) out.indication = indication;
+  const age = toNumber(fields.age);
+  if (age != null) out.age = age;
+  if (fields.sex) out.sex = fields.sex;
+  const weight = toNumber(fields.weightKg);
+  if (weight != null) out.weight_kg = weight;
+  const egfr = toNumber(fields.egfr);
+  if (egfr != null) out.egfr = egfr;
+  const allergies = splitListText(fields.allergies);
+  if (allergies) out.allergies = allergies;
+  const meds = splitListText(fields.meds);
+  if (meds) out.current_medications = meds;
+  return out;
+}
+
+function titleFromManualFields(fields: Partial<SampleCase>): string | null {
+  const ageSex =
+    fields.age != null || fields.sex
+      ? [fields.age != null ? String(fields.age) : null, fields.sex].filter(Boolean).join('')
+      : null;
+  const title = [ageSex, fields.indication].filter(Boolean).join(' · ');
+  return title || null;
+}
 
 function summarizeCase(c: SampleCase): string {
   const parts: string[] = [];
@@ -64,11 +354,14 @@ function summarizeCase(c: SampleCase): string {
 
 export default function AnalyzeScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ payload?: string; patient?: string; auto?: string }>();
   const { patients, addPatient, llm } = useApp();
 
   const [cases, setCases] = useState<SampleCase[]>([]);
   const [bannerVisible, setBannerVisible] = useState(false);
   const [selected, setSelected] = useState<SampleCase | null>(null);
+  const [importedCase, setImportedCase] = useState<SampleCase | null>(null);
+  const [manualFields, setManualFields] = useState<ManualCaseFields>(EMPTY_MANUAL_FIELDS);
   const [text, setText] = useState('');
   const [useOpenFda, setUseOpenFda] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -80,6 +373,7 @@ export default function AnalyzeScreen() {
 
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const mountedRef = useRef(true);
+  const lastPayloadRef = useRef<string | null>(null);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -106,10 +400,32 @@ export default function AnalyzeScreen() {
   }, []);
 
   const onSelectPreset = useCallback((c: SampleCase) => {
-    setSelected((prev) => (prev?.id === c.id ? null : c));
+    setImportedCase(null);
+    if (selected?.id === c.id) {
+      setSelected(null);
+      return;
+    }
+    setSelected(c);
+    setManualFields(caseToManualFields(c));
+  }, [selected?.id]);
+
+  const importPayload = useCallback((raw: string): SampleCase => {
+    const imported = normalizePatientPayload(decodePayload(raw));
+    setImportedCase(imported);
+    setSelected(null);
+    setManualFields(EMPTY_MANUAL_FIELDS);
+    setError(null);
+    return imported;
   }, []);
 
-  const onAnalyze = useCallback(async () => {
+  const setManualField = useCallback(
+    (key: keyof ManualCaseFields, value: string) => {
+      setManualFields((prev) => ({ ...prev, [key]: value }));
+    },
+    [],
+  );
+
+  const onAnalyze = useCallback(async (overrideCase?: SampleCase) => {
     if (busy) return;
     setBusy(true);
     setError(null);
@@ -124,14 +440,21 @@ export default function AnalyzeScreen() {
       timersRef.current.push(t);
     });
 
-    const { id, ...presetFields } = selected ?? ({} as SampleCase);
+    const sourceCase = overrideCase ?? importedCase ?? selected;
+    const { id, title: sourceTitle, ...sourceFields } = sourceCase ?? ({} as SampleCase);
     void id;
+    void sourceTitle;
+    const manualCaseFields = overrideCase ? {} : buildManualCaseFields(manualFields);
+    const fields = {
+      ...(sourceCase ? (sourceFields as unknown as Record<string, unknown>) : {}),
+      ...(manualCaseFields as Record<string, unknown>),
+    };
 
     try {
       const bundle = await analyze({
-        fields: selected ? (presetFields as unknown as Record<string, unknown>) : {},
+        fields,
         text,
-        patient_id: selected?.id ?? `case-${patients.length + 1}`,
+        patient_id: sourceCase?.id ?? `case-${patients.length + 1}`,
         use_openfda: useOpenFda,
         llm,
       });
@@ -149,7 +472,8 @@ export default function AnalyzeScreen() {
       });
 
       const title =
-        selected?.title ??
+        sourceCase?.title ??
+        titleFromManualFields(manualCaseFields) ??
         (text.trim() ? text.trim().slice(0, 40) : null) ??
         bundle.result.indication_label ??
         'Case';
@@ -169,7 +493,24 @@ export default function AnalyzeScreen() {
       setBusy(false);
       setError(e instanceof Error ? e.message : 'Analyze failed');
     }
-  }, [busy, selected, text, useOpenFda, llm, patients.length, addPatient, router, clearTimers]);
+  }, [busy, importedCase, selected, manualFields, text, useOpenFda, llm, patients.length, addPatient, router, clearTimers]);
+
+  useEffect(() => {
+    const raw = firstString(params.payload) ?? firstString(params.patient);
+    if (!raw || raw === lastPayloadRef.current) return;
+    lastPayloadRef.current = raw;
+    try {
+      const imported = importPayload(raw);
+      const auto = firstString(params.auto);
+      if (auto === '1' || auto === 'true') {
+        setTimeout(() => {
+          void onAnalyze(imported);
+        }, 80);
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not import patient payload.');
+    }
+  }, [params.payload, params.patient, params.auto, importPayload, onAnalyze]);
 
   return (
     <KeyboardAvoidingView
@@ -207,14 +548,116 @@ export default function AnalyzeScreen() {
           </View>
         )}
 
-        <Text style={styles.sectionLabel}>CASE NOTES</Text>
+        <Text style={styles.sectionLabel}>CASE DETAILS</Text>
+        <View style={styles.formCard}>
+          <View style={styles.fieldBlock}>
+            <Text style={styles.fieldLabel}>Indication</Text>
+            <TextInput
+              style={styles.fieldInput}
+              value={manualFields.indication}
+              onChangeText={(value) => setManualField('indication', value)}
+              placeholder="acute coronary syndrome"
+              placeholderTextColor={colors.textMuted}
+              autoCapitalize="none"
+            />
+          </View>
+
+          <View style={styles.fieldRow}>
+            <View style={styles.ageField}>
+              <Text style={styles.fieldLabel}>Age</Text>
+              <TextInput
+                style={styles.fieldInput}
+                value={manualFields.age}
+                onChangeText={(value) => setManualField('age', value)}
+                keyboardType="number-pad"
+                placeholder="64"
+                placeholderTextColor={colors.textMuted}
+              />
+            </View>
+            <View style={styles.sexField}>
+              <Text style={styles.fieldLabel}>Sex</Text>
+              <View style={styles.sexPicker}>
+                {SEX_OPTIONS.map((option) => {
+                  const active = manualFields.sex === option;
+                  return (
+                    <Pressable
+                      key={option}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: active }}
+                      onPress={() => setManualField('sex', active ? '' : option)}
+                      style={({ pressed }) => [
+                        styles.sexOption,
+                        active && styles.sexOptionActive,
+                        pressed && { opacity: 0.82 },
+                      ]}>
+                      <Text style={[styles.sexOptionText, active && styles.sexOptionTextActive]}>
+                        {option}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </View>
+          </View>
+
+          <View style={styles.fieldRow}>
+            <View style={styles.compactField}>
+              <Text style={styles.fieldLabel}>Weight kg</Text>
+              <TextInput
+                style={styles.fieldInput}
+                value={manualFields.weightKg}
+                onChangeText={(value) => setManualField('weightKg', value)}
+                keyboardType="decimal-pad"
+                placeholder="82"
+                placeholderTextColor={colors.textMuted}
+              />
+            </View>
+            <View style={styles.compactField}>
+              <Text style={styles.fieldLabel}>eGFR</Text>
+              <TextInput
+                style={styles.fieldInput}
+                value={manualFields.egfr}
+                onChangeText={(value) => setManualField('egfr', value)}
+                keyboardType="decimal-pad"
+                placeholder="72"
+                placeholderTextColor={colors.textMuted}
+              />
+            </View>
+          </View>
+
+          <View style={styles.fieldBlock}>
+            <Text style={styles.fieldLabel}>Allergies</Text>
+            <TextInput
+              style={styles.fieldInput}
+              value={manualFields.allergies}
+              onChangeText={(value) => setManualField('allergies', value)}
+              placeholder="aspirin, penicillin"
+              placeholderTextColor={colors.textMuted}
+              autoCapitalize="none"
+            />
+          </View>
+
+          <View style={styles.fieldBlock}>
+            <Text style={styles.fieldLabel}>Current meds</Text>
+            <TextInput
+              style={styles.fieldInput}
+              value={manualFields.meds}
+              onChangeText={(value) => setManualField('meds', value)}
+              placeholder="metoprolol, warfarin"
+              placeholderTextColor={colors.textMuted}
+              autoCapitalize="none"
+            />
+          </View>
+        </View>
+
+        <Text style={styles.sectionLabel}>CASE NOTE</Text>
         <TextInput
           style={styles.textarea}
           multiline
           textAlignVertical="top"
           value={text}
           onChangeText={setText}
-          placeholder="64M crushing chest pain, acute coronary syndrome. BP 88/54, HR 112, eGFR 72."
+          placeholder="BP 88/54, HR 112, crushing chest pain."
           placeholderTextColor={colors.textMuted}
         />
 
@@ -232,7 +675,7 @@ export default function AnalyzeScreen() {
 
         <Pressable
           accessibilityRole="button"
-          onPress={onAnalyze}
+          onPress={() => onAnalyze()}
           disabled={busy}
           style={({ pressed }) => [
             styles.primaryBtn,
@@ -314,6 +757,79 @@ const styles = StyleSheet.create({
     marginTop: spacing.lg,
     marginBottom: spacing.sm,
   },
+  formCard: {
+    backgroundColor: colors.bgCard,
+    borderWidth: 1,
+    borderColor: colors.borderSolid,
+    borderRadius: radius.card,
+    padding: spacing.md,
+    gap: spacing.sm,
+    ...shadow.sm,
+  },
+  fieldBlock: {
+    gap: 6,
+  },
+  fieldRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  ageField: {
+    width: 86,
+    gap: 6,
+  },
+  sexField: {
+    flex: 1,
+    gap: 6,
+  },
+  compactField: {
+    flex: 1,
+    gap: 6,
+  },
+  fieldLabel: {
+    fontFamily: fonts.heading,
+    fontSize: 10.5,
+    letterSpacing: 0,
+    color: colors.textMuted,
+    textTransform: 'uppercase',
+  },
+  fieldInput: {
+    minHeight: 44,
+    backgroundColor: colors.bg,
+    borderWidth: 1,
+    borderColor: colors.borderSolid,
+    borderRadius: radius.sm,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 10,
+    fontFamily: fonts.body,
+    fontSize: 13.5,
+    color: colors.text,
+  },
+  sexPicker: {
+    flexDirection: 'row',
+    gap: 6,
+  },
+  sexOption: {
+    flex: 1,
+    minHeight: 44,
+    borderWidth: 1,
+    borderColor: colors.borderSolid,
+    backgroundColor: colors.bg,
+    borderRadius: radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sexOptionActive: {
+    borderColor: colors.accent,
+    backgroundColor: colors.accent,
+  },
+  sexOptionText: {
+    fontFamily: fonts.bodySemiBold,
+    fontSize: 13,
+    color: colors.textSecondary,
+  },
+  sexOptionTextActive: {
+    color: '#FFFFFF',
+  },
   summaryCard: {
     backgroundColor: colors.bgCard,
     borderWidth: 1,
@@ -336,7 +852,7 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   textarea: {
-    minHeight: 116,
+    minHeight: 82,
     backgroundColor: colors.bgCard,
     borderWidth: 1,
     borderColor: colors.borderSolid,
