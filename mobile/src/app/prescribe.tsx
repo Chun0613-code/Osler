@@ -216,7 +216,11 @@ export default function PrescribeScreen() {
         <Text style={styles.fieldLabel}>MEDICATION</Text>
         <View style={styles.card}>
           {options.candidates.length === 0 ? (
-            <Text style={styles.note}>No catalog match found for {options.drug}.</Text>
+            <Text style={styles.note}>
+              No outpatient pharmacy match for {options.drug}.{' '}
+              {options.catalog_error ??
+                'It may be a parenteral or inpatient-only drug (e.g. IV heparin) that cannot be e-prescribed to a retail pharmacy — handle it through inpatient orders instead.'}
+            </Text>
           ) : (
             options.candidates.map((m: MedOption) => {
               const active = m.treatment_id === treatmentId;

@@ -331,6 +331,8 @@ export interface PrescribeOptions {
   drug: string;
   clinical_role?: string | null;
   rationale?: string | null;
+  /** Set by the backend when the Photon catalog search failed or Photon is off. */
+  catalog_error?: string | null;
   candidates: MedOption[];
   default: PrescribeDefaults;
 }
