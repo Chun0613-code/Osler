@@ -2,10 +2,10 @@
 
 The Flask service hosts both the browser demo and the API:
 
-- Browser demo: `https://demo.example.com/`
-- Health check: `https://demo.example.com/healthz`
-- API: `https://demo.example.com/api/*`
-- Mobile app: set `EXPO_PUBLIC_API_BASE=https://demo.example.com`
+- Browser demo: `https://demo.oslian.com/`
+- Health check: `https://demo.oslian.com/healthz`
+- API: `https://demo.oslian.com/api/*`
+- Mobile app: set `EXPO_PUBLIC_API_BASE=https://demo.oslian.com`
 
 ## 1. Deploy the backend
 
@@ -16,7 +16,7 @@ The repository includes `render.yaml` and a production `Dockerfile`.
 2. Add the environment variables from `demo/.env.example` in the Render
    dashboard. Keep all secret values out of GitHub.
 3. Set `PHOTON_OAUTH_REDIRECT` to the final public origin, for example
-   `https://demo.example.com`.
+   `https://demo.oslian.com`.
 4. Set `CORS_ORIGINS` only when the Expo web build is hosted on another origin.
    Use a comma-separated allowlist such as `https://app.example.com`.
 5. Confirm that `/healthz` returns HTTP 200 before configuring DNS.
@@ -30,7 +30,7 @@ request after an idle period can take longer while the service wakes up.
 ## 2. Connect the Cloudflare domain
 
 1. Add the domain to Cloudflare and use Cloudflare's assigned nameservers.
-2. In Render, add the custom domain, such as `demo.example.com`.
+2. In Render, add the custom domain `demo.oslian.com`.
 3. In Cloudflare DNS, create the CNAME Render provides with proxy status set to
    **DNS only**. Remove conflicting `AAAA` records for that hostname.
 4. Wait until Render verifies the domain and issues its certificate. Then enable
@@ -45,7 +45,7 @@ Do not cache `/api/*`, `/healthz`, or OAuth callback responses in Cloudflare.
 
 ```bash
 cd mobile
-EXPO_PUBLIC_API_BASE=https://demo.example.com npx expo start
+EXPO_PUBLIC_API_BASE=https://demo.oslian.com npx expo start
 ```
 
 For a distributable app build, set the same variable in the EAS build profile.
@@ -55,8 +55,8 @@ must remain server-side or in the device's secure settings.
 ## 4. Smoke test
 
 ```bash
-curl -fsS https://demo.example.com/healthz
-curl -fsS https://demo.example.com/api/cases
+curl -fsS https://demo.oslian.com/healthz
+curl -fsS https://demo.oslian.com/api/cases
 ```
 
 Then analyze a preset case in the browser and in the mobile app, open Reasoning,

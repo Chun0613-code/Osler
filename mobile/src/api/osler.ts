@@ -1,15 +1,15 @@
 /**
  * API client for the Osler·Rx demo backend (demo/demo_app.py, Flask, port 5000).
  *
- * iOS simulator shares the Mac's localhost, so the default base works as-is.
- * On a physical device set EXPO_PUBLIC_API_BASE to the Mac's LAN IP
- * (ATS exceptions for local networking are pre-configured in app.json).
+ * Development defaults to the Mac's localhost. Release builds default to the
+ * public demo API; EXPO_PUBLIC_API_BASE can override either environment.
  */
 
 // 127.0.0.1 (not "localhost"): macOS AirPlay Receiver squats on *:5000 and iOS
 // resolves localhost to ::1 first, which would hit AirPlay instead of Flask.
 export const API_BASE =
-  process.env.EXPO_PUBLIC_API_BASE ?? 'http://127.0.0.1:5000';
+  process.env.EXPO_PUBLIC_API_BASE ??
+  (__DEV__ ? 'http://127.0.0.1:5000' : 'https://demo.oslian.com');
 
 // ── Types mirroring demo/agent.py bundle ─────────────────────────────────
 
