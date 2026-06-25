@@ -24,6 +24,8 @@ The repository includes `render.yaml` and a production `Dockerfile`.
 The Gunicorn command intentionally uses one worker because this demo stores
 analysis, OAuth, and prescription state in memory. A production system should
 move that state to Redis or a database before increasing worker count.
+The Blueprint uses Render's free web-service plan for the demo, so the first
+request after an idle period can take longer while the service wakes up.
 
 ## 2. Connect the Cloudflare domain
 
