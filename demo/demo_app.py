@@ -23,7 +23,7 @@ from pathlib import Path
 
 # This demo (demo/) reuses the pharmacology engine in engine/ and data in data/.
 _ROOT = Path(__file__).resolve().parent.parent
-for _p in (_ROOT / "engine", _ROOT):
+for _p in (_ROOT / "demo", _ROOT / "engine", _ROOT):
     if str(_p) not in sys.path:
         sys.path.insert(0, str(_p))
 
@@ -57,6 +57,36 @@ import photon_oauth
 
 _HERE = Path(__file__).parent
 app = Flask(__name__)
+app.config["MAX_CONTENT_LENGTH"] = int(os.environ.get("MAX_REQUEST_BYTES", "1048576"))
+
+
+def _allowed_origins() -> set[str]:
+    raw = os.environ.get("CORS_ORIGINS", "")
+    return {origin.strip().rstrip("/") for origin in raw.split(",") if origin.strip()}
+
+
+@app.after_request
+def add_public_headers(response):
+    """Allow an optional separately hosted Expo web build to call this API."""
+    origin = (request.headers.get("Origin") or "").rstrip("/")
+    allowed = _allowed_origins()
+    if origin and ("*" in allowed or origin in allowed):
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Vary"] = "Origin"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["Referrer-Policy"] = "same-origin"
+    return response
+
+
+@app.route("/healthz")
+def healthz():
+    return jsonify({
+        "ok": True,
+        "service": "oslian-demo",
+        "photon": photon_client.env_label() if photon_client.is_enabled() else "mock",
+    })
 
 DRUGS_PKPD = RE._load("drugs_pkpd.json")["drugs"]
 
@@ -407,4 +437,8 @@ if __name__ == "__main__":
           f"env_llm={'on' if llm_client.available() else 'off'} "
           f"photon={'on (' + photon_client.env_label() + ')' if photon_client.is_enabled() else 'mock'} "
           f"provider_oauth={'ready' if photon_oauth.is_enabled() else 'off'}")
-    app.run(debug=True, port=5000)
+    app.run(
+        host=os.environ.get("HOST", "0.0.0.0"),
+        port=int(os.environ.get("PORT", "5000")),
+        debug=os.environ.get("FLASK_DEBUG", "").lower() in {"1", "true", "yes"},
+    )

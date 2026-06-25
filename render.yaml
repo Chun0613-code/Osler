@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: oslian-demo-api
+    runtime: docker
+    plan: starter
+    branch: feature/mobile-demo
+    healthCheckPath: /healthz
+    autoDeployTrigger: commit
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: FLASK_DEBUG
+        value: "false"
+      - key: PHOTON_ENV
+        value: sandbox
+      - key: CORS_ORIGINS
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: PHOTON_CLIENT_ID
+        sync: false
+      - key: PHOTON_CLIENT_SECRET
+        sync: false
+      - key: PHOTON_SPA_CLIENT_ID
+        sync: false
+      - key: PHOTON_ORG_ID
+        sync: false
+      - key: PHOTON_OAUTH_REDIRECT
+        sync: false
