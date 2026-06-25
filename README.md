@@ -535,6 +535,17 @@ physiology. On the maintenance replay it found no remaining `V`, `HCO3`, `Ke`, o
 `Cr` floor hits. The remaining notable bound hit is `Na` ceiling, which feeds a
 non-terminal osmotic burden with a clipped hourly sodium rate.
 
+`dka_treatment_recovery_audit.py` extends falsification from death mechanisms to
+treatment recovery. It replays eICU active-DKA windows with their exact treatment
+grids, but judges runtime changes only when a fixed clinical-prior boundary and a
+captured-treatment external failure agree. The neutral reference protocol lowers
+glucose by `66.07 mg/dL` in the first hour, inside its sourced `50-75 mg/dL/hr`
+research boundary. Captured-insulin windows have the correct glucose and
+acid-base direction; 14/17 simulated deaths occur without captured insulin.
+The audit therefore blocks parameter fitting and runtime changes, localizing the
+remaining problem to treatment coverage rather than missing generic mean
+reversion. See `DKA_TREATMENT_RECOVERY_AUDIT.md`.
+
 `dka_symbolic_jepa_v6_candidate.pt` is a candidate-only integration checkpoint
 trained from the repaired simulator plus the candidate grey-box residual. It
 improves simulator-held-out counterfactual effect-sign accuracy (`0.9388` at six

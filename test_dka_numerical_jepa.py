@@ -76,6 +76,11 @@ from dka_viability_falsification_audit import (
     classify_death_cause, coverage_artifact_reasons, threshold_excess,
 )
 from dka_numeric_artifact_audit import BOUND_REGISTRY, DENOMINATOR_GUARDS
+from dka_treatment_recovery_audit import (
+    SOURCE_PRIORS,
+    decision as treatment_recovery_decision,
+    reference_protocol_boundary,
+)
 from dka_transition_extract import find_dka_onset
 from mimic_action_history import (
     action_window_summary, deduplicate_events, normalize_events,
@@ -887,6 +892,46 @@ class NumericalJEPATests(unittest.TestCase):
         self.assertLess(end["BHB"], start["BHB"])
         self.assertGreater(end["HCO3"], start["HCO3"])
         self.assertGreater(end["pH"], start["pH"])
+
+    def test_reference_dka_protocol_meets_sourced_glucose_decline(self):
+        result = reference_protocol_boundary()
+        lower, upper = result["boundary"]
+        self.assertEqual(
+            [lower, upper],
+            [
+                SOURCE_PRIORS["initial_insulin_glucose_decline_mg_dl_hr"]["lower"],
+                SOURCE_PRIORS["initial_insulin_glucose_decline_mg_dl_hr"]["upper"],
+            ],
+        )
+        self.assertTrue(result["passes_sourced_boundary"])
+        self.assertTrue(result["alive"])
+        self.assertGreaterEqual(result["glucose_decline_mg_dl_hr"], lower)
+        self.assertLessEqual(result["glucose_decline_mg_dl_hr"], upper)
+
+    def test_recovery_gate_requires_source_and_treated_external_failure(self):
+        report = {
+            "sourced_boundary_checks": {
+                "reference_protocol": {"passes_sourced_boundary": False},
+            },
+            "treatment_strata": {
+                "insulin_without_dextrose": {
+                    "targets": {
+                        "glucose": {"n": 40, "direction_agreement": 0.8},
+                        "bicarbonate": {"n": 40, "direction_agreement": 0.8},
+                        "ph": {"n": 40, "direction_agreement": 0.8},
+                        "potassium": {"n": 40, "direction_agreement": 0.8},
+                    },
+                },
+            },
+        }
+        result = treatment_recovery_decision(report)
+        self.assertFalse(result["runtime_change_allowed"])
+        report["treatment_strata"]["insulin_without_dextrose"]["targets"][
+            "glucose"
+        ]["direction_agreement"] = 0.4
+        result = treatment_recovery_decision(report)
+        self.assertTrue(result["runtime_change_allowed"])
+        self.assertFalse(result["automatic_parameter_fit_allowed"])
 
     def test_fluid_sodium_metadata_changes_sodium_trajectory(self):
         saline = DKABody()
