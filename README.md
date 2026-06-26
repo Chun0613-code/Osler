@@ -385,6 +385,9 @@ python symbolic_real_test.py \
   --checkpoint dka_symbolic_jepa_v5.pt \
   --mimic dka_transitions_6h_mimiciv_full_v31_icd.parquet \
   --output mimiciv_full_v31_icd_symbolic_real_test_v5.json
+
+python next_chapter_ab.py \
+  --output next_chapter_ab_contract.json
 ```
 
 The first ICD-supported run produced 755 subjects, 1,010 ICU stays, and 10,785
@@ -412,6 +415,12 @@ persistence for all other targets. Active-DKA median stay-level delta improves
 to `-0.029998`, and the router beats the no-realfit base router in 7/7 splits.
 This is still observational factual forecasting, not causal validation. See
 `MIMICIV_FULL_V31_DKA_FINDINGS.md`.
+
+The post-DKA A/B handoff is versioned in `NEXT_CHAPTER_AB.md` and
+`next_chapter_ab_contract.json`. Chapter A is a fail-closed causal-readiness
+contract for randomized, instrumental-variable, or front-door evidence. Chapter B
+is a disease-agnostic per-target router template for sepsis, acute kidney injury,
+and asthma exacerbation.
 
 ### MIMIC-III demo observed-treatment DKA-like schema test
 

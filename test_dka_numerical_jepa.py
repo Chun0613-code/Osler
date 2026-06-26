@@ -40,6 +40,15 @@ from osler_jepa.rule_sandbox import RuleSandbox
 from osler_jepa.rule_inducer import validate_candidates
 from osler_jepa.real_world_adapter import RealWorldAdapter
 from osler_jepa.causal_evaluation import TargetTrialSpec, evaluate_trial
+from osler_jepa.causal_readiness import (
+    CausalEvidenceSpec,
+    evaluate_causal_evidence_contract,
+)
+from osler_jepa.disease_router import (
+    SourceMetric,
+    choose_target_routes,
+    disease_expansion_blueprint,
+)
 from osler_jepa.symbolic import RULE_IDS, rule_supervision
 from osler_jepa.state_compiler import DKA_SYMBOLIC_FACT_KEYS, ground_dka_facts
 from osler_jepa.viability import HomeostaticWorldModelObjective
@@ -1825,6 +1834,78 @@ class NumericalJEPATests(unittest.TestCase):
             result["osler_transition_validation"]["status"],
             {"verified", "contradicted", "unexplained"},
         )
+
+    def test_causal_readiness_fails_closed_without_external_evidence(self):
+        spec = CausalEvidenceSpec(
+            name="demo_rct",
+            disease="DKA",
+            identification_design="randomized_trial",
+            treatment_strategy="protocol A",
+            comparator_strategy="protocol B",
+            outcome="glucose delta",
+            time_zero="randomization",
+            assignment_column="arm",
+            treatment_column="received",
+            outcome_column="delta",
+            patient_id_column="participant",
+            baseline_covariates=("baseline_glucose",),
+        )
+        report = evaluate_causal_evidence_contract(None, spec)
+        self.assertFalse(report["readiness"]["passes"])
+        self.assertIn("evidence_table_not_present", report["readiness"]["failures"])
+        self.assertFalse(report["causal_claim_allowed"])
+        self.assertFalse(report["clinical_claim_allowed"])
+
+    def test_causal_readiness_opens_only_research_gate_for_clean_randomization(self):
+        frame = pd.DataFrame({
+            "participant": np.arange(120),
+            "arm": np.where(np.arange(120) % 2 == 0, "A", "B"),
+            "received": np.where(np.arange(120) % 2 == 0, 0.0, 1.0),
+            "delta": np.linspace(-10.0, 10.0, 120),
+            "baseline_glucose": np.full(120, 300.0),
+        })
+        spec = CausalEvidenceSpec(
+            name="demo_rct",
+            disease="DKA",
+            identification_design="randomized_trial",
+            treatment_strategy="protocol B",
+            comparator_strategy="protocol A",
+            outcome="glucose delta",
+            time_zero="randomization",
+            assignment_column="arm",
+            treatment_column="received",
+            outcome_column="delta",
+            patient_id_column="participant",
+            baseline_covariates=("baseline_glucose",),
+        )
+        report = evaluate_causal_evidence_contract(frame, spec)
+        self.assertTrue(report["readiness"]["passes"], report)
+        self.assertTrue(report["causal_claim_allowed"])
+        self.assertFalse(report["clinical_claim_allowed"])
+        self.assertFalse(report["runtime_decision_authority"])
+
+    def test_disease_router_selects_only_significant_supported_sources(self):
+        metrics = {
+            "glucose": {
+                "persistence": SourceMetric(100, 50, 120.0, 0.0, 0.0, 0.0),
+                "candidate": SourceMetric(100, 50, 90.0, -30.0, -40.0, -10.0),
+            },
+            "creatinine": {
+                "persistence": SourceMetric(100, 50, 0.2, 0.0, 0.0, 0.0),
+                "candidate": SourceMetric(100, 50, 0.19, -0.01, -0.03, 0.02),
+            },
+            "BHB": {
+                "persistence": SourceMetric(5, 5, 1.0, 0.0, 0.0, 0.0),
+                "candidate": SourceMetric(5, 5, 0.3, -0.7, -1.0, -0.2),
+            },
+        }
+        routes = choose_target_routes(metrics, min_rows=20, min_stays=10)
+        self.assertEqual(routes["glucose"]["selected_source"], "candidate")
+        self.assertEqual(routes["creatinine"]["selected_source"], "persistence")
+        self.assertEqual(routes["BHB"]["selected_source"], "persistence")
+        blueprint = disease_expansion_blueprint()
+        self.assertTrue(blueprint["do_not_mix_latent_spaces_initially"])
+        self.assertGreaterEqual(len(blueprint["templates"]), 3)
 
 
 if __name__ == "__main__":

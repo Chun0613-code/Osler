@@ -151,6 +151,13 @@ Build separate state adapters, simulators/data loaders, and validator rule packs
 for sepsis, asthma, and acute kidney injury. Keep the shared ontology and action
 schema; do not mix diseases into one unvalidated latent space at the start.
 
+Implemented next-chapter contract: `osler_jepa/disease_router.py` defines the
+reusable per-disease, per-target router gate. `next_chapter_ab_contract.json`
+instantiates starter templates for sepsis, acute kidney injury, and asthma
+exacerbation. Each disease must begin with its own cohort definition, target
+contract, action channels, discovery-only source selection, and held-out
+evaluation before any shared latent space is attempted.
+
 ### Phase 3: Learn From Real EHR Trajectories
 
 - Preserve actual dose, route, formulation, start, stop, and administration timing.
@@ -170,6 +177,12 @@ schema; do not mix diseases into one unvalidated latent space at the start.
   local HMAC pseudonyms, subject-cluster bootstrap intervals, state coverage, and
   minimum-sample promotion gates. Passing remains retrospective evidence only.
 - Keep simulator and EHR provenance separate in training and reports.
+
+Implemented next-chapter causal boundary: `osler_jepa/causal_readiness.py`
+defines the external-evidence gate for randomized, instrumental-variable, or
+front-door data. Current observational EHR remains valid for factual forecasting
+and confounding diagnostics, but causal what-if planning stays closed until an
+external identification dataset passes that gate.
 
 ### Phase 4: Connect to the Live Symbolic Engine
 

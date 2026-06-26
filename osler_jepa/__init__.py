@@ -28,6 +28,19 @@ from .causal_evaluation import (
     TargetTrialSpec,
     evaluate_target_trials,
 )
+from .causal_readiness import (
+    CausalEvidenceSpec,
+    causal_source_registry,
+    default_causal_specs,
+    evaluate_causal_evidence_contract,
+)
+from .disease_router import (
+    DiseaseModuleSpec,
+    SourceMetric,
+    choose_target_routes,
+    disease_expansion_blueprint,
+    disease_expansion_templates,
+)
 from .shadow import (
     ShadowObserver,
     build_dka_shadow_state,
@@ -68,6 +81,15 @@ __all__ = [
     "prolog_direction_gate",
     "TargetTrialSpec",
     "evaluate_target_trials",
+    "CausalEvidenceSpec",
+    "causal_source_registry",
+    "default_causal_specs",
+    "evaluate_causal_evidence_contract",
+    "DiseaseModuleSpec",
+    "SourceMetric",
+    "choose_target_routes",
+    "disease_expansion_blueprint",
+    "disease_expansion_templates",
     "ShadowObserver",
     "build_dka_shadow_state",
     "observe_live_recommendation",

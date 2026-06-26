@@ -1,0 +1,195 @@
+{
+  "artifact": "Osler-JEPA next chapter A/B contract",
+  "context": {
+    "completed_arc": "DKA factual advisory converged to a nested per-target router: glucose -> presentation-only, anion_gap -> real-fit grey-box residual, other targets -> persistence.",
+    "observational_causal_status": "Full MIMIC-IV DKA diagnostics are runnable but fail causal readiness due overlap, co-treatment, and balance."
+  },
+  "chapter_a_causal": {
+    "goal": "open causal what-if planning only with external identification evidence",
+    "source_registry": [
+      {
+        "source": "Vivli",
+        "role": "candidate randomized-trial data source",
+        "status": "not_in_workspace",
+        "allowed_use_when_present": "research causal-effect estimation only"
+      },
+      {
+        "source": "YODA",
+        "role": "candidate randomized-trial data source",
+        "status": "not_in_workspace",
+        "allowed_use_when_present": "research causal-effect estimation only"
+      },
+      {
+        "source": "observational EHR",
+        "role": "factual forecasting and confounding diagnostics",
+        "status": "available",
+        "allowed_use_when_present": "no causal claim without external design"
+      }
+    ],
+    "readiness": {
+      "dka_insulin_strategy_rct": {
+        "spec": {
+          "name": "dka_insulin_strategy_rct",
+          "disease": "DKA",
+          "identification_design": "randomized_trial",
+          "treatment_strategy": "protocolized insulin strategy",
+          "comparator_strategy": "alternative protocolized insulin strategy",
+          "outcome": "six-hour glucose or anion-gap change",
+          "time_zero": "randomization",
+          "assignment_column": "assigned_arm",
+          "treatment_column": "received_protocol_treatment",
+          "outcome_column": "outcome_delta",
+          "patient_id_column": "participant_key",
+          "baseline_covariates": [
+            "baseline_glucose",
+            "baseline_anion_gap"
+          ],
+          "source_registry": [
+            "Vivli",
+            "YODA",
+            "trial sponsor repository"
+          ]
+        },
+        "support": {
+          "rows": 0,
+          "subjects": 0,
+          "assignment_arms": [],
+          "outcome_missing_fraction": null,
+          "adherence_fraction": null,
+          "max_abs_baseline_smd": null
+        },
+        "readiness": {
+          "passes": false,
+          "failures": [
+            "evidence_table_not_present"
+          ],
+          "warnings": []
+        },
+        "causal_claim_allowed": false,
+        "clinical_claim_allowed": false,
+        "runtime_decision_authority": false
+      }
+    },
+    "allowed_now": [
+      "prepare RCT/IV/front-door data dictionaries",
+      "run fail-closed readiness checks when external evidence arrives",
+      "continue observational confounding diagnostics as negative evidence"
+    ],
+    "forbidden_now": [
+      "causal treatment-effect claims from current observational EHR",
+      "clinical treatment recommendations from router deltas",
+      "runtime action authority"
+    ]
+  },
+  "chapter_b_multi_disease": {
+    "architecture": "per-disease, per-target gated factual router",
+    "do_not_mix_latent_spaces_initially": true,
+    "promotion_sequence": [
+      "define disease cohort and target/action contract",
+      "build observed-treatment transitions with masks and ages",
+      "train or evaluate candidate sources",
+      "select sources on discovery patients only",
+      "evaluate on held-out patients and time/care-unit splits",
+      "keep causal claims closed unless causal_readiness gates pass"
+    ],
+    "templates": [
+      {
+        "disease": "sepsis",
+        "cohort_definition": "suspected infection plus organ dysfunction or SepsisLabel, with hourly vitals/labs and treatment timing",
+        "targets": [
+          "MAP",
+          "lactate",
+          "vasopressor_requirement",
+          "creatinine",
+          "urine_output",
+          "oxygenation"
+        ],
+        "action_channels": [
+          "fluids",
+          "vasopressors",
+          "antibiotics",
+          "oxygen_or_ventilation",
+          "renal_replacement_context"
+        ],
+        "candidate_sources": [
+          "persistence",
+          "mechanistic_world_model",
+          "real_fit_residual",
+          "pretrained_presentation_prior"
+        ],
+        "safety_boundary": "research factual advisory only until patient-held-out, symbolic, causal-readiness, and clinical-review gates pass",
+        "notes": [
+          "Start as factual router using PhysioNet/eICU/MIMIC trajectories.",
+          "Do not claim antibiotic or fluid causal effects from observational EHR."
+        ]
+      },
+      {
+        "disease": "acute_kidney_injury",
+        "cohort_definition": "KDIGO-like creatinine or urine-output change with medication and hemodynamic context",
+        "targets": [
+          "creatinine",
+          "urine_output",
+          "potassium",
+          "bicarbonate",
+          "MAP",
+          "fluid_balance"
+        ],
+        "action_channels": [
+          "fluids",
+          "vasopressors",
+          "diuretics",
+          "nephrotoxin_exposure",
+          "renal_replacement_therapy"
+        ],
+        "candidate_sources": [
+          "persistence",
+          "mechanistic_world_model",
+          "real_fit_residual",
+          "pretrained_presentation_prior"
+        ],
+        "safety_boundary": "research factual advisory only until patient-held-out, symbolic, causal-readiness, and clinical-review gates pass",
+        "notes": [
+          "Use belief states for renal reserve and sodium-water balance.",
+          "Persistence will be strong for creatinine; router must fall back."
+        ]
+      },
+      {
+        "disease": "asthma_exacerbation",
+        "cohort_definition": "bronchospasm/asthma encounter with respiratory vitals, oxygenation, and bronchodilator/steroid timing",
+        "targets": [
+          "respiratory_rate",
+          "oxygen_saturation",
+          "work_of_breathing_proxy",
+          "heart_rate",
+          "peak_flow_or_fev1_if_available"
+        ],
+        "action_channels": [
+          "albuterol",
+          "ipratropium",
+          "systemic_steroids",
+          "magnesium",
+          "epinephrine",
+          "oxygen_or_ventilation"
+        ],
+        "candidate_sources": [
+          "persistence",
+          "mechanistic_world_model",
+          "real_fit_residual",
+          "pretrained_presentation_prior"
+        ],
+        "safety_boundary": "research factual advisory only until patient-held-out, symbolic, causal-readiness, and clinical-review gates pass",
+        "notes": [
+          "Likely needs curated non-ICU data; ICU EHR alone may under-cover peak-flow targets.",
+          "Symbolic safety for beta-agonist tachycardia and contraindications stays human-owned."
+        ]
+      }
+    ]
+  },
+  "shared_safety_boundary": {
+    "row_level_predictions_written": false,
+    "patient_identifiers_written": false,
+    "clinical_claim_allowed": false,
+    "runtime_decision_authority": false,
+    "active_rule_promotion_allowed": false
+  }
+}

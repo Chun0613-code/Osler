@@ -70,6 +70,13 @@ seeds. Causal diagnostics are runnable but fail readiness gates; these artifacts
 do not permit causal, counterfactual, clinical, checkpoint-promotion,
 residual-artifact-promotion, or active-rule-promotion claims.
 
+`next_chapter_ab_contract.json` is an aggregate-only post-DKA build contract.
+It contains no patient rows or identifiers. It records that the causal chapter
+is fail-closed until randomized, instrumental-variable, or front-door evidence is
+mapped into `osler_jepa/causal_readiness.py`, and that multi-disease expansion
+should reuse the disease-specific target-router template in
+`osler_jepa/disease_router.py`.
+
 `mimiciii_dka_transitions_6h_demo.parquet` is local-only and ignored by git. It
 is the observed-treatment MIMIC-III demo lab-defined DKA-like transition cohort
 used for schema and factual proxy smoke testing. Committed aggregate reports
