@@ -53,7 +53,8 @@ reports include `mimiciv_full_v31_icd_dka_transition_report.json`,
 `mimiciv_full_v31_icd_robustness.json`,
 `mimiciv_full_v31_icd_treatment_recovery_audit.json`,
 `mimiciv_full_v31_icd_causal_diagnostics.json`,
-`mimiciv_full_v31_icd_greybox_realfit.json`, and
+`mimiciv_full_v31_icd_greybox_realfit.json`,
+`mimiciv_full_v31_icd_target_router.json`, and
 `mimiciv_full_v31_icd_symbolic_real_test_v5.json`. These reports contain
 cohort-level counts and metrics only; raw rows, timestamps, and patient
 identifiers are not versioned. The patient-held-out per-target ensemble beats
@@ -62,8 +63,11 @@ random patient split seeds and a time-order split, but this remains
 observational. The real-patient grey-box residual fit learns target-specific
 glucose and ketone/anion-gap recovery signal, but it is not promoted as a
 whole-state residual model because sodium and creatinine regress versus
-persistence. Causal diagnostics are runnable but fail readiness gates; these
-artifacts do not permit causal, counterfactual, clinical, checkpoint-promotion,
+persistence. The nested target router safely gates that residual to anion gap,
+keeps presentation-only for glucose, and falls back to persistence for the other
+targets; it improves over the no-realfit base router in all seven patient split
+seeds. Causal diagnostics are runnable but fail readiness gates; these artifacts
+do not permit causal, counterfactual, clinical, checkpoint-promotion,
 residual-artifact-promotion, or active-rule-promotion claims.
 
 `mimiciii_dka_transitions_6h_demo.parquet` is local-only and ignored by git. It

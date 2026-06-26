@@ -158,6 +158,48 @@ persistence or for the validated per-target ensemble. No candidate artifact was
 written, and no checkpoint was promoted. The next safe use is a target-gated
 candidate experiment, not runtime replacement.
 
+## Nested Target-Gated Router
+
+`mimiciv_full_v31_target_router.py` turns the previous result into the safer
+architecture implied by the data. It evaluates a nested router over
+`persistence`, v5, the PhysioNet presentation-only candidate, DKABody mechanism
+rollout, and a real-fit grey-box residual source.
+
+The important leakage guard is nested:
+
+- discovery rows use inner out-of-fold grey-box residual predictions for source
+  selection
+- held-out rows use a residual model fit only on discovery stays
+- each non-persistence source must significantly beat persistence on discovery
+  active-DKA rows before it can be selected
+- no row-level predictions, stay lists, patient identifiers, or timestamp
+  cutoffs are written
+
+Seven patient split seeds all select the same shape:
+
+- glucose -> presentation-only
+- anion gap -> real-fit grey-box residual
+- pH, bicarbonate, potassium, MAP, sodium, osmolality, creatinine, urine output,
+  and BHB -> persistence
+
+Held-out results:
+
+- target router active-DKA: 7/7 splits beat persistence and 7/7 are significant
+- active-DKA median stay-level delta: `-0.029998`
+- all-window median stay-level delta: `-0.011437`
+- base router without real-fit residual is also significant, but weaker:
+  active-DKA median delta `-0.025236`
+- target router improves over the base router in 7/7 splits; median active-DKA
+  gain is `-0.004591`
+
+Conclusion: the current factual advisory shape is a target-gated router, not a
+single monolithic JEPA or residual model. The real-fit residual is valuable as a
+strictly gated anion-gap source, while presentation-only remains the glucose
+source and persistence remains the guard for variables without a significant
+validated source. This is still observational and does not open causal,
+counterfactual, clinical, checkpoint-promotion, residual-artifact-promotion, or
+active-rule-promotion claims.
+
 ## Treatment-Recovery Audit
 
 The DKABody treatment-recovery audit found:
@@ -208,4 +250,5 @@ git. The versioned artifacts are aggregate-only reports:
 - `mimiciv_full_v31_icd_treatment_recovery_audit.json`
 - `mimiciv_full_v31_icd_causal_diagnostics.json`
 - `mimiciv_full_v31_icd_greybox_realfit.json`
+- `mimiciv_full_v31_icd_target_router.json`
 - `mimiciv_full_v31_icd_symbolic_real_test_v5.json`

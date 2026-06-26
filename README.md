@@ -374,6 +374,13 @@ python mimiciv_full_v31_greybox_realfit.py \
   --output mimiciv_full_v31_icd_greybox_realfit.json \
   --seeds 7,19,37
 
+python mimiciv_full_v31_target_router.py \
+  --cohort dka_transitions_6h_mimiciv_full_v31_icd.parquet \
+  --output mimiciv_full_v31_icd_target_router.json \
+  --seeds 7,11,19,23,37,53,71 \
+  --greybox-epochs 60 \
+  --greybox-inner-folds 2
+
 python symbolic_real_test.py \
   --checkpoint dka_symbolic_jepa_v5.pt \
   --mimic dka_transitions_6h_mimiciv_full_v31_icd.parquet \
@@ -395,7 +402,15 @@ The first real-patient grey-box residual fit is also aggregate-only and
 patient-held-out. It learns strong target-specific active-DKA signals for glucose
 and ketone/anion-gap proxy, but it does not beat persistence as a whole-state
 residual model because sodium and creatinine regress. No residual artifact is
-promoted; the safe follow-up is target-gated candidate testing. See
+promoted.
+
+The nested target router is the current factual advisory shape. It uses inner
+out-of-fold grey-box predictions for discovery selection and discovery-only
+grey-box fits for held-out rows. Across seven patient split seeds it selects
+presentation-only for glucose, real-fit grey-box residual for anion gap, and
+persistence for all other targets. Active-DKA median stay-level delta improves
+to `-0.029998`, and the router beats the no-realfit base router in 7/7 splits.
+This is still observational factual forecasting, not causal validation. See
 `MIMICIV_FULL_V31_DKA_FINDINGS.md`.
 
 ### MIMIC-III demo observed-treatment DKA-like schema test
