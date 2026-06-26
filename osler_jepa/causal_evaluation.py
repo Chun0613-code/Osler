@@ -35,7 +35,7 @@ DEFAULT_TRIALS = (
     TargetTrialSpec("fluids_to_map", "act_fluids", "map_tp6", "map_t"),
     TargetTrialSpec(
         "potassium_to_serum_potassium",
-        "act_potassium", "potassium_tp6", "potassium_t",
+        "act_kcl", "potassium_tp6", "potassium_t",
     ),
 )
 

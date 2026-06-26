@@ -357,9 +357,17 @@ python eicu_dka_per_target_ensemble.py \
   --min-pairs 50 \
   --min-stays 20
 
+python mimiciv_full_v31_robustness.py \
+  --cohort dka_transitions_6h_mimiciv_full_v31_icd.parquet \
+  --output mimiciv_full_v31_icd_robustness.json
+
 python dka_treatment_recovery_audit.py \
   --cohort dka_transitions_6h_mimiciv_full_v31_icd.parquet \
   --output mimiciv_full_v31_icd_treatment_recovery_audit.json
+
+python dka_causal_evaluation.py \
+  dka_transitions_6h_mimiciv_full_v31_icd.parquet \
+  --output mimiciv_full_v31_icd_causal_diagnostics.json
 
 python symbolic_real_test.py \
   --checkpoint dka_symbolic_jepa_v5.pt \
@@ -372,8 +380,11 @@ six-hour transitions. The patient-held-out per-target ensemble is the first
 robust full MIMIC result to beat persistence: active-DKA normalized MAE improves
 from `0.390721` to `0.369611`, with bootstrap delta `-0.027072` and 95% CI
 `[-0.036244, -0.018760]`. The signal is driven by glucose and anion gap. This is
-still a factual observed-treatment proxy, not counterfactual or causal
-validation, and it does not promote any checkpoint or active rule. See
+stable across seven random patient-held-out split seeds and an early/late
+time-order split. Causal diagnostics are now runnable but still fail promotion
+readiness because of overlap, concomitant-treatment, and matched-balance
+failures. This is still a factual observed-treatment proxy, not counterfactual
+or causal validation, and it does not promote any checkpoint or active rule. See
 `MIMICIV_FULL_V31_DKA_FINDINGS.md`.
 
 ### MIMIC-III demo observed-treatment DKA-like schema test

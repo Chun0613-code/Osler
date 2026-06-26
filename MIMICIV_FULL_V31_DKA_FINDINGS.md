@@ -62,6 +62,65 @@ This is the first robust patient-held-out MIMIC result in this project where the
 guarded ensemble beats persistence. It is still a factual observed-treatment
 proxy, not counterfactual validation.
 
+## Robustness
+
+The first significant result was pressure-tested before any promotion claim.
+`mimiciv_full_v31_robustness.py` reuses the same prediction logic and writes only
+aggregate metrics. It does not write row-level predictions, patient identifiers,
+stay lists, or timestamp cutoffs.
+
+Across seven random patient-held-out split seeds:
+
+- active-DKA: 7/7 splits beat persistence and 7/7 are significant
+- active-DKA stay-level delta range: `-0.027468` to `-0.023236`
+- active-DKA median delta: `-0.025305`
+- all windows: 7/7 splits beat persistence and 7/7 are significant
+- all-window median delta: `-0.009065`
+
+The time-order split also holds:
+
+- early-stay discovery, late-stay held-out
+- active-DKA normalized MAE improves from persistence `0.386096` to ensemble
+  `0.366090`
+- bootstrap delta `-0.025508`, 95% CI `[-0.032894, -0.018012]`
+
+The diagnosis-pure check is already satisfied for this parquet because it is
+restricted to ICD-supported DKA stays. Hospital/careunit robustness is not yet
+tested: the current parquet does not include aggregate-safe careunit/site
+metadata.
+
+Conclusion: the factual ensemble win is not a single-split accident. It is
+stable across random patient splits and a time-order split, while remaining
+observational.
+
+## Causal Feasibility
+
+`dka_causal_evaluation.py` was rerun on the full MIMIC-IV v3.1 cohort to check
+whether causal target-trial diagnostics are now feasible. The answer is no: N is
+large enough to run diagnostics, but treatment-effect claims are still blocked.
+
+All tested target trials are available, but none pass promotion readiness:
+
+- insulin -> glucose
+- insulin -> bicarbonate
+- insulin -> anion gap
+- fluids -> MAP
+- KCl -> serum potassium
+
+The repeated blockers are:
+
+- insufficient propensity overlap
+- high concomitant treatment rate
+- matched covariate balance inadequate
+
+Examples: insulin trials have overlap around `0.675` and concomitant treatment
+rate `1.0`; fluids -> MAP has overlap `0.191`; KCl -> potassium has concomitant
+treatment rate `0.956`.
+
+Conclusion: the full MIMIC cohort opens the factual prediction gate, but not the
+causal gate. The next modeling branch should prioritize real-data factual
+training/fine-tuning unless a stricter causal design is added.
+
 ## Treatment-Recovery Audit
 
 The DKABody treatment-recovery audit found:
@@ -108,5 +167,7 @@ git. The versioned artifacts are aggregate-only reports:
 - `mimiciv_full_v31_icd_v5_evaluation.json`
 - `mimiciv_full_v31_icd_presentation_only_evaluation.json`
 - `mimiciv_full_v31_icd_per_target_ensemble.json`
+- `mimiciv_full_v31_icd_robustness.json`
 - `mimiciv_full_v31_icd_treatment_recovery_audit.json`
+- `mimiciv_full_v31_icd_causal_diagnostics.json`
 - `mimiciv_full_v31_icd_symbolic_real_test_v5.json`
