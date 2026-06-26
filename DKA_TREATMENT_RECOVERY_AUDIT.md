@@ -7,11 +7,12 @@ Date: 2026-06-25
 Does `DKABody` lack the treatment-driven recovery dynamics needed to move
 glucose, acid-base state, and potassium toward a viable state?
 
-The audit separates three things that must not be mixed:
+The audit separates four things that must not be mixed:
 
 1. a fixed clinical-prior check;
-2. observational eICU falsification;
-3. treatment-coverage failure.
+2. numeric dose-captured eICU falsification;
+3. treatment-presence evidence without dose;
+4. no-evidence windows.
 
 No parameter is fitted to eICU. The clinical-prior check cites:
 
@@ -34,75 +35,94 @@ recovery direction.
 
 This check passes without fitting the scenario to eICU.
 
-## eICU Treatment Strata
+## eICU Action Boundary
 
-The audit replayed all 367 active-DKA windows from 182 stays using their
-six-hour treatment grids and prior treatment history.
+The audit was rerun after correcting the eICU treatment contract:
 
-The full cohort looks poor because most windows have no captured insulin. The
-treatment-bearing strata tell a different story.
+- `infusionDrug` rows with defensible U/hr rates enter numeric action grids;
+- `medication` rows are orders, not administrations;
+- `treatment` rows are coarse presence text;
+- unknown-concentration infusion rows are presence evidence only.
 
-### Captured insulin without dextrose
+This removes medication-order leakage from the numeric action grid.
+
+## Active-DKA Treatment Strata
+
+The audit replayed all 367 active-DKA windows from 182 stays using the stricter
+six-hour action grid and prior treatment history.
+
+| Stratum | Rows | Stays |
+|---|---:|---:|
+| Numeric insulin dose captured | 35 | 22 |
+| Insulin evidence only | 181 | 104 |
+| No insulin evidence | 151 | 83 |
+
+### Numeric insulin dose captured
 
 | Target | Rows | Real change/hr | Sim change/hr | Direction agreement | Simulator MAE | Persistence MAE |
 |---|---:|---:|---:|---:|---:|---:|
-| Glucose | 24 | -28.10 | -17.08 | 91.7% | 82.24 | 168.58 |
-| HCO3 | 15 | +0.97 | +1.93 | 100.0% | 7.00 | 5.95 |
-| Anion gap | 14 | -1.32 | -1.48 | 71.4% | 5.56 | 11.10 |
-| Potassium | 15 | -0.052 | -0.027 | 60.0% | 0.84 | 0.67 |
+| Glucose | 34 | -24.50 | -13.38 | 79.4% | 94.76 | 150.03 |
+| HCO3 | 19 | +0.98 | +1.32 | 89.5% | 5.56 | 5.96 |
+| Anion gap | 16 | -1.31 | -0.78 | 62.5% | 5.35 | 8.38 |
+| Potassium | 18 | -0.060 | -0.017 | 66.7% | 0.71 | 0.81 |
 
-### Captured insulin with dextrose
+The numeric-dose stratum remains physiologically encouraging: glucose and
+acid-base direction are mostly correct, and several targets beat persistence.
+It is also too small for promotion.
+
+### Insulin evidence only
 
 | Target | Rows | Real change/hr | Sim change/hr | Direction agreement | Simulator MAE | Persistence MAE |
 |---|---:|---:|---:|---:|---:|---:|
-| Glucose | 65 | -27.40 | -12.51 | 73.8% | 123.73 | 173.62 |
-| HCO3 | 50 | +0.91 | +1.17 | 84.0% | 4.98 | 5.84 |
-| Anion gap | 36 | -1.41 | -0.70 | 77.8% | 5.40 | 8.58 |
-| Potassium | 49 | -0.103 | -0.043 | 81.6% | 0.56 | 0.87 |
+| Glucose | 157 | -22.66 | +17.95 | 17.2% | 249.01 | 152.64 |
+| HCO3 | 114 | +0.74 | -0.48 | 20.2% | 7.99 | 5.44 |
+| Anion gap | 85 | -1.26 | +1.31 | 9.4% | 15.67 | 8.41 |
+| Potassium | 111 | -0.077 | +0.072 | 36.9% | 0.98 | 0.68 |
 
-The captured-treatment windows do not falsify the treatment theory. Glucose,
-acid-base, anion-gap, and potassium directions are mostly correct, and several
-targets beat persistence.
+These rows are the key evidence for the coverage diagnosis. The raw data says
+insulin likely existed, but the demo does not provide a usable numeric dose. The
+simulator is therefore replaying a falsely untreated patient.
 
-## Coverage Failure
+### No insulin evidence
 
-Among active-DKA windows, 270 have no captured insulin. In that stratum:
+| Target | Rows | Real change/hr | Sim change/hr | Direction agreement | Simulator MAE | Persistence MAE |
+|---|---:|---:|---:|---:|---:|---:|
+| Glucose | 119 | -12.51 | +15.21 | 16.8% | 171.65 | 90.40 |
+| HCO3 | 74 | +0.49 | -0.28 | 21.6% | 5.42 | 3.98 |
+| Anion gap | 51 | -0.92 | +1.02 | 13.7% | 11.70 | 6.13 |
+| Potassium | 60 | -0.074 | +0.035 | 46.7% | 0.79 | 0.68 |
 
-- real glucose changes by `-15.49 mg/dL/hr`;
-- simulated glucose changes by `+17.11 mg/dL/hr`;
-- direction agreement is only `18.6%`;
-- real HCO3 and anion gap improve while untreated simulation worsens.
+These windows may still contain missing treatment, but the demo does not prove
+it. They are not permission to weaken untreated DKA physiology.
 
-That pattern is consistent with missing treatment capture. Weakening untreated
-DKA physiology to imitate these windows would encode an extraction artifact as
-biology.
+## Death Coverage
 
-The simulator produced 17 deaths:
+The simulator produced 26 deaths:
 
-| Cause | Total | No captured insulin | Captured insulin |
-|---|---:|---:|---:|
-| Acidosis | 13 | 12 | 1 |
-| Circulatory collapse | 3 | 2 | 1 |
-| Hyperkalemia | 1 | 0 | 1 |
+| Cause | Total | Numeric dose | Evidence only | No evidence |
+|---|---:|---:|---:|---:|
+| Acidosis | 22 | 1 | 16 | 5 |
+| Circulatory collapse | 3 | 1 | 0 | 2 |
+| Hyperkalemia | 1 | 0 | 1 | 0 |
 
-Fourteen of 17 deaths are therefore coverage-limited. The remaining three are
-useful falsification cases, but are too few and heterogeneous to identify a new
-equation.
+Seventeen of 26 deaths have insulin presence evidence but no numeric dose.
+Those are explicitly coverage-limited. The two deaths with numeric dose captured
+remain useful falsification cases, but are too few and heterogeneous to identify
+a new equation.
 
 ## Decision
 
 `runtime_change_allowed: false`
 
-The standard protocol passes its sourced boundary, and captured-insulin windows
-do not fail the external direction gate. Therefore:
+The standard protocol passes its sourced boundary, and the numeric-dose stratum
+does not fail the external direction gate. Therefore:
 
 - do not tune insulin, glucose, HCO3, or potassium constants to this cohort;
 - do not add generic setpoint mean reversion;
 - keep untreated DKA progressive;
-- improve treatment capture before revisiting the 14 coverage-limited deaths;
-- retain the three captured-treatment deaths as future falsification cases;
+- do not use medication orders or treatment text as numeric administrations;
+- improve dose-resolved treatment capture before revisiting evidence-only deaths;
 - do not promote a checkpoint or make causal or clinical claims.
 
-The main theoretical correction is now encoded as a gate: a mechanism may
-change only when a fixed source boundary and a treatment-bearing external
-falsification agree.
+The reusable gate is now stricter: a mechanism may change only when a fixed
+source boundary and a dose-observed external falsification agree.

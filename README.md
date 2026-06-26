@@ -248,11 +248,13 @@ python eicu_demo_action_audit.py \
   --output eicu_demo_action_audit.json
 ```
 
-The demo audit found 304 DKA-like stays and 3,635 mapped action rows in the
--6h/+24h DKA anchor window, making eICU demo the first open cross-hospital
-treated DKA cohort scaffold in this project. The follow-up transition extractor
-turns that scaffold into the same observed-treatment factual contract used by
-the MIMIC proxy evaluator:
+The demo audit found 304 DKA-like stays and 3,635 mapped treatment-evidence rows
+in the -6h/+24h DKA anchor window, making eICU demo the first open
+cross-hospital treated DKA cohort scaffold in this project. The follow-up
+transition extractor turns that scaffold into the same factual contract used by
+the MIMIC proxy evaluator, but with a stricter action boundary: only defensible
+`infusionDrug` administrations enter numeric dose grids. eICU `medication`
+orders and `treatment` text remain treatment-presence evidence only.
 
 ```bash
 python eicu_dka_transition_extract.py \
@@ -264,6 +266,14 @@ python evaluate_dka_mimic.py \
   --checkpoint dka_symbolic_jepa_v5.pt \
   --mimic eicu_dka_transitions_6h_demo.parquet \
   --output eicu_dka_v5_evaluation.json
+
+python evaluate_dka_mimic.py \
+  --checkpoint dka_physionet_presentation_only_candidate.pt \
+  --mimic eicu_dka_transitions_6h_demo.parquet \
+  --output eicu_dka_physionet_presentation_only_evaluation.json
+
+python eicu_dka_real_proxy_comparison.py \
+  --output eicu_dka_real_proxy_comparison.json
 
 python symbolic_real_test.py \
   --checkpoint dka_symbolic_jepa_v5.pt \
@@ -278,13 +288,14 @@ python eicu_dka_per_target_ensemble.py \
 ```
 
 The eICU demo transition run produced 259 evaluable DKA-like stays, 2,762
-6-hour transitions, and 367 active-DKA windows. Observed support clears the
-reference power gate for `fluids -> MAP` and barely clears it for
-`insulin -> glucose`; `KCl -> potassium` remains underpowered after target-pair
-filtering. This is still an observational factual proxy, not a causal treatment
-effect test or a checkpoint promotion. The patient-held-out per-target ensemble
-found a real glucose signal but did not pass the active-DKA bootstrap gate as a
-whole. See `EICU_DKA_TRANSITION_FINDINGS.md` and
+6-hour transitions, and 367 active-DKA windows. After removing medication-order
+leakage, numeric action support no longer clears any prior reference power gate:
+insulin->glucose has 27 dose-observed stays and 21 active-DKA stays, while 181
+active-DKA windows have insulin evidence without dose-resolved administration.
+This is still an observational factual proxy, not a causal treatment-effect test
+or a checkpoint promotion. The patient-held-out per-target ensemble retains a
+narrow glucose signal but does not pass the active-DKA bootstrap gate as a whole.
+See `EICU_DKA_TRANSITION_FINDINGS.md` and
 `EICU_DEMO_PRETRAINING_FINDINGS.md`.
 
 If you want to test whether this real-ICU representation helps DKA training, use

@@ -143,6 +143,12 @@ def replay_row(row: pd.Series):
         "kcl_total": float(future_grid[:, 5].sum() * DT),
         "bicarbonate_total": float(future_grid[:, 6].sum() * DT),
         "dextrose_total": float(future_grid[:, 7].sum() * DT),
+        "insulin_evidence": bool(row.get(
+            "act_insulin_evidence", row.get("act_insulin_total", 0.0) > 0.0
+        )),
+        "insulin_evidence_only": bool(row.get(
+            "act_insulin_evidence_only", False
+        )),
         "first_hour_iv_rate_mean": float(future_grid[:2, 0].mean()),
         "first_hour_insulin_total": float(future_grid[:2, :4].sum() * DT),
         "first_hour_dextrose_total": float(future_grid[:2, 7].sum() * DT),
@@ -321,10 +327,16 @@ def death_coverage_summary(frame: pd.DataFrame):
     deaths = frame[~frame["sim_alive"]].copy()
     if deaths.empty:
         return {"total": 0, "by_cause": {}, "by_insulin_coverage": {}}
-    deaths["insulin_coverage"] = np.where(
-        deaths["insulin_total"] > 0.0,
-        "captured_insulin",
-        "no_captured_insulin",
+    deaths["insulin_coverage"] = np.select(
+        [
+            deaths["insulin_total"] > 0.0,
+            deaths["insulin_evidence"],
+        ],
+        [
+            "numeric_dose_captured",
+            "presence_evidence_only",
+        ],
+        default="no_insulin_evidence",
     )
     return {
         "total": int(len(deaths)),
@@ -348,8 +360,9 @@ def death_coverage_summary(frame: pd.DataFrame):
             )
         },
         "interpretation": (
-            "Deaths without captured insulin are coverage-limited falsification "
-            "cases, not permission to weaken untreated DKA physiology."
+            "Deaths with presence evidence but no numeric dose are explicitly "
+            "coverage-limited. No-evidence deaths may still reflect missing "
+            "capture, but the demo cannot prove treatment occurred."
         ),
     }
 
@@ -357,6 +370,7 @@ def death_coverage_summary(frame: pd.DataFrame):
 def treatment_strata(frame: pd.DataFrame):
     masks = {
         "all_active_dka": np.ones(len(frame), dtype=bool),
+        "numeric_dose_captured": frame["insulin_total"] > 0.0,
         "insulin_without_dextrose": (
             (frame["insulin_total"] > 0.0)
             & (frame["dextrose_total"] == 0.0)
@@ -366,6 +380,14 @@ def treatment_strata(frame: pd.DataFrame):
             & (frame["dextrose_total"] > 0.0)
         ),
         "no_captured_insulin": frame["insulin_total"] == 0.0,
+        "insulin_evidence_only": (
+            (frame["insulin_total"] == 0.0)
+            & frame["insulin_evidence"]
+        ),
+        "no_insulin_evidence": (
+            (frame["insulin_total"] == 0.0)
+            & ~frame["insulin_evidence"]
+        ),
         "fluids_without_insulin": (
             (frame["fluids_total"] > 0.0)
             & (frame["insulin_total"] == 0.0)

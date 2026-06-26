@@ -27,6 +27,7 @@ from eicu_demo_action_audit import (
     DKA_PH_MAX,
     ID as EICU_ID,
     add_hour,
+    classify_eicu_action,
     merge_dka_like_stays,
 )
 from eicu_demo_pretrain import (
@@ -119,6 +120,10 @@ ACTION_SEARCH_TERMS = (
     "potassium chloride", "kcl", "bicarbonate", "dextrose", "d5", "d10",
     "d20", "d50",
 )
+EVIDENCE_COLUMNS = [
+    "stay_id", "starttime", "endtime", "action", "source",
+    "evidence_kind", "dose_observed", "original_label",
+]
 
 
 def pseudo_time(minutes_or_hours: float, unit: str = "minutes") -> pd.Timestamp:
@@ -286,6 +291,34 @@ def infer_rate_unit(label: object) -> str:
     return "ml/hr"
 
 
+def canonical_eicu_insulin_rate(record: dict[str, object]) -> tuple[float, str] | None:
+    """Return a defensible insulin rate in U/hr, without guessing concentration."""
+    label = str(record.get("drugname") or "").lower()
+    rate = pd.to_numeric(record.get("drugrate"), errors="coerce")
+    if not np.isfinite(rate):
+        rate = pd.to_numeric(record.get("infusionrate"), errors="coerce")
+    if not np.isfinite(rate) or float(rate) <= 0.0:
+        return None
+    rate = float(rate)
+    if "units/kg/hr" in label:
+        weight = pd.to_numeric(record.get("patientweight"), errors="coerce")
+        if np.isfinite(weight) and float(weight) > 0.0:
+            return rate * float(weight), "recorded_weight_x_units_per_kg_hr"
+        return None
+    if "units/hr" in label:
+        return rate, "recorded_units_per_hr"
+    if "ml/hr" in label:
+        drug_amount = pd.to_numeric(record.get("drugamount"), errors="coerce")
+        fluid_volume = pd.to_numeric(record.get("volumeoffluid"), errors="coerce")
+        if (
+            np.isfinite(drug_amount) and float(drug_amount) > 0.0
+            and np.isfinite(fluid_volume) and float(fluid_volume) > 0.0
+        ):
+            concentration = float(drug_amount) / float(fluid_volume)
+            return rate * concentration, "recorded_ml_hr_x_recorded_concentration"
+    return None
+
+
 def eicu_infusion_raw(data_root: Path, max_snapshot_hours: float = 4.0) -> pd.DataFrame:
     path = data_root / "infusiondrug.csv.gz"
     columns = [
@@ -309,6 +342,17 @@ def eicu_infusion_raw(data_root: Path, max_snapshot_hours: float = 4.0) -> pd.Da
             rate = record.get("drugrate")
             if pd.isna(rate):
                 rate = record.get("infusionrate")
+            actions = classify_eicu_action(
+                record.get("drugname"), route="iv", source="infusiondrug"
+            )
+            if any(action.startswith("insulin_") for action in actions):
+                canonical = canonical_eicu_insulin_rate(record)
+                if canonical is None:
+                    continue
+                rate, _dose_derivation = canonical
+                rate_uom = "unit/hr"
+            else:
+                rate_uom = infer_rate_unit(record.get("drugname"))
             rows.append({
                 "subject_id": int(record[EICU_ID]),
                 "stay_id": int(record[EICU_ID]),
@@ -318,7 +362,7 @@ def eicu_infusion_raw(data_root: Path, max_snapshot_hours: float = 4.0) -> pd.Da
                 "amount": np.nan,
                 "uom": "",
                 "rate": rate,
-                "rate_uom": infer_rate_unit(record.get("drugname")),
+                "rate_uom": rate_uom,
                 "route": "IV",
                 "product_description": "",
                 "itemid": np.nan,
@@ -329,15 +373,153 @@ def eicu_infusion_raw(data_root: Path, max_snapshot_hours: float = 4.0) -> pd.Da
 
 
 def read_actions(data_root: Path) -> pd.DataFrame:
-    raw = pd.concat(
-        [eicu_medication_raw(data_root), eicu_infusion_raw(data_root)],
-        ignore_index=True,
-    )
+    # eICU medication is an order table, not an administration table. Only
+    # infusionDrug rows with defensible numeric rates enter the dose grid.
+    raw = eicu_infusion_raw(data_root)
     if raw.empty:
         return normalize_events(raw)
     events = normalize_events(raw)
     events = events[events["amount"].notna() & (events["amount"] > 0)]
     return deduplicate_events(events).sort_values(["stay_id", "starttime"]).reset_index(drop=True)
+
+
+def empty_evidence() -> pd.DataFrame:
+    return pd.DataFrame(columns=EVIDENCE_COLUMNS)
+
+
+def medication_order_evidence(data_root: Path) -> pd.DataFrame:
+    path = data_root / "medication.csv.gz"
+    columns = [
+        EICU_ID, "drugstartoffset", "drugstopoffset", "drugname",
+        "routeadmin", "drugordercancelled",
+    ]
+    frame = pd.read_csv(path, usecols=columns, low_memory=False)
+    frame = frame[
+        (frame["drugordercancelled"].fillna("No").astype(str).str.lower() != "yes")
+        & action_terms_mask(frame["drugname"])
+    ]
+    rows = []
+    for record in frame.to_dict("records"):
+        start = pd.to_numeric(record.get("drugstartoffset"), errors="coerce")
+        if not np.isfinite(start):
+            continue
+        stop = pd.to_numeric(record.get("drugstopoffset"), errors="coerce")
+        if not np.isfinite(stop) or float(stop) <= float(start):
+            stop = float(start) + 30.0
+        label = record.get("drugname")
+        for action in classify_eicu_action(
+            label, route=record.get("routeadmin"), source="medication"
+        ):
+            rows.append({
+                "stay_id": int(record[EICU_ID]),
+                "starttime": pseudo_time(start),
+                "endtime": pseudo_time(stop),
+                "action": action,
+                "source": "eicu_medication",
+                "evidence_kind": "active_medication_order",
+                "dose_observed": False,
+                "original_label": str(label or ""),
+            })
+    return pd.DataFrame(rows, columns=EVIDENCE_COLUMNS)
+
+
+def infusion_evidence(data_root: Path, max_snapshot_hours: float = 4.0) -> pd.DataFrame:
+    path = data_root / "infusiondrug.csv.gz"
+    columns = [
+        EICU_ID, "infusionoffset", "drugname", "drugrate", "infusionrate",
+        "drugamount", "volumeoffluid", "patientweight",
+    ]
+    frame = pd.read_csv(path, usecols=columns)
+    frame = frame[action_terms_mask(frame["drugname"])].copy()
+    frame["offset"] = pd.to_numeric(frame["infusionoffset"], errors="coerce")
+    frame = frame[np.isfinite(frame["offset"])].sort_values(
+        [EICU_ID, "drugname", "offset"]
+    )
+    rows = []
+    for (_stay, _label), group in frame.groupby(
+        [EICU_ID, "drugname"], sort=False
+    ):
+        offsets = group["offset"].to_numpy(dtype=np.float64)
+        next_offsets = np.r_[offsets[1:], np.nan]
+        for record, next_offset in zip(group.to_dict("records"), next_offsets):
+            rate = pd.to_numeric(record.get("drugrate"), errors="coerce")
+            if not np.isfinite(rate):
+                rate = pd.to_numeric(record.get("infusionrate"), errors="coerce")
+            if not np.isfinite(rate) or float(rate) <= 0.0:
+                continue
+            start = float(record["offset"])
+            if np.isfinite(next_offset) and next_offset > start:
+                duration = min(
+                    float(next_offset - start), max_snapshot_hours * 60.0
+                )
+            else:
+                duration = 60.0
+            label = record.get("drugname")
+            actions = classify_eicu_action(
+                label, route="iv", source="infusiondrug"
+            )
+            insulin_rate = (
+                canonical_eicu_insulin_rate(record)
+                if any(action.startswith("insulin_") for action in actions)
+                else None
+            )
+            for action in actions:
+                rows.append({
+                    "stay_id": int(record[EICU_ID]),
+                    "starttime": pseudo_time(start),
+                    "endtime": pseudo_time(start + duration),
+                    "action": action,
+                    "source": "eicu_infusiondrug",
+                    "evidence_kind": (
+                        "dose_observed_infusion"
+                        if not action.startswith("insulin_") or insulin_rate is not None
+                        else "unknown_concentration_infusion"
+                    ),
+                    "dose_observed": bool(
+                        not action.startswith("insulin_") or insulin_rate is not None
+                    ),
+                    "original_label": str(label or ""),
+                })
+    return pd.DataFrame(rows, columns=EVIDENCE_COLUMNS)
+
+
+def treatment_presence_evidence(data_root: Path) -> pd.DataFrame:
+    path = data_root / "treatment.csv.gz"
+    columns = [EICU_ID, "treatmentoffset", "treatmentstring"]
+    frame = pd.read_csv(path, usecols=columns)
+    frame = frame[action_terms_mask(frame["treatmentstring"])]
+    rows = []
+    for record in frame.to_dict("records"):
+        offset = pd.to_numeric(record.get("treatmentoffset"), errors="coerce")
+        if not np.isfinite(offset):
+            continue
+        label = record.get("treatmentstring")
+        for action in classify_eicu_action(label, source="treatment"):
+            rows.append({
+                "stay_id": int(record[EICU_ID]),
+                "starttime": pseudo_time(offset),
+                "endtime": pseudo_time(float(offset) + 30.0),
+                "action": action,
+                "source": "eicu_treatment",
+                "evidence_kind": "coarse_treatment_presence",
+                "dose_observed": False,
+                "original_label": str(label or ""),
+            })
+    return pd.DataFrame(rows, columns=EVIDENCE_COLUMNS)
+
+
+def read_action_evidence(data_root: Path) -> pd.DataFrame:
+    frames = [
+        medication_order_evidence(data_root),
+        infusion_evidence(data_root),
+        treatment_presence_evidence(data_root),
+    ]
+    frames = [frame for frame in frames if not frame.empty]
+    if not frames:
+        return empty_evidence()
+    return pd.concat(frames, ignore_index=True).sort_values(
+        ["stay_id", "starttime", "source", "action"]
+    ).reset_index(drop=True)
 
 
 def read_patient_meta(data_root: Path) -> pd.DataFrame:
@@ -440,10 +622,65 @@ def assemble_states(anchors: pd.DataFrame, measurements: pd.DataFrame) -> pd.Dat
     return pd.DataFrame(rows, index=anchors.index)
 
 
-def assemble_actions(anchors: pd.DataFrame, actions: pd.DataFrame) -> pd.DataFrame:
+def evidence_window_summary(
+    evidence: pd.DataFrame,
+    anchor: pd.Timestamp,
+    history_hours: float = LOOKBACK_H,
+    future_hours: float = DELTA_H,
+) -> dict[str, object]:
+    history_start = anchor - pd.Timedelta(hours=history_hours)
+    future_end = anchor + pd.Timedelta(hours=future_hours)
+    history = evidence[
+        (evidence["endtime"] >= history_start)
+        & (evidence["starttime"] < anchor)
+    ]
+    future = evidence[
+        (evidence["endtime"] >= anchor)
+        & (evidence["starttime"] < future_end)
+    ]
+    output = {}
+    for action in ACTION_KEYS:
+        hist_selected = history[history["action"] == action]
+        future_selected = future[future["action"] == action]
+        output[f"hist_{action}_evidence_count"] = int(len(hist_selected))
+        output[f"act_{action}_evidence_count"] = int(len(future_selected))
+    insulin_mask_history = history["action"].isin(INSULIN_KEYS)
+    insulin_mask_future = future["action"].isin(INSULIN_KEYS)
+    hist_insulin = history[insulin_mask_history]
+    act_insulin = future[insulin_mask_future]
+    output.update({
+        "hist_insulin_evidence_count": int(len(hist_insulin)),
+        "act_insulin_evidence_count": int(len(act_insulin)),
+        "hist_insulin_evidence": int(len(hist_insulin) > 0),
+        "act_insulin_evidence": int(len(act_insulin) > 0),
+        "hist_insulin_evidence_sources": json.dumps(sorted(
+            hist_insulin["source"].dropna().astype(str).unique().tolist()
+        )),
+        "act_insulin_evidence_sources": json.dumps(sorted(
+            act_insulin["source"].dropna().astype(str).unique().tolist()
+        )),
+        "act_insulin_evidence_kinds": json.dumps(sorted(
+            act_insulin["evidence_kind"].dropna().astype(str).unique().tolist()
+        )),
+        "act_insulin_evidence_has_numeric_dose": int(
+            act_insulin["dose_observed"].fillna(False).any()
+        ),
+    })
+    return output
+
+
+def assemble_actions(
+    anchors: pd.DataFrame,
+    actions: pd.DataFrame,
+    evidence: pd.DataFrame,
+) -> pd.DataFrame:
     rows = []
     grouped = {stay: frame for stay, frame in actions.groupby("stay_id")}
+    evidence_grouped = {
+        stay: frame for stay, frame in evidence.groupby("stay_id")
+    }
     empty = actions.iloc[0:0]
+    empty_evidence_frame = evidence.iloc[0:0]
     for anchor in anchors.itertuples(index=False):
         events = grouped.get(int(anchor.stay_id), empty)
         summary = action_window_summary(events, pd.Timestamp(anchor.t), LOOKBACK_H, DELTA_H)
@@ -456,6 +693,15 @@ def assemble_actions(anchors: pd.DataFrame, actions: pd.DataFrame) -> pd.DataFra
             row[f"act_{action}_rate_mean"] = row[f"act_{action}_total"] / DELTA_H
         row["act_insulin"] = int(row["act_insulin_total"] > 0)
         row["act_insulin_rate_mean"] = row["act_insulin_total"] / DELTA_H
+        stay_evidence = evidence_grouped.get(
+            int(anchor.stay_id), empty_evidence_frame
+        )
+        row.update(evidence_window_summary(
+            stay_evidence, pd.Timestamp(anchor.t), LOOKBACK_H, DELTA_H
+        ))
+        row["act_insulin_evidence_only"] = int(
+            row["act_insulin_evidence"] and not row["act_insulin"]
+        )
         rows.append(row)
     return pd.DataFrame(rows, index=anchors.index)
 
@@ -535,7 +781,8 @@ def support_counts(frame: pd.DataFrame) -> dict[str, dict[str, int]]:
 
 def cohort_report(frame: pd.DataFrame, data_root: Path, output: Path,
                   dka_like_stays: dict[int, dict[str, object]],
-                  actions: pd.DataFrame) -> dict[str, object]:
+                  actions: pd.DataFrame,
+                  evidence: pd.DataFrame) -> dict[str, object]:
     core_pair_counts = {
         var: int((frame[f"{var}_t"].notna() & frame[f"{var}_tp6"].notna()).sum())
         for var in ("glucose", "potassium", "bicarbonate", "ph", "map")
@@ -580,16 +827,44 @@ def cohort_report(frame: pd.DataFrame, data_root: Path, output: Path,
                 if not actions.empty else 0.0
             ),
         },
+        "treatment_presence_evidence": {
+            "rows": int(len(evidence)),
+            "sources": (
+                evidence["source"].value_counts().astype(int).to_dict()
+                if not evidence.empty else {}
+            ),
+            "active_dka_windows_with_insulin_evidence": int(
+                (
+                    frame["dka_active_t"].fillna(False)
+                    & (frame["act_insulin_evidence"] > 0)
+                ).sum()
+            ),
+            "active_dka_windows_with_evidence_but_no_numeric_dose": int(
+                (
+                    frame["dka_active_t"].fillna(False)
+                    & (frame["act_insulin_evidence_only"] > 0)
+                ).sum()
+            ),
+            "note": (
+                "Medication orders, coarse treatment rows, and unknown-unit "
+                "infusions are presence evidence only and never enter dose grids."
+            ),
+        },
         "schema": {
             "compatible_with_evaluate_mimic_proxy": True,
             "has_exact_action_grids": "future_action_grid" in frame,
             "has_treatment_lifecycle": "future_treatment_event_grid" in frame,
             "has_treatment_history": "history_action_grid" in frame,
+            "has_separate_treatment_presence_evidence": (
+                "act_insulin_evidence_only" in frame
+            ),
         },
         "safety_boundary": {
             "raw_rows_included": False,
             "patient_ids_included_in_report": False,
             "factual_observed_treatment_only": True,
+            "medication_orders_used_as_numeric_administrations": False,
+            "unknown_dose_evidence_used_in_action_grid": False,
             "causal_claim_allowed": False,
             "counterfactual_claim_allowed": False,
             "clinical_claim_allowed": False,
@@ -602,8 +877,9 @@ def build_transitions(data_root: Path, output: Path) -> dict[str, object]:
     meta = read_patient_meta(data_root)
     anchors, dka_like_stays = build_anchors(data_root, measurements, meta)
     actions = read_actions(data_root)
+    evidence = read_action_evidence(data_root)
     states = assemble_states(anchors, measurements)
-    action_summary = assemble_actions(anchors, actions)
+    action_summary = assemble_actions(anchors, actions, evidence)
     outcomes = assemble_outcomes(anchors, meta)
     frame = pd.concat(
         [
@@ -620,7 +896,9 @@ def build_transitions(data_root: Path, output: Path) -> dict[str, object]:
     frame = filter_evaluable(add_derived_columns(frame))
     output.parent.mkdir(parents=True, exist_ok=True)
     frame.to_parquet(output, index=False)
-    return cohort_report(frame, data_root, output, dka_like_stays, actions)
+    return cohort_report(
+        frame, data_root, output, dka_like_stays, actions, evidence
+    )
 
 
 def parse_args() -> argparse.Namespace:

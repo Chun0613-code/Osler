@@ -88,6 +88,11 @@ from mimic_action_history import (
     treatment_event_records,
 )
 from eicu_demo_action_audit import classify_eicu_action
+from eicu_dka_transition_extract import (
+    canonical_eicu_insulin_rate,
+    eicu_infusion_raw,
+    evidence_window_summary,
+)
 
 sys.path.insert(0, str(Path(__file__).parent / "engine"))
 sys.path.insert(0, str(Path(__file__).parent / "demo"))
@@ -542,6 +547,86 @@ class NumericalJEPATests(unittest.TestCase):
             set(classify_eicu_action("D5 normal saline infusion", route="IV")),
             {"fluids", "dextrose"},
         )
+
+    def test_eicu_insulin_rate_requires_defensible_units(self):
+        self.assertEqual(
+            canonical_eicu_insulin_rate({
+                "drugname": "Insulin (units/hr)",
+                "drugrate": 6.0,
+            }),
+            (6.0, "recorded_units_per_hr"),
+        )
+        self.assertEqual(
+            canonical_eicu_insulin_rate({
+                "drugname": "Insulin (ml/hr)",
+                "drugrate": 4.0,
+                "drugamount": 100.0,
+                "volumeoffluid": 100.0,
+            }),
+            (4.0, "recorded_ml_hr_x_recorded_concentration"),
+        )
+        self.assertIsNone(canonical_eicu_insulin_rate({
+            "drugname": "Insulin (ml/hr)",
+            "drugrate": 4.0,
+        }))
+        self.assertIsNone(canonical_eicu_insulin_rate({
+            "drugname": "Insulin (units/kg/hr)",
+            "drugrate": 0.1,
+            "patientweight": np.nan,
+        }))
+
+    def test_eicu_presence_evidence_is_separate_from_numeric_dose(self):
+        anchor = pd.Timestamp("2100-01-01 06:00:00")
+        evidence = pd.DataFrame([{
+            "stay_id": 1,
+            "starttime": anchor,
+            "endtime": anchor + pd.Timedelta(minutes=30),
+            "action": "insulin_iv",
+            "source": "eicu_treatment",
+            "evidence_kind": "coarse_treatment_presence",
+            "dose_observed": False,
+            "original_label": "continuous insulin infusion",
+        }])
+        summary = evidence_window_summary(evidence, anchor)
+        self.assertEqual(summary["act_insulin_evidence"], 1)
+        self.assertEqual(summary["act_insulin_evidence_count"], 1)
+        self.assertEqual(summary["act_insulin_evidence_has_numeric_dose"], 0)
+        self.assertEqual(
+            json.loads(summary["act_insulin_evidence_sources"]),
+            ["eicu_treatment"],
+        )
+
+    def test_eicu_infusion_raw_keeps_only_convertible_insulin_rates(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            pd.DataFrame([
+                {
+                    "patientunitstayid": 1,
+                    "infusiondrugid": 10,
+                    "infusionoffset": 0,
+                    "drugname": "Insulin (units/hr)",
+                    "drugrate": 6.0,
+                    "infusionrate": np.nan,
+                    "drugamount": 100.0,
+                    "volumeoffluid": 100.0,
+                    "patientweight": np.nan,
+                },
+                {
+                    "patientunitstayid": 2,
+                    "infusiondrugid": 11,
+                    "infusionoffset": 0,
+                    "drugname": "Insulin (ml/hr)",
+                    "drugrate": 4.0,
+                    "infusionrate": np.nan,
+                    "drugamount": np.nan,
+                    "volumeoffluid": np.nan,
+                    "patientweight": np.nan,
+                },
+            ]).to_csv(root / "infusiondrug.csv.gz", index=False)
+            raw = eicu_infusion_raw(root)
+        self.assertEqual(len(raw), 1)
+        self.assertEqual(raw.iloc[0]["rate"], 6.0)
+        self.assertEqual(raw.iloc[0]["rate_uom"], "unit/hr")
 
     def test_zero_event_context_preserves_legacy_prediction(self):
         model = WorldModel().eval()

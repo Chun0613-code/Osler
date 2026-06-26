@@ -32,8 +32,10 @@ aggregate treatment-table coverage for DKA-relevant action channels and contains
 no raw rows or patient identifiers.
 
 `eicu_dka_transitions_6h_demo.parquet` is local-only and ignored by git. It is
-the observed-treatment eICU demo DKA-like transition cohort used for factual
-proxy evaluation. Committed aggregate reports include
+the eICU demo DKA-like transition cohort used for factual proxy evaluation.
+Only defensible `infusionDrug` administrations enter numeric action grids;
+eICU medication orders, treatment text, and unknown-dose infusions are retained
+as treatment-presence evidence only. Committed aggregate reports include
 `eicu_dka_transition_report.json`, `eicu_dka_v5_evaluation.json`,
 `eicu_dka_physionet_presentation_only_evaluation.json`,
 `eicu_dka_real_proxy_comparison.json`, `eicu_dka_symbolic_real_test_v5.json`,
