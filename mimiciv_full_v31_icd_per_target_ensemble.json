@@ -1,0 +1,963 @@
+{
+  "experiment": "eicu_patient_heldout_per_target_ensemble",
+  "cohort": "/Users/chunyouchang/Desktop/llm_project/medical_jepa/dka_transitions_6h_mimiciv_full_v31_icd.parquet",
+  "models": {
+    "v5": "/Users/chunyouchang/Desktop/llm_project/medical_jepa/dka_symbolic_jepa_v5.pt",
+    "presentation_only": "/Users/chunyouchang/Desktop/llm_project/medical_jepa/dka_physionet_presentation_only_candidate.pt"
+  },
+  "split": {
+    "seed": 19,
+    "discovery_fraction": 0.67,
+    "discovery_stays": 663,
+    "heldout_stays": 326,
+    "overlap": 0,
+    "prediction_rows": 47788,
+    "active_prediction_rows": 22904
+  },
+  "selector_training_scope": "active_dka_only",
+  "selector_gate": {
+    "min_pairs": 50,
+    "min_stays": 20,
+    "rule": "Choose the lowest-MAE method on discovery active-DKA stays; otherwise fall back to persistence."
+  },
+  "discovery_selector": {
+    "glucose": {
+      "n": 1531,
+      "stays": 546,
+      "mae": {
+        "persistence": 142.825604,
+        "v5": 174.13952,
+        "presentation_only": 105.325243
+      },
+      "selected_method": "presentation_only",
+      "reason": "lowest_discovery_mae",
+      "selected_beats_persistence": true
+    },
+    "ph": {
+      "n": 771,
+      "stays": 379,
+      "mae": {
+        "persistence": 0.067289,
+        "v5": 0.076572,
+        "presentation_only": 0.071244
+      },
+      "selected_method": "persistence",
+      "reason": "lowest_discovery_mae",
+      "selected_beats_persistence": false
+    },
+    "bicarbonate": {
+      "n": 1487,
+      "stays": 539,
+      "mae": {
+        "persistence": 3.577539,
+        "v5": 4.145594,
+        "presentation_only": 5.381035
+      },
+      "selected_method": "persistence",
+      "reason": "lowest_discovery_mae",
+      "selected_beats_persistence": false
+    },
+    "anion_gap": {
+      "n": 1480,
+      "stays": 538,
+      "mae": {
+        "persistence": 5.014865,
+        "v5": 5.45486,
+        "presentation_only": 4.618631
+      },
+      "selected_method": "presentation_only",
+      "reason": "lowest_discovery_mae",
+      "selected_beats_persistence": true
+    },
+    "potassium": {
+      "n": 1557,
+      "stays": 547,
+      "mae": {
+        "persistence": 0.591651,
+        "v5": 0.830288,
+        "presentation_only": 0.690636
+      },
+      "selected_method": "persistence",
+      "reason": "lowest_discovery_mae",
+      "selected_beats_persistence": false
+    },
+    "map": {
+      "n": 2372,
+      "stays": 588,
+      "mae": {
+        "persistence": 11.409781,
+        "v5": 11.390847,
+        "presentation_only": 11.995707
+      },
+      "selected_method": "v5",
+      "reason": "lowest_discovery_mae",
+      "selected_beats_persistence": true
+    },
+    "sodium": {
+      "n": 1525,
+      "stays": 544,
+      "mae": {
+        "persistence": 2.83082,
+        "v5": 6.548315,
+        "presentation_only": 3.593435
+      },
+      "selected_method": "persistence",
+      "reason": "lowest_discovery_mae",
+      "selected_beats_persistence": false
+    },
+    "osmolality": {
+      "n": 1505,
+      "stays": 544,
+      "mae": {
+        "persistence": 8.400849,
+        "v5": 21.16245,
+        "presentation_only": 10.122959
+      },
+      "selected_method": "persistence",
+      "reason": "lowest_discovery_mae",
+      "selected_beats_persistence": false
+    },
+    "creatinine": {
+      "n": 1466,
+      "stays": 540,
+      "mae": {
+        "persistence": 0.266071,
+        "v5": 0.659591,
+        "presentation_only": 5.523456
+      },
+      "selected_method": "persistence",
+      "reason": "lowest_discovery_mae",
+      "selected_beats_persistence": false
+    },
+    "urine_output": {
+      "n": 1563,
+      "stays": 513,
+      "mae": {
+        "persistence": 77.492402,
+        "v5": 133.747452,
+        "presentation_only": 89.434487
+      },
+      "selected_method": "persistence",
+      "reason": "lowest_discovery_mae",
+      "selected_beats_persistence": false
+    },
+    "BHB": {
+      "n": 5,
+      "stays": 5,
+      "mae": {
+        "persistence": 1.6,
+        "v5": 4.15598,
+        "presentation_only": 4.906518
+      },
+      "selected_method": "persistence",
+      "reason": "insufficient_discovery_support",
+      "selected_beats_persistence": false
+    }
+  },
+  "selected_methods": {
+    "glucose": "presentation_only",
+    "ph": "persistence",
+    "bicarbonate": "persistence",
+    "anion_gap": "presentation_only",
+    "potassium": "persistence",
+    "map": "v5",
+    "sodium": "persistence",
+    "osmolality": "persistence",
+    "creatinine": "persistence",
+    "urine_output": "persistence",
+    "BHB": "persistence"
+  },
+  "heldout": {
+    "all_windows": {
+      "n_rows": 15925,
+      "stays": 326,
+      "normalized_mae": {
+        "persistence": 0.324739,
+        "v5": 0.504475,
+        "presentation_only": 0.758498,
+        "per_target_ensemble": 0.31707
+      },
+      "ensemble_delta_vs_persistence": {
+        "stays": 326,
+        "point_delta": -0.006545,
+        "bootstrap_95_ci": [
+          -0.01096,
+          -0.002483
+        ],
+        "beats_persistence": true,
+        "significant": true
+      },
+      "per_target": {
+        "glucose": {
+          "n": 1557,
+          "stays": 303,
+          "selected_method": "presentation_only",
+          "mae": {
+            "persistence": 101.136159,
+            "v5": 134.93607,
+            "presentation_only": 86.538162,
+            "per_target_ensemble": 86.538162
+          },
+          "ensemble_delta_vs_persistence": {
+            "stays": 303,
+            "point_delta": -12.497878,
+            "bootstrap_95_ci": [
+              -18.800398,
+              -6.67054
+            ],
+            "beats_persistence": true,
+            "significant": true
+          }
+        },
+        "ph": {
+          "n": 879,
+          "stays": 241,
+          "selected_method": "persistence",
+          "mae": {
+            "persistence": 0.054164,
+            "v5": 0.067519,
+            "presentation_only": 0.06986,
+            "per_target_ensemble": 0.054164
+          },
+          "ensemble_delta_vs_persistence": {
+            "stays": 241,
+            "point_delta": 0.0,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "beats_persistence": false,
+            "significant": false
+          }
+        },
+        "bicarbonate": {
+          "n": 1519,
+          "stays": 305,
+          "selected_method": "persistence",
+          "mae": {
+            "persistence": 2.789598,
+            "v5": 3.632037,
+            "presentation_only": 5.333652,
+            "per_target_ensemble": 2.789598
+          },
+          "ensemble_delta_vs_persistence": {
+            "stays": 305,
+            "point_delta": 0.0,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "beats_persistence": false,
+            "significant": false
+          }
+        },
+        "anion_gap": {
+          "n": 1503,
+          "stays": 305,
+          "selected_method": "presentation_only",
+          "mae": {
+            "persistence": 3.739188,
+            "v5": 4.450584,
+            "presentation_only": 3.715504,
+            "per_target_ensemble": 3.715504
+          },
+          "ensemble_delta_vs_persistence": {
+            "stays": 305,
+            "point_delta": -0.013525,
+            "bootstrap_95_ci": [
+              -0.217801,
+              0.212415
+            ],
+            "beats_persistence": true,
+            "significant": false
+          }
+        },
+        "potassium": {
+          "n": 1587,
+          "stays": 305,
+          "selected_method": "persistence",
+          "mae": {
+            "persistence": 0.520101,
+            "v5": 0.850483,
+            "presentation_only": 0.616282,
+            "per_target_ensemble": 0.520101
+          },
+          "ensemble_delta_vs_persistence": {
+            "stays": 305,
+            "point_delta": 0.0,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "beats_persistence": false,
+            "significant": false
+          }
+        },
+        "map": {
+          "n": 2592,
+          "stays": 326,
+          "selected_method": "v5",
+          "mae": {
+            "persistence": 11.357639,
+            "v5": 11.300621,
+            "presentation_only": 11.938833,
+            "per_target_ensemble": 11.300621
+          },
+          "ensemble_delta_vs_persistence": {
+            "stays": 326,
+            "point_delta": -0.028133,
+            "bootstrap_95_ci": [
+              -0.309654,
+              0.262005
+            ],
+            "beats_persistence": true,
+            "significant": false
+          }
+        },
+        "sodium": {
+          "n": 1542,
+          "stays": 305,
+          "selected_method": "persistence",
+          "mae": {
+            "persistence": 2.732166,
+            "v5": 6.899432,
+            "presentation_only": 3.366462,
+            "per_target_ensemble": 2.732166
+          },
+          "ensemble_delta_vs_persistence": {
+            "stays": 305,
+            "point_delta": 0.0,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "beats_persistence": false,
+            "significant": false
+          }
+        },
+        "osmolality": {
+          "n": 1526,
+          "stays": 303,
+          "selected_method": "persistence",
+          "mae": {
+            "persistence": 6.69459,
+            "v5": 20.148852,
+            "presentation_only": 8.81694,
+            "per_target_ensemble": 6.69459
+          },
+          "ensemble_delta_vs_persistence": {
+            "stays": 303,
+            "point_delta": 0.0,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "beats_persistence": false,
+            "significant": false
+          }
+        },
+        "creatinine": {
+          "n": 1470,
+          "stays": 302,
+          "selected_method": "persistence",
+          "mae": {
+            "persistence": 0.23485,
+            "v5": 0.568953,
+            "presentation_only": 6.455742,
+            "per_target_ensemble": 0.23485
+          },
+          "ensemble_delta_vs_persistence": {
+            "stays": 302,
+            "point_delta": 0.0,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "beats_persistence": false,
+            "significant": false
+          }
+        },
+        "urine_output": {
+          "n": 1750,
+          "stays": 303,
+          "selected_method": "persistence",
+          "mae": {
+            "persistence": 78.663143,
+            "v5": 122.264392,
+            "presentation_only": 94.460405,
+            "per_target_ensemble": 78.663143
+          },
+          "ensemble_delta_vs_persistence": {
+            "stays": 303,
+            "point_delta": 0.0,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "beats_persistence": false,
+            "significant": false
+          }
+        },
+        "BHB": {
+          "n": 0,
+          "stays": 0,
+          "selected_method": "persistence",
+          "mae": {
+            "persistence": null,
+            "v5": null,
+            "presentation_only": null,
+            "per_target_ensemble": null
+          },
+          "ensemble_delta_vs_persistence": {
+            "stays": 0,
+            "point_delta": null,
+            "bootstrap_95_ci": [
+              null,
+              null
+            ],
+            "beats_persistence": null,
+            "significant": false
+          }
+        }
+      }
+    },
+    "active_dka_only": {
+      "n_rows": 7642,
+      "stays": 280,
+      "normalized_mae": {
+        "persistence": 0.390721,
+        "v5": 0.57284,
+        "presentation_only": 0.758158,
+        "per_target_ensemble": 0.369611
+      },
+      "ensemble_delta_vs_persistence": {
+        "stays": 280,
+        "point_delta": -0.027072,
+        "bootstrap_95_ci": [
+          -0.036244,
+          -0.01876
+        ],
+        "beats_persistence": true,
+        "significant": true
+      },
+      "per_target": {
+        "glucose": {
+          "n": 774,
+          "stays": 252,
+          "selected_method": "presentation_only",
+          "mae": {
+            "persistence": 144.457364,
+            "v5": 178.878862,
+            "presentation_only": 108.766936,
+            "per_target_ensemble": 108.766936
+          },
+          "ensemble_delta_vs_persistence": {
+            "stays": 252,
+            "point_delta": -38.49972,
+            "bootstrap_95_ci": [
+              -49.271367,
+              -28.592391
+            ],
+            "beats_persistence": true,
+            "significant": true
+          }
+        },
+        "ph": {
+          "n": 422,
+          "stays": 189,
+          "selected_method": "persistence",
+          "mae": {
+            "persistence": 0.067986,
+            "v5": 0.077258,
+            "presentation_only": 0.076528,
+            "per_target_ensemble": 0.067986
+          },
+          "ensemble_delta_vs_persistence": {
+            "stays": 189,
+            "point_delta": 0.0,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "beats_persistence": false,
+            "significant": false
+          }
+        },
+        "bicarbonate": {
+          "n": 753,
+          "stays": 251,
+          "selected_method": "persistence",
+          "mae": {
+            "persistence": 3.554316,
+            "v5": 4.074187,
+            "presentation_only": 5.698293,
+            "per_target_ensemble": 3.554316
+          },
+          "ensemble_delta_vs_persistence": {
+            "stays": 251,
+            "point_delta": 0.0,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "beats_persistence": false,
+            "significant": false
+          }
+        },
+        "anion_gap": {
+          "n": 744,
+          "stays": 251,
+          "selected_method": "presentation_only",
+          "mae": {
+            "persistence": 5.041667,
+            "v5": 5.445149,
+            "presentation_only": 4.679705,
+            "per_target_ensemble": 4.679705
+          },
+          "ensemble_delta_vs_persistence": {
+            "stays": 251,
+            "point_delta": -0.707247,
+            "bootstrap_95_ci": [
+              -1.119807,
+              -0.329234
+            ],
+            "beats_persistence": true,
+            "significant": true
+          }
+        },
+        "potassium": {
+          "n": 788,
+          "stays": 252,
+          "selected_method": "persistence",
+          "mae": {
+            "persistence": 0.601777,
+            "v5": 0.858303,
+            "presentation_only": 0.664526,
+            "per_target_ensemble": 0.601777
+          },
+          "ensemble_delta_vs_persistence": {
+            "stays": 252,
+            "point_delta": 0.0,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "beats_persistence": false,
+            "significant": false
+          }
+        },
+        "map": {
+          "n": 1158,
+          "stays": 280,
+          "selected_method": "v5",
+          "mae": {
+            "persistence": 11.75475,
+            "v5": 11.851261,
+            "presentation_only": 12.431871,
+            "per_target_ensemble": 11.851261
+          },
+          "ensemble_delta_vs_persistence": {
+            "stays": 280,
+            "point_delta": -0.243419,
+            "bootstrap_95_ci": [
+              -0.782935,
+              0.291328
+            ],
+            "beats_persistence": true,
+            "significant": false
+          }
+        },
+        "sodium": {
+          "n": 764,
+          "stays": 252,
+          "selected_method": "persistence",
+          "mae": {
+            "persistence": 3.098168,
+            "v5": 6.613899,
+            "presentation_only": 3.577861,
+            "per_target_ensemble": 3.098168
+          },
+          "ensemble_delta_vs_persistence": {
+            "stays": 252,
+            "point_delta": 0.0,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "beats_persistence": false,
+            "significant": false
+          }
+        },
+        "osmolality": {
+          "n": 758,
+          "stays": 252,
+          "selected_method": "persistence",
+          "mae": {
+            "persistence": 8.412123,
+            "v5": 21.104329,
+            "presentation_only": 10.12519,
+            "per_target_ensemble": 8.412123
+          },
+          "ensemble_delta_vs_persistence": {
+            "stays": 252,
+            "point_delta": 0.0,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "beats_persistence": false,
+            "significant": false
+          }
+        },
+        "creatinine": {
+          "n": 732,
+          "stays": 250,
+          "selected_method": "persistence",
+          "mae": {
+            "persistence": 0.263019,
+            "v5": 0.716657,
+            "presentation_only": 5.611315,
+            "per_target_ensemble": 0.263019
+          },
+          "ensemble_delta_vs_persistence": {
+            "stays": 250,
+            "point_delta": 0.0,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "beats_persistence": false,
+            "significant": false
+          }
+        },
+        "urine_output": {
+          "n": 749,
+          "stays": 240,
+          "selected_method": "persistence",
+          "mae": {
+            "persistence": 89.246662,
+            "v5": 154.851692,
+            "presentation_only": 102.87935,
+            "per_target_ensemble": 89.246662
+          },
+          "ensemble_delta_vs_persistence": {
+            "stays": 240,
+            "point_delta": 0.0,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "beats_persistence": false,
+            "significant": false
+          }
+        },
+        "BHB": {
+          "n": 0,
+          "stays": 0,
+          "selected_method": "persistence",
+          "mae": {
+            "persistence": null,
+            "v5": null,
+            "presentation_only": null,
+            "per_target_ensemble": null
+          },
+          "ensemble_delta_vs_persistence": {
+            "stays": 0,
+            "point_delta": null,
+            "bootstrap_95_ci": [
+              null,
+              null
+            ],
+            "beats_persistence": null,
+            "significant": false
+          }
+        }
+      }
+    }
+  },
+  "oracle_upper_bound_heldout": {
+    "warning": "This selector is fit on held-out outcomes and is leakage; use only as an upper-bound sanity check.",
+    "selected_methods": {
+      "glucose": "presentation_only",
+      "ph": "persistence",
+      "bicarbonate": "persistence",
+      "anion_gap": "presentation_only",
+      "potassium": "persistence",
+      "map": "persistence",
+      "sodium": "persistence",
+      "osmolality": "persistence",
+      "creatinine": "persistence",
+      "urine_output": "persistence",
+      "BHB": "persistence"
+    },
+    "active_dka_only": {
+      "n_rows": 7642,
+      "stays": 280,
+      "normalized_mae": {
+        "persistence": 0.390721,
+        "v5": 0.57284,
+        "presentation_only": 0.758158,
+        "per_target_ensemble": 0.369123
+      },
+      "ensemble_delta_vs_persistence": {
+        "stays": 280,
+        "point_delta": -0.024431,
+        "bootstrap_95_ci": [
+          -0.031306,
+          -0.017786
+        ],
+        "beats_persistence": true,
+        "significant": true
+      },
+      "per_target": {
+        "glucose": {
+          "n": 774,
+          "stays": 252,
+          "selected_method": "presentation_only",
+          "mae": {
+            "persistence": 144.457364,
+            "v5": 178.878862,
+            "presentation_only": 108.766936,
+            "per_target_ensemble": 108.766936
+          },
+          "ensemble_delta_vs_persistence": {
+            "stays": 252,
+            "point_delta": -38.49972,
+            "bootstrap_95_ci": [
+              -49.651025,
+              -27.701888
+            ],
+            "beats_persistence": true,
+            "significant": true
+          }
+        },
+        "ph": {
+          "n": 422,
+          "stays": 189,
+          "selected_method": "persistence",
+          "mae": {
+            "persistence": 0.067986,
+            "v5": 0.077258,
+            "presentation_only": 0.076528,
+            "per_target_ensemble": 0.067986
+          },
+          "ensemble_delta_vs_persistence": {
+            "stays": 189,
+            "point_delta": 0.0,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "beats_persistence": false,
+            "significant": false
+          }
+        },
+        "bicarbonate": {
+          "n": 753,
+          "stays": 251,
+          "selected_method": "persistence",
+          "mae": {
+            "persistence": 3.554316,
+            "v5": 4.074187,
+            "presentation_only": 5.698293,
+            "per_target_ensemble": 3.554316
+          },
+          "ensemble_delta_vs_persistence": {
+            "stays": 251,
+            "point_delta": 0.0,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "beats_persistence": false,
+            "significant": false
+          }
+        },
+        "anion_gap": {
+          "n": 744,
+          "stays": 251,
+          "selected_method": "presentation_only",
+          "mae": {
+            "persistence": 5.041667,
+            "v5": 5.445149,
+            "presentation_only": 4.679705,
+            "per_target_ensemble": 4.679705
+          },
+          "ensemble_delta_vs_persistence": {
+            "stays": 251,
+            "point_delta": -0.707247,
+            "bootstrap_95_ci": [
+              -1.114515,
+              -0.352506
+            ],
+            "beats_persistence": true,
+            "significant": true
+          }
+        },
+        "potassium": {
+          "n": 788,
+          "stays": 252,
+          "selected_method": "persistence",
+          "mae": {
+            "persistence": 0.601777,
+            "v5": 0.858303,
+            "presentation_only": 0.664526,
+            "per_target_ensemble": 0.601777
+          },
+          "ensemble_delta_vs_persistence": {
+            "stays": 252,
+            "point_delta": 0.0,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "beats_persistence": false,
+            "significant": false
+          }
+        },
+        "map": {
+          "n": 1158,
+          "stays": 280,
+          "selected_method": "persistence",
+          "mae": {
+            "persistence": 11.75475,
+            "v5": 11.851261,
+            "presentation_only": 12.431871,
+            "per_target_ensemble": 11.75475
+          },
+          "ensemble_delta_vs_persistence": {
+            "stays": 280,
+            "point_delta": 0.0,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "beats_persistence": false,
+            "significant": false
+          }
+        },
+        "sodium": {
+          "n": 764,
+          "stays": 252,
+          "selected_method": "persistence",
+          "mae": {
+            "persistence": 3.098168,
+            "v5": 6.613899,
+            "presentation_only": 3.577861,
+            "per_target_ensemble": 3.098168
+          },
+          "ensemble_delta_vs_persistence": {
+            "stays": 252,
+            "point_delta": 0.0,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "beats_persistence": false,
+            "significant": false
+          }
+        },
+        "osmolality": {
+          "n": 758,
+          "stays": 252,
+          "selected_method": "persistence",
+          "mae": {
+            "persistence": 8.412123,
+            "v5": 21.104329,
+            "presentation_only": 10.12519,
+            "per_target_ensemble": 8.412123
+          },
+          "ensemble_delta_vs_persistence": {
+            "stays": 252,
+            "point_delta": 0.0,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "beats_persistence": false,
+            "significant": false
+          }
+        },
+        "creatinine": {
+          "n": 732,
+          "stays": 250,
+          "selected_method": "persistence",
+          "mae": {
+            "persistence": 0.263019,
+            "v5": 0.716657,
+            "presentation_only": 5.611315,
+            "per_target_ensemble": 0.263019
+          },
+          "ensemble_delta_vs_persistence": {
+            "stays": 250,
+            "point_delta": 0.0,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "beats_persistence": false,
+            "significant": false
+          }
+        },
+        "urine_output": {
+          "n": 749,
+          "stays": 240,
+          "selected_method": "persistence",
+          "mae": {
+            "persistence": 89.246662,
+            "v5": 154.851692,
+            "presentation_only": 102.87935,
+            "per_target_ensemble": 89.246662
+          },
+          "ensemble_delta_vs_persistence": {
+            "stays": 240,
+            "point_delta": 0.0,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "beats_persistence": false,
+            "significant": false
+          }
+        },
+        "BHB": {
+          "n": 0,
+          "stays": 0,
+          "selected_method": "persistence",
+          "mae": {
+            "persistence": null,
+            "v5": null,
+            "presentation_only": null,
+            "per_target_ensemble": null
+          },
+          "ensemble_delta_vs_persistence": {
+            "stays": 0,
+            "point_delta": null,
+            "bootstrap_95_ci": [
+              null,
+              null
+            ],
+            "beats_persistence": null,
+            "significant": false
+          }
+        }
+      }
+    }
+  },
+  "decision": "no_checkpoint_promotion_research_proxy_only",
+  "safety_boundary": {
+    "factual_observed_treatment_only": true,
+    "causal_claim_allowed": false,
+    "counterfactual_claim_allowed": false,
+    "clinical_claim_allowed": false,
+    "checkpoint_promotion_allowed": false,
+    "row_level_predictions_written": false,
+    "row_level_predictions_versioned": false
+  },
+  "interpretation": [
+    "The primary result is the discovery-selected held-out ensemble, not the oracle upper bound.",
+    "The selector is target-wise and patient-held-out, so target outcomes from held-out stays do not choose methods.",
+    "Negative bootstrap deltas mean the ensemble beats persistence; intervals crossing zero are not significant.",
+    "This remains observational and treatment-confounded even when it beats persistence factually."
+  ]
+}

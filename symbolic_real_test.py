@@ -52,6 +52,9 @@ def _cohort_info(path):
     elif "mimiciii" in name or "mimic-iii" in name:
         label = "MIMIC-III demo"
         population = "MIMIC-III demo ICU lab-defined DKA-like anchors"
+    elif "mimiciv_full" in name or "full_v31" in name:
+        label = "MIMIC-IV full v3.1"
+        population = "MIMIC-IV full v3.1 ICU DKA-like anchors"
     elif "mimic" in name or "dka_transitions_6h_demo" in name:
         label = "MIMIC-IV demo"
         population = "MIMIC-IV ICU DKA-like anchors"

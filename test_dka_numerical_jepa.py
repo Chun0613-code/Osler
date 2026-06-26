@@ -1499,6 +1499,21 @@ class NumericalJEPATests(unittest.TestCase):
         self.assertEqual(event["amount"], 50.0)
         self.assertEqual(event["timing_source"], "default_duration")
 
+    def test_mimic_normalizer_converts_only_84_percent_bicarbonate_ml(self):
+        now = pd.Timestamp("2026-01-01 12:00:00")
+        raw = pd.DataFrame([
+            {"stay_id": 1, "starttime": now, "endtime": now,
+             "label": "Sodium Bicarbonate 8.4%", "itemid": 220995,
+             "amount": 50, "uom": "mL", "source": "inputevents"},
+            {"stay_id": 1, "starttime": now, "endtime": now,
+             "label": "Sodium Bicarbonate 1.4%", "itemid": 221211,
+             "amount": 50, "uom": "mL", "source": "inputevents"},
+        ])
+        events = normalize_events(raw)
+        self.assertEqual(len(events), 1)
+        self.assertEqual(events.iloc[0]["itemid"], 220995)
+        self.assertEqual(events.iloc[0]["amount"], 50.0)
+
     def test_ingredientevents_add_observed_maintenance_without_calorie_guessing(self):
         now = pd.Timestamp("2026-01-01 12:00:00")
         raw = pd.DataFrame([

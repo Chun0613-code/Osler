@@ -43,6 +43,21 @@ and `eicu_dka_per_target_ensemble.json`. These reports contain cohort-level
 counts and metrics only; raw rows, timestamps, and patient identifiers are not
 versioned.
 
+`dka_transitions_6h_mimiciv_full_v31_icd.parquet` is local-only and ignored by
+git. It is the credentialed MIMIC-IV v3.1 ICD-supported, lab-defined DKA
+transition cohort used for full-scale factual proxy testing. Committed aggregate
+reports include `mimiciv_full_v31_icd_dka_transition_report.json`,
+`mimiciv_full_v31_icd_v5_evaluation.json`,
+`mimiciv_full_v31_icd_presentation_only_evaluation.json`,
+`mimiciv_full_v31_icd_per_target_ensemble.json`,
+`mimiciv_full_v31_icd_treatment_recovery_audit.json`, and
+`mimiciv_full_v31_icd_symbolic_real_test_v5.json`. These reports contain
+cohort-level counts and metrics only; raw rows, timestamps, and patient
+identifiers are not versioned. The patient-held-out per-target ensemble beats
+persistence on active-DKA factual proxy MAE, but this remains observational and
+does not permit causal, counterfactual, clinical, checkpoint-promotion, or
+active-rule-promotion claims.
+
 `mimiciii_dka_transitions_6h_demo.parquet` is local-only and ignored by git. It
 is the observed-treatment MIMIC-III demo lab-defined DKA-like transition cohort
 used for schema and factual proxy smoke testing. Committed aggregate reports

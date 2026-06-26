@@ -1,9 +1,9 @@
-"""Falsify DKABody treatment-recovery dynamics against observed eICU windows.
+"""Falsify DKABody treatment-recovery dynamics against observed cohort windows.
 
 The audit keeps two judges separate:
 
 1. Fixed clinical priors define broad physiologic boundaries.
-2. eICU provides an observational external check of direction and magnitude.
+2. Observed ICU cohorts provide external direction and magnitude checks.
 
 The script never fits simulator parameters. A runtime change is justified only
 when a sourced boundary and external falsification identify the same mechanism.
@@ -362,7 +362,7 @@ def death_coverage_summary(frame: pd.DataFrame):
         "interpretation": (
             "Deaths with presence evidence but no numeric dose are explicitly "
             "coverage-limited. No-evidence deaths may still reflect missing "
-            "capture, but the demo cannot prove treatment occurred."
+            "capture, but this observational cohort cannot prove treatment occurred."
         ),
     }
 
@@ -502,7 +502,7 @@ def main():
         },
         "sourced_boundary_checks": {
             "reference_protocol": reference_protocol_boundary(),
-            "eicu_protocol_dose_response": eicu_protocol_dose_response(active),
+            "observed_protocol_dose_response": eicu_protocol_dose_response(active),
         },
     }
     report["decision"] = decision(report)

@@ -325,6 +325,57 @@ python train_intervention_jepa.py \
 The full-budget transfer candidate was tested and rejected for runtime
 promotion; see `dka_v5_vs_physionet_transfer_comparison.json`.
 
+### MIMIC-IV full v3.1 ICD-supported DKA cohort
+
+The credentialed local MIMIC-IV v3.1 files can now be mapped into the same
+observed-treatment DKA transition contract. The full-data extractor first finds
+lab co-occurring DKA onset in DuckDB SQL, then pulls measurements and treatments
+only for the DKA stays. For the promotion-facing cohort, require ICD support:
+
+```bash
+python dka_transition_extract.py \
+  --mimic-dir /Users/chunyouchang/Downloads/mimic-iv-3.1 \
+  --require-icd-support \
+  --out dka_transitions_6h_mimiciv_full_v31_icd.parquet \
+  --cohort-report mimiciv_full_v31_icd_dka_transition_report.json
+
+python evaluate_dka_mimic.py \
+  --checkpoint dka_symbolic_jepa_v5.pt \
+  --mimic dka_transitions_6h_mimiciv_full_v31_icd.parquet \
+  --output mimiciv_full_v31_icd_v5_evaluation.json
+
+python evaluate_dka_mimic.py \
+  --checkpoint dka_physionet_presentation_only_candidate.pt \
+  --mimic dka_transitions_6h_mimiciv_full_v31_icd.parquet \
+  --output mimiciv_full_v31_icd_presentation_only_evaluation.json
+
+python eicu_dka_per_target_ensemble.py \
+  --cohort dka_transitions_6h_mimiciv_full_v31_icd.parquet \
+  --v5-checkpoint dka_symbolic_jepa_v5.pt \
+  --presentation-checkpoint dka_physionet_presentation_only_candidate.pt \
+  --output mimiciv_full_v31_icd_per_target_ensemble.json \
+  --min-pairs 50 \
+  --min-stays 20
+
+python dka_treatment_recovery_audit.py \
+  --cohort dka_transitions_6h_mimiciv_full_v31_icd.parquet \
+  --output mimiciv_full_v31_icd_treatment_recovery_audit.json
+
+python symbolic_real_test.py \
+  --checkpoint dka_symbolic_jepa_v5.pt \
+  --mimic dka_transitions_6h_mimiciv_full_v31_icd.parquet \
+  --output mimiciv_full_v31_icd_symbolic_real_test_v5.json
+```
+
+The first ICD-supported run produced 755 subjects, 1,010 ICU stays, and 10,785
+six-hour transitions. The patient-held-out per-target ensemble is the first
+robust full MIMIC result to beat persistence: active-DKA normalized MAE improves
+from `0.390721` to `0.369611`, with bootstrap delta `-0.027072` and 95% CI
+`[-0.036244, -0.018760]`. The signal is driven by glucose and anion gap. This is
+still a factual observed-treatment proxy, not counterfactual or causal
+validation, and it does not promote any checkpoint or active rule. See
+`MIMICIV_FULL_V31_DKA_FINDINGS.md`.
+
 ### MIMIC-III demo observed-treatment DKA-like schema test
 
 The PhysioNet MIMIC-III Clinical Database Demo v1.4 can also be mapped into the

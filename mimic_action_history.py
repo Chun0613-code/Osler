@@ -161,9 +161,9 @@ def canonical_amount(action, amount, uom, label, duration_hours=None,
     elif action in ("kcl", "bicarbonate"):
         if "mmol" in unit or "meq" in unit or unit == "":
             return amount
-        # MIMIC item 227533 is sodium bicarbonate 8.4% (1 mEq/mL).
+        # MIMIC 8.4% sodium bicarbonate items are approximately 1 mEq/mL.
         # KCl bolus carrier volume is deliberately not converted to mEq.
-        if action == "bicarbonate" and _integer(itemid) == 227533 and "ml" in unit:
+        if action == "bicarbonate" and _integer(itemid) in (220995, 227533) and "ml" in unit:
             return amount
     elif action == "dextrose":
         if unit in ("g", "gram", "grams") or "gm" in unit:
