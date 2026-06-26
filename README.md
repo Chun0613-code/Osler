@@ -369,6 +369,11 @@ python dka_causal_evaluation.py \
   dka_transitions_6h_mimiciv_full_v31_icd.parquet \
   --output mimiciv_full_v31_icd_causal_diagnostics.json
 
+python mimiciv_full_v31_greybox_realfit.py \
+  --cohort dka_transitions_6h_mimiciv_full_v31_icd.parquet \
+  --output mimiciv_full_v31_icd_greybox_realfit.json \
+  --seeds 7,19,37
+
 python symbolic_real_test.py \
   --checkpoint dka_symbolic_jepa_v5.pt \
   --mimic dka_transitions_6h_mimiciv_full_v31_icd.parquet \
@@ -384,7 +389,13 @@ stable across seven random patient-held-out split seeds and an early/late
 time-order split. Causal diagnostics are now runnable but still fail promotion
 readiness because of overlap, concomitant-treatment, and matched-balance
 failures. This is still a factual observed-treatment proxy, not counterfactual
-or causal validation, and it does not promote any checkpoint or active rule. See
+or causal validation, and it does not promote any checkpoint or active rule.
+
+The first real-patient grey-box residual fit is also aggregate-only and
+patient-held-out. It learns strong target-specific active-DKA signals for glucose
+and ketone/anion-gap proxy, but it does not beat persistence as a whole-state
+residual model because sodium and creatinine regress. No residual artifact is
+promoted; the safe follow-up is target-gated candidate testing. See
 `MIMICIV_FULL_V31_DKA_FINDINGS.md`.
 
 ### MIMIC-III demo observed-treatment DKA-like schema test

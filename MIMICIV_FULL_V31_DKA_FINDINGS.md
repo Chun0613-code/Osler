@@ -121,6 +121,43 @@ Conclusion: the full MIMIC cohort opens the factual prediction gate, but not the
 causal gate. The next modeling branch should prioritize real-data factual
 training/fine-tuning unless a stricter causal design is added.
 
+## Real-Data Grey-Box Residual Fit
+
+`mimiciv_full_v31_greybox_realfit.py` tests the first real-patient residual
+training path. It fits the small constrained grey-box residual on full MIMIC-IV
+DKA transitions with grouped patient-stay cross-fitting and writes aggregate
+metrics only. The residual can only change `G`, ketone proxy, `HCO3`, serum
+potassium, sodium, and creatinine rates. DKABody still owns total-body
+potassium, volume, insulin depots, dose balance, osmotic injury, and critical
+burdens.
+
+The 3-seed cross-fit used 5,899 examples across 985 stays. Result:
+
+- raw DKABody mechanism loses persistence overall: active-DKA stay-level delta
+  `+0.122078`
+- grey-box residual improves the active-DKA point estimate in 3/3 seeds, but
+  remains non-significant overall: median active-DKA stay-level delta
+  `-0.008810`, with all seed CIs crossing zero
+- all-window residual performance still loses persistence: median delta
+  `+0.038122`
+
+The useful signal is target-specific:
+
+- active-DKA glucose is significant in 3/3 seeds; point deltas are about
+  `-0.236` to `-0.239`
+- active-DKA ketone/anion-gap proxy is significant in 3/3 seeds; point deltas
+  are about `-0.130` to `-0.133`
+- active-DKA bicarbonate and serum potassium only show small, non-significant
+  point improvements
+- sodium and creatinine regress versus persistence and must not be handed to the
+  residual blindly
+
+Conclusion: real-patient residual fitting does learn a real glucose and
+anion-gap recovery signal, but it is not a whole-state replacement for
+persistence or for the validated per-target ensemble. No candidate artifact was
+written, and no checkpoint was promoted. The next safe use is a target-gated
+candidate experiment, not runtime replacement.
+
 ## Treatment-Recovery Audit
 
 The DKABody treatment-recovery audit found:
@@ -170,4 +207,5 @@ git. The versioned artifacts are aggregate-only reports:
 - `mimiciv_full_v31_icd_robustness.json`
 - `mimiciv_full_v31_icd_treatment_recovery_audit.json`
 - `mimiciv_full_v31_icd_causal_diagnostics.json`
+- `mimiciv_full_v31_icd_greybox_realfit.json`
 - `mimiciv_full_v31_icd_symbolic_real_test_v5.json`

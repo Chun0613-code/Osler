@@ -52,15 +52,19 @@ reports include `mimiciv_full_v31_icd_dka_transition_report.json`,
 `mimiciv_full_v31_icd_per_target_ensemble.json`,
 `mimiciv_full_v31_icd_robustness.json`,
 `mimiciv_full_v31_icd_treatment_recovery_audit.json`,
-`mimiciv_full_v31_icd_causal_diagnostics.json`, and
+`mimiciv_full_v31_icd_causal_diagnostics.json`,
+`mimiciv_full_v31_icd_greybox_realfit.json`, and
 `mimiciv_full_v31_icd_symbolic_real_test_v5.json`. These reports contain
 cohort-level counts and metrics only; raw rows, timestamps, and patient
 identifiers are not versioned. The patient-held-out per-target ensemble beats
 persistence on active-DKA factual proxy MAE and remains significant across seven
 random patient split seeds and a time-order split, but this remains
-observational. Causal diagnostics are runnable but fail readiness gates; these
+observational. The real-patient grey-box residual fit learns target-specific
+glucose and ketone/anion-gap recovery signal, but it is not promoted as a
+whole-state residual model because sodium and creatinine regress versus
+persistence. Causal diagnostics are runnable but fail readiness gates; these
 artifacts do not permit causal, counterfactual, clinical, checkpoint-promotion,
-or active-rule-promotion claims.
+residual-artifact-promotion, or active-rule-promotion claims.
 
 `mimiciii_dka_transitions_6h_demo.parquet` is local-only and ignored by git. It
 is the observed-treatment MIMIC-III demo lab-defined DKA-like transition cohort
