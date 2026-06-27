@@ -20,9 +20,9 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from aki_mechanism import predict_aki_mechanism
 from eicu_aki_transition_extract import ACTION_KEYS, TARGET_VARS
 from eicu_sepsis_target_router import (
-    METHODS,
     _bootstrap_ci,
     _feature_columns,
     _fit_population_delta,
@@ -35,6 +35,7 @@ from eicu_sepsis_target_router import (
 
 
 ACTIVE_COLUMN = "aki_active_t"
+AKI_METHODS = ("persistence", "population_delta", "ridge_realfit", "renal_mechanism")
 
 
 def _target_pairs(frame: pd.DataFrame, target: str) -> pd.DataFrame:
@@ -90,6 +91,7 @@ def _build_base_rows(frame: pd.DataFrame, scales: dict[str, float]) -> pd.DataFr
             "persistence": selected[current].to_numpy(dtype=np.float64),
             "population_delta": np.full(len(selected), np.nan, dtype=np.float64),
             "ridge_realfit": np.full(len(selected), np.nan, dtype=np.float64),
+            "renal_mechanism": np.full(len(selected), np.nan, dtype=np.float64),
         })
         parts.append(part)
     return pd.concat(parts, ignore_index=True) if parts else pd.DataFrame()
@@ -146,6 +148,7 @@ def attach_sources(
             "persistence": "current observed value",
             "population_delta": "discovery-only mean target delta",
             "ridge_realfit": "small linear residual model fit on discovery patients",
+            "renal_mechanism": "narrow sourced-prior AKI mechanism for creatinine/BUN only; no fitted coefficients",
         },
     }
     for target in TARGET_VARS:
@@ -191,6 +194,13 @@ def attach_sources(
             target,
             "ridge_realfit",
             combined_ridge.reindex(combined_frame.index).to_numpy(dtype=np.float64),
+        )
+        _assign_predictions(
+            rows,
+            combined_frame,
+            target,
+            "renal_mechanism",
+            predict_aki_mechanism(combined_frame, target),
         )
     return rows, diagnostics
 
@@ -286,7 +296,7 @@ def _choose_selector(
     for target_index, target in enumerate(TARGET_VARS):
         target_rows = scoped[scoped["target"] == target].copy()
         target_details = {}
-        for method_index, method in enumerate(METHODS):
+        for method_index, method in enumerate(AKI_METHODS):
             target_details[method] = _method_stats(
                 target_rows,
                 method,
@@ -295,7 +305,7 @@ def _choose_selector(
                 normalized=False,
             )
         candidates = {}
-        for method in METHODS:
+        for method in AKI_METHODS:
             if method == "persistence":
                 continue
             stats = target_details[method]
@@ -329,7 +339,7 @@ def _router_predictions(rows: pd.DataFrame, selector: dict[str, str]) -> np.ndar
         return np.asarray([], dtype=np.float64)
     selected = rows["target"].map(selector).fillna("persistence").to_numpy()
     predictions = rows["persistence"].to_numpy(dtype=np.float64).copy()
-    for method in METHODS:
+    for method in AKI_METHODS:
         method_mask = selected == method
         if method == "persistence" or not method_mask.any():
             continue
@@ -386,7 +396,7 @@ def _router_delta_summary(rows: pd.DataFrame, selector: dict[str, str], seed: in
 
 
 def _fixed_methods_summary(rows: pd.DataFrame, normalized: bool) -> dict[str, float | None]:
-    return {method: _round(_mae(rows, method, normalized=normalized)) for method in METHODS}
+    return {method: _round(_mae(rows, method, normalized=normalized)) for method in AKI_METHODS}
 
 
 def _scope_summary(rows: pd.DataFrame, selector: dict[str, str], active_only: bool, seed: int, samples: int) -> dict[str, object]:
@@ -630,6 +640,7 @@ def main() -> None:
             "persistence": "current observed value",
             "population_delta": "discovery-only mean target delta; discovery selection uses inner OOF predictions",
             "ridge_realfit": "small discovery-only ridge residual; discovery selection uses inner OOF predictions",
+            "renal_mechanism": "candidate-only AKI mechanism source for creatinine/BUN; no cohort-fitted coefficients",
         },
         "selector_gate": {
             "scope": "discovery active-AKI rows",

@@ -118,6 +118,9 @@ AKI:
 - `eicu_aki_transition_report.json`
 - `eicu_aki_target_router.json`
 - `EICU_AKI_ROUTER_FINDINGS.md`
+- `aki_mechanism.py`
+- `eicu_aki_mechanism_target_router.json`
+- `AKI_MECHANISM_CANDIDATE_FINDINGS.md`
 
 - 43,748 evaluable stays
 - 37,119 subjects
@@ -129,6 +132,8 @@ AKI:
 - creatinine, BUN -> persistence
 - urine output -> mostly persistence
 - bicarbonate, MAP, potassium, sodium -> ridge realfit
+- renal mechanism candidate -> rejected; it did not robustly improve
+  creatinine/BUN over persistence in the 6-hour factual window
 
 It does not open Chapter A.  Antibiotic, fluid, ventilation, vasopressor, and
 renal-replacement causal claims remain closed.  AKI diuretic, nephrotoxin,
@@ -139,11 +144,13 @@ fluid, vasopressor, and renal-replacement causal claims also remain closed.
 This A/B contract contains no patient rows or identifiers. It is a build
 contract, not a clinical product claim.
 
-The immediate next engineering step for B is to choose the next disease module
-after sepsis and AKI.  Asthma/respiratory exacerbation is the next named
-template, but its peak-flow and work-of-breathing targets may need data beyond
-ICU EHR.  A safer near-term alternative is to deepen the renal-fluid/electrolyte
-module with a mechanistic belief layer now that AKI has a validated factual
-router.  The immediate next external-data step for A is unchanged: obtain or map
-a randomized or otherwise externally identified treatment dataset into the
-causal-readiness contract.
+The immediate next engineering step for B is no longer to add a fourth broad
+router by default.  Three diseases already validate the factual-router pattern.
+The AKI renal mechanism audit shows that the first simple mechanism candidate is
+not enough for slow creatinine/BUN targets.  The next deeper renal step should
+use a longer horizon, a patient-specific renal reserve/GFR belief state, or
+richer RRT and fluid-balance observability.  Asthma/respiratory exacerbation
+remains a named template, but its peak-flow and work-of-breathing targets may
+need data beyond ICU EHR.  The immediate next external-data step for A is
+unchanged: obtain or map a randomized or otherwise externally identified
+treatment dataset into the causal-readiness contract.

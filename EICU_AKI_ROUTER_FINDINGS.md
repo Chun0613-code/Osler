@@ -104,6 +104,38 @@ This is consistent with the earlier DKA/sepsis lesson: the stable architecture
 is not a single monolithic model, but a per-target router that lets unsupported
 targets refuse to move.
 
+## Mechanism Candidate Audit
+
+After the validated factual router, a narrow renal mechanism source was tested
+for the slow targets where the router fell back to persistence.
+
+Candidate:
+
+- file: `aki_mechanism.py`
+- source name: `renal_mechanism`
+- supported targets: creatinine and BUN only
+- design: transparent renal stress proxy, no fitted cohort coefficients
+
+Result:
+
+- baseline active-AKI median normalized delta: -0.044771
+- with `renal_mechanism`: -0.044744
+- baseline all-window median normalized delta: -0.041323
+- with `renal_mechanism`: -0.041212
+- creatinine selected `persistence` in 7/7 random patient splits
+- BUN selected `persistence` in 6/7 random patient splits and
+  `renal_mechanism` in 1/7, but that held-out BUN result was worse than
+  persistence
+- hospital-held-out creatinine and BUN both selected `persistence`
+
+Conclusion:
+
+`renal_mechanism` is rejected as a source candidate. The negative result is
+informative: a simple 6-hour renal accumulation prior does not beat persistence
+on slow creatinine/BUN targets. The next mechanism attempt should require a
+longer horizon, a patient-specific renal reserve/GFR belief state, or richer RRT
+and fluid-balance observability.
+
 ## Boundary
 
 - No row-level predictions are committed.

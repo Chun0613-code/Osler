@@ -100,6 +100,46 @@
           "significant": true
         },
         "hospitals": 204,
+        "mechanism_candidate": {
+          "boundary": {
+            "causal_claim_allowed": false,
+            "checkpoint_promotion_allowed": false,
+            "clinical_claim_allowed": false,
+            "counterfactual_claim_allowed": false
+          },
+          "candidate_source": "renal_mechanism",
+          "date": "2026-06-27",
+          "files": [
+            "aki_mechanism.py",
+            "eicu_aki_mechanism_target_router.json",
+            "AKI_MECHANISM_CANDIDATE_FINDINGS.md"
+          ],
+          "hospital_holdout": {
+            "bun_mae": {
+              "persistence": 5.558835,
+              "renal_mechanism": 5.614559
+            },
+            "creatinine_mae": {
+              "persistence": 0.405716,
+              "renal_mechanism": 0.410854
+            }
+          },
+          "interpretation": "A simple 6-hour renal accumulation prior does not robustly beat persistence for slow creatinine/BUN targets.",
+          "random_patient_splits": {
+            "active_aki_median_delta_with_candidate": -0.044744,
+            "all_window_median_delta_with_candidate": -0.041212,
+            "selected_counts": {
+              "bun": {
+                "persistence": 6,
+                "renal_mechanism": 1
+              },
+              "creatinine": {
+                "persistence": 7
+              }
+            }
+          },
+          "status": "rejected_candidate"
+        },
         "random_patient_splits": {
           "active_aki_beats_persistence": 7,
           "active_aki_significant": 7,
@@ -161,7 +201,7 @@
         "transitions": 422244
       }
     },
-    "next_engineering_step": "choose next disease after sepsis and AKI; asthma is the named template, while renal-fluid/electrolyte mechanism deepening is the safer adjacent path",
+    "next_engineering_step": "three diseases now validate the factual-router pattern; the first simple AKI renal mechanism candidate was rejected, so deeper renal work should use longer horizons, renal reserve/GFR belief states, or richer RRT and fluid-balance observability",
     "promotion_sequence": [
       "define disease cohort and target/action contract",
       "build observed-treatment transitions with masks and ages",
