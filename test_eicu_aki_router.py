@@ -4,6 +4,7 @@ import pandas as pd
 
 from aki_mechanism import predict_aki_mechanism
 from eicu_aki_transition_extract import classify_aki_action
+from eicu_sepsis_target_router import _feature_columns
 
 
 class EicuAkiRouterTests(unittest.TestCase):
@@ -57,6 +58,23 @@ class EicuAkiRouterTests(unittest.TestCase):
 
         self.assertLess(creatinine[0], frame.loc[0, "creatinine_t"])
         self.assertLess(bun[0], frame.loc[0, "bun_t"])
+
+    def test_feature_columns_exclude_long_horizon_future_targets(self):
+        frame = pd.DataFrame({
+            "creatinine_t": [1.2, 1.3],
+            "creatinine_tp24": [1.8, 1.9],
+            "bun_tp48": [60.0, 62.0],
+            "map_age_hr": [1.0, 2.0],
+            "act_fluids": [0, 1],
+        })
+
+        features = _feature_columns(frame)
+
+        self.assertIn("creatinine_t", features)
+        self.assertIn("map_age_hr", features)
+        self.assertIn("act_fluids", features)
+        self.assertNotIn("creatinine_tp24", features)
+        self.assertNotIn("bun_tp48", features)
 
 
 if __name__ == "__main__":

@@ -25,6 +25,7 @@ Implemented now:
 - `osler_jepa/causal_readiness.py`
 - `next_chapter_ab.py`
 - `next_chapter_ab_contract.json`
+- `CHAPTER_A_CAUSAL_READINESS_FINDINGS.md`
 
 The causal gate accepts only explicit external identification evidence:
 
@@ -36,6 +37,7 @@ Current status is fail-closed:
 
 - Vivli: candidate source, not in workspace
 - YODA: candidate source, not in workspace
+- BioLINCC: candidate source, not in workspace
 - observational EHR: available for factual forecasting and negative confounding
   diagnostics only
 
@@ -147,10 +149,13 @@ contract, not a clinical product claim.
 The immediate next engineering step for B is no longer to add a fourth broad
 router by default.  Three diseases already validate the factual-router pattern.
 The AKI renal mechanism audit shows that the first simple mechanism candidate is
-not enough for slow creatinine/BUN targets.  The next deeper renal step should
-use a longer horizon, a patient-specific renal reserve/GFR belief state, or
-richer RRT and fluid-balance observability.  Asthma/respiratory exacerbation
-remains a named template, but its peak-flow and work-of-breathing targets may
-need data beyond ICU EHR.  The immediate next external-data step for A is
-unchanged: obtain or map a randomized or otherwise externally identified
-treatment dataset into the causal-readiness contract.
+not enough for slow creatinine/BUN targets at 6 hours.  The long-horizon AKI
+audit answers the next question: at 24-48 hours, creatinine and BUN move from
+persistence to `ridge_realfit` in 7/7 patient splits and also pass
+hospital-heldout evaluation.  The next deeper renal step should therefore use
+the 24-48h setting, a patient-specific renal reserve/GFR belief state, and richer
+RRT/fluid-balance observability.  Asthma/respiratory exacerbation remains a
+named template, but its peak-flow and work-of-breathing targets may need data
+beyond ICU EHR.  The immediate next external-data step for A is unchanged:
+obtain or map a randomized or otherwise externally identified treatment dataset
+into the causal-readiness contract.

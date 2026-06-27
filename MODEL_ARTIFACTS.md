@@ -77,6 +77,20 @@ mapped into `osler_jepa/causal_readiness.py`, and that multi-disease expansion
 should reuse the disease-specific target-router template in
 `osler_jepa/disease_router.py`.
 
+Full eICU sepsis and AKI router artifacts follow the same aggregate/report
+boundary. Local transition parquet cohorts, including
+`eicu_aki_transitions_6h.parquet`, `eicu_aki_transitions_24h.parquet`,
+`eicu_aki_transitions_48h.parquet`, and `eicu_sepsis_transitions_6h.parquet`,
+are row-level research cohorts and are not versioned. Committed aggregate AKI
+reports include `eicu_aki_transition_report.json`,
+`eicu_aki_target_router.json`, `eicu_aki_mechanism_target_router.json`,
+`eicu_aki_transition_report_24h.json`, `eicu_aki_target_router_24h.json`,
+`eicu_aki_transition_report_48h.json`, and
+`eicu_aki_target_router_48h.json`. The 24h/48h AKI reports show that
+creatinine and BUN fall back to persistence at 6h but select `ridge_realfit` in
+7/7 patient splits at both 24h and 48h. These artifacts remain factual,
+observational, and non-clinical.
+
 `mimiciii_dka_transitions_6h_demo.parquet` is local-only and ignored by git. It
 is the observed-treatment MIMIC-III demo lab-defined DKA-like transition cohort
 used for schema and factual proxy smoke testing. Committed aggregate reports

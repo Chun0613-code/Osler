@@ -114,6 +114,10 @@ def _feature_columns(frame: pd.DataFrame, target: str | None = None) -> list[str
             "unittype",
         }:
             continue
+        if "_tp" in column:
+            future_suffix = column.rsplit("_tp", 1)[-1]
+            if future_suffix.replace(".", "", 1).isdigit():
+                continue
         if column.endswith("_tp6"):
             continue
         if column.endswith("_t") or column.endswith("_age_hr"):

@@ -25,9 +25,8 @@ from eicu_aki_transition_extract import ACTION_KEYS, TARGET_VARS
 from eicu_sepsis_target_router import (
     _bootstrap_ci,
     _feature_columns,
-    _fit_population_delta,
-    _fit_ridge,
     _group_folds,
+    _prepare_features,
     _round,
     _subject_column,
     split_subjects,
@@ -36,18 +35,23 @@ from eicu_sepsis_target_router import (
 
 ACTIVE_COLUMN = "aki_active_t"
 AKI_METHODS = ("persistence", "population_delta", "ridge_realfit", "renal_mechanism")
+DEFAULT_FUTURE_SUFFIX = "tp6"
 
 
-def _target_pairs(frame: pd.DataFrame, target: str) -> pd.DataFrame:
+def _future_column(target: str, future_suffix: str) -> str:
+    return f"{target}_{future_suffix}"
+
+
+def _target_pairs(frame: pd.DataFrame, target: str, future_suffix: str = DEFAULT_FUTURE_SUFFIX) -> pd.DataFrame:
     current = f"{target}_t"
-    future = f"{target}_tp6"
+    future = _future_column(target, future_suffix)
     if current not in frame or future not in frame:
         return frame.iloc[0:0].copy()
     return frame[frame[current].notna() & frame[future].notna()].copy()
 
 
-def _target_scale(discovery: pd.DataFrame, target: str) -> float:
-    future = pd.to_numeric(discovery[f"{target}_tp6"], errors="coerce")
+def _target_scale(discovery: pd.DataFrame, target: str, future_suffix: str = DEFAULT_FUTURE_SUFFIX) -> float:
+    future = pd.to_numeric(discovery[_future_column(target, future_suffix)], errors="coerce")
     std = float(future.std(skipna=True))
     if not np.isfinite(std) or std < 1e-6:
         current = pd.to_numeric(discovery[f"{target}_t"], errors="coerce")
@@ -55,11 +59,15 @@ def _target_scale(discovery: pd.DataFrame, target: str) -> float:
     return max(std, 1.0) if np.isfinite(std) else 1.0
 
 
-def _build_base_rows(frame: pd.DataFrame, scales: dict[str, float]) -> pd.DataFrame:
+def _build_base_rows(
+    frame: pd.DataFrame,
+    scales: dict[str, float],
+    future_suffix: str = DEFAULT_FUTURE_SUFFIX,
+) -> pd.DataFrame:
     parts = []
     for target in TARGET_VARS:
         current = f"{target}_t"
-        future = f"{target}_tp6"
+        future = _future_column(target, future_suffix)
         if current not in frame or future not in frame:
             continue
         selected = frame[frame[current].notna() & frame[future].notna()].copy()
@@ -97,6 +105,55 @@ def _build_base_rows(frame: pd.DataFrame, scales: dict[str, float]) -> pd.DataFr
     return pd.concat(parts, ignore_index=True) if parts else pd.DataFrame()
 
 
+def _fit_ridge_future(
+    train: pd.DataFrame,
+    predict: pd.DataFrame,
+    target: str,
+    feature_columns: list[str],
+    alpha: float,
+    future_suffix: str,
+) -> np.ndarray:
+    current = f"{target}_t"
+    future = _future_column(target, future_suffix)
+    usable = train[train[current].notna() & train[future].notna()].copy()
+    if len(usable) < max(20, len(feature_columns) + 2):
+        return np.full(len(predict), np.nan, dtype=np.float64)
+    x_train, x_predict = _prepare_features(usable, predict, feature_columns)
+    y = (
+        usable[future].to_numpy(dtype=np.float64)
+        - usable[current].to_numpy(dtype=np.float64)
+    )
+    x_train = np.c_[np.ones(len(x_train)), x_train]
+    x_predict = np.c_[np.ones(len(x_predict)), x_predict]
+    penalty = np.eye(x_train.shape[1], dtype=np.float64) * float(alpha)
+    penalty[0, 0] = 0.0
+    try:
+        beta = np.linalg.solve(x_train.T @ x_train + penalty, x_train.T @ y)
+    except np.linalg.LinAlgError:
+        beta = np.linalg.pinv(x_train.T @ x_train + penalty) @ x_train.T @ y
+    delta = x_predict @ beta
+    return predict[current].to_numpy(dtype=np.float64) + delta
+
+
+def _fit_population_delta_future(
+    train: pd.DataFrame,
+    predict: pd.DataFrame,
+    target: str,
+    future_suffix: str,
+) -> np.ndarray:
+    current = f"{target}_t"
+    future = _future_column(target, future_suffix)
+    usable = train[train[current].notna() & train[future].notna()]
+    if usable.empty:
+        return np.full(len(predict), np.nan, dtype=np.float64)
+    delta = (
+        usable[future].to_numpy(dtype=np.float64)
+        - usable[current].to_numpy(dtype=np.float64)
+    )
+    mean_delta = float(np.nanmean(delta))
+    return predict[current].to_numpy(dtype=np.float64) + mean_delta
+
+
 def _assign_predictions(
     rows: pd.DataFrame,
     frame: pd.DataFrame,
@@ -122,15 +179,16 @@ def attach_sources(
     inner_folds: int,
     ridge_alpha: float,
     group_column: str | None = None,
+    future_suffix: str = DEFAULT_FUTURE_SUFFIX,
 ) -> tuple[pd.DataFrame, dict[str, object]]:
     group_column = group_column or _subject_column(frame)
     discovery = frame[frame[group_column].isin(discovery_groups)].copy()
     heldout = frame[frame[group_column].isin(heldout_groups)].copy()
     scales = {
-        target: _target_scale(_target_pairs(discovery, target), target)
+        target: _target_scale(_target_pairs(discovery, target, future_suffix), target, future_suffix)
         for target in TARGET_VARS
     }
-    rows = _build_base_rows(pd.concat([discovery, heldout], axis=0), scales)
+    rows = _build_base_rows(pd.concat([discovery, heldout], axis=0), scales, future_suffix=future_suffix)
     features_by_target = {
         target: _feature_columns(frame, target)
         for target in TARGET_VARS
@@ -144,6 +202,7 @@ def attach_sources(
         },
         "inner_oof_folds": int(len(folds)),
         "ridge_alpha": float(ridge_alpha),
+        "future_suffix": future_suffix,
         "sources": {
             "persistence": "current observed value",
             "population_delta": "discovery-only mean target delta",
@@ -153,7 +212,7 @@ def attach_sources(
     }
     for target in TARGET_VARS:
         current = f"{target}_t"
-        future = f"{target}_tp6"
+        future = _future_column(target, future_suffix)
         if current not in frame or future not in frame:
             continue
         features = features_by_target[target]
@@ -165,13 +224,13 @@ def attach_sources(
             train_fold = discovery.iloc[train_local]
             validation_fold = discovery.iloc[validation_local]
             discovery_predictions["population_delta"].loc[validation_fold.index] = (
-                _fit_population_delta(train_fold, validation_fold, target)
+                _fit_population_delta_future(train_fold, validation_fold, target, future_suffix)
             )
             discovery_predictions["ridge_realfit"].loc[validation_fold.index] = (
-                _fit_ridge(train_fold, validation_fold, target, features, ridge_alpha)
+                _fit_ridge_future(train_fold, validation_fold, target, features, ridge_alpha, future_suffix)
             )
-        heldout_population = _fit_population_delta(discovery, heldout, target)
-        heldout_ridge = _fit_ridge(discovery, heldout, target, features, ridge_alpha)
+        heldout_population = _fit_population_delta_future(discovery, heldout, target, future_suffix)
+        heldout_ridge = _fit_ridge_future(discovery, heldout, target, features, ridge_alpha, future_suffix)
         combined_frame = pd.concat([discovery, heldout], axis=0).sort_index()
         combined_population = pd.concat([
             discovery_predictions["population_delta"],
@@ -454,6 +513,7 @@ def _split_report(
     inner_folds: int,
     ridge_alpha: float,
     group_column: str | None = None,
+    future_suffix: str = DEFAULT_FUTURE_SUFFIX,
 ) -> dict[str, object]:
     group_column = group_column or _subject_column(frame)
     rows, source_diagnostics = attach_sources(
@@ -464,6 +524,7 @@ def _split_report(
         inner_folds=inner_folds,
         ridge_alpha=ridge_alpha,
         group_column=group_column,
+        future_suffix=future_suffix,
     )
     discovery = rows[rows[group_column].isin(discovery_groups)].copy()
     heldout = rows[rows[group_column].isin(heldout_groups)].copy()
@@ -540,7 +601,7 @@ def _multi_seed_summary(reports: list[dict[str, object]]) -> dict[str, object]:
     }
 
 
-def _cohort_summary(frame: pd.DataFrame) -> dict[str, object]:
+def _cohort_summary(frame: pd.DataFrame, future_suffix: str = DEFAULT_FUTURE_SUFFIX) -> dict[str, object]:
     summary = {
         "rows": int(len(frame)),
         "subjects": int(frame["subject_id"].nunique()) if "subject_id" in frame else None,
@@ -550,7 +611,7 @@ def _cohort_summary(frame: pd.DataFrame) -> dict[str, object]:
     }
     for target in TARGET_VARS:
         current = f"{target}_t"
-        future = f"{target}_tp6"
+        future = _future_column(target, future_suffix)
         if current in frame and future in frame:
             summary[f"{target}_pairs"] = int((frame[current].notna() & frame[future].notna()).sum())
     return summary
@@ -565,6 +626,7 @@ def _hospital_holdout_report(
     bootstrap_samples: int,
     inner_folds: int,
     ridge_alpha: float,
+    future_suffix: str = DEFAULT_FUTURE_SUFFIX,
 ) -> dict[str, object]:
     if "hospitalid" not in frame or frame["hospitalid"].nunique() < 3:
         return {"available": False, "reason": "cohort has fewer than three hospitals"}
@@ -583,6 +645,7 @@ def _hospital_holdout_report(
             inner_folds=inner_folds,
             ridge_alpha=ridge_alpha,
             group_column="hospitalid",
+            future_suffix=future_suffix,
         ),
     }
 
@@ -598,6 +661,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--bootstrap-samples", type=int, default=1000)
     parser.add_argument("--inner-folds", type=int, default=3)
     parser.add_argument("--ridge-alpha", type=float, default=10.0)
+    parser.add_argument("--future-suffix", default=DEFAULT_FUTURE_SUFFIX)
     return parser.parse_args()
 
 
@@ -618,6 +682,7 @@ def main() -> None:
             bootstrap_samples=args.bootstrap_samples,
             inner_folds=args.inner_folds,
             ridge_alpha=args.ridge_alpha,
+            future_suffix=args.future_suffix,
         ))
 
     hospital = _hospital_holdout_report(
@@ -629,11 +694,13 @@ def main() -> None:
         bootstrap_samples=args.bootstrap_samples,
         inner_folds=args.inner_folds,
         ridge_alpha=args.ridge_alpha,
+        future_suffix=args.future_suffix,
     )
     report = {
         "experiment": "Full eICU AKI nested factual target router",
         "cohort": Path(args.cohort).name,
-        "cohort_summary": _cohort_summary(frame),
+        "future_suffix": args.future_suffix,
+        "cohort_summary": _cohort_summary(frame, future_suffix=args.future_suffix),
         "targets": TARGET_VARS,
         "action_channels": ACTION_KEYS,
         "sources": {

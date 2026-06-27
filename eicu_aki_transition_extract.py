@@ -103,6 +103,17 @@ ACTION_EVIDENCE_COLUMNS = [
     "original_label",
 ]
 
+
+def horizon_suffix(horizon_hours: float) -> str:
+    value = float(horizon_hours)
+    if value.is_integer():
+        return f"tp{int(value)}"
+    return "tp" + str(value).replace(".", "p")
+
+
+def future_column(var: str, horizon_hours: float) -> str:
+    return f"{var}_{horizon_suffix(horizon_hours)}"
+
 FLUID_TERMS = (
     "normal saline",
     "sodium chloride",
@@ -447,6 +458,7 @@ def build_anchors(
     aki_stays: dict[int, dict[str, object]],
     measurements: pd.DataFrame,
     meta: pd.DataFrame,
+    horizon_hours: float = DELTA_H,
 ) -> pd.DataFrame:
     if measurements.empty:
         return pd.DataFrame()
@@ -458,9 +470,9 @@ def build_anchors(
         anchor = max(0.0, float(payload["anchor_hour"]))
         discharge = meta.loc[stay_id, "unitdischarge_hr"] if stay_id in meta.index else np.nan
         observed_last = float(max_observed[stay_id])
-        last = min(anchor + EPISODE_MAX_H, observed_last - DELTA_H)
+        last = min(anchor + EPISODE_MAX_H, observed_last - horizon_hours)
         if np.isfinite(discharge):
-            last = min(last, float(discharge) - DELTA_H)
+            last = min(last, float(discharge) - horizon_hours)
         t = anchor
         while t <= last:
             subject = str(meta.loc[stay_id, "subject_id"]) if stay_id in meta.index else str(stay_id)
@@ -477,14 +489,18 @@ def build_anchors(
                 "hours_since_onset": float(t - anchor),
                 "t": pseudo_time(t, unit="hours"),
                 "t_hour": float(t),
-                "t_plus": pseudo_time(t + DELTA_H, unit="hours"),
-                "t_plus_hour": float(t + DELTA_H),
+                "t_plus": pseudo_time(t + horizon_hours, unit="hours"),
+                "t_plus_hour": float(t + horizon_hours),
             })
             t += ANCHOR_STEP_H
     return pd.DataFrame(rows)
 
 
-def assemble_states(anchors: pd.DataFrame, measurements: pd.DataFrame) -> pd.DataFrame:
+def assemble_states(
+    anchors: pd.DataFrame,
+    measurements: pd.DataFrame,
+    horizon_hours: float = DELTA_H,
+) -> pd.DataFrame:
     lookup = measurement_lookup(measurements)
     rows = []
     for anchor in anchors.itertuples(index=False):
@@ -498,7 +514,7 @@ def assemble_states(anchors: pd.DataFrame, measurements: pd.DataFrame) -> pd.Dat
                 current, age, future = np.nan, np.nan, np.nan
             row[f"{var}_t"] = current
             row[f"{var}_age_hr"] = age
-            row[f"{var}_tp6"] = future
+            row[future_column(var, horizon_hours)] = future
         rows.append(row)
     return pd.DataFrame(rows, index=anchors.index)
 
@@ -506,9 +522,10 @@ def assemble_states(anchors: pd.DataFrame, measurements: pd.DataFrame) -> pd.Dat
 def evidence_window_summary(
     action_lookup: dict[str, tuple[np.ndarray, np.ndarray, np.ndarray]],
     anchor_hour: float,
+    horizon_hours: float = DELTA_H,
 ) -> dict[str, object]:
     history_start = float(anchor_hour - LOOKBACK_H)
-    future_end = float(anchor_hour + DELTA_H)
+    future_end = float(anchor_hour + horizon_hours)
     output = {}
     for action in ACTION_KEYS:
         starts, ends, dose_observed = action_lookup.get(
@@ -527,13 +544,18 @@ def evidence_window_summary(
     return output
 
 
-def assemble_actions(anchors: pd.DataFrame, evidence: pd.DataFrame) -> pd.DataFrame:
+def assemble_actions(
+    anchors: pd.DataFrame,
+    evidence: pd.DataFrame,
+    horizon_hours: float = DELTA_H,
+) -> pd.DataFrame:
     lookup = prepare_evidence_lookup(evidence)
     rows = []
     for anchor in anchors.itertuples(index=False):
         rows.append(evidence_window_summary(
             lookup.get(int(anchor.stay_id), {}),
             float(anchor.t_hour),
+            horizon_hours,
         ))
     return pd.DataFrame(rows, index=anchors.index)
 
@@ -572,16 +594,17 @@ def add_derived_columns(frame: pd.DataFrame) -> pd.DataFrame:
     return frame
 
 
-def filter_evaluable(frame: pd.DataFrame) -> pd.DataFrame:
+def filter_evaluable(frame: pd.DataFrame, horizon_hours: float = DELTA_H) -> pd.DataFrame:
     has_pair = np.zeros(len(frame), dtype=bool)
     for var in TARGET_VARS:
-        has_pair |= frame[f"{var}_t"].notna().values & frame[f"{var}_tp6"].notna().values
+        future = future_column(var, horizon_hours)
+        has_pair |= frame[f"{var}_t"].notna().values & frame[future].notna().values
     return frame[has_pair].reset_index(drop=True)
 
 
-def target_pair_counts(frame: pd.DataFrame) -> dict[str, int]:
+def target_pair_counts(frame: pd.DataFrame, horizon_hours: float = DELTA_H) -> dict[str, int]:
     return {
-        var: int((frame[f"{var}_t"].notna() & frame[f"{var}_tp6"].notna()).sum())
+        var: int((frame[f"{var}_t"].notna() & frame[future_column(var, horizon_hours)].notna()).sum())
         for var in TARGET_VARS
     }
 
@@ -608,6 +631,7 @@ def cohort_report(
     aki_stays: dict[int, dict[str, object]],
     measurements: pd.DataFrame,
     evidence: pd.DataFrame,
+    horizon_hours: float = DELTA_H,
 ) -> dict[str, object]:
     criteria_counts = pd.Series(
         [payload["criteria"] for payload in aki_stays.values()],
@@ -632,7 +656,7 @@ def cohort_report(
                 if len(measurements) else {}
             ),
         },
-        "target_pair_counts": target_pair_counts(frame) if len(frame) else {},
+        "target_pair_counts": target_pair_counts(frame, horizon_hours) if len(frame) else {},
         "action_support": action_support_counts(frame) if len(frame) else {},
         "action_evidence": {
             "rows": int(len(evidence)),
@@ -653,7 +677,8 @@ def cohort_report(
             "targets": TARGET_VARS,
             "state_vars": STATE_VARS,
             "action_channels": ACTION_KEYS,
-            "horizon_hours": DELTA_H,
+            "horizon_hours": horizon_hours,
+            "future_suffix": horizon_suffix(horizon_hours),
             "anchor_step_hours": ANCHOR_STEP_H,
             "lookback_hours": LOOKBACK_H,
             "target_tolerance_hours": TARGET_TOL_H,
@@ -671,18 +696,23 @@ def cohort_report(
     }
 
 
-def build_transitions(data_root: Path, output: Path, max_stays: int | None = None) -> dict[str, object]:
+def build_transitions(
+    data_root: Path,
+    output: Path,
+    max_stays: int | None = None,
+    horizon_hours: float = DELTA_H,
+) -> dict[str, object]:
     meta = read_patient_meta(data_root)
     aki_stays = merge_aki_like_stays(data_root, meta, max_stays=max_stays)
     stay_ids = set(aki_stays)
     measurements = read_measurements(data_root, stay_ids)
-    anchors = build_anchors(aki_stays, measurements, meta)
+    anchors = build_anchors(aki_stays, measurements, meta, horizon_hours=horizon_hours)
     evidence = read_action_evidence(data_root, stay_ids)
     if anchors.empty:
         frame = pd.DataFrame()
     else:
-        states = assemble_states(anchors, measurements)
-        actions = assemble_actions(anchors, evidence)
+        states = assemble_states(anchors, measurements, horizon_hours=horizon_hours)
+        actions = assemble_actions(anchors, evidence, horizon_hours=horizon_hours)
         outcomes = assemble_outcomes(anchors, meta)
         frame = pd.concat(
             [
@@ -704,10 +734,10 @@ def build_transitions(data_root: Path, output: Path, max_stays: int | None = Non
             ],
             axis=1,
         )
-        frame = filter_evaluable(add_derived_columns(frame))
+        frame = filter_evaluable(add_derived_columns(frame), horizon_hours=horizon_hours)
     output.parent.mkdir(parents=True, exist_ok=True)
     frame.to_parquet(output, index=False)
-    return cohort_report(frame, data_root, output, aki_stays, measurements, evidence)
+    return cohort_report(frame, data_root, output, aki_stays, measurements, evidence, horizon_hours=horizon_hours)
 
 
 def parse_args() -> argparse.Namespace:
@@ -720,12 +750,18 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output", type=Path, default=Path("eicu_aki_transitions_6h.parquet"))
     parser.add_argument("--report", type=Path, default=Path("eicu_aki_transition_report.json"))
     parser.add_argument("--max-stays", type=int, default=None)
+    parser.add_argument("--horizon-hours", type=float, default=DELTA_H)
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
-    report = build_transitions(args.data_root, args.output, max_stays=args.max_stays)
+    report = build_transitions(
+        args.data_root,
+        args.output,
+        max_stays=args.max_stays,
+        horizon_hours=args.horizon_hours,
+    )
     args.report.write_text(json.dumps(report, indent=2, sort_keys=True), encoding="utf-8")
     print(json.dumps({
         "output": str(args.output),

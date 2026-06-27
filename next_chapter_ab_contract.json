@@ -70,6 +70,12 @@
         "status": "not_in_workspace"
       },
       {
+        "allowed_use_when_present": "research causal-effect estimation only",
+        "role": "candidate public clinical-trial and cohort data source",
+        "source": "BioLINCC",
+        "status": "not_in_workspace"
+      },
+      {
         "allowed_use_when_present": "no causal claim without external design",
         "role": "factual forecasting and confounding diagnostics",
         "source": "observational EHR",
@@ -140,6 +146,82 @@
           },
           "status": "rejected_candidate"
         },
+        "long_horizon": {
+          "boundary": {
+            "causal_claim_allowed": false,
+            "checkpoint_promotion_allowed": false,
+            "clinical_claim_allowed": false,
+            "counterfactual_claim_allowed": false
+          },
+          "date": "2026-06-27",
+          "files": [
+            "eicu_aki_transitions_24h.parquet",
+            "eicu_aki_transition_report_24h.json",
+            "eicu_aki_target_router_24h.json",
+            "eicu_aki_transitions_48h.parquet",
+            "eicu_aki_transition_report_48h.json",
+            "eicu_aki_target_router_48h.json",
+            "AKI_LONG_HORIZON_FINDINGS.md"
+          ],
+          "interpretation": "Slow renal targets are a horizon problem: creatinine/BUN fall back to persistence at 6h but select ridge_realfit at 24h and 48h.",
+          "horizons": {
+            "24h": {
+              "active_aki_transitions": 178294,
+              "hospital_holdout": {
+                "active_aki_bootstrap_95_ci": [
+                  -0.07689,
+                  -0.068759
+                ],
+                "active_aki_point_delta_vs_persistence": -0.072671,
+                "bun_point_delta_vs_persistence": -0.650428,
+                "creatinine_point_delta_vs_persistence": -0.027636,
+                "significant": true
+              },
+              "random_patient_splits": {
+                "active_aki_beats_persistence": 7,
+                "active_aki_significant": 7,
+                "median_normalized_delta_vs_persistence": -0.067735,
+                "selected_sources": {
+                  "bun": "ridge_realfit_7_of_7",
+                  "creatinine": "ridge_realfit_7_of_7",
+                  "urine_output": "population_delta_7_of_7"
+                },
+                "splits": 7
+              },
+              "stays": 33975,
+              "subjects": 29508,
+              "transitions": 530265
+            },
+            "48h": {
+              "active_aki_transitions": 135870,
+              "hospital_holdout": {
+                "active_aki_bootstrap_95_ci": [
+                  -0.116736,
+                  -0.103889
+                ],
+                "active_aki_point_delta_vs_persistence": -0.11015,
+                "bun_point_delta_vs_persistence": -0.756922,
+                "creatinine_point_delta_vs_persistence": -0.032039,
+                "significant": true
+              },
+              "random_patient_splits": {
+                "active_aki_beats_persistence": 7,
+                "active_aki_significant": 7,
+                "median_normalized_delta_vs_persistence": -0.106262,
+                "selected_sources": {
+                  "bun": "ridge_realfit_7_of_7",
+                  "creatinine": "ridge_realfit_7_of_7",
+                  "urine_output": "population_delta_7_of_7"
+                },
+                "splits": 7
+              },
+              "stays": 24098,
+              "subjects": 21427,
+              "transitions": 397897
+            }
+          },
+          "status": "validated_long_horizon_factual_router"
+        },
         "random_patient_splits": {
           "active_aki_beats_persistence": 7,
           "active_aki_significant": 7,
@@ -201,7 +283,7 @@
         "transitions": 422244
       }
     },
-    "next_engineering_step": "three diseases now validate the factual-router pattern; the first simple AKI renal mechanism candidate was rejected, so deeper renal work should use longer horizons, renal reserve/GFR belief states, or richer RRT and fluid-balance observability",
+    "next_engineering_step": "three diseases validate the 6h factual-router pattern; AKI 24h/48h validates horizon as the slow renal target lever, so deeper renal work should build renal reserve/GFR belief states and richer RRT/fluid-balance observability in the long-horizon setting",
     "promotion_sequence": [
       "define disease cohort and target/action contract",
       "build observed-treatment transitions with masks and ages",

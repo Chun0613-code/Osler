@@ -136,6 +136,40 @@ on slow creatinine/BUN targets. The next mechanism attempt should require a
 longer horizon, a patient-specific renal reserve/GFR belief state, or richer RRT
 and fluid-balance observability.
 
+## Long-Horizon Audit
+
+The longer-horizon audit confirms that the 6-hour creatinine/BUN fallback is a
+horizon effect, not simply a modeling failure.
+
+At 24 hours:
+
+- 530,265 transitions
+- 178,294 active-AKI rows
+- active-AKI median normalized delta: -0.067735
+- 7/7 random patient splits beat persistence significantly
+- creatinine and BUN selected `ridge_realfit` in 7/7 splits
+
+At 48 hours:
+
+- 397,897 transitions
+- 135,870 active-AKI rows
+- active-AKI median normalized delta: -0.106262
+- 7/7 random patient splits beat persistence significantly
+- creatinine and BUN selected `ridge_realfit` in 7/7 splits
+
+Hospital-held-out evaluation also supports the horizon effect:
+
+- 24h creatinine delta: -0.027636
+- 24h BUN delta: -0.650428
+- 48h creatinine delta: -0.032039
+- 48h BUN delta: -0.756922
+
+Interpretation:
+
+Slow renal accumulation targets do not provide enough 6-hour factual signal to
+beat persistence. At 24-48 hours, the signal appears and the router moves
+creatinine/BUN from persistence to `ridge_realfit`.
+
 ## Boundary
 
 - No row-level predictions are committed.
