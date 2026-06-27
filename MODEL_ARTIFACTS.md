@@ -91,6 +91,14 @@ creatinine and BUN fall back to persistence at 6h but select `ridge_realfit` in
 7/7 patient splits at both 24h and 48h. These artifacts remain factual,
 observational, and non-clinical.
 
+`eicu_aki_renal_belief_audit.json` is also aggregate-only. It evaluates
+candidate renal reserve/GFR belief features on 24h/48h AKI cohorts. The belief
+candidate improves downstream creatinine and BUN prediction beyond both baseline
+`ridge_realfit` and a capacity-matched placebo in 7/7 patient splits at both
+horizons. The artifact does not contain raw rows or patient identifiers and does
+not permit direct hidden-state accuracy, causal, counterfactual, clinical,
+checkpoint-promotion, or active-rule-promotion claims.
+
 `mimiciii_dka_transitions_6h_demo.parquet` is local-only and ignored by git. It
 is the observed-treatment MIMIC-III demo lab-defined DKA-like transition cohort
 used for schema and factual proxy smoke testing. Committed aggregate reports

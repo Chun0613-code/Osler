@@ -3,6 +3,11 @@ import unittest
 import pandas as pd
 
 from aki_mechanism import predict_aki_mechanism
+from aki_renal_belief import (
+    RENAL_BELIEF_COLUMNS,
+    placebo_belief_features,
+    renal_belief_features,
+)
 from eicu_aki_transition_extract import classify_aki_action
 from eicu_sepsis_target_router import _feature_columns
 
@@ -75,6 +80,34 @@ class EicuAkiRouterTests(unittest.TestCase):
         self.assertIn("act_fluids", features)
         self.assertNotIn("creatinine_tp24", features)
         self.assertNotIn("bun_tp48", features)
+
+    def test_renal_belief_features_are_fixed_and_finite(self):
+        frame = pd.DataFrame({
+            "creatinine_t": [2.0, None],
+            "bun_t": [45.0, None],
+            "urine_output_t": [5.0, None],
+            "map_t": [52.0, None],
+            "creatinine_age_hr": [2.0, None],
+            "bun_age_hr": [2.0, None],
+            "urine_output_age_hr": [1.0, None],
+            "hist_renal_replacement": [0.0, 1.0],
+            "act_renal_replacement": [0.0, 0.0],
+            "hist_vasopressor": [1.0, 0.0],
+            "act_vasopressor": [0.0, 0.0],
+        })
+
+        features = renal_belief_features(frame)
+
+        self.assertEqual(tuple(features.columns), RENAL_BELIEF_COLUMNS)
+        self.assertFalse(features.isna().any().any())
+
+    def test_placebo_belief_is_capacity_matched(self):
+        frame = pd.DataFrame({"creatinine_t": [1.0, 2.0, 3.0]})
+
+        placebo = placebo_belief_features(frame, seed=7)
+
+        self.assertEqual(placebo.shape, (len(frame), len(RENAL_BELIEF_COLUMNS)))
+        self.assertTrue(all(column.startswith("placebo_") for column in placebo.columns))
 
 
 if __name__ == "__main__":

@@ -159,3 +159,11 @@ named template, but its peak-flow and work-of-breathing targets may need data
 beyond ICU EHR.  The immediate next external-data step for A is unchanged:
 obtain or map a randomized or otherwise externally identified treatment dataset
 into the causal-readiness contract.
+
+The first B-deep renal belief audit has now been run.  A transparent renal
+reserve/GFR proxy improves long-horizon AKI downstream observable prediction
+beyond both baseline `ridge_realfit` and a capacity-matched placebo for
+creatinine and BUN at 24h/48h.  This does not open causal or hidden-state
+accuracy claims.  It does establish the next research layer: convert the feature
+belief into an explicit predict-update renal reserve belief state and keep the
+same downstream-observable gate.

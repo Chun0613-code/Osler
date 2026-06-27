@@ -170,6 +170,27 @@ Slow renal accumulation targets do not provide enough 6-hour factual signal to
 beat persistence. At 24-48 hours, the signal appears and the router moves
 creatinine/BUN from persistence to `ridge_realfit`.
 
+## Renal Belief Audit
+
+The first B-deep AKI personalization layer was tested after the long-horizon
+audit.  It adds transparent renal reserve/GFR proxy features to `ridge_realfit`
+and compares them against both the baseline and a capacity-matched placebo.
+
+Result:
+
+- 24h creatinine, BUN, and urine output pass in 7/7 patient splits and
+  hospital-heldout evaluation
+- 48h creatinine and BUN pass in 7/7 patient splits and hospital-heldout
+  evaluation
+- 48h urine output passes in 7/7 patient splits but is only directionally
+  positive on hospital-heldout
+
+Interpretation:
+
+The belief layer is useful as a patient-specific personalization signal for
+long-horizon renal forecasting.  It does not claim direct hidden-state accuracy,
+causal treatment effect, clinical authority, or active-rule promotion.
+
 ## Boundary
 
 - No row-level predictions are committed.

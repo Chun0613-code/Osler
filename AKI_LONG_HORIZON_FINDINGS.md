@@ -84,3 +84,14 @@ Until then, the validated shape is:
 
 - 6h: persistence fallback for creatinine/BUN;
 - 24-48h: real-fit source for creatinine/BUN/BUN-like slow renal targets.
+
+## Renal Belief Follow-Up
+
+The B-deep renal belief audit adds patient-specific belief features on top of
+the long-horizon `ridge_realfit` source.  It passes the downstream observable
+gate for creatinine and BUN at both 24h and 48h, including hospital-heldout
+evaluation, and it passes 24h urine output.
+
+This repositions mechanism/belief correctly: it is no longer needed to beat
+persistence at the right horizon; its value is personalization and inverse
+physiologic state estimation.
