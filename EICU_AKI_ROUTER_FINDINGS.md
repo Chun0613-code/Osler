@@ -1,0 +1,114 @@
+# Full eICU AKI Router Findings
+
+Date: 2026-06-27
+
+This instantiates Chapter B for acute kidney injury using the full PhysioNet
+eICU Collaborative Research Database 2.0.  It reuses the validated DKA/sepsis
+pattern: disease-specific observed-treatment transitions, discovery-only source
+selection, held-out patient evaluation, hospital-held-out evaluation, and
+persistence fallback.
+
+## Cohort
+
+AKI-like cohort definition:
+
+- diagnosis text/code support for AKI / acute renal failure / acute tubular
+  necrosis; or
+- KDIGO-like creatinine rise:
+  - creatinine increase >= 0.3 mg/dL within 48 hours; or
+  - creatinine ratio >= 1.5 versus the previous 7-day minimum.
+
+Aggregate support:
+
+- AKI-like stays before evaluable filtering: 56,132
+- Evaluable stays: 43,748
+- Subjects: 37,119
+- Hospitals: 204
+- Six-hour transitions: 667,799
+- Active-AKI transitions: 219,417
+
+Targets:
+
+- creatinine
+- urine output
+- potassium
+- bicarbonate
+- MAP
+- BUN
+- sodium
+
+Observed treatment evidence:
+
+- fluids
+- vasopressors
+- diuretics
+- renal replacement therapy context
+- nephrotoxin exposure context
+
+## Router
+
+Candidate sources:
+
+- `persistence`: current observed value
+- `population_delta`: discovery-only mean target delta
+- `ridge_realfit`: discovery-only linear residual model using observed state,
+  observation ages, history, and factual treatment evidence
+
+Selection rule:
+
+Only a non-persistence source whose discovery subject-bootstrap CI beats
+persistence can be selected.  Otherwise the target falls back to persistence.
+Discovery source selection uses out-of-fold predictions.
+
+## Results
+
+Random patient splits, seven seeds:
+
+- Active-AKI: 7/7 splits beat persistence, 7/7 significant
+- Active-AKI median normalized delta vs persistence: -0.044771
+- All windows: 7/7 splits beat persistence, 7/7 significant
+- All-window median normalized delta vs persistence: -0.041323
+
+Hospital-held-out split:
+
+- Active-AKI normalized MAE:
+  - persistence: 0.437640
+  - target router: 0.408232
+  - subject-bootstrap delta: -0.039494, 95% CI [-0.042375, -0.036591]
+- All-window normalized MAE:
+  - persistence: 0.495730
+  - target router: 0.465980
+  - subject-bootstrap delta: -0.035677, 95% CI [-0.037538, -0.033738]
+
+Stable selected sources across seven random patient splits:
+
+- creatinine -> persistence
+- BUN -> persistence
+- urine output -> persistence in 6/7 splits, population delta in 1/7
+- bicarbonate -> ridge_realfit
+- MAP -> ridge_realfit
+- potassium -> ridge_realfit
+- sodium -> ridge_realfit
+
+## Interpretation
+
+The AKI module validates the Chapter-B recipe on a second non-DKA disease.  It
+also exposes an important physiology pattern:
+
+- slow renal accumulation targets such as creatinine and BUN remain hard to
+  beat over a 6-hour factual horizon and correctly fall back to persistence;
+- electrolyte, acid-base, and perfusion-related targets show stable real-fit
+  signal across patient and hospital splits.
+
+This is consistent with the earlier DKA/sepsis lesson: the stable architecture
+is not a single monolithic model, but a per-target router that lets unsupported
+targets refuse to move.
+
+## Boundary
+
+- No row-level predictions are committed.
+- No patient identifiers are included in aggregate reports.
+- No causal claim is allowed.
+- No counterfactual claim is allowed.
+- No clinical claim is allowed.
+- No checkpoint promotion is allowed.

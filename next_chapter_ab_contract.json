@@ -81,6 +81,45 @@
     "architecture": "per-disease, per-target gated factual router",
     "do_not_mix_latent_spaces_initially": true,
     "implemented_modules": {
+      "aki": {
+        "active_aki_transitions": 219417,
+        "boundary": {
+          "causal_claim_allowed": false,
+          "checkpoint_promotion_allowed": false,
+          "clinical_claim_allowed": false,
+          "counterfactual_claim_allowed": false
+        },
+        "data_source": "full_eicu_2.0",
+        "date": "2026-06-27",
+        "hospital_holdout": {
+          "active_aki_bootstrap_95_ci": [
+            -0.042375,
+            -0.036591
+          ],
+          "active_aki_point_delta_vs_persistence": -0.039494,
+          "significant": true
+        },
+        "hospitals": 204,
+        "random_patient_splits": {
+          "active_aki_beats_persistence": 7,
+          "active_aki_significant": 7,
+          "median_normalized_delta_vs_persistence": -0.044771,
+          "splits": 7
+        },
+        "selected_sources": {
+          "BUN": "persistence",
+          "MAP": "ridge_realfit",
+          "bicarbonate": "ridge_realfit",
+          "creatinine": "persistence",
+          "potassium": "ridge_realfit",
+          "sodium": "ridge_realfit",
+          "urine_output": "mostly_persistence"
+        },
+        "status": "validated_factual_router",
+        "stays": 43748,
+        "subjects": 37119,
+        "transitions": 667799
+      },
       "sepsis": {
         "active_sepsis_transitions": 252177,
         "boundary": {
@@ -122,7 +161,7 @@
         "transitions": 422244
       }
     },
-    "next_engineering_step": "choose next disease module after sepsis; AKI is the most adjacent target/action contract",
+    "next_engineering_step": "choose next disease after sepsis and AKI; asthma is the named template, while renal-fluid/electrolyte mechanism deepening is the safer adjacent path",
     "promotion_sequence": [
       "define disease cohort and target/action contract",
       "build observed-treatment transitions with masks and ages",

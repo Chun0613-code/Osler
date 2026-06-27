@@ -88,17 +88,17 @@ Each disease starts as a factual research router:
 - no active rule promotion;
 - no shared latent space until each disease has its own validated contract.
 
-## Chapter B Sepsis Status
+## Chapter B Implemented Disease Modules
 
 Implemented on 2026-06-27:
+
+Sepsis:
 
 - `eicu_sepsis_transition_extract.py`
 - `eicu_sepsis_target_router.py`
 - `eicu_sepsis_transition_report.json`
 - `eicu_sepsis_target_router.json`
 - `EICU_SEPSIS_ROUTER_FINDINGS.md`
-
-The full eICU sepsis router is now the first Chapter-B disease expansion:
 
 - 30,198 evaluable stays
 - 25,175 subjects
@@ -107,14 +107,32 @@ The full eICU sepsis router is now the first Chapter-B disease expansion:
 - 7/7 random patient splits significantly beat persistence
 - hospital-held-out split also significantly beats persistence
 
-The selected router remains factual and observational:
-
 - creatinine -> persistence
 - heart rate, lactate, MAP, oxygen saturation, respiratory rate, urine output -> ridge realfit
 - vasopressor-support proxy -> persistence after leakage guard
 
+AKI:
+
+- `eicu_aki_transition_extract.py`
+- `eicu_aki_target_router.py`
+- `eicu_aki_transition_report.json`
+- `eicu_aki_target_router.json`
+- `EICU_AKI_ROUTER_FINDINGS.md`
+
+- 43,748 evaluable stays
+- 37,119 subjects
+- 204 hospitals
+- 667,799 six-hour transitions
+- 7/7 random patient splits significantly beat persistence
+- hospital-held-out split also significantly beats persistence
+
+- creatinine, BUN -> persistence
+- urine output -> mostly persistence
+- bicarbonate, MAP, potassium, sodium -> ridge realfit
+
 It does not open Chapter A.  Antibiotic, fluid, ventilation, vasopressor, and
-renal-replacement causal claims remain closed.
+renal-replacement causal claims remain closed.  AKI diuretic, nephrotoxin,
+fluid, vasopressor, and renal-replacement causal claims also remain closed.
 
 ## Boundary
 
@@ -122,8 +140,10 @@ This A/B contract contains no patient rows or identifiers. It is a build
 contract, not a clinical product claim.
 
 The immediate next engineering step for B is to choose the next disease module
-after sepsis, likely AKI because its target/action contract is closer to the
-existing renal, fluid, electrolyte, and urine-output machinery.  The immediate
-next external-data step for A is unchanged: obtain or map a randomized or
-otherwise externally identified treatment dataset into the causal-readiness
-contract.
+after sepsis and AKI.  Asthma/respiratory exacerbation is the next named
+template, but its peak-flow and work-of-breathing targets may need data beyond
+ICU EHR.  A safer near-term alternative is to deepen the renal-fluid/electrolyte
+module with a mechanistic belief layer now that AKI has a validated factual
+router.  The immediate next external-data step for A is unchanged: obtain or map
+a randomized or otherwise externally identified treatment dataset into the
+causal-readiness contract.

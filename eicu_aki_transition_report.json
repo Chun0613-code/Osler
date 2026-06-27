@@ -1,0 +1,152 @@
+{
+  "action_evidence": {
+    "by_action": {
+      "diuretics": 151164,
+      "fluids": 309491,
+      "nephrotoxin": 68317,
+      "renal_replacement": 37469,
+      "vasopressor": 829348
+    },
+    "dose_observed_fraction": 0.579239,
+    "rows": 1395789,
+    "sources": {
+      "eicu_infusiondrug": 830155,
+      "eicu_medication": 348051,
+      "eicu_treatment": 217583
+    }
+  },
+  "action_support": {
+    "diuretics": {
+      "active_stays": 9400,
+      "active_windows": 32530,
+      "dose_observed_windows": 11150,
+      "stays": 13878,
+      "windows": 109430
+    },
+    "fluids": {
+      "active_stays": 21987,
+      "active_windows": 115417,
+      "dose_observed_windows": 6274,
+      "stays": 28913,
+      "windows": 330303
+    },
+    "nephrotoxin": {
+      "active_stays": 7864,
+      "active_windows": 30510,
+      "dose_observed_windows": 55,
+      "stays": 11036,
+      "windows": 88141
+    },
+    "renal_replacement": {
+      "active_stays": 3917,
+      "active_windows": 11743,
+      "dose_observed_windows": 4,
+      "stays": 4728,
+      "windows": 18099
+    },
+    "vasopressor": {
+      "active_stays": 12643,
+      "active_windows": 74980,
+      "dose_observed_windows": 110894,
+      "stays": 15760,
+      "windows": 178915
+    }
+  },
+  "active_aki_transitions": 219417,
+  "aki_criteria_counts_before_filter": {
+    "diagnosis_and_kdigo_like_creatinine": 9371,
+    "diagnosis_text_or_code:admissionDx.csv.gz": 1224,
+    "diagnosis_text_or_code:diagnosis.csv.gz": 9461,
+    "kdigo_like_creatinine_rise_absolute": 29230,
+    "kdigo_like_creatinine_rise_ratio": 6846
+  },
+  "aki_like_stay_count_before_evaluable_filter": 56132,
+  "data_root": "eicu-collaborative-research-database-2.0",
+  "dataset": "PhysioNet eICU Collaborative Research Database 2.0",
+  "hospitals": 204,
+  "measurements": {
+    "by_var": {
+      "bicarbonate": 828157,
+      "bilirubin": 213727,
+      "bilirubin_direct": 41118,
+      "bun": 636257,
+      "creatinine": 639379,
+      "glucose": 2375623,
+      "heart_rate": 70315850,
+      "lactate": 115698,
+      "map": 28303316,
+      "o2sat": 65052116,
+      "ph": 235745,
+      "platelets": 546683,
+      "potassium": 748591,
+      "respiratory_rate": 61493717,
+      "sodium": 700383,
+      "temperature": 8008161,
+      "urine_output": 1911166,
+      "wbc": 541803
+    },
+    "rows": 242707490,
+    "stays": 56113
+  },
+  "output": "eicu_aki_transitions_6h.parquet",
+  "safety_boundary": {
+    "causal_claim_allowed": false,
+    "clinical_claim_allowed": false,
+    "coarse_treatment_rows_used_as_numeric_administrations": false,
+    "counterfactual_claim_allowed": false,
+    "factual_observed_treatment_only": true,
+    "medication_orders_used_as_numeric_administrations": false,
+    "patient_ids_included_in_report": false,
+    "raw_rows_included": false
+  },
+  "schema": {
+    "action_channels": [
+      "fluids",
+      "vasopressor",
+      "diuretics",
+      "renal_replacement",
+      "nephrotoxin"
+    ],
+    "anchor_step_hours": 4.0,
+    "horizon_hours": 6.0,
+    "lookback_hours": 6.0,
+    "state_vars": [
+      "creatinine",
+      "urine_output",
+      "potassium",
+      "bicarbonate",
+      "map",
+      "bun",
+      "sodium",
+      "heart_rate",
+      "respiratory_rate",
+      "o2sat",
+      "temperature",
+      "wbc",
+      "lactate",
+      "glucose"
+    ],
+    "target_tolerance_hours": 2.0,
+    "targets": [
+      "creatinine",
+      "urine_output",
+      "potassium",
+      "bicarbonate",
+      "map",
+      "bun",
+      "sodium"
+    ]
+  },
+  "stays": 43748,
+  "subjects": 37119,
+  "target_pair_counts": {
+    "bicarbonate": 84065,
+    "bun": 55715,
+    "creatinine": 55920,
+    "map": 658253,
+    "potassium": 80502,
+    "sodium": 66469,
+    "urine_output": 255976
+  },
+  "transitions": 667799
+}
