@@ -88,13 +88,42 @@ Each disease starts as a factual research router:
 - no active rule promotion;
 - no shared latent space until each disease has its own validated contract.
 
+## Chapter B Sepsis Status
+
+Implemented on 2026-06-27:
+
+- `eicu_sepsis_transition_extract.py`
+- `eicu_sepsis_target_router.py`
+- `eicu_sepsis_transition_report.json`
+- `eicu_sepsis_target_router.json`
+- `EICU_SEPSIS_ROUTER_FINDINGS.md`
+
+The full eICU sepsis router is now the first Chapter-B disease expansion:
+
+- 30,198 evaluable stays
+- 25,175 subjects
+- 204 hospitals
+- 422,244 six-hour transitions
+- 7/7 random patient splits significantly beat persistence
+- hospital-held-out split also significantly beats persistence
+
+The selected router remains factual and observational:
+
+- creatinine -> persistence
+- heart rate, lactate, MAP, oxygen saturation, respiratory rate, urine output -> ridge realfit
+- vasopressor-support proxy -> persistence after leakage guard
+
+It does not open Chapter A.  Antibiotic, fluid, ventilation, vasopressor, and
+renal-replacement causal claims remain closed.
+
 ## Boundary
 
 This A/B contract contains no patient rows or identifiers. It is a build
 contract, not a clinical product claim.
 
-The immediate next engineering step for B is to instantiate the sepsis template
-first, because PhysioNet/eICU already expose dense vitals/labs and sepsis labels.
-The immediate next external-data step for A is to obtain or map a randomized or
+The immediate next engineering step for B is to choose the next disease module
+after sepsis, likely AKI because its target/action contract is closer to the
+existing renal, fluid, electrolyte, and urine-output machinery.  The immediate
+next external-data step for A is unchanged: obtain or map a randomized or
 otherwise externally identified treatment dataset into the causal-readiness
 contract.
