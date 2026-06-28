@@ -135,6 +135,17 @@ creatinine level/slope/innovation dimension and passes the downstream gate for
 24h creatinine/BUN/urine output and 48h creatinine/BUN. It remains factual,
 observational, and non-clinical.
 
+`eicu_heme_coag_belief_audit.json` and
+`eicu_heme_coag_state_belief_audit.json` are aggregate-only hematology
+candidate-belief audits. They evaluate bleeding/coagulation reserve features and
+an explicit predict-update coagulation state against both baseline
+`ridge_realfit` and a capacity-matched placebo. The feature belief shows partial
+hematocrit/hemoglobin signal, but no target passes robust 7/7 validation and
+hospital-heldout does not pass. The explicit state is weaker. These artifacts do
+not validate a promoted heme/coag hidden state; they keep the belief
+candidate-only and preserve the same factual, observational, non-clinical
+boundary.
+
 `mimiciii_dka_transitions_6h_demo.parquet` is local-only and ignored by git. It
 is the observed-treatment MIMIC-III demo lab-defined DKA-like transition cohort
 used for schema and factual proxy smoke testing. Committed aggregate reports

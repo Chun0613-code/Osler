@@ -162,6 +162,11 @@
           "assignment_column": "assigned_arm",
           "baseline_covariates": [
             "baseline_platelets",
+            "baseline_hemoglobin",
+            "baseline_hematocrit",
+            "baseline_inr",
+            "baseline_ptt",
+            "baseline_fibrinogen",
             "baseline_lactate",
             "baseline_map"
           ],
@@ -169,7 +174,7 @@
           "disease": "coagulopathy_heme",
           "identification_design": "randomized_trial",
           "name": "coagulopathy_transfusion_strategy_rct",
-          "outcome": "six-to-twenty-four-hour platelet/perfusion/proxy bleeding response",
+          "outcome": "six-to-twenty-four-hour hemoglobin/hematocrit/platelet/coagulation/perfusion response",
           "outcome_column": "outcome_delta",
           "patient_id_column": "participant_key",
           "source_registry": [
@@ -396,7 +401,7 @@
   },
   "chapter_b_multi_disease": {
     "architecture": "per-disease, per-target gated factual router",
-    "body_system_coverage_status": "DKA/endocrine-metabolic, sepsis/systemic-infectious, AKI/renal, respiratory/pulmonary, cardiovascular, neurologic-proxy, hepatic-GI, and hematologic-proxy modules now have isolated factual-router contracts.",
+    "body_system_coverage_status": "DKA/endocrine-metabolic, sepsis/systemic-infectious, AKI/renal, respiratory/pulmonary, cardiovascular, neurologic-proxy, hepatic-GI, and first-class hematologic/coagulation modules now have isolated factual-router contracts.",
     "do_not_mix_latent_spaces_initially": true,
     "implemented_modules": {
       "acute_neuro": {
@@ -876,6 +881,51 @@
         },
         "hospitals": 12,
         "interpretation": "Heme/coag is no longer just a platelet/WBC proxy: hemoglobin and hematocrit select ridge_realfit in 7/7 splits, INR has partial signal, and transfusion evidence includes volume/dose-observed intakeOutput rows.",
+        "heme_coag_belief": {
+          "boundary": {
+            "causal_claim_allowed": false,
+            "checkpoint_promotion_allowed": false,
+            "clinical_claim_allowed": false,
+            "counterfactual_claim_allowed": false,
+            "direct_hidden_state_accuracy_claim_allowed": false
+          },
+          "candidate": "ridge_realfit_plus_bleeding_coagulation_reserve_belief",
+          "date": "2026-06-28",
+          "files": [
+            "heme_coag_belief.py",
+            "eicu_heme_coag_belief_audit.py",
+            "eicu_heme_coag_belief_audit.json",
+            "eicu_heme_coag_state_belief_audit.json",
+            "HEME_COAG_BELIEF_FINDINGS.md"
+          ],
+          "gate": {
+            "baseline": "ridge_realfit",
+            "pass_rule": "candidate must significantly beat both baseline and capacity-matched placebo on downstream observable targets",
+            "placebo": "ridge_realfit_plus_capacity_matched_noise_features"
+          },
+          "random_patient_splits": {
+            "feature_belief": {
+              "hematocrit_passes_both": 4,
+              "hemoglobin_passes_both": 3,
+              "inr_passes_both": 0,
+              "ptt_passes_both": 0,
+              "platelets_passes_both": 0,
+              "fibrinogen_passes_both": 0,
+              "splits": 7
+            },
+            "explicit_state_belief": {
+              "hematocrit_passes_both": 1,
+              "hemoglobin_passes_both": 2,
+              "inr_passes_both": 0,
+              "ptt_passes_both": 0,
+              "platelets_passes_both": 0,
+              "fibrinogen_passes_both": 0,
+              "splits": 7
+            }
+          },
+          "interpretation": "Bleeding/coagulation reserve beliefs show partial hemoglobin/hematocrit signal, but no target reaches robust 7/7 placebo-gated validation and hospital-heldout does not pass.",
+          "status": "candidate_only_not_validated_for_promotion"
+        },
         "random_patient_splits": {
           "active_beats_persistence": 7,
           "active_significant": 7,
@@ -1107,7 +1157,7 @@
         "transitions": 422244
       }
     },
-    "next_engineering_step": "Heme/coag v2 now has first-class Hgb/Hct/INR/PTT/fibrinogen and transfusion evidence; next depth work should build a bleeding/coagulation reserve belief state or add first-class neuro/hepatic variables.",
+    "next_engineering_step": "Heme/coag v2 now has first-class Hgb/Hct/INR/PTT/fibrinogen and transfusion evidence; the first bleeding/coagulation belief audit remains candidate-only, so next depth work should improve transfusion-dose/product subtype observability, longer heme/coag horizons, or add first-class neuro/hepatic variables.",
     "promotion_sequence": [
       "define disease cohort and target/action contract",
       "build observed-treatment transitions with masks and ages",
@@ -1318,15 +1368,21 @@
           "real_fit_residual",
           "pretrained_presentation_prior"
         ],
-        "cohort_definition": "coagulopathy / thrombocytopenia / anemia / bleeding diagnosis support with platelet, inflammatory, perfusion, acid-base, and renal targets",
+        "cohort_definition": "coagulopathy / thrombocytopenia / anemia / bleeding diagnosis support with hemoglobin, hematocrit, platelet, INR/PTT/fibrinogen, inflammatory, perfusion, acid-base, and renal targets",
         "disease": "coagulopathy_heme",
         "notes": [
-          "Hemoglobin and INR are not yet first-class shared state variables.",
+          "Hemoglobin, hematocrit, INR, PTT, fibrinogen, and transfusion evidence are first-class shared state variables.",
+          "Bleeding/coagulation reserve belief candidates are not yet validated for promotion.",
           "Transfusion and anticoagulation effects stay Chapter-A closed."
         ],
         "safety_boundary": "research factual advisory only until patient-held-out, symbolic, causal-readiness, and clinical-review gates pass",
         "targets": [
           "platelets",
+          "hemoglobin",
+          "hematocrit",
+          "INR",
+          "PTT",
+          "fibrinogen",
           "WBC",
           "lactate",
           "MAP",

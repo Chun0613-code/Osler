@@ -61,6 +61,9 @@ Observed examples:
 - Hematologic/coagulation v2: hemoglobin, hematocrit, INR, PTT, fibrinogen, and
   transfusion evidence are first-class; hemoglobin and hematocrit select
   `ridge_realfit` in 7/7 splits while sparse PTT/fibrinogen fall back.
+- Hematologic/coagulation belief: bleeding/coagulation reserve candidates show
+  partial Hgb/Hct signal, but do not pass robust 7/7 placebo-gated validation;
+  the heme/coag hidden state remains candidate-only.
 
 This is a physiological result, not just a modeling trick.  A 6-hour window is
 long enough for fast ICU targets, but too short for many renal accumulation

@@ -25,7 +25,7 @@ is granted.
 | Cardiovascular | Cardiovascular instability / shock / heart failure | validated bounded factual router |
 | Nervous system | Acute neurologic injury / seizure / coma | validated bounded physiologic-proxy router |
 | Hepatic / GI | Hepatic failure / cirrhosis | validated bounded proxy router |
-| Hematologic | Coagulopathy / thrombocytopenia / bleeding | validated bounded first-class heme/coag router |
+| Hematologic | Coagulopathy / thrombocytopenia / bleeding | validated bounded first-class heme/coag router + candidate-only belief audit |
 
 ## New Bounded Router Results
 
@@ -80,6 +80,12 @@ Hematologic:
   dose-observed windows.
 - This is no longer just a platelet/WBC proxy, but it is still not a
   transfusion or anticoagulation causal model.
+- A bleeding/coagulation reserve belief audit was run with a strict
+  capacity-matched placebo gate.  Feature beliefs showed partial Hct/Hgb signal
+  (Hct 4/7, Hgb 3/7 passes-both), but no target reached robust 7/7 validation,
+  hospital-heldout did not pass, and the explicit predict-update state was
+  weaker.  The heme/coag belief therefore remains candidate-only, unlike the
+  validated AKI renal belief state.
 
 ## Boundary
 
@@ -99,7 +105,8 @@ The most valuable next step is not just adding more disease names.  It is adding
 missing first-class variables so the proxy systems become deeper:
 
 - hematology: bleeding/coagulation reserve belief state, transfusion dose
-  normalization, and longer-horizon hemoglobin/coagulation evaluation;
+  normalization, blood-product subtype separation, and longer-horizon
+  hemoglobin/coagulation evaluation;
 - hepatic: INR, ammonia/encephalopathy proxy, paracentesis/bleeding context;
 - neurologic: GCS/mental-status proxies, ICP/EVD/procedure evidence;
 - cardiovascular: rhythm/procedure evidence, inotrope dose normalization;

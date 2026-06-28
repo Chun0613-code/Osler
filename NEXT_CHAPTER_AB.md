@@ -243,3 +243,13 @@ passes 7/7 random splits and hospital-heldout, and 48h passes hospital-heldout
 with 5/7 random splits.  The next B-deep step is not another feature audit; it is
 to expose this v2 state as a shadow-mode digital-twin state object while keeping
 all causal and clinical gates closed.
+
+The first hematology B-deep belief audit has also been run.  It adds
+bleeding/coagulation reserve features and an explicit predict-update coagulation
+state, then tests both against baseline `ridge_realfit` and a capacity-matched
+placebo.  The feature belief shows partial hemoglobin/hematocrit signal, but no
+target reaches robust 7/7 validation and hospital-heldout does not pass.  The
+explicit state is weaker.  Therefore heme/coagulation depth remains
+candidate-only.  The next hematology step should be better transfusion-dose and
+blood-product subtype observability plus longer horizons, not promotion of the
+current hidden state.

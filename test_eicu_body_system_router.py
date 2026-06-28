@@ -6,6 +6,14 @@ from eicu_body_system_configs import BODY_SYSTEM_CONFIGS, get_body_system_config
 from eicu_body_system_transition_extract import add_active_column, classify_action
 from eicu_sepsis_transition_extract import LAB_TO_STATE, PLAUSIBLE
 from eicu_sepsis_target_router import _feature_columns
+from heme_coag_belief import (
+    CoagulationReserveBelief,
+    HEME_COAG_BELIEF_COLUMNS,
+    HEME_COAG_STATE_COLUMNS,
+    heme_coag_belief_features,
+    heme_coag_state_features,
+    placebo_heme_coag_belief_features,
+)
 
 
 class EicuBodySystemRouterTests(unittest.TestCase):
@@ -93,6 +101,77 @@ class EicuBodySystemRouterTests(unittest.TestCase):
         self.assertIn("act_vasopressor", features)
         self.assertNotIn("map_tp6", features)
         self.assertNotIn("lactate_tp24", features)
+
+    def test_heme_coag_belief_features_are_fixed_and_finite(self):
+        frame = pd.DataFrame({
+            "hemoglobin_t": [6.8, 12.0],
+            "hematocrit_t": [21.0, 36.0],
+            "platelets_t": [45.0, 220.0],
+            "inr_t": [2.5, 1.1],
+            "ptt_t": [80.0, 32.0],
+            "fibrinogen_t": [90.0, 320.0],
+            "map_t": [58.0, 82.0],
+            "lactate_t": [4.5, 1.0],
+            "hist_transfusion": [1.0, 0.0],
+            "act_anticoagulant": [1.0, 0.0],
+        })
+
+        features = heme_coag_belief_features(frame)
+
+        self.assertEqual(tuple(features.columns), HEME_COAG_BELIEF_COLUMNS)
+        self.assertFalse(features.isna().any().any())
+        self.assertGreater(features.loc[0, "belief_bleeding_burden"], features.loc[1, "belief_bleeding_burden"])
+        self.assertLess(features.loc[0, "belief_coagulation_reserve"], features.loc[1, "belief_coagulation_reserve"])
+
+    def test_heme_coag_placebo_is_capacity_matched(self):
+        frame = pd.DataFrame({"hemoglobin_t": [7.0, 10.0, 12.0]})
+
+        placebo = placebo_heme_coag_belief_features(frame, seed=17)
+
+        self.assertEqual(placebo.shape, (len(frame), len(HEME_COAG_BELIEF_COLUMNS)))
+        self.assertTrue(all(column.startswith("placebo_") for column in placebo.columns))
+
+    def test_coagulation_reserve_belief_predict_update(self):
+        row = pd.Series({
+            "hemoglobin_t": 7.5,
+            "hematocrit_t": 23.0,
+            "platelets_t": 70.0,
+            "inr_t": 1.8,
+            "ptt_t": 55.0,
+            "fibrinogen_t": 150.0,
+            "hist_transfusion": 1.0,
+            "act_anticoagulant": 0.0,
+        })
+
+        belief = CoagulationReserveBelief.from_row(row)
+        predicted = belief.predict(row, delta_hours=6.0)
+        updated = predicted.update(row)
+
+        self.assertGreaterEqual(updated.mean, 0.0)
+        self.assertLessEqual(updated.mean, 1.0)
+        self.assertGreater(predicted.variance, belief.variance)
+
+    def test_heme_coag_state_features_are_fixed_and_finite(self):
+        frame = pd.DataFrame({
+            "stay_id": [1, 1],
+            "hours_since_onset": [0.0, 6.0],
+            "hemoglobin_t": [10.0, 7.8],
+            "hematocrit_t": [30.0, 23.0],
+            "platelets_t": [180.0, 80.0],
+            "inr_t": [1.1, 2.0],
+            "ptt_t": [32.0, 70.0],
+            "fibrinogen_t": [300.0, 120.0],
+            "hist_transfusion": [0.0, 1.0],
+        })
+
+        features = heme_coag_state_features(frame)
+
+        self.assertEqual(tuple(features.columns), HEME_COAG_STATE_COLUMNS)
+        self.assertFalse(features.isna().any().any())
+        self.assertNotEqual(
+            features.loc[0, "state_belief_coag_reserve_mean"],
+            features.loc[1, "state_belief_coag_reserve_mean"],
+        )
 
 
 if __name__ == "__main__":
