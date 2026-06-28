@@ -18,7 +18,13 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from aki_renal_belief import RENAL_BELIEF_COLUMNS, placebo_belief_features, renal_belief_features
+from aki_renal_belief import (
+    RENAL_BELIEF_COLUMNS,
+    RENAL_STATE_BELIEF_COLUMNS,
+    placebo_belief_features,
+    renal_belief_features,
+    renal_belief_state_features,
+)
 from eicu_aki_target_router import _fit_ridge_future
 from eicu_aki_transition_extract import TARGET_VARS
 from eicu_sepsis_target_router import _bootstrap_ci, _feature_columns, _round, split_subjects
@@ -40,11 +46,21 @@ def _target_rows(frame: pd.DataFrame, target: str, future_suffix: str) -> pd.Dat
     return frame[frame[current].notna() & frame[future].notna()].copy()
 
 
-def _augment(frame: pd.DataFrame, seed: int, kind: str) -> tuple[pd.DataFrame, list[str]]:
+def _belief_columns(kind: str) -> tuple[str, ...]:
+    if kind == "feature":
+        return RENAL_BELIEF_COLUMNS
+    if kind == "state":
+        return RENAL_STATE_BELIEF_COLUMNS
+    raise ValueError(f"unknown belief kind: {kind}")
+
+
+def attach_belief(frame: pd.DataFrame, kind: str) -> tuple[pd.DataFrame, list[str]]:
     if kind == "renal_belief":
+        kind = "feature"
+    if kind == "feature":
         extra = renal_belief_features(frame)
-    elif kind == "placebo_belief":
-        extra = placebo_belief_features(frame, seed=seed)
+    elif kind == "state":
+        extra = renal_belief_state_features(frame)
     else:
         raise ValueError(f"unknown belief kind: {kind}")
     return pd.concat([frame, extra], axis=1), list(extra.columns)
@@ -57,6 +73,8 @@ def _fit_predictions(
     future_suffix: str,
     ridge_alpha: float,
     seed: int,
+    belief_columns: list[str],
+    placebo_columns: tuple[str, ...],
 ) -> dict[str, np.ndarray]:
     base_features = _feature_columns(train, target)
     base_pred = _fit_ridge_future(
@@ -68,24 +86,29 @@ def _fit_predictions(
         future_suffix,
     )
 
-    train_belief, belief_columns = _augment(train, seed=seed + 101, kind="renal_belief")
-    heldout_belief, _ = _augment(heldout, seed=seed + 101, kind="renal_belief")
     belief_pred = _fit_ridge_future(
-        train_belief,
-        heldout_belief,
+        train,
+        heldout,
         target,
         sorted(set(base_features + belief_columns)),
         ridge_alpha,
         future_suffix,
     )
 
-    train_placebo, placebo_columns = _augment(train, seed=seed + 202, kind="placebo_belief")
-    heldout_placebo, _ = _augment(heldout, seed=seed + 303, kind="placebo_belief")
+    train_placebo = pd.concat([
+        train,
+        placebo_belief_features(train, seed=seed + 202, columns=placebo_columns),
+    ], axis=1)
+    heldout_placebo = pd.concat([
+        heldout,
+        placebo_belief_features(heldout, seed=seed + 303, columns=placebo_columns),
+    ], axis=1)
+    placebo_feature_columns = [f"placebo_{name}" for name in placebo_columns]
     placebo_pred = _fit_ridge_future(
         train_placebo,
         heldout_placebo,
         target,
-        sorted(set(base_features + placebo_columns)),
+        sorted(set(base_features + placebo_feature_columns)),
         ridge_alpha,
         future_suffix,
     )
@@ -149,6 +172,8 @@ def _target_report(
     ridge_alpha: float,
     seed: int,
     bootstrap_samples: int,
+    belief_columns: list[str],
+    placebo_columns: tuple[str, ...],
 ) -> dict[str, object]:
     train_target = _target_rows(train, target, future_suffix)
     heldout_target = _target_rows(heldout, target, future_suffix)
@@ -161,6 +186,8 @@ def _target_report(
         future_suffix,
         ridge_alpha,
         seed,
+        belief_columns,
+        placebo_columns,
     )
     baseline = predictions["baseline_ridge"]
     placebo = predictions["placebo_belief_ridge"]
@@ -196,6 +223,8 @@ def split_report(
     ridge_alpha: float,
     bootstrap_samples: int,
     group_column: str | None = None,
+    belief_columns: list[str] | None = None,
+    placebo_columns: tuple[str, ...] = RENAL_BELIEF_COLUMNS,
 ) -> dict[str, object]:
     group_column = group_column or _subject_column(frame)
     discovery_groups, heldout_groups = split_subjects(
@@ -206,6 +235,7 @@ def split_report(
     )
     discovery = frame[frame[group_column].isin(discovery_groups)].copy()
     heldout = frame[frame[group_column].isin(heldout_groups)].copy()
+    belief_columns = belief_columns or list(RENAL_BELIEF_COLUMNS)
     targets = {
         target: _target_report(
             discovery,
@@ -215,6 +245,8 @@ def split_report(
             ridge_alpha,
             seed=seed + 1000 * index,
             bootstrap_samples=bootstrap_samples,
+            belief_columns=belief_columns,
+            placebo_columns=placebo_columns,
         )
         for index, target in enumerate(BELIEF_TARGETS)
     }
@@ -269,8 +301,11 @@ def audit_horizon(
     discovery_fraction: float,
     ridge_alpha: float,
     bootstrap_samples: int,
+    belief_kind: str,
 ) -> dict[str, object]:
     frame = pd.read_parquet(cohort).reset_index(drop=True)
+    frame, belief_columns = attach_belief(frame, belief_kind)
+    placebo_columns = _belief_columns(belief_kind)
     random_reports = [
         split_report(
             frame,
@@ -279,6 +314,8 @@ def audit_horizon(
             discovery_fraction=discovery_fraction,
             ridge_alpha=ridge_alpha,
             bootstrap_samples=bootstrap_samples,
+            belief_columns=belief_columns,
+            placebo_columns=placebo_columns,
         )
         for seed in seeds
     ]
@@ -292,10 +329,14 @@ def audit_horizon(
             ridge_alpha=ridge_alpha,
             bootstrap_samples=bootstrap_samples,
             group_column="hospitalid",
+            belief_columns=belief_columns,
+            placebo_columns=placebo_columns,
         )
     return {
         "cohort": cohort.name,
         "future_suffix": future_suffix,
+        "belief_kind": belief_kind,
+        "belief_columns": belief_columns,
         "cohort_summary": {
             "rows": int(len(frame)),
             "subjects": int(frame["subject_id"].nunique()) if "subject_id" in frame else None,
@@ -321,6 +362,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--discovery-fraction", type=float, default=0.67)
     parser.add_argument("--ridge-alpha", type=float, default=10.0)
     parser.add_argument("--bootstrap-samples", type=int, default=500)
+    parser.add_argument("--belief-kind", choices=("feature", "state"), default="state")
     return parser.parse_args()
 
 
@@ -337,6 +379,7 @@ def main() -> None:
             discovery_fraction=args.discovery_fraction,
             ridge_alpha=args.ridge_alpha,
             bootstrap_samples=args.bootstrap_samples,
+            belief_kind=args.belief_kind,
         )
         for cohort, future_suffix in zip(args.cohort, args.future_suffix)
     ]
@@ -374,6 +417,7 @@ def main() -> None:
             {
                 "cohort": horizon["cohort"],
                 "future_suffix": horizon["future_suffix"],
+                "belief_kind": horizon["belief_kind"],
                 "summary": horizon["random_patient_splits"]["summary"],
             }
             for horizon in horizons
@@ -384,4 +428,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

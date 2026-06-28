@@ -99,6 +99,12 @@ horizons. The artifact does not contain raw rows or patient identifiers and does
 not permit direct hidden-state accuracy, causal, counterfactual, clinical,
 checkpoint-promotion, or active-rule-promotion claims.
 
+`eicu_aki_renal_belief_state_audit.json` is the explicit predict-update version
+of the renal belief audit. It is aggregate-only. The state belief passes
+downstream gates for BUN at 24h/48h and for urine output at 24h, but it does not
+pass for creatinine. This artifact validates a narrower online-compatible belief
+state and preserves the same safety boundary.
+
 `mimiciii_dka_transitions_6h_demo.parquet` is local-only and ignored by git. It
 is the observed-treatment MIMIC-III demo lab-defined DKA-like transition cohort
 used for schema and factual proxy smoke testing. Committed aggregate reports

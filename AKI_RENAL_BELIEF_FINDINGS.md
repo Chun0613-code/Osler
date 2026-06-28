@@ -94,6 +94,21 @@ This is the correct role for mechanism/belief after the long-horizon audit:
 The next B-deep step should convert this feature belief into an explicit
 predict-update renal reserve/GFR belief state and test the same downstream gate.
 
+## Explicit State Follow-Up
+
+The explicit predict-update state version has now been tested separately in
+`AKI_RENAL_BELIEF_STATE_FINDINGS.md`.
+
+Result:
+
+- BUN passes the state-belief gate at 24h/48h;
+- urine output passes at 24h and is directionally positive at 48h;
+- creatinine does not pass.
+
+So the feature belief remains the broader personalization source, while the
+explicit online-compatible state belief is currently validated only for BUN and
+part of urine-output forecasting.
+
 ## Boundary
 
 - No raw rows are committed.
@@ -103,4 +118,3 @@ predict-update renal reserve/GFR belief state and test the same downstream gate.
 - No counterfactual claim is allowed.
 - No clinical claim is allowed.
 - No checkpoint or active-rule promotion is allowed.
-

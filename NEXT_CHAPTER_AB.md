@@ -167,3 +167,9 @@ creatinine and BUN at 24h/48h.  This does not open causal or hidden-state
 accuracy claims.  It does establish the next research layer: convert the feature
 belief into an explicit predict-update renal reserve belief state and keep the
 same downstream-observable gate.
+
+That explicit state version has also been tested.  It is partially validated:
+BUN passes at 24h/48h, urine output passes at 24h and is directionally positive
+at 48h, while creatinine does not pass.  The next B-deep refinement should focus
+on improving the predict-update renal reserve equation for creatinine without
+relaxing the placebo gate.

@@ -191,6 +191,11 @@ The belief layer is useful as a patient-specific personalization signal for
 long-horizon renal forecasting.  It does not claim direct hidden-state accuracy,
 causal treatment effect, clinical authority, or active-rule promotion.
 
+The explicit predict-update version of this belief is narrower.  It passes for
+BUN at 24h/48h and urine output at 24h, but it does not pass for creatinine.
+This keeps the online-compatible state belief candidate scoped to the targets it
+actually helps.
+
 ## Boundary
 
 - No row-level predictions are committed.

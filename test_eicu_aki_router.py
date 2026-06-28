@@ -5,8 +5,11 @@ import pandas as pd
 from aki_mechanism import predict_aki_mechanism
 from aki_renal_belief import (
     RENAL_BELIEF_COLUMNS,
+    RENAL_STATE_BELIEF_COLUMNS,
+    RenalReserveBelief,
     placebo_belief_features,
     renal_belief_features,
+    renal_belief_state_features,
 )
 from eicu_aki_transition_extract import classify_aki_action
 from eicu_sepsis_target_router import _feature_columns
@@ -108,6 +111,54 @@ class EicuAkiRouterTests(unittest.TestCase):
 
         self.assertEqual(placebo.shape, (len(frame), len(RENAL_BELIEF_COLUMNS)))
         self.assertTrue(all(column.startswith("placebo_") for column in placebo.columns))
+
+    def test_renal_reserve_belief_predict_update(self):
+        row = pd.Series({
+            "creatinine_t": 2.0,
+            "bun_t": 45.0,
+            "urine_output_t": 5.0,
+            "map_t": 52.0,
+            "creatinine_age_hr": 2.0,
+            "bun_age_hr": 2.0,
+            "urine_output_age_hr": 1.0,
+            "hist_vasopressor": 1.0,
+            "hist_nephrotoxin": 1.0,
+            "hist_renal_replacement": 0.0,
+        })
+
+        belief = RenalReserveBelief.from_row(row)
+        predicted = belief.predict(row, delta_hours=4.0)
+        updated = predicted.update(row)
+
+        self.assertGreater(belief.mean, 0.0)
+        self.assertGreater(predicted.variance, belief.variance)
+        self.assertGreater(updated.mean, 0.0)
+        self.assertLessEqual(updated.variance, predicted.variance)
+
+    def test_renal_belief_state_features_are_fixed_and_finite(self):
+        frame = pd.DataFrame({
+            "stay_id": [1, 1],
+            "hours_since_onset": [0.0, 4.0],
+            "creatinine_t": [2.0, 2.2],
+            "bun_t": [45.0, 48.0],
+            "urine_output_t": [5.0, 8.0],
+            "map_t": [52.0, 60.0],
+            "creatinine_age_hr": [2.0, 2.0],
+            "bun_age_hr": [2.0, 2.0],
+            "urine_output_age_hr": [1.0, 1.0],
+            "hist_vasopressor": [1.0, 1.0],
+            "hist_nephrotoxin": [1.0, 1.0],
+            "hist_renal_replacement": [0.0, 0.0],
+        })
+
+        features = renal_belief_state_features(frame)
+
+        self.assertEqual(tuple(features.columns), RENAL_STATE_BELIEF_COLUMNS)
+        self.assertFalse(features.isna().any().any())
+        self.assertNotEqual(
+            features.loc[0, "state_belief_renal_reserve_mean"],
+            features.loc[1, "state_belief_renal_reserve_mean"],
+        )
 
 
 if __name__ == "__main__":
