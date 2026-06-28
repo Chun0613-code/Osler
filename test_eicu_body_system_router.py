@@ -20,10 +20,60 @@ from heme_coag_belief import (
 
 class EicuBodySystemRouterTests(unittest.TestCase):
     def test_body_system_contracts_cover_major_missing_systems(self):
+        self.assertIn("electrolyte_acid_base", BODY_SYSTEM_CONFIGS)
+        self.assertIn("endocrine_stress", BODY_SYSTEM_CONFIGS)
+        self.assertIn("gi_pancreatic_nutrition", BODY_SYSTEM_CONFIGS)
+        self.assertIn("cardiac_injury", BODY_SYSTEM_CONFIGS)
+        self.assertIn("musculoskeletal_rhabdo", BODY_SYSTEM_CONFIGS)
+        self.assertIn("immune_inflammatory", BODY_SYSTEM_CONFIGS)
         self.assertIn("cardiovascular_instability", BODY_SYSTEM_CONFIGS)
         self.assertIn("acute_neuro", BODY_SYSTEM_CONFIGS)
         self.assertIn("hepatic_failure", BODY_SYSTEM_CONFIGS)
         self.assertIn("coagulopathy_heme", BODY_SYSTEM_CONFIGS)
+
+    def test_expanded_labs_are_first_class_state_variables(self):
+        expected = {
+            "anion gap": "anion_gap",
+            "chloride": "chloride",
+            "calcium": "calcium",
+            "magnesium": "magnesium",
+            "phosphate": "phosphate",
+            "albumin": "albumin",
+            "AST (SGOT)": "ast",
+            "lipase": "lipase",
+            "troponin - I": "troponin_i",
+            "CPK": "cpk",
+            "CRP": "crp",
+        }
+
+        for lab_name, state_name in expected.items():
+            self.assertEqual(LAB_TO_STATE[lab_name], state_name)
+            self.assertIn(state_name, PLAUSIBLE)
+
+    def test_classifies_new_body_system_actions(self):
+        electrolyte = get_body_system_config("electrolyte_acid_base")
+        endocrine = get_body_system_config("endocrine_stress")
+        gi = get_body_system_config("gi_pancreatic_nutrition")
+        cardiac = get_body_system_config("cardiac_injury")
+        muscle = get_body_system_config("musculoskeletal_rhabdo")
+        immune = get_body_system_config("immune_inflammatory")
+
+        self.assertIn("magnesium_repletion", classify_action(electrolyte, "magnesium sulfate"))
+        self.assertIn("bicarbonate", classify_action(electrolyte, "sodium bicarbonate"))
+        self.assertIn("insulin", classify_action(endocrine, "regular insulin infusion"))
+        self.assertIn("dextrose", classify_action(endocrine, "dextrose 50%"))
+        self.assertIn("systemic_steroid", classify_action(endocrine, "hydrocortisone"))
+        self.assertIn("ppi", classify_action(gi, "pantoprazole"))
+        self.assertIn("octreotide", classify_action(gi, "octreotide"))
+        self.assertIn("nutrition", classify_action(gi, "TPN"))
+        self.assertIn("antiarrhythmic", classify_action(cardiac, "amiodarone"))
+        self.assertIn("anticoagulant", classify_action(cardiac, "heparin"))
+        self.assertIn("inotrope", classify_action(cardiac, "dobutamine"))
+        self.assertNotIn("anticoagulant", classify_action(cardiac, "troponin"))
+        self.assertIn("bicarbonate", classify_action(muscle, "sodium bicarbonate"))
+        self.assertIn("renal_replacement", classify_action(muscle, "crrt"))
+        self.assertIn("systemic_steroid", classify_action(immune, "methylprednisolone"))
+        self.assertIn("antibiotics", classify_action(immune, "vancomycin"))
 
     def test_classifies_cardiovascular_actions(self):
         config = get_body_system_config("cardiovascular_instability")

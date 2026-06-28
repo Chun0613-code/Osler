@@ -198,6 +198,22 @@ has moved beyond proxy status with first-class hemoglobin, hematocrit, INR,
 PTT, fibrinogen, and transfusion evidence, but it remains factual rather than
 causal.
 
+Expanded full-body coverage pass:
+
+- electrolyte / acid-base / osmotic instability
+- endocrine stress / glycemic / adrenal-thyroid proxy
+- GI / pancreatic / nutrition failure proxy
+- cardiac injury / myocardial stress biomarkers
+- musculoskeletal injury / rhabdomyolysis proxy
+- immune / inflammatory activation proxy
+
+All six bounded modules pass 7/7 random patient split seeds on active windows.
+Five of the six also beat persistence on hospital-heldout normalized MAE.
+Electrolyte/acid-base is the cautionary exception: it passes random splits but
+regresses on hospital-heldout, likely from cross-hospital measurement or
+practice shift.  This expands body-system factual physiology coverage, not
+causal treatment planning or complete human simulation.
+
 ## Boundary
 
 This A/B contract contains no patient rows or identifiers. It is a build
@@ -209,8 +225,14 @@ validate the factual-router pattern.
 The generic body-system adapter now pushes the same pattern further across
 cardiovascular, neurologic-proxy, hepatic-proxy, and hematologic/coagulation
 systems.
-The next coverage work should add missing first-class variables rather than
-only adding more disease names.
+The expanded body-system pass now pushes the same pattern into electrolyte,
+endocrine, GI/pancreatic/nutrition, cardiac injury, musculoskeletal, and
+immune/inflammatory systems.  The next coverage work should add missing
+first-class variables and deeper hidden-state belief objects rather than only
+adding more disease names.  Remaining high-value gaps include skin/wound state,
+detailed neurologic exam trajectories, reproductive physiology, microbiology and
+immune phenotype depth, procedure-specific cardiac/neuro variables, and
+high-resolution treatment dosing.
 The AKI renal mechanism audit shows that the first simple mechanism candidate is
 not enough for slow creatinine/BUN targets at 6 hours.  The long-horizon AKI
 audit answers the next question: at 24-48 hours, creatinine and BUN move from

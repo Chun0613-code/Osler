@@ -14,6 +14,11 @@ contract to cardiovascular instability, acute neurologic physiologic proxies,
 hepatic failure proxies, and coagulopathy/hematology proxies.  Those modules are
 validated bounded engineering cohorts rather than full canonical disease
 chapters, but all four pass 7/7 patient split seeds and hospital-heldout gates.
+The second coverage pass adds electrolyte/acid-base, broad endocrine stress,
+GI/pancreatic/nutrition, cardiac injury, musculoskeletal/rhabdomyolysis, and
+immune/inflammatory modules.  These widen the factual physiology surface toward
+whole-body coverage while preserving the same safety boundary: no causal,
+clinical, runtime, checkpoint-promotion, or active-rule authority.
 
 ## Validated Pattern
 
@@ -68,6 +73,22 @@ Observed examples:
 - Hematologic/coagulation belief: bleeding/coagulation reserve candidates show
   partial Hgb/Hct signal, but do not pass robust 7/7 placebo-gated validation;
   the heme/coag hidden state remains candidate-only.
+- Electrolyte/acid-base: calcium, chloride, magnesium, MAP, potassium, and
+  sodium select `ridge_realfit` in 7/7 random splits, while creatinine,
+  phosphate, osmolality, and sparse ionized calcium fall back.  Hospital-heldout
+  is worse than persistence, so this module has a cross-hospital calibration
+  caveat.
+- Endocrine stress: glucose and MAP select `ridge_realfit`; thyroid/adrenal,
+  ketone, osmolality, sodium, and temperature proxies fall back because they are
+  sparse or short-horizon stable.
+- GI/pancreatic/nutrition: glucose and MAP drive the router; pancreatic and
+  nutrition-specific labs are mostly sparse and fall back.
+- Cardiac injury: heart rate, MAP, and potassium carry short-horizon signal;
+  troponin/BNP/CK-MB/CPK fall back in the six-hour window.
+- Musculoskeletal/rhabdomyolysis: potassium is the only stable 7/7 real-fit
+  target in the bounded pass; CPK/myoglobin/LDH and renal targets fall back.
+- Immune/inflammatory: the overall router is significant, but inflammatory
+  biomarkers themselves are too sparse for stable 7/7 real-fit target selection.
 
 This is a physiological result, not just a modeling trick.  A 6-hour window is
 long enough for fast ICU targets, but too short for many renal accumulation
@@ -111,3 +132,10 @@ The cardiovascular/neuro/hepatic/heme modules also carry a bounded-cohort caveat
 and, for neuro/hepatic, a proxy-target caveat.  Heme/coagulation has now moved
 one step deeper with first-class Hgb/Hct/INR/PTT/fibrinogen and transfusion
 evidence, but it is still factual rather than causal.
+
+The expanded electrolyte/endocrine/GI/cardiac/musculoskeletal/immune pass also
+carries a bounded-cohort caveat.  It should be read as body-system factual
+coverage, not complete human simulation.  Systems that depend on physical exam,
+skin/wound state, detailed neurologic exam, reproductive physiology,
+microbiology phenotype, procedure details, or high-resolution treatment dosing
+remain limited by observability.

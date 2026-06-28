@@ -401,7 +401,110 @@
   },
   "chapter_b_multi_disease": {
     "architecture": "per-disease, per-target gated factual router",
-    "body_system_coverage_status": "DKA/endocrine-metabolic, sepsis/systemic-infectious, AKI/renal, respiratory/pulmonary, cardiovascular, neurologic-proxy, hepatic-GI, and first-class hematologic/coagulation modules now have isolated factual-router contracts.",
+    "body_system_coverage_status": "DKA/endocrine-metabolic, sepsis/systemic-infectious, AKI/renal, respiratory/pulmonary, cardiovascular, neurologic-proxy, hepatic-GI, first-class hematologic/coagulation, electrolyte/acid-base, broad endocrine stress, GI/pancreatic/nutrition, cardiac injury, musculoskeletal/rhabdomyolysis, and immune/inflammatory modules now have isolated factual-router contracts.",
+    "expanded_body_system_coverage_v2": {
+      "boundary": {
+        "bounded_engineering_cohort": true,
+        "causal_claim_allowed": false,
+        "checkpoint_promotion_allowed": false,
+        "clinical_claim_allowed": false,
+        "complete_human_simulation_claim_allowed": false,
+        "counterfactual_claim_allowed": false,
+        "runtime_decision_authority": false
+      },
+      "date": "2026-06-28",
+      "files": [
+        "eicu_body_system_configs.py",
+        "eicu_body_system_transition_extract.py",
+        "eicu_body_system_target_router.py",
+        "BODY_SYSTEM_COVERAGE_FINDINGS.md"
+      ],
+      "modules": {
+        "cardiac_injury": {
+          "active_median_delta": -0.067364,
+          "active_transitions": 10824,
+          "hospital_holdout_delta": -0.042691,
+          "random_patient_splits": "7/7 significant",
+          "stable_ridge_targets": [
+            "heart_rate",
+            "map",
+            "potassium"
+          ],
+          "stays": 1386,
+          "transitions": 17231
+        },
+        "electrolyte_acid_base": {
+          "active_median_delta": -0.061541,
+          "active_transitions": 15255,
+          "caveat": "random patient splits pass, but hospital-heldout normalized MAE regresses versus persistence",
+          "hospital_holdout_delta": 0.100273,
+          "random_patient_splits": "7/7 significant",
+          "stable_ridge_targets": [
+            "calcium",
+            "chloride",
+            "magnesium",
+            "map",
+            "potassium",
+            "sodium"
+          ],
+          "stays": 1385,
+          "transitions": 17387
+        },
+        "endocrine_stress": {
+          "active_median_delta": -0.085487,
+          "active_transitions": 15710,
+          "hospital_holdout_delta": -0.044598,
+          "random_patient_splits": "7/7 significant",
+          "stable_ridge_targets": [
+            "glucose",
+            "map"
+          ],
+          "stays": 1420,
+          "transitions": 17009
+        },
+        "gi_pancreatic_nutrition": {
+          "active_median_delta": -0.073193,
+          "active_transitions": 12045,
+          "hospital_holdout_delta": -0.01842,
+          "random_patient_splits": "7/7 significant",
+          "stable_ridge_targets": [
+            "glucose",
+            "map"
+          ],
+          "stays": 1387,
+          "transitions": 16043
+        },
+        "immune_inflammatory": {
+          "active_median_delta": -0.078651,
+          "active_transitions": 11957,
+          "hospital_holdout_delta": -0.040749,
+          "random_patient_splits": "7/7 significant",
+          "stable_ridge_targets": [],
+          "stays": 1411,
+          "transitions": 18392
+        },
+        "musculoskeletal_rhabdo": {
+          "active_median_delta": -0.00551,
+          "active_transitions": 13751,
+          "hospital_holdout_delta": -0.023751,
+          "random_patient_splits": "7/7 significant",
+          "stable_ridge_targets": [
+            "potassium"
+          ],
+          "stays": 1397,
+          "transitions": 16837
+        }
+      },
+      "remaining_observability_gaps": [
+        "skin and wound state",
+        "detailed neurologic exam trajectories",
+        "reproductive physiology",
+        "microbiology and immune phenotype depth",
+        "procedure-specific cardiac and neurologic variables",
+        "high-resolution treatment dosing"
+      ],
+      "status": "expanded_bounded_body_system_factual_coverage"
+    },
     "do_not_mix_latent_spaces_initially": true,
     "implemented_modules": {
       "acute_neuro": {

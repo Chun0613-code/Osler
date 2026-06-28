@@ -1,0 +1,424 @@
+{
+  "action_evidence": {
+    "by_action": {
+      "bicarbonate": 901,
+      "calcium_repletion": 1523,
+      "dextrose": 7581,
+      "diuretics": 3452,
+      "fluids": 12104,
+      "insulin": 5266,
+      "magnesium_repletion": 2689,
+      "phosphate_repletion": 849,
+      "potassium_repletion": 6730,
+      "renal_replacement": 535
+    },
+    "dose_observed_fraction": 0.024141,
+    "rows": 41630,
+    "sources": {
+      "eicu_infusiondrug": 1092,
+      "eicu_medication": 30702,
+      "eicu_treatment": 9836
+    }
+  },
+  "action_support": {
+    "bicarbonate": {
+      "active_stays": 195,
+      "active_windows": 1187,
+      "dose_observed_windows": 32,
+      "stays": 198,
+      "windows": 1263
+    },
+    "calcium_repletion": {
+      "active_stays": 503,
+      "active_windows": 5082,
+      "dose_observed_windows": 9,
+      "stays": 507,
+      "windows": 5482
+    },
+    "dextrose": {
+      "active_stays": 985,
+      "active_windows": 10742,
+      "dose_observed_windows": 83,
+      "stays": 1001,
+      "windows": 11757
+    },
+    "diuretics": {
+      "active_stays": 487,
+      "active_windows": 3731,
+      "dose_observed_windows": 33,
+      "stays": 512,
+      "windows": 3860
+    },
+    "fluids": {
+      "active_stays": 1160,
+      "active_windows": 12796,
+      "dose_observed_windows": 67,
+      "stays": 1173,
+      "windows": 13019
+    },
+    "insulin": {
+      "active_stays": 694,
+      "active_windows": 7330,
+      "dose_observed_windows": 218,
+      "stays": 707,
+      "windows": 8145
+    },
+    "magnesium_repletion": {
+      "active_stays": 652,
+      "active_windows": 6995,
+      "dose_observed_windows": 3,
+      "stays": 664,
+      "windows": 7595
+    },
+    "phosphate_repletion": {
+      "active_stays": 280,
+      "active_windows": 2497,
+      "dose_observed_windows": 4,
+      "stays": 284,
+      "windows": 2862
+    },
+    "potassium_repletion": {
+      "active_stays": 786,
+      "active_windows": 7936,
+      "dose_observed_windows": 25,
+      "stays": 803,
+      "windows": 8633
+    },
+    "renal_replacement": {
+      "active_stays": 58,
+      "active_windows": 203,
+      "dose_observed_windows": 0,
+      "stays": 61,
+      "windows": 221
+    }
+  },
+  "active_transitions": 15255,
+  "body_system": "fluid_electrolyte_acid_base",
+  "bounded_max_stays": 1500,
+  "candidate_stay_count_before_bound": 22115,
+  "criteria_counts_before_filter": {
+    "diagnosis_text_or_code:admissionDx.csv.gz": 206,
+    "diagnosis_text_or_code:diagnosis.csv.gz": 1294
+  },
+  "data_root": "eicu-collaborative-research-database-2.0",
+  "dataset": "PhysioNet eICU Collaborative Research Database 2.0",
+  "disease": "electrolyte_acid_base",
+  "display_name": "Electrolyte / acid-base / osmotic instability",
+  "hospitals": 26,
+  "measurements": {
+    "by_var": {
+      "albumin": 6467,
+      "alkaline_phos": 5537,
+      "alt": 5528,
+      "amylase": 208,
+      "anion_gap": 13186,
+      "ast": 5539,
+      "bicarbonate": 20667,
+      "bilirubin": 5524,
+      "bilirubin_direct": 718,
+      "bnp": 1048,
+      "bun": 13593,
+      "calcium": 13612,
+      "chloride": 13828,
+      "ck_mb": 412,
+      "ck_mb_index": 207,
+      "cortisol": 171,
+      "cpk": 932,
+      "creatinine": 13736,
+      "crp": 256,
+      "crp_hs": 16,
+      "esr": 198,
+      "ferritin": 166,
+      "fibrinogen": 440,
+      "free_t4": 154,
+      "glucose": 54884,
+      "heart_rate": 1753949,
+      "hematocrit": 13233,
+      "hemoglobin": 13364,
+      "inr": 4473,
+      "ionized_calcium": 319,
+      "lactate": 2166,
+      "ldh": 216,
+      "lipase": 534,
+      "magnesium": 6550,
+      "map": 903277,
+      "myoglobin": 17,
+      "o2sat": 1586548,
+      "ph": 6934,
+      "phosphate": 5024,
+      "platelets": 11735,
+      "potassium": 18699,
+      "prealbumin": 468,
+      "ptt": 3200,
+      "respiratory_rate": 1411297,
+      "serum_osmolality": 420,
+      "sodium": 15411,
+      "temperature": 323588,
+      "total_protein": 5545,
+      "triglycerides": 555,
+      "troponin_i": 1185,
+      "troponin_t": 347,
+      "tsh": 494,
+      "uric_acid": 159,
+      "urine_output": 21604,
+      "wbc": 11599
+    },
+    "rows": 6299937,
+    "stays": 1500
+  },
+  "output": "eicu_electrolyte_acid_base_transitions_6h.parquet",
+  "restricted_stay_count": null,
+  "restricted_stay_source": null,
+  "safety_boundary": {
+    "bounded_engineering_cohort": true,
+    "causal_claim_allowed": false,
+    "clinical_claim_allowed": false,
+    "coarse_treatment_rows_used_as_numeric_administrations": false,
+    "counterfactual_claim_allowed": false,
+    "factual_observed_treatment_only": true,
+    "medication_orders_used_as_numeric_administrations": false,
+    "patient_ids_included_in_report": false,
+    "raw_rows_included": false,
+    "restricted_stay_ids_used_internally": false
+  },
+  "schema": {
+    "action_channels": [
+      "fluids",
+      "diuretics",
+      "renal_replacement",
+      "potassium_repletion",
+      "magnesium_repletion",
+      "phosphate_repletion",
+      "calcium_repletion",
+      "bicarbonate",
+      "insulin",
+      "dextrose"
+    ],
+    "active_column": "electrolyte_acid_base_active_t",
+    "anchor_step_hours": 4.0,
+    "config": {
+      "action_keys": [
+        "fluids",
+        "diuretics",
+        "renal_replacement",
+        "potassium_repletion",
+        "magnesium_repletion",
+        "phosphate_repletion",
+        "calcium_repletion",
+        "bicarbonate",
+        "insulin",
+        "dextrose"
+      ],
+      "action_terms": {
+        "bicarbonate": [
+          "sodium bicarbonate",
+          "bicarbonate",
+          "bicarb"
+        ],
+        "calcium_repletion": [
+          "calcium chloride",
+          "calcium gluconate",
+          "calcium"
+        ],
+        "dextrose": [
+          "dextrose",
+          "d50",
+          "d10",
+          "d5w",
+          "glucose"
+        ],
+        "diuretics": [
+          "furosemide",
+          "lasix",
+          "bumetanide",
+          "bumex",
+          "torsemide",
+          "chlorothiazide",
+          "metolazone",
+          "hydrochlorothiazide",
+          "hctz"
+        ],
+        "fluids": [
+          "normal saline",
+          "sodium chloride",
+          "nacl",
+          "lactated",
+          "ringer",
+          "crystalloid",
+          "fluid bolus",
+          "iv fluid",
+          "saline bolus"
+        ],
+        "insulin": [
+          "insulin",
+          "regular insulin",
+          "humalog",
+          "lispro",
+          "novolog",
+          "aspart",
+          "lantus",
+          "glargine",
+          "nph"
+        ],
+        "magnesium_repletion": [
+          "magnesium sulfate",
+          "magnesium"
+        ],
+        "phosphate_repletion": [
+          "potassium phosphate",
+          "sodium phosphate",
+          "phosphate",
+          "phos"
+        ],
+        "potassium_repletion": [
+          "potassium chloride",
+          "kcl",
+          "potassium"
+        ],
+        "renal_replacement": [
+          "dialysis",
+          "crrt",
+          "cvvh",
+          "cvvhd",
+          "hemofiltration",
+          "renal replacement"
+        ]
+      },
+      "active_actions": [
+        "hist_fluids",
+        "hist_diuretics",
+        "hist_renal_replacement"
+      ],
+      "active_high": {
+        "anion_gap": 16.0,
+        "chloride": 112.0,
+        "creatinine": 2.0,
+        "potassium": 5.5,
+        "serum_osmolality": 310.0,
+        "sodium": 150.0
+      },
+      "active_low": {
+        "bicarbonate": 18.0,
+        "calcium": 7.5,
+        "magnesium": 1.5,
+        "map": 65.0,
+        "phosphate": 2.0,
+        "potassium": 3.2,
+        "sodium": 130.0
+      },
+      "body_system": "fluid_electrolyte_acid_base",
+      "diagnosis_patterns": [
+        "hyponatremia",
+        "hypernatremia",
+        "hypokalemia",
+        "hyperkalemia",
+        "hypomagnesemia",
+        "hypermagnesemia",
+        "hypophosphatemia",
+        "hyperphosphatemia",
+        "hypocalcemia",
+        "hypercalcemia",
+        "metabolic acidosis",
+        "metabolic alkalosis",
+        "electrolyte",
+        "dehydration",
+        "fluid overload",
+        "276",
+        "e87"
+      ],
+      "display_name": "Electrolyte / acid-base / osmotic instability",
+      "name": "electrolyte_acid_base",
+      "notes": [
+        "First-class electrolyte/acid-base factual router; not an electrolyte-repletion causal model.",
+        "Treatment channels are observed evidence only."
+      ],
+      "state_vars": [
+        "sodium",
+        "potassium",
+        "chloride",
+        "bicarbonate",
+        "anion_gap",
+        "calcium",
+        "ionized_calcium",
+        "magnesium",
+        "phosphate",
+        "serum_osmolality",
+        "ph",
+        "creatinine",
+        "bun",
+        "glucose",
+        "map",
+        "heart_rate",
+        "urine_output"
+      ],
+      "targets": [
+        "sodium",
+        "potassium",
+        "chloride",
+        "bicarbonate",
+        "anion_gap",
+        "calcium",
+        "ionized_calcium",
+        "magnesium",
+        "phosphate",
+        "serum_osmolality",
+        "map",
+        "creatinine"
+      ]
+    },
+    "future_suffix": "tp6",
+    "horizon_hours": 6.0,
+    "lookback_hours": 6.0,
+    "state_vars": [
+      "sodium",
+      "potassium",
+      "chloride",
+      "bicarbonate",
+      "anion_gap",
+      "calcium",
+      "ionized_calcium",
+      "magnesium",
+      "phosphate",
+      "serum_osmolality",
+      "ph",
+      "creatinine",
+      "bun",
+      "glucose",
+      "map",
+      "heart_rate",
+      "urine_output"
+    ],
+    "target_tolerance_hours": 2.0,
+    "targets": [
+      "sodium",
+      "potassium",
+      "chloride",
+      "bicarbonate",
+      "anion_gap",
+      "calcium",
+      "ionized_calcium",
+      "magnesium",
+      "phosphate",
+      "serum_osmolality",
+      "map",
+      "creatinine"
+    ]
+  },
+  "stays": 1385,
+  "subjects": 1249,
+  "target_pair_counts": {
+    "anion_gap": 1345,
+    "bicarbonate": 2435,
+    "calcium": 1328,
+    "chloride": 1412,
+    "creatinine": 1332,
+    "ionized_calcium": 53,
+    "magnesium": 579,
+    "map": 17275,
+    "phosphate": 357,
+    "potassium": 2914,
+    "serum_osmolality": 47,
+    "sodium": 1970
+  },
+  "transitions": 17387
+}

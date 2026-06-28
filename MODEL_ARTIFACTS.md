@@ -123,6 +123,21 @@ module now includes first-class hemoglobin, hematocrit, INR, PTT, fibrinogen,
 and transfusion evidence. They remain observational, non-clinical,
 bounded-cohort artifacts with no causal or runtime treatment authority.
 
+The expanded full-body coverage pass produces additional local-only row-level
+parquets: `eicu_electrolyte_acid_base_transitions_6h.parquet`,
+`eicu_endocrine_stress_transitions_6h.parquet`,
+`eicu_gi_pancreatic_nutrition_transitions_6h.parquet`,
+`eicu_cardiac_injury_transitions_6h.parquet`,
+`eicu_musculoskeletal_rhabdo_transitions_6h.parquet`, and
+`eicu_immune_inflammatory_transitions_6h.parquet`. These are ignored by git.
+Committed aggregate reports include the matching `*_transition_report.json` and
+`*_target_router.json` files plus updated `BODY_SYSTEM_COVERAGE_FINDINGS.md`.
+They widen factual physiology coverage to electrolyte/acid-base, endocrine,
+GI/pancreatic/nutrition, cardiac injury, musculoskeletal/rhabdomyolysis, and
+immune/inflammatory systems.  The pass remains bounded, observational,
+non-clinical, and non-causal; it does not make Osler-JEPA a complete human
+simulator.
+
 `eicu_aki_renal_belief_state_audit.json` is the explicit predict-update version
 of the renal belief audit. It is aggregate-only. The state belief passes
 downstream gates for BUN at 24h/48h and for urine output at 24h, but it does not

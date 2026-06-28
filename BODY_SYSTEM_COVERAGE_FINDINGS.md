@@ -26,6 +26,12 @@ is granted.
 | Nervous system | Acute neurologic injury / seizure / coma | validated bounded physiologic-proxy router |
 | Hepatic / GI | Hepatic failure / cirrhosis | validated bounded proxy router |
 | Hematologic | Coagulopathy / thrombocytopenia / bleeding | validated bounded first-class heme/coag router + long-horizon audit + candidate-only belief audit |
+| Fluid / electrolyte / acid-base | Electrolyte, acid-base, osmotic instability | validated bounded factual router; hospital-heldout caveat |
+| Endocrine / metabolic broad | Endocrine stress / glycemic / adrenal-thyroid proxy | validated bounded factual router |
+| GI / pancreatic / nutrition | GI, pancreatic, nutrition failure proxy | validated bounded factual router |
+| Cardiac / myocardial | Cardiac injury and myocardial stress biomarkers | validated bounded factual router |
+| Musculoskeletal | Rhabdomyolysis / muscle-injury proxy | validated bounded factual router |
+| Immune / inflammatory | Immune and inflammatory activation proxy | validated bounded factual router |
 
 ## New Bounded Router Results
 
@@ -92,6 +98,59 @@ Hematologic:
   hospital-heldout did not pass, and the explicit predict-update state was
   weaker.  The heme/coag belief therefore remains candidate-only, unlike the
   validated AKI renal belief state.
+
+## Expanded Full-Body Coverage Pass
+
+The second body-system pass adds six broader organ/system modules and promotes
+additional labs to first-class shared state variables:
+
+- electrolytes / acid-base / osmolality: chloride, calcium, ionized calcium,
+  magnesium, phosphate, anion gap, serum osmolality;
+- endocrine-metabolic stress: glucose, ketones/osmolality, adrenal/thyroid
+  marker proxies;
+- GI / pancreatic / nutrition: lipase, amylase, triglycerides, albumin,
+  prealbumin, total protein;
+- cardiac / myocardial injury: troponin-I/T, BNP, CPK/CK-MB, LDH, myoglobin;
+- musculoskeletal injury: CPK, myoglobin, LDH plus renal/electrolyte downstream
+  targets;
+- immune / inflammatory activation: CRP/CRP-hs, ESR, ferritin, WBC, temperature,
+  lactate, albumin.
+
+All six modules were run as bounded 1,500-stay full-eICU engineering cohorts.
+The table reports aggregate metrics only; row-level transition parquets remain
+local-only and ignored by git.
+
+| Module | Stays | Transitions | Active Rows | Active Median Delta | Random Splits | Hospital-Heldout Delta | Stable 7/7 Ridge Targets |
+|---|---:|---:|---:|---:|---:|---:|---|
+| Electrolyte / acid-base | 1,385 | 17,387 | 15,255 | -0.061541 | 7/7 significant | +0.100273 | calcium, chloride, magnesium, MAP, potassium, sodium |
+| Endocrine stress | 1,420 | 17,009 | 15,710 | -0.085487 | 7/7 significant | -0.044598 | glucose, MAP |
+| GI / pancreatic / nutrition | 1,387 | 16,043 | 12,045 | -0.073193 | 7/7 significant | -0.018420 | glucose, MAP |
+| Cardiac injury | 1,386 | 17,231 | 10,824 | -0.067364 | 7/7 significant | -0.042691 | heart rate, MAP, potassium |
+| Musculoskeletal / rhabdo | 1,397 | 16,837 | 13,751 | -0.005510 | 7/7 significant | -0.023751 | potassium |
+| Immune / inflammatory | 1,411 | 18,392 | 11,957 | -0.078651 | 7/7 significant | -0.040749 | none |
+
+The expanded pass preserves the central Chapter-B rule:
+
+- dense fast variables such as glucose, MAP, heart rate, potassium, sodium,
+  chloride, calcium, and magnesium can support real-fit factual forecasting;
+- sparse or slow biomarkers such as troponin, BNP, CK-MB, CPK, myoglobin,
+  lipase, amylase, CRP, ESR, ferritin, thyroid markers, cortisol, serum ketones,
+  osmolality, creatinine, and BUN usually fall back to persistence in a six-hour
+  factual window;
+- the router's value is still selective movement, not universal movement.
+
+The electrolyte/acid-base module is a useful caution.  It passes all seven
+random patient splits, but its hospital-heldout normalized MAE delta is worse
+than persistence.  That suggests electrolyte measurement/practice shift across
+hospitals is stronger than the random split suggests, so this module remains
+validated only as a bounded engineering cohort and should not be treated as
+cross-hospital robust without further calibration.
+
+This pass moves Osler-JEPA closer to whole-body factual physiology coverage, but
+it is not a complete human simulator.  Major remaining gaps include skin/wound
+state, reproductive/endocrine physiology beyond ICU proxies, detailed neurologic
+exam trajectories, procedure-specific cardiac/neuro variables, microbiology and
+immune phenotype depth, and high-resolution physical exam states.
 
 ## Boundary
 
