@@ -25,7 +25,7 @@ is granted.
 | Cardiovascular | Cardiovascular instability / shock / heart failure | validated bounded factual router |
 | Nervous system | Acute neurologic injury / seizure / coma | validated bounded physiologic-proxy router |
 | Hepatic / GI | Hepatic failure / cirrhosis | validated bounded proxy router |
-| Hematologic | Coagulopathy / thrombocytopenia / bleeding | validated bounded proxy router |
+| Hematologic | Coagulopathy / thrombocytopenia / bleeding | validated bounded first-class heme/coag router |
 
 ## New Bounded Router Results
 
@@ -37,7 +37,7 @@ cohorts with seven patient split seeds and a hospital-heldout split.
 | Cardiovascular instability | 1,382 | 16,047 | 4,734 | -0.145857 | 7/7 significant | -0.178511 |
 | Acute neuro proxy | 1,390 | 16,238 | 11,418 | -0.086287 | 7/7 significant | -0.065234 |
 | Hepatic failure proxy | 1,396 | 17,730 | 10,717 | -0.073574 | 7/7 significant | -0.064441 |
-| Coagulopathy / heme proxy | 1,380 | 16,794 | 5,904 | -0.08778 | 7/7 significant | -0.056817 |
+| Coagulopathy / heme v2 | 1,382 | 16,870 | 8,055 | -0.083132 | 7/7 significant | -0.087116 |
 
 The consistent pattern remains the same as DKA/sepsis/AKI/respiratory:
 
@@ -70,10 +70,16 @@ Hepatic:
 
 Hematologic:
 
-- Platelets and WBC show non-persistence signal in the bounded cohort.
-- Creatinine falls back; bicarbonate/pH are mixed.
-- Hemoglobin and INR are not yet first-class shared state variables, so this is
-  still a proxy module rather than a full hematology/coagulation model.
+- Hemoglobin, hematocrit, INR, PTT, fibrinogen, and transfusion evidence are now
+  first-class inputs.
+- Hemoglobin and hematocrit select `ridge_realfit` in 7/7 splits.
+- INR has partial signal (`ridge_realfit` in 2/7 splits); PTT and fibrinogen
+  correctly fall back to persistence in this bounded 6h window.
+- Transfusion evidence is now captured from both treatment text and
+  intakeOutput blood-product rows: 577 stays / 1,860 windows, with 1,858
+  dose-observed windows.
+- This is no longer just a platelet/WBC proxy, but it is still not a
+  transfusion or anticoagulation causal model.
 
 ## Boundary
 
@@ -92,9 +98,9 @@ These artifacts are factual and observational.
 The most valuable next step is not just adding more disease names.  It is adding
 missing first-class variables so the proxy systems become deeper:
 
-- hematology: hemoglobin, INR/PT/PTT, transfusion dose/time;
+- hematology: bleeding/coagulation reserve belief state, transfusion dose
+  normalization, and longer-horizon hemoglobin/coagulation evaluation;
 - hepatic: INR, ammonia/encephalopathy proxy, paracentesis/bleeding context;
 - neurologic: GCS/mental-status proxies, ICP/EVD/procedure evidence;
 - cardiovascular: rhythm/procedure evidence, inotrope dose normalization;
 - endocrine beyond DKA: HHS/hypoglycemia and thyroid/adrenal crisis contracts.
-

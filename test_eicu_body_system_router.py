@@ -4,6 +4,7 @@ import pandas as pd
 
 from eicu_body_system_configs import BODY_SYSTEM_CONFIGS, get_body_system_config
 from eicu_body_system_transition_extract import add_active_column, classify_action
+from eicu_sepsis_transition_extract import LAB_TO_STATE, PLAUSIBLE
 from eicu_sepsis_target_router import _feature_columns
 
 
@@ -35,8 +36,29 @@ class EicuBodySystemRouterTests(unittest.TestCase):
 
         self.assertIn("hepatic_encephalopathy_tx", classify_action(hepatic, "lactulose"))
         self.assertIn("transfusion", classify_action(heme, "packed red blood cells"))
+        self.assertIn("transfusion", classify_action(heme, "Volume-Transfuse plasma"))
         self.assertIn("anticoagulant", classify_action(heme, "heparin infusion"))
         self.assertIn("antiplatelet", classify_action(heme, "clopidogrel"))
+
+    def test_heme_labs_are_first_class_state_variables(self):
+        expected = {
+            "Hgb": "hemoglobin",
+            "Hct": "hematocrit",
+            "PT - INR": "inr",
+            "PTT": "ptt",
+            "fibrinogen": "fibrinogen",
+        }
+
+        for lab_name, state_name in expected.items():
+            self.assertEqual(LAB_TO_STATE[lab_name], state_name)
+            self.assertIn(state_name, PLAUSIBLE)
+
+    def test_coagulopathy_targets_include_first_class_heme_variables(self):
+        config = get_body_system_config("coagulopathy_heme")
+
+        for target in ("hemoglobin", "hematocrit", "inr", "ptt", "fibrinogen"):
+            self.assertIn(target, config.targets)
+            self.assertIn(target, config.state_vars)
 
     def test_active_rules_create_disease_specific_column(self):
         config = get_body_system_config("cardiovascular_instability")

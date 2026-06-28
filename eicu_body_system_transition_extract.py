@@ -302,12 +302,63 @@ def respiratory_evidence(data_root: Path, stay_ids: set[int], config: BodySystem
     return pd.DataFrame(rows, columns=ACTION_EVIDENCE_COLUMNS) if rows else empty_action_evidence()
 
 
+def transfusion_intake_output_evidence(
+    data_root: Path,
+    stay_ids: set[int],
+    config: BodySystemDiseaseConfig,
+) -> pd.DataFrame:
+    if "transfusion" not in config.action_keys:
+        return empty_action_evidence()
+    path = data_root / "intakeOutput.csv.gz"
+    if not path.exists():
+        return empty_action_evidence()
+    columns = [ID, "intakeoutputoffset", "celllabel", "cellpath", "cellvaluenumeric", "cellvaluetext"]
+    rows = []
+    for chunk in _read_csv_chunks(path, columns, chunksize=500_000):
+        chunk = chunk[chunk[ID].isin(stay_ids)].copy()
+        if chunk.empty:
+            continue
+        text = (
+            chunk["celllabel"].fillna("").astype(str)
+            + " "
+            + chunk["cellpath"].fillna("").astype(str)
+            + " "
+            + chunk["cellvaluetext"].fillna("").astype(str)
+        ).str.lower()
+        mask = pd.Series(False, index=chunk.index)
+        for term in config.action_terms["transfusion"]:
+            mask |= text.str.contains(term, regex=False)
+        chunk = chunk[mask].copy()
+        if chunk.empty:
+            continue
+        for record in chunk.to_dict("records"):
+            offset = _finite_number(record.get("intakeoutputoffset"))
+            if not np.isfinite(offset):
+                continue
+            amount = _finite_number(record.get("cellvaluenumeric"))
+            rows.append({
+                "stay_id": int(record[ID]),
+                "starttime": pseudo_time(offset),
+                "endtime": pseudo_time(offset + 60.0),
+                "action": "transfusion",
+                "source": "eicu_intakeoutput",
+                "evidence_kind": "blood_product_volume_or_presence",
+                "dose_observed": bool(np.isfinite(amount) and amount > 0.0),
+                "original_label": " ".join(
+                    str(record.get(column) or "")
+                    for column in ("celllabel", "cellpath", "cellvaluetext")
+                ),
+            })
+    return pd.DataFrame(rows, columns=ACTION_EVIDENCE_COLUMNS) if rows else empty_action_evidence()
+
+
 def read_action_evidence(data_root: Path, stay_ids: set[int], config: BodySystemDiseaseConfig) -> pd.DataFrame:
     frames = [
         medication_evidence(data_root, stay_ids, config),
         infusion_evidence(data_root, stay_ids, config),
         treatment_evidence(data_root, stay_ids, config),
         respiratory_evidence(data_root, stay_ids, config),
+        transfusion_intake_output_evidence(data_root, stay_ids, config),
     ]
     frames = [frame for frame in frames if not frame.empty]
     if not frames:

@@ -839,7 +839,7 @@
         "transitions": 16047
       },
       "coagulopathy_heme": {
-        "active_transitions": 5904,
+        "active_transitions": 8055,
         "body_system": "hematologic",
         "boundary": {
           "bounded_engineering_cohort": true,
@@ -859,19 +859,27 @@
           "eicu_coagulopathy_heme_target_router.json",
           "BODY_SYSTEM_COVERAGE_FINDINGS.md"
         ],
+        "first_class_variables_added": [
+          "hemoglobin",
+          "hematocrit",
+          "inr",
+          "ptt",
+          "fibrinogen"
+        ],
         "hospital_holdout": {
           "active_bootstrap_95_ci": [
-            -0.091537,
-            -0.025203
+            -0.120808,
+            -0.056939
           ],
-          "active_point_delta_vs_persistence": -0.056817,
+          "active_point_delta_vs_persistence": -0.087116,
           "significant": true
         },
         "hospitals": 12,
+        "interpretation": "Heme/coag is no longer just a platelet/WBC proxy: hemoglobin and hematocrit select ridge_realfit in 7/7 splits, INR has partial signal, and transfusion evidence includes volume/dose-observed intakeOutput rows.",
         "random_patient_splits": {
           "active_beats_persistence": 7,
           "active_significant": 7,
-          "median_normalized_delta_vs_persistence": -0.08778,
+          "median_normalized_delta_vs_persistence": -0.083132,
           "splits": 7
         },
         "selected_sources": {
@@ -882,29 +890,52 @@
           "creatinine": {
             "persistence": 7
           },
+          "fibrinogen": {
+            "persistence": 7
+          },
+          "hematocrit": {
+            "ridge_realfit": 7
+          },
+          "hemoglobin": {
+            "ridge_realfit": 7
+          },
+          "inr": {
+            "persistence": 5,
+            "ridge_realfit": 2
+          },
           "lactate": {
-            "persistence": 3,
-            "population_delta": 4
+            "persistence": 5,
+            "population_delta": 2
           },
           "map": {
             "ridge_realfit": 7
           },
           "ph": {
-            "persistence": 5,
-            "ridge_realfit": 2
+            "persistence": 7
           },
           "platelets": {
-            "population_delta": 2,
-            "ridge_realfit": 5
+            "population_delta": 4,
+            "ridge_realfit": 3
+          },
+          "ptt": {
+            "persistence": 7
           },
           "wbc": {
-            "population_delta": 7
+            "persistence": 2,
+            "population_delta": 5
           }
         },
-        "status": "validated_bounded_factual_router",
-        "stays": 1380,
-        "subjects": 1187,
-        "transitions": 16794
+        "status": "validated_bounded_first_class_heme_coag_router",
+        "stays": 1382,
+        "subjects": 1189,
+        "transfusion_evidence": {
+          "active_stays": 538,
+          "active_windows": 1598,
+          "dose_observed_windows": 1858,
+          "stays": 577,
+          "windows": 1860
+        },
+        "transitions": 16870
       },
       "hepatic_failure": {
         "active_transitions": 10717,
@@ -1076,7 +1107,7 @@
         "transitions": 422244
       }
     },
-    "next_engineering_step": "Map missing first-class variables for heme/hepatic/neuro (hemoglobin, INR, neurologic exam/procedure proxies), then run selected modules at full scale or longer horizons where physiology is slow.",
+    "next_engineering_step": "Heme/coag v2 now has first-class Hgb/Hct/INR/PTT/fibrinogen and transfusion evidence; next depth work should build a bleeding/coagulation reserve belief state or add first-class neuro/hepatic variables.",
     "promotion_sequence": [
       "define disease cohort and target/action contract",
       "build observed-treatment transitions with masks and ages",

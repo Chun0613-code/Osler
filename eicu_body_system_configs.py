@@ -89,15 +89,21 @@ HEPATIC_ENCEPHALOPATHY_TERMS = (
 
 TRANSFUSION_TERMS = (
     "packed red blood",
+    "packed red blood cells",
     "prbc",
+    "prbcs",
     "rbc transfusion",
     "red blood cell",
+    "red blood cells",
     "platelet transfusion",
+    "platelet concentrate",
     "fresh frozen plasma",
     "ffp",
     "cryoprecipitate",
     "blood product",
+    "blood products",
     "transfusion",
+    "transfuse",
 )
 
 
@@ -324,6 +330,11 @@ BODY_SYSTEM_CONFIGS: dict[str, BodySystemDiseaseConfig] = {
         ),
         targets=(
             "platelets",
+            "hemoglobin",
+            "hematocrit",
+            "inr",
+            "ptt",
+            "fibrinogen",
             "wbc",
             "lactate",
             "map",
@@ -333,6 +344,11 @@ BODY_SYSTEM_CONFIGS: dict[str, BodySystemDiseaseConfig] = {
         ),
         state_vars=(
             "platelets",
+            "hemoglobin",
+            "hematocrit",
+            "inr",
+            "ptt",
+            "fibrinogen",
             "wbc",
             "lactate",
             "map",
@@ -355,11 +371,11 @@ BODY_SYSTEM_CONFIGS: dict[str, BodySystemDiseaseConfig] = {
             "antibiotics": ANTIBIOTIC_TERMS,
             "nephrotoxin": NEPHROTOXIN_TERMS,
         },
-        active_low={"platelets": 100.0, "map": 65.0, "ph": 7.30},
-        active_high={"lactate": 2.0, "wbc": 12.0, "creatinine": 2.0},
+        active_low={"platelets": 100.0, "hemoglobin": 8.0, "map": 65.0, "ph": 7.30},
+        active_high={"inr": 1.5, "ptt": 45.0, "lactate": 2.0, "wbc": 12.0, "creatinine": 2.0},
         active_actions=("hist_transfusion", "hist_vasopressor"),
         notes=(
-            "Hemoglobin/INR are not yet in the shared eICU state map; this is a proxy module.",
+            "Hemoglobin, hematocrit, INR, PTT, fibrinogen, and transfusion evidence are first-class inputs.",
             "Transfusion and anticoagulation effects remain causal-closed.",
         ),
     ),
@@ -372,4 +388,3 @@ def get_body_system_config(name: str) -> BodySystemDiseaseConfig:
     except KeyError as exc:
         available = ", ".join(sorted(BODY_SYSTEM_CONFIGS))
         raise ValueError(f"unknown body-system disease '{name}'. Available: {available}") from exc
-

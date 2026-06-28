@@ -6,66 +6,68 @@
       "antiplatelet": 922,
       "fluids": 9512,
       "nephrotoxin": 1439,
+      "transfusion": 3777,
       "vasopressor": 301
     },
-    "dose_observed_fraction": 0.0,
-    "rows": 18237,
+    "dose_observed_fraction": 0.170891,
+    "rows": 22014,
     "sources": {
+      "eicu_intakeoutput": 3777,
       "eicu_medication": 18237
     }
   },
   "action_support": {
     "antibiotics": {
-      "active_stays": 470,
-      "active_windows": 2835,
+      "active_stays": 522,
+      "active_windows": 3424,
       "dose_observed_windows": 0,
-      "stays": 610,
-      "windows": 6411
+      "stays": 612,
+      "windows": 6423
     },
     "anticoagulant": {
-      "active_stays": 360,
-      "active_windows": 1794,
+      "active_stays": 403,
+      "active_windows": 2228,
       "dose_observed_windows": 0,
-      "stays": 497,
-      "windows": 5079
+      "stays": 498,
+      "windows": 5087
     },
     "antiplatelet": {
-      "active_stays": 198,
-      "active_windows": 976,
+      "active_stays": 227,
+      "active_windows": 1195,
       "dose_observed_windows": 0,
-      "stays": 293,
-      "windows": 2809
+      "stays": 294,
+      "windows": 2816
     },
     "fluids": {
-      "active_stays": 805,
-      "active_windows": 4655,
+      "active_stays": 949,
+      "active_windows": 6416,
       "dose_observed_windows": 0,
-      "stays": 1126,
-      "windows": 13487
+      "stays": 1128,
+      "windows": 13545
     },
     "nephrotoxin": {
-      "active_stays": 229,
-      "active_windows": 970,
+      "active_stays": 251,
+      "active_windows": 1181,
       "dose_observed_windows": 0,
       "stays": 292,
-      "windows": 2209
+      "windows": 2211
     },
     "transfusion": {
-      "active_stays": 0,
-      "active_windows": 0,
-      "dose_observed_windows": 0,
-      "stays": 0,
-      "windows": 0
+      "active_stays": 538,
+      "active_windows": 1598,
+      "dose_observed_windows": 1858,
+      "stays": 577,
+      "windows": 1860
     },
     "vasopressor": {
-      "active_stays": 175,
-      "active_windows": 2041,
+      "active_stays": 176,
+      "active_windows": 2052,
       "dose_observed_windows": 0,
       "stays": 177,
-      "windows": 2091
+      "windows": 2095
     }
   },
-  "active_transitions": 5904,
+  "active_transitions": 8055,
   "body_system": "hematologic",
   "bounded_max_stays": 1500,
   "candidate_stay_count_before_bound": 37686,
@@ -85,21 +87,26 @@
       "bilirubin_direct": 550,
       "bun": 11908,
       "creatinine": 12093,
+      "fibrinogen": 539,
       "glucose": 49515,
       "heart_rate": 1649697,
+      "hematocrit": 15336,
+      "hemoglobin": 15373,
+      "inr": 5522,
       "lactate": 1166,
       "map": 713545,
       "o2sat": 1486610,
       "ph": 4533,
       "platelets": 12528,
       "potassium": 16097,
+      "ptt": 3955,
       "respiratory_rate": 1244347,
       "sodium": 13182,
       "temperature": 326871,
       "urine_output": 18936,
       "wbc": 12350
     },
-    "rows": 5595512,
+    "rows": 5636237,
     "stays": 1500
   },
   "output": "eicu_coagulopathy_heme_transitions_6h.parquet",
@@ -207,15 +214,21 @@
         ],
         "transfusion": [
           "packed red blood",
+          "packed red blood cells",
           "prbc",
+          "prbcs",
           "rbc transfusion",
           "red blood cell",
+          "red blood cells",
           "platelet transfusion",
+          "platelet concentrate",
           "fresh frozen plasma",
           "ffp",
           "cryoprecipitate",
           "blood product",
-          "transfusion"
+          "blood products",
+          "transfusion",
+          "transfuse"
         ],
         "vasopressor": [
           "norepinephrine",
@@ -233,10 +246,13 @@
       ],
       "active_high": {
         "creatinine": 2.0,
+        "inr": 1.5,
         "lactate": 2.0,
+        "ptt": 45.0,
         "wbc": 12.0
       },
       "active_low": {
+        "hemoglobin": 8.0,
         "map": 65.0,
         "ph": 7.3,
         "platelets": 100.0
@@ -261,11 +277,16 @@
       "display_name": "Coagulopathy / thrombocytopenia / hematologic instability",
       "name": "coagulopathy_heme",
       "notes": [
-        "Hemoglobin/INR are not yet in the shared eICU state map; this is a proxy module.",
+        "Hemoglobin, hematocrit, INR, PTT, fibrinogen, and transfusion evidence are first-class inputs.",
         "Transfusion and anticoagulation effects remain causal-closed."
       ],
       "state_vars": [
         "platelets",
+        "hemoglobin",
+        "hematocrit",
+        "inr",
+        "ptt",
+        "fibrinogen",
         "wbc",
         "lactate",
         "map",
@@ -281,6 +302,11 @@
       ],
       "targets": [
         "platelets",
+        "hemoglobin",
+        "hematocrit",
+        "inr",
+        "ptt",
+        "fibrinogen",
         "wbc",
         "lactate",
         "map",
@@ -294,6 +320,11 @@
     "lookback_hours": 6.0,
     "state_vars": [
       "platelets",
+      "hemoglobin",
+      "hematocrit",
+      "inr",
+      "ptt",
+      "fibrinogen",
       "wbc",
       "lactate",
       "map",
@@ -310,6 +341,11 @@
     "target_tolerance_hours": 2.0,
     "targets": [
       "platelets",
+      "hemoglobin",
+      "hematocrit",
+      "inr",
+      "ptt",
+      "fibrinogen",
       "wbc",
       "lactate",
       "map",
@@ -318,16 +354,21 @@
       "creatinine"
     ]
   },
-  "stays": 1380,
-  "subjects": 1187,
+  "stays": 1382,
+  "subjects": 1189,
   "target_pair_counts": {
     "bicarbonate": 1429,
     "creatinine": 746,
+    "fibrinogen": 61,
+    "hematocrit": 2392,
+    "hemoglobin": 2472,
+    "inr": 340,
     "lactate": 138,
     "map": 16685,
     "ph": 544,
     "platelets": 946,
+    "ptt": 309,
     "wbc": 905
   },
-  "transitions": 16794
+  "transitions": 16870
 }

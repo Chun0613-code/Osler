@@ -58,8 +58,9 @@ Observed examples:
   respiratory rate select `ridge_realfit`; sodium/pH remain mixed.
 - Hepatic proxy: MAP carries most six-hour signal; bilirubin and creatinine fall
   back.
-- Hematologic proxy: platelets and WBC show signal, but hemoglobin/INR are still
-  missing from the shared state map.
+- Hematologic/coagulation v2: hemoglobin, hematocrit, INR, PTT, fibrinogen, and
+  transfusion evidence are first-class; hemoglobin and hematocrit select
+  `ridge_realfit` in 7/7 splits while sparse PTT/fibrinogen fall back.
 
 This is a physiological result, not just a modeling trick.  A 6-hour window is
 long enough for fast ICU targets, but too short for many renal accumulation
@@ -100,5 +101,6 @@ deterministic 5,000-stay extraction because the full respiratory cohort is much
 larger and slower than sepsis/AKI in an interactive run.
 
 The cardiovascular/neuro/hepatic/heme modules also carry a bounded-cohort caveat
-and, for neuro/hepatic/heme, a proxy-target caveat.  They broaden body coverage;
-they do not yet replace disease-specific mechanistic models.
+and, for neuro/hepatic, a proxy-target caveat.  Heme/coagulation has now moved
+one step deeper with first-class Hgb/Hct/INR/PTT/fibrinogen and transfusion
+evidence, but it is still factual rather than causal.

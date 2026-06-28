@@ -191,10 +191,12 @@ All four bounded modules pass the same factual router gate:
 - no causal, counterfactual, clinical, runtime, checkpoint, or active-rule claim
 
 This expands body coverage to cardiovascular, nervous-system proxy,
-hepatic/GI proxy, and hematologic proxy systems.  The proxy caveat matters:
-neuro lacks detailed exam trajectories, hepatic lacks first-class INR/ammonia
-state, and heme lacks first-class hemoglobin/INR state.  These modules broaden
-factual coverage; they do not yet become full mechanistic digital twins.
+hepatic/GI proxy, and hematologic/coagulation systems.  The proxy caveat still
+matters for neuro and hepatic modules: neuro lacks detailed exam trajectories,
+and hepatic lacks first-class ammonia/encephalopathy state.  Heme/coagulation
+has moved beyond proxy status with first-class hemoglobin, hematocrit, INR,
+PTT, fibrinogen, and transfusion evidence, but it remains factual rather than
+causal.
 
 ## Boundary
 
@@ -205,7 +207,8 @@ The immediate broad engineering step for B has now been tested with a fourth
 respiratory module.  DKA, sepsis, AKI, and bounded respiratory failure all
 validate the factual-router pattern.
 The generic body-system adapter now pushes the same pattern further across
-cardiovascular, neurologic-proxy, hepatic-proxy, and hematologic-proxy systems.
+cardiovascular, neurologic-proxy, hepatic-proxy, and hematologic/coagulation
+systems.
 The next coverage work should add missing first-class variables rather than
 only adding more disease names.
 The AKI renal mechanism audit shows that the first simple mechanism candidate is
