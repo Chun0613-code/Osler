@@ -61,6 +61,10 @@ Observed examples:
 - Hematologic/coagulation v2: hemoglobin, hematocrit, INR, PTT, fibrinogen, and
   transfusion evidence are first-class; hemoglobin and hematocrit select
   `ridge_realfit` in 7/7 splits while sparse PTT/fibrinogen fall back.
+- Hematologic/coagulation long horizon: 24h is stronger than 6h for the overall
+  heme router and preserves 7/7 `ridge_realfit` selection for hemoglobin and
+  hematocrit; 48h still beats persistence overall but heme lab selection weakens.
+  INR/PTT/fibrinogen/platelets remain persistence at 24h/48h.
 - Hematologic/coagulation belief: bleeding/coagulation reserve candidates show
   partial Hgb/Hct signal, but do not pass robust 7/7 placebo-gated validation;
   the heme/coag hidden state remains candidate-only.

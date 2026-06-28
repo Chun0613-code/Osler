@@ -25,7 +25,7 @@ is granted.
 | Cardiovascular | Cardiovascular instability / shock / heart failure | validated bounded factual router |
 | Nervous system | Acute neurologic injury / seizure / coma | validated bounded physiologic-proxy router |
 | Hepatic / GI | Hepatic failure / cirrhosis | validated bounded proxy router |
-| Hematologic | Coagulopathy / thrombocytopenia / bleeding | validated bounded first-class heme/coag router + candidate-only belief audit |
+| Hematologic | Coagulopathy / thrombocytopenia / bleeding | validated bounded first-class heme/coag router + long-horizon audit + candidate-only belief audit |
 
 ## New Bounded Router Results
 
@@ -80,6 +80,12 @@ Hematologic:
   dose-observed windows.
 - This is no longer just a platelet/WBC proxy, but it is still not a
   transfusion or anticoagulation causal model.
+- Long-horizon heme/coag audits were run on the same stay set as the 6h cohort.
+  The router remains significant at 24h and 48h, with the strongest active
+  median delta at 24h (-0.133450).  Hemoglobin and hematocrit keep `ridge_realfit`
+  in 7/7 splits at 24h, but weaken by 48h.  INR, PTT, fibrinogen, and platelets
+  still fall back to persistence at 24h/48h, so horizon alone does not unlock
+  coagulation-cascade targets.
 - A bleeding/coagulation reserve belief audit was run with a strict
   capacity-matched placebo gate.  Feature beliefs showed partial Hct/Hgb signal
   (Hct 4/7, Hgb 3/7 passes-both), but no target reached robust 7/7 validation,

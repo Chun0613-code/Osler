@@ -253,3 +253,13 @@ explicit state is weaker.  Therefore heme/coagulation depth remains
 candidate-only.  The next hematology step should be better transfusion-dose and
 blood-product subtype observability plus longer horizons, not promotion of the
 current hidden state.
+
+The longer-horizon heme/coag audit has now been run on the same stay set as the
+6h cohort.  It strengthens the factual router at 24h: active median delta
+improves to -0.133450, with hemoglobin and hematocrit still selecting
+`ridge_realfit` in 7/7 random splits.  At 48h the router still beats persistence
+in 7/7 splits, but heme lab selection weakens.  INR, PTT, fibrinogen, and
+platelets remain persistence at both 24h and 48h.  This closes the simple
+"just extend the horizon" hypothesis for coagulation cascade targets: horizon
+helps Hgb/Hct, but coagulation depth now needs blood-product subtype and dose
+observability rather than another hidden-state promotion attempt.

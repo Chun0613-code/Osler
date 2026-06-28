@@ -129,6 +129,12 @@ The next useful heme/coag depth work is not another 6h belief tweak.  It is:
   cryoprecipitate;
 - external validation or a larger cohort for sparse INR/PTT/fibrinogen windows.
 
+The longer-horizon audit has since been run.  It validates 24h hemoglobin and
+hematocrit factual routing, but INR/PTT/fibrinogen/platelets still fall back to
+persistence at 24h/48h.  This supports the same boundary: longer horizons help
+observable Hgb/Hct forecasting, but they do not validate the current hidden
+coagulation-reserve belief state.
+
 Until then, the validated heme/coag module remains the factual router with
 first-class hematology variables, while the bleeding/coagulation belief remains
 candidate-only.

@@ -145,6 +145,25 @@ def bounded_stays(
     return {stay_id: stays[stay_id] for stay_id in keep}
 
 
+def read_restricted_stay_ids(path: Path | None) -> set[int] | None:
+    """Read a local cohort stay set for apples-to-apples horizon audits.
+
+    The returned identifiers are used only internally to restrict extraction.
+    Reports include only counts and the source filename, never the identifiers.
+    """
+
+    if path is None:
+        return None
+    if not path.exists():
+        raise FileNotFoundError(f"restricted stay source not found: {path}")
+    if path.suffix == ".parquet":
+        frame = pd.read_parquet(path, columns=["stay_id"])
+    else:
+        frame = pd.read_csv(path, usecols=["stay_id"])
+    values = pd.to_numeric(frame["stay_id"], errors="coerce").dropna().astype("int64")
+    return {int(value) for value in values.unique()}
+
+
 def medication_evidence(
     data_root: Path,
     stay_ids: set[int],
@@ -535,6 +554,8 @@ def cohort_report(
     config: BodySystemDiseaseConfig,
     horizon_hours: float,
     max_stays: int | None,
+    restricted_stay_source: Path | None = None,
+    restricted_stay_count: int | None = None,
 ) -> dict[str, object]:
     criteria_counts = pd.Series(
         [payload["criteria"] for payload in disease_stays.values()],
@@ -549,6 +570,8 @@ def cohort_report(
         "body_system": config.body_system,
         "output": output.name,
         "bounded_max_stays": max_stays,
+        "restricted_stay_source": restricted_stay_source.name if restricted_stay_source is not None else None,
+        "restricted_stay_count": restricted_stay_count,
         "candidate_stay_count_before_bound": int(len(disease_stays)),
         "criteria_counts_before_filter": criteria_counts,
         "stays": int(frame["stay_id"].nunique()) if len(frame) else 0,
@@ -585,6 +608,7 @@ def cohort_report(
             "raw_rows_included": False,
             "patient_ids_included_in_report": False,
             "bounded_engineering_cohort": max_stays is not None,
+            "restricted_stay_ids_used_internally": restricted_stay_source is not None,
             "factual_observed_treatment_only": True,
             "medication_orders_used_as_numeric_administrations": False,
             "coarse_treatment_rows_used_as_numeric_administrations": False,
@@ -601,9 +625,17 @@ def build_transitions(
     config: BodySystemDiseaseConfig,
     max_stays: int | None,
     horizon_hours: float,
+    restrict_stays_from: Path | None = None,
 ) -> dict[str, object]:
     meta = read_patient_meta(data_root)
     all_stays = read_diagnosis_stays(data_root, meta, config)
+    restricted_stay_ids = read_restricted_stay_ids(restrict_stays_from)
+    if restricted_stay_ids is not None:
+        all_stays = {
+            stay_id: payload
+            for stay_id, payload in all_stays.items()
+            if stay_id in restricted_stay_ids
+        }
     disease_stays = bounded_stays(all_stays, max_stays=max_stays)
     stay_ids = set(disease_stays)
     measurements = read_measurements(data_root, stay_ids)
@@ -646,6 +678,8 @@ def build_transitions(
         config,
         horizon_hours,
         max_stays,
+        restricted_stay_source=restrict_stays_from,
+        restricted_stay_count=len(restricted_stay_ids) if restricted_stay_ids is not None else None,
     )
     report["candidate_stay_count_before_bound"] = int(len(all_stays))
     return report
@@ -659,6 +693,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--report", type=Path, default=None)
     parser.add_argument("--max-stays", type=int, default=2500)
     parser.add_argument("--horizon-hours", type=float, default=DELTA_H)
+    parser.add_argument("--restrict-stays-from", type=Path, default=None)
     return parser.parse_args()
 
 
@@ -673,6 +708,7 @@ def main() -> None:
         config,
         max_stays=args.max_stays,
         horizon_hours=args.horizon_hours,
+        restrict_stays_from=args.restrict_stays_from,
     )
     report_path.write_text(json.dumps(report, indent=2, sort_keys=True), encoding="utf-8")
     print(json.dumps({

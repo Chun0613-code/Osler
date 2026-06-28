@@ -1,9 +1,11 @@
 import unittest
+from pathlib import Path
+import tempfile
 
 import pandas as pd
 
 from eicu_body_system_configs import BODY_SYSTEM_CONFIGS, get_body_system_config
-from eicu_body_system_transition_extract import add_active_column, classify_action
+from eicu_body_system_transition_extract import add_active_column, classify_action, read_restricted_stay_ids
 from eicu_sepsis_transition_extract import LAB_TO_STATE, PLAUSIBLE
 from eicu_sepsis_target_router import _feature_columns
 from heme_coag_belief import (
@@ -172,6 +174,15 @@ class EicuBodySystemRouterTests(unittest.TestCase):
             features.loc[0, "state_belief_coag_reserve_mean"],
             features.loc[1, "state_belief_coag_reserve_mean"],
         )
+
+    def test_restricted_stay_ids_are_read_without_duplicates(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "stay_ids.csv"
+            pd.DataFrame({"stay_id": [10, 10, 12, None]}).to_csv(path, index=False)
+
+            stay_ids = read_restricted_stay_ids(path)
+
+        self.assertEqual(stay_ids, {10, 12})
 
 
 if __name__ == "__main__":

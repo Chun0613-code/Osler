@@ -926,6 +926,75 @@
           "interpretation": "Bleeding/coagulation reserve beliefs show partial hemoglobin/hematocrit signal, but no target reaches robust 7/7 placebo-gated validation and hospital-heldout does not pass.",
           "status": "candidate_only_not_validated_for_promotion"
         },
+        "long_horizon": {
+          "boundary": {
+            "causal_claim_allowed": false,
+            "checkpoint_promotion_allowed": false,
+            "clinical_claim_allowed": false,
+            "counterfactual_claim_allowed": false,
+            "restricted_stay_ids_used_internally": true
+          },
+          "date": "2026-06-28",
+          "files": [
+            "eicu_coagulopathy_heme_transition_report_24h.json",
+            "eicu_coagulopathy_heme_transition_report_48h.json",
+            "eicu_coagulopathy_heme_target_router_24h.json",
+            "eicu_coagulopathy_heme_target_router_48h.json",
+            "HEME_COAG_LONG_HORIZON_FINDINGS.md"
+          ],
+          "horizons": {
+            "24h": {
+              "active_transitions": 6266,
+              "hospital_holdout": {
+                "active_bootstrap_95_ci": [
+                  -0.201937,
+                  -0.091589
+                ],
+                "active_point_delta_vs_persistence": -0.141781,
+                "significant": true
+              },
+              "random_patient_splits": {
+                "active_beats_persistence": 7,
+                "active_significant": 7,
+                "hematocrit_source": "ridge_realfit_7_of_7",
+                "hemoglobin_source": "ridge_realfit_7_of_7",
+                "inr_ptt_fibrinogen_platelets_source": "persistence_7_of_7",
+                "median_normalized_delta_vs_persistence": -0.13345,
+                "splits": 7
+              },
+              "restricted_stay_source": "eicu_coagulopathy_heme_transitions_6h.parquet",
+              "stays": 1044,
+              "subjects": 907,
+              "transitions": 12379
+            },
+            "48h": {
+              "active_transitions": 4468,
+              "hospital_holdout": {
+                "active_bootstrap_95_ci": [
+                  -0.034186,
+                  -0.009517
+                ],
+                "active_point_delta_vs_persistence": -0.021492,
+                "significant": true
+              },
+              "random_patient_splits": {
+                "active_beats_persistence": 7,
+                "active_significant": 7,
+                "hematocrit_source": "ridge_realfit_2_of_7",
+                "hemoglobin_source": "ridge_realfit_4_of_7",
+                "inr_ptt_fibrinogen_platelets_source": "persistence_7_of_7",
+                "median_normalized_delta_vs_persistence": -0.121074,
+                "splits": 7
+              },
+              "restricted_stay_source": "eicu_coagulopathy_heme_transitions_6h.parquet",
+              "stays": 650,
+              "subjects": 584,
+              "transitions": 8480
+            }
+          },
+          "interpretation": "24h strengthens hemoglobin/hematocrit factual routing, but 48h weakens heme lab source selection and coagulation cascade targets remain persistence at both horizons.",
+          "status": "validated_long_horizon_factual_router_candidate_only_for_hidden_state"
+        },
         "random_patient_splits": {
           "active_beats_persistence": 7,
           "active_significant": 7,
@@ -1157,7 +1226,7 @@
         "transitions": 422244
       }
     },
-    "next_engineering_step": "Heme/coag v2 now has first-class Hgb/Hct/INR/PTT/fibrinogen and transfusion evidence; the first bleeding/coagulation belief audit remains candidate-only, so next depth work should improve transfusion-dose/product subtype observability, longer heme/coag horizons, or add first-class neuro/hepatic variables.",
+    "next_engineering_step": "Heme/coag long-horizon audit is complete: 24h strengthens Hgb/Hct factual routing, but INR/PTT/fibrinogen/platelets remain persistence. Next depth work should improve transfusion-dose/product subtype observability or add first-class neuro/hepatic variables.",
     "promotion_sequence": [
       "define disease cohort and target/action contract",
       "build observed-treatment transitions with masks and ages",

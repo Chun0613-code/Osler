@@ -146,6 +146,19 @@ not validate a promoted heme/coag hidden state; they keep the belief
 candidate-only and preserve the same factual, observational, non-clinical
 boundary.
 
+`eicu_coagulopathy_heme_transitions_24h.parquet` and
+`eicu_coagulopathy_heme_transitions_48h.parquet` are local-only long-horizon
+heme/coag row-level cohorts and are ignored by git. They are restricted
+internally to the existing 6h heme/coag stay set for apples-to-apples horizon
+comparison. Aggregate reports are committed as
+`eicu_coagulopathy_heme_transition_report_24h.json`,
+`eicu_coagulopathy_heme_transition_report_48h.json`,
+`eicu_coagulopathy_heme_target_router_24h.json`, and
+`eicu_coagulopathy_heme_target_router_48h.json`. The 24h router has the
+strongest heme/coag active-window delta and preserves 7/7 hemoglobin/hematocrit
+`ridge_realfit` selection; 48h remains significant overall but heme lab
+selection weakens. Coagulation cascade targets remain persistence fallback.
+
 `mimiciii_dka_transitions_6h_demo.parquet` is local-only and ignored by git. It
 is the observed-treatment MIMIC-III demo lab-defined DKA-like transition cohort
 used for schema and factual proxy smoke testing. Committed aggregate reports
