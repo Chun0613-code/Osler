@@ -42,8 +42,12 @@ Default readiness specs now cover four disease chapters:
 - sepsis fluid strategy RCT
 - AKI renal-support / RRT timing strategy RCT
 - respiratory oxygenation / ventilation strategy RCT
+- cardiovascular vasopressor / inotrope strategy RCT
+- acute neuro hemodynamic / oxygenation strategy RCT
+- hepatic failure resuscitation / support strategy RCT
+- coagulopathy transfusion / anticoagulation strategy RCT
 
-All four fail closed until an external evidence table is mapped into the
+All specs fail closed until an external evidence table is mapped into the
 contract.
 
 ## Required Data Contract

@@ -110,6 +110,18 @@ in hospital-heldout evaluation. This remains factual, observational,
 non-clinical, and bounded-cohort only; no causal or runtime treatment authority
 is granted.
 
+The generic body-system adapter produces additional local-only row-level
+parquets: `eicu_cardiovascular_instability_transitions_6h.parquet`,
+`eicu_acute_neuro_transitions_6h.parquet`,
+`eicu_hepatic_failure_transitions_6h.parquet`, and
+`eicu_coagulopathy_heme_transitions_6h.parquet`. These are ignored by git.
+Committed aggregate reports include the matching `*_transition_report.json` and
+`*_target_router.json` files plus `BODY_SYSTEM_COVERAGE_FINDINGS.md`. These
+bounded modules extend factual-router coverage to cardiovascular, neurologic
+proxy, hepatic/GI proxy, and hematology/coagulation proxy systems. They remain
+observational, non-clinical, bounded-cohort artifacts with no causal or runtime
+treatment authority.
+
 `eicu_aki_renal_belief_state_audit.json` is the explicit predict-update version
 of the renal belief audit. It is aggregate-only. The state belief passes
 downstream gates for BUN at 24h/48h and for urine output at 24h, but it does not

@@ -1,0 +1,272 @@
+{
+  "action_evidence": {
+    "by_action": {
+      "antiepileptic": 3003,
+      "fluids": 6795,
+      "vasopressor": 244,
+      "ventilation": 640
+    },
+    "dose_observed_fraction": 0.0,
+    "rows": 10682,
+    "sources": {
+      "eicu_medication": 10042,
+      "eicu_respiratorycare": 640
+    }
+  },
+  "action_support": {
+    "antiepileptic": {
+      "active_stays": 749,
+      "active_windows": 7667,
+      "dose_observed_windows": 0,
+      "stays": 772,
+      "windows": 7985
+    },
+    "fluids": {
+      "active_stays": 1036,
+      "active_windows": 9322,
+      "dose_observed_windows": 0,
+      "stays": 1127,
+      "windows": 13002
+    },
+    "osmotherapy": {
+      "active_stays": 0,
+      "active_windows": 0,
+      "dose_observed_windows": 0,
+      "stays": 0,
+      "windows": 0
+    },
+    "vasopressor": {
+      "active_stays": 141,
+      "active_windows": 1363,
+      "dose_observed_windows": 0,
+      "stays": 143,
+      "windows": 1780
+    },
+    "ventilation": {
+      "active_stays": 181,
+      "active_windows": 417,
+      "dose_observed_windows": 0,
+      "stays": 181,
+      "windows": 431
+    }
+  },
+  "active_transitions": 11418,
+  "body_system": "nervous_system",
+  "bounded_max_stays": 1500,
+  "candidate_stay_count_before_bound": 33128,
+  "criteria_counts_before_filter": {
+    "diagnosis_text_or_code:admissionDx.csv.gz": 974,
+    "diagnosis_text_or_code:diagnosis.csv.gz": 526
+  },
+  "data_root": "eicu-collaborative-research-database-2.0",
+  "dataset": "PhysioNet eICU Collaborative Research Database 2.0",
+  "disease": "acute_neuro",
+  "display_name": "Acute neurologic injury / seizure / coma",
+  "hospitals": 12,
+  "measurements": {
+    "by_var": {
+      "bicarbonate": 13652,
+      "bilirubin": 3920,
+      "bilirubin_direct": 479,
+      "bun": 10158,
+      "creatinine": 10394,
+      "glucose": 43904,
+      "heart_rate": 1449087,
+      "lactate": 880,
+      "map": 577492,
+      "o2sat": 1330263,
+      "ph": 3424,
+      "platelets": 10155,
+      "potassium": 13782,
+      "respiratory_rate": 1172103,
+      "sodium": 11908,
+      "temperature": 345362,
+      "urine_output": 12502,
+      "wbc": 10091
+    },
+    "rows": 5019556,
+    "stays": 1497
+  },
+  "output": "eicu_acute_neuro_transitions_6h.parquet",
+  "safety_boundary": {
+    "bounded_engineering_cohort": true,
+    "causal_claim_allowed": false,
+    "clinical_claim_allowed": false,
+    "coarse_treatment_rows_used_as_numeric_administrations": false,
+    "counterfactual_claim_allowed": false,
+    "factual_observed_treatment_only": true,
+    "medication_orders_used_as_numeric_administrations": false,
+    "patient_ids_included_in_report": false,
+    "raw_rows_included": false
+  },
+  "schema": {
+    "action_channels": [
+      "ventilation",
+      "vasopressor",
+      "antiepileptic",
+      "osmotherapy",
+      "fluids"
+    ],
+    "active_column": "acute_neuro_active_t",
+    "anchor_step_hours": 4.0,
+    "config": {
+      "action_keys": [
+        "ventilation",
+        "vasopressor",
+        "antiepileptic",
+        "osmotherapy",
+        "fluids"
+      ],
+      "action_terms": {
+        "antiepileptic": [
+          "levetiracetam",
+          "keppra",
+          "phenytoin",
+          "fosphenytoin",
+          "valproate",
+          "valproic",
+          "lacosamide",
+          "lorazepam",
+          "midazolam"
+        ],
+        "fluids": [
+          "normal saline",
+          "sodium chloride",
+          "nacl",
+          "lactated",
+          "ringer",
+          "crystalloid",
+          "fluid bolus",
+          "iv fluid",
+          "saline bolus"
+        ],
+        "osmotherapy": [
+          "mannitol",
+          "hypertonic saline",
+          "3% saline",
+          "sodium chloride 3",
+          "23.4% sodium chloride"
+        ],
+        "vasopressor": [
+          "norepinephrine",
+          "levophed",
+          "epinephrine",
+          "vasopressin",
+          "phenylephrine",
+          "neosynephrine",
+          "dopamine"
+        ],
+        "ventilation": [
+          "ventilator",
+          "mechanical ventilation",
+          "intub",
+          "ett",
+          "bipap",
+          "cpap"
+        ]
+      },
+      "active_actions": [
+        "hist_ventilation",
+        "hist_antiepileptic",
+        "hist_osmotherapy"
+      ],
+      "active_high": {
+        "glucose": 250.0,
+        "respiratory_rate": 24.0,
+        "sodium": 150.0
+      },
+      "active_low": {
+        "glucose": 70.0,
+        "map": 65.0,
+        "o2sat": 92.0,
+        "ph": 7.3
+      },
+      "body_system": "nervous_system",
+      "diagnosis_patterns": [
+        "stroke",
+        "cerebrovascular accident",
+        "intracranial hemorrhage",
+        "subarachnoid",
+        "subdural",
+        "seizure",
+        "status epilepticus",
+        "coma",
+        "encephalopathy",
+        "traumatic brain",
+        "i63",
+        "i61",
+        "i60",
+        "r56",
+        "g40"
+      ],
+      "display_name": "Acute neurologic injury / seizure / coma",
+      "name": "acute_neuro",
+      "notes": [
+        "ICU EHR does not expose neurologic exam granularity reliably; targets are physiologic proxies.",
+        "No neurologic outcome or treatment-effect claim is allowed."
+      ],
+      "state_vars": [
+        "map",
+        "heart_rate",
+        "respiratory_rate",
+        "o2sat",
+        "glucose",
+        "sodium",
+        "ph",
+        "bicarbonate",
+        "potassium",
+        "creatinine",
+        "temperature",
+        "wbc"
+      ],
+      "targets": [
+        "map",
+        "heart_rate",
+        "respiratory_rate",
+        "o2sat",
+        "glucose",
+        "sodium",
+        "ph"
+      ]
+    },
+    "future_suffix": "tp6",
+    "horizon_hours": 6.0,
+    "lookback_hours": 6.0,
+    "state_vars": [
+      "map",
+      "heart_rate",
+      "respiratory_rate",
+      "o2sat",
+      "glucose",
+      "sodium",
+      "ph",
+      "bicarbonate",
+      "potassium",
+      "creatinine",
+      "temperature",
+      "wbc"
+    ],
+    "target_tolerance_hours": 2.0,
+    "targets": [
+      "map",
+      "heart_rate",
+      "respiratory_rate",
+      "o2sat",
+      "glucose",
+      "sodium",
+      "ph"
+    ]
+  },
+  "stays": 1390,
+  "subjects": 1183,
+  "target_pair_counts": {
+    "glucose": 8374,
+    "heart_rate": 15995,
+    "map": 15749,
+    "o2sat": 15047,
+    "ph": 368,
+    "respiratory_rate": 12715,
+    "sodium": 1414
+  },
+  "transitions": 16238
+}

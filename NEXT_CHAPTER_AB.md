@@ -62,6 +62,9 @@ one latent space immediately.
 Implemented now:
 
 - `osler_jepa/disease_router.py`
+- `eicu_body_system_configs.py`
+- `eicu_body_system_transition_extract.py`
+- `eicu_body_system_target_router.py`
 - `next_chapter_ab.py`
 - `next_chapter_ab_contract.json`
 
@@ -167,6 +170,32 @@ hypoxemia are common in ICU data.  The extractor and router are ready for a
 background full-scale run, but the committed result is the bounded engineering
 cohort.
 
+Body-system coverage layer:
+
+- `eicu_body_system_configs.py`
+- `eicu_body_system_transition_extract.py`
+- `eicu_body_system_target_router.py`
+- `BODY_SYSTEM_COVERAGE_FINDINGS.md`
+
+New bounded modules:
+
+- cardiovascular instability / shock / heart failure
+- acute neurologic injury / seizure / coma physiologic proxy
+- hepatic failure / cirrhosis proxy
+- coagulopathy / thrombocytopenia / hematologic instability proxy
+
+All four bounded modules pass the same factual router gate:
+
+- 7/7 random patient splits significantly beat persistence on active windows
+- hospital-heldout split also significantly beats persistence
+- no causal, counterfactual, clinical, runtime, checkpoint, or active-rule claim
+
+This expands body coverage to cardiovascular, nervous-system proxy,
+hepatic/GI proxy, and hematologic proxy systems.  The proxy caveat matters:
+neuro lacks detailed exam trajectories, hepatic lacks first-class INR/ammonia
+state, and heme lacks first-class hemoglobin/INR state.  These modules broaden
+factual coverage; they do not yet become full mechanistic digital twins.
+
 ## Boundary
 
 This A/B contract contains no patient rows or identifiers. It is a build
@@ -175,6 +204,10 @@ contract, not a clinical product claim.
 The immediate broad engineering step for B has now been tested with a fourth
 respiratory module.  DKA, sepsis, AKI, and bounded respiratory failure all
 validate the factual-router pattern.
+The generic body-system adapter now pushes the same pattern further across
+cardiovascular, neurologic-proxy, hepatic-proxy, and hematologic-proxy systems.
+The next coverage work should add missing first-class variables rather than
+only adding more disease names.
 The AKI renal mechanism audit shows that the first simple mechanism candidate is
 not enough for slow creatinine/BUN targets at 6 hours.  The long-horizon AKI
 audit answers the next question: at 24-48 hours, creatinine and BUN move from

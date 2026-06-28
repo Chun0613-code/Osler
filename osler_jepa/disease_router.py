@@ -176,6 +176,117 @@ def disease_expansion_templates() -> tuple[DiseaseModuleSpec, ...]:
                 "Asthma-specific peak-flow/work-of-breathing targets remain a future non-ICU data problem.",
             ),
         ),
+        DiseaseModuleSpec(
+            disease="cardiovascular_instability",
+            cohort_definition=(
+                "cardiogenic shock / heart failure / acute coronary / arrhythmia "
+                "diagnosis support with hemodynamic, lactate, renal, and electrolyte targets"
+            ),
+            targets=(
+                "MAP",
+                "heart_rate",
+                "lactate",
+                "creatinine",
+                "urine_output",
+                "potassium",
+                "bicarbonate",
+            ),
+            action_channels=(
+                "vasopressors",
+                "inotropes",
+                "fluids",
+                "diuretics",
+                "antiarrhythmics",
+                "ventilation",
+            ),
+            notes=(
+                "Use as hemodynamic factual router only.",
+                "Vasopressor/inotrope treatment effects stay Chapter-A closed.",
+            ),
+        ),
+        DiseaseModuleSpec(
+            disease="acute_neuro",
+            cohort_definition=(
+                "stroke / intracranial hemorrhage / seizure / coma / encephalopathy "
+                "diagnosis support with physiologic proxy targets"
+            ),
+            targets=(
+                "MAP",
+                "heart_rate",
+                "respiratory_rate",
+                "oxygen_saturation",
+                "glucose",
+                "sodium",
+                "pH",
+            ),
+            action_channels=(
+                "ventilation",
+                "vasopressors",
+                "antiepileptics",
+                "osmotherapy",
+                "fluids",
+            ),
+            notes=(
+                "ICU EHR does not reliably expose detailed neurologic exam targets.",
+                "Treat this as a physiologic proxy router, not a neurologic outcome model.",
+            ),
+        ),
+        DiseaseModuleSpec(
+            disease="hepatic_failure",
+            cohort_definition=(
+                "hepatic failure / cirrhosis / hepatic encephalopathy diagnosis support "
+                "with bilirubin, platelet, lactate, renal, and perfusion targets"
+            ),
+            targets=(
+                "bilirubin",
+                "direct_bilirubin",
+                "platelets",
+                "lactate",
+                "bicarbonate",
+                "creatinine",
+                "MAP",
+            ),
+            action_channels=(
+                "fluids",
+                "vasopressors",
+                "antibiotics",
+                "renal_replacement",
+                "hepatic_encephalopathy_treatment",
+            ),
+            notes=(
+                "Coagulation and encephalopathy labels are incomplete in shared ICU state maps.",
+                "Use as bounded factual proxy router until richer hepatic data are mapped.",
+            ),
+        ),
+        DiseaseModuleSpec(
+            disease="coagulopathy_heme",
+            cohort_definition=(
+                "coagulopathy / thrombocytopenia / anemia / bleeding diagnosis support "
+                "with platelet, inflammatory, perfusion, acid-base, and renal targets"
+            ),
+            targets=(
+                "platelets",
+                "WBC",
+                "lactate",
+                "MAP",
+                "bicarbonate",
+                "pH",
+                "creatinine",
+            ),
+            action_channels=(
+                "transfusion",
+                "anticoagulants",
+                "antiplatelets",
+                "fluids",
+                "vasopressors",
+                "antibiotics",
+                "nephrotoxin_context",
+            ),
+            notes=(
+                "Hemoglobin and INR are not yet first-class shared state variables.",
+                "Transfusion and anticoagulation effects stay Chapter-A closed.",
+            ),
+        ),
     )
 
 

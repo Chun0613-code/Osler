@@ -1,0 +1,289 @@
+{
+  "action_evidence": {
+    "by_action": {
+      "antiarrhythmic": 3644,
+      "diuretics": 2878,
+      "fluids": 7210,
+      "vasopressor": 264,
+      "ventilation": 639
+    },
+    "dose_observed_fraction": 0.0,
+    "rows": 14635,
+    "sources": {
+      "eicu_medication": 13996,
+      "eicu_respiratorycare": 639
+    }
+  },
+  "action_support": {
+    "antiarrhythmic": {
+      "active_stays": 415,
+      "active_windows": 1844,
+      "dose_observed_windows": 0,
+      "stays": 750,
+      "windows": 7041
+    },
+    "diuretics": {
+      "active_stays": 348,
+      "active_windows": 1382,
+      "dose_observed_windows": 0,
+      "stays": 634,
+      "windows": 5201
+    },
+    "fluids": {
+      "active_stays": 657,
+      "active_windows": 3848,
+      "dose_observed_windows": 0,
+      "stays": 1042,
+      "windows": 12251
+    },
+    "inotrope": {
+      "active_stays": 0,
+      "active_windows": 0,
+      "dose_observed_windows": 0,
+      "stays": 0,
+      "windows": 0
+    },
+    "vasopressor": {
+      "active_stays": 171,
+      "active_windows": 1899,
+      "dose_observed_windows": 0,
+      "stays": 176,
+      "windows": 1972
+    },
+    "ventilation": {
+      "active_stays": 108,
+      "active_windows": 181,
+      "dose_observed_windows": 0,
+      "stays": 195,
+      "windows": 484
+    }
+  },
+  "active_transitions": 4734,
+  "body_system": "cardiovascular",
+  "bounded_max_stays": 1500,
+  "candidate_stay_count_before_bound": 58970,
+  "criteria_counts_before_filter": {
+    "diagnosis_text_or_code:admissionDx.csv.gz": 437,
+    "diagnosis_text_or_code:diagnosis.csv.gz": 1063
+  },
+  "data_root": "eicu-collaborative-research-database-2.0",
+  "dataset": "PhysioNet eICU Collaborative Research Database 2.0",
+  "disease": "cardiovascular_instability",
+  "display_name": "Cardiovascular instability / shock / heart failure",
+  "hospitals": 12,
+  "measurements": {
+    "by_var": {
+      "bicarbonate": 14583,
+      "bilirubin": 3553,
+      "bilirubin_direct": 362,
+      "bun": 9748,
+      "creatinine": 9939,
+      "glucose": 41839,
+      "heart_rate": 1314684,
+      "lactate": 841,
+      "map": 545315,
+      "o2sat": 1143140,
+      "ph": 4756,
+      "platelets": 9627,
+      "potassium": 13984,
+      "respiratory_rate": 908311,
+      "sodium": 10135,
+      "temperature": 222624,
+      "urine_output": 17467,
+      "wbc": 9417
+    },
+    "rows": 4280325,
+    "stays": 1500
+  },
+  "output": "eicu_cardiovascular_instability_transitions_6h.parquet",
+  "safety_boundary": {
+    "bounded_engineering_cohort": true,
+    "causal_claim_allowed": false,
+    "clinical_claim_allowed": false,
+    "coarse_treatment_rows_used_as_numeric_administrations": false,
+    "counterfactual_claim_allowed": false,
+    "factual_observed_treatment_only": true,
+    "medication_orders_used_as_numeric_administrations": false,
+    "patient_ids_included_in_report": false,
+    "raw_rows_included": false
+  },
+  "schema": {
+    "action_channels": [
+      "vasopressor",
+      "inotrope",
+      "fluids",
+      "diuretics",
+      "antiarrhythmic",
+      "ventilation"
+    ],
+    "active_column": "cardiovascular_instability_active_t",
+    "anchor_step_hours": 4.0,
+    "config": {
+      "action_keys": [
+        "vasopressor",
+        "inotrope",
+        "fluids",
+        "diuretics",
+        "antiarrhythmic",
+        "ventilation"
+      ],
+      "action_terms": {
+        "antiarrhythmic": [
+          "amiodarone",
+          "lidocaine",
+          "procainamide",
+          "diltiazem",
+          "verapamil",
+          "metoprolol",
+          "esmolol"
+        ],
+        "diuretics": [
+          "furosemide",
+          "lasix",
+          "bumetanide",
+          "bumex",
+          "torsemide",
+          "chlorothiazide",
+          "metolazone",
+          "hydrochlorothiazide",
+          "hctz"
+        ],
+        "fluids": [
+          "normal saline",
+          "sodium chloride",
+          "nacl",
+          "lactated",
+          "ringer",
+          "crystalloid",
+          "fluid bolus",
+          "iv fluid",
+          "saline bolus"
+        ],
+        "inotrope": [
+          "dobutamine",
+          "milrinone",
+          "inamrinone",
+          "isoproterenol"
+        ],
+        "vasopressor": [
+          "norepinephrine",
+          "levophed",
+          "epinephrine",
+          "vasopressin",
+          "phenylephrine",
+          "neosynephrine",
+          "dopamine"
+        ],
+        "ventilation": [
+          "ventilator",
+          "mechanical ventilation",
+          "intub",
+          "ett",
+          "bipap",
+          "cpap"
+        ]
+      },
+      "active_actions": [
+        "hist_vasopressor",
+        "hist_inotrope"
+      ],
+      "active_high": {
+        "creatinine": 2.0,
+        "heart_rate": 120.0,
+        "lactate": 2.0
+      },
+      "active_low": {
+        "map": 65.0,
+        "urine_output": 30.0
+      },
+      "body_system": "cardiovascular",
+      "diagnosis_patterns": [
+        "cardiogenic shock",
+        "shock, cardiogenic",
+        "heart failure",
+        "congestive heart failure",
+        "acute coronary",
+        "myocardial infarction",
+        "cardiac arrest",
+        "arrhythmia",
+        "atrial fibrillation",
+        "428",
+        "410",
+        "i50",
+        "i21",
+        "i46",
+        "i48"
+      ],
+      "display_name": "Cardiovascular instability / shock / heart failure",
+      "name": "cardiovascular_instability",
+      "notes": [
+        "Covers hemodynamic factual forecasting, not treatment-effect estimation.",
+        "Vasopressor/inotrope claims remain observational and fail-closed for causality."
+      ],
+      "state_vars": [
+        "map",
+        "heart_rate",
+        "lactate",
+        "creatinine",
+        "urine_output",
+        "potassium",
+        "bicarbonate",
+        "ph",
+        "sodium",
+        "o2sat",
+        "respiratory_rate",
+        "temperature",
+        "glucose"
+      ],
+      "targets": [
+        "map",
+        "heart_rate",
+        "lactate",
+        "creatinine",
+        "urine_output",
+        "potassium",
+        "bicarbonate"
+      ]
+    },
+    "future_suffix": "tp6",
+    "horizon_hours": 6.0,
+    "lookback_hours": 6.0,
+    "state_vars": [
+      "map",
+      "heart_rate",
+      "lactate",
+      "creatinine",
+      "urine_output",
+      "potassium",
+      "bicarbonate",
+      "ph",
+      "sodium",
+      "o2sat",
+      "respiratory_rate",
+      "temperature",
+      "glucose"
+    ],
+    "target_tolerance_hours": 2.0,
+    "targets": [
+      "map",
+      "heart_rate",
+      "lactate",
+      "creatinine",
+      "urine_output",
+      "potassium",
+      "bicarbonate"
+    ]
+  },
+  "stays": 1382,
+  "subjects": 1211,
+  "target_pair_counts": {
+    "bicarbonate": 1671,
+    "creatinine": 681,
+    "heart_rate": 15878,
+    "lactate": 123,
+    "map": 15481,
+    "potassium": 2176,
+    "urine_output": 2432
+  },
+  "transitions": 16047
+}

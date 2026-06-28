@@ -12,8 +12,53 @@
       "runtime treatment action authority",
       "active symbolic-rule promotion from causal candidates"
     ],
-    "goal": "multi-disease causal what-if planning, fail-closed until external identification evidence is mapped",
+    "goal": "body-system causal what-if planning, fail-closed until external identification evidence is mapped",
     "readiness": {
+      "acute_neuro_bp_oxygenation_strategy_rct": {
+        "causal_claim_allowed": false,
+        "clinical_claim_allowed": false,
+        "readiness": {
+          "failures": [
+            "evidence_table_not_present"
+          ],
+          "passes": false,
+          "warnings": []
+        },
+        "runtime_decision_authority": false,
+        "spec": {
+          "assignment_column": "assigned_arm",
+          "baseline_covariates": [
+            "baseline_map",
+            "baseline_o2sat",
+            "baseline_glucose",
+            "baseline_sodium"
+          ],
+          "comparator_strategy": "alternative neurologic support strategy",
+          "disease": "acute_neuro",
+          "identification_design": "randomized_trial",
+          "name": "acute_neuro_bp_oxygenation_strategy_rct",
+          "outcome": "six-to-twenty-four-hour physiologic proxy or neurologic outcome response",
+          "outcome_column": "outcome_delta",
+          "patient_id_column": "participant_key",
+          "source_registry": [
+            "BioLINCC",
+            "Vivli",
+            "YODA",
+            "trial sponsor repository"
+          ],
+          "time_zero": "randomization",
+          "treatment_column": "received_protocol_treatment",
+          "treatment_strategy": "protocolized neurologic hemodynamic or oxygenation strategy"
+        },
+        "support": {
+          "adherence_fraction": null,
+          "assignment_arms": [],
+          "max_abs_baseline_smd": null,
+          "outcome_missing_fraction": null,
+          "rows": 0,
+          "subjects": 0
+        }
+      },
       "aki_rrt_timing_strategy_rct": {
         "causal_claim_allowed": false,
         "clinical_claim_allowed": false,
@@ -58,6 +103,94 @@
           "subjects": 0
         }
       },
+      "cardiovascular_vasopressor_inotrope_strategy_rct": {
+        "causal_claim_allowed": false,
+        "clinical_claim_allowed": false,
+        "readiness": {
+          "failures": [
+            "evidence_table_not_present"
+          ],
+          "passes": false,
+          "warnings": []
+        },
+        "runtime_decision_authority": false,
+        "spec": {
+          "assignment_column": "assigned_arm",
+          "baseline_covariates": [
+            "baseline_map",
+            "baseline_lactate",
+            "baseline_heart_rate"
+          ],
+          "comparator_strategy": "alternative hemodynamic support strategy",
+          "disease": "cardiovascular_instability",
+          "identification_design": "randomized_trial",
+          "name": "cardiovascular_vasopressor_inotrope_strategy_rct",
+          "outcome": "six-to-twenty-four-hour MAP/lactate/renal-perfusion response",
+          "outcome_column": "outcome_delta",
+          "patient_id_column": "participant_key",
+          "source_registry": [
+            "BioLINCC",
+            "Vivli",
+            "YODA",
+            "trial sponsor repository"
+          ],
+          "time_zero": "randomization",
+          "treatment_column": "received_protocol_treatment",
+          "treatment_strategy": "protocolized vasopressor or inotrope strategy"
+        },
+        "support": {
+          "adherence_fraction": null,
+          "assignment_arms": [],
+          "max_abs_baseline_smd": null,
+          "outcome_missing_fraction": null,
+          "rows": 0,
+          "subjects": 0
+        }
+      },
+      "coagulopathy_transfusion_strategy_rct": {
+        "causal_claim_allowed": false,
+        "clinical_claim_allowed": false,
+        "readiness": {
+          "failures": [
+            "evidence_table_not_present"
+          ],
+          "passes": false,
+          "warnings": []
+        },
+        "runtime_decision_authority": false,
+        "spec": {
+          "assignment_column": "assigned_arm",
+          "baseline_covariates": [
+            "baseline_platelets",
+            "baseline_lactate",
+            "baseline_map"
+          ],
+          "comparator_strategy": "alternative hematologic support strategy",
+          "disease": "coagulopathy_heme",
+          "identification_design": "randomized_trial",
+          "name": "coagulopathy_transfusion_strategy_rct",
+          "outcome": "six-to-twenty-four-hour platelet/perfusion/proxy bleeding response",
+          "outcome_column": "outcome_delta",
+          "patient_id_column": "participant_key",
+          "source_registry": [
+            "BioLINCC",
+            "Vivli",
+            "YODA",
+            "trial sponsor repository"
+          ],
+          "time_zero": "randomization",
+          "treatment_column": "received_protocol_treatment",
+          "treatment_strategy": "protocolized transfusion or anticoagulation strategy"
+        },
+        "support": {
+          "adherence_fraction": null,
+          "assignment_arms": [],
+          "max_abs_baseline_smd": null,
+          "outcome_missing_fraction": null,
+          "rows": 0,
+          "subjects": 0
+        }
+      },
       "dka_insulin_strategy_rct": {
         "causal_claim_allowed": false,
         "clinical_claim_allowed": false,
@@ -91,6 +224,50 @@
           "time_zero": "randomization",
           "treatment_column": "received_protocol_treatment",
           "treatment_strategy": "protocolized insulin strategy"
+        },
+        "support": {
+          "adherence_fraction": null,
+          "assignment_arms": [],
+          "max_abs_baseline_smd": null,
+          "outcome_missing_fraction": null,
+          "rows": 0,
+          "subjects": 0
+        }
+      },
+      "hepatic_failure_resuscitation_strategy_rct": {
+        "causal_claim_allowed": false,
+        "clinical_claim_allowed": false,
+        "readiness": {
+          "failures": [
+            "evidence_table_not_present"
+          ],
+          "passes": false,
+          "warnings": []
+        },
+        "runtime_decision_authority": false,
+        "spec": {
+          "assignment_column": "assigned_arm",
+          "baseline_covariates": [
+            "baseline_bilirubin",
+            "baseline_lactate",
+            "baseline_creatinine"
+          ],
+          "comparator_strategy": "alternative hepatic support strategy",
+          "disease": "hepatic_failure",
+          "identification_design": "randomized_trial",
+          "name": "hepatic_failure_resuscitation_strategy_rct",
+          "outcome": "six-to-forty-eight-hour bilirubin/lactate/renal proxy or survival response",
+          "outcome_column": "outcome_delta",
+          "patient_id_column": "participant_key",
+          "source_registry": [
+            "BioLINCC",
+            "Vivli",
+            "YODA",
+            "trial sponsor repository"
+          ],
+          "time_zero": "randomization",
+          "treatment_column": "received_protocol_treatment",
+          "treatment_strategy": "protocolized hepatic-failure resuscitation or encephalopathy-support strategy"
         },
         "support": {
           "adherence_fraction": null,
@@ -219,8 +396,77 @@
   },
   "chapter_b_multi_disease": {
     "architecture": "per-disease, per-target gated factual router",
+    "body_system_coverage_status": "DKA/endocrine-metabolic, sepsis/systemic-infectious, AKI/renal, respiratory/pulmonary, cardiovascular, neurologic-proxy, hepatic-GI, and hematologic-proxy modules now have isolated factual-router contracts.",
     "do_not_mix_latent_spaces_initially": true,
     "implemented_modules": {
+      "acute_neuro": {
+        "active_transitions": 11418,
+        "body_system": "nervous_system",
+        "boundary": {
+          "bounded_engineering_cohort": true,
+          "causal_claim_allowed": false,
+          "checkpoint_promotion_allowed": false,
+          "clinical_claim_allowed": false,
+          "counterfactual_claim_allowed": false
+        },
+        "candidate_stay_count_before_bound": 33128,
+        "data_source": "full_eicu_2.0_bounded_deterministic_1500_stays_from_body_system_contract",
+        "date": "2026-06-28",
+        "files": [
+          "eicu_body_system_configs.py",
+          "eicu_body_system_transition_extract.py",
+          "eicu_body_system_target_router.py",
+          "eicu_acute_neuro_transition_report.json",
+          "eicu_acute_neuro_target_router.json",
+          "BODY_SYSTEM_COVERAGE_FINDINGS.md"
+        ],
+        "hospital_holdout": {
+          "active_bootstrap_95_ci": [
+            -0.086209,
+            -0.047212
+          ],
+          "active_point_delta_vs_persistence": -0.065234,
+          "significant": true
+        },
+        "hospitals": 12,
+        "random_patient_splits": {
+          "active_beats_persistence": 7,
+          "active_significant": 7,
+          "median_normalized_delta_vs_persistence": -0.086287,
+          "splits": 7
+        },
+        "selected_sources": {
+          "glucose": {
+            "ridge_realfit": 7
+          },
+          "heart_rate": {
+            "ridge_realfit": 7
+          },
+          "map": {
+            "ridge_realfit": 7
+          },
+          "o2sat": {
+            "ridge_realfit": 7
+          },
+          "ph": {
+            "persistence": 3,
+            "population_delta": 3,
+            "ridge_realfit": 1
+          },
+          "respiratory_rate": {
+            "ridge_realfit": 7
+          },
+          "sodium": {
+            "persistence": 4,
+            "population_delta": 2,
+            "ridge_realfit": 1
+          }
+        },
+        "status": "validated_bounded_factual_router",
+        "stays": 1390,
+        "subjects": 1183,
+        "transitions": 16238
+      },
       "aki": {
         "active_aki_transitions": 219417,
         "boundary": {
@@ -527,6 +773,206 @@
         "subjects": 37119,
         "transitions": 667799
       },
+      "cardiovascular_instability": {
+        "active_transitions": 4734,
+        "body_system": "cardiovascular",
+        "boundary": {
+          "bounded_engineering_cohort": true,
+          "causal_claim_allowed": false,
+          "checkpoint_promotion_allowed": false,
+          "clinical_claim_allowed": false,
+          "counterfactual_claim_allowed": false
+        },
+        "candidate_stay_count_before_bound": 58970,
+        "data_source": "full_eicu_2.0_bounded_deterministic_1500_stays_from_body_system_contract",
+        "date": "2026-06-28",
+        "files": [
+          "eicu_body_system_configs.py",
+          "eicu_body_system_transition_extract.py",
+          "eicu_body_system_target_router.py",
+          "eicu_cardiovascular_instability_transition_report.json",
+          "eicu_cardiovascular_instability_target_router.json",
+          "BODY_SYSTEM_COVERAGE_FINDINGS.md"
+        ],
+        "hospital_holdout": {
+          "active_bootstrap_95_ci": [
+            -0.225842,
+            -0.132734
+          ],
+          "active_point_delta_vs_persistence": -0.178511,
+          "significant": true
+        },
+        "hospitals": 12,
+        "random_patient_splits": {
+          "active_beats_persistence": 7,
+          "active_significant": 7,
+          "median_normalized_delta_vs_persistence": -0.145857,
+          "splits": 7
+        },
+        "selected_sources": {
+          "bicarbonate": {
+            "persistence": 6,
+            "ridge_realfit": 1
+          },
+          "creatinine": {
+            "persistence": 7
+          },
+          "heart_rate": {
+            "ridge_realfit": 7
+          },
+          "lactate": {
+            "persistence": 7
+          },
+          "map": {
+            "ridge_realfit": 7
+          },
+          "potassium": {
+            "ridge_realfit": 7
+          },
+          "urine_output": {
+            "persistence": 7
+          }
+        },
+        "status": "validated_bounded_factual_router",
+        "stays": 1382,
+        "subjects": 1211,
+        "transitions": 16047
+      },
+      "coagulopathy_heme": {
+        "active_transitions": 5904,
+        "body_system": "hematologic",
+        "boundary": {
+          "bounded_engineering_cohort": true,
+          "causal_claim_allowed": false,
+          "checkpoint_promotion_allowed": false,
+          "clinical_claim_allowed": false,
+          "counterfactual_claim_allowed": false
+        },
+        "candidate_stay_count_before_bound": 37686,
+        "data_source": "full_eicu_2.0_bounded_deterministic_1500_stays_from_body_system_contract",
+        "date": "2026-06-28",
+        "files": [
+          "eicu_body_system_configs.py",
+          "eicu_body_system_transition_extract.py",
+          "eicu_body_system_target_router.py",
+          "eicu_coagulopathy_heme_transition_report.json",
+          "eicu_coagulopathy_heme_target_router.json",
+          "BODY_SYSTEM_COVERAGE_FINDINGS.md"
+        ],
+        "hospital_holdout": {
+          "active_bootstrap_95_ci": [
+            -0.091537,
+            -0.025203
+          ],
+          "active_point_delta_vs_persistence": -0.056817,
+          "significant": true
+        },
+        "hospitals": 12,
+        "random_patient_splits": {
+          "active_beats_persistence": 7,
+          "active_significant": 7,
+          "median_normalized_delta_vs_persistence": -0.08778,
+          "splits": 7
+        },
+        "selected_sources": {
+          "bicarbonate": {
+            "persistence": 5,
+            "ridge_realfit": 2
+          },
+          "creatinine": {
+            "persistence": 7
+          },
+          "lactate": {
+            "persistence": 3,
+            "population_delta": 4
+          },
+          "map": {
+            "ridge_realfit": 7
+          },
+          "ph": {
+            "persistence": 5,
+            "ridge_realfit": 2
+          },
+          "platelets": {
+            "population_delta": 2,
+            "ridge_realfit": 5
+          },
+          "wbc": {
+            "population_delta": 7
+          }
+        },
+        "status": "validated_bounded_factual_router",
+        "stays": 1380,
+        "subjects": 1187,
+        "transitions": 16794
+      },
+      "hepatic_failure": {
+        "active_transitions": 10717,
+        "body_system": "hepatic_gastrointestinal",
+        "boundary": {
+          "bounded_engineering_cohort": true,
+          "causal_claim_allowed": false,
+          "checkpoint_promotion_allowed": false,
+          "clinical_claim_allowed": false,
+          "counterfactual_claim_allowed": false
+        },
+        "candidate_stay_count_before_bound": 3368,
+        "data_source": "full_eicu_2.0_bounded_deterministic_1500_stays_from_body_system_contract",
+        "date": "2026-06-28",
+        "files": [
+          "eicu_body_system_configs.py",
+          "eicu_body_system_transition_extract.py",
+          "eicu_body_system_target_router.py",
+          "eicu_hepatic_failure_transition_report.json",
+          "eicu_hepatic_failure_target_router.json",
+          "BODY_SYSTEM_COVERAGE_FINDINGS.md"
+        ],
+        "hospital_holdout": {
+          "active_bootstrap_95_ci": [
+            -0.085533,
+            -0.041009
+          ],
+          "active_point_delta_vs_persistence": -0.064441,
+          "significant": true
+        },
+        "hospitals": 88,
+        "random_patient_splits": {
+          "active_beats_persistence": 7,
+          "active_significant": 7,
+          "median_normalized_delta_vs_persistence": -0.073574,
+          "splits": 7
+        },
+        "selected_sources": {
+          "bicarbonate": {
+            "persistence": 5,
+            "ridge_realfit": 2
+          },
+          "bilirubin": {
+            "persistence": 7
+          },
+          "bilirubin_direct": {
+            "persistence": 7
+          },
+          "creatinine": {
+            "persistence": 7
+          },
+          "lactate": {
+            "persistence": 5,
+            "population_delta": 2
+          },
+          "map": {
+            "ridge_realfit": 7
+          },
+          "platelets": {
+            "persistence": 4,
+            "population_delta": 3
+          }
+        },
+        "status": "validated_bounded_factual_router",
+        "stays": 1396,
+        "subjects": 1096,
+        "transitions": 17730
+      },
       "respiratory_failure": {
         "active_respiratory_transitions": 26558,
         "boundary": {
@@ -630,7 +1076,7 @@
         "transitions": 422244
       }
     },
-    "next_engineering_step": "Chapter B now has DKA, sepsis, AKI, and a bounded respiratory-failure router; the next broad step is to run the optimized respiratory extractor at full scale in background, while the next deep step remains online belief-state exposure for validated renal v2.",
+    "next_engineering_step": "Map missing first-class variables for heme/hepatic/neuro (hemoglobin, INR, neurologic exam/procedure proxies), then run selected modules at full scale or longer horizons where physiology is slow.",
     "promotion_sequence": [
       "define disease cohort and target/action contract",
       "build observed-treatment transitions with masks and ages",
@@ -729,6 +1175,133 @@
           "MAP",
           "bicarbonate",
           "pH"
+        ]
+      },
+      {
+        "action_channels": [
+          "vasopressors",
+          "inotropes",
+          "fluids",
+          "diuretics",
+          "antiarrhythmics",
+          "ventilation"
+        ],
+        "candidate_sources": [
+          "persistence",
+          "mechanistic_world_model",
+          "real_fit_residual",
+          "pretrained_presentation_prior"
+        ],
+        "cohort_definition": "cardiogenic shock / heart failure / acute coronary / arrhythmia diagnosis support with hemodynamic, lactate, renal, and electrolyte targets",
+        "disease": "cardiovascular_instability",
+        "notes": [
+          "Use as hemodynamic factual router only.",
+          "Vasopressor/inotrope treatment effects stay Chapter-A closed."
+        ],
+        "safety_boundary": "research factual advisory only until patient-held-out, symbolic, causal-readiness, and clinical-review gates pass",
+        "targets": [
+          "MAP",
+          "heart_rate",
+          "lactate",
+          "creatinine",
+          "urine_output",
+          "potassium",
+          "bicarbonate"
+        ]
+      },
+      {
+        "action_channels": [
+          "ventilation",
+          "vasopressors",
+          "antiepileptics",
+          "osmotherapy",
+          "fluids"
+        ],
+        "candidate_sources": [
+          "persistence",
+          "mechanistic_world_model",
+          "real_fit_residual",
+          "pretrained_presentation_prior"
+        ],
+        "cohort_definition": "stroke / intracranial hemorrhage / seizure / coma / encephalopathy diagnosis support with physiologic proxy targets",
+        "disease": "acute_neuro",
+        "notes": [
+          "ICU EHR does not reliably expose detailed neurologic exam targets.",
+          "Treat this as a physiologic proxy router, not a neurologic outcome model."
+        ],
+        "safety_boundary": "research factual advisory only until patient-held-out, symbolic, causal-readiness, and clinical-review gates pass",
+        "targets": [
+          "MAP",
+          "heart_rate",
+          "respiratory_rate",
+          "oxygen_saturation",
+          "glucose",
+          "sodium",
+          "pH"
+        ]
+      },
+      {
+        "action_channels": [
+          "fluids",
+          "vasopressors",
+          "antibiotics",
+          "renal_replacement",
+          "hepatic_encephalopathy_treatment"
+        ],
+        "candidate_sources": [
+          "persistence",
+          "mechanistic_world_model",
+          "real_fit_residual",
+          "pretrained_presentation_prior"
+        ],
+        "cohort_definition": "hepatic failure / cirrhosis / hepatic encephalopathy diagnosis support with bilirubin, platelet, lactate, renal, and perfusion targets",
+        "disease": "hepatic_failure",
+        "notes": [
+          "Coagulation and encephalopathy labels are incomplete in shared ICU state maps.",
+          "Use as bounded factual proxy router until richer hepatic data are mapped."
+        ],
+        "safety_boundary": "research factual advisory only until patient-held-out, symbolic, causal-readiness, and clinical-review gates pass",
+        "targets": [
+          "bilirubin",
+          "direct_bilirubin",
+          "platelets",
+          "lactate",
+          "bicarbonate",
+          "creatinine",
+          "MAP"
+        ]
+      },
+      {
+        "action_channels": [
+          "transfusion",
+          "anticoagulants",
+          "antiplatelets",
+          "fluids",
+          "vasopressors",
+          "antibiotics",
+          "nephrotoxin_context"
+        ],
+        "candidate_sources": [
+          "persistence",
+          "mechanistic_world_model",
+          "real_fit_residual",
+          "pretrained_presentation_prior"
+        ],
+        "cohort_definition": "coagulopathy / thrombocytopenia / anemia / bleeding diagnosis support with platelet, inflammatory, perfusion, acid-base, and renal targets",
+        "disease": "coagulopathy_heme",
+        "notes": [
+          "Hemoglobin and INR are not yet first-class shared state variables.",
+          "Transfusion and anticoagulation effects stay Chapter-A closed."
+        ],
+        "safety_boundary": "research factual advisory only until patient-held-out, symbolic, causal-readiness, and clinical-review gates pass",
+        "targets": [
+          "platelets",
+          "WBC",
+          "lactate",
+          "MAP",
+          "bicarbonate",
+          "pH",
+          "creatinine"
         ]
       }
     ]

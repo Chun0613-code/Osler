@@ -20,6 +20,10 @@ class CausalReadinessTests(unittest.TestCase):
         self.assertIn("sepsis", diseases)
         self.assertIn("AKI", diseases)
         self.assertIn("respiratory_failure", diseases)
+        self.assertIn("cardiovascular_instability", diseases)
+        self.assertIn("acute_neuro", diseases)
+        self.assertIn("hepatic_failure", diseases)
+        self.assertIn("coagulopathy_heme", diseases)
 
 
 if __name__ == "__main__":

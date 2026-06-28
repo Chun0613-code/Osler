@@ -9,6 +9,12 @@ per-disease, per-target factual router can reliably beat persistence where the
 target has enough short-horizon physiological signal, and it should refuse to
 move where persistence is the correct short-horizon baseline.
 
+An additional body-system coverage layer now extends the same bounded router
+contract to cardiovascular instability, acute neurologic physiologic proxies,
+hepatic failure proxies, and coagulopathy/hematology proxies.  Those modules are
+validated bounded engineering cohorts rather than full canonical disease
+chapters, but all four pass 7/7 patient split seeds and hospital-heldout gates.
+
 ## Validated Pattern
 
 Across DKA, sepsis, and AKI, the stable architecture is:
@@ -46,6 +52,14 @@ Observed examples:
   oxygen saturation, respiratory rate, heart rate, MAP, pH, and most bicarbonate
   splits select `ridge_realfit`, with 7/7 significant random patient splits and
   a significant hospital-heldout result.
+- Cardiovascular instability: MAP, heart rate, and potassium select
+  `ridge_realfit`; slow renal/perfusion targets fall back.
+- Acute neuro proxy: glucose, heart rate, MAP, oxygen saturation, and
+  respiratory rate select `ridge_realfit`; sodium/pH remain mixed.
+- Hepatic proxy: MAP carries most six-hour signal; bilirubin and creatinine fall
+  back.
+- Hematologic proxy: platelets and WBC show signal, but hemoglobin/INR are still
+  missing from the shared state map.
 
 This is a physiological result, not just a modeling trick.  A 6-hour window is
 long enough for fast ICU targets, but too short for many renal accumulation
@@ -84,3 +98,7 @@ The respiratory module currently has a bounded-cohort caveat.  Its extractor and
 router are full-scale-ready, but the committed respiratory result uses a
 deterministic 5,000-stay extraction because the full respiratory cohort is much
 larger and slower than sepsis/AKI in an interactive run.
+
+The cardiovascular/neuro/hepatic/heme modules also carry a bounded-cohort caveat
+and, for neuro/hepatic/heme, a proxy-target caveat.  They broaden body coverage;
+they do not yet replace disease-specific mechanistic models.
