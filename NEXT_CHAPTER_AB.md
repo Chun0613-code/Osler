@@ -35,9 +35,9 @@ The causal gate accepts only explicit external identification evidence:
 
 Current status is fail-closed:
 
+- BioLINCC: candidate source, not in workspace
 - Vivli: candidate source, not in workspace
 - YODA: candidate source, not in workspace
-- BioLINCC: candidate source, not in workspace
 - observational EHR: available for factual forecasting and negative confounding
   diagnostics only
 
@@ -81,7 +81,7 @@ Starter modules:
 
 - sepsis
 - acute kidney injury
-- asthma exacerbation
+- respiratory failure / hypoxemia
 
 Each disease starts as a factual research router:
 
@@ -141,13 +141,40 @@ It does not open Chapter A.  Antibiotic, fluid, ventilation, vasopressor, and
 renal-replacement causal claims remain closed.  AKI diuretic, nephrotoxin,
 fluid, vasopressor, and renal-replacement causal claims also remain closed.
 
+Respiratory failure / hypoxemia:
+
+- `eicu_respiratory_transition_extract.py`
+- `eicu_respiratory_target_router.py`
+- `eicu_respiratory_transition_report.json`
+- `eicu_respiratory_target_router.json`
+- `EICU_RESPIRATORY_ROUTER_FINDINGS.md`
+
+- bounded deterministic cohort from full eICU: 4,170 evaluable stays
+- 3,618 subjects
+- 55 hospitals
+- 57,673 six-hour transitions
+- 26,558 active respiratory transitions
+- 7/7 random patient splits significantly beat persistence
+- hospital-heldout split also significantly beats persistence
+
+- oxygen saturation, respiratory rate, heart rate, MAP, and pH -> ridge realfit
+- bicarbonate -> ridge realfit in 5/7 splits, otherwise persistence
+
+This respiratory module validates the same factual-router recipe in a fourth
+domain, but it carries a bounded-cohort caveat.  The full respiratory cohort is
+much larger and slower than sepsis/AKI because respiratory diagnoses and
+hypoxemia are common in ICU data.  The extractor and router are ready for a
+background full-scale run, but the committed result is the bounded engineering
+cohort.
+
 ## Boundary
 
 This A/B contract contains no patient rows or identifiers. It is a build
 contract, not a clinical product claim.
 
-The immediate next engineering step for B is no longer to add a fourth broad
-router by default.  Three diseases already validate the factual-router pattern.
+The immediate broad engineering step for B has now been tested with a fourth
+respiratory module.  DKA, sepsis, AKI, and bounded respiratory failure all
+validate the factual-router pattern.
 The AKI renal mechanism audit shows that the first simple mechanism candidate is
 not enough for slow creatinine/BUN targets at 6 hours.  The long-horizon AKI
 audit answers the next question: at 24-48 hours, creatinine and BUN move from

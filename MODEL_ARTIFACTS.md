@@ -99,6 +99,17 @@ horizons. The artifact does not contain raw rows or patient identifiers and does
 not permit direct hidden-state accuracy, causal, counterfactual, clinical,
 checkpoint-promotion, or active-rule-promotion claims.
 
+`eicu_respiratory_transitions_6h.parquet` is local-only and ignored by git. It
+is a bounded deterministic respiratory-failure / severe-hypoxemia transition
+cohort extracted from full eICU for the fourth Chapter-B disease module.
+Committed aggregate reports include `eicu_respiratory_transition_report.json`
+and `eicu_respiratory_target_router.json`. The bounded cohort has 4,170
+evaluable stays, 57,673 transitions, and 26,558 active respiratory transitions.
+The nested respiratory router beats persistence in 7/7 random patient splits and
+in hospital-heldout evaluation. This remains factual, observational,
+non-clinical, and bounded-cohort only; no causal or runtime treatment authority
+is granted.
+
 `eicu_aki_renal_belief_state_audit.json` is the explicit predict-update version
 of the renal belief audit. It is aggregate-only. The state belief passes
 downstream gates for BUN at 24h/48h and for urine output at 24h, but it does not

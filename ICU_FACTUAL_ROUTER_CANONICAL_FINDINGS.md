@@ -2,12 +2,12 @@
 
 Date: 2026-06-27
 
-This file closes the first Chapter-B factual-router arc across DKA, sepsis, and
-AKI.  The goal is not to claim one universal ICU world model.  The finding is
-narrower and more useful: a per-disease, per-target factual router can reliably
-beat persistence where the target has enough short-horizon physiological signal,
-and it should refuse to move where persistence is the correct short-horizon
-baseline.
+This file closes the first Chapter-B factual-router arc across DKA, sepsis, AKI,
+and a bounded respiratory-failure module.  The goal is not to claim one
+universal ICU world model.  The finding is narrower and more useful: a
+per-disease, per-target factual router can reliably beat persistence where the
+target has enough short-horizon physiological signal, and it should refuse to
+move where persistence is the correct short-horizon baseline.
 
 ## Validated Pattern
 
@@ -42,6 +42,10 @@ Observed examples:
   signal; creatinine falls back.
 - AKI: bicarbonate, MAP, potassium, and sodium show real-fit signal at 6h;
   creatinine and BUN fall back at 6h.
+- Respiratory failure/hypoxemia: in a bounded full-eICU engineering cohort,
+  oxygen saturation, respiratory rate, heart rate, MAP, pH, and most bicarbonate
+  splits select `ridge_realfit`, with 7/7 significant random patient splits and
+  a significant hospital-heldout result.
 
 This is a physiological result, not just a modeling trick.  A 6-hour window is
 long enough for fast ICU targets, but too short for many renal accumulation
@@ -76,3 +80,7 @@ This finding remains factual and observational.
 The router is a research-grade advisory artifact: useful for factual state
 forecasting and hypothesis generation, not for autonomous treatment choice.
 
+The respiratory module currently has a bounded-cohort caveat.  Its extractor and
+router are full-scale-ready, but the committed respiratory result uses a
+deterministic 5,000-stay extraction because the full respiratory cohort is much
+larger and slower than sepsis/AKI in an interactive run.

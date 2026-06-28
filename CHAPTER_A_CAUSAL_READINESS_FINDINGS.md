@@ -3,8 +3,8 @@
 Date: 2026-06-27
 
 Chapter A is the causal what-if planning chapter.  It is intentionally
-fail-closed.  The validated DKA/sepsis/AKI routers are factual forecasting
-artifacts; they do not identify treatment effects.
+fail-closed.  The validated DKA/sepsis/AKI/respiratory routers are factual
+forecasting artifacts; they do not identify treatment effects.
 
 ## Current Status
 
@@ -30,11 +30,21 @@ external identification evidence.
 
 The source registry is:
 
+- BioLINCC: candidate NHLBI randomized-trial source, not in workspace
 - Vivli: candidate randomized-trial source, not in workspace
 - YODA: candidate randomized-trial source, not in workspace
-- BioLINCC: candidate public trial/cohort source, not in workspace
 - observational EHR: available for factual prediction and negative diagnostics
   only
+
+Default readiness specs now cover four disease chapters:
+
+- DKA insulin strategy RCT
+- sepsis fluid strategy RCT
+- AKI renal-support / RRT timing strategy RCT
+- respiratory oxygenation / ventilation strategy RCT
+
+All four fail closed until an external evidence table is mapped into the
+contract.
 
 ## Required Data Contract
 
@@ -71,4 +81,3 @@ It would not allow:
 
 Until an external dataset is mapped into `osler_jepa/causal_readiness.py`, all
 causal claims remain closed.
-

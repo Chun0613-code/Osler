@@ -149,29 +149,31 @@ def disease_expansion_templates() -> tuple[DiseaseModuleSpec, ...]:
             ),
         ),
         DiseaseModuleSpec(
-            disease="asthma_exacerbation",
+            disease="respiratory_failure",
             cohort_definition=(
-                "bronchospasm/asthma encounter with respiratory vitals, oxygenation, "
-                "and bronchodilator/steroid timing"
+                "ARDS / ventilator-coded respiratory failure or severe measured "
+                "hypoxemia with respiratory vitals, oxygenation, acid-base, "
+                "and observed respiratory treatment evidence"
             ),
             targets=(
                 "respiratory_rate",
                 "oxygen_saturation",
-                "work_of_breathing_proxy",
                 "heart_rate",
-                "peak_flow_or_fev1_if_available",
+                "MAP",
+                "bicarbonate",
+                "pH",
             ),
             action_channels=(
-                "albuterol",
-                "ipratropium",
-                "systemic_steroids",
-                "magnesium",
-                "epinephrine",
                 "oxygen_or_ventilation",
+                "bronchodilators",
+                "systemic_steroids",
+                "antibiotics",
+                "fluids",
+                "vasopressors",
             ),
             notes=(
-                "Likely needs curated non-ICU data; ICU EHR alone may under-cover peak-flow targets.",
-                "Symbolic safety for beta-agonist tachycardia and contraindications stays human-owned.",
+                "Start as factual router; do not claim oxygen or ventilation causal effects from observational EHR.",
+                "Asthma-specific peak-flow/work-of-breathing targets remain a future non-ICU data problem.",
             ),
         ),
     )

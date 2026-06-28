@@ -2,17 +2,62 @@
   "artifact": "Osler-JEPA next chapter A/B contract",
   "chapter_a_causal": {
     "allowed_now": [
-      "prepare RCT/IV/front-door data dictionaries",
-      "run fail-closed readiness checks when external evidence arrives",
-      "continue observational confounding diagnostics as negative evidence"
+      "factual forecasting",
+      "negative confounding diagnostics",
+      "causal-readiness contract evaluation with external evidence tables"
     ],
     "forbidden_now": [
-      "causal treatment-effect claims from current observational EHR",
-      "clinical treatment recommendations from router deltas",
-      "runtime action authority"
+      "causal treatment-effect claims from observational EHR alone",
+      "clinical recommendation authority",
+      "runtime treatment action authority",
+      "active symbolic-rule promotion from causal candidates"
     ],
-    "goal": "open causal what-if planning only with external identification evidence",
+    "goal": "multi-disease causal what-if planning, fail-closed until external identification evidence is mapped",
     "readiness": {
+      "aki_rrt_timing_strategy_rct": {
+        "causal_claim_allowed": false,
+        "clinical_claim_allowed": false,
+        "readiness": {
+          "failures": [
+            "evidence_table_not_present"
+          ],
+          "passes": false,
+          "warnings": []
+        },
+        "runtime_decision_authority": false,
+        "spec": {
+          "assignment_column": "assigned_arm",
+          "baseline_covariates": [
+            "baseline_creatinine",
+            "baseline_bun",
+            "baseline_urine_output"
+          ],
+          "comparator_strategy": "delayed or standard renal-support strategy",
+          "disease": "AKI",
+          "identification_design": "randomized_trial",
+          "name": "aki_rrt_timing_strategy_rct",
+          "outcome": "twenty-four-to-forty-eight-hour creatinine/BUN/urine trajectory or RRT-free survival",
+          "outcome_column": "outcome_delta",
+          "patient_id_column": "participant_key",
+          "source_registry": [
+            "BioLINCC",
+            "Vivli",
+            "YODA",
+            "trial sponsor repository"
+          ],
+          "time_zero": "randomization",
+          "treatment_column": "received_protocol_treatment",
+          "treatment_strategy": "early renal replacement or renal-support strategy"
+        },
+        "support": {
+          "adherence_fraction": null,
+          "assignment_arms": [],
+          "max_abs_baseline_smd": null,
+          "outcome_missing_fraction": null,
+          "rows": 0,
+          "subjects": 0
+        }
+      },
       "dka_insulin_strategy_rct": {
         "causal_claim_allowed": false,
         "clinical_claim_allowed": false,
@@ -38,6 +83,7 @@
           "outcome_column": "outcome_delta",
           "patient_id_column": "participant_key",
           "source_registry": [
+            "BioLINCC",
             "Vivli",
             "YODA",
             "trial sponsor repository"
@@ -54,9 +100,103 @@
           "rows": 0,
           "subjects": 0
         }
+      },
+      "respiratory_oxygen_ventilation_strategy_rct": {
+        "causal_claim_allowed": false,
+        "clinical_claim_allowed": false,
+        "readiness": {
+          "failures": [
+            "evidence_table_not_present"
+          ],
+          "passes": false,
+          "warnings": []
+        },
+        "runtime_decision_authority": false,
+        "spec": {
+          "assignment_column": "assigned_arm",
+          "baseline_covariates": [
+            "baseline_o2sat",
+            "baseline_respiratory_rate",
+            "baseline_ventilation"
+          ],
+          "comparator_strategy": "alternative oxygenation or ventilation strategy",
+          "disease": "respiratory_failure",
+          "identification_design": "randomized_trial",
+          "name": "respiratory_oxygen_ventilation_strategy_rct",
+          "outcome": "six-to-twenty-four-hour oxygenation response or ventilator-free days",
+          "outcome_column": "outcome_delta",
+          "patient_id_column": "participant_key",
+          "source_registry": [
+            "BioLINCC",
+            "Vivli",
+            "YODA",
+            "trial sponsor repository"
+          ],
+          "time_zero": "randomization",
+          "treatment_column": "received_protocol_treatment",
+          "treatment_strategy": "protocolized oxygenation or ventilation strategy"
+        },
+        "support": {
+          "adherence_fraction": null,
+          "assignment_arms": [],
+          "max_abs_baseline_smd": null,
+          "outcome_missing_fraction": null,
+          "rows": 0,
+          "subjects": 0
+        }
+      },
+      "sepsis_fluid_strategy_rct": {
+        "causal_claim_allowed": false,
+        "clinical_claim_allowed": false,
+        "readiness": {
+          "failures": [
+            "evidence_table_not_present"
+          ],
+          "passes": false,
+          "warnings": []
+        },
+        "runtime_decision_authority": false,
+        "spec": {
+          "assignment_column": "assigned_arm",
+          "baseline_covariates": [
+            "baseline_map",
+            "baseline_lactate",
+            "baseline_vasopressor"
+          ],
+          "comparator_strategy": "restricted or alternative protocolized fluid strategy",
+          "disease": "sepsis",
+          "identification_design": "randomized_trial",
+          "name": "sepsis_fluid_strategy_rct",
+          "outcome": "twenty-four-hour MAP/lactate response or vasopressor-free days",
+          "outcome_column": "outcome_delta",
+          "patient_id_column": "participant_key",
+          "source_registry": [
+            "BioLINCC",
+            "Vivli",
+            "YODA",
+            "trial sponsor repository"
+          ],
+          "time_zero": "randomization",
+          "treatment_column": "received_protocol_treatment",
+          "treatment_strategy": "protocolized early fluid strategy"
+        },
+        "support": {
+          "adherence_fraction": null,
+          "assignment_arms": [],
+          "max_abs_baseline_smd": null,
+          "outcome_missing_fraction": null,
+          "rows": 0,
+          "subjects": 0
+        }
       }
     },
     "source_registry": [
+      {
+        "allowed_use_when_present": "research causal-effect estimation only",
+        "role": "candidate NHLBI randomized-trial data source",
+        "source": "BioLINCC",
+        "status": "not_in_workspace"
+      },
       {
         "allowed_use_when_present": "research causal-effect estimation only",
         "role": "candidate randomized-trial data source",
@@ -67,12 +207,6 @@
         "allowed_use_when_present": "research causal-effect estimation only",
         "role": "candidate randomized-trial data source",
         "source": "YODA",
-        "status": "not_in_workspace"
-      },
-      {
-        "allowed_use_when_present": "research causal-effect estimation only",
-        "role": "candidate public clinical-trial and cohort data source",
-        "source": "BioLINCC",
         "status": "not_in_workspace"
       },
       {
@@ -106,46 +240,6 @@
           "significant": true
         },
         "hospitals": 204,
-        "mechanism_candidate": {
-          "boundary": {
-            "causal_claim_allowed": false,
-            "checkpoint_promotion_allowed": false,
-            "clinical_claim_allowed": false,
-            "counterfactual_claim_allowed": false
-          },
-          "candidate_source": "renal_mechanism",
-          "date": "2026-06-27",
-          "files": [
-            "aki_mechanism.py",
-            "eicu_aki_mechanism_target_router.json",
-            "AKI_MECHANISM_CANDIDATE_FINDINGS.md"
-          ],
-          "hospital_holdout": {
-            "bun_mae": {
-              "persistence": 5.558835,
-              "renal_mechanism": 5.614559
-            },
-            "creatinine_mae": {
-              "persistence": 0.405716,
-              "renal_mechanism": 0.410854
-            }
-          },
-          "interpretation": "A simple 6-hour renal accumulation prior does not robustly beat persistence for slow creatinine/BUN targets.",
-          "random_patient_splits": {
-            "active_aki_median_delta_with_candidate": -0.044744,
-            "all_window_median_delta_with_candidate": -0.041212,
-            "selected_counts": {
-              "bun": {
-                "persistence": 6,
-                "renal_mechanism": 1
-              },
-              "creatinine": {
-                "persistence": 7
-              }
-            }
-          },
-          "status": "rejected_candidate"
-        },
         "long_horizon": {
           "boundary": {
             "causal_claim_allowed": false,
@@ -163,7 +257,6 @@
             "eicu_aki_target_router_48h.json",
             "AKI_LONG_HORIZON_FINDINGS.md"
           ],
-          "interpretation": "Slow renal targets are a horizon problem: creatinine/BUN fall back to persistence at 6h but select ridge_realfit at 24h and 48h.",
           "horizons": {
             "24h": {
               "active_aki_transitions": 178294,
@@ -220,7 +313,54 @@
               "transitions": 397897
             }
           },
+          "interpretation": "Slow renal targets are a horizon problem: creatinine/BUN fall back to persistence at 6h but select ridge_realfit at 24h and 48h.",
           "status": "validated_long_horizon_factual_router"
+        },
+        "mechanism_candidate": {
+          "boundary": {
+            "causal_claim_allowed": false,
+            "checkpoint_promotion_allowed": false,
+            "clinical_claim_allowed": false,
+            "counterfactual_claim_allowed": false
+          },
+          "candidate_source": "renal_mechanism",
+          "date": "2026-06-27",
+          "files": [
+            "aki_mechanism.py",
+            "eicu_aki_mechanism_target_router.json",
+            "AKI_MECHANISM_CANDIDATE_FINDINGS.md"
+          ],
+          "hospital_holdout": {
+            "bun_mae": {
+              "persistence": 5.558835,
+              "renal_mechanism": 5.614559
+            },
+            "creatinine_mae": {
+              "persistence": 0.405716,
+              "renal_mechanism": 0.410854
+            }
+          },
+          "interpretation": "A simple 6-hour renal accumulation prior does not robustly beat persistence for slow creatinine/BUN targets.",
+          "random_patient_splits": {
+            "active_aki_median_delta_with_candidate": -0.044744,
+            "all_window_median_delta_with_candidate": -0.041212,
+            "selected_counts": {
+              "bun": {
+                "persistence": 6,
+                "renal_mechanism": 1
+              },
+              "creatinine": {
+                "persistence": 7
+              }
+            }
+          },
+          "status": "rejected_candidate"
+        },
+        "random_patient_splits": {
+          "active_aki_beats_persistence": 7,
+          "active_aki_significant": 7,
+          "median_normalized_delta_vs_persistence": -0.044771,
+          "splits": 7
         },
         "renal_belief": {
           "boundary": {
@@ -243,7 +383,6 @@
             "pass_rule": "candidate must significantly beat both baseline and capacity-matched placebo on downstream observable targets",
             "placebo": "ridge_realfit_plus_capacity_matched_noise_features"
           },
-          "interpretation": "Renal belief is useful as patient-specific personalization on long-horizon AKI forecasts, not as a direct hidden-state truth claim or causal model.",
           "horizons": {
             "24h": {
               "hospital_holdout_passed_targets": [
@@ -271,6 +410,7 @@
               }
             }
           },
+          "interpretation": "Renal belief is useful as patient-specific personalization on long-horizon AKI forecasts, not as a direct hidden-state truth claim or causal model.",
           "status": "validated_downstream_belief_candidate"
         },
         "renal_belief_state": {
@@ -294,7 +434,6 @@
             "pass_rule": "candidate must significantly beat both baseline and capacity-matched placebo on downstream observable targets",
             "placebo": "ridge_realfit_plus_capacity_matched_noise_features"
           },
-          "interpretation": "The explicit online-compatible predict-update belief state is partially validated: useful for BUN and 24h urine output, not yet for creatinine.",
           "horizons": {
             "24h": {
               "hospital_holdout_passed_targets": [
@@ -320,6 +459,7 @@
               }
             }
           },
+          "interpretation": "The explicit online-compatible predict-update belief state is partially validated: useful for BUN and 24h urine output, not yet for creatinine.",
           "status": "partial_validated_downstream_belief_state"
         },
         "renal_belief_state_v2": {
@@ -343,7 +483,6 @@
             "pass_rule": "candidate must significantly beat both baseline and capacity-matched placebo on downstream observable targets",
             "placebo": "ridge_realfit_plus_capacity_matched_noise_features"
           },
-          "interpretation": "Adding a creatinine-specific level/slope/innovation state fixes the prior explicit state's creatinine gap and creates the current best online-compatible renal belief candidate.",
           "horizons": {
             "24h": {
               "hospital_holdout_passed_targets": [
@@ -371,13 +510,8 @@
               }
             }
           },
+          "interpretation": "Adding a creatinine-specific level/slope/innovation state fixes the prior explicit state's creatinine gap and creates the current best online-compatible renal belief candidate.",
           "status": "validated_downstream_belief_state"
-        },
-        "random_patient_splits": {
-          "active_aki_beats_persistence": 7,
-          "active_aki_significant": 7,
-          "median_normalized_delta_vs_persistence": -0.044771,
-          "splits": 7
         },
         "selected_sources": {
           "BUN": "persistence",
@@ -392,6 +526,68 @@
         "stays": 43748,
         "subjects": 37119,
         "transitions": 667799
+      },
+      "respiratory_failure": {
+        "active_respiratory_transitions": 26558,
+        "boundary": {
+          "bounded_engineering_cohort": true,
+          "causal_claim_allowed": false,
+          "checkpoint_promotion_allowed": false,
+          "clinical_claim_allowed": false,
+          "counterfactual_claim_allowed": false,
+          "full_scale_ready_but_not_run_to_completion_in_this_artifact": true
+        },
+        "cohort_support_before_evaluable_filter": 5000,
+        "data_source": "full_eicu_2.0_bounded_deterministic_5000_stays_from_narrow_respiratory_contract",
+        "date": "2026-06-28",
+        "files": [
+          "eicu_respiratory_transition_extract.py",
+          "eicu_respiratory_target_router.py",
+          "eicu_respiratory_transition_report.json",
+          "eicu_respiratory_target_router.json",
+          "EICU_RESPIRATORY_ROUTER_FINDINGS.md"
+        ],
+        "hospital_holdout": {
+          "active_respiratory_bootstrap_95_ci": [
+            -0.342021,
+            -0.26934
+          ],
+          "active_respiratory_point_delta_vs_persistence": -0.305452,
+          "significant": true
+        },
+        "hospitals": 55,
+        "interpretation": "A narrow respiratory/ARDS/ventilator-coded eICU module validates the same factual router pattern; oxygenation, respiratory-rate, perfusion, heart-rate, pH, and most bicarbonate splits select ridge_realfit.",
+        "random_patient_splits": {
+          "active_respiratory_beats_persistence": 7,
+          "active_respiratory_significant": 7,
+          "median_normalized_delta_vs_persistence": -0.334511,
+          "splits": 7
+        },
+        "selected_sources": {
+          "bicarbonate": {
+            "persistence": 2,
+            "ridge_realfit": 5
+          },
+          "heart_rate": {
+            "ridge_realfit": 7
+          },
+          "map": {
+            "ridge_realfit": 7
+          },
+          "o2sat": {
+            "ridge_realfit": 7
+          },
+          "ph": {
+            "ridge_realfit": 7
+          },
+          "respiratory_rate": {
+            "ridge_realfit": 7
+          }
+        },
+        "status": "validated_bounded_factual_router",
+        "stays": 4170,
+        "subjects": 3618,
+        "transitions": 57673
       },
       "sepsis": {
         "active_sepsis_transitions": 252177,
@@ -434,7 +630,7 @@
         "transitions": 422244
       }
     },
-    "next_engineering_step": "three diseases validate the 6h factual-router pattern; AKI 24h/48h validates horizon as the slow renal target lever, so deeper renal work should build renal reserve/GFR belief states and richer RRT/fluid-balance observability in the long-horizon setting",
+    "next_engineering_step": "Chapter B now has DKA, sepsis, AKI, and a bounded respiratory-failure router; the next broad step is to run the optimized respiratory extractor at full scale in background, while the next deep step remains online belief-state exposure for validated renal v2.",
     "promotion_sequence": [
       "define disease cohort and target/action contract",
       "build observed-treatment transitions with masks and ages",
@@ -506,12 +702,12 @@
       },
       {
         "action_channels": [
-          "albuterol",
-          "ipratropium",
+          "oxygen_or_ventilation",
+          "bronchodilators",
           "systemic_steroids",
-          "magnesium",
-          "epinephrine",
-          "oxygen_or_ventilation"
+          "antibiotics",
+          "fluids",
+          "vasopressors"
         ],
         "candidate_sources": [
           "persistence",
@@ -519,19 +715,20 @@
           "real_fit_residual",
           "pretrained_presentation_prior"
         ],
-        "cohort_definition": "bronchospasm/asthma encounter with respiratory vitals, oxygenation, and bronchodilator/steroid timing",
-        "disease": "asthma_exacerbation",
+        "cohort_definition": "ARDS / ventilator-coded respiratory failure or severe measured hypoxemia with respiratory vitals, oxygenation, acid-base, and observed respiratory treatment evidence",
+        "disease": "respiratory_failure",
         "notes": [
-          "Likely needs curated non-ICU data; ICU EHR alone may under-cover peak-flow targets.",
-          "Symbolic safety for beta-agonist tachycardia and contraindications stays human-owned."
+          "Start as factual router; do not claim oxygen or ventilation causal effects from observational EHR.",
+          "Asthma-specific peak-flow/work-of-breathing targets remain a future non-ICU data problem."
         ],
         "safety_boundary": "research factual advisory only until patient-held-out, symbolic, causal-readiness, and clinical-review gates pass",
         "targets": [
           "respiratory_rate",
           "oxygen_saturation",
-          "work_of_breathing_proxy",
           "heart_rate",
-          "peak_flow_or_fev1_if_available"
+          "MAP",
+          "bicarbonate",
+          "pH"
         ]
       }
     ]
