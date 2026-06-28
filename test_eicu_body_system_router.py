@@ -20,6 +20,8 @@ from heme_coag_belief import (
 
 class EicuBodySystemRouterTests(unittest.TestCase):
     def test_body_system_contracts_cover_major_missing_systems(self):
+        self.assertIn("integumentary_skin_wound", BODY_SYSTEM_CONFIGS)
+        self.assertIn("toxic_metabolic", BODY_SYSTEM_CONFIGS)
         self.assertIn("electrolyte_acid_base", BODY_SYSTEM_CONFIGS)
         self.assertIn("endocrine_stress", BODY_SYSTEM_CONFIGS)
         self.assertIn("gi_pancreatic_nutrition", BODY_SYSTEM_CONFIGS)
@@ -74,6 +76,21 @@ class EicuBodySystemRouterTests(unittest.TestCase):
         self.assertIn("renal_replacement", classify_action(muscle, "crrt"))
         self.assertIn("systemic_steroid", classify_action(immune, "methylprednisolone"))
         self.assertIn("antibiotics", classify_action(immune, "vancomycin"))
+
+    def test_classifies_skin_and_toxic_metabolic_actions(self):
+        skin = get_body_system_config("integumentary_skin_wound")
+        toxic = get_body_system_config("toxic_metabolic")
+
+        self.assertIn("wound_care", classify_action(skin, "wound vac dressing change"))
+        self.assertIn("topical_antimicrobial", classify_action(skin, "silver sulfadiazine cream"))
+        self.assertIn("antibiotics", classify_action(skin, "vancomycin"))
+        self.assertIn("nutrition", classify_action(skin, "TPN"))
+        self.assertIn("antidote", classify_action(toxic, "naloxone"))
+        self.assertIn("antidote", classify_action(toxic, "N-acetylcysteine"))
+        self.assertIn("decontamination", classify_action(toxic, "activated charcoal"))
+        self.assertIn("toxic_support", classify_action(toxic, "lipid emulsion"))
+        self.assertIn("bicarbonate", classify_action(toxic, "sodium bicarbonate"))
+        self.assertIn("renal_replacement", classify_action(toxic, "CRRT"))
 
     def test_classifies_cardiovascular_actions(self):
         config = get_body_system_config("cardiovascular_instability")

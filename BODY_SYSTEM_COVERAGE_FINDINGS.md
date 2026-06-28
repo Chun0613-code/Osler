@@ -32,6 +32,8 @@ is granted.
 | Cardiac / myocardial | Cardiac injury and myocardial stress biomarkers | validated bounded factual router |
 | Musculoskeletal | Rhabdomyolysis / muscle-injury proxy | validated bounded factual router |
 | Immune / inflammatory | Immune and inflammatory activation proxy | validated bounded factual router |
+| Integumentary | Skin / wound / burn proxy | validated bounded factual router |
+| Toxicologic / metabolic | Poisoning / overdose / toxic-metabolic proxy | validated bounded factual router |
 
 ## New Bounded Router Results
 
@@ -152,6 +154,39 @@ state, reproductive/endocrine physiology beyond ICU proxies, detailed neurologic
 exam trajectories, procedure-specific cardiac/neuro variables, microbiology and
 immune phenotype depth, and high-resolution physical exam states.
 
+## Breadth Completion Pass
+
+The final breadth pass adds the remaining feasible adult-ICU coverage modules:
+
+- `integumentary_skin_wound`: pressure ulcer, wound, burn, cellulitis, skin
+  infection, and related physiologic proxy coverage;
+- `toxic_metabolic`: poisoning, overdose, toxic ingestion, and metabolic
+  derangement proxy coverage.
+
+| Module | Stays | Transitions | Active Rows | Active Median Delta | Random Splits | Hospital-Heldout Delta | Stable 7/7 Ridge Targets |
+|---|---:|---:|---:|---:|---:|---:|---|
+| Integumentary / skin / wound | 1,377 | 17,327 | 10,023 | -0.058359 | 7/7 significant | -0.030696 | glucose, heart rate, hematocrit, hemoglobin, MAP |
+| Toxicologic / metabolic | 1,333 | 11,318 | 5,390 | -0.094078 | 7/7 significant | -0.014730 | glucose, heart rate, MAP, oxygen saturation, potassium, respiratory rate |
+
+Both modules preserve the same pattern:
+
+- dense physiologic downstream targets can beat persistence;
+- skin/wound healing state, toxin concentration, and exposure-level trajectories
+  are not first-class in the current eICU state map;
+- sparse or unobserved system-specific targets must remain data ceilings, not
+  hallucinated state variables.
+
+With these two modules, the adult-ICU breadth pass now covers all standard
+organ-system buckets that eICU can support with factual observed physiology:
+cardiovascular, respiratory, nervous, renal/urinary, endocrine/metabolic,
+digestive/hepatic/pancreatic/nutrition, hematologic/coagulation, immune/lymphatic
+proxy, musculoskeletal, integumentary, and fluid/electrolyte/acid-base.
+
+Reproductive/obstetric physiology is marked as a data ceiling in this adult ICU
+dataset.  It is not implemented as a router because eICU lacks reliable
+high-density pregnancy, fetal, obstetric intervention, or reproductive hormone
+trajectories for this contract.
+
 ## Boundary
 
 These artifacts are factual and observational.
@@ -176,3 +211,9 @@ missing first-class variables so the proxy systems become deeper:
 - neurologic: GCS/mental-status proxies, ICP/EVD/procedure evidence;
 - cardiovascular: rhythm/procedure evidence, inotrope dose normalization;
 - endocrine beyond DKA: HHS/hypoglycemia and thyroid/adrenal crisis contracts.
+- integumentary: structured wound stage/size/drainage and burn surface-area
+  trajectories;
+- toxicologic: measured toxin levels, ingestion timing, antidote dose
+  normalization, and poison-control protocol context;
+- reproductive/obstetric: external obstetric ICU datasets would be required;
+  eICU is treated as a data ceiling for this system.

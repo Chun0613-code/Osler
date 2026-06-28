@@ -214,6 +214,18 @@ regresses on hospital-heldout, likely from cross-hospital measurement or
 practice shift.  This expands body-system factual physiology coverage, not
 causal treatment planning or complete human simulation.
 
+Breadth completion pass:
+
+- integumentary / skin / wound / burn proxy
+- toxicologic / metabolic poisoning proxy
+- reproductive / obstetric marked as eICU data ceiling
+
+Both feasible final modules pass 7/7 random patient split seeds and
+hospital-heldout evaluation as bounded physiologic proxy routers.  Reproductive
+and obstetric physiology is not forced into the router because this adult ICU
+dataset lacks reliable pregnancy, fetal, obstetric intervention, and
+reproductive hormone trajectories.
+
 ## Boundary
 
 This A/B contract contains no patient rows or identifiers. It is a build
@@ -233,6 +245,12 @@ adding more disease names.  Remaining high-value gaps include skin/wound state,
 detailed neurologic exam trajectories, reproductive physiology, microbiology and
 immune phenotype depth, procedure-specific cardiac/neuro variables, and
 high-resolution treatment dosing.
+The final breadth pass adds integumentary and toxicologic/metabolic proxy
+coverage, then marks reproductive/obstetric physiology as an eICU data ceiling.
+Chapter B breadth-first expansion is therefore closed for the current data
+source.  The next Chapter-B work should be depth-first: structured wound state,
+toxin-level/exposure trajectories, microbiology phenotypes, procedure-specific
+variables, normalized treatment dosing, and more predict-update belief states.
 The AKI renal mechanism audit shows that the first simple mechanism candidate is
 not enough for slow creatinine/BUN targets at 6 hours.  The long-horizon AKI
 audit answers the next question: at 24-48 hours, creatinine and BUN move from

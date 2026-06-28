@@ -19,6 +19,10 @@ GI/pancreatic/nutrition, cardiac injury, musculoskeletal/rhabdomyolysis, and
 immune/inflammatory modules.  These widen the factual physiology surface toward
 whole-body coverage while preserving the same safety boundary: no causal,
 clinical, runtime, checkpoint-promotion, or active-rule authority.
+The final breadth pass adds integumentary skin/wound/burn proxy coverage and a
+toxicologic/metabolic poisoning proxy.  Reproductive/obstetric physiology is
+explicitly marked as an eICU data ceiling rather than forced into an unsupported
+router.
 
 ## Validated Pattern
 
@@ -89,6 +93,13 @@ Observed examples:
   target in the bounded pass; CPK/myoglobin/LDH and renal targets fall back.
 - Immune/inflammatory: the overall router is significant, but inflammatory
   biomarkers themselves are too sparse for stable 7/7 real-fit target selection.
+- Integumentary/skin/wound: glucose, heart rate, hematocrit, hemoglobin, and MAP
+  carry the stable short-horizon signal; creatinine, lactate, and temperature
+  fall back.  This is a wound/skin physiology proxy, not wound-healing state.
+- Toxicologic/metabolic: glucose, heart rate, MAP, oxygen saturation,
+  potassium, and respiratory rate select `ridge_realfit`; creatinine,
+  osmolality, and temperature fall back.  This is a toxic-metabolic physiology
+  proxy, not toxin-level modeling.
 
 This is a physiological result, not just a modeling trick.  A 6-hour window is
 long enough for fast ICU targets, but too short for many renal accumulation
@@ -139,3 +150,11 @@ coverage, not complete human simulation.  Systems that depend on physical exam,
 skin/wound state, detailed neurologic exam, reproductive physiology,
 microbiology phenotype, procedure details, or high-resolution treatment dosing
 remain limited by observability.
+
+The breadth-first body-system pass is now closed for the current eICU data
+source.  Adult-ICU factual physiology coverage exists for cardiovascular,
+respiratory, nervous-system proxy, renal/urinary, fluid/electrolyte/acid-base,
+endocrine/metabolic, digestive/hepatic/pancreatic/nutrition,
+hematologic/coagulation, immune/inflammatory, musculoskeletal, integumentary,
+and toxicologic buckets.  Reproductive/obstetric physiology remains a data
+ceiling requiring an external obstetric ICU dataset.

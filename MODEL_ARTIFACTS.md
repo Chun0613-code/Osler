@@ -138,6 +138,16 @@ immune/inflammatory systems.  The pass remains bounded, observational,
 non-clinical, and non-causal; it does not make Osler-JEPA a complete human
 simulator.
 
+The final breadth-completion pass adds local-only row-level parquets:
+`eicu_integumentary_skin_wound_transitions_6h.parquet` and
+`eicu_toxic_metabolic_transitions_6h.parquet`. These are ignored by git.
+Committed aggregate reports include the matching `*_transition_report.json` and
+`*_target_router.json` files plus `BODY_SYSTEM_COVERAGE_COMPLETE.md`. The pass
+closes the feasible adult-ICU body-system breadth layer with integumentary and
+toxicologic/metabolic proxy modules, while marking reproductive/obstetric
+physiology as an eICU data ceiling.  It remains factual, observational,
+bounded, non-clinical, and non-causal.
+
 `eicu_aki_renal_belief_state_audit.json` is the explicit predict-update version
 of the renal belief audit. It is aggregate-only. The state belief passes
 downstream gates for BUN at 24h/48h and for urine output at 24h, but it does not

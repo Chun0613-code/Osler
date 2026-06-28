@@ -401,7 +401,7 @@
   },
   "chapter_b_multi_disease": {
     "architecture": "per-disease, per-target gated factual router",
-    "body_system_coverage_status": "DKA/endocrine-metabolic, sepsis/systemic-infectious, AKI/renal, respiratory/pulmonary, cardiovascular, neurologic-proxy, hepatic-GI, first-class hematologic/coagulation, electrolyte/acid-base, broad endocrine stress, GI/pancreatic/nutrition, cardiac injury, musculoskeletal/rhabdomyolysis, and immune/inflammatory modules now have isolated factual-router contracts.",
+    "body_system_coverage_status": "DKA/endocrine-metabolic, sepsis/systemic-infectious, AKI/renal, respiratory/pulmonary, cardiovascular, neurologic-proxy, hepatic-GI, first-class hematologic/coagulation, electrolyte/acid-base, broad endocrine stress, GI/pancreatic/nutrition, cardiac injury, musculoskeletal/rhabdomyolysis, immune/inflammatory, integumentary skin/wound, and toxic-metabolic modules now have isolated factual-router contracts. Reproductive/obstetric physiology is an eICU data ceiling.",
     "expanded_body_system_coverage_v2": {
       "boundary": {
         "bounded_engineering_cohort": true,
@@ -504,6 +504,64 @@
         "high-resolution treatment dosing"
       ],
       "status": "expanded_bounded_body_system_factual_coverage"
+    },
+    "body_system_breadth_completion": {
+      "boundary": {
+        "bounded_engineering_cohort": true,
+        "causal_claim_allowed": false,
+        "checkpoint_promotion_allowed": false,
+        "clinical_claim_allowed": false,
+        "complete_human_simulation_claim_allowed": false,
+        "counterfactual_claim_allowed": false,
+        "runtime_decision_authority": false
+      },
+      "data_ceilings": {
+        "reproductive_obstetric": "not implemented; adult eICU lacks reliable pregnancy, fetal, obstetric intervention, or reproductive hormone trajectories",
+        "skin_wound_depth": "structured wound stage, wound size, drainage, and burn surface area are not first-class numeric trajectories",
+        "toxicology_depth": "toxin concentration, ingestion timing, exposure dose, and poison-control protocol context are not reliable first-class trajectories"
+      },
+      "date": "2026-06-28",
+      "files": [
+        "eicu_body_system_configs.py",
+        "eicu_body_system_transition_extract.py",
+        "eicu_body_system_target_router.py",
+        "BODY_SYSTEM_COVERAGE_FINDINGS.md",
+        "BODY_SYSTEM_COVERAGE_COMPLETE.md"
+      ],
+      "modules": {
+        "integumentary_skin_wound": {
+          "active_median_delta": -0.058359,
+          "active_transitions": 10023,
+          "hospital_holdout_delta": -0.030696,
+          "random_patient_splits": "7/7 significant",
+          "stable_ridge_targets": [
+            "glucose",
+            "heart_rate",
+            "hematocrit",
+            "hemoglobin",
+            "map"
+          ],
+          "stays": 1377,
+          "transitions": 17327
+        },
+        "toxic_metabolic": {
+          "active_median_delta": -0.094078,
+          "active_transitions": 5390,
+          "hospital_holdout_delta": -0.01473,
+          "random_patient_splits": "7/7 significant",
+          "stable_ridge_targets": [
+            "glucose",
+            "heart_rate",
+            "map",
+            "o2sat",
+            "potassium",
+            "respiratory_rate"
+          ],
+          "stays": 1333,
+          "transitions": 11318
+        }
+      },
+      "status": "breadth_complete_for_current_eicu_factual_physiology"
     },
     "do_not_mix_latent_spaces_initially": true,
     "implemented_modules": {
