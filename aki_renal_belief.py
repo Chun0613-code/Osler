@@ -34,6 +34,19 @@ RENAL_STATE_BELIEF_COLUMNS = (
     "state_belief_delta_since_prior",
 )
 
+RENAL_STATE_V2_BELIEF_COLUMNS = (
+    "state2_belief_renal_reserve_mean",
+    "state2_belief_renal_reserve_sd",
+    "state2_belief_renal_stress",
+    "state2_belief_observation_confidence",
+    "state2_belief_delta_since_prior",
+    "state2_belief_creatinine_level",
+    "state2_belief_creatinine_slope",
+    "state2_belief_creatinine_sd",
+    "state2_belief_creatinine_innovation",
+    "state2_belief_creatinine_observation_confidence",
+)
+
 
 def _num(frame: pd.DataFrame, column: str, default=np.nan) -> np.ndarray:
     if column not in frame:
@@ -171,6 +184,85 @@ class RenalReserveBelief:
         }
 
 
+@dataclass(frozen=True)
+class CreatinineKineticsBelief:
+    """Gaussian-ish belief over current creatinine level and local slope.
+
+    This gives creatinine its own state dimension instead of forcing it through
+    the generic renal reserve proxy.  It uses only current and previous
+    observations in the same stay, so it is online-compatible and future-safe.
+    """
+
+    level: float
+    slope: float
+    variance: float
+    source: str = "creatinine_observation_prior"
+
+    @property
+    def standard_deviation(self) -> float:
+        return math.sqrt(max(float(self.variance), 1e-6))
+
+    @classmethod
+    def from_row(cls, row: pd.Series) -> "CreatinineKineticsBelief":
+        creatinine = float(np.clip(_scalar(row, "creatinine_t", 1.2), 0.2, 20.0))
+        age = float(np.clip(_scalar(row, "creatinine_age_hr", 24.0), 0.0, 72.0))
+        variance = float(np.clip(0.015 + 0.25 * (age / 72.0), 0.015, 0.40))
+        return cls(level=creatinine, slope=0.0, variance=variance, source="current_creatinine")
+
+    def predict(self, row: pd.Series, delta_hours: float) -> "CreatinineKineticsBelief":
+        hours = max(0.0, float(delta_hours))
+        _reserve, _variance, stress, _confidence = _row_observation(row)
+        rrt = 1.0 if (_flag(row, "hist_renal_replacement") or _flag(row, "act_renal_replacement")) else 0.0
+        nephrotoxin = 1.0 if (_flag(row, "hist_nephrotoxin") or _flag(row, "act_nephrotoxin")) else 0.0
+        vasopressor = 1.0 if (_flag(row, "hist_vasopressor") or _flag(row, "act_vasopressor")) else 0.0
+        drift_slope = 0.0035 * stress + 0.0015 * nephrotoxin + 0.0010 * vasopressor - 0.0030 * rrt
+        predicted_slope = float(np.clip(0.82 * self.slope + drift_slope, -0.08, 0.12))
+        predicted_level = float(np.clip(self.level + predicted_slope * hours, 0.2, 20.0))
+        process_variance = (0.006 + 0.020 * stress + 0.006 * nephrotoxin + 0.004 * rrt) * max(hours, 0.25)
+        return CreatinineKineticsBelief(
+            level=predicted_level,
+            slope=predicted_slope,
+            variance=float(np.clip(self.variance + process_variance, 0.015, 2.0)),
+            source="predicted_creatinine_kinetics",
+        )
+
+    def update(self, row: pd.Series, delta_hours: float) -> tuple["CreatinineKineticsBelief", float, float]:
+        observation = _scalar(row, "creatinine_t", np.nan)
+        if not np.isfinite(observation):
+            return self, 0.0, 0.0
+        observation = float(np.clip(observation, 0.2, 20.0))
+        age = float(np.clip(_scalar(row, "creatinine_age_hr", 24.0), 0.0, 72.0))
+        confidence = float(np.clip(1.0 - 0.75 * (age / 72.0), 0.05, 1.0))
+        observation_variance = float(np.clip(0.012 + (1.0 - confidence) * 0.20, 0.012, 0.40))
+        prior_var = max(float(self.variance), 1e-6)
+        obs_var = max(float(observation_variance), 1e-6)
+        posterior_var = 1.0 / (1.0 / prior_var + 1.0 / obs_var)
+        posterior_level = posterior_var * (self.level / prior_var + observation / obs_var)
+        innovation = float(observation - self.level)
+        hours = max(float(delta_hours), 0.25)
+        observed_slope = float(np.clip(innovation / hours, -0.20, 0.20))
+        posterior_slope = float(np.clip(0.70 * self.slope + 0.30 * observed_slope, -0.10, 0.14))
+        return (
+            CreatinineKineticsBelief(
+                level=float(np.clip(posterior_level, 0.2, 20.0)),
+                slope=posterior_slope,
+                variance=float(np.clip(posterior_var, 0.008, 2.0)),
+                source="predict_update_creatinine_observation",
+            ),
+            innovation,
+            confidence,
+        )
+
+    def to_features(self, innovation: float, confidence: float) -> dict[str, float]:
+        return {
+            "state2_belief_creatinine_level": float(self.level),
+            "state2_belief_creatinine_slope": float(self.slope),
+            "state2_belief_creatinine_sd": float(self.standard_deviation),
+            "state2_belief_creatinine_innovation": float(innovation),
+            "state2_belief_creatinine_observation_confidence": float(confidence),
+        }
+
+
 def renal_belief_features(frame: pd.DataFrame) -> pd.DataFrame:
     """Return candidate renal belief features for downstream prediction gates."""
 
@@ -262,6 +354,60 @@ def renal_belief_state_features(frame: pd.DataFrame) -> pd.DataFrame:
                 belief = prior.update(row)
             features = belief.to_features(row, prior_mean=prior_mean)
             for column, value in features.items():
+                output.loc[index, column] = value
+            previous_hour = hour
+            previous_row = row
+    return output.astype(np.float64)
+
+
+def renal_belief_state_v2_features(frame: pd.DataFrame) -> pd.DataFrame:
+    """Return predict-update renal reserve plus creatinine-specific state."""
+
+    output = pd.DataFrame(
+        np.nan,
+        index=frame.index,
+        columns=RENAL_STATE_V2_BELIEF_COLUMNS,
+        dtype=np.float64,
+    )
+    if frame.empty:
+        return output
+    sort_column = "hours_since_onset" if "hours_since_onset" in frame else None
+    for _stay_id, group in frame.groupby("stay_id", sort=False):
+        ordered = group.sort_values(sort_column) if sort_column else group
+        reserve_belief: RenalReserveBelief | None = None
+        creatinine_belief: CreatinineKineticsBelief | None = None
+        previous_hour: float | None = None
+        previous_row: pd.Series | None = None
+        for index, row in ordered.iterrows():
+            hour = _scalar(row, "hours_since_onset", 0.0)
+            if reserve_belief is None or creatinine_belief is None:
+                reserve_belief = RenalReserveBelief.from_row(row)
+                creatinine_belief = CreatinineKineticsBelief.from_row(row)
+                reserve_prior_mean = None
+                creatinine_innovation = 0.0
+                creatinine_confidence = 1.0
+            else:
+                delta_hours = max(0.0, hour - (previous_hour if previous_hour is not None else hour))
+                reserve_prior = reserve_belief.predict(previous_row if previous_row is not None else row, delta_hours)
+                reserve_prior_mean = reserve_prior.mean
+                reserve_belief = reserve_prior.update(row)
+                creatinine_prior = creatinine_belief.predict(
+                    previous_row if previous_row is not None else row,
+                    delta_hours,
+                )
+                creatinine_belief, creatinine_innovation, creatinine_confidence = (
+                    creatinine_prior.update(row, delta_hours)
+                )
+            reserve_features = reserve_belief.to_features(row, prior_mean=reserve_prior_mean)
+            output.loc[index, "state2_belief_renal_reserve_mean"] = reserve_features["state_belief_renal_reserve_mean"]
+            output.loc[index, "state2_belief_renal_reserve_sd"] = reserve_features["state_belief_renal_reserve_sd"]
+            output.loc[index, "state2_belief_renal_stress"] = reserve_features["state_belief_renal_stress"]
+            output.loc[index, "state2_belief_observation_confidence"] = reserve_features["state_belief_observation_confidence"]
+            output.loc[index, "state2_belief_delta_since_prior"] = reserve_features["state_belief_delta_since_prior"]
+            for column, value in creatinine_belief.to_features(
+                creatinine_innovation,
+                creatinine_confidence,
+            ).items():
                 output.loc[index, column] = value
             previous_hour = hour
             previous_row = row

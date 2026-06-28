@@ -173,3 +173,10 @@ BUN passes at 24h/48h, urine output passes at 24h and is directionally positive
 at 48h, while creatinine does not pass.  The next B-deep refinement should focus
 on improving the predict-update renal reserve equation for creatinine without
 relaxing the placebo gate.
+
+The creatinine-specific v2 state has now done exactly that.  Adding a separate
+creatinine level/slope/innovation belief dimension recovers creatinine: 24h
+passes 7/7 random splits and hospital-heldout, and 48h passes hospital-heldout
+with 5/7 random splits.  The next B-deep step is not another feature audit; it is
+to expose this v2 state as a shadow-mode digital-twin state object while keeping
+all causal and clinical gates closed.

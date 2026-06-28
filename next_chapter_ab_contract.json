@@ -322,6 +322,57 @@
           },
           "status": "partial_validated_downstream_belief_state"
         },
+        "renal_belief_state_v2": {
+          "boundary": {
+            "causal_claim_allowed": false,
+            "checkpoint_promotion_allowed": false,
+            "clinical_claim_allowed": false,
+            "counterfactual_claim_allowed": false,
+            "direct_hidden_state_accuracy_claim_allowed": false
+          },
+          "candidate": "ridge_realfit_plus_explicit_predict_update_renal_belief_state_v2",
+          "date": "2026-06-27",
+          "files": [
+            "aki_renal_belief.py",
+            "eicu_aki_belief_audit.py",
+            "eicu_aki_renal_belief_state_v2_audit.json",
+            "AKI_RENAL_BELIEF_STATE_V2_FINDINGS.md"
+          ],
+          "gate": {
+            "baseline": "ridge_realfit",
+            "pass_rule": "candidate must significantly beat both baseline and capacity-matched placebo on downstream observable targets",
+            "placebo": "ridge_realfit_plus_capacity_matched_noise_features"
+          },
+          "interpretation": "Adding a creatinine-specific level/slope/innovation state fixes the prior explicit state's creatinine gap and creates the current best online-compatible renal belief candidate.",
+          "horizons": {
+            "24h": {
+              "hospital_holdout_passed_targets": [
+                "creatinine",
+                "bun",
+                "urine_output"
+              ],
+              "random_patient_splits": {
+                "bun_passes_both": 7,
+                "creatinine_passes_both": 7,
+                "splits": 7,
+                "urine_output_passes_both": 7
+              }
+            },
+            "48h": {
+              "hospital_holdout_passed_targets": [
+                "creatinine",
+                "bun"
+              ],
+              "random_patient_splits": {
+                "bun_passes_both": 7,
+                "creatinine_passes_both": 5,
+                "splits": 7,
+                "urine_output_passes_both": 7
+              }
+            }
+          },
+          "status": "validated_downstream_belief_state"
+        },
         "random_patient_splits": {
           "active_aki_beats_persistence": 7,
           "active_aki_significant": 7,

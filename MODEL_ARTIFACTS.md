@@ -105,6 +105,12 @@ downstream gates for BUN at 24h/48h and for urine output at 24h, but it does not
 pass for creatinine. This artifact validates a narrower online-compatible belief
 state and preserves the same safety boundary.
 
+`eicu_aki_renal_belief_state_v2_audit.json` is the creatinine-specific
+predict-update refinement. It is aggregate-only. The v2 state adds a separate
+creatinine level/slope/innovation dimension and passes the downstream gate for
+24h creatinine/BUN/urine output and 48h creatinine/BUN. It remains factual,
+observational, and non-clinical.
+
 `mimiciii_dka_transitions_6h_demo.parquet` is local-only and ignored by git. It
 is the observed-treatment MIMIC-III demo lab-defined DKA-like transition cohort
 used for schema and factual proxy smoke testing. Committed aggregate reports

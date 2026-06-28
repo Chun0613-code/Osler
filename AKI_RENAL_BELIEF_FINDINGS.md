@@ -109,6 +109,10 @@ So the feature belief remains the broader personalization source, while the
 explicit online-compatible state belief is currently validated only for BUN and
 part of urine-output forecasting.
 
+The state-v2 follow-up adds a creatinine-specific state dimension and recovers
+creatinine performance.  It is now the preferred explicit online-compatible
+belief state candidate.
+
 ## Boundary
 
 - No raw rows are committed.

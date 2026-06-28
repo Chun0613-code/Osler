@@ -99,6 +99,19 @@ state version is more online-compatible, but the current state equations lose
 some creatinine signal.  The next refinement should focus on the predict-update
 equation, not on relaxing the gate.
 
+## V2 Follow-Up
+
+`AKI_RENAL_BELIEF_STATE_V2_FINDINGS.md` implements that refinement by adding a
+creatinine-specific predict-update state dimension.  The v2 state fixes the main
+creatinine failure:
+
+- 24h creatinine passes 7/7 random splits and hospital-heldout
+- 48h creatinine passes 5/7 random splits and hospital-heldout
+- BUN remains strongly positive
+
+The v1 state should therefore be treated as a useful intermediate audit, not the
+current best explicit state.
+
 ## Boundary
 
 - No raw rows are committed.
@@ -108,4 +121,3 @@ equation, not on relaxing the gate.
 - No counterfactual claim is allowed.
 - No clinical claim is allowed.
 - No checkpoint or active-rule promotion is allowed.
-

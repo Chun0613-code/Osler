@@ -21,9 +21,11 @@ import pandas as pd
 from aki_renal_belief import (
     RENAL_BELIEF_COLUMNS,
     RENAL_STATE_BELIEF_COLUMNS,
+    RENAL_STATE_V2_BELIEF_COLUMNS,
     placebo_belief_features,
     renal_belief_features,
     renal_belief_state_features,
+    renal_belief_state_v2_features,
 )
 from eicu_aki_target_router import _fit_ridge_future
 from eicu_aki_transition_extract import TARGET_VARS
@@ -51,6 +53,8 @@ def _belief_columns(kind: str) -> tuple[str, ...]:
         return RENAL_BELIEF_COLUMNS
     if kind == "state":
         return RENAL_STATE_BELIEF_COLUMNS
+    if kind == "state_v2":
+        return RENAL_STATE_V2_BELIEF_COLUMNS
     raise ValueError(f"unknown belief kind: {kind}")
 
 
@@ -61,6 +65,8 @@ def attach_belief(frame: pd.DataFrame, kind: str) -> tuple[pd.DataFrame, list[st
         extra = renal_belief_features(frame)
     elif kind == "state":
         extra = renal_belief_state_features(frame)
+    elif kind == "state_v2":
+        extra = renal_belief_state_v2_features(frame)
     else:
         raise ValueError(f"unknown belief kind: {kind}")
     return pd.concat([frame, extra], axis=1), list(extra.columns)
@@ -362,7 +368,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--discovery-fraction", type=float, default=0.67)
     parser.add_argument("--ridge-alpha", type=float, default=10.0)
     parser.add_argument("--bootstrap-samples", type=int, default=500)
-    parser.add_argument("--belief-kind", choices=("feature", "state"), default="state")
+    parser.add_argument("--belief-kind", choices=("feature", "state", "state_v2"), default="state")
     return parser.parse_args()
 
 

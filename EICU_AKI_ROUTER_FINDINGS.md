@@ -196,6 +196,11 @@ BUN at 24h/48h and urine output at 24h, but it does not pass for creatinine.
 This keeps the online-compatible state belief candidate scoped to the targets it
 actually helps.
 
+The v2 explicit state adds a creatinine-specific level/slope/innovation state.
+That refinement passes creatinine at 24h and 48h on hospital-heldout evaluation,
+while preserving BUN gains.  It is the current best online-compatible renal
+belief candidate.
+
 ## Boundary
 
 - No row-level predictions are committed.
