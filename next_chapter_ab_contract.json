@@ -442,6 +442,44 @@
       ],
       "whole_body_next_step": "temporal predict-update coupling between validated belief states rather than same-window static feature concatenation"
     },
+    "temporal_cross_system_coupling_audit": {
+      "boundary": {
+        "active_rule_promotion_allowed": false,
+        "causal_claim_allowed": false,
+        "checkpoint_promotion_allowed": false,
+        "clinical_claim_allowed": false,
+        "counterfactual_claim_allowed": false,
+        "runtime_decision_authority": false
+      },
+      "date": "2026-06-29",
+      "files": [
+        "body_temporal_coupling_belief.py",
+        "eicu_body_system_temporal_coupling_audit.py",
+        "eicu_body_system_temporal_coupling_audit.json",
+        "BODY_SYSTEM_TEMPORAL_COUPLING_FINDINGS.md"
+      ],
+      "gate": "temporal predict-update coupling belief must significantly beat both downstream baseline and capacity-matched placebo on held-out patients",
+      "promoted_edges": [],
+      "status": "generic_temporal_coupling_candidate_only",
+      "weak_candidate_edges": [
+        {
+          "edge": "renal_to_electrolyte_acid_base",
+          "active_pass_both_counts": {
+            "bicarbonate": "2/7",
+            "sodium": "1/7"
+          },
+          "promotion_allowed": false
+        },
+        {
+          "edge": "immune_to_hemodynamics",
+          "active_pass_both_counts": {
+            "map": "1/7"
+          },
+          "promotion_allowed": false
+        }
+      ],
+      "whole_body_next_step": "edge-specific shared state models for renal-electrolyte buffering, immune-hemodynamic capillary leak, respiratory CO2/ventilation, and heme oxygen delivery"
+    },
     "expanded_body_system_coverage_v2": {
       "boundary": {
         "bounded_engineering_cohort": true,

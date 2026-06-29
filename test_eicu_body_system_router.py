@@ -2,6 +2,7 @@ import unittest
 from pathlib import Path
 import tempfile
 
+import numpy as np
 import pandas as pd
 
 from eicu_body_system_configs import BODY_SYSTEM_CONFIGS, get_body_system_config
@@ -16,6 +17,10 @@ from eicu_body_system_transition_extract import (
 )
 from eicu_sepsis_transition_extract import LAB_TO_STATE, PLAUSIBLE
 from eicu_sepsis_target_router import _feature_columns
+from body_temporal_coupling_belief import (
+    temporal_coupling_features,
+    temporal_resp_acid_base_features,
+)
 from heme_coag_belief import (
     CoagulationReserveBelief,
     HEME_COAG_BELIEF_COLUMNS,
@@ -315,6 +320,33 @@ class EicuBodySystemRouterTests(unittest.TestCase):
 
         self.assertEqual(readiness["promoted_edges"], [])
         self.assertEqual(readiness["rejected_edges"][0]["name"], "immune_to_hemodynamics")
+
+    def test_temporal_coupling_features_are_online_and_finite(self):
+        frame = pd.DataFrame({
+            "stay_id": [1, 1, 1],
+            "hours_since_onset": [0.0, 6.0, 12.0],
+            "o2sat_t": [96.0, 88.0, 92.0],
+            "o2sat_age_hr": [1.0, 1.0, 2.0],
+            "respiratory_rate_t": [18.0, 34.0, 24.0],
+            "respiratory_rate_age_hr": [1.0, 1.0, 2.0],
+            "hist_ventilation": [0.0, 0.0, 1.0],
+            "act_ventilation": [0.0, 1.0, 1.0],
+            "hist_bronchodilator": [0.0, 0.0, 0.0],
+            "act_bronchodilator": [0.0, 1.0, 0.0],
+            "hist_systemic_steroid": [0.0, 0.0, 1.0],
+            "act_systemic_steroid": [0.0, 0.0, 0.0],
+        })
+
+        features = temporal_resp_acid_base_features(frame)
+
+        self.assertIn("tc_resp_burden_mean", features.columns)
+        self.assertFalse(features.isna().all(axis=None))
+        self.assertTrue(np.isfinite(features.to_numpy(dtype="float64")).all())
+        self.assertNotEqual(features.loc[1, "tc_resp_burden_innovation"], 0.0)
+
+    def test_temporal_coupling_dispatcher_rejects_unknown_edge(self):
+        with self.assertRaises(KeyError):
+            temporal_coupling_features(pd.DataFrame({"stay_id": [1]}), "not_a_body_edge")
 
     def test_heme_coag_belief_features_are_fixed_and_finite(self):
         frame = pd.DataFrame({

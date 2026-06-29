@@ -72,6 +72,14 @@ belief-based rather than static feature concatenation, for example renal reserve
 belief -> electrolyte/acid-base updates, perfusion shock burden -> renal reserve
 updates, and respiratory burden -> acid-base updates.
 
+That temporal belief-based coupling layer has now been tested as
+`eicu_body_system_temporal_coupling_audit.json`.  It improves the shape of the
+signal but still does not promote any edge: renal -> bicarbonate reaches 2/7
+active-window patient splits, renal -> sodium reaches 1/7, and immune -> MAP
+reaches 1/7.  These weak signals stay candidate-only.  The next depth work
+should therefore be edge-specific shared state, not a generic all-edge coupling
+feature block.
+
 ## Data Ceilings
 
 The following are explicit data ceilings in the current eICU contract:

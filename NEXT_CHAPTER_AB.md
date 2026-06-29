@@ -329,3 +329,12 @@ perfusion shock burden -> renal reserve and lactate updates, respiratory burden
 and inflammatory burden -> hemodynamic/albumin/platelet updates.  These remain
 candidate-only until they improve downstream observables beyond both baseline
 and placebo.
+
+That temporal predict-update coupling audit has now been run.  It moves in the
+right direction but still does not pass promotion: renal -> bicarbonate reaches
+2/7 active-window splits, renal -> sodium reaches 1/7, and immune -> MAP reaches
+1/7.  No edge reaches 7/7, so the whole-body coupling layer remains
+candidate-only.  The next Chapter-B depth step should be edge-specific shared
+state rather than generic burden features: renal-electrolyte buffering,
+immune-hemodynamic/capillary-leak state, respiratory CO2/ventilation state, and
+heme oxygen-delivery state.

@@ -203,6 +203,16 @@ coupling direction. The artifact contains no raw rows or patient identifiers
 and grants no causal, counterfactual, clinical, checkpoint-promotion, runtime,
 or active-rule authority.
 
+`eicu_body_system_temporal_coupling_audit.json` is the second aggregate-only
+cross-system coupling audit. It tests temporal predict-update coupling belief
+features instead of static upstream feature concatenation. The temporal layer
+produces weak plausible signals, including renal -> bicarbonate in 2/7 patient
+splits, renal -> sodium in 1/7, and immune -> MAP in 1/7, but no edge reaches the
+robust 7/7 active-window promotion boundary. `BODY_SYSTEM_TEMPORAL_COUPLING_FINDINGS.md`
+records the candidate-only interpretation. This artifact contains no raw rows or
+patient identifiers and grants no causal, counterfactual, clinical,
+checkpoint-promotion, runtime, or active-rule authority.
+
 `mimiciii_dka_transitions_6h_demo.parquet` is local-only and ignored by git. It
 is the observed-treatment MIMIC-III demo lab-defined DKA-like transition cohort
 used for schema and factual proxy smoke testing. Committed aggregate reports

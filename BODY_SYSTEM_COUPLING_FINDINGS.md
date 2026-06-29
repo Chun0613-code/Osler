@@ -67,6 +67,13 @@ baseline and capacity-matched placebo, with patient-heldout and hospital-heldout
 checks.  Until an edge passes that gate, it remains candidate-only and
 fail-closed.
 
+That temporal coupling audit has now been run and is documented in
+`BODY_SYSTEM_TEMPORAL_COUPLING_FINDINGS.md`.  It produced weak candidate signals
+but still no promoted edge: renal -> bicarbonate passed 2/7 active-window splits,
+renal -> sodium passed 1/7, and immune -> MAP passed 1/7.  This confirms that
+temporal predict-update state is a better direction than static concatenation,
+but the current generic layer is not strong enough to leave fail-closed status.
+
 ## Safety Boundary
 
 This audit grants no causal claim, counterfactual claim, clinical claim,
