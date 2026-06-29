@@ -105,6 +105,12 @@ current validated factual coupling map is therefore cardio -> renal long horizon
 and sepsis/immune -> MAP short horizon; hepato-renal remains a candidate for a
 longer-horizon or richer-observability audit.
 
+The longer-horizon hepato-renal audit has also been run on the same hepatic stay
+set.  It does not validate the edge: creatinine reaches 2/7 at 24h and 3/7 at
+48h, while BUN remains 0/7 active-window splits at both horizons.  Hepato-renal
+therefore needs richer hepatic state and treatment/procedure context rather than
+another horizon-only pass.
+
 ## Data Ceilings
 
 The following are explicit data ceilings in the current eICU contract:

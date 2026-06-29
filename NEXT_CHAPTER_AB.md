@@ -372,6 +372,11 @@ splits at 6h, despite hospital-heldout creatinine signal.
 The whole-body factual coupling map now has two validated research edges:
 cardio-renal long-horizon coupling and sepsis/immune -> MAP.  The next depth
 step should expose both as shadow factual state objects while keeping all
-treatment-effect, causal, and clinical gates closed.  Hepato-renal should move
-to a 24h/48h hepatic cohort or richer hepatic observability before another
-promotion attempt.
+treatment-effect, causal, and clinical gates closed.
+
+Hepato-renal has now been pushed to 24h/48h on the same hepatic stay set.  The
+longer horizon does not rescue it: creatinine reaches only 2/7 active splits at
+24h and 3/7 at 48h, while BUN remains 0/7 at both horizons.  This rejects the
+simple "like cardio-renal, just make the horizon longer" hypothesis.  The next
+hepato-renal step is richer hepatic observability and context, not another
+horizon-only audit.

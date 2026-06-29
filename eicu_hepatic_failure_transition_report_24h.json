@@ -1,0 +1,328 @@
+{
+  "action_evidence": {
+    "by_action": {
+      "antibiotics": 4281,
+      "fluids": 8231,
+      "hepatic_encephalopathy_tx": 1895,
+      "renal_replacement": 1400,
+      "vasopressor": 35465
+    },
+    "dose_observed_fraction": 0.613883,
+    "rows": 51272,
+    "sources": {
+      "eicu_infusiondrug": 32326,
+      "eicu_medication": 9519,
+      "eicu_treatment": 9427
+    }
+  },
+  "action_support": {
+    "antibiotics": {
+      "active_stays": 496,
+      "active_windows": 3805,
+      "dose_observed_windows": 0,
+      "stays": 543,
+      "windows": 5388
+    },
+    "fluids": {
+      "active_stays": 728,
+      "active_windows": 5633,
+      "dose_observed_windows": 146,
+      "stays": 802,
+      "windows": 8538
+    },
+    "hepatic_encephalopathy_tx": {
+      "active_stays": 362,
+      "active_windows": 2696,
+      "dose_observed_windows": 0,
+      "stays": 388,
+      "windows": 3961
+    },
+    "renal_replacement": {
+      "active_stays": 130,
+      "active_windows": 1239,
+      "dose_observed_windows": 0,
+      "stays": 133,
+      "windows": 1358
+    },
+    "vasopressor": {
+      "active_stays": 386,
+      "active_windows": 4320,
+      "dose_observed_windows": 2945,
+      "stays": 401,
+      "windows": 4629
+    }
+  },
+  "active_transitions": 8402,
+  "body_system": "hepatic_gastrointestinal",
+  "bounded_max_stays": 2500,
+  "candidate_stay_count_before_bound": 1396,
+  "criteria_counts_before_filter": {
+    "diagnosis_text_or_code:admissionDx.csv.gz": 326,
+    "diagnosis_text_or_code:diagnosis.csv.gz": 1070
+  },
+  "data_root": "eicu-collaborative-research-database-2.0",
+  "dataset": "PhysioNet eICU Collaborative Research Database 2.0",
+  "disease": "hepatic_failure",
+  "display_name": "Hepatic failure / cirrhosis / hepatic encephalopathy",
+  "hospitals": 82,
+  "measurements": {
+    "by_var": {
+      "albumin": 8925,
+      "alkaline_phos": 8307,
+      "alt": 8276,
+      "amylase": 283,
+      "anion_gap": 10405,
+      "ast": 8295,
+      "bicarbonate": 18489,
+      "bilirubin": 8111,
+      "bilirubin_direct": 2330,
+      "bnp": 325,
+      "bun": 13859,
+      "calcium": 13423,
+      "chloride": 14061,
+      "ck_mb": 349,
+      "ck_mb_index": 115,
+      "cortisol": 184,
+      "cpk": 802,
+      "creatinine": 13792,
+      "crp": 102,
+      "crp_hs": 4,
+      "esr": 122,
+      "ferritin": 253,
+      "fibrinogen": 632,
+      "free_t4": 125,
+      "glucose": 45505,
+      "heart_rate": 1609440,
+      "hematocrit": 14585,
+      "hemoglobin": 15002,
+      "inr": 7169,
+      "ionized_calcium": 483,
+      "lactate": 3281,
+      "ldh": 241,
+      "lipase": 845,
+      "magnesium": 7429,
+      "map": 663833,
+      "myoglobin": 11,
+      "o2sat": 1461169,
+      "ph": 4837,
+      "phosphate": 5938,
+      "platelets": 12768,
+      "potassium": 15992,
+      "prealbumin": 255,
+      "ptt": 2952,
+      "respiratory_rate": 1411825,
+      "serum_ketones": 4,
+      "serum_osmolality": 163,
+      "sodium": 15074,
+      "temperature": 151215,
+      "total_protein": 8293,
+      "triglycerides": 339,
+      "troponin_i": 799,
+      "troponin_t": 151,
+      "tsh": 398,
+      "uric_acid": 99,
+      "urine_output": 34351,
+      "wbc": 12552
+    },
+    "rows": 5638567,
+    "stays": 1396
+  },
+  "output": "eicu_hepatic_failure_transitions_24h.parquet",
+  "restricted_stay_count": 1396,
+  "restricted_stay_source": "eicu_hepatic_failure_transitions_6h.parquet",
+  "safety_boundary": {
+    "bounded_engineering_cohort": true,
+    "causal_claim_allowed": false,
+    "clinical_claim_allowed": false,
+    "coarse_treatment_rows_used_as_numeric_administrations": false,
+    "counterfactual_claim_allowed": false,
+    "factual_observed_treatment_only": true,
+    "medication_orders_used_as_numeric_administrations": false,
+    "patient_ids_included_in_report": false,
+    "raw_rows_included": false,
+    "restricted_stay_ids_used_internally": true
+  },
+  "schema": {
+    "action_channels": [
+      "fluids",
+      "vasopressor",
+      "antibiotics",
+      "renal_replacement",
+      "hepatic_encephalopathy_tx"
+    ],
+    "active_column": "hepatic_failure_active_t",
+    "anchor_step_hours": 4.0,
+    "config": {
+      "action_keys": [
+        "fluids",
+        "vasopressor",
+        "antibiotics",
+        "renal_replacement",
+        "hepatic_encephalopathy_tx"
+      ],
+      "action_terms": {
+        "antibiotics": [
+          "vancomycin",
+          "zosyn",
+          "piperacillin",
+          "tazobactam",
+          "meropenem",
+          "imipenem",
+          "ertapenem",
+          "cefepime",
+          "ceftriaxone",
+          "ceftazidime",
+          "cefazolin",
+          "cefuroxime",
+          "ciprofloxacin",
+          "levofloxacin",
+          "metronidazole",
+          "gentamicin",
+          "tobramycin",
+          "linezolid",
+          "daptomycin",
+          "clindamycin",
+          "aztreonam",
+          "ampicillin",
+          "amoxicillin",
+          "penicillin",
+          "nafcillin",
+          "oxacillin"
+        ],
+        "fluids": [
+          "normal saline",
+          "sodium chloride",
+          "nacl",
+          "lactated",
+          "ringer",
+          "crystalloid",
+          "fluid bolus",
+          "iv fluid",
+          "saline bolus"
+        ],
+        "hepatic_encephalopathy_tx": [
+          "lactulose",
+          "rifaximin"
+        ],
+        "renal_replacement": [
+          "dialysis",
+          "crrt",
+          "cvvh",
+          "cvvhd",
+          "hemofiltration",
+          "renal replacement"
+        ],
+        "vasopressor": [
+          "norepinephrine",
+          "levophed",
+          "epinephrine",
+          "vasopressin",
+          "phenylephrine",
+          "neosynephrine",
+          "dopamine"
+        ]
+      },
+      "active_actions": [
+        "hist_vasopressor",
+        "hist_renal_replacement"
+      ],
+      "active_high": {
+        "bilirubin": 2.0,
+        "creatinine": 2.0,
+        "lactate": 2.0
+      },
+      "active_low": {
+        "map": 65.0,
+        "platelets": 100.0
+      },
+      "body_system": "hepatic_gastrointestinal",
+      "diagnosis_patterns": [
+        "liver failure",
+        "hepatic failure",
+        "cirrhosis",
+        "hepatic encephalopathy",
+        "acute liver",
+        "alcoholic hepatitis",
+        "shock liver",
+        "liver disease",
+        "k72",
+        "k74",
+        "570",
+        "571"
+      ],
+      "display_name": "Hepatic failure / cirrhosis / hepatic encephalopathy",
+      "name": "hepatic_failure",
+      "notes": [
+        "Coagulation labs are incomplete in the current eICU state map; bilirubin/platelets are proxies.",
+        "No transplant, bleeding, or encephalopathy treatment-effect claim is allowed."
+      ],
+      "state_vars": [
+        "bilirubin",
+        "bilirubin_direct",
+        "platelets",
+        "lactate",
+        "bicarbonate",
+        "creatinine",
+        "map",
+        "bun",
+        "sodium",
+        "potassium",
+        "ph",
+        "wbc",
+        "glucose",
+        "heart_rate"
+      ],
+      "targets": [
+        "bilirubin",
+        "bilirubin_direct",
+        "platelets",
+        "lactate",
+        "bicarbonate",
+        "creatinine",
+        "map"
+      ]
+    },
+    "future_suffix": "tp24",
+    "horizon_hours": 24.0,
+    "lookback_hours": 6.0,
+    "state_vars": [
+      "bilirubin",
+      "bilirubin_direct",
+      "platelets",
+      "lactate",
+      "bicarbonate",
+      "creatinine",
+      "map",
+      "bun",
+      "sodium",
+      "potassium",
+      "ph",
+      "wbc",
+      "glucose",
+      "heart_rate"
+    ],
+    "target_tolerance_hours": 2.0,
+    "targets": [
+      "bilirubin",
+      "bilirubin_direct",
+      "platelets",
+      "lactate",
+      "bicarbonate",
+      "creatinine",
+      "map"
+    ]
+  },
+  "stays": 1063,
+  "subjects": 864,
+  "target_pair_counts": {
+    "bicarbonate": 2393,
+    "bilirubin": 828,
+    "bilirubin_direct": 184,
+    "creatinine": 1808,
+    "lactate": 405,
+    "map": 13216,
+    "platelets": 1610
+  },
+  "transfusion_subtype_support": {},
+  "transitions": 13269
+}

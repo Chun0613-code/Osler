@@ -108,6 +108,11 @@ heart rate 5/7 and lactate 4/7 partial.  Hepato-renal reaches 3/7 for
 creatinine and BUN, which is not enough to promote and should move to a longer
 horizon or richer hepatic observability.
 
+That longer-horizon hepato-renal test has now been run.  It still does not pass:
+creatinine reaches 2/7 at 24h and 3/7 at 48h, while BUN stays 0/7 at both
+horizons.  The candidate is therefore observability-limited, not merely
+horizon-limited.
+
 ## Safety Boundary
 
 No edge-specific coupling edge is promoted.  The current artifact is a

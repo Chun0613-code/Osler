@@ -848,6 +848,8 @@ FOCUSED_COUPLING_FEATURE_BUILDERS.update({
     "cardio_renal_48h": focused_cardio_renal_long_horizon_features,
     "sepsis_cardio_6h": focused_sepsis_cardiovascular_features,
     "hepato_renal_6h": focused_hepato_renal_features,
+    "hepato_renal_24h": focused_hepato_renal_features,
+    "hepato_renal_48h": focused_hepato_renal_features,
 })
 
 

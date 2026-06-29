@@ -38,7 +38,9 @@ dynamics remain candidate-only.
 | cardio-renal, 24h | 530,265 | 29,508 | 203 | creatinine 7/7, BUN 7/7, urine output 5/7 | creatinine, BUN, and urine output pass all-window; creatinine/BUN pass active-window | validated factual coupling edge |
 | cardio-renal, 48h | 397,897 | 21,427 | 198 | creatinine 7/7, BUN 7/7, urine output 4/7 | creatinine and BUN pass; urine output does not robustly pass hospital-heldout | validated for creatinine/BUN; urine partial |
 | sepsis/immune -> cardiovascular, 6h | 422,244 | 25,175 | 204 | MAP 7/7, heart rate 5/7, lactate 4/7 | MAP and heart rate pass; lactate is placebo-only in hospital-heldout | validated for MAP; HR/lactate partial |
-| hepatic -> renal, 6h | 17,730 | 1,096 | 88 | creatinine 3/7, BUN 3/7 | creatinine passes hospital-heldout but not random patient splits | candidate-only; likely horizon/observability limited |
+| hepatic -> renal, 6h | 17,730 | 1,096 | 88 | creatinine 3/7, BUN 3/7 | creatinine passes hospital-heldout but not random patient splits | candidate-only |
+| hepatic -> renal, 24h | 13,269 | 864 | 82 | creatinine 2/7, BUN 0/7 | creatinine and BUN pass hospital-heldout, but random splits fail | candidate-only; heterogeneous |
+| hepatic -> renal, 48h | 9,316 | 596 | 73 | creatinine 3/7, BUN 0/7 | no target passes hospital-heldout | candidate-only; not a simple horizon fix |
 
 ## Detailed Signal
 
@@ -78,6 +80,17 @@ promote.  Its 6h active-window signals are 3/7 for both creatinine and BUN:
 | creatinine | 3/7 | 3/7 | -0.034476 | -0.044751 |
 | BUN | 2/7 | 3/7 | -0.016291 | -0.019774 |
 
+Longer horizons do not rescue the hepato-renal edge.  This explicitly tests the
+analogy to cardio-renal slow coupling and rejects it under the current eICU
+hepatic proxy contract:
+
+| Horizon | Target | All-Window Passes | Active Passes | Active Median Delta vs Baseline | Active Median Delta vs Placebo |
+|---|---|---:|---:|---:|---:|
+| 24h | creatinine | 1/7 | 2/7 | -0.027727 | -0.030759 |
+| 24h | BUN | 0/7 | 0/7 | -0.008791 | -0.011425 |
+| 48h | creatinine | 3/7 | 3/7 | -0.030555 | -0.048204 |
+| 48h | BUN | 1/7 | 0/7 | -0.008718 | -0.024667 |
+
 Renal-electrolyte store features do not pass.  The explicit potassium store and
 bicarbonate buffer state produce only weak bicarbonate/anion-gap signals and no
 potassium signal:
@@ -98,7 +111,8 @@ This closes the first whole-body coupling question with a split answer:
   promote;
 - long-horizon cardio-renal coupling is validated as a factual predictive edge.
 - sepsis/immune burden carries reproducible 6h factual signal for MAP;
-- hepatic burden carries renal signal, but not reproducibly enough at 6h.
+- hepatic burden carries renal signal, but not reproducibly enough at 6h, 24h,
+  or 48h.
 
 The physiology is coherent.  Perfusion burden and renal reserve do not need to
 change creatinine/BUN inside a six-hour window to be useful.  At 24-48 hours,
@@ -130,5 +144,8 @@ The renal-electrolyte focused store remains candidate-only.  Its next step is
 richer observability: treatment timing, KCl/bicarbonate dosing, urine
 electrolytes when available, and better acid-base/ventilation context.
 
-The hepato-renal focused candidate also remains candidate-only.  Its next step
-is a 24h/48h hepatic cohort or richer hepatic observability, not a relaxed gate.
+The hepato-renal focused candidate also remains candidate-only.  The 24h/48h
+test shows that horizon alone is not enough.  Its next step is richer hepatic
+observability: INR/synthetic function, ammonia or encephalopathy severity,
+ascites/volume status, albumin therapy, paracentesis/procedure context, and
+cleaner hepatorenal syndrome labels.

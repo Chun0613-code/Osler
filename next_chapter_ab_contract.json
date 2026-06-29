@@ -560,6 +560,10 @@
         "eicu_body_system_focused_cardio_renal_48h_audit.json",
         "eicu_body_system_focused_sepsis_cardio_6h_audit.json",
         "eicu_body_system_focused_hepato_renal_6h_audit.json",
+        "eicu_body_system_focused_hepato_renal_24h_audit.json",
+        "eicu_body_system_focused_hepato_renal_48h_audit.json",
+        "eicu_hepatic_failure_transition_report_24h.json",
+        "eicu_hepatic_failure_transition_report_48h.json",
         "BODY_SYSTEM_FOCUSED_COUPLING_FINDINGS.md",
         "osler_jepa/body_coupling.py"
       ],
@@ -612,16 +616,27 @@
           "promotion_allowed": false
         },
         {
-          "edge": "hepato_renal_6h",
+          "edge": "hepato_renal",
           "active_pass_both_counts": {
-            "bun": "3/7",
-            "creatinine": "3/7"
+            "24h": {
+              "bun": "0/7",
+              "creatinine": "2/7"
+            },
+            "48h": {
+              "bun": "0/7",
+              "creatinine": "3/7"
+            },
+            "6h": {
+              "bun": "3/7",
+              "creatinine": "3/7"
+            }
           },
+          "interpretation": "horizon extension alone does not validate hepato-renal coupling under the current hepatic proxy contract",
           "promotion_allowed": false
         }
       ],
       "status": "validated_cross_system_factual_coupling_edges",
-      "whole_body_next_step": "expose cardio-renal 24h/48h and sepsis-MAP coupling as shadow factual state objects; keep renal-electrolyte and hepato-renal candidates closed until observability or horizon improves"
+      "whole_body_next_step": "expose cardio-renal 24h/48h and sepsis-MAP coupling as shadow factual state objects; keep renal-electrolyte and hepato-renal candidates closed until observability improves"
     },
     "expanded_body_system_coverage_v2": {
       "boundary": {

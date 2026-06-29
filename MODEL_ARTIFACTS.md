@@ -232,12 +232,24 @@ anion-gap signals. Cardio-renal long-horizon coupling is the first validated
 cross-system factual edge: creatinine and BUN pass the candidate-versus-baseline
 and candidate-versus-placebo gate in 7/7 patient splits at both 24h and 48h,
 with hospital-heldout support. Sepsis/immune -> cardiovascular is the second
-validated factual edge for MAP at 6h. Hepato-renal 6h improves to a 3/7
-candidate signal for creatinine and BUN but does not promote. Urine output,
-heart rate, and lactate remain partial. The matching findings are recorded in
-`BODY_SYSTEM_FOCUSED_COUPLING_FINDINGS.md`. This artifact contains no raw rows
-or patient identifiers and grants no causal, counterfactual, clinical,
-checkpoint-promotion, runtime, or active-rule authority.
+validated factual edge for MAP at 6h. Hepato-renal improves to candidate signal
+but does not promote at 6h, 24h, or 48h, so it is not a simple horizon mismatch.
+Urine output, heart rate, and lactate remain partial. The matching findings are
+recorded in `BODY_SYSTEM_FOCUSED_COUPLING_FINDINGS.md`. This artifact contains
+no raw rows or patient identifiers and grants no causal, counterfactual,
+clinical, checkpoint-promotion, runtime, or active-rule authority.
+
+`eicu_hepatic_failure_transitions_24h.parquet` and
+`eicu_hepatic_failure_transitions_48h.parquet` are local-only long-horizon
+hepatic row-level cohorts and are ignored by git. They are restricted internally
+to the existing 6h hepatic stay set for apples-to-apples horizon comparison.
+Aggregate reports are committed as
+`eicu_hepatic_failure_transition_report_24h.json` and
+`eicu_hepatic_failure_transition_report_48h.json`; focused coupling audit
+summaries are committed as
+`eicu_body_system_focused_hepato_renal_24h_audit.json` and
+`eicu_body_system_focused_hepato_renal_48h_audit.json`. These artifacts remain
+candidate-only.
 
 `mimiciii_dka_transitions_6h_demo.parquet` is local-only and ignored by git. It
 is the observed-treatment MIMIC-III demo lab-defined DKA-like transition cohort
