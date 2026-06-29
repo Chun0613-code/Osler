@@ -5,6 +5,7 @@ import tempfile
 import pandas as pd
 
 from eicu_body_system_configs import BODY_SYSTEM_CONFIGS, get_body_system_config
+from eicu_body_system_coupling_audit import _resolve_upstream_columns, summarize_reports
 from eicu_body_system_transition_extract import (
     add_active_column,
     classify_action,
@@ -22,6 +23,10 @@ from heme_coag_belief import (
     heme_coag_belief_features,
     heme_coag_state_features,
     placebo_heme_coag_belief_features,
+)
+from osler_jepa.body_coupling import (
+    body_system_coupling_edges,
+    coupling_readiness_from_audit,
 )
 
 
@@ -208,6 +213,108 @@ class EicuBodySystemRouterTests(unittest.TestCase):
         self.assertIn("act_vasopressor", features)
         self.assertNotIn("map_tp6", features)
         self.assertNotIn("lactate_tp24", features)
+
+    def test_coupling_resolves_upstream_wildcard_features(self):
+        frame = pd.DataFrame({
+            "potassium_t": [4.0, 5.0],
+            "potassium_tp6": [4.1, 4.8],
+            "creatinine_t": [1.0, 2.0],
+            "creatinine_age_hr": [1.0, 2.0],
+            "act_renal_replacement": [0, 1],
+            "act_renal_replacement_evidence_count": [0, 2],
+            "act_renal_replacement_dose_observed": [0, 0],
+            "map_t": [70.0, 65.0],
+        })
+
+        columns = _resolve_upstream_columns(
+            frame,
+            "potassium",
+            ("creatinine_t", "creatinine_age_hr", "act_renal_replacement*"),
+        )
+
+        self.assertIn("creatinine_t", columns)
+        self.assertIn("creatinine_age_hr", columns)
+        self.assertIn("act_renal_replacement", columns)
+        self.assertIn("act_renal_replacement_evidence_count", columns)
+        self.assertNotIn("potassium_tp6", columns)
+
+    def test_coupling_summary_counts_pass_both(self):
+        reports = [{
+            "targets": {
+                "potassium": {
+                    "active_only": {
+                        "candidate_vs_baseline": {"significant": True, "point_delta": -0.1},
+                        "candidate_vs_placebo": {"significant": True, "point_delta": -0.2},
+                    },
+                    "all_windows": {
+                        "candidate_vs_baseline": {"significant": True, "point_delta": -0.1},
+                        "candidate_vs_placebo": {"significant": False, "point_delta": 0.0},
+                    },
+                }
+            }
+        }]
+
+        summary = summarize_reports(reports, ("potassium",))
+
+        self.assertEqual(summary["potassium"]["active_only"]["candidate_passes_both_count"], 1)
+        self.assertEqual(summary["potassium"]["all_windows"]["candidate_passes_both_count"], 0)
+
+    def test_body_coupling_contract_includes_key_organ_edges(self):
+        edges = {edge.name: edge for edge in body_system_coupling_edges()}
+
+        self.assertIn("renal_to_electrolyte_acid_base", edges)
+        self.assertIn("respiratory_to_acid_base", edges)
+        self.assertIn("cardiovascular_to_renal", edges)
+        self.assertIn("potassium", edges["renal_to_electrolyte_acid_base"].targets)
+        self.assertEqual(edges["heme_to_perfusion"].horizon_hours, 24)
+
+    def test_coupling_readiness_keeps_weak_signal_candidate_only(self):
+        audit = {
+            "edges": [{
+                "name": "endocrine_to_electrolyte",
+                "source_system": "endocrine_metabolic",
+                "target_system": "electrolyte_acid_base",
+                "targets": ("potassium", "sodium"),
+                "random_patient_splits": {
+                    "summary": {
+                        "potassium": {
+                            "active_only": {"candidate_passes_both_count": 1},
+                        },
+                        "sodium": {
+                            "active_only": {"candidate_passes_both_count": 0},
+                        },
+                    },
+                },
+            }],
+        }
+
+        readiness = coupling_readiness_from_audit(audit)
+
+        self.assertEqual(readiness["promoted_edges"], [])
+        self.assertEqual(readiness["weak_candidate_edges"][0]["weak_candidate_targets"], ["potassium"])
+        self.assertFalse(readiness["causal_claim_allowed"])
+
+    def test_coupling_readiness_rejects_zero_pass_edges(self):
+        audit = {
+            "edges": [{
+                "name": "immune_to_hemodynamics",
+                "source_system": "immune_inflammatory",
+                "target_system": "cardiovascular_perfusion",
+                "targets": ("map",),
+                "random_patient_splits": {
+                    "summary": {
+                        "map": {
+                            "active_only": {"candidate_passes_both_count": 0},
+                        },
+                    },
+                },
+            }],
+        }
+
+        readiness = coupling_readiness_from_audit(audit)
+
+        self.assertEqual(readiness["promoted_edges"], [])
+        self.assertEqual(readiness["rejected_edges"][0]["name"], "immune_to_hemodynamics")
 
     def test_heme_coag_belief_features_are_fixed_and_finite(self):
         frame = pd.DataFrame({

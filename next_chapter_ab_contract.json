@@ -402,6 +402,46 @@
   "chapter_b_multi_disease": {
     "architecture": "per-disease, per-target gated factual router",
     "body_system_coverage_status": "DKA/endocrine-metabolic, sepsis/systemic-infectious, AKI/renal, respiratory/pulmonary, cardiovascular, neurologic-proxy, hepatic-GI, first-class hematologic/coagulation, electrolyte/acid-base, broad endocrine stress, GI/pancreatic/nutrition, cardiac injury, musculoskeletal/rhabdomyolysis, immune/inflammatory, integumentary skin/wound, and toxic-metabolic modules now have isolated factual-router contracts. Reproductive/obstetric physiology is an eICU data ceiling.",
+    "cross_system_coupling_audit": {
+      "boundary": {
+        "active_rule_promotion_allowed": false,
+        "causal_claim_allowed": false,
+        "checkpoint_promotion_allowed": false,
+        "clinical_claim_allowed": false,
+        "counterfactual_claim_allowed": false,
+        "runtime_decision_authority": false
+      },
+      "date": "2026-06-29",
+      "files": [
+        "eicu_body_system_coupling_audit.py",
+        "eicu_body_system_coupling_audit.json",
+        "BODY_SYSTEM_COUPLING_FINDINGS.md",
+        "osler_jepa/body_coupling.py"
+      ],
+      "gate": "coupled_ridge must significantly beat both no-upstream baseline and capacity-matched placebo on held-out patients",
+      "promoted_edges": [],
+      "status": "static_feature_coupling_rejected_fail_closed",
+      "tested_edges": [
+        "renal_to_electrolyte_acid_base",
+        "respiratory_to_acid_base",
+        "endocrine_to_electrolyte",
+        "heme_to_perfusion",
+        "cardiovascular_to_renal",
+        "hepatic_to_coagulation_platelets",
+        "immune_to_hemodynamics"
+      ],
+      "weak_candidate_edges": [
+        {
+          "edge": "endocrine_to_electrolyte",
+          "active_pass_both_counts": {
+            "potassium": "1/7",
+            "sodium": "1/7"
+          },
+          "promotion_allowed": false
+        }
+      ],
+      "whole_body_next_step": "temporal predict-update coupling between validated belief states rather than same-window static feature concatenation"
+    },
     "expanded_body_system_coverage_v2": {
       "boundary": {
         "bounded_engineering_cohort": true,

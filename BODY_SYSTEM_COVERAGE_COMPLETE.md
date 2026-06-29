@@ -54,6 +54,24 @@ structured skin/wound state, toxin-level trajectories, microbiology phenotypes,
 procedure-specific cardiac/neuro variables, treatment dose normalization, and
 additional validated predict-update belief states.
 
+## Cross-System Coupling Baseline
+
+The first cross-system depth audit has now been run in
+`eicu_body_system_coupling_audit.json` and summarized in
+`BODY_SYSTEM_COUPLING_FINDINGS.md`.
+
+It tests whether upstream organ-system features improve downstream factual
+prediction beyond both a no-upstream baseline and a capacity-matched placebo.
+No directed edge passes the robust 7/7 active-window promotion gate.  The only
+weak active-window signals are endocrine -> electrolyte potassium and sodium,
+each at 1/7 patient split seeds, so they remain candidate-only.
+
+This is a useful boundary: isolated full-body surface coverage is not yet a
+whole-body digital twin.  The next depth layer should be temporal and
+belief-based rather than static feature concatenation, for example renal reserve
+belief -> electrolyte/acid-base updates, perfusion shock burden -> renal reserve
+updates, and respiratory burden -> acid-base updates.
+
 ## Data Ceilings
 
 The following are explicit data ceilings in the current eICU contract:
@@ -68,4 +86,3 @@ The following are explicit data ceilings in the current eICU contract:
   incomplete;
 - causal planning: observational EHR remains fail-closed without external
   randomized, instrumental-variable, or front-door identification evidence.
-

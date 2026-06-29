@@ -192,6 +192,17 @@ PRBC/plasma/platelet/cryo/unknown blood-product evidence is now separated with
 `volume_like_ml` and `unit_like_count` features, but the improvement remains
 partial and candidate-only.
 
+`eicu_body_system_coupling_audit.json` is the first aggregate-only
+cross-system coupling audit after breadth completion. It tests seven directed
+body-system edges by comparing a coupled ridge candidate against both a
+no-upstream baseline and a capacity-matched placebo. No edge passes the robust
+7/7 active-window promotion boundary; endocrine -> electrolyte potassium and
+sodium show only 1/7 weak candidate signals. `BODY_SYSTEM_COUPLING_FINDINGS.md`
+records the fail-closed interpretation and the next temporal/belief-based
+coupling direction. The artifact contains no raw rows or patient identifiers
+and grants no causal, counterfactual, clinical, checkpoint-promotion, runtime,
+or active-rule authority.
+
 `mimiciii_dka_transitions_6h_demo.parquet` is local-only and ignored by git. It
 is the observed-treatment MIMIC-III demo lab-defined DKA-like transition cohort
 used for schema and factual proxy smoke testing. Committed aggregate reports

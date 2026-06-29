@@ -41,6 +41,11 @@ from .disease_router import (
     disease_expansion_blueprint,
     disease_expansion_templates,
 )
+from .body_coupling import (
+    CouplingEdgeSpec,
+    body_system_coupling_edges,
+    coupling_readiness_from_audit,
+)
 from .shadow import (
     ShadowObserver,
     build_dka_shadow_state,
@@ -90,6 +95,9 @@ __all__ = [
     "choose_target_routes",
     "disease_expansion_blueprint",
     "disease_expansion_templates",
+    "CouplingEdgeSpec",
+    "body_system_coupling_edges",
+    "coupling_readiness_from_audit",
     "ShadowObserver",
     "build_dka_shadow_state",
     "observe_live_recommendation",

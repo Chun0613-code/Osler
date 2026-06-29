@@ -316,3 +316,16 @@ unlock INR/PTT/fibrinogen/platelets.  Heme/coag therefore stays candidate-only.
 The next heme step is not another hidden-state promotion attempt; it requires
 stronger unit semantics, transfusion protocol context, bleeding-source/procedure
 context, anticoagulation reversal evidence, or external identified data.
+
+The first cross-system coupling audit has now also been run.  It tests seven
+directed organ-system edges with a fail-closed gate: coupled ridge must beat both
+a no-upstream baseline and a capacity-matched placebo.  No edge passes the
+robust 7/7 active-window boundary; endocrine -> electrolyte potassium and sodium
+show only 1/7 weak candidate signals.  This closes the static feature-concat
+coupling hypothesis.  Whole-body depth should now move to temporal
+predict-update coupling: renal reserve -> electrolyte/acid-base updates,
+perfusion shock burden -> renal reserve and lactate updates, respiratory burden
+-> acid-base updates, heme oxygen-carrying capacity -> perfusion/lactate updates,
+and inflammatory burden -> hemodynamic/albumin/platelet updates.  These remain
+candidate-only until they improve downstream observables beyond both baseline
+and placebo.
