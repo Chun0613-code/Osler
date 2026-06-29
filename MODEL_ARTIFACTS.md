@@ -251,6 +251,22 @@ summaries are committed as
 `eicu_body_system_focused_hepato_renal_48h_audit.json`. These artifacts remain
 candidate-only.
 
+`eicu_body_system_multihop_coupling_audit.json` is the first aggregate-only
+multi-hop coupling audit. It tests whether a discovery-only MAP mediator adds
+renal prediction signal beyond a direct sepsis-to-renal ridge baseline and a
+capacity-matched placebo on the full eICU sepsis cohort. BUN passes 7/7 active
+patient splits, creatinine passes 6/7, and urine output fails; hospital-heldout
+support is mixed. The matching findings are recorded in
+`BODY_SYSTEM_MULTIHOP_COUPLING_FINDINGS.md`. This is a strong candidate-only
+whole-body path, not a promoted clinical or causal edge.
+
+`eicu_respiratory_acid_base_observability_audit.json` is an aggregate-only label
+coverage scan for the next respiratory -> acid-base coupling attempt. It shows
+that eICU has substantial PaCO2, FiO2, PEEP, tidal-volume, ventilator-mode, and
+minute-ventilation observability in lab and respiratory charting tables. The
+next respiratory coupling pass should promote these to first-class features
+before retesting respiratory -> acid-base.
+
 `mimiciii_dka_transitions_6h_demo.parquet` is local-only and ignored by git. It
 is the observed-treatment MIMIC-III demo lab-defined DKA-like transition cohort
 used for schema and factual proxy smoke testing. Committed aggregate reports

@@ -111,6 +111,18 @@ set.  It does not validate the edge: creatinine reaches 2/7 at 24h and 3/7 at
 therefore needs richer hepatic state and treatment/procedure context rather than
 another horizon-only pass.
 
+The first multi-hop audit has been run as
+`eicu_body_system_multihop_coupling_audit.json`.  It tests
+sepsis/immune -> MAP -> renal against a direct sepsis-to-renal baseline.  BUN
+passes 7/7 active-window patient splits, creatinine reaches 6/7, and urine
+output fails; hospital-heldout support is mixed.  This is the first strong
+multi-hop whole-body candidate, but not a promoted path.
+
+A respiratory acid-base observability scan shows that eICU contains abundant
+PaCO2, FiO2, PEEP, tidal-volume, ventilator-mode, and minute-ventilation labels.
+Respiratory -> acid-base is therefore blocked by feature extraction, not by
+absence of source measurements.
+
 ## Data Ceilings
 
 The following are explicit data ceilings in the current eICU contract:

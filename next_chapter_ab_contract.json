@@ -638,6 +638,66 @@
       "status": "validated_cross_system_factual_coupling_edges",
       "whole_body_next_step": "expose cardio-renal 24h/48h and sepsis-MAP coupling as shadow factual state objects; keep renal-electrolyte and hepato-renal candidates closed until observability improves"
     },
+    "multihop_coupling_audit": {
+      "boundary": {
+        "active_rule_promotion_allowed": false,
+        "causal_claim_allowed": false,
+        "checkpoint_promotion_allowed": false,
+        "clinical_claim_allowed": false,
+        "counterfactual_claim_allowed": false,
+        "runtime_decision_authority": false
+      },
+      "date": "2026-06-29",
+      "files": [
+        "eicu_body_system_multihop_coupling_audit.py",
+        "eicu_body_system_multihop_coupling_audit.json",
+        "BODY_SYSTEM_MULTIHOP_COUPLING_FINDINGS.md"
+      ],
+      "gate": "multi-hop candidate must significantly beat both direct first-hop-to-downstream baseline and capacity-matched placebo on held-out patients",
+      "tested_paths": [
+        {
+          "active_pass_both_counts": {
+            "bun": "7/7",
+            "creatinine": "6/7",
+            "urine_output": "0/7"
+          },
+          "baseline": "direct_sepsis_renal_ridge",
+          "candidate": "direct baseline plus discovery-only MAP mediator features",
+          "hospital_holdout": "creatinine active-window passes; BUN all-window passes but active candidate-vs-direct-baseline is not significant; urine output fails",
+          "path": "sepsis_immune_inflammatory -> MAP mediator -> renal",
+          "promotion_allowed": false,
+          "status": "strong_candidate_only"
+        }
+      ],
+      "whole_body_next_step": "generate compatible long-horizon sepsis/MAP/renal cohort or expose as candidate-only shadow path; do not promote to causal or clinical use"
+    },
+    "respiratory_acid_base_observability": {
+      "boundary": {
+        "causal_claim_allowed": false,
+        "clinical_claim_allowed": false,
+        "runtime_decision_authority": false
+      },
+      "date": "2026-06-29",
+      "files": [
+        "eicu_respiratory_acid_base_observability_audit.json"
+      ],
+      "observed_labels": {
+        "lab_csv": {
+          "fio2": 360107,
+          "paco2": 416467,
+          "peep": 112830
+        },
+        "respiratory_charting_csv": {
+          "fio2": 3227365,
+          "minute_ventilation": 25068,
+          "peep": 1600134,
+          "tidal_volume": 1328813,
+          "vent_mode": 15402
+        }
+      },
+      "status": "sufficient_observability_for_feature_extraction_audit",
+      "whole_body_next_step": "promote PaCO2, FiO2, PEEP, tidal volume, minute ventilation, and ventilator mode to first-class respiratory-acid-base features before retesting respiratory -> acid-base coupling"
+    },
     "expanded_body_system_coverage_v2": {
       "boundary": {
         "bounded_engineering_cohort": true,

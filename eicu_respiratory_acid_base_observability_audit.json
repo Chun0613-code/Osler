@@ -1,0 +1,75 @@
+{
+  "artifact": "eICU respiratory acid-base observability audit",
+  "date": "2026-06-29",
+  "data_source": "local full eICU 2.0 aggregate label scan",
+  "goal": "Check whether respiratory -> acid-base coupling is blocked by missing observability or by unimplemented feature extraction.",
+  "tables": {
+    "customLab.csv.gz": {
+      "counts": {
+        "fio2": 0,
+        "minute_ventilation": 0,
+        "paco2": 0,
+        "peep": 6,
+        "tidal_volume": 11,
+        "vent_mode": 3
+      }
+    },
+    "lab.csv.gz": {
+      "counts": {
+        "fio2": 360107,
+        "minute_ventilation": 0,
+        "paco2": 416467,
+        "peep": 112830,
+        "tidal_volume": 86,
+        "vent_mode": 609
+      },
+      "examples": {
+        "fio2": "FiO2 %",
+        "paco2": "paCO2 mm Hg",
+        "peep": "PEEP cm H2O"
+      }
+    },
+    "respiratoryCare.csv.gz": {
+      "counts": {
+        "fio2": 0,
+        "minute_ventilation": 0,
+        "paco2": 0,
+        "peep": 0,
+        "tidal_volume": 0,
+        "vent_mode": 0
+      }
+    },
+    "respiratoryCharting.csv.gz": {
+      "counts": {
+        "fio2": 3227365,
+        "minute_ventilation": 25068,
+        "paco2": 0,
+        "peep": 1600134,
+        "tidal_volume": 1328813,
+        "vent_mode": 15402
+      },
+      "examples": {
+        "fio2": "respFlowSettings FiO2",
+        "minute_ventilation": "respFlowCareData Minute Volume, Spontaneous",
+        "peep": "respFlowSettings PEEP",
+        "tidal_volume": "respFlowSettings Tidal Volume (set) / Tidal Volume Observed (VT)",
+        "vent_mode": "Mechanical Ventilator Mode / Non-invasive Ventilation Mode"
+      }
+    }
+  },
+  "interpretation": {
+    "blocked_by_missing_data": false,
+    "next_step": "Promote PaCO2, FiO2, PEEP, tidal volume, minute ventilation, and ventilator mode to first-class respiratory-acid-base features, then rerun respiratory -> acid-base focused coupling.",
+    "observability_status": "sufficient_for_feature_extraction_audit"
+  },
+  "safety_boundary": {
+    "active_rule_promotion_allowed": false,
+    "causal_claim_allowed": false,
+    "checkpoint_promotion_allowed": false,
+    "clinical_claim_allowed": false,
+    "counterfactual_claim_allowed": false,
+    "patient_ids_included_in_report": false,
+    "raw_rows_included": false,
+    "runtime_decision_authority": false
+  }
+}

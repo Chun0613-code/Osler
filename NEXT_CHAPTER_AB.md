@@ -380,3 +380,19 @@ longer horizon does not rescue it: creatinine reaches only 2/7 active splits at
 simple "like cardio-renal, just make the horizon longer" hypothesis.  The next
 hepato-renal step is richer hepatic observability and context, not another
 horizon-only audit.
+
+The first multi-hop coupling audit has also been run.  It tests
+sepsis/immune -> MAP -> renal on the full eICU sepsis cohort, using a
+discovery-only MAP mediator and comparing against a direct sepsis-to-renal
+baseline plus a capacity-matched placebo.  The path is a strong candidate but
+not fully promoted: BUN passes 7/7 active-window patient splits, creatinine
+passes 6/7, urine output fails, and hospital-heldout support is mixed.  This is
+the first evidence that body-system edges can start to form a path, but it
+should stay candidate-only until a compatible long-horizon sepsis/MAP/renal
+cohort or stronger hospital-heldout support exists.
+
+Respiratory -> acid-base now has a clear observability path.  A full-eICU label
+scan finds abundant PaCO2, FiO2, PEEP, tidal-volume, ventilator-mode, and
+minute-ventilation evidence in lab and respiratory charting tables.  The next
+respiratory coupling step should be feature extraction from those tables, not
+another generic coupling model.
