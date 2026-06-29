@@ -347,3 +347,17 @@ next depth step should stop trying all edges generically and focus on the two
 most plausible frontiers: renal-electrolyte buffering with explicit
 potassium/bicarbonate store dynamics, and cardio-renal coupling at 24h/48h where
 creatinine and urine output have time to move.
+
+That focused coupling audit has now been run.  It gives the first robust
+cross-system factual coupling edge.  The renal-electrolyte explicit
+potassium/bicarbonate store candidate does not promote: bicarbonate and anion
+gap reach only 1/7 active-window patient splits, and potassium/sodium/phosphate
+stay at 0/7.  Cardio-renal coupling does promote as a factual research edge at
+the right time scale: creatinine and BUN pass 7/7 active-window splits at both
+24h and 48h, with hospital-heldout support; urine output is partial
+(5/7 at 24h and 4/7 at 48h).
+
+The next B-deep step is therefore to expose the cardio-renal 24h/48h coupling as
+a shadow factual state object, not as a treatment policy.  Renal-electrolyte
+coupling should stay candidate-only until treatment timing, KCl/bicarbonate
+dosing, urine electrolyte evidence, and acid-base/ventilation context are richer.

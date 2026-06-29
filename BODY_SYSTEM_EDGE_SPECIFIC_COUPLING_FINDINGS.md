@@ -81,6 +81,25 @@ state or a longer horizon:
   protocol context;
 - immune -> hemodynamics needs capillary-leak and vasoplegia observability.
 
+## Focused Follow-Up
+
+The focused follow-up audit has now been run in
+`eicu_body_system_focused_coupling_audit.json` and summarized in
+`BODY_SYSTEM_FOCUSED_COUPLING_FINDINGS.md`.
+
+It confirms the split implied by this edge-specific pass:
+
+- renal-electrolyte explicit potassium/bicarbonate store dynamics remain
+  candidate-only, with only bicarbonate and anion gap reaching 1/7 active-window
+  patient splits;
+- cardio-renal coupling becomes the first validated cross-system factual edge
+  once moved to the right 24h/48h renal time scale.
+
+At 24h and 48h, creatinine and BUN pass 7/7 active-window patient splits beyond
+both no-coupling baseline and capacity-matched placebo, with hospital-heldout
+support.  Urine output is partial.  This does not change the safety boundary:
+the edge is factual and observational, not causal or clinical.
+
 ## Safety Boundary
 
 No edge-specific coupling edge is promoted.  The current artifact is a

@@ -25,6 +25,7 @@ from body_temporal_coupling_belief import (
     _clip01,
     _finite_clip,
     _freshness,
+    _hours,
     _num,
     _temporal_scalar_features,
     temporal_endocrine_electrolyte_features,
@@ -37,6 +38,73 @@ from heme_coag_belief import heme_coag_state_features
 
 
 EDGE_SPECIFIC_COUPLING_FEATURE_BUILDERS: dict[str, Callable[[pd.DataFrame], pd.DataFrame]] = {}
+FOCUSED_COUPLING_FEATURE_BUILDERS: dict[str, Callable[[pd.DataFrame], pd.DataFrame]] = {}
+
+
+def _fast_online_state_features(
+    frame: pd.DataFrame,
+    *,
+    prefix: str,
+    observation: np.ndarray,
+    confidence: np.ndarray,
+    low: float = 0.0,
+    high: float = 2.0,
+) -> pd.DataFrame:
+    """Vectorized online state approximation for very large cohorts.
+
+    This keeps the future-safety property of the slower predict-update helper:
+    each row uses its current observation plus the immediately previous
+    observation from the same stay.  It avoids per-row DataFrame writes, which
+    are too slow for 500k-row long-horizon cohorts.
+    """
+
+    observation = np.clip(np.asarray(observation, dtype=np.float64), low, high)
+    observation[~np.isfinite(observation)] = 0.0
+    confidence = np.clip(np.asarray(confidence, dtype=np.float64), 0.05, 1.0)
+    confidence[~np.isfinite(confidence)] = 0.05
+    previous = observation.copy()
+    if len(frame):
+        stay = frame["stay_id"].to_numpy() if "stay_id" in frame else np.arange(len(frame))
+        hour = _hours(frame)
+        order = np.lexsort((hour, stay))
+        same_stay = stay[order][1:] == stay[order][:-1]
+        previous[order[1:][same_stay]] = observation[order[:-1][same_stay]]
+    innovation = observation - previous
+    mean = np.clip(0.65 * observation + 0.35 * previous, low, high)
+    sd = np.sqrt(np.clip(0.025 + (1.0 - confidence) * 0.45 + 0.05 * np.abs(innovation), 0.01, 2.0))
+    return pd.DataFrame({
+        f"{prefix}_mean": mean,
+        f"{prefix}_sd": sd,
+        f"{prefix}_observation": observation,
+        f"{prefix}_innovation": innovation,
+        f"{prefix}_delta_since_prior": innovation,
+        f"{prefix}_observation_confidence": confidence,
+    }, index=frame.index, dtype=np.float64)
+
+
+def _fast_previous_slope(
+    frame: pd.DataFrame,
+    values: np.ndarray,
+    *,
+    low: float,
+    high: float,
+) -> np.ndarray:
+    """Return current-minus-previous slope by stay using only past rows."""
+
+    values = np.asarray(values, dtype=np.float64)
+    values[~np.isfinite(values)] = 0.0
+    slope = np.zeros(len(values), dtype=np.float64)
+    if not len(frame):
+        return slope
+    stay = frame["stay_id"].to_numpy() if "stay_id" in frame else np.arange(len(frame))
+    hour = _hours(frame)
+    order = np.lexsort((hour, stay))
+    same_stay = stay[order][1:] == stay[order][:-1]
+    current_positions = order[1:][same_stay]
+    previous_positions = order[:-1][same_stay]
+    delta_hours = np.maximum(hour[current_positions] - hour[previous_positions], 0.25)
+    slope[current_positions] = (values[current_positions] - values[previous_positions]) / delta_hours
+    return np.clip(slope, low, high)
 
 
 def edge_renal_electrolyte_buffering_features(frame: pd.DataFrame) -> pd.DataFrame:
@@ -362,4 +430,246 @@ def edge_specific_coupling_features(frame: pd.DataFrame, edge_name: str) -> pd.D
     features = builder(frame)
     if len(features) != len(frame):
         raise ValueError(f"Edge-specific coupling feature length mismatch for {edge_name}")
+    return features
+
+
+def focused_renal_electrolyte_store_features(frame: pd.DataFrame) -> pd.DataFrame:
+    """Explicit renal-electrolyte K and bicarbonate buffering store features."""
+
+    base = edge_renal_electrolyte_buffering_features(frame)
+    renal_reserve = _finite_clip(
+        base["esc_renal_state2_belief_renal_reserve_mean"].to_numpy(dtype=np.float64),
+        0.0,
+        2.0,
+        0.8,
+    )
+    creatinine_slope = _finite_clip(
+        base["esc_renal_state2_belief_creatinine_slope"].to_numpy(dtype=np.float64),
+        -0.1,
+        0.14,
+        0.0,
+    )
+    potassium = _finite_clip(_num(frame, "potassium_t"), 1.5, 9.0, 4.2)
+    bicarbonate = _finite_clip(_num(frame, "bicarbonate_t"), 2.0, 45.0, 24.0)
+    ph = _finite_clip(_num(frame, "ph_t"), 6.7, 7.8, 7.35)
+    anion_gap = _finite_clip(_num(frame, "anion_gap_t"), 0.0, 50.0, 12.0)
+    sodium = _finite_clip(_num(frame, "sodium_t"), 105.0, 180.0, 140.0)
+    osmolality = _finite_clip(_num(frame, "serum_osmolality_t"), 240.0, 430.0, 290.0)
+    glucose = _finite_clip(_num(frame, "glucose_t"), 20.0, 1200.0, 140.0)
+    urine = _finite_clip(_num(frame, "urine_output_t"), 0.0, 500.0, 60.0)
+
+    rrt = _action_any(frame, "renal_replacement")
+    diuretics = _action_any(frame, "diuretics")
+    fluids = _action_any(frame, "fluids")
+    k_repletion = _action_any(frame, "potassium_repletion")
+    bicarbonate_tx = _action_any(frame, "bicarbonate")
+
+    acidemia_shift = _clip01((7.35 - ph) / 0.35)
+    renal_clearance_limited = np.clip(1.0 - renal_reserve / 1.5, 0.0, 1.0)
+    osmotic_diuresis = _clip01((glucose - 180.0) / 360.0) * _clip01(urine / 180.0)
+    k_intracellular_deficit = np.clip(
+        0.38 * _clip01((3.7 - potassium) / 1.4)
+        + 0.25 * osmotic_diuresis
+        + 0.18 * diuretics
+        + 0.12 * renal_clearance_limited
+        - 0.10 * k_repletion
+        - 0.08 * rrt,
+        0.0,
+        2.0,
+    )
+    k_extracellular_excess = np.clip(
+        0.42 * _clip01((potassium - 5.0) / 2.0)
+        + 0.24 * acidemia_shift
+        + 0.22 * renal_clearance_limited
+        - 0.12 * rrt,
+        0.0,
+        2.0,
+    )
+    k_store_observation = np.clip(0.55 * k_intracellular_deficit + 0.45 * k_extracellular_excess, 0.0, 2.0)
+    k_store_state = _temporal_scalar_features(
+        frame,
+        prefix="fbc_k_store_instability",
+        observation=k_store_observation,
+        confidence=_freshness(frame, ("potassium_age_hr", "ph_age_hr", "creatinine_age_hr", "urine_output_age_hr")),
+        drift_per_hour=-0.006 * rrt - 0.004 * k_repletion + 0.004 * osmotic_diuresis,
+        low=0.0,
+        high=2.0,
+    )
+
+    buffer_depletion = np.clip(
+        0.36 * _clip01((22.0 - bicarbonate) / 14.0)
+        + 0.24 * acidemia_shift
+        + 0.22 * _clip01((anion_gap - 14.0) / 18.0)
+        + 0.12 * renal_clearance_limited
+        + 0.06 * np.maximum(creatinine_slope, 0.0) / 0.08,
+        0.0,
+        2.0,
+    )
+    buffer_state = _temporal_scalar_features(
+        frame,
+        prefix="fbc_bicarbonate_buffer_depletion",
+        observation=buffer_depletion,
+        confidence=_freshness(frame, ("bicarbonate_age_hr", "ph_age_hr", "anion_gap_age_hr", "creatinine_age_hr")),
+        drift_per_hour=-0.006 * bicarbonate_tx - 0.004 * rrt + 0.003 * np.maximum(creatinine_slope, 0.0),
+        low=0.0,
+        high=2.0,
+    )
+
+    sodium_water_store = np.clip(
+        0.32 * _clip01(np.abs(sodium - 140.0) / 18.0)
+        + 0.28 * _clip01((osmolality - 300.0) / 65.0)
+        + 0.20 * _clip01((30.0 - urine) / 30.0)
+        + 0.10 * fluids
+        + 0.10 * diuretics,
+        0.0,
+        2.0,
+    )
+    sodium_state = _temporal_scalar_features(
+        frame,
+        prefix="fbc_sodium_water_store_stress",
+        observation=sodium_water_store,
+        confidence=_freshness(frame, ("sodium_age_hr", "serum_osmolality_age_hr", "urine_output_age_hr")),
+        drift_per_hour=-0.004 * rrt - 0.002 * fluids + 0.004 * diuretics,
+        low=0.0,
+        high=2.0,
+    )
+
+    interactions = pd.DataFrame({
+        "fbc_low_reserve_x_k_store_instability": renal_clearance_limited * k_store_observation,
+        "fbc_low_reserve_x_buffer_depletion": renal_clearance_limited * buffer_depletion,
+        "fbc_k_shift_x_buffer_depletion": acidemia_shift * buffer_depletion,
+        "fbc_k_store_x_sodium_water": k_store_observation * sodium_water_store,
+        "fbc_creatinine_slope_x_buffer_depletion": np.maximum(creatinine_slope, 0.0) * buffer_depletion,
+    }, index=frame.index)
+    return _clean(pd.concat([base, k_store_state, buffer_state, sodium_state, interactions], axis=1))
+
+
+def focused_cardio_renal_long_horizon_features(frame: pd.DataFrame) -> pd.DataFrame:
+    """Perfusion-to-renal shared state for 24h/48h AKI coupling audits."""
+
+    map_value = _finite_clip(_num(frame, "map_t"), 20.0, 180.0, 75.0)
+    lactate = _finite_clip(_num(frame, "lactate_t"), 0.1, 30.0, 1.5)
+    heart_rate = _finite_clip(_num(frame, "heart_rate_t"), 20.0, 240.0, 85.0)
+    urine = _finite_clip(_num(frame, "urine_output_t"), 0.0, 500.0, 60.0)
+    creatinine = _finite_clip(_num(frame, "creatinine_t"), 0.2, 20.0, 1.2)
+    bun = _finite_clip(_num(frame, "bun_t"), 2.0, 220.0, 22.0)
+
+    vasopressor = _action_any(frame, "vasopressor")
+    inotrope = _action_any(frame, "inotrope")
+    fluids = _action_any(frame, "fluids")
+    diuretics = _action_any(frame, "diuretics")
+    rrt = _action_any(frame, "renal_replacement")
+    nephrotoxin = _action_any(frame, "nephrotoxin")
+
+    low_map = _clip01((65.0 - map_value) / 35.0)
+    lactate_burden = _clip01((lactate - 2.0) / 8.0)
+    tachy = _clip01((heart_rate - 110.0) / 55.0)
+    shock_observation = np.clip(0.40 * low_map + 0.30 * lactate_burden + 0.12 * tachy + 0.18 * vasopressor, 0.0, 2.0)
+    shock_state = _fast_online_state_features(
+        frame,
+        prefix="fbc_cardio_shock_burden",
+        observation=shock_observation,
+        confidence=_freshness(frame, ("map_age_hr", "lactate_age_hr", "heart_rate_age_hr")),
+        low=0.0,
+        high=2.0,
+    )
+    creatinine_clearance_proxy = np.clip(1.2 / np.maximum(creatinine, 0.2), 0.0, 2.5)
+    urine_support = np.clip(urine / 120.0, 0.0, 2.0)
+    perfusion_support = np.clip((map_value - 50.0) / 45.0, 0.0, 2.0)
+    renal_stress = np.clip(
+        0.35 * _clip01((30.0 - urine) / 30.0)
+        + 0.25 * low_map
+        + 0.15 * vasopressor
+        + 0.10 * nephrotoxin
+        + 0.10 * _clip01((creatinine - 1.2) / 4.0)
+        + 0.05 * _clip01((bun - 25.0) / 80.0),
+        0.0,
+        1.5,
+    )
+    renal_reserve = np.clip(
+        0.45 * creatinine_clearance_proxy
+        + 0.25 * urine_support
+        + 0.20 * perfusion_support
+        + 0.10 * rrt
+        - 0.20 * renal_stress,
+        0.0,
+        2.0,
+    )
+    creatinine_slope = _fast_previous_slope(frame, creatinine, low=-0.10, high=0.14)
+    shock = shock_state["fbc_cardio_shock_burden_mean"].to_numpy(dtype=np.float64)
+    low_reserve = np.clip(1.0 - renal_reserve / 1.5, 0.0, 1.0)
+    hypoperfusion = np.clip(
+        0.38 * low_map
+        + 0.28 * lactate_burden
+        + 0.18 * vasopressor
+        + 0.10 * inotrope
+        + 0.06 * _clip01((30.0 - urine) / 30.0),
+        0.0,
+        2.0,
+    )
+    renal_afterload = np.clip(
+        0.36 * hypoperfusion
+        + 0.28 * low_reserve
+        + 0.16 * _clip01((creatinine - 1.2) / 4.0)
+        + 0.10 * _clip01((bun - 25.0) / 80.0)
+        + 0.10 * nephrotoxin,
+        0.0,
+        2.0,
+    )
+    afterload_state = _fast_online_state_features(
+        frame,
+        prefix="fbc_cardio_renal_afterload",
+        observation=renal_afterload,
+        confidence=_freshness(frame, ("map_age_hr", "lactate_age_hr", "creatinine_age_hr", "urine_output_age_hr")),
+        low=0.0,
+        high=2.0,
+    )
+    recovery_drive = np.clip(
+        0.30 * fluids
+        + 0.22 * rrt
+        + 0.18 * diuretics
+        + 0.15 * np.clip(renal_reserve / 1.5, 0.0, 1.0)
+        - 0.20 * hypoperfusion,
+        0.0,
+        2.0,
+    )
+    recovery_state = _fast_online_state_features(
+        frame,
+        prefix="fbc_cardio_renal_recovery_drive",
+        observation=recovery_drive,
+        confidence=_freshness(frame, ("creatinine_age_hr", "urine_output_age_hr", "map_age_hr")),
+        low=0.0,
+        high=2.0,
+    )
+    interactions = pd.DataFrame({
+        "fbc_vector_renal_reserve": renal_reserve,
+        "fbc_vector_creatinine_slope": creatinine_slope,
+        "fbc_vector_renal_stress": renal_stress,
+        "fbc_vector_hypoperfusion": hypoperfusion,
+        "fbc_shock_x_low_renal_reserve": shock * low_reserve,
+        "fbc_hypoperfusion_x_creatinine_slope": hypoperfusion * np.maximum(creatinine_slope, 0.0),
+        "fbc_afterload_x_current_creatinine": renal_afterload * _clip01((creatinine - 1.2) / 4.0),
+        "fbc_afterload_x_oliguria": renal_afterload * _clip01((30.0 - urine) / 30.0),
+        "fbc_recovery_x_low_reserve": recovery_drive * low_reserve,
+    }, index=frame.index)
+    return _clean(pd.concat([shock_state, afterload_state, recovery_state, interactions], axis=1))
+
+
+FOCUSED_COUPLING_FEATURE_BUILDERS.update({
+    "renal_electrolyte_store_6h": focused_renal_electrolyte_store_features,
+    "cardio_renal_24h": focused_cardio_renal_long_horizon_features,
+    "cardio_renal_48h": focused_cardio_renal_long_horizon_features,
+})
+
+
+def focused_coupling_features(frame: pd.DataFrame, focus_name: str) -> pd.DataFrame:
+    """Return focused deep-coupling features for a named physiology frontier."""
+
+    try:
+        builder = FOCUSED_COUPLING_FEATURE_BUILDERS[focus_name]
+    except KeyError as exc:
+        raise KeyError(f"Unknown focused coupling edge: {focus_name}") from exc
+    features = builder(frame)
+    if len(features) != len(frame):
+        raise ValueError(f"Focused coupling feature length mismatch for {focus_name}")
     return features

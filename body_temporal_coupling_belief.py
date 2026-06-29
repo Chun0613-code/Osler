@@ -88,9 +88,9 @@ def _temporal_scalar_features(
         f"{prefix}_delta_since_prior",
         f"{prefix}_observation_confidence",
     )
-    output = pd.DataFrame(np.nan, index=frame.index, columns=columns, dtype=np.float64)
     if frame.empty:
-        return output
+        return pd.DataFrame(np.nan, index=frame.index, columns=columns, dtype=np.float64)
+    output = np.full((len(frame), len(columns)), np.nan, dtype=np.float64)
 
     work = pd.DataFrame({
         "_position": np.arange(len(frame), dtype=np.int64),
@@ -132,16 +132,16 @@ def _temporal_scalar_features(
             posterior_mean = posterior_var * (prior_mean / max(prior_var, 1e-6) + obs / max(obs_var, 1e-6))
             mean = float(np.clip(posterior_mean, low, high))
             variance = float(np.clip(posterior_var, 0.006, 2.0))
-            output.loc[index, f"{prefix}_mean"] = mean
-            output.loc[index, f"{prefix}_sd"] = float(np.sqrt(max(variance, 1e-6)))
-            output.loc[index, f"{prefix}_observation"] = obs
-            output.loc[index, f"{prefix}_innovation"] = innovation
-            output.loc[index, f"{prefix}_delta_since_prior"] = delta_since_prior
-            output.loc[index, f"{prefix}_observation_confidence"] = conf
+            output[position, 0] = mean
+            output[position, 1] = float(np.sqrt(max(variance, 1e-6)))
+            output[position, 2] = obs
+            output[position, 3] = innovation
+            output[position, 4] = delta_since_prior
+            output[position, 5] = conf
             previous_hour = float(row["_hour"])
             previous_position = position
 
-    return output.astype(np.float64)
+    return pd.DataFrame(output, index=frame.index, columns=columns, dtype=np.float64)
 
 
 def _clean(frame: pd.DataFrame) -> pd.DataFrame:

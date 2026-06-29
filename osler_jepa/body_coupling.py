@@ -110,7 +110,11 @@ def coupling_readiness_from_audit(
     weak_candidate_edges: list[dict[str, object]] = []
     rejected_edges: list[dict[str, object]] = []
 
-    for edge in audit_report.get("edges", []):
+    edge_items = audit_report.get("edges")
+    if edge_items is None:
+        edge_items = audit_report.get("focused_specs", [])
+
+    for edge in edge_items:
         summary = edge.get("random_patient_splits", {}).get("summary", {})
         promoted_targets = [
             target for target in edge.get("targets", ())

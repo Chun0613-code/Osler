@@ -89,6 +89,14 @@ states.  This improves weak signal coverage but still does not promote any edge.
 The whole-body layer therefore remains a candidate map, not an online digital
 twin coupling graph.
 
+The focused follow-up audit has now been run as
+`eicu_body_system_focused_coupling_audit.json`.  It rejects the same-window
+renal-electrolyte explicit store candidate, but validates the first
+cross-system factual coupling edge: cardiovascular perfusion / shock burden to
+renal creatinine and BUN at 24h/48h.  Urine output remains partial.  This means
+the whole-body layer now has one validated factual coupling line, while all
+causal and runtime treatment gates remain closed.
+
 ## Data Ceilings
 
 The following are explicit data ceilings in the current eICU contract:

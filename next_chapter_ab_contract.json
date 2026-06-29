@@ -541,6 +541,64 @@
       ],
       "whole_body_next_step": "stop generic all-edge coupling; focus on renal-electrolyte buffering with explicit potassium/bicarbonate store dynamics and cardio-renal 24h/48h coupling"
     },
+    "focused_cross_system_coupling_audit": {
+      "boundary": {
+        "active_rule_promotion_allowed": false,
+        "causal_claim_allowed": false,
+        "checkpoint_promotion_allowed": false,
+        "clinical_claim_allowed": false,
+        "counterfactual_claim_allowed": false,
+        "runtime_decision_authority": false
+      },
+      "date": "2026-06-29",
+      "files": [
+        "body_edge_specific_coupling_belief.py",
+        "eicu_body_system_focused_coupling_audit.py",
+        "eicu_body_system_focused_coupling_audit.json",
+        "eicu_body_system_focused_renal_electrolyte_store_audit.json",
+        "eicu_body_system_focused_cardio_renal_24h_audit.json",
+        "eicu_body_system_focused_cardio_renal_48h_audit.json",
+        "BODY_SYSTEM_FOCUSED_COUPLING_FINDINGS.md",
+        "osler_jepa/body_coupling.py"
+      ],
+      "gate": "focused coupling features must significantly beat both downstream baseline and capacity-matched placebo on held-out patients",
+      "promoted_edges": [
+        {
+          "edge": "cardio_renal_long_horizon",
+          "source_system": "cardiovascular_perfusion",
+          "target_system": "renal",
+          "validated_targets": {
+            "24h": {
+              "bun": "7/7 active-window patient splits plus hospital-heldout support",
+              "creatinine": "7/7 active-window patient splits plus hospital-heldout support",
+              "urine_output": "5/7 active-window patient splits; partial"
+            },
+            "48h": {
+              "bun": "7/7 active-window patient splits plus hospital-heldout support",
+              "creatinine": "7/7 active-window patient splits plus hospital-heldout support",
+              "urine_output": "4/7 active-window patient splits; partial"
+            }
+          },
+          "promotion_scope": "research factual coupling map only",
+          "runtime_decision_authority": false
+        }
+      ],
+      "rejected_or_candidate_edges": [
+        {
+          "edge": "renal_electrolyte_store_6h",
+          "active_pass_both_counts": {
+            "anion_gap": "1/7",
+            "bicarbonate": "1/7",
+            "phosphate": "0/7",
+            "potassium": "0/7",
+            "sodium": "0/7"
+          },
+          "promotion_allowed": false
+        }
+      ],
+      "status": "first_validated_cross_system_factual_coupling_edge",
+      "whole_body_next_step": "expose cardio-renal 24h/48h coupling as a shadow factual state object; keep renal-electrolyte store candidate-only until observability improves"
+    },
     "expanded_body_system_coverage_v2": {
       "boundary": {
         "bounded_engineering_cohort": true,

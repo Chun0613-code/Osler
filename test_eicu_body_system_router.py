@@ -24,6 +24,9 @@ from body_temporal_coupling_belief import (
 from body_edge_specific_coupling_belief import (
     edge_renal_electrolyte_buffering_features,
     edge_specific_coupling_features,
+    focused_cardio_renal_long_horizon_features,
+    focused_coupling_features,
+    focused_renal_electrolyte_store_features,
 )
 from heme_coag_belief import (
     CoagulationReserveBelief,
@@ -325,6 +328,33 @@ class EicuBodySystemRouterTests(unittest.TestCase):
         self.assertEqual(readiness["promoted_edges"], [])
         self.assertEqual(readiness["rejected_edges"][0]["name"], "immune_to_hemodynamics")
 
+    def test_coupling_readiness_accepts_focused_specs(self):
+        audit = {
+            "focused_specs": [{
+                "name": "cardio_renal_24h",
+                "source_system": "cardiovascular_perfusion",
+                "target_system": "renal",
+                "targets": ("creatinine", "bun"),
+                "random_patient_splits": {
+                    "summary": {
+                        "creatinine": {
+                            "active_only": {"candidate_passes_both_count": 7},
+                        },
+                        "bun": {
+                            "active_only": {"candidate_passes_both_count": 6},
+                        },
+                    },
+                },
+            }],
+        }
+
+        readiness = coupling_readiness_from_audit(audit)
+
+        self.assertEqual(readiness["promoted_edges"][0]["name"], "cardio_renal_24h")
+        self.assertEqual(readiness["promoted_edges"][0]["promoted_targets"], ["creatinine"])
+        self.assertEqual(readiness["weak_candidate_edges"], [])
+        self.assertFalse(readiness["runtime_decision_authority"])
+
     def test_temporal_coupling_features_are_online_and_finite(self):
         frame = pd.DataFrame({
             "stay_id": [1, 1, 1],
@@ -400,6 +430,96 @@ class EicuBodySystemRouterTests(unittest.TestCase):
     def test_edge_specific_coupling_dispatcher_rejects_unknown_edge(self):
         with self.assertRaises(KeyError):
             edge_specific_coupling_features(pd.DataFrame({"stay_id": [1]}), "not_a_body_edge")
+
+    def test_focused_renal_store_features_include_k_and_buffer_state(self):
+        frame = pd.DataFrame({
+            "stay_id": [1, 1],
+            "hours_since_onset": [0.0, 6.0],
+            "creatinine_t": [1.2, 2.0],
+            "creatinine_age_hr": [1.0, 1.0],
+            "bun_t": [20.0, 40.0],
+            "bun_age_hr": [1.0, 1.0],
+            "urine_output_t": [100.0, 20.0],
+            "urine_output_age_hr": [1.0, 1.0],
+            "map_t": [75.0, 58.0],
+            "potassium_t": [4.1, 5.8],
+            "potassium_age_hr": [1.0, 1.0],
+            "bicarbonate_t": [24.0, 12.0],
+            "bicarbonate_age_hr": [1.0, 1.0],
+            "ph_t": [7.35, 7.12],
+            "ph_age_hr": [1.0, 1.0],
+            "anion_gap_t": [12.0, 28.0],
+            "anion_gap_age_hr": [1.0, 1.0],
+            "sodium_t": [140.0, 128.0],
+            "sodium_age_hr": [1.0, 1.0],
+            "serum_osmolality_t": [290.0, 318.0],
+            "serum_osmolality_age_hr": [1.0, 1.0],
+            "glucose_t": [140.0, 260.0],
+            "hist_renal_replacement": [0.0, 0.0],
+            "act_renal_replacement": [0.0, 1.0],
+            "hist_diuretics": [0.0, 0.0],
+            "act_diuretics": [0.0, 1.0],
+            "hist_potassium_repletion": [0.0, 0.0],
+            "act_potassium_repletion": [0.0, 0.0],
+            "hist_bicarbonate": [0.0, 0.0],
+            "act_bicarbonate": [0.0, 1.0],
+            "hist_fluids": [0.0, 1.0],
+            "act_fluids": [0.0, 0.0],
+        })
+
+        features = focused_renal_electrolyte_store_features(frame)
+
+        self.assertIn("fbc_k_store_instability_mean", features.columns)
+        self.assertIn("fbc_bicarbonate_buffer_depletion_mean", features.columns)
+        self.assertTrue(np.isfinite(features.to_numpy(dtype="float64")).all())
+        self.assertGreater(
+            features.loc[1, "fbc_bicarbonate_buffer_depletion_mean"],
+            features.loc[0, "fbc_bicarbonate_buffer_depletion_mean"],
+        )
+
+    def test_focused_cardio_renal_features_include_afterload_state(self):
+        frame = pd.DataFrame({
+            "stay_id": [1, 1],
+            "hours_since_onset": [0.0, 24.0],
+            "map_t": [78.0, 56.0],
+            "map_age_hr": [1.0, 1.0],
+            "heart_rate_t": [85.0, 120.0],
+            "heart_rate_age_hr": [1.0, 1.0],
+            "lactate_t": [1.5, 5.0],
+            "lactate_age_hr": [1.0, 1.0],
+            "creatinine_t": [1.0, 2.3],
+            "creatinine_age_hr": [1.0, 1.0],
+            "bun_t": [20.0, 48.0],
+            "bun_age_hr": [1.0, 1.0],
+            "urine_output_t": [120.0, 15.0],
+            "urine_output_age_hr": [1.0, 1.0],
+            "hist_vasopressor": [0.0, 1.0],
+            "act_vasopressor": [0.0, 1.0],
+            "hist_inotrope": [0.0, 0.0],
+            "act_inotrope": [0.0, 0.0],
+            "hist_fluids": [0.0, 1.0],
+            "act_fluids": [0.0, 0.0],
+            "hist_diuretics": [0.0, 0.0],
+            "act_diuretics": [0.0, 1.0],
+            "hist_renal_replacement": [0.0, 0.0],
+            "act_renal_replacement": [0.0, 0.0],
+            "hist_nephrotoxin": [0.0, 1.0],
+            "act_nephrotoxin": [0.0, 0.0],
+        })
+
+        features = focused_cardio_renal_long_horizon_features(frame)
+
+        self.assertIn("fbc_cardio_renal_afterload_mean", features.columns)
+        self.assertIn("fbc_shock_x_low_renal_reserve", features.columns)
+        self.assertTrue(np.isfinite(features.to_numpy(dtype="float64")).all())
+        self.assertGreater(
+            features.loc[1, "fbc_cardio_renal_afterload_mean"],
+            features.loc[0, "fbc_cardio_renal_afterload_mean"],
+        )
+
+    def test_focused_coupling_dispatcher_rejects_unknown_focus(self):
+        with self.assertRaises(KeyError):
+            focused_coupling_features(pd.DataFrame({"stay_id": [1]}), "not_a_focus")
 
     def test_heme_coag_belief_features_are_fixed_and_finite(self):
         frame = pd.DataFrame({
