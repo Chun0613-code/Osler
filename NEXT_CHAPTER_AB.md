@@ -391,6 +391,16 @@ the first evidence that body-system edges can start to form a path, but it
 should stay candidate-only until a compatible long-horizon sepsis/MAP/renal
 cohort or stronger hospital-heldout support exists.
 
+That compatible long-horizon cohort has now been generated and tested.  The
+time-scale-corrected path uses sepsis -> MAP at 6h as the mediator and renal
+targets at 24h/48h as the downstream hop.  The 24h path validates for
+creatinine and BUN: both pass 7/7 active-window patient splits and pass
+hospital-heldout active-window comparisons against both the direct
+sepsis-to-renal baseline and a capacity-matched placebo.  Urine output fails,
+and the 48h path remains candidate-only.  This is the first validated multi-hop
+whole-body factual path; it can be exposed only as a shadow factual state, not a
+treatment or causal policy.
+
 Respiratory -> acid-base now has a clear observability path.  A full-eICU label
 scan finds abundant PaCO2, FiO2, PEEP, tidal-volume, ventilator-mode, and
 minute-ventilation evidence in lab and respiratory charting tables.  The next

@@ -15,6 +15,7 @@ from eicu_body_system_transition_extract import (
     read_restricted_stay_ids,
     unit_like_count,
 )
+from eicu_body_system_multihop_coupling_audit import _merge_mediator_future
 from eicu_sepsis_transition_extract import LAB_TO_STATE, PLAUSIBLE
 from eicu_respiratory_transition_extract import classify_respiratory_support_label
 from eicu_sepsis_target_router import _feature_columns
@@ -79,6 +80,43 @@ class EicuBodySystemRouterTests(unittest.TestCase):
         for lab_name, state_name in expected.items():
             self.assertEqual(LAB_TO_STATE[lab_name], state_name)
             self.assertIn(state_name, PLAUSIBLE)
+
+    def test_multihop_long_horizon_merges_6h_mediator_by_anchor(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            frame = pd.DataFrame({
+                "stay_id": [1, 1, 2],
+                "t": pd.to_datetime([
+                    "2100-01-01 00:00:00",
+                    "2100-01-01 04:00:00",
+                    "2100-01-02 00:00:00",
+                ]),
+                "creatinine_tp24": [1.4, 1.8, 2.1],
+            })
+            mediator = pd.DataFrame({
+                "stay_id": [1, 2],
+                "t": pd.to_datetime([
+                    "2100-01-01 00:00:00",
+                    "2100-01-02 00:00:00",
+                ]),
+                "map_tp6": [63.0, 72.0],
+            })
+            mediator.to_parquet(root / "mediator.parquet", index=False)
+
+            merged = _merge_mediator_future(
+                frame,
+                {
+                    "mediator": "map",
+                    "mediator_future_suffix": "tp6",
+                    "future_suffix": "tp24",
+                    "mediator_cohort": "mediator.parquet",
+                },
+                data_dir=root,
+            )
+
+        self.assertEqual(len(merged), 2)
+        self.assertIn("map_tp6", merged.columns)
+        self.assertEqual(merged["map_tp6"].tolist(), [63.0, 72.0])
 
     def test_classifies_new_body_system_actions(self):
         electrolyte = get_body_system_config("electrolyte_acid_base")

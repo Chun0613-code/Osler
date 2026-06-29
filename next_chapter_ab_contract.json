@@ -651,6 +651,9 @@
       "files": [
         "eicu_body_system_multihop_coupling_audit.py",
         "eicu_body_system_multihop_coupling_audit.json",
+        "eicu_body_system_multihop_long_horizon_coupling_audit.json",
+        "eicu_sepsis_transition_report_24h.json",
+        "eicu_sepsis_transition_report_48h.json",
         "BODY_SYSTEM_MULTIHOP_COUPLING_FINDINGS.md"
       ],
       "gate": "multi-hop candidate must significantly beat both direct first-hop-to-downstream baseline and capacity-matched placebo on held-out patients",
@@ -667,9 +670,37 @@
           "path": "sepsis_immune_inflammatory -> MAP mediator -> renal",
           "promotion_allowed": false,
           "status": "strong_candidate_only"
+        },
+        {
+          "active_pass_both_counts": {
+            "bun": "7/7",
+            "creatinine": "7/7",
+            "urine_output": "1/7"
+          },
+          "baseline": "direct_sepsis_renal_ridge_at_24h",
+          "candidate": "direct 24h baseline plus discovery-only 6h MAP mediator features",
+          "hospital_holdout": "creatinine and BUN active-window and all-window comparisons pass against both direct baseline and placebo; urine output fails",
+          "path": "sepsis_immune_inflammatory -> MAP mediator at 6h -> renal at 24h",
+          "promotion_allowed": false,
+          "shadow_factual_state_allowed": true,
+          "shadow_scope": "research_factual_shadow_state_only_for_creatinine_and_bun",
+          "status": "validated_factual_multihop_path"
+        },
+        {
+          "active_pass_both_counts": {
+            "bun": "5/7",
+            "creatinine": "5/7",
+            "urine_output": "0/7"
+          },
+          "baseline": "direct_sepsis_renal_ridge_at_48h",
+          "candidate": "direct 48h baseline plus discovery-only 6h MAP mediator features",
+          "hospital_holdout": "creatinine and BUN do not significantly beat direct baseline; urine output fails",
+          "path": "sepsis_immune_inflammatory -> MAP mediator at 6h -> renal at 48h",
+          "promotion_allowed": false,
+          "status": "candidate_only"
         }
       ],
-      "whole_body_next_step": "generate compatible long-horizon sepsis/MAP/renal cohort or expose as candidate-only shadow path; do not promote to causal or clinical use"
+      "whole_body_next_step": "expose the validated 24h sepsis->MAP6->renal creatinine/BUN path as a shadow factual state object; keep 48h and urine-output paths candidate-only; do not promote to causal or clinical use"
     },
     "respiratory_acid_base_observability": {
       "boundary": {

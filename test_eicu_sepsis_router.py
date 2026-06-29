@@ -3,7 +3,12 @@ import unittest
 import pandas as pd
 
 from eicu_sepsis_target_router import _feature_columns
-from eicu_sepsis_transition_extract import classify_sepsis_action
+from eicu_sepsis_transition_extract import (
+    evidence_window_summary,
+    future_column,
+    horizon_suffix,
+    classify_sepsis_action,
+)
 
 
 class EicuSepsisRouterTests(unittest.TestCase):
@@ -34,6 +39,23 @@ class EicuSepsisRouterTests(unittest.TestCase):
         self.assertNotIn("act_fluids", vaso_columns)
         self.assertIn("hist_vasopressor", vaso_columns)
         self.assertIn("act_vasopressor", map_columns)
+
+    def test_long_horizon_suffixes_and_action_windows_are_explicit(self):
+        action_lookup = {
+            "vasopressor": (
+                pd.Series([10.0]).to_numpy(dtype="float64"),
+                pd.Series([20.0]).to_numpy(dtype="float64"),
+                pd.Series([True]).to_numpy(dtype=bool),
+            ),
+        }
+
+        summary = evidence_window_summary(action_lookup, anchor_hour=0.0, future_hours=24.0)
+
+        self.assertEqual(horizon_suffix(24.0), "tp24")
+        self.assertEqual(future_column("creatinine", 48.0), "creatinine_tp48")
+        self.assertIn("vasopressor_requirement_tp24", summary)
+        self.assertNotIn("vasopressor_requirement_tp6", summary)
+        self.assertEqual(summary["act_vasopressor"], 1)
 
 
 if __name__ == "__main__":

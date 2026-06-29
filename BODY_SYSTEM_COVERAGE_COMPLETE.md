@@ -118,6 +118,15 @@ passes 7/7 active-window patient splits, creatinine reaches 6/7, and urine
 output fails; hospital-heldout support is mixed.  This is the first strong
 multi-hop whole-body candidate, but not a promoted path.
 
+The compatible long-horizon multi-hop audit has now been run as
+`eicu_body_system_multihop_long_horizon_coupling_audit.json`.  It composes the
+validated 6h sepsis -> MAP edge with renal targets at 24h and 48h.  The 24h path
+validates for creatinine and BUN: both reach 7/7 active-window patient splits
+and pass hospital-heldout active-window comparisons against both the direct
+sepsis-to-renal baseline and the capacity-matched placebo.  Urine output fails.
+The 48h path remains candidate-only.  This is the first validated multi-hop
+whole-body factual path.
+
 A respiratory acid-base observability scan shows that eICU contains abundant
 PaCO2, FiO2, PEEP, tidal-volume, ventilator-mode, and minute-ventilation labels.
 Respiratory -> acid-base is therefore blocked by feature extraction, not by

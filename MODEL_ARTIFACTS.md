@@ -80,7 +80,9 @@ should reuse the disease-specific target-router template in
 Full eICU sepsis and AKI router artifacts follow the same aggregate/report
 boundary. Local transition parquet cohorts, including
 `eicu_aki_transitions_6h.parquet`, `eicu_aki_transitions_24h.parquet`,
-`eicu_aki_transitions_48h.parquet`, and `eicu_sepsis_transitions_6h.parquet`,
+`eicu_aki_transitions_48h.parquet`, `eicu_sepsis_transitions_6h.parquet`,
+`eicu_sepsis_transitions_24h.parquet`, and
+`eicu_sepsis_transitions_48h.parquet`,
 are row-level research cohorts and are not versioned. Committed aggregate AKI
 reports include `eicu_aki_transition_report.json`,
 `eicu_aki_target_router.json`, `eicu_aki_mechanism_target_router.json`,
@@ -90,6 +92,12 @@ reports include `eicu_aki_transition_report.json`,
 creatinine and BUN fall back to persistence at 6h but select `ridge_realfit` in
 7/7 patient splits at both 24h and 48h. These artifacts remain factual,
 observational, and non-clinical.
+
+Committed aggregate sepsis long-horizon reports include
+`eicu_sepsis_transition_report_24h.json` and
+`eicu_sepsis_transition_report_48h.json`. These support the compatible
+long-horizon multihop audit only; they do not grant causal or treatment-policy
+authority.
 
 `eicu_aki_renal_belief_audit.json` is also aggregate-only. It evaluates
 candidate renal reserve/GFR belief features on 24h/48h AKI cohorts. The belief
@@ -257,8 +265,11 @@ renal prediction signal beyond a direct sepsis-to-renal ridge baseline and a
 capacity-matched placebo on the full eICU sepsis cohort. BUN passes 7/7 active
 patient splits, creatinine passes 6/7, and urine output fails; hospital-heldout
 support is mixed. The matching findings are recorded in
-`BODY_SYSTEM_MULTIHOP_COUPLING_FINDINGS.md`. This is a strong candidate-only
-whole-body path, not a promoted clinical or causal edge.
+`BODY_SYSTEM_MULTIHOP_COUPLING_FINDINGS.md`. The follow-up
+`eicu_body_system_multihop_long_horizon_coupling_audit.json` composes the same
+6h sepsis -> MAP mediator with 24h and 48h renal targets. The 24h path validates
+for creatinine and BUN; the 48h path remains candidate-only. This is a promoted
+research factual path only, not a clinical, causal, or treatment-policy edge.
 
 `eicu_respiratory_acid_base_observability_audit.json` is an aggregate-only label
 coverage scan for the next respiratory -> acid-base coupling attempt. It shows

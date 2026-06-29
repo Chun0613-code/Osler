@@ -46,11 +46,36 @@ MULTIHOP_SPECS: tuple[dict[str, object], ...] = (
         "name": "sepsis_map_renal_6h",
         "cohort": "eicu_sepsis_transitions_6h.parquet",
         "future_suffix": "tp6",
+        "mediator_future_suffix": "tp6",
         "first_hop": "sepsis_immune_inflammatory_to_map",
         "mediator": "map",
         "target_system": "renal",
         "targets": ("creatinine", "bun", "urine_output"),
         "rationale": "test whether validated sepsis->MAP signal adds renal prediction beyond direct sepsis->renal features",
+    },
+    {
+        "name": "sepsis_map6_renal_24h",
+        "cohort": "eicu_sepsis_transitions_24h.parquet",
+        "mediator_cohort": "eicu_sepsis_transitions_6h.parquet",
+        "future_suffix": "tp24",
+        "mediator_future_suffix": "tp6",
+        "first_hop": "sepsis_immune_inflammatory_to_map_6h",
+        "mediator": "map",
+        "target_system": "renal",
+        "targets": ("creatinine", "bun", "urine_output"),
+        "rationale": "compose the validated 6h sepsis->MAP mediator with 24h renal targets on the validated cardio-renal time scale",
+    },
+    {
+        "name": "sepsis_map6_renal_48h",
+        "cohort": "eicu_sepsis_transitions_48h.parquet",
+        "mediator_cohort": "eicu_sepsis_transitions_6h.parquet",
+        "future_suffix": "tp48",
+        "mediator_future_suffix": "tp6",
+        "first_hop": "sepsis_immune_inflammatory_to_map_6h",
+        "mediator": "map",
+        "target_system": "renal",
+        "targets": ("creatinine", "bun", "urine_output"),
+        "rationale": "compose the validated 6h sepsis->MAP mediator with 48h renal targets on the validated cardio-renal time scale",
     },
 )
 
@@ -63,6 +88,28 @@ def _attach_first_hop_features(frame: pd.DataFrame) -> tuple[pd.DataFrame, list[
     features = focused_sepsis_cardiovascular_features(frame)
     columns = list(features.columns)
     return pd.concat([frame.reset_index(drop=True), features.reset_index(drop=True)], axis=1), columns
+
+
+def _merge_mediator_future(
+    frame: pd.DataFrame,
+    spec: dict[str, object],
+    *,
+    data_dir: Path,
+) -> pd.DataFrame:
+    mediator_cohort = spec.get("mediator_cohort")
+    if not mediator_cohort:
+        return frame
+    mediator = str(spec["mediator"])
+    mediator_suffix = str(spec.get("mediator_future_suffix", spec["future_suffix"]))
+    mediator_column = f"{mediator}_{mediator_suffix}"
+    if mediator_column in frame:
+        return frame
+    mediator_frame = pd.read_parquet(
+        data_dir / str(mediator_cohort),
+        columns=["stay_id", "t", mediator_column],
+    ).drop_duplicates(["stay_id", "t"])
+    merged = frame.merge(mediator_frame, on=["stay_id", "t"], how="inner", validate="one_to_one")
+    return merged.reset_index(drop=True)
 
 
 def _mediator_predict(
@@ -151,7 +198,7 @@ def _attach_multihop_features(
     *,
     first_hop_features: list[str],
     mediator: str,
-    future_suffix: str,
+    mediator_future_suffix: str,
     ridge_alpha: float,
     seed: int,
 ) -> tuple[pd.DataFrame, pd.DataFrame, list[str]]:
@@ -160,7 +207,7 @@ def _attach_multihop_features(
         discovery,
         mediator=mediator,
         feature_columns=mediator_features,
-        future_suffix=future_suffix,
+        future_suffix=mediator_future_suffix,
         ridge_alpha=ridge_alpha,
         seed=seed,
     )
@@ -169,7 +216,7 @@ def _attach_multihop_features(
         heldout,
         mediator=mediator,
         feature_columns=mediator_features,
-        future_suffix=future_suffix,
+        future_suffix=mediator_future_suffix,
         ridge_alpha=ridge_alpha,
     )
     discovery_mh = _map_mediator_features(discovery, discovery_pred)
@@ -350,7 +397,7 @@ def split_report(
         heldout,
         first_hop_features=first_hop_features,
         mediator=str(spec["mediator"]),
-        future_suffix=str(spec["future_suffix"]),
+        mediator_future_suffix=str(spec.get("mediator_future_suffix", spec["future_suffix"])),
         ridge_alpha=ridge_alpha,
         seed=seed,
     )
@@ -390,6 +437,7 @@ def audit_spec(
     bootstrap_samples: int,
 ) -> dict[str, object]:
     frame = pd.read_parquet(data_dir / str(spec["cohort"])).reset_index(drop=True)
+    frame = _merge_mediator_future(frame, spec, data_dir=data_dir)
     frame, first_hop_features = _attach_first_hop_features(frame)
     random_reports = [
         split_report(
@@ -423,7 +471,9 @@ def audit_spec(
         "target_system": spec["target_system"],
         "rationale": spec["rationale"],
         "cohort": str(spec["cohort"]),
+        "mediator_cohort": str(spec.get("mediator_cohort", spec["cohort"])),
         "future_suffix": spec["future_suffix"],
+        "mediator_future_suffix": spec.get("mediator_future_suffix", spec["future_suffix"]),
         "rows": int(len(frame)),
         "subjects": int(frame[_subject_column(frame)].nunique()) if len(frame) else 0,
         "stays": int(frame["stay_id"].nunique()) if "stay_id" in frame else None,
