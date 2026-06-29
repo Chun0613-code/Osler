@@ -264,8 +264,15 @@ whole-body path, not a promoted clinical or causal edge.
 coverage scan for the next respiratory -> acid-base coupling attempt. It shows
 that eICU has substantial PaCO2, FiO2, PEEP, tidal-volume, ventilator-mode, and
 minute-ventilation observability in lab and respiratory charting tables. The
-next respiratory coupling pass should promote these to first-class features
-before retesting respiratory -> acid-base.
+follow-up feature-extraction pass is recorded in
+`eicu_respiratory_transition_report_observed.json` and
+`eicu_body_system_focused_respiratory_acid_base_observed_6h_audit.json`.
+`eicu_respiratory_transitions_6h_observed.parquet` is local-only and ignored by
+git. The bounded observed cohort has 4,170 evaluable stays, 57,675 transitions,
+and 39,572 active respiratory transitions. PaCO2, FiO2, PEEP, tidal-volume, and
+ventilator-mode are first-class state variables in that cohort, but the focused
+respiratory -> acid-base gate remains candidate-only: bicarbonate reaches 1/7
+active-window splits, while pH, PaCO2, and lactate are 0/7.
 
 `mimiciii_dka_transitions_6h_demo.parquet` is local-only and ignored by git. It
 is the observed-treatment MIMIC-III demo lab-defined DKA-like transition cohort

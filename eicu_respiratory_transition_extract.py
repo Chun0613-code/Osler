@@ -17,6 +17,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import re
 from pathlib import Path
 
 import numpy as np
@@ -58,6 +59,7 @@ RESPIRATORY_PATTERNS = (
 )
 
 TARGET_VARS = (
+    "paco2",
     "o2sat",
     "respiratory_rate",
     "heart_rate",
@@ -67,6 +69,14 @@ TARGET_VARS = (
 )
 
 STATE_VARS = (
+    "paco2",
+    "fio2",
+    "peep",
+    "tidal_volume_set",
+    "tidal_volume_observed",
+    "minute_ventilation",
+    "vent_mode_invasive",
+    "vent_mode_noninvasive",
     "o2sat",
     "respiratory_rate",
     "heart_rate",
@@ -183,6 +193,132 @@ def empty_action_evidence() -> pd.DataFrame:
     return pd.DataFrame(columns=ACTION_EVIDENCE_COLUMNS)
 
 
+RESPIRATORY_SUPPORT_PLAUSIBLE = {
+    "paco2": (5.0, 200.0),
+    "fio2": (20.0, 100.0),
+    "peep": (0.0, 40.0),
+    "tidal_volume_set": (50.0, 1200.0),
+    "tidal_volume_observed": (50.0, 1200.0),
+    "minute_ventilation": (0.5, 40.0),
+    "vent_mode_invasive": (0.0, 1.0),
+    "vent_mode_noninvasive": (0.0, 1.0),
+}
+
+
+def _numeric_from_text(values: pd.Series) -> pd.Series:
+    text = values.fillna("").astype(str)
+    extracted = text.str.extract(r"([-+]?\d*\.?\d+)", expand=False)
+    return pd.to_numeric(extracted, errors="coerce").astype("float32")
+
+
+def clean_respiratory_support_values(var: str, values: pd.Series) -> pd.Series:
+    cleaned = _numeric_from_text(values)
+    if var == "fio2":
+        fractional = (cleaned > 0.0) & (cleaned <= 1.0)
+        cleaned.loc[fractional] = cleaned.loc[fractional] * 100.0
+    lower, upper = RESPIRATORY_SUPPORT_PLAUSIBLE[var]
+    return cleaned.where((cleaned >= lower) & (cleaned <= upper))
+
+
+def classify_respiratory_support_label(label: object, value: object = "") -> str | None:
+    text = f"{label or ''} {value or ''}".lower()
+    compact = re.sub(r"[^a-z0-9]+", "", text)
+    label_text = str(label or "").lower()
+    label_compact = re.sub(r"[^a-z0-9]+", "", label_text)
+
+    if "noninvasiveventilationmode" in label_compact or "noninvasive" in label_text:
+        return "vent_mode_noninvasive"
+    if "mechanicalventilatormode" in label_compact or (
+        "ventilatormode" in label_compact and "noninvasive" not in label_text
+    ):
+        return "vent_mode_invasive"
+    if any(term in compact for term in ("bipap", "cpap")):
+        return "vent_mode_noninvasive"
+    if any(term in compact for term in ("paco2", "pco2", "arterialco2")):
+        return "paco2"
+    if "fio2" in compact or "fio" in compact:
+        return "fio2"
+    if "peep" in compact:
+        return "peep"
+    if "minutevolume" in compact or "minuteventilation" in compact:
+        return "minute_ventilation"
+    if "tidalvolume" in compact or re.search(r"\bvt\b", text):
+        if "set" in text:
+            return "tidal_volume_set"
+        return "tidal_volume_observed"
+    return None
+
+
+def _support_measurement_rows(chunk: pd.DataFrame, offset_column: str, value_column: str) -> pd.DataFrame:
+    chunk = chunk.copy()
+    if "respchartvaluelabel" in chunk:
+        chunk["var"] = [
+            classify_respiratory_support_label(label, value)
+            for label, value in zip(chunk["respchartvaluelabel"], chunk[value_column])
+        ]
+    else:
+        chunk["var"] = [
+            classify_respiratory_support_label(label, value)
+            for label, value in zip(chunk["labname"], chunk[value_column])
+        ]
+    chunk = chunk[chunk["var"].notna()].copy()
+    if chunk.empty:
+        return empty_measurements()
+
+    frames = []
+    mode_vars = {"vent_mode_invasive", "vent_mode_noninvasive"}
+    for var, group in chunk.groupby("var", sort=False):
+        if var in mode_vars:
+            values = pd.Series(1.0, index=group.index, dtype="float32")
+        else:
+            values = clean_respiratory_support_values(str(var), group[value_column])
+        rows = pd.DataFrame({
+            "stay_id": group[ID].astype("int64"),
+            "offset": group[offset_column],
+            "var": str(var),
+            "valuenum": values,
+        })
+        frames.append(rows)
+    if not frames:
+        return empty_measurements()
+    rows = pd.concat(frames, ignore_index=True).dropna(subset=["valuenum"])
+    return rows[["stay_id", "offset", "var", "valuenum"]]
+
+
+def read_respiratory_support_measurements(data_root: Path, stay_ids: set[int]) -> pd.DataFrame:
+    """Read PaCO2 and ventilator-setting observations as first-class states."""
+
+    rows = []
+    lab_path = data_root / "lab.csv.gz"
+    if lab_path.exists():
+        columns = [ID, "labresultoffset", "labname", "labresult"]
+        for chunk in _read_csv_chunks(lab_path, columns, chunksize=750_000):
+            chunk = chunk[chunk[ID].isin(stay_ids)].copy()
+            if chunk.empty:
+                continue
+            subset = _support_measurement_rows(chunk, "labresultoffset", "labresult")
+            if not subset.empty:
+                rows.append(subset)
+
+    chart_path = data_root / "respiratoryCharting.csv.gz"
+    if chart_path.exists():
+        columns = [ID, "respchartoffset", "respchartvaluelabel", "respchartvalue"]
+        for chunk in _read_csv_chunks(chart_path, columns, chunksize=750_000):
+            chunk = chunk[chunk[ID].isin(stay_ids)].copy()
+            if chunk.empty:
+                continue
+            subset = _support_measurement_rows(chunk, "respchartoffset", "respchartvalue")
+            if not subset.empty:
+                rows.append(subset)
+
+    if not rows:
+        return empty_measurements()
+    measurements = pd.concat(rows, ignore_index=True)
+    measurements["offset"] = pd.to_numeric(measurements["offset"], errors="coerce")
+    measurements = measurements[np.isfinite(measurements["offset"])]
+    return measurements.sort_values(["stay_id", "offset", "var"]).reset_index(drop=True)
+
+
 def read_diagnosis_respiratory_stays(data_root: Path, meta: pd.DataFrame) -> dict[int, dict[str, object]]:
     hits: dict[int, dict[str, object]] = {}
     specs = [
@@ -285,9 +421,11 @@ def medication_evidence(data_root: Path, stay_ids: set[int]) -> pd.DataFrame:
     columns = [ID, "drugstartoffset", "drugstopoffset", "drugname", "drugordercancelled"]
     rows = []
     for chunk in _read_csv_chunks(path, columns, chunksize=500_000):
+        chunk = chunk[chunk[ID].isin(stay_ids)].copy()
+        if chunk.empty:
+            continue
         chunk = chunk[
-            chunk[ID].isin(stay_ids)
-            & (chunk["drugordercancelled"].fillna("No").astype(str).str.lower() != "yes")
+            (chunk["drugordercancelled"].fillna("No").astype(str).str.lower() != "yes")
             & action_terms_mask(chunk["drugname"])
         ]
         for record in chunk.to_dict("records"):
@@ -316,7 +454,10 @@ def infusion_evidence(data_root: Path, stay_ids: set[int], max_snapshot_hours: f
     columns = [ID, "infusionoffset", "drugname", "drugrate", "infusionrate", "drugamount", "volumeoffluid"]
     frames = []
     for chunk in _read_csv_chunks(path, columns, chunksize=500_000):
-        chunk = chunk[chunk[ID].isin(stay_ids) & action_terms_mask(chunk["drugname"])].copy()
+        chunk = chunk[chunk[ID].isin(stay_ids)].copy()
+        if chunk.empty:
+            continue
+        chunk = chunk[action_terms_mask(chunk["drugname"])].copy()
         if chunk.empty:
             continue
         chunk["offset"] = pd.to_numeric(chunk["infusionoffset"], errors="coerce")
@@ -365,7 +506,10 @@ def treatment_evidence(data_root: Path, stay_ids: set[int]) -> pd.DataFrame:
     columns = [ID, "treatmentoffset", "treatmentstring"]
     rows = []
     for chunk in _read_csv_chunks(path, columns, chunksize=500_000):
-        chunk = chunk[chunk[ID].isin(stay_ids) & action_terms_mask(chunk["treatmentstring"])]
+        chunk = chunk[chunk[ID].isin(stay_ids)].copy()
+        if chunk.empty:
+            continue
+        chunk = chunk[action_terms_mask(chunk["treatmentstring"])]
         for record in chunk.to_dict("records"):
             offset = _finite_number(record.get("treatmentoffset"))
             if not np.isfinite(offset):
@@ -585,11 +729,21 @@ def assemble_outcomes(anchors: pd.DataFrame, meta: pd.DataFrame) -> pd.DataFrame
 
 def add_derived_columns(frame: pd.DataFrame) -> pd.DataFrame:
     frame = frame.copy()
+    paco2 = pd.to_numeric(frame.get("paco2_t"), errors="coerce")
+    fio2 = pd.to_numeric(frame.get("fio2_t"), errors="coerce")
+    peep = pd.to_numeric(frame.get("peep_t"), errors="coerce")
+    invasive = pd.to_numeric(frame.get("vent_mode_invasive_t"), errors="coerce").fillna(0.0)
+    noninvasive = pd.to_numeric(frame.get("vent_mode_noninvasive_t"), errors="coerce").fillna(0.0)
     frame["respiratory_active_t"] = (
         (frame["o2sat_t"] <= 92.0)
         | (frame["respiratory_rate_t"] >= 24.0)
         | (frame["hist_ventilation"] > 0)
         | (frame["ph_t"] <= 7.30)
+        | (paco2 >= 50.0)
+        | (fio2 >= 40.0)
+        | (peep >= 5.0)
+        | (invasive > 0.0)
+        | (noninvasive > 0.0)
     )
     return frame
 
@@ -692,7 +846,18 @@ def build_transitions(
     meta = read_patient_meta(data_root)
     respiratory_stays = merge_respiratory_like_stays(data_root, meta, max_stays=max_stays)
     stay_ids = set(respiratory_stays)
-    measurements = read_measurements(data_root, stay_ids)
+    measurements = pd.concat(
+        [
+            read_measurements(data_root, stay_ids),
+            read_respiratory_support_measurements(data_root, stay_ids),
+        ],
+        ignore_index=True,
+    )
+    if not measurements.empty:
+        measurements["stay_id"] = measurements["stay_id"].astype("int64")
+        measurements["time_hr"] = pd.to_numeric(measurements["offset"], errors="coerce") / 60.0
+        measurements = measurements[np.isfinite(measurements["time_hr"])]
+        measurements = measurements.sort_values(["stay_id", "time_hr", "var"]).reset_index(drop=True)
     anchors = build_anchors(respiratory_stays, measurements, meta, horizon_hours=horizon_hours)
     evidence = read_action_evidence(data_root, stay_ids)
     if anchors.empty:

@@ -12,6 +12,7 @@ plausible frontiers from the edge-specific audit and clinical physiology:
    change creatinine, BUN, and urine output.
 3. sepsis/immune burden to cardiovascular tone and lactate clearance;
 4. hepatic burden to renal stress.
+5. respiratory ventilation/gas-exchange observability to acid-base state.
 
 The gate is unchanged:
 
@@ -30,7 +31,9 @@ Focused coupling now produces two validated cross-system factual edges:
 cardio-renal long-horizon coupling and sepsis/immune burden to MAP.  Hepato-
 renal coupling shows a stronger candidate signal than the broad edge-specific
 pass, but it does not reach the 7/7 boundary.  Renal-electrolyte explicit store
-dynamics remain candidate-only.
+dynamics remain candidate-only.  Respiratory -> acid-base has now been retested
+with first-class PaCO2/FiO2/PEEP/tidal-volume observability and remains
+candidate-only.
 
 | Focus | Rows | Subjects | Hospitals | Active Pass-Both Targets | Hospital-Heldout | Interpretation |
 |---|---:|---:|---:|---|---|---|
@@ -41,6 +44,7 @@ dynamics remain candidate-only.
 | hepatic -> renal, 6h | 17,730 | 1,096 | 88 | creatinine 3/7, BUN 3/7 | creatinine passes hospital-heldout but not random patient splits | candidate-only |
 | hepatic -> renal, 24h | 13,269 | 864 | 82 | creatinine 2/7, BUN 0/7 | creatinine and BUN pass hospital-heldout, but random splits fail | candidate-only; heterogeneous |
 | hepatic -> renal, 48h | 9,316 | 596 | 73 | creatinine 3/7, BUN 0/7 | no target passes hospital-heldout | candidate-only; not a simple horizon fix |
+| respiratory -> acid-base observed, 6h | 57,675 | 3,618 | 55 | bicarbonate 1/7; pH/PaCO2/lactate 0/7 | bicarbonate weak all-window placebo signal only; active-window not significant | candidate-only; observability no longer the main excuse |
 
 ## Detailed Signal
 
@@ -103,6 +107,24 @@ potassium signal:
 | sodium | 0/7 | 0/7 |
 | phosphate | 0/7 | 0/7 |
 
+Respiratory -> acid-base was retested after promoting PaCO2, FiO2, PEEP, tidal
+volume, and ventilator mode to first-class respiratory state features in a
+deterministic 5,000-stay bounded eICU respiratory cohort.  The cohort contains
+57,675 transitions, 3,618 subjects, 4,170 stays, and 55 hospitals.  Feature
+extraction adds 26,194 PaCO2 observations, 174,359 FiO2 observations, 87,581
+PEEP observations, 58,266 set tidal-volume observations, and 20,094 observed
+tidal-volume observations.  Minute ventilation did not yield usable numeric
+rows in this bounded subset.
+
+The observed respiratory focused state does not pass the active-window gate:
+
+| Target | All-Window Passes | Active Passes | Hospital-Heldout Active Result |
+|---|---:|---:|---|
+| bicarbonate | 1/7 | 1/7 | small improvement, not significant vs baseline or placebo |
+| pH | 0/7 | 0/7 | worse than baseline |
+| PaCO2 | 0/7 | 0/7 | worse than baseline |
+| lactate | 0/7 | 0/7 | worse than baseline |
+
 ## Interpretation
 
 This closes the first whole-body coupling question with a split answer:
@@ -113,6 +135,8 @@ This closes the first whole-body coupling question with a split answer:
 - sepsis/immune burden carries reproducible 6h factual signal for MAP;
 - hepatic burden carries renal signal, but not reproducibly enough at 6h, 24h,
   or 48h.
+- respiratory ventilation/gas-exchange observability is now first-class enough
+  to test, but it still does not add robust 6h acid-base prediction signal.
 
 The physiology is coherent.  Perfusion burden and renal reserve do not need to
 change creatinine/BUN inside a six-hour window to be useful.  At 24-48 hours,
@@ -149,3 +173,9 @@ test shows that horizon alone is not enough.  Its next step is richer hepatic
 observability: INR/synthetic function, ammonia or encephalopathy severity,
 ascites/volume status, albumin therapy, paracentesis/procedure context, and
 cleaner hepatorenal syndrome labels.
+
+The respiratory-acid-base focused candidate also remains candidate-only.  The
+next step is not another generic feature block.  Either build a more specific
+ventilator/ABG trajectory contract with usable minute-ventilation and repeated
+ABG windows, or leave this edge closed under the current eICU factual router
+contract.

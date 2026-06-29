@@ -123,6 +123,15 @@ PaCO2, FiO2, PEEP, tidal-volume, ventilator-mode, and minute-ventilation labels.
 Respiratory -> acid-base is therefore blocked by feature extraction, not by
 absence of source measurements.
 
+That feature-extraction pass has now been run as a bounded deterministic
+5,000-stay observed respiratory cohort.  PaCO2, FiO2, PEEP, tidal-volume, and
+ventilator-mode features are promoted to first-class state variables, but the
+focused respiratory -> acid-base gate still does not validate: bicarbonate
+reaches only 1/7 active-window patient splits, while pH, PaCO2, and lactate are
+0/7.  Respiratory -> acid-base therefore remains candidate-only under the
+current eICU factual contract; the blocker is no longer simple absence of
+PaCO2/PEEP/FiO2 extraction.
+
 ## Data Ceilings
 
 The following are explicit data ceilings in the current eICU contract:

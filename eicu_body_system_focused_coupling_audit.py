@@ -8,6 +8,7 @@ physiologic plausibility and empirical signal:
 * cardio-renal perfusion coupling at 24h and 48h.
 * sepsis/immune burden to cardiovascular tone at 6h;
 * hepatic burden to renal stress at 6h, 24h, and 48h.
+* respiratory ventilation/gas-exchange observability to acid-base state at 6h.
 
 The gate remains fail-closed: focused coupling features must beat both a
 downstream baseline and a capacity-matched placebo on held-out patients.
@@ -99,6 +100,15 @@ FOCUSED_SPECS: tuple[dict[str, object], ...] = (
         "target_system": "renal",
         "targets": ("creatinine", "bun"),
         "rationale": "hepatic burden, low effective arterial volume, and acid-perfusion stress coupled to renal targets at 48h",
+    },
+    {
+        "name": "respiratory_acid_base_observed_6h",
+        "cohort": "eicu_respiratory_transitions_6h_observed.parquet",
+        "future_suffix": "tp6",
+        "source_system": "respiratory_ventilation_gas_exchange",
+        "target_system": "acid_base",
+        "targets": ("ph", "bicarbonate", "paco2", "lactate"),
+        "rationale": "first-class PaCO2, FiO2, PEEP, tidal-volume, minute-ventilation, and vent-mode features coupled to acid-base targets at 6h",
     },
 )
 

@@ -16,6 +16,7 @@ from eicu_body_system_transition_extract import (
     unit_like_count,
 )
 from eicu_sepsis_transition_extract import LAB_TO_STATE, PLAUSIBLE
+from eicu_respiratory_transition_extract import classify_respiratory_support_label
 from eicu_sepsis_target_router import _feature_columns
 from body_temporal_coupling_belief import (
     temporal_coupling_features,
@@ -28,6 +29,7 @@ from body_edge_specific_coupling_belief import (
     focused_coupling_features,
     focused_hepato_renal_features,
     focused_renal_electrolyte_store_features,
+    focused_respiratory_acid_base_observed_features,
     focused_sepsis_cardiovascular_features,
 )
 from heme_coag_belief import (
@@ -609,6 +611,66 @@ class EicuBodySystemRouterTests(unittest.TestCase):
         self.assertGreater(
             features.loc[1, "fbc_hepato_renal_pressure_mean"],
             features.loc[0, "fbc_hepato_renal_pressure_mean"],
+        )
+
+    def test_respiratory_support_label_classifier_maps_observed_features(self):
+        cases = {
+            ("paCO2 mm Hg", "58"): "paco2",
+            ("respFlowSettings FiO2", "0.6"): "fio2",
+            ("respFlowSettings PEEP", "8"): "peep",
+            ("respFlowSettings Tidal Volume (set)", "450"): "tidal_volume_set",
+            ("Tidal Volume Observed (VT)", "520"): "tidal_volume_observed",
+            ("respFlowCareData Minute Volume, Spontaneous", "9.5"): "minute_ventilation",
+            ("Mechanical Ventilator Mode", "AC/VC"): "vent_mode_invasive",
+            ("Non-invasive Ventilation Mode", "BiPAP"): "vent_mode_noninvasive",
+        }
+
+        for (label, value), expected in cases.items():
+            self.assertEqual(classify_respiratory_support_label(label, value), expected)
+
+    def test_focused_respiratory_acid_base_features_use_observed_ventilation(self):
+        frame = pd.DataFrame({
+            "stay_id": [1, 1],
+            "hours_since_onset": [0.0, 6.0],
+            "paco2_t": [38.0, 68.0],
+            "paco2_age_hr": [0.5, 0.5],
+            "fio2_t": [28.0, 70.0],
+            "fio2_age_hr": [0.5, 0.5],
+            "peep_t": [2.0, 12.0],
+            "peep_age_hr": [0.5, 0.5],
+            "tidal_volume_set_t": [450.0, 420.0],
+            "tidal_volume_set_age_hr": [0.5, 0.5],
+            "tidal_volume_observed_t": [455.0, 250.0],
+            "tidal_volume_observed_age_hr": [0.5, 0.5],
+            "minute_ventilation_t": [7.5, 3.2],
+            "minute_ventilation_age_hr": [0.5, 0.5],
+            "vent_mode_invasive_t": [0.0, 1.0],
+            "vent_mode_noninvasive_t": [0.0, 0.0],
+            "ph_t": [7.38, 7.18],
+            "ph_age_hr": [0.5, 0.5],
+            "bicarbonate_t": [24.0, 18.0],
+            "bicarbonate_age_hr": [0.5, 0.5],
+            "lactate_t": [1.2, 3.5],
+            "lactate_age_hr": [0.5, 0.5],
+            "respiratory_rate_t": [18.0, 34.0],
+            "o2sat_t": [97.0, 86.0],
+            "o2sat_age_hr": [0.5, 0.5],
+            "hist_ventilation": [0.0, 1.0],
+            "act_ventilation": [0.0, 1.0],
+            "hist_bronchodilator": [0.0, 1.0],
+            "act_bronchodilator": [0.0, 0.0],
+            "hist_systemic_steroid": [0.0, 0.0],
+            "act_systemic_steroid": [0.0, 1.0],
+        })
+
+        features = focused_respiratory_acid_base_observed_features(frame)
+
+        self.assertIn("fbc_resp_co2_load_mean", features.columns)
+        self.assertIn("fbc_resp_oxygenation_support_mean", features.columns)
+        self.assertTrue(np.isfinite(features.to_numpy(dtype="float64")).all())
+        self.assertGreater(
+            features.loc[1, "fbc_resp_co2_load_mean"],
+            features.loc[0, "fbc_resp_co2_load_mean"],
         )
 
     def test_heme_coag_belief_features_are_fixed_and_finite(self):

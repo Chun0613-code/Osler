@@ -394,5 +394,11 @@ cohort or stronger hospital-heldout support exists.
 Respiratory -> acid-base now has a clear observability path.  A full-eICU label
 scan finds abundant PaCO2, FiO2, PEEP, tidal-volume, ventilator-mode, and
 minute-ventilation evidence in lab and respiratory charting tables.  The next
-respiratory coupling step should be feature extraction from those tables, not
-another generic coupling model.
+respiratory coupling pass has now promoted PaCO2, FiO2, PEEP, tidal-volume, and
+ventilator-mode columns to first-class observed respiratory state variables in a
+bounded deterministic 5,000-stay cohort.  That retest still does not validate
+respiratory -> acid-base: bicarbonate reaches only 1/7 active-window splits,
+while pH, PaCO2, and lactate are 0/7.  The current next step is therefore not
+another generic feature block.  Either build a specific ventilator/ABG
+trajectory contract with usable minute-ventilation and repeated ABG windows, or
+keep this edge closed under the present eICU factual router contract.

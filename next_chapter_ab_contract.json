@@ -679,7 +679,9 @@
       },
       "date": "2026-06-29",
       "files": [
-        "eicu_respiratory_acid_base_observability_audit.json"
+        "eicu_respiratory_acid_base_observability_audit.json",
+        "eicu_respiratory_transition_report_observed.json",
+        "eicu_body_system_focused_respiratory_acid_base_observed_6h_audit.json"
       ],
       "observed_labels": {
         "lab_csv": {
@@ -695,8 +697,32 @@
           "vent_mode": 15402
         }
       },
-      "status": "sufficient_observability_for_feature_extraction_audit",
-      "whole_body_next_step": "promote PaCO2, FiO2, PEEP, tidal volume, minute ventilation, and ventilator mode to first-class respiratory-acid-base features before retesting respiratory -> acid-base coupling"
+      "observed_feature_audit": {
+        "active_pass_both_counts": {
+          "bicarbonate": "1/7",
+          "lactate": "0/7",
+          "paco2": "0/7",
+          "ph": "0/7"
+        },
+        "bounded_engineering_cohort": true,
+        "first_class_features_added": [
+          "paco2",
+          "fio2",
+          "peep",
+          "tidal_volume_set",
+          "tidal_volume_observed",
+          "minute_ventilation",
+          "vent_mode_invasive",
+          "vent_mode_noninvasive"
+        ],
+        "hospital_holdout": "bicarbonate all-window beats placebo only; active-window comparisons are not significant; pH and PaCO2 are worse than baseline",
+        "minute_ventilation_usable_numeric_rows_in_bounded_subset": 0,
+        "rows": 57675,
+        "status": "candidate_only_not_validated",
+        "subjects": 3618
+      },
+      "status": "feature_extraction_completed_but_coupling_not_validated",
+      "whole_body_next_step": "do not run another generic respiratory-acid-base feature block; either build a specific ventilator/ABG trajectory contract with usable minute-ventilation and repeated ABG windows, or keep this edge closed under the current eICU factual router contract"
     },
     "expanded_body_system_coverage_v2": {
       "boundary": {

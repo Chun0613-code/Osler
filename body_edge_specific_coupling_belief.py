@@ -842,6 +842,113 @@ def focused_hepato_renal_features(frame: pd.DataFrame) -> pd.DataFrame:
     return _clean(pd.concat([hepatic_state, renal_pressure_state, acid_perfusion_state, interactions], axis=1))
 
 
+def focused_respiratory_acid_base_observed_features(frame: pd.DataFrame) -> pd.DataFrame:
+    """Observed ventilation/gas-exchange state coupled to acid-base targets."""
+
+    paco2 = _finite_clip(_num(frame, "paco2_t"), 5.0, 200.0, 40.0)
+    fio2 = _finite_clip(_num(frame, "fio2_t"), 20.0, 100.0, 21.0)
+    peep = _finite_clip(_num(frame, "peep_t"), 0.0, 40.0, 0.0)
+    tidal_set = _finite_clip(_num(frame, "tidal_volume_set_t"), 50.0, 1200.0, 450.0)
+    tidal_observed = _finite_clip(_num(frame, "tidal_volume_observed_t"), 50.0, 1200.0, 450.0)
+    minute_vent = _finite_clip(_num(frame, "minute_ventilation_t"), 0.5, 40.0, 7.0)
+    ph = _finite_clip(_num(frame, "ph_t"), 6.7, 7.8, 7.35)
+    bicarbonate = _finite_clip(_num(frame, "bicarbonate_t"), 2.0, 45.0, 24.0)
+    lactate = _finite_clip(_num(frame, "lactate_t"), 0.1, 30.0, 1.5)
+    rr = _finite_clip(_num(frame, "respiratory_rate_t"), 2.0, 80.0, 18.0)
+    o2sat = _finite_clip(_num(frame, "o2sat_t"), 0.0, 100.0, 96.0)
+
+    ventilation = _action_any(frame, "ventilation")
+    bronchodilator = _action_any(frame, "bronchodilator")
+    steroid = _action_any(frame, "systemic_steroid")
+    invasive = _finite_clip(_num(frame, "vent_mode_invasive_t"), 0.0, 1.0, 0.0)
+    noninvasive = _finite_clip(_num(frame, "vent_mode_noninvasive_t"), 0.0, 1.0, 0.0)
+    vent_mode = np.clip(np.maximum(invasive, noninvasive) + ventilation, 0.0, 1.0)
+
+    hypercapnia = _clip01((paco2 - 45.0) / 35.0)
+    hypocapnia = _clip01((35.0 - paco2) / 18.0)
+    acidemia = _clip01((7.35 - ph) / 0.25)
+    alk_buffer = _clip01((bicarbonate - 28.0) / 12.0)
+    bicarb_deficit = _clip01((22.0 - bicarbonate) / 14.0)
+    hypoxemia = _clip01((92.0 - o2sat) / 22.0)
+    oxygen_support = _clip01((fio2 - 30.0) / 50.0) + 0.45 * _clip01(peep / 14.0)
+    tidal_mismatch = _clip01(np.abs(tidal_observed - tidal_set) / 350.0)
+    low_minute_vent = _clip01((5.0 - minute_vent) / 4.0)
+    high_minute_vent = _clip01((minute_vent - 12.0) / 12.0)
+    tachypnea = _clip01((rr - 24.0) / 24.0)
+
+    co2_load = np.clip(
+        0.34 * hypercapnia
+        + 0.24 * acidemia
+        + 0.16 * low_minute_vent
+        + 0.12 * tidal_mismatch
+        + 0.08 * vent_mode
+        + 0.06 * alk_buffer,
+        0.0,
+        2.0,
+    )
+    co2_state = _fast_online_state_features(
+        frame,
+        prefix="fbc_resp_co2_load",
+        observation=co2_load,
+        confidence=_freshness(frame, ("paco2_age_hr", "ph_age_hr", "minute_ventilation_age_hr", "tidal_volume_observed_age_hr")),
+        low=0.0,
+        high=2.0,
+    )
+
+    oxygenation_support = np.clip(
+        0.38 * hypoxemia
+        + 0.28 * oxygen_support
+        + 0.14 * vent_mode
+        + 0.12 * peep / 14.0
+        + 0.08 * high_minute_vent,
+        0.0,
+        2.0,
+    )
+    oxygen_state = _fast_online_state_features(
+        frame,
+        prefix="fbc_resp_oxygenation_support",
+        observation=oxygenation_support,
+        confidence=_freshness(frame, ("fio2_age_hr", "peep_age_hr", "o2sat_age_hr")),
+        low=0.0,
+        high=2.0,
+    )
+
+    acid_base_instability = np.clip(
+        0.30 * acidemia
+        + 0.24 * bicarb_deficit
+        + 0.18 * hypercapnia
+        + 0.12 * hypocapnia
+        + 0.10 * _clip01((lactate - 2.0) / 8.0)
+        + 0.06 * tachypnea,
+        0.0,
+        2.0,
+    )
+    acid_state = _fast_online_state_features(
+        frame,
+        prefix="fbc_resp_acid_base_instability",
+        observation=acid_base_instability,
+        confidence=_freshness(frame, ("ph_age_hr", "bicarbonate_age_hr", "paco2_age_hr", "lactate_age_hr")),
+        low=0.0,
+        high=2.0,
+    )
+
+    co2_mean = co2_state["fbc_resp_co2_load_mean"].to_numpy(dtype=np.float64)
+    oxygen_mean = oxygen_state["fbc_resp_oxygenation_support_mean"].to_numpy(dtype=np.float64)
+    acid_mean = acid_state["fbc_resp_acid_base_instability_mean"].to_numpy(dtype=np.float64)
+    interactions = pd.DataFrame({
+        "fbc_resp_paco2_x_acidemia": hypercapnia * acidemia,
+        "fbc_resp_paco2_x_bicarbonate_buffer": hypercapnia * alk_buffer,
+        "fbc_resp_minute_vent_x_co2_load": low_minute_vent * co2_mean,
+        "fbc_resp_oxygen_support_x_hypoxemia": oxygen_support * hypoxemia,
+        "fbc_resp_peep_fio2_context": np.clip(0.55 * _clip01(peep / 14.0) + 0.45 * _clip01((fio2 - 30.0) / 50.0), 0.0, 2.0),
+        "fbc_resp_vent_mode_context": vent_mode,
+        "fbc_resp_tidal_mismatch_x_co2_load": tidal_mismatch * co2_mean,
+        "fbc_resp_acid_x_oxygen_support": acid_mean * oxygen_mean,
+        "fbc_resp_bronchodilator_steroid_context": np.clip(0.6 * bronchodilator + 0.4 * steroid, 0.0, 1.0),
+    }, index=frame.index)
+    return _clean(pd.concat([co2_state, oxygen_state, acid_state, interactions], axis=1))
+
+
 FOCUSED_COUPLING_FEATURE_BUILDERS.update({
     "renal_electrolyte_store_6h": focused_renal_electrolyte_store_features,
     "cardio_renal_24h": focused_cardio_renal_long_horizon_features,
@@ -850,6 +957,7 @@ FOCUSED_COUPLING_FEATURE_BUILDERS.update({
     "hepato_renal_6h": focused_hepato_renal_features,
     "hepato_renal_24h": focused_hepato_renal_features,
     "hepato_renal_48h": focused_hepato_renal_features,
+    "respiratory_acid_base_observed_6h": focused_respiratory_acid_base_observed_features,
 })
 
 
