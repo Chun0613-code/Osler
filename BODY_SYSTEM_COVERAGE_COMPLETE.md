@@ -97,6 +97,14 @@ renal creatinine and BUN at 24h/48h.  Urine output remains partial.  This means
 the whole-body layer now has one validated factual coupling line, while all
 causal and runtime treatment gates remain closed.
 
+The next focused pass adds two more clinically grounded edges.  Sepsis/immune
+burden to cardiovascular tone validates MAP at 6h, becoming the second
+cross-system factual coupling line.  Hepatic burden to renal stress improves to
+a 3/7 candidate signal for creatinine and BUN at 6h but does not promote.  The
+current validated factual coupling map is therefore cardio -> renal long horizon
+and sepsis/immune -> MAP short horizon; hepato-renal remains a candidate for a
+longer-horizon or richer-observability audit.
+
 ## Data Ceilings
 
 The following are explicit data ceilings in the current eICU contract:

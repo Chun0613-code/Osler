@@ -361,3 +361,17 @@ The next B-deep step is therefore to expose the cardio-renal 24h/48h coupling as
 a shadow factual state object, not as a treatment policy.  Renal-electrolyte
 coupling should stay candidate-only until treatment timing, KCl/bicarbonate
 dosing, urine electrolyte evidence, and acid-base/ventilation context are richer.
+
+The next focused coupling pass has now tested two more clinically grounded
+edges.  Sepsis/immune -> cardiovascular passes for MAP at 6h: MAP reaches 7/7
+active-window patient splits with hospital-heldout support, while heart rate
+and lactate remain partial.  Hepatic -> renal improves over the broad audit but
+does not promote: creatinine and BUN reach only 3/7 active-window patient
+splits at 6h, despite hospital-heldout creatinine signal.
+
+The whole-body factual coupling map now has two validated research edges:
+cardio-renal long-horizon coupling and sepsis/immune -> MAP.  The next depth
+step should expose both as shadow factual state objects while keeping all
+treatment-effect, causal, and clinical gates closed.  Hepato-renal should move
+to a 24h/48h hepatic cohort or richer hepatic observability before another
+promotion attempt.

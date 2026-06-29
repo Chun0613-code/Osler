@@ -225,16 +225,19 @@ candidate-only and contains no raw rows or patient identifiers.
 
 `eicu_body_system_focused_coupling_audit.json` is the fourth aggregate-only
 cross-system coupling audit. It narrows the search to explicit renal-electrolyte
-store dynamics and long-horizon cardio-renal coupling. The renal-electrolyte
+store dynamics, long-horizon cardio-renal coupling, sepsis/immune to
+cardiovascular coupling, and hepatic to renal coupling. The renal-electrolyte
 store candidate remains rejected for promotion, with only weak bicarbonate and
 anion-gap signals. Cardio-renal long-horizon coupling is the first validated
 cross-system factual edge: creatinine and BUN pass the candidate-versus-baseline
 and candidate-versus-placebo gate in 7/7 patient splits at both 24h and 48h,
-with hospital-heldout support. Urine output is partial. The matching findings
-are recorded in `BODY_SYSTEM_FOCUSED_COUPLING_FINDINGS.md`. This artifact
-contains no raw rows or patient identifiers and grants no causal,
-counterfactual, clinical, checkpoint-promotion, runtime, or active-rule
-authority.
+with hospital-heldout support. Sepsis/immune -> cardiovascular is the second
+validated factual edge for MAP at 6h. Hepato-renal 6h improves to a 3/7
+candidate signal for creatinine and BUN but does not promote. Urine output,
+heart rate, and lactate remain partial. The matching findings are recorded in
+`BODY_SYSTEM_FOCUSED_COUPLING_FINDINGS.md`. This artifact contains no raw rows
+or patient identifiers and grants no causal, counterfactual, clinical,
+checkpoint-promotion, runtime, or active-rule authority.
 
 `mimiciii_dka_transitions_6h_demo.parquet` is local-only and ignored by git. It
 is the observed-treatment MIMIC-III demo lab-defined DKA-like transition cohort

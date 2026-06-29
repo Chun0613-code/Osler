@@ -6,6 +6,8 @@ physiologic plausibility and empirical signal:
 
 * renal-electrolyte K/bicarbonate store dynamics at 6h;
 * cardio-renal perfusion coupling at 24h and 48h.
+* sepsis/immune burden to cardiovascular tone at 6h;
+* hepatic burden to renal stress at 6h.
 
 The gate remains fail-closed: focused coupling features must beat both a
 downstream baseline and a capacity-matched placebo on held-out patients.
@@ -61,6 +63,24 @@ FOCUSED_SPECS: tuple[dict[str, object], ...] = (
         "target_system": "renal",
         "targets": ("creatinine", "bun", "urine_output"),
         "rationale": "perfusion shock burden coupled to renal reserve and creatinine kinetics at 48h",
+    },
+    {
+        "name": "sepsis_cardio_6h",
+        "cohort": "eicu_sepsis_transitions_6h.parquet",
+        "future_suffix": "tp6",
+        "source_system": "sepsis_immune_inflammatory",
+        "target_system": "cardiovascular_perfusion",
+        "targets": ("map", "lactate", "heart_rate"),
+        "rationale": "sepsis inflammatory burden, capillary leak, and vasoplegia coupled to cardiovascular targets at 6h",
+    },
+    {
+        "name": "hepato_renal_6h",
+        "cohort": "eicu_hepatic_failure_transitions_6h.parquet",
+        "future_suffix": "tp6",
+        "source_system": "hepatic_gastrointestinal",
+        "target_system": "renal",
+        "targets": ("creatinine", "bun"),
+        "rationale": "hepatic burden, low effective arterial volume, and acid-perfusion stress coupled to renal targets at 6h",
     },
 )
 

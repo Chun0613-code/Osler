@@ -94,11 +94,19 @@ It confirms the split implied by this edge-specific pass:
   patient splits;
 - cardio-renal coupling becomes the first validated cross-system factual edge
   once moved to the right 24h/48h renal time scale.
+- sepsis/immune -> cardiovascular becomes a validated MAP edge when run on the
+  full sepsis cohort with focused vasoplegia/capillary-leak state;
+- hepato-renal becomes a stronger but still non-promoted candidate at 6h.
 
 At 24h and 48h, creatinine and BUN pass 7/7 active-window patient splits beyond
 both no-coupling baseline and capacity-matched placebo, with hospital-heldout
 support.  Urine output is partial.  This does not change the safety boundary:
 the edge is factual and observational, not causal or clinical.
+
+The second focused pass adds MAP 7/7 for sepsis/immune -> cardiovascular, with
+heart rate 5/7 and lactate 4/7 partial.  Hepato-renal reaches 3/7 for
+creatinine and BUN, which is not enough to promote and should move to a longer
+horizon or richer hepatic observability.
 
 ## Safety Boundary
 

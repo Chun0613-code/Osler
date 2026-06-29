@@ -558,6 +558,8 @@
         "eicu_body_system_focused_renal_electrolyte_store_audit.json",
         "eicu_body_system_focused_cardio_renal_24h_audit.json",
         "eicu_body_system_focused_cardio_renal_48h_audit.json",
+        "eicu_body_system_focused_sepsis_cardio_6h_audit.json",
+        "eicu_body_system_focused_hepato_renal_6h_audit.json",
         "BODY_SYSTEM_FOCUSED_COUPLING_FINDINGS.md",
         "osler_jepa/body_coupling.py"
       ],
@@ -581,6 +583,20 @@
           },
           "promotion_scope": "research factual coupling map only",
           "runtime_decision_authority": false
+        },
+        {
+          "edge": "sepsis_immune_to_cardiovascular",
+          "source_system": "sepsis_immune_inflammatory",
+          "target_system": "cardiovascular_perfusion",
+          "validated_targets": {
+            "6h": {
+              "heart_rate": "5/7 active-window patient splits; partial",
+              "lactate": "4/7 active-window patient splits; partial",
+              "map": "7/7 active-window patient splits plus hospital-heldout support"
+            }
+          },
+          "promotion_scope": "research factual coupling map only",
+          "runtime_decision_authority": false
         }
       ],
       "rejected_or_candidate_edges": [
@@ -594,10 +610,18 @@
             "sodium": "0/7"
           },
           "promotion_allowed": false
+        },
+        {
+          "edge": "hepato_renal_6h",
+          "active_pass_both_counts": {
+            "bun": "3/7",
+            "creatinine": "3/7"
+          },
+          "promotion_allowed": false
         }
       ],
-      "status": "first_validated_cross_system_factual_coupling_edge",
-      "whole_body_next_step": "expose cardio-renal 24h/48h coupling as a shadow factual state object; keep renal-electrolyte store candidate-only until observability improves"
+      "status": "validated_cross_system_factual_coupling_edges",
+      "whole_body_next_step": "expose cardio-renal 24h/48h and sepsis-MAP coupling as shadow factual state objects; keep renal-electrolyte and hepato-renal candidates closed until observability or horizon improves"
     },
     "expanded_body_system_coverage_v2": {
       "boundary": {

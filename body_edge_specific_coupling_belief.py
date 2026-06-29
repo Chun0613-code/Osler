@@ -655,10 +655,199 @@ def focused_cardio_renal_long_horizon_features(frame: pd.DataFrame) -> pd.DataFr
     return _clean(pd.concat([shock_state, afterload_state, recovery_state, interactions], axis=1))
 
 
+def focused_sepsis_cardiovascular_features(frame: pd.DataFrame) -> pd.DataFrame:
+    """Sepsis/immune burden coupled to cardiovascular tone and lactate clearance."""
+
+    wbc = _finite_clip(_num(frame, "wbc_t"), 0.1, 120.0, 8.0)
+    temperature = _finite_clip(_num(frame, "temperature_t"), 30.0, 43.0, 37.0)
+    lactate = _finite_clip(_num(frame, "lactate_t"), 0.1, 30.0, 1.5)
+    platelets = _finite_clip(_num(frame, "platelets_t"), 1.0, 1000.0, 220.0)
+    albumin = _finite_clip(_num(frame, "albumin_t"), 0.5, 6.0, 3.3)
+    map_value = _finite_clip(_num(frame, "map_t"), 20.0, 180.0, 75.0)
+    heart_rate = _finite_clip(_num(frame, "heart_rate_t"), 20.0, 240.0, 85.0)
+    respiratory_rate = _finite_clip(_num(frame, "respiratory_rate_t"), 4.0, 70.0, 18.0)
+    creatinine = _finite_clip(_num(frame, "creatinine_t"), 0.2, 20.0, 1.1)
+
+    antibiotics = _action_any(frame, "antibiotics")
+    vasopressor = _action_any(frame, "vasopressor")
+    fluids = _action_any(frame, "fluids")
+    ventilation = _action_any(frame, "ventilation")
+    steroid = _action_any(frame, "systemic_steroid")
+
+    leukocyte_stress = np.maximum(_clip01((wbc - 12.0) / 24.0), _clip01((4.0 - wbc) / 3.0))
+    fever_stress = np.maximum(_clip01((temperature - 38.3) / 2.7), _clip01((36.0 - temperature) / 4.0))
+    inflammatory_observation = np.clip(
+        0.26 * leukocyte_stress
+        + 0.20 * fever_stress
+        + 0.20 * _clip01((lactate - 2.0) / 8.0)
+        + 0.14 * _clip01((100.0 - platelets) / 90.0)
+        + 0.10 * _clip01((3.0 - albumin) / 1.5)
+        + 0.10 * antibiotics,
+        0.0,
+        2.0,
+    )
+    inflammatory_state = _fast_online_state_features(
+        frame,
+        prefix="fbc_sepsis_inflammatory_burden",
+        observation=inflammatory_observation,
+        confidence=_freshness(frame, ("wbc_age_hr", "temperature_age_hr", "lactate_age_hr", "platelets_age_hr")),
+        low=0.0,
+        high=2.0,
+    )
+
+    vasoplegia_observation = np.clip(
+        0.35 * _clip01((65.0 - map_value) / 35.0)
+        + 0.22 * vasopressor
+        + 0.18 * _clip01((lactate - 2.0) / 8.0)
+        + 0.12 * _clip01((heart_rate - 110.0) / 55.0)
+        + 0.08 * fluids
+        + 0.05 * steroid,
+        0.0,
+        2.0,
+    )
+    vasoplegia_state = _fast_online_state_features(
+        frame,
+        prefix="fbc_sepsis_vasoplegia_burden",
+        observation=vasoplegia_observation,
+        confidence=_freshness(frame, ("map_age_hr", "lactate_age_hr", "heart_rate_age_hr")),
+        low=0.0,
+        high=2.0,
+    )
+
+    capillary_leak = np.clip(
+        0.30 * _clip01((3.0 - albumin) / 1.5)
+        + 0.22 * _clip01((100.0 - platelets) / 90.0)
+        + 0.18 * _clip01((lactate - 2.0) / 8.0)
+        + 0.12 * _clip01((creatinine - 1.5) / 3.0)
+        + 0.10 * fluids
+        + 0.08 * ventilation,
+        0.0,
+        2.0,
+    )
+    capillary_state = _fast_online_state_features(
+        frame,
+        prefix="fbc_sepsis_capillary_leak",
+        observation=capillary_leak,
+        confidence=_freshness(frame, ("albumin_age_hr", "platelets_age_hr", "lactate_age_hr", "creatinine_age_hr")),
+        low=0.0,
+        high=2.0,
+    )
+
+    inflammation = inflammatory_state["fbc_sepsis_inflammatory_burden_mean"].to_numpy(dtype=np.float64)
+    vasoplegia = vasoplegia_state["fbc_sepsis_vasoplegia_burden_mean"].to_numpy(dtype=np.float64)
+    leak = capillary_state["fbc_sepsis_capillary_leak_mean"].to_numpy(dtype=np.float64)
+    interactions = pd.DataFrame({
+        "fbc_sepsis_inflammation_x_low_map": inflammation * _clip01((65.0 - map_value) / 35.0),
+        "fbc_sepsis_inflammation_x_lactate": inflammation * _clip01((lactate - 2.0) / 8.0),
+        "fbc_sepsis_vasoplegia_x_tachycardia": vasoplegia * _clip01((heart_rate - 110.0) / 55.0),
+        "fbc_sepsis_leak_x_lactate": leak * _clip01((lactate - 2.0) / 8.0),
+        "fbc_sepsis_leak_x_hypoalbumin": leak * _clip01((3.0 - albumin) / 1.5),
+        "fbc_sepsis_respiratory_stress": _clip01((respiratory_rate - 24.0) / 18.0) + 0.25 * ventilation,
+        "fbc_sepsis_treatment_context": np.clip(0.35 * antibiotics + 0.30 * fluids + 0.25 * vasopressor + 0.10 * steroid, 0.0, 1.0),
+    }, index=frame.index)
+    return _clean(pd.concat([inflammatory_state, vasoplegia_state, capillary_state, interactions], axis=1))
+
+
+def focused_hepato_renal_features(frame: pd.DataFrame) -> pd.DataFrame:
+    """Hepatic burden coupled to renal perfusion and hepatorenal stress."""
+
+    bilirubin = _finite_clip(_num(frame, "bilirubin_t"), 0.0, 60.0, 1.0)
+    bilirubin_direct = _finite_clip(_num(frame, "bilirubin_direct_t"), 0.0, 50.0, 0.4)
+    platelets = _finite_clip(_num(frame, "platelets_t"), 1.0, 1000.0, 220.0)
+    lactate = _finite_clip(_num(frame, "lactate_t"), 0.1, 30.0, 1.5)
+    bicarbonate = _finite_clip(_num(frame, "bicarbonate_t"), 2.0, 45.0, 24.0)
+    creatinine = _finite_clip(_num(frame, "creatinine_t"), 0.2, 20.0, 1.1)
+    bun = _finite_clip(_num(frame, "bun_t"), 2.0, 220.0, 22.0)
+    map_value = _finite_clip(_num(frame, "map_t"), 20.0, 180.0, 75.0)
+    sodium = _finite_clip(_num(frame, "sodium_t"), 105.0, 180.0, 140.0)
+    potassium = _finite_clip(_num(frame, "potassium_t"), 1.5, 9.0, 4.2)
+
+    fluids = _action_any(frame, "fluids")
+    vasopressor = _action_any(frame, "vasopressor")
+    antibiotics = _action_any(frame, "antibiotics")
+    rrt = _action_any(frame, "renal_replacement")
+    encephalopathy_tx = _action_any(frame, "hepatic_encephalopathy_tx")
+
+    cholestatic_burden = _clip01((bilirubin - 2.0) / 10.0)
+    direct_burden = _clip01((bilirubin_direct - 1.0) / 8.0)
+    synthetic_proxy = _clip01((120.0 - platelets) / 100.0)
+    shock_liver_proxy = _clip01((lactate - 2.0) / 8.0) * _clip01((70.0 - map_value) / 35.0)
+    hepatic_observation = np.clip(
+        0.32 * cholestatic_burden
+        + 0.20 * direct_burden
+        + 0.18 * synthetic_proxy
+        + 0.18 * shock_liver_proxy
+        + 0.12 * encephalopathy_tx,
+        0.0,
+        2.0,
+    )
+    hepatic_state = _fast_online_state_features(
+        frame,
+        prefix="fbc_hepatic_burden",
+        observation=hepatic_observation,
+        confidence=_freshness(frame, ("bilirubin_age_hr", "bilirubin_direct_age_hr", "platelets_age_hr", "lactate_age_hr")),
+        low=0.0,
+        high=2.0,
+    )
+
+    renal_clearance_pressure = np.clip(
+        0.30 * _clip01((creatinine - 1.2) / 4.0)
+        + 0.20 * _clip01((bun - 25.0) / 80.0)
+        + 0.18 * _clip01((65.0 - map_value) / 35.0)
+        + 0.12 * vasopressor
+        + 0.10 * _clip01((130.0 - sodium) / 20.0)
+        + 0.10 * _clip01((potassium - 5.0) / 2.0),
+        0.0,
+        2.0,
+    )
+    renal_pressure_state = _fast_online_state_features(
+        frame,
+        prefix="fbc_hepato_renal_pressure",
+        observation=renal_clearance_pressure,
+        confidence=_freshness(frame, ("creatinine_age_hr", "bun_age_hr", "map_age_hr", "sodium_age_hr")),
+        low=0.0,
+        high=2.0,
+    )
+
+    acid_perfusion_stress = np.clip(
+        0.30 * _clip01((22.0 - bicarbonate) / 14.0)
+        + 0.28 * _clip01((lactate - 2.0) / 8.0)
+        + 0.18 * _clip01((65.0 - map_value) / 35.0)
+        + 0.12 * cholestatic_burden
+        + 0.12 * antibiotics,
+        0.0,
+        2.0,
+    )
+    acid_perfusion_state = _fast_online_state_features(
+        frame,
+        prefix="fbc_hepato_renal_acid_perfusion_stress",
+        observation=acid_perfusion_stress,
+        confidence=_freshness(frame, ("bicarbonate_age_hr", "lactate_age_hr", "map_age_hr", "bilirubin_age_hr")),
+        low=0.0,
+        high=2.0,
+    )
+
+    hepatic = hepatic_state["fbc_hepatic_burden_mean"].to_numpy(dtype=np.float64)
+    renal_pressure = renal_pressure_state["fbc_hepato_renal_pressure_mean"].to_numpy(dtype=np.float64)
+    acid_stress = acid_perfusion_state["fbc_hepato_renal_acid_perfusion_stress_mean"].to_numpy(dtype=np.float64)
+    interactions = pd.DataFrame({
+        "fbc_hepatic_x_creatinine": hepatic * _clip01((creatinine - 1.2) / 4.0),
+        "fbc_hepatic_x_bun": hepatic * _clip01((bun - 25.0) / 80.0),
+        "fbc_hepatic_x_low_map": hepatic * _clip01((65.0 - map_value) / 35.0),
+        "fbc_hepatic_x_hyponatremia": hepatic * _clip01((130.0 - sodium) / 20.0),
+        "fbc_renal_pressure_x_lactate": renal_pressure * _clip01((lactate - 2.0) / 8.0),
+        "fbc_acid_stress_x_hepatic": acid_stress * hepatic,
+        "fbc_hepato_renal_treatment_context": np.clip(0.30 * fluids + 0.25 * vasopressor + 0.20 * rrt + 0.15 * antibiotics + 0.10 * encephalopathy_tx, 0.0, 1.0),
+    }, index=frame.index)
+    return _clean(pd.concat([hepatic_state, renal_pressure_state, acid_perfusion_state, interactions], axis=1))
+
+
 FOCUSED_COUPLING_FEATURE_BUILDERS.update({
     "renal_electrolyte_store_6h": focused_renal_electrolyte_store_features,
     "cardio_renal_24h": focused_cardio_renal_long_horizon_features,
     "cardio_renal_48h": focused_cardio_renal_long_horizon_features,
+    "sepsis_cardio_6h": focused_sepsis_cardiovascular_features,
+    "hepato_renal_6h": focused_hepato_renal_features,
 })
 
 

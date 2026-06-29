@@ -26,7 +26,9 @@ from body_edge_specific_coupling_belief import (
     edge_specific_coupling_features,
     focused_cardio_renal_long_horizon_features,
     focused_coupling_features,
+    focused_hepato_renal_features,
     focused_renal_electrolyte_store_features,
+    focused_sepsis_cardiovascular_features,
 )
 from heme_coag_belief import (
     CoagulationReserveBelief,
@@ -520,6 +522,94 @@ class EicuBodySystemRouterTests(unittest.TestCase):
     def test_focused_coupling_dispatcher_rejects_unknown_focus(self):
         with self.assertRaises(KeyError):
             focused_coupling_features(pd.DataFrame({"stay_id": [1]}), "not_a_focus")
+
+    def test_focused_sepsis_cardio_features_include_vasoplegia_state(self):
+        frame = pd.DataFrame({
+            "stay_id": [1, 1],
+            "hours_since_onset": [0.0, 6.0],
+            "wbc_t": [10.0, 24.0],
+            "wbc_age_hr": [1.0, 1.0],
+            "temperature_t": [37.0, 39.5],
+            "temperature_age_hr": [1.0, 1.0],
+            "lactate_t": [1.5, 5.0],
+            "lactate_age_hr": [1.0, 1.0],
+            "platelets_t": [220.0, 75.0],
+            "platelets_age_hr": [1.0, 1.0],
+            "albumin_t": [3.4, 2.1],
+            "albumin_age_hr": [1.0, 1.0],
+            "map_t": [78.0, 55.0],
+            "map_age_hr": [1.0, 1.0],
+            "heart_rate_t": [85.0, 128.0],
+            "heart_rate_age_hr": [1.0, 1.0],
+            "respiratory_rate_t": [18.0, 32.0],
+            "creatinine_t": [1.0, 2.0],
+            "creatinine_age_hr": [1.0, 1.0],
+            "hist_antibiotics": [0.0, 1.0],
+            "act_antibiotics": [0.0, 1.0],
+            "hist_vasopressor": [0.0, 1.0],
+            "act_vasopressor": [0.0, 1.0],
+            "hist_fluids": [0.0, 1.0],
+            "act_fluids": [0.0, 0.0],
+            "hist_ventilation": [0.0, 0.0],
+            "act_ventilation": [0.0, 1.0],
+            "hist_systemic_steroid": [0.0, 0.0],
+            "act_systemic_steroid": [0.0, 1.0],
+        })
+
+        features = focused_sepsis_cardiovascular_features(frame)
+
+        self.assertIn("fbc_sepsis_vasoplegia_burden_mean", features.columns)
+        self.assertIn("fbc_sepsis_capillary_leak_mean", features.columns)
+        self.assertTrue(np.isfinite(features.to_numpy(dtype="float64")).all())
+        self.assertGreater(
+            features.loc[1, "fbc_sepsis_vasoplegia_burden_mean"],
+            features.loc[0, "fbc_sepsis_vasoplegia_burden_mean"],
+        )
+
+    def test_focused_hepato_renal_features_include_pressure_state(self):
+        frame = pd.DataFrame({
+            "stay_id": [1, 1],
+            "hours_since_onset": [0.0, 6.0],
+            "bilirubin_t": [1.0, 8.0],
+            "bilirubin_age_hr": [1.0, 1.0],
+            "bilirubin_direct_t": [0.3, 4.0],
+            "bilirubin_direct_age_hr": [1.0, 1.0],
+            "platelets_t": [220.0, 70.0],
+            "platelets_age_hr": [1.0, 1.0],
+            "lactate_t": [1.5, 4.8],
+            "lactate_age_hr": [1.0, 1.0],
+            "bicarbonate_t": [24.0, 14.0],
+            "bicarbonate_age_hr": [1.0, 1.0],
+            "creatinine_t": [1.0, 2.6],
+            "creatinine_age_hr": [1.0, 1.0],
+            "bun_t": [18.0, 58.0],
+            "bun_age_hr": [1.0, 1.0],
+            "map_t": [78.0, 58.0],
+            "map_age_hr": [1.0, 1.0],
+            "sodium_t": [138.0, 126.0],
+            "sodium_age_hr": [1.0, 1.0],
+            "potassium_t": [4.0, 5.7],
+            "hist_fluids": [0.0, 1.0],
+            "act_fluids": [0.0, 0.0],
+            "hist_vasopressor": [0.0, 1.0],
+            "act_vasopressor": [0.0, 1.0],
+            "hist_antibiotics": [0.0, 1.0],
+            "act_antibiotics": [0.0, 0.0],
+            "hist_renal_replacement": [0.0, 0.0],
+            "act_renal_replacement": [0.0, 1.0],
+            "hist_hepatic_encephalopathy_tx": [0.0, 1.0],
+            "act_hepatic_encephalopathy_tx": [0.0, 0.0],
+        })
+
+        features = focused_hepato_renal_features(frame)
+
+        self.assertIn("fbc_hepatic_burden_mean", features.columns)
+        self.assertIn("fbc_hepato_renal_pressure_mean", features.columns)
+        self.assertTrue(np.isfinite(features.to_numpy(dtype="float64")).all())
+        self.assertGreater(
+            features.loc[1, "fbc_hepato_renal_pressure_mean"],
+            features.loc[0, "fbc_hepato_renal_pressure_mean"],
+        )
 
     def test_heme_coag_belief_features_are_fixed_and_finite(self):
         frame = pd.DataFrame({
