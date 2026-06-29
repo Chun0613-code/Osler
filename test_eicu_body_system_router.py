@@ -21,6 +21,10 @@ from body_temporal_coupling_belief import (
     temporal_coupling_features,
     temporal_resp_acid_base_features,
 )
+from body_edge_specific_coupling_belief import (
+    edge_renal_electrolyte_buffering_features,
+    edge_specific_coupling_features,
+)
 from heme_coag_belief import (
     CoagulationReserveBelief,
     HEME_COAG_BELIEF_COLUMNS,
@@ -347,6 +351,55 @@ class EicuBodySystemRouterTests(unittest.TestCase):
     def test_temporal_coupling_dispatcher_rejects_unknown_edge(self):
         with self.assertRaises(KeyError):
             temporal_coupling_features(pd.DataFrame({"stay_id": [1]}), "not_a_body_edge")
+
+    def test_edge_specific_renal_coupling_features_include_interactions(self):
+        frame = pd.DataFrame({
+            "stay_id": [1, 1, 1],
+            "hours_since_onset": [0.0, 6.0, 12.0],
+            "creatinine_t": [1.1, 1.8, 2.2],
+            "creatinine_age_hr": [1.0, 1.0, 1.0],
+            "bun_t": [20.0, 35.0, 45.0],
+            "bun_age_hr": [1.0, 1.0, 1.0],
+            "urine_output_t": [100.0, 25.0, 15.0],
+            "urine_output_age_hr": [1.0, 1.0, 1.0],
+            "map_t": [75.0, 60.0, 58.0],
+            "potassium_t": [4.2, 5.6, 5.9],
+            "potassium_age_hr": [1.0, 1.0, 1.0],
+            "bicarbonate_t": [24.0, 15.0, 12.0],
+            "bicarbonate_age_hr": [1.0, 1.0, 1.0],
+            "ph_t": [7.35, 7.20, 7.12],
+            "ph_age_hr": [1.0, 1.0, 1.0],
+            "anion_gap_t": [12.0, 22.0, 28.0],
+            "anion_gap_age_hr": [1.0, 1.0, 1.0],
+            "sodium_t": [140.0, 130.0, 128.0],
+            "sodium_age_hr": [1.0, 1.0, 1.0],
+            "serum_osmolality_t": [290.0, 310.0, 318.0],
+            "serum_osmolality_age_hr": [1.0, 1.0, 1.0],
+            "hist_renal_replacement": [0.0, 0.0, 0.0],
+            "act_renal_replacement": [0.0, 0.0, 1.0],
+            "hist_diuretics": [0.0, 0.0, 0.0],
+            "act_diuretics": [0.0, 1.0, 1.0],
+            "hist_potassium_repletion": [0.0, 0.0, 0.0],
+            "act_potassium_repletion": [0.0, 0.0, 0.0],
+            "hist_bicarbonate": [0.0, 0.0, 0.0],
+            "act_bicarbonate": [0.0, 0.0, 1.0],
+            "hist_fluids": [0.0, 1.0, 1.0],
+            "act_fluids": [0.0, 1.0, 0.0],
+        })
+
+        features = edge_renal_electrolyte_buffering_features(frame)
+
+        self.assertIn("esc_renal_low_reserve_x_acid_deficit", features.columns)
+        self.assertIn("esc_renal_potassium_handling_stress_mean", features.columns)
+        self.assertTrue(np.isfinite(features.to_numpy(dtype="float64")).all())
+        self.assertGreater(
+            features.loc[2, "esc_renal_acid_buffer_deficit_mean"],
+            features.loc[0, "esc_renal_acid_buffer_deficit_mean"],
+        )
+
+    def test_edge_specific_coupling_dispatcher_rejects_unknown_edge(self):
+        with self.assertRaises(KeyError):
+            edge_specific_coupling_features(pd.DataFrame({"stay_id": [1]}), "not_a_body_edge")
 
     def test_heme_coag_belief_features_are_fixed_and_finite(self):
         frame = pd.DataFrame({

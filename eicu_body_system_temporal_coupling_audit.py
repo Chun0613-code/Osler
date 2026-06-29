@@ -24,6 +24,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from body_edge_specific_coupling_belief import edge_specific_coupling_features
 from body_temporal_coupling_belief import temporal_coupling_features
 from eicu_body_system_coupling_audit import (
     COUPLING_SPECS,
@@ -41,10 +42,18 @@ from eicu_sepsis_target_router import _feature_columns, _round, _subject_column,
 
 
 METHODS = ("baseline_ridge", "temporal_coupled_ridge", "placebo_ridge")
+FEATURE_MODES = {
+    "temporal": temporal_coupling_features,
+    "edge_specific": edge_specific_coupling_features,
+}
 
 
-def _attach_temporal_features(frame: pd.DataFrame, edge_name: str) -> tuple[pd.DataFrame, list[str]]:
-    features = temporal_coupling_features(frame, edge_name)
+def _attach_coupling_features(
+    frame: pd.DataFrame,
+    edge_name: str,
+    feature_mode: str,
+) -> tuple[pd.DataFrame, list[str]]:
+    features = FEATURE_MODES[feature_mode](frame, edge_name)
     feature_columns = list(features.columns)
     output = pd.concat([frame.reset_index(drop=True), features.reset_index(drop=True)], axis=1)
     return output, feature_columns
@@ -215,10 +224,11 @@ def audit_spec(
     discovery_fraction: float,
     ridge_alpha: float,
     bootstrap_samples: int,
+    feature_mode: str,
 ) -> dict[str, object]:
     cohort = data_dir / str(spec["cohort"])
     frame = pd.read_parquet(cohort).reset_index(drop=True)
-    frame, coupling_features = _attach_temporal_features(frame, str(spec["name"]))
+    frame, coupling_features = _attach_coupling_features(frame, str(spec["name"]), feature_mode)
     random_reports = [
         split_report(
             frame,
@@ -256,7 +266,8 @@ def audit_spec(
         "stays": int(frame["stay_id"].nunique()) if "stay_id" in frame else None,
         "hospitals": int(frame["hospitalid"].nunique()) if "hospitalid" in frame else None,
         "targets": targets,
-        "candidate": "temporal_predict_update_coupling_belief",
+        "candidate": f"{feature_mode}_coupling_belief",
+        "feature_mode": feature_mode,
         "random_patient_splits": {
             "seeds": list(seeds),
             "summary": summarize_reports(random_reports, targets),
@@ -275,6 +286,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--ridge-alpha", type=float, default=10.0)
     parser.add_argument("--bootstrap-samples", type=int, default=300)
     parser.add_argument("--edges", default="all", help="comma-separated edge names or 'all'")
+    parser.add_argument("--feature-mode", choices=sorted(FEATURE_MODES), default="temporal")
     return parser.parse_args()
 
 
@@ -291,13 +303,14 @@ def main() -> None:
             discovery_fraction=args.discovery_fraction,
             ridge_alpha=args.ridge_alpha,
             bootstrap_samples=args.bootstrap_samples,
+            feature_mode=args.feature_mode,
         )
         for spec in specs
     ]
     report = {
-        "experiment": "eICU body-system temporal predict-update coupling audit",
+        "experiment": f"eICU body-system {args.feature_mode} coupling audit",
         "gate": {
-            "candidate": "temporal_predict_update_belief_features",
+            "candidate": f"{args.feature_mode}_coupling_belief_features",
             "baseline": "ridge_without_temporal_coupling_belief",
             "placebo": "ridge_plus_capacity_matched_random_features",
             "pass_rule": "candidate must significantly beat both baseline and placebo on held-out patients",

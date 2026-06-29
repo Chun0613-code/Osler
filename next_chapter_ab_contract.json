@@ -480,6 +480,67 @@
       ],
       "whole_body_next_step": "edge-specific shared state models for renal-electrolyte buffering, immune-hemodynamic capillary leak, respiratory CO2/ventilation, and heme oxygen delivery"
     },
+    "edge_specific_cross_system_coupling_audit": {
+      "boundary": {
+        "active_rule_promotion_allowed": false,
+        "causal_claim_allowed": false,
+        "checkpoint_promotion_allowed": false,
+        "clinical_claim_allowed": false,
+        "counterfactual_claim_allowed": false,
+        "runtime_decision_authority": false
+      },
+      "date": "2026-06-29",
+      "files": [
+        "body_edge_specific_coupling_belief.py",
+        "eicu_body_system_temporal_coupling_audit.py",
+        "eicu_body_system_edge_specific_coupling_audit.json",
+        "BODY_SYSTEM_EDGE_SPECIFIC_COUPLING_FINDINGS.md"
+      ],
+      "gate": "edge-specific shared state must significantly beat both downstream baseline and capacity-matched placebo on held-out patients",
+      "promoted_edges": [],
+      "status": "edge_specific_coupling_candidate_only",
+      "weak_candidate_edges": [
+        {
+          "edge": "renal_to_electrolyte_acid_base",
+          "active_pass_both_counts": {
+            "anion_gap": "1/7",
+            "bicarbonate": "2/7"
+          },
+          "promotion_allowed": false
+        },
+        {
+          "edge": "respiratory_to_acid_base",
+          "active_pass_both_counts": {
+            "bicarbonate": "1/7"
+          },
+          "promotion_allowed": false
+        },
+        {
+          "edge": "endocrine_to_electrolyte",
+          "active_pass_both_counts": {
+            "anion_gap": "1/7",
+            "bicarbonate": "1/7",
+            "sodium": "1/7"
+          },
+          "promotion_allowed": false
+        },
+        {
+          "edge": "heme_to_perfusion",
+          "active_pass_both_counts": {
+            "heart_rate": "1/7"
+          },
+          "promotion_allowed": false
+        },
+        {
+          "edge": "cardiovascular_to_renal",
+          "active_pass_both_counts": {
+            "creatinine": "1/7"
+          },
+          "promotion_allowed": false
+        }
+      ],
+      "whole_body_next_step": "stop generic all-edge coupling; focus on renal-electrolyte buffering with explicit potassium/bicarbonate store dynamics and cardio-renal 24h/48h coupling"
+    },
     "expanded_body_system_coverage_v2": {
       "boundary": {
         "bounded_engineering_cohort": true,

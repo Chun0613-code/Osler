@@ -67,6 +67,16 @@ The next layer needs edge-specific physiology:
   transfusion protocol semantics, and oxygen delivery rather than generic
   coagulation reserve.
 
+That edge-specific pass has now been run and is documented in
+`BODY_SYSTEM_EDGE_SPECIFIC_COUPLING_FINDINGS.md`.  It improves the shape of the
+signals but still does not promote any edge.  The strongest active-window weak
+signals are renal -> bicarbonate (2/7), renal -> anion gap (1/7),
+respiratory -> bicarbonate (1/7), endocrine -> sodium/bicarbonate/anion gap
+(1/7 each), heme -> heart rate (1/7), and cardiovascular -> creatinine (1/7).
+This confirms that edge-specific physiology is more promising than generic
+burden features, but the current eICU state map still does not support a
+promoted whole-body coupling layer.
+
 ## Safety Boundary
 
 No temporal coupling edge is promoted.  The current whole-body status is:

@@ -338,3 +338,12 @@ candidate-only.  The next Chapter-B depth step should be edge-specific shared
 state rather than generic burden features: renal-electrolyte buffering,
 immune-hemodynamic/capillary-leak state, respiratory CO2/ventilation state, and
 heme oxygen-delivery state.
+
+The edge-specific shared-state audit has now been run.  It produces broader weak
+signals but still no promoted edge: renal -> bicarbonate 2/7, renal -> anion gap
+1/7, respiratory -> bicarbonate 1/7, endocrine -> sodium/bicarbonate/anion gap
+1/7 each, heme -> heart rate 1/7, and cardiovascular -> creatinine 1/7.  The
+next depth step should stop trying all edges generically and focus on the two
+most plausible frontiers: renal-electrolyte buffering with explicit
+potassium/bicarbonate store dynamics, and cardio-renal coupling at 24h/48h where
+creatinine and urine output have time to move.

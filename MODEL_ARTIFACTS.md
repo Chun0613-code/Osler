@@ -213,6 +213,16 @@ records the candidate-only interpretation. This artifact contains no raw rows or
 patient identifiers and grants no causal, counterfactual, clinical,
 checkpoint-promotion, runtime, or active-rule authority.
 
+`eicu_body_system_edge_specific_coupling_audit.json` is the third
+aggregate-only cross-system coupling audit. It tests bespoke shared-state
+features for each directed edge, including renal-electrolyte buffering,
+respiratory CO2/ventilation mismatch, endocrine osmotic/electrolyte interaction,
+heme oxygen-delivery debt, cardio-renal perfusion stress, hepatic/coagulation
+state, and immune capillary-leak/shock state. Edge-specific features produce
+more plausible weak signals than generic temporal coupling, but still no edge
+passes the robust 7/7 active-window promotion boundary. The artifact remains
+candidate-only and contains no raw rows or patient identifiers.
+
 `mimiciii_dka_transitions_6h_demo.parquet` is local-only and ignored by git. It
 is the observed-treatment MIMIC-III demo lab-defined DKA-like transition cohort
 used for schema and factual proxy smoke testing. Committed aggregate reports

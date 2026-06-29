@@ -80,6 +80,15 @@ reaches 1/7.  These weak signals stay candidate-only.  The next depth work
 should therefore be edge-specific shared state, not a generic all-edge coupling
 feature block.
 
+The edge-specific shared-state pass has also been run as
+`eicu_body_system_edge_specific_coupling_audit.json`.  It adds bespoke
+renal-electrolyte buffering, respiratory CO2/ventilation mismatch,
+endocrine-electrolyte osmotic interaction, heme oxygen-delivery debt,
+cardio-renal perfusion stress, hepatic/coagulation, and immune capillary-leak
+states.  This improves weak signal coverage but still does not promote any edge.
+The whole-body layer therefore remains a candidate map, not an online digital
+twin coupling graph.
+
 ## Data Ceilings
 
 The following are explicit data ceilings in the current eICU contract:
