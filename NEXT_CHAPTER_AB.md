@@ -303,3 +303,16 @@ platelets remain persistence at both 24h and 48h.  This closes the simple
 "just extend the horizon" hypothesis for coagulation cascade targets: horizon
 helps Hgb/Hct, but coagulation depth now needs blood-product subtype and dose
 observability rather than another hidden-state promotion attempt.
+
+That transfusion observability step has now been run.  The extractor separates
+PRBC, plasma, platelet, cryoprecipitate, whole-blood, and unknown blood-product
+evidence and adds `volume_like_ml` / `unit_like_count` features while preserving
+the original binary `transfusion` channel.  The features are non-empty at 6h
+(PRBC 1,509 future windows, plasma 254, platelets 306, cryoprecipitate 72), and
+the heme router remains significant at 6h/24h/48h.  The strongest new belief
+signal is 24h feature belief for hemoglobin (5/7 pass-both) and hematocrit
+(4/7 pass-both), but it still fails the 7/7 promotion boundary and does not
+unlock INR/PTT/fibrinogen/platelets.  Heme/coag therefore stays candidate-only.
+The next heme step is not another hidden-state promotion attempt; it requires
+stronger unit semantics, transfusion protocol context, bleeding-source/procedure
+context, anticoagulation reversal evidence, or external identified data.

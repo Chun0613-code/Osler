@@ -160,16 +160,20 @@ creatinine level/slope/innovation dimension and passes the downstream gate for
 24h creatinine/BUN/urine output and 48h creatinine/BUN. It remains factual,
 observational, and non-clinical.
 
-`eicu_heme_coag_belief_audit.json` and
-`eicu_heme_coag_state_belief_audit.json` are aggregate-only hematology
+`eicu_heme_coag_belief_audit.json`,
+`eicu_heme_coag_state_belief_audit.json`,
+`eicu_heme_coag_belief_audit_24h.json`,
+`eicu_heme_coag_state_belief_audit_24h.json`,
+`eicu_heme_coag_belief_audit_48h.json`, and
+`eicu_heme_coag_state_belief_audit_48h.json` are aggregate-only hematology
 candidate-belief audits. They evaluate bleeding/coagulation reserve features and
 an explicit predict-update coagulation state against both baseline
-`ridge_realfit` and a capacity-matched placebo. The feature belief shows partial
-hematocrit/hemoglobin signal, but no target passes robust 7/7 validation and
-hospital-heldout does not pass. The explicit state is weaker. These artifacts do
-not validate a promoted heme/coag hidden state; they keep the belief
-candidate-only and preserve the same factual, observational, non-clinical
-boundary.
+`ridge_realfit` and a capacity-matched placebo. After adding blood-product
+subtype and normalized dose evidence, the strongest signal is 24h feature belief
+for hemoglobin (5/7 pass-both) and hematocrit (4/7 pass-both), but no target
+passes robust 7/7 validation. These artifacts do not validate a promoted
+heme/coag hidden state; they keep the belief candidate-only and preserve the
+same factual, observational, non-clinical boundary.
 
 `eicu_coagulopathy_heme_transitions_24h.parquet` and
 `eicu_coagulopathy_heme_transitions_48h.parquet` are local-only long-horizon
@@ -183,6 +187,10 @@ comparison. Aggregate reports are committed as
 strongest heme/coag active-window delta and preserves 7/7 hemoglobin/hematocrit
 `ridge_realfit` selection; 48h remains significant overall but heme lab
 selection weakens. Coagulation cascade targets remain persistence fallback.
+`HEME_TRANSFUSION_DEPTH_FINDINGS.md` records the subtype/dose depth pass:
+PRBC/plasma/platelet/cryo/unknown blood-product evidence is now separated with
+`volume_like_ml` and `unit_like_count` features, but the improvement remains
+partial and candidate-only.
 
 `mimiciii_dka_transitions_6h_demo.parquet` is local-only and ignored by git. It
 is the observed-treatment MIMIC-III demo lab-defined DKA-like transition cohort

@@ -24,6 +24,9 @@ HEME_COAG_BELIEF_COLUMNS = (
     "belief_platelet_reserve",
     "belief_transfusion_pressure",
     "belief_anticoagulation_pressure",
+    "belief_rbc_transfusion_exposure",
+    "belief_hemostatic_product_exposure",
+    "belief_transfusion_dose_intensity",
     "belief_hemostatic_stress",
     "belief_observation_confidence",
 )
@@ -75,6 +78,26 @@ def _action_any(frame: pd.DataFrame, stem: str) -> np.ndarray:
     ).astype(np.float64)
 
 
+def _transfusion_unit_exposure(frame: pd.DataFrame, product: str | None = None) -> np.ndarray:
+    stems = ["transfusion"] if product is None else [f"transfusion_{product}"]
+    values = np.zeros(len(frame), dtype=np.float64)
+    for stem in stems:
+        for prefix in ("hist", "act"):
+            unit_column = f"{prefix}_{stem}_unit_like_count"
+            volume_column = f"{prefix}_{stem}_volume_like_ml"
+            count_column = f"{prefix}_{stem}_evidence_count"
+            flag_column = f"{prefix}_{stem}"
+            if unit_column in frame:
+                values += _finite_clip(_num(frame, unit_column), 0.0, 20.0, 0.0)
+            elif volume_column in frame:
+                values += _finite_clip(_num(frame, volume_column), 0.0, 6000.0, 0.0) / 300.0
+            elif count_column in frame:
+                values += _finite_clip(_num(frame, count_column), 0.0, 20.0, 0.0)
+            elif flag_column in frame:
+                values += (_num(frame, flag_column, default=0.0) > 0.0).astype(np.float64)
+    return np.clip(values, 0.0, 20.0)
+
+
 def _observation_confidence(frame: pd.DataFrame) -> np.ndarray:
     ages = []
     for column in (
@@ -113,6 +136,14 @@ def heme_coag_belief_features(frame: pd.DataFrame) -> pd.DataFrame:
     antiplatelet = _action_any(frame, "antiplatelet")
     vasopressor = _action_any(frame, "vasopressor")
     fluids = _action_any(frame, "fluids")
+    rbc_units = _transfusion_unit_exposure(frame, "prbc")
+    plasma_units = _transfusion_unit_exposure(frame, "plasma")
+    platelet_units = _transfusion_unit_exposure(frame, "platelet")
+    cryo_units = _transfusion_unit_exposure(frame, "cryo")
+    total_units = _transfusion_unit_exposure(frame)
+    rbc_exposure = _clip01(rbc_units / 3.0)
+    hemostatic_product_exposure = _clip01((plasma_units + platelet_units + cryo_units) / 3.0)
+    transfusion_dose_intensity = _clip01(total_units / 5.0)
 
     anemia_risk = 0.65 * _clip01((8.0 - hemoglobin) / 3.0) + 0.35 * _clip01((24.0 - hematocrit) / 9.0)
     platelet_risk = _clip01((100.0 - platelets) / 80.0)
@@ -124,7 +155,7 @@ def heme_coag_belief_features(frame: pd.DataFrame) -> pd.DataFrame:
     coagulation_reserve = _clip01(1.0 - (0.40 * inr_risk + 0.25 * ptt_risk + 0.25 * fibrinogen_risk + 0.10 * anticoagulant))
     oxygen_carrying_reserve = _clip01(0.60 * ((hemoglobin - 7.0) / 5.0) + 0.40 * ((hematocrit - 21.0) / 15.0))
     platelet_reserve = _clip01((platelets - 50.0) / 150.0)
-    transfusion_pressure = _clip01(0.70 * transfusion + 0.20 * anemia_risk + 0.10 * shock_risk)
+    transfusion_pressure = _clip01(0.45 * transfusion + 0.25 * transfusion_dose_intensity + 0.20 * anemia_risk + 0.10 * shock_risk)
     anticoagulation_pressure = _clip01(0.65 * anticoagulant + 0.25 * antiplatelet + 0.10 * ptt_risk)
     hemostatic_stress = _clip01(
         0.30 * platelet_risk
@@ -150,6 +181,9 @@ def heme_coag_belief_features(frame: pd.DataFrame) -> pd.DataFrame:
         "belief_platelet_reserve": platelet_reserve,
         "belief_transfusion_pressure": transfusion_pressure,
         "belief_anticoagulation_pressure": anticoagulation_pressure,
+        "belief_rbc_transfusion_exposure": rbc_exposure,
+        "belief_hemostatic_product_exposure": hemostatic_product_exposure,
+        "belief_transfusion_dose_intensity": transfusion_dose_intensity,
         "belief_hemostatic_stress": hemostatic_stress,
         "belief_observation_confidence": observation_confidence,
     }, index=frame.index)
@@ -191,11 +225,13 @@ class CoagulationReserveBelief:
         hours = max(0.0, float(delta_hours))
         _reserve, _variance, bleeding, _oxygen, _platelet, _confidence = _row_observation(row)
         transfusion = 1.0 if _flag(row, "hist_transfusion") or _flag(row, "act_transfusion") else 0.0
+        dose_units = _scalar(row, "hist_transfusion_unit_like_count", 0.0) + _scalar(row, "act_transfusion_unit_like_count", 0.0)
+        dose_intensity = float(np.clip(dose_units / 5.0, 0.0, 1.0))
         anticoag = 1.0 if _flag(row, "hist_anticoagulant") or _flag(row, "act_anticoagulant") else 0.0
         antiplatelet = 1.0 if _flag(row, "hist_antiplatelet") or _flag(row, "act_antiplatelet") else 0.0
-        drift = (0.010 * transfusion - 0.008 * anticoag - 0.006 * antiplatelet - 0.006 * bleeding) * hours
+        drift = (0.006 * transfusion + 0.010 * dose_intensity - 0.008 * anticoag - 0.006 * antiplatelet - 0.006 * bleeding) * hours
         mean = float(np.clip(self.mean + drift, 0.0, 1.0))
-        process_variance = (0.006 + 0.015 * bleeding + 0.006 * anticoag + 0.004 * transfusion) * max(hours, 0.25)
+        process_variance = (0.006 + 0.015 * bleeding + 0.006 * anticoag + 0.003 * transfusion + 0.003 * dose_intensity) * max(hours, 0.25)
         return CoagulationReserveBelief(
             mean=mean,
             variance=float(np.clip(self.variance + process_variance, 0.03, 2.0)),

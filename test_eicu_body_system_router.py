@@ -5,7 +5,14 @@ import tempfile
 import pandas as pd
 
 from eicu_body_system_configs import BODY_SYSTEM_CONFIGS, get_body_system_config
-from eicu_body_system_transition_extract import add_active_column, classify_action, read_restricted_stay_ids
+from eicu_body_system_transition_extract import (
+    add_active_column,
+    classify_action,
+    classify_blood_product_subtype,
+    evidence_window_summary,
+    read_restricted_stay_ids,
+    unit_like_count,
+)
 from eicu_sepsis_transition_extract import LAB_TO_STATE, PLAUSIBLE
 from eicu_sepsis_target_router import _feature_columns
 from heme_coag_belief import (
@@ -116,6 +123,37 @@ class EicuBodySystemRouterTests(unittest.TestCase):
         self.assertIn("transfusion", classify_action(heme, "Volume-Transfuse plasma"))
         self.assertIn("anticoagulant", classify_action(heme, "heparin infusion"))
         self.assertIn("antiplatelet", classify_action(heme, "clopidogrel"))
+
+    def test_classifies_blood_product_subtypes_and_units(self):
+        self.assertEqual(classify_blood_product_subtype("packed red blood cells"), "prbc")
+        self.assertEqual(classify_blood_product_subtype("fresh frozen plasma"), "plasma")
+        self.assertEqual(classify_blood_product_subtype("platelet pheresis"), "platelet")
+        self.assertEqual(classify_blood_product_subtype("cryoprecipitate"), "cryo")
+        self.assertEqual(classify_blood_product_subtype("blood product"), "unknown")
+        self.assertAlmostEqual(unit_like_count(300.0, "prbc"), 1.0)
+        self.assertAlmostEqual(unit_like_count(2.0, "plasma"), 2.0)
+
+    def test_transfusion_window_summary_keeps_subtype_and_dose_features(self):
+        config = get_body_system_config("coagulopathy_heme")
+        lookup = {
+            "transfusion": {
+                "starts": pd.Series([-2.0, 1.0, 2.0]).to_numpy(dtype="float64"),
+                "ends": pd.Series([-1.0, 2.0, 3.0]).to_numpy(dtype="float64"),
+                "dose_observed": pd.Series([True, True, False]).to_numpy(dtype=bool),
+                "product_subtype": pd.Series(["prbc", "plasma", "unknown"]).to_numpy(dtype=object),
+                "dose_amount": pd.Series([300.0, 250.0, float("nan")]).to_numpy(dtype="float64"),
+                "unit_like_count": pd.Series([1.0, 1.0, float("nan")]).to_numpy(dtype="float64"),
+            }
+        }
+
+        summary = evidence_window_summary(lookup, config, anchor_hour=0.0, horizon_hours=6.0)
+
+        self.assertEqual(summary["hist_transfusion_prbc"], 1)
+        self.assertEqual(summary["act_transfusion_plasma"], 1)
+        self.assertEqual(summary["act_transfusion_unknown"], 1)
+        self.assertEqual(summary["hist_transfusion_prbc_unit_like_count"], 1.0)
+        self.assertEqual(summary["act_transfusion_plasma_volume_like_ml"], 250.0)
+        self.assertEqual(summary["act_transfusion_plasma_dose_observed"], 1)
 
     def test_heme_labs_are_first_class_state_variables(self):
         expected = {

@@ -27,7 +27,6 @@ from eicu_sepsis_transition_extract import (
     clean_state_values,
     measurement_lookup,
     nearest_value,
-    prepare_evidence_lookup,
     pseudo_time,
     read_measurements,
     read_patient_meta,
@@ -45,8 +44,21 @@ ACTION_EVIDENCE_COLUMNS = [
     "source",
     "evidence_kind",
     "dose_observed",
+    "product_subtype",
+    "dose_amount",
+    "unit_like_count",
     "original_label",
 ]
+
+BLOOD_PRODUCT_SUBTYPES = ("prbc", "plasma", "platelet", "cryo", "whole_blood", "unknown")
+BLOOD_PRODUCT_NOMINAL_ML = {
+    "prbc": 300.0,
+    "plasma": 250.0,
+    "platelet": 300.0,
+    "cryo": 100.0,
+    "whole_blood": 500.0,
+    "unknown": 300.0,
+}
 
 
 def horizon_suffix(horizon_hours: float) -> str:
@@ -62,6 +74,48 @@ def future_column(var: str, horizon_hours: float) -> str:
 
 def empty_action_evidence() -> pd.DataFrame:
     return pd.DataFrame(columns=ACTION_EVIDENCE_COLUMNS)
+
+
+def classify_blood_product_subtype(label: object) -> str:
+    text = str(label or "").lower()
+    compact = text.replace(" ", "").replace("-", "")
+    if "cryoprecipitate" in text or "cryo" in text:
+        return "cryo"
+    if "platelet" in text or "plt" in compact or "pheresis" in text:
+        return "platelet"
+    if "fresh frozen plasma" in text or "plasma" in text or "ffp" in compact:
+        return "plasma"
+    if "whole blood" in text:
+        return "whole_blood"
+    if (
+        "prbc" in compact
+        or "prbcs" in compact
+        or "rbc" in compact
+        or "packed red" in text
+        or "red blood cell" in text
+        or "packed cell" in text
+    ):
+        return "prbc"
+    return "unknown"
+
+
+def unit_like_count(amount: float, product_subtype: str) -> float:
+    if not np.isfinite(amount) or amount <= 0.0:
+        return np.nan
+    if amount <= 20.0:
+        return float(amount)
+    nominal = BLOOD_PRODUCT_NOMINAL_ML.get(product_subtype, BLOOD_PRODUCT_NOMINAL_ML["unknown"])
+    return float(amount / nominal)
+
+
+def transfusion_evidence_payload(label: object, amount: float = np.nan) -> dict[str, object]:
+    product_subtype = classify_blood_product_subtype(label)
+    amount = float(amount) if np.isfinite(amount) and amount > 0.0 else np.nan
+    return {
+        "product_subtype": product_subtype,
+        "dose_amount": amount,
+        "unit_like_count": unit_like_count(amount, product_subtype),
+    }
 
 
 def classify_action(config: BodySystemDiseaseConfig, label: object) -> tuple[str, ...]:
@@ -195,6 +249,7 @@ def medication_evidence(
                     "source": "eicu_medication",
                     "evidence_kind": "active_medication_order",
                     "dose_observed": False,
+                    **(transfusion_evidence_payload(label) if action == "transfusion" else {}),
                     "original_label": str(label or ""),
                 })
     return pd.DataFrame(rows, columns=ACTION_EVIDENCE_COLUMNS) if rows else empty_action_evidence()
@@ -250,6 +305,11 @@ def infusion_evidence(
                     "source": "eicu_infusiondrug",
                     "evidence_kind": "infusion_presence",
                     "dose_observed": dose_observed,
+                    **(
+                        transfusion_evidence_payload(label, amount if np.isfinite(amount) else volume)
+                        if action == "transfusion"
+                        else {}
+                    ),
                     "original_label": str(label or ""),
                 })
     return pd.DataFrame(rows, columns=ACTION_EVIDENCE_COLUMNS) if rows else empty_action_evidence()
@@ -279,6 +339,7 @@ def treatment_evidence(
                     "source": "eicu_treatment",
                     "evidence_kind": "coarse_treatment_presence",
                     "dose_observed": False,
+                    **(transfusion_evidence_payload(label) if action == "transfusion" else {}),
                     "original_label": str(label or ""),
                 })
     return pd.DataFrame(rows, columns=ACTION_EVIDENCE_COLUMNS) if rows else empty_action_evidence()
@@ -355,6 +416,10 @@ def transfusion_intake_output_evidence(
             if not np.isfinite(offset):
                 continue
             amount = _finite_number(record.get("cellvaluenumeric"))
+            label = " ".join(
+                str(record.get(column) or "")
+                for column in ("celllabel", "cellpath", "cellvaluetext")
+            )
             rows.append({
                 "stay_id": int(record[ID]),
                 "starttime": pseudo_time(offset),
@@ -363,10 +428,8 @@ def transfusion_intake_output_evidence(
                 "source": "eicu_intakeoutput",
                 "evidence_kind": "blood_product_volume_or_presence",
                 "dose_observed": bool(np.isfinite(amount) and amount > 0.0),
-                "original_label": " ".join(
-                    str(record.get(column) or "")
-                    for column in ("celllabel", "cellpath", "cellvaluetext")
-                ),
+                **transfusion_evidence_payload(label, amount),
+                "original_label": label,
             })
     return pd.DataFrame(rows, columns=ACTION_EVIDENCE_COLUMNS) if rows else empty_action_evidence()
 
@@ -384,6 +447,42 @@ def read_action_evidence(data_root: Path, stay_ids: set[int], config: BodySystem
         return empty_action_evidence()
     evidence = pd.concat(frames, ignore_index=True)
     return evidence.sort_values(["stay_id", "starttime", "source", "action"]).reset_index(drop=True)
+
+
+def _hours_since_base(series: pd.Series) -> np.ndarray:
+    return (
+        (pd.to_datetime(series, errors="coerce") - BASE_TIME)
+        / pd.Timedelta(hours=1)
+    ).to_numpy(dtype=np.float64)
+
+
+def prepare_body_evidence_lookup(evidence: pd.DataFrame) -> dict[int, dict[str, dict[str, np.ndarray]]]:
+    if evidence.empty:
+        return {}
+    frame = evidence.copy()
+    frame["start_hr"] = _hours_since_base(frame["starttime"])
+    frame["end_hr"] = _hours_since_base(frame["endtime"])
+    frame = frame[np.isfinite(frame["start_hr"]) & np.isfinite(frame["end_hr"])]
+    output: dict[int, dict[str, dict[str, np.ndarray]]] = {}
+    for (stay_id, action), group in frame.groupby(["stay_id", "action"], sort=False):
+        output.setdefault(int(stay_id), {})[str(action)] = {
+            "starts": group["start_hr"].to_numpy(dtype=np.float64),
+            "ends": group["end_hr"].to_numpy(dtype=np.float64),
+            "dose_observed": group["dose_observed"].fillna(False).to_numpy(dtype=bool),
+            "product_subtype": group.get(
+                "product_subtype",
+                pd.Series("unknown", index=group.index),
+            ).fillna("unknown").astype(str).to_numpy(dtype=object),
+            "dose_amount": pd.to_numeric(
+                group.get("dose_amount", pd.Series(np.nan, index=group.index)),
+                errors="coerce",
+            ).to_numpy(dtype=np.float64),
+            "unit_like_count": pd.to_numeric(
+                group.get("unit_like_count", pd.Series(np.nan, index=group.index)),
+                errors="coerce",
+            ).to_numpy(dtype=np.float64),
+        }
+    return output
 
 
 def build_anchors(
@@ -449,8 +548,50 @@ def assemble_states(
     return pd.DataFrame(rows, index=anchors.index)
 
 
+def _empty_action_payload() -> dict[str, np.ndarray]:
+    return {
+        "starts": np.asarray([], dtype=np.float64),
+        "ends": np.asarray([], dtype=np.float64),
+        "dose_observed": np.asarray([], dtype=bool),
+        "product_subtype": np.asarray([], dtype=object),
+        "dose_amount": np.asarray([], dtype=np.float64),
+        "unit_like_count": np.asarray([], dtype=np.float64),
+    }
+
+
+def _positive_sum(values: np.ndarray) -> float:
+    values = np.asarray(values, dtype=np.float64)
+    mask = np.isfinite(values) & (values > 0.0)
+    return float(values[mask].sum()) if mask.any() else 0.0
+
+
+def _add_transfusion_subtype_summary(
+    output: dict[str, object],
+    payload: dict[str, np.ndarray],
+    history_mask: np.ndarray,
+    future_mask: np.ndarray,
+) -> None:
+    subtype = payload["product_subtype"].astype(str)
+    dose_amount = payload["dose_amount"]
+    unit_like = payload["unit_like_count"]
+    dose_observed = payload["dose_observed"]
+    for prefix, mask in (("hist", history_mask), ("act", future_mask)):
+        output[f"{prefix}_transfusion_volume_like_ml"] = round(_positive_sum(dose_amount[mask]), 6)
+        output[f"{prefix}_transfusion_unit_like_count"] = round(_positive_sum(unit_like[mask]), 6)
+        for product in BLOOD_PRODUCT_SUBTYPES:
+            product_mask = mask & (subtype == product)
+            output[f"{prefix}_transfusion_{product}"] = int(product_mask.any())
+            output[f"{prefix}_transfusion_{product}_evidence_count"] = int(product_mask.sum())
+            output[f"{prefix}_transfusion_{product}_volume_like_ml"] = round(_positive_sum(dose_amount[product_mask]), 6)
+            output[f"{prefix}_transfusion_{product}_unit_like_count"] = round(_positive_sum(unit_like[product_mask]), 6)
+            if prefix == "act":
+                output[f"act_transfusion_{product}_dose_observed"] = int(
+                    dose_observed[product_mask].any() if product_mask.any() else False
+                )
+
+
 def evidence_window_summary(
-    action_lookup: dict[str, tuple[np.ndarray, np.ndarray, np.ndarray]],
+    action_lookup: dict[str, dict[str, np.ndarray]],
     config: BodySystemDiseaseConfig,
     anchor_hour: float,
     horizon_hours: float,
@@ -459,10 +600,10 @@ def evidence_window_summary(
     future_end = float(anchor_hour + horizon_hours)
     output = {}
     for action in config.action_keys:
-        starts, ends, dose_observed = action_lookup.get(
-            action,
-            (np.asarray([], dtype=np.float64), np.asarray([], dtype=np.float64), np.asarray([], dtype=bool)),
-        )
+        payload = action_lookup.get(action, _empty_action_payload())
+        starts = payload["starts"]
+        ends = payload["ends"]
+        dose_observed = payload["dose_observed"]
         history_mask = (ends >= history_start) & (starts < anchor_hour)
         future_mask = (ends >= anchor_hour) & (starts < future_end)
         output[f"hist_{action}_evidence_count"] = int(history_mask.sum())
@@ -470,6 +611,8 @@ def evidence_window_summary(
         output[f"hist_{action}"] = int(history_mask.any())
         output[f"act_{action}"] = int(future_mask.any())
         output[f"act_{action}_dose_observed"] = int(dose_observed[future_mask].any() if future_mask.any() else False)
+        if action == "transfusion":
+            _add_transfusion_subtype_summary(output, payload, history_mask, future_mask)
     return output
 
 
@@ -479,7 +622,7 @@ def assemble_actions(
     config: BodySystemDiseaseConfig,
     horizon_hours: float,
 ) -> pd.DataFrame:
-    lookup = prepare_evidence_lookup(evidence)
+    lookup = prepare_body_evidence_lookup(evidence)
     rows = []
     for anchor in anchors.itertuples(index=False):
         rows.append(evidence_window_summary(
@@ -544,6 +687,29 @@ def action_support_counts(frame: pd.DataFrame, config: BodySystemDiseaseConfig) 
     return output
 
 
+def transfusion_subtype_support_counts(frame: pd.DataFrame) -> dict[str, dict[str, float | int]]:
+    output: dict[str, dict[str, float | int]] = {}
+    for product in BLOOD_PRODUCT_SUBTYPES:
+        act_column = f"act_transfusion_{product}"
+        hist_column = f"hist_transfusion_{product}"
+        if act_column not in frame:
+            continue
+        act_mask = frame[act_column].fillna(0).astype(bool)
+        hist_mask = frame.get(hist_column, pd.Series(False, index=frame.index)).fillna(0).astype(bool)
+        active_column = next((column for column in frame.columns if column.endswith("_active_t")), None)
+        active = frame[active_column].fillna(False).astype(bool) if active_column else pd.Series(False, index=frame.index)
+        output[product] = {
+            "history_windows": int(hist_mask.sum()),
+            "future_windows": int(act_mask.sum()),
+            "future_stays": int(frame.loc[act_mask, "stay_id"].nunique()),
+            "active_future_windows": int((act_mask & active).sum()),
+            "dose_observed_windows": int(frame.get(f"act_transfusion_{product}_dose_observed", pd.Series(0, index=frame.index)).fillna(0).sum()),
+            "future_volume_like_ml": round(float(frame.get(f"act_transfusion_{product}_volume_like_ml", pd.Series(0.0, index=frame.index)).fillna(0.0).sum()), 6),
+            "future_unit_like_count": round(float(frame.get(f"act_transfusion_{product}_unit_like_count", pd.Series(0.0, index=frame.index)).fillna(0.0).sum()), 6),
+        }
+    return output
+
+
 def cohort_report(
     frame: pd.DataFrame,
     data_root: Path,
@@ -586,6 +752,11 @@ def cohort_report(
         },
         "target_pair_counts": target_pair_counts(frame, config, horizon_hours) if len(frame) else {},
         "action_support": action_support_counts(frame, config) if len(frame) else {},
+        "transfusion_subtype_support": (
+            transfusion_subtype_support_counts(frame)
+            if len(frame) and "transfusion" in config.action_keys
+            else {}
+        ),
         "action_evidence": {
             "rows": int(len(evidence)),
             "sources": evidence["source"].value_counts().astype(int).to_dict() if len(evidence) else {},

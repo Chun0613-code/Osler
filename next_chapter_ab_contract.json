@@ -1215,7 +1215,136 @@
           "stays": 577,
           "windows": 1860
         },
-        "transitions": 16870
+        "transitions": 16870,
+        "transfusion_subtype_depth": {
+          "date": "2026-06-28",
+          "status": "candidate_only_partial_signal",
+          "files": [
+            "eicu_body_system_transition_extract.py",
+            "heme_coag_belief.py",
+            "eicu_coagulopathy_heme_transition_report.json",
+            "eicu_coagulopathy_heme_target_router.json",
+            "eicu_coagulopathy_heme_transition_report_24h.json",
+            "eicu_coagulopathy_heme_target_router_24h.json",
+            "eicu_coagulopathy_heme_transition_report_48h.json",
+            "eicu_coagulopathy_heme_target_router_48h.json",
+            "eicu_heme_coag_belief_audit.json",
+            "eicu_heme_coag_state_belief_audit.json",
+            "eicu_heme_coag_belief_audit_24h.json",
+            "eicu_heme_coag_state_belief_audit_24h.json",
+            "eicu_heme_coag_belief_audit_48h.json",
+            "eicu_heme_coag_state_belief_audit_48h.json",
+            "HEME_TRANSFUSION_DEPTH_FINDINGS.md"
+          ],
+          "boundary": {
+            "causal_claim_allowed": false,
+            "counterfactual_claim_allowed": false,
+            "clinical_claim_allowed": false,
+            "runtime_decision_authority": false,
+            "hidden_state_promotion_allowed": false
+          },
+          "subtype_support_6h": {
+            "prbc": {
+              "future_windows": 1509,
+              "future_stays": 515,
+              "unit_like_count": 2408.191536
+            },
+            "plasma": {
+              "future_windows": 254,
+              "future_stays": 111,
+              "unit_like_count": 542.65408
+            },
+            "platelet": {
+              "future_windows": 306,
+              "future_stays": 102,
+              "unit_like_count": 348.624031
+            },
+            "cryo": {
+              "future_windows": 72,
+              "future_stays": 26,
+              "unit_like_count": 190.55
+            },
+            "unknown": {
+              "future_windows": 14,
+              "future_stays": 7,
+              "unit_like_count": 161.1
+            },
+            "whole_blood": {
+              "future_windows": 0,
+              "future_stays": 0,
+              "unit_like_count": 0.0
+            }
+          },
+          "router_results": {
+            "6h": {
+              "active_median_delta": -0.084253,
+              "hospital_holdout_delta": -0.0263,
+              "significant_splits": "7/7"
+            },
+            "24h": {
+              "active_median_delta": -0.133439,
+              "hospital_holdout_delta": -0.01292,
+              "significant_splits": "7/7"
+            },
+            "48h": {
+              "active_median_delta": -0.109033,
+              "hospital_holdout_delta": -0.009951,
+              "significant_splits": "7/7"
+            }
+          },
+          "belief_pass_both_counts": {
+            "6h_feature": {
+              "hemoglobin": 0,
+              "hematocrit": 1,
+              "inr": 0,
+              "ptt": 0,
+              "fibrinogen": 0,
+              "platelets": 0
+            },
+            "6h_state": {
+              "hemoglobin": 0,
+              "hematocrit": 1,
+              "inr": 0,
+              "ptt": 0,
+              "fibrinogen": 0,
+              "platelets": 0
+            },
+            "24h_feature": {
+              "hemoglobin": 5,
+              "hematocrit": 4,
+              "inr": 2,
+              "ptt": 0,
+              "fibrinogen": 0,
+              "platelets": 0
+            },
+            "24h_state": {
+              "hemoglobin": 4,
+              "hematocrit": 3,
+              "inr": 1,
+              "ptt": 1,
+              "fibrinogen": 0,
+              "platelets": 0
+            },
+            "48h_feature": {
+              "hemoglobin": 2,
+              "hematocrit": 3,
+              "inr": 0,
+              "ptt": 0,
+              "fibrinogen": 0,
+              "platelets": 1
+            },
+            "48h_state": {
+              "hemoglobin": 2,
+              "hematocrit": 2,
+              "inr": 0,
+              "ptt": 0,
+              "fibrinogen": 0,
+              "platelets": 2
+            }
+          },
+          "interpretation": "Blood-product subtype and dose observability is non-empty and strengthens 24h Hgb/Hct belief signal, but no target passes the 7/7 placebo-gated promotion boundary and coagulation cascade targets remain locked.",
+          "next_step": "Need stronger unit semantics, protocol/bleeding/procedure context, anticoagulation reversal evidence, or external identified transfusion data; do not relax the gate."
+        }
       },
       "hepatic_failure": {
         "active_transitions": 10717,
@@ -1387,7 +1516,7 @@
         "transitions": 422244
       }
     },
-    "next_engineering_step": "Heme/coag long-horizon audit is complete: 24h strengthens Hgb/Hct factual routing, but INR/PTT/fibrinogen/platelets remain persistence. Next depth work should improve transfusion-dose/product subtype observability or add first-class neuro/hepatic variables.",
+    "next_engineering_step": "Body-system breadth is closed. Heme transfusion subtype/dose depth was tested and remains candidate-only; next depth work should add stronger context/observability or move to another validated belief-state target rather than adding disease names.",
     "promotion_sequence": [
       "define disease cohort and target/action contract",
       "build observed-treatment transitions with masks and ages",

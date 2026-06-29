@@ -86,20 +86,27 @@ Hematologic:
 - Transfusion evidence is now captured from both treatment text and
   intakeOutput blood-product rows: 577 stays / 1,860 windows, with 1,858
   dose-observed windows.
+- Blood-product subtype and dose observability were added after breadth
+  completion.  The 6h cohort now exposes PRBC, plasma, platelet,
+  cryoprecipitate, whole-blood, and unknown blood-product channels plus
+  `volume_like_ml` and `unit_like_count` features.  Aggregate future-window
+  support is PRBC 1,509 windows / 515 stays, plasma 254 / 111, platelets
+  306 / 102, cryoprecipitate 72 / 26, and unknown 14 / 7.
 - This is no longer just a platelet/WBC proxy, but it is still not a
   transfusion or anticoagulation causal model.
 - Long-horizon heme/coag audits were run on the same stay set as the 6h cohort.
-  The router remains significant at 24h and 48h, with the strongest active
-  median delta at 24h (-0.133450).  Hemoglobin and hematocrit keep `ridge_realfit`
+  With subtype/dose observability, the router remains significant at 24h and
+  48h, with the strongest active median delta at 24h (-0.133439).  Hemoglobin
+  and hematocrit keep `ridge_realfit`
   in 7/7 splits at 24h, but weaken by 48h.  INR, PTT, fibrinogen, and platelets
   still fall back to persistence at 24h/48h, so horizon alone does not unlock
   coagulation-cascade targets.
-- A bleeding/coagulation reserve belief audit was run with a strict
-  capacity-matched placebo gate.  Feature beliefs showed partial Hct/Hgb signal
-  (Hct 4/7, Hgb 3/7 passes-both), but no target reached robust 7/7 validation,
-  hospital-heldout did not pass, and the explicit predict-update state was
-  weaker.  The heme/coag belief therefore remains candidate-only, unlike the
-  validated AKI renal belief state.
+- A bleeding/coagulation reserve belief audit was rerun with the new subtype/dose
+  features and the same strict capacity-matched placebo gate.  The strongest
+  signal is 24h feature belief for hemoglobin (5/7 pass-both) and hematocrit
+  (4/7 pass-both), with weaker 24h state belief (Hgb 4/7, Hct 3/7).  No target
+  reaches robust 7/7 validation, so the heme/coag belief remains candidate-only,
+  unlike the validated AKI renal belief state.
 
 ## Expanded Full-Body Coverage Pass
 
@@ -205,8 +212,8 @@ The most valuable next step is not just adding more disease names.  It is adding
 missing first-class variables so the proxy systems become deeper:
 
 - hematology: bleeding/coagulation reserve belief state, transfusion dose
-  normalization, blood-product subtype separation, and longer-horizon
-  hemoglobin/coagulation evaluation;
+  normalization with stronger unit semantics, blood-product protocol context,
+  bleeding-source/procedure context, and anticoagulation reversal evidence;
 - hepatic: INR, ammonia/encephalopathy proxy, paracentesis/bleeding context;
 - neurologic: GCS/mental-status proxies, ICP/EVD/procedure evidence;
 - cardiovascular: rhythm/procedure evidence, inotrope dose normalization;
