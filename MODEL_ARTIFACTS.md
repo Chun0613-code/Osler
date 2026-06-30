@@ -77,6 +77,16 @@ mapped into `osler_jepa/causal_readiness.py`, and that multi-disease expansion
 should reuse the disease-specific target-router template in
 `osler_jepa/disease_router.py`.
 
+`whole_body_observation_contract.json` and
+`WHOLE_BODY_OBSERVATION_PREDICTION_LAYER.md` are aggregate-only
+observation/prediction artifacts. `osler_jepa/observation_layer.py` exposes the
+validated factual observation capabilities across disease routers, body-system
+surface routers, single-hop coupling edges, the validated sepsis -> MAP6 ->
+renal24 multi-hop path, and the AKI renal belief state. These artifacts allow
+shadow observation and factual prediction only. They do not permit causal,
+counterfactual treatment-effect, clinical, runtime-treatment, checkpoint,
+complete-human-simulation, or active-rule-promotion claims.
+
 Full eICU sepsis and AKI router artifacts follow the same aggregate/report
 boundary. Local transition parquet cohorts, including
 `eicu_aki_transitions_6h.parquet`, `eicu_aki_transitions_24h.parquet`,

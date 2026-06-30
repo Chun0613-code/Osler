@@ -1,5 +1,39 @@
 {
   "artifact": "Osler-JEPA next chapter A/B contract",
+  "whole_body_observation_prediction": {
+    "allowed_now": [
+      "shadow observation",
+      "validated factual prediction",
+      "capability reporting",
+      "persistence fallback for unsupported targets"
+    ],
+    "boundary": {
+      "active_rule_promotion_allowed": false,
+      "causal_claim_allowed": false,
+      "checkpoint_promotion_allowed": false,
+      "clinical_claim_allowed": false,
+      "complete_human_simulation_claim_allowed": false,
+      "counterfactual_claim_allowed": false,
+      "runtime_decision_authority": false
+    },
+    "date": "2026-06-30",
+    "files": [
+      "osler_jepa/observation_layer.py",
+      "whole_body_observation_contract.json",
+      "WHOLE_BODY_OBSERVATION_PREDICTION_LAYER.md"
+    ],
+    "goal": "ignore treatment planning for this layer and maximize validated body-state observation plus factual physiology prediction",
+    "policy": {
+      "fast_horizon_hours": 6,
+      "fallback": "persistence for unsupported, sparse, wrong-horizon, or candidate-only targets",
+      "slow_renal_horizon_hours": [
+        24,
+        48
+      ],
+      "validated_multihop": "sepsis/immune -> MAP at 6h -> renal creatinine/BUN at 24h"
+    },
+    "status": "aggregate_observation_contract_added"
+  },
   "chapter_a_causal": {
     "allowed_now": [
       "factual forecasting",

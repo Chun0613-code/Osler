@@ -54,6 +54,29 @@ Even a passing causal-readiness gate permits only a research causal-effect
 estimate. It does not grant clinical recommendation authority, runtime action
 authority, checkpoint promotion, or active-rule promotion.
 
+## Current Product Focus: Observation And Prediction
+
+The current engineering focus is the non-causal observation layer, not treatment
+planning.  The validated layer is documented in
+`WHOLE_BODY_OBSERVATION_PREDICTION_LAYER.md`,
+`whole_body_observation_contract.json`, and `osler_jepa/observation_layer.py`.
+
+Its allowed role is:
+
+- shadow observation;
+- factual physiology prediction at validated target/horizon pairs;
+- capability reporting;
+- persistence fallback when a target is unsupported, sparse, slow at the wrong
+  horizon, or candidate-only.
+
+Its forbidden role remains:
+
+- causal treatment-effect estimation;
+- counterfactual treatment planning;
+- clinical recommendation authority;
+- runtime treatment action authority;
+- checkpoint or active symbolic-rule promotion.
+
 ## Chapter B: Multi-Disease Expansion
 
 The multi-disease chapter should reuse the DKA pattern, not mix all diseases into
