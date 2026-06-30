@@ -71,9 +71,11 @@
   "prediction_policy": {
     "fast_horizon_hours": 6,
     "slow_renal_horizon_hours": [24, 48],
+    "trajectory_horizons_hours": [1, 3, 6, 12, 24, 48],
     "validated_multihop": "sepsis/immune -> MAP at 6h -> renal creatinine/BUN at 24h",
     "fallback": "persistence for unsupported, sparse, slow-at-wrong-horizon, or candidate-only targets",
-    "selection_rule": "validated target and horizon only; otherwise abstain or fall back"
+    "selection_rule": "validated target and horizon only; otherwise abstain or fall back",
+    "uncertainty_rule": "numeric intervals require target-horizon-source conformal calibration; otherwise interval_status is needs_calibration_audit"
   },
   "safety_boundary": {
     "shadow_observation_allowed": true,
@@ -89,6 +91,8 @@
   "source_files": [
     "osler_jepa/observation_layer.py",
     "WHOLE_BODY_OBSERVATION_PREDICTION_LAYER.md",
+    "WHOLE_BODY_TRAJECTORY_UNCERTAINTY_LAYER.md",
+    "whole_body_rollout_uncertainty_contract.json",
     "BODY_SYSTEM_COVERAGE_COMPLETE.md",
     "ICU_FACTUAL_ROUTER_CANONICAL_FINDINGS.md",
     "BODY_SYSTEM_FOCUSED_COUPLING_FINDINGS.md",

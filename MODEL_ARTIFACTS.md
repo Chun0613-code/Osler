@@ -87,6 +87,15 @@ shadow observation and factual prediction only. They do not permit causal,
 counterfactual treatment-effect, clinical, runtime-treatment, checkpoint,
 complete-human-simulation, or active-rule-promotion claims.
 
+`whole_body_rollout_uncertainty_contract.json` and
+`WHOLE_BODY_TRAJECTORY_UNCERTAINTY_LAYER.md` extend that observation contract
+from single-point forecasts to a target-by-horizon rollout map. The canonical
+horizons are 1h, 3h, 6h, 12h, 24h, and 48h. Fast variables may move only at
+validated horizons, slow renal variables may move at 24-48h, and all other
+cells fall back to persistence or missing. Numeric confidence intervals are not
+shown unless a target/horizon/source-specific calibration artifact passes the
+specified conformal coverage gate.
+
 Full eICU sepsis and AKI router artifacts follow the same aggregate/report
 boundary. Local transition parquet cohorts, including
 `eicu_aki_transitions_6h.parquet`, `eicu_aki_transitions_24h.parquet`,

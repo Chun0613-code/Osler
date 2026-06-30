@@ -60,6 +60,9 @@ The current engineering focus is the non-causal observation layer, not treatment
 planning.  The validated layer is documented in
 `WHOLE_BODY_OBSERVATION_PREDICTION_LAYER.md`,
 `whole_body_observation_contract.json`, and `osler_jepa/observation_layer.py`.
+The trajectory and uncertainty extension is documented in
+`WHOLE_BODY_TRAJECTORY_UNCERTAINTY_LAYER.md` and
+`whole_body_rollout_uncertainty_contract.json`.
 
 Its allowed role is:
 
@@ -68,6 +71,8 @@ Its allowed role is:
 - capability reporting;
 - persistence fallback when a target is unsupported, sparse, slow at the wrong
   horizon, or candidate-only.
+- target-by-horizon trajectory cells with calibrated intervals only after a
+  conformal coverage gate passes.
 
 Its forbidden role remains:
 

@@ -1,0 +1,77 @@
+{
+  "artifact": "Osler-JEPA whole-body trajectory and uncertainty contract",
+  "date": "2026-06-30",
+  "goal": "Represent a complete target-by-horizon factual physiology trajectory while moving only validated cells and withholding numeric confidence intervals until calibration passes.",
+  "horizons_hours": [1, 3, 6, 12, 24, 48],
+  "validated_move_cells": {
+    "6h_fast_physiology": [
+      "glucose",
+      "anion_gap",
+      "potassium",
+      "bicarbonate",
+      "ph",
+      "map",
+      "heart_rate",
+      "oxygen_saturation",
+      "respiratory_rate",
+      "lactate"
+    ],
+    "24_48h_slow_renal": [
+      "creatinine",
+      "bun",
+      "urine_output"
+    ]
+  },
+  "fallback_cells": {
+    "fast_targets_at_unvalidated_horizons": "persistence until a target-horizon held-out gate passes",
+    "slow_renal_targets_at_short_horizons": "persistence because the physiology is too slow for the horizon",
+    "sparse_or_observability_limited_targets": [
+      "bilirubin",
+      "inr",
+      "ptt",
+      "fibrinogen",
+      "paco2"
+    ]
+  },
+  "uncertainty_policy": {
+    "interval_method": "split_conformal_residual_interval_per_target_horizon_source",
+    "coverage_targets": [0.5, 0.8, 0.9],
+    "primary_coverage_target": 0.9,
+    "coverage_gate": {
+      "patient_heldout_split_seeds": 7,
+      "hospital_heldout_required": true,
+      "accepted_90pct_coverage_range": [0.87, 0.93]
+    },
+    "missing_calibration_policy": "do not show numeric intervals; set interval_status to needs_calibration_audit"
+  },
+  "output_schema": {
+    "target": "physiology variable name",
+    "horizon_hours": "prediction horizon",
+    "point_estimate": "numeric value or null",
+    "lower": "numeric lower interval bound or null",
+    "upper": "numeric upper interval bound or null",
+    "interval_level": "coverage level or null",
+    "source": "validated router, belief state, multihop path, persistence, or missing",
+    "status": "validated, fallback, candidate_only, or missing",
+    "can_move": "true only when the target-horizon cell is validated",
+    "interval_status": "calibrated or needs_calibration_audit"
+  },
+  "safety_boundary": {
+    "shadow_observation_allowed": true,
+    "factual_prediction_allowed": true,
+    "causal_claim_allowed": false,
+    "counterfactual_treatment_effect_allowed": false,
+    "clinical_claim_allowed": false,
+    "runtime_treatment_authority": false,
+    "checkpoint_promotion_allowed": false,
+    "active_rule_promotion_allowed": false,
+    "complete_human_simulation_claim_allowed": false
+  },
+  "source_files": [
+    "osler_jepa/observation_layer.py",
+    "WHOLE_BODY_TRAJECTORY_UNCERTAINTY_LAYER.md",
+    "WHOLE_BODY_OBSERVATION_PREDICTION_LAYER.md",
+    "whole_body_observation_contract.json",
+    "test_observation_layer.py"
+  ]
+}

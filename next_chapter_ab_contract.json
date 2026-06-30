@@ -20,7 +20,9 @@
     "files": [
       "osler_jepa/observation_layer.py",
       "whole_body_observation_contract.json",
-      "WHOLE_BODY_OBSERVATION_PREDICTION_LAYER.md"
+      "WHOLE_BODY_OBSERVATION_PREDICTION_LAYER.md",
+      "whole_body_rollout_uncertainty_contract.json",
+      "WHOLE_BODY_TRAJECTORY_UNCERTAINTY_LAYER.md"
     ],
     "goal": "ignore treatment planning for this layer and maximize validated body-state observation plus factual physiology prediction",
     "policy": {
@@ -30,6 +32,15 @@
         24,
         48
       ],
+      "trajectory_horizons_hours": [
+        1,
+        3,
+        6,
+        12,
+        24,
+        48
+      ],
+      "uncertainty_rule": "numeric confidence intervals require target/horizon/source conformal coverage validation",
       "validated_multihop": "sepsis/immune -> MAP at 6h -> renal creatinine/BUN at 24h"
     },
     "status": "aggregate_observation_contract_added"

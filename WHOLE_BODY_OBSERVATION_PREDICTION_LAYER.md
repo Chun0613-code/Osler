@@ -101,8 +101,23 @@ The machine-readable readiness map lives in:
 
 - `osler_jepa/observation_layer.py`
 - `whole_body_observation_contract.json`
+- `whole_body_rollout_uncertainty_contract.json`
+- `WHOLE_BODY_TRAJECTORY_UNCERTAINTY_LAYER.md`
 
 The aggregate evidence comes from the already committed disease, body-system,
 coupling, multihop, and renal-belief findings.  No row-level cohorts, patient
 identifiers, timestamps, or treatment-policy claims are included in this
 artifact.
+
+## Trajectory Extension
+
+The next layer is not "make every variable move." It is a target x horizon map
+with explicit fallback. Current canonical horizons are 1h, 3h, 6h, 12h, 24h,
+and 48h. Fast physiology is currently allowed to move mainly at 6h; slow renal
+variables are allowed to move at 24-48h. Other cells stay at persistence or
+missing until their own held-out audit passes.
+
+Numeric confidence intervals require a separate calibration gate. Until split
+conformal residual intervals pass patient-heldout and hospital-heldout coverage
+checks, a forecast cell may expose a point estimate and source but must mark the
+interval as `needs_calibration_audit`.

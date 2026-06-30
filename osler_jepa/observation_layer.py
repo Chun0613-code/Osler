@@ -13,6 +13,8 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 
 
+PREDICTION_HORIZONS_HOURS = (1, 3, 6, 12, 24, 48)
+
 DENIED_AUTHORITIES = (
     "causal_claim",
     "counterfactual_treatment_effect",
@@ -49,6 +51,23 @@ class ObservationCapability:
     @property
     def is_validated(self) -> bool:
         return self.status == "validated"
+
+
+@dataclass(frozen=True)
+class TrajectoryGridCell:
+    """One target-horizon cell in the factual rollout map."""
+
+    target: str
+    horizon_hours: int
+    status: str
+    source: str
+    context: str
+    can_move: bool
+    reason: str
+    interval_status: str = "needs_calibration_audit"
+
+    def to_dict(self) -> dict[str, object]:
+        return asdict(self)
 
 
 def whole_body_observation_capabilities() -> tuple[ObservationCapability, ...]:
@@ -214,4 +233,183 @@ def observation_readiness() -> dict[str, object]:
             "checkpoint_promotion_allowed": False,
             "active_rule_promotion_allowed": False,
         },
+    }
+
+
+def _cell(
+    target: str,
+    horizon_hours: int,
+    status: str,
+    source: str,
+    context: str,
+    can_move: bool,
+    reason: str,
+) -> TrajectoryGridCell:
+    return TrajectoryGridCell(
+        target=target,
+        horizon_hours=horizon_hours,
+        status=status,
+        source=source,
+        context=context,
+        can_move=can_move,
+        reason=reason,
+    )
+
+
+def trajectory_prediction_grid() -> tuple[TrajectoryGridCell, ...]:
+    """Return the current target x horizon factual rollout map.
+
+    Unlisted target-horizon pairs are intentionally unsupported and should use
+    the same fallback policy as explicit unsupported cells.  This map is a
+    capability contract, not a generated patient trajectory.
+    """
+
+    fast_validated = {
+        "glucose": ("dka_or_body_surface_router", "validated 6h dense/fast target"),
+        "anion_gap": ("dka_realfit_router", "validated 6h DKA anion-gap recovery target"),
+        "potassium": ("dka_or_body_surface_router", "validated 6h electrolyte target"),
+        "bicarbonate": ("dka_or_respiratory_surface_router", "validated 6h acid-base target in bounded contexts"),
+        "ph": ("respiratory_surface_router", "validated 6h respiratory acid-base surface target"),
+        "map": ("body_surface_or_sepsis_map_router", "validated 6h perfusion target"),
+        "heart_rate": ("body_surface_router", "validated 6h dense vital-sign target"),
+        "oxygen_saturation": ("respiratory_or_sepsis_router", "validated 6h oxygenation target"),
+        "respiratory_rate": ("respiratory_or_sepsis_router", "validated 6h respiratory target"),
+        "lactate": ("sepsis_or_body_surface_router", "validated 6h perfusion/metabolic target"),
+    }
+    slow_renal_validated = {
+        "creatinine": ("aki_long_horizon_router_or_renal_belief_v2", "validated 24-48h slow renal target"),
+        "bun": ("aki_long_horizon_router_or_renal_belief_v2", "validated 24-48h slow renal target"),
+        "urine_output": ("aki_long_horizon_router", "validated long-horizon AKI router target"),
+    }
+
+    cells: list[TrajectoryGridCell] = []
+    for target, (source, reason) in fast_validated.items():
+        for horizon in PREDICTION_HORIZONS_HOURS:
+            if horizon == 6:
+                cells.append(
+                    _cell(
+                        target,
+                        horizon,
+                        "validated",
+                        source,
+                        "fast_physiology",
+                        True,
+                        reason,
+                    )
+                )
+            else:
+                cells.append(
+                    _cell(
+                        target,
+                        horizon,
+                        "fallback_pending_validation",
+                        "persistence",
+                        "fast_physiology",
+                        False,
+                        "no aggregate held-out gate for this target at this horizon",
+                    )
+                )
+
+    for target, (source, reason) in slow_renal_validated.items():
+        for horizon in PREDICTION_HORIZONS_HOURS:
+            if horizon in (24, 48):
+                cells.append(
+                    _cell(
+                        target,
+                        horizon,
+                        "validated",
+                        source,
+                        "slow_renal_accumulation",
+                        True,
+                        reason,
+                    )
+                )
+            else:
+                cells.append(
+                    _cell(
+                        target,
+                        horizon,
+                        "fallback_wrong_horizon",
+                        "persistence",
+                        "slow_renal_accumulation",
+                        False,
+                        "slow renal targets do not reliably move at this horizon",
+                    )
+                )
+
+    for target in ("bilirubin", "inr", "ptt", "fibrinogen", "paco2"):
+        for horizon in PREDICTION_HORIZONS_HOURS:
+            cells.append(
+                _cell(
+                    target,
+                    horizon,
+                    "fallback_observability_limited",
+                    "persistence_or_missing",
+                    "sparse_or_observability_limited",
+                    False,
+                    "current audits do not validate forward movement for this sparse target",
+                )
+            )
+
+    return tuple(cells)
+
+
+def uncertainty_calibration_policy() -> dict[str, object]:
+    """Return the interval-calibration contract for future prediction outputs."""
+
+    return {
+        "point_estimate_allowed": "validated target-horizon cells only",
+        "interval_method": "split_conformal_residual_interval_per_target_horizon_source",
+        "coverage_targets": [0.5, 0.8, 0.9],
+        "primary_coverage_target": 0.9,
+        "coverage_gate": {
+            "required": True,
+            "minimum_patient_heldout_splits": 7,
+            "hospital_heldout_required": True,
+            "acceptable_90pct_coverage_range": [0.87, 0.93],
+        },
+        "missing_calibration_policy": (
+            "emit point estimate only when the target-horizon is validated; mark "
+            "interval_status as needs_calibration_audit and do not show a numeric "
+            "confidence interval"
+        ),
+        "fallback_interval_policy": (
+            "for persistence fallback cells, interval calibration must be learned "
+            "from persistence residuals at the same target and horizon before any "
+            "numeric interval is shown"
+        ),
+        "output_schema": {
+            "target": "physiology variable name",
+            "horizon_hours": "prediction horizon",
+            "point_estimate": "numeric value or null when missing",
+            "lower": "numeric lower interval bound or null",
+            "upper": "numeric upper interval bound or null",
+            "interval_level": "coverage level, e.g. 0.9, or null",
+            "source": "validated router, belief state, multihop path, or persistence",
+            "status": "validated, fallback, candidate_only, or missing",
+            "can_move": "whether model is allowed to move the target away from persistence",
+        },
+    }
+
+
+def rollout_readiness() -> dict[str, object]:
+    """Return readiness for a whole-body factual trajectory object."""
+
+    grid = trajectory_prediction_grid()
+    validated = [cell for cell in grid if cell.status == "validated"]
+    fallback = [cell for cell in grid if cell.status != "validated"]
+    return {
+        "horizons_hours": list(PREDICTION_HORIZONS_HOURS),
+        "validated_cell_count": len(validated),
+        "fallback_or_closed_cell_count": len(fallback),
+        "validated_cells": [cell.to_dict() for cell in validated],
+        "fallback_or_closed_cells": [cell.to_dict() for cell in fallback],
+        "trajectory_policy": {
+            "rollout_shape": "target x horizon factual state grid",
+            "move_rule": "only validated cells may move away from persistence",
+            "fallback_rule": "unsupported target-horizon pairs stay at persistence or missing",
+            "no_recursive_unvalidated_rollout": True,
+        },
+        "uncertainty_policy": uncertainty_calibration_policy(),
+        "safety_boundary": observation_readiness()["safety_boundary"],
     }
