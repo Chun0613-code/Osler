@@ -95,6 +95,15 @@ validated horizons, slow renal variables may move at 24-48h, and all other
 cells fall back to persistence or missing. Numeric confidence intervals are not
 shown unless a target/horizon/source-specific calibration artifact passes the
 specified conformal coverage gate.
+`WHOLE_BODY_TRAJECTORY_VALIDATION_FINDINGS.md`,
+`whole_body_intermediate_horizon_move_audit.json`, and
+`whole_body_conformal_coverage_audit.json` record the first aggregate
+validation pass for that contract. The intermediate-horizon audit validates
+selective 1h/3h/12h movement for sepsis and AKI routers. The split-conformal
+audit validates 90% residual intervals for sepsis 6h active-window forecasts and
+AKI 24h/48h forecasts, while rejecting the sepsis all-window vasopressor proxy
+interval for slight overcoverage. These reports are aggregate-only and contain
+no row-level patient identifiers.
 
 Full eICU sepsis and AKI router artifacts follow the same aggregate/report
 boundary. Local transition parquet cohorts, including

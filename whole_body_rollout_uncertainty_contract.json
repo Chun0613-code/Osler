@@ -4,6 +4,26 @@
   "goal": "Represent a complete target-by-horizon factual physiology trajectory while moving only validated cells and withholding numeric confidence intervals until calibration passes.",
   "horizons_hours": [1, 3, 6, 12, 24, 48],
   "validated_move_cells": {
+    "1h_intermediate": {
+      "sepsis": ["map"],
+      "aki": ["map"]
+    },
+    "3h_intermediate": {
+      "sepsis": [
+        "heart_rate",
+        "lactate",
+        "map",
+        "o2sat",
+        "respiratory_rate",
+        "urine_output"
+      ],
+      "aki": [
+        "bicarbonate",
+        "map",
+        "potassium",
+        "sodium"
+      ]
+    },
     "6h_fast_physiology": [
       "glucose",
       "anion_gap",
@@ -16,6 +36,24 @@
       "respiratory_rate",
       "lactate"
     ],
+    "12h_intermediate": {
+      "sepsis": [
+        "heart_rate",
+        "lactate",
+        "map",
+        "o2sat",
+        "respiratory_rate",
+        "urine_output"
+      ],
+      "aki": [
+        "bicarbonate",
+        "bun",
+        "map",
+        "potassium",
+        "sodium",
+        "urine_output"
+      ]
+    },
     "24_48h_slow_renal": [
       "creatinine",
       "bun",
@@ -44,6 +82,22 @@
     },
     "missing_calibration_policy": "do not show numeric intervals; set interval_status to needs_calibration_audit"
   },
+  "validated_interval_cells": {
+    "audit_artifact": "whole_body_conformal_coverage_audit.json",
+    "method": "split_conformal_residual_interval_per_target_horizon_source",
+    "accepted_90pct_coverage_range": [0.87, 0.93],
+    "passed_scopes": {
+      "sepsis_tp6_active_only": "8/8 targets",
+      "sepsis_tp6_all_windows": "7/8 targets; vasopressor_requirement rejected for slight overcoverage",
+      "aki_tp24_active_only": "7/7 targets",
+      "aki_tp24_all_windows": "7/7 targets",
+      "aki_tp48_active_only": "7/7 targets",
+      "aki_tp48_all_windows": "7/7 targets"
+    },
+    "rejected_scopes": {
+      "sepsis_tp6_all_windows_vasopressor_requirement": "zero-width persistence interval slightly overcovers the upper bound"
+    }
+  },
   "output_schema": {
     "target": "physiology variable name",
     "horizon_hours": "prediction horizon",
@@ -70,8 +124,11 @@
   "source_files": [
     "osler_jepa/observation_layer.py",
     "WHOLE_BODY_TRAJECTORY_UNCERTAINTY_LAYER.md",
+    "WHOLE_BODY_TRAJECTORY_VALIDATION_FINDINGS.md",
     "WHOLE_BODY_OBSERVATION_PREDICTION_LAYER.md",
     "whole_body_observation_contract.json",
+    "whole_body_intermediate_horizon_move_audit.json",
+    "whole_body_conformal_coverage_audit.json",
     "test_observation_layer.py"
   ]
 }

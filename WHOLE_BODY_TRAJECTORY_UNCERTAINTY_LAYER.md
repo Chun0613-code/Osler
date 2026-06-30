@@ -21,14 +21,30 @@ The canonical horizons are:
 
 Current validation is sparse by design:
 
-- Fast physiology validates primarily at 6h.
-- Slow renal accumulation validates at 24-48h.
+- Immediate perfusion validates at 1h.
+- Electrolyte, acid-base, respiratory, and inflammatory physiology validates
+  across 3-12h when supported.
+- Fast physiology validates at 6h.
+- Slow renal accumulation validates at 12-48h when the target has enough
+  observable movement.
 - Sparse or poorly observed variables remain fallback or missing.
 
 This means a full trajectory object can exist without pretending that every
 point is a learned prediction. The object is complete; the motion is selective.
 
 ## Current Move Rules
+
+Validated intermediate-horizon cells from
+`whole_body_intermediate_horizon_move_audit.json` include:
+
+| Module | Horizon | Validated moving targets |
+|---|---:|---|
+| sepsis | 1h | MAP |
+| sepsis | 3h | heart rate, lactate, MAP, O2 saturation, respiratory rate, urine output |
+| sepsis | 12h | heart rate, lactate, MAP, O2 saturation, respiratory rate, urine output |
+| AKI | 1h | MAP |
+| AKI | 3h | bicarbonate, MAP, potassium, sodium |
+| AKI | 12h | bicarbonate, BUN, MAP, potassium, sodium, urine output |
 
 Validated 6h fast-physiology cells include:
 
@@ -70,7 +86,21 @@ The gate is:
 - observed 90% interval coverage inside the accepted range 0.87-0.93;
 - no interval shown when the calibration artifact is missing.
 
-Until that gate exists for a cell, the layer may expose:
+The first split-conformal audit is recorded in
+`whole_body_conformal_coverage_audit.json`. Passing interval scopes are:
+
+- sepsis 6h active-window forecasts: 8/8 targets;
+- AKI 24h active-window and all-window forecasts: 7/7 targets;
+- AKI 48h active-window and all-window forecasts: 7/7 targets;
+- sepsis 6h all-window physiologic targets except the vasopressor proxy.
+
+The only rejected interval scope in this audit is sepsis all-window
+vasopressor-requirement fallback. Its zero-width persistence interval slightly
+over-covers the accepted 0.87-0.93 band, so it remains
+`needs_calibration_audit` for all-window display.
+
+When that gate exists for a cell, the layer may expose numeric lower/upper
+interval bounds. Until that gate exists for a cell, the layer may expose:
 
 - target;
 - horizon;
@@ -118,4 +148,7 @@ The implementation contract lives in:
 
 - `osler_jepa/observation_layer.py`
 - `whole_body_rollout_uncertainty_contract.json`
+- `WHOLE_BODY_TRAJECTORY_VALIDATION_FINDINGS.md`
+- `whole_body_intermediate_horizon_move_audit.json`
+- `whole_body_conformal_coverage_audit.json`
 - `test_observation_layer.py`

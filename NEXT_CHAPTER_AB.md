@@ -62,7 +62,10 @@ planning.  The validated layer is documented in
 `whole_body_observation_contract.json`, and `osler_jepa/observation_layer.py`.
 The trajectory and uncertainty extension is documented in
 `WHOLE_BODY_TRAJECTORY_UNCERTAINTY_LAYER.md` and
-`whole_body_rollout_uncertainty_contract.json`.
+`whole_body_rollout_uncertainty_contract.json`. The first validation pass is
+documented in `WHOLE_BODY_TRAJECTORY_VALIDATION_FINDINGS.md`,
+`whole_body_intermediate_horizon_move_audit.json`, and
+`whole_body_conformal_coverage_audit.json`.
 
 Its allowed role is:
 

@@ -1,0 +1,904 @@
+{
+  "artifact": "eICU intermediate-horizon move audit",
+  "bootstrap_samples": 300,
+  "data_root": "eicu-collaborative-research-database-2.0",
+  "horizons_hours": [
+    1.0,
+    3.0,
+    12.0
+  ],
+  "modules": [
+    "sepsis",
+    "aki"
+  ],
+  "results": {
+    "aki": {
+      "12h": {
+        "cohort": "eicu_aki_transitions_12h.parquet",
+        "future_suffix": "tp12",
+        "hospital_holdout_available": true,
+        "router_report": "eicu_aki_target_router_12h.json",
+        "router_summary": {
+          "selected_method_counts_by_target": {
+            "bicarbonate": {
+              "ridge_realfit": 7
+            },
+            "bun": {
+              "ridge_realfit": 7
+            },
+            "creatinine": {
+              "persistence": 4,
+              "ridge_realfit": 3
+            },
+            "map": {
+              "ridge_realfit": 7
+            },
+            "potassium": {
+              "ridge_realfit": 7
+            },
+            "sodium": {
+              "ridge_realfit": 7
+            },
+            "urine_output": {
+              "population_delta": 7
+            }
+          },
+          "target_router": {
+            "active_aki_only": {
+              "beats_persistence_count": 7,
+              "delta_max": -0.061938,
+              "delta_median": -0.06436,
+              "delta_min": -0.066286,
+              "significant_count": 7,
+              "splits": 7
+            },
+            "all_windows": {
+              "beats_persistence_count": 7,
+              "delta_max": -0.057335,
+              "delta_median": -0.058169,
+              "delta_min": -0.05896,
+              "significant_count": 7,
+              "splits": 7
+            }
+          }
+        },
+        "target_validation": {
+          "bicarbonate": {
+            "heldout_beats_persistence_splits": 7,
+            "heldout_significant_splits": 7,
+            "hospital_holdout_significant": true,
+            "move_validated": true,
+            "non_persistence_selected_splits": 7,
+            "selected_method_counts": {
+              "ridge_realfit": 7
+            }
+          },
+          "bun": {
+            "heldout_beats_persistence_splits": 7,
+            "heldout_significant_splits": 7,
+            "hospital_holdout_significant": true,
+            "move_validated": true,
+            "non_persistence_selected_splits": 7,
+            "selected_method_counts": {
+              "ridge_realfit": 7
+            }
+          },
+          "creatinine": {
+            "heldout_beats_persistence_splits": 3,
+            "heldout_significant_splits": 2,
+            "hospital_holdout_significant": false,
+            "move_validated": false,
+            "non_persistence_selected_splits": 3,
+            "selected_method_counts": {
+              "persistence": 4,
+              "ridge_realfit": 3
+            }
+          },
+          "map": {
+            "heldout_beats_persistence_splits": 7,
+            "heldout_significant_splits": 7,
+            "hospital_holdout_significant": true,
+            "move_validated": true,
+            "non_persistence_selected_splits": 7,
+            "selected_method_counts": {
+              "ridge_realfit": 7
+            }
+          },
+          "potassium": {
+            "heldout_beats_persistence_splits": 7,
+            "heldout_significant_splits": 7,
+            "hospital_holdout_significant": true,
+            "move_validated": true,
+            "non_persistence_selected_splits": 7,
+            "selected_method_counts": {
+              "ridge_realfit": 7
+            }
+          },
+          "sodium": {
+            "heldout_beats_persistence_splits": 7,
+            "heldout_significant_splits": 7,
+            "hospital_holdout_significant": true,
+            "move_validated": true,
+            "non_persistence_selected_splits": 7,
+            "selected_method_counts": {
+              "ridge_realfit": 7
+            }
+          },
+          "urine_output": {
+            "heldout_beats_persistence_splits": 7,
+            "heldout_significant_splits": 7,
+            "hospital_holdout_significant": true,
+            "move_validated": true,
+            "non_persistence_selected_splits": 7,
+            "selected_method_counts": {
+              "population_delta": 7
+            }
+          }
+        },
+        "transition_report": "eicu_aki_transition_report_12h.json",
+        "transition_summary": {
+          "active_transitions": 200961,
+          "hospitals": 202,
+          "stays": 40091,
+          "subjects": 34321,
+          "target_pair_counts": {
+            "bicarbonate": 74830,
+            "bun": 49845,
+            "creatinine": 50049,
+            "map": 608713,
+            "potassium": 71781,
+            "sodium": 59566,
+            "urine_output": 235148
+          },
+          "transitions": 617474
+        }
+      },
+      "1h": {
+        "cohort": "eicu_aki_transitions_1h.parquet",
+        "future_suffix": "tp1",
+        "hospital_holdout_available": true,
+        "router_report": "eicu_aki_target_router_1h.json",
+        "router_summary": {
+          "selected_method_counts_by_target": {
+            "bicarbonate": {
+              "persistence": 7
+            },
+            "bun": {
+              "persistence": 7
+            },
+            "creatinine": {
+              "persistence": 7
+            },
+            "map": {
+              "ridge_realfit": 7
+            },
+            "potassium": {
+              "persistence": 7
+            },
+            "sodium": {
+              "persistence": 7
+            },
+            "urine_output": {
+              "persistence": 7
+            }
+          },
+          "target_router": {
+            "active_aki_only": {
+              "beats_persistence_count": 7,
+              "delta_max": -0.006917,
+              "delta_median": -0.007428,
+              "delta_min": -0.008609,
+              "significant_count": 7,
+              "splits": 7
+            },
+            "all_windows": {
+              "beats_persistence_count": 7,
+              "delta_max": -0.005821,
+              "delta_median": -0.007844,
+              "delta_min": -0.008123,
+              "significant_count": 7,
+              "splits": 7
+            }
+          }
+        },
+        "target_validation": {
+          "bicarbonate": {
+            "heldout_beats_persistence_splits": 0,
+            "heldout_significant_splits": 0,
+            "hospital_holdout_significant": false,
+            "move_validated": false,
+            "non_persistence_selected_splits": 0,
+            "selected_method_counts": {
+              "persistence": 7
+            }
+          },
+          "bun": {
+            "heldout_beats_persistence_splits": 0,
+            "heldout_significant_splits": 0,
+            "hospital_holdout_significant": false,
+            "move_validated": false,
+            "non_persistence_selected_splits": 0,
+            "selected_method_counts": {
+              "persistence": 7
+            }
+          },
+          "creatinine": {
+            "heldout_beats_persistence_splits": 0,
+            "heldout_significant_splits": 0,
+            "hospital_holdout_significant": false,
+            "move_validated": false,
+            "non_persistence_selected_splits": 0,
+            "selected_method_counts": {
+              "persistence": 7
+            }
+          },
+          "map": {
+            "heldout_beats_persistence_splits": 7,
+            "heldout_significant_splits": 7,
+            "hospital_holdout_significant": true,
+            "move_validated": true,
+            "non_persistence_selected_splits": 7,
+            "selected_method_counts": {
+              "ridge_realfit": 7
+            }
+          },
+          "potassium": {
+            "heldout_beats_persistence_splits": 0,
+            "heldout_significant_splits": 0,
+            "hospital_holdout_significant": false,
+            "move_validated": false,
+            "non_persistence_selected_splits": 0,
+            "selected_method_counts": {
+              "persistence": 7
+            }
+          },
+          "sodium": {
+            "heldout_beats_persistence_splits": 0,
+            "heldout_significant_splits": 0,
+            "hospital_holdout_significant": false,
+            "move_validated": false,
+            "non_persistence_selected_splits": 0,
+            "selected_method_counts": {
+              "persistence": 7
+            }
+          },
+          "urine_output": {
+            "heldout_beats_persistence_splits": 0,
+            "heldout_significant_splits": 0,
+            "hospital_holdout_significant": false,
+            "move_validated": false,
+            "non_persistence_selected_splits": 0,
+            "selected_method_counts": {
+              "persistence": 7
+            }
+          }
+        },
+        "transition_report": "eicu_aki_transition_report_1h.json",
+        "transition_summary": {
+          "active_transitions": 234115,
+          "hospitals": 204,
+          "stays": 45971,
+          "subjects": 38725,
+          "target_pair_counts": {
+            "bicarbonate": 132864,
+            "bun": 99614,
+            "creatinine": 100011,
+            "map": 702538,
+            "potassium": 121033,
+            "sodium": 110635,
+            "urine_output": 276244
+          },
+          "transitions": 714019
+        }
+      },
+      "3h": {
+        "cohort": "eicu_aki_transitions_3h.parquet",
+        "future_suffix": "tp3",
+        "hospital_holdout_available": true,
+        "router_report": "eicu_aki_target_router_3h.json",
+        "router_summary": {
+          "selected_method_counts_by_target": {
+            "bicarbonate": {
+              "ridge_realfit": 7
+            },
+            "bun": {
+              "persistence": 7
+            },
+            "creatinine": {
+              "persistence": 7
+            },
+            "map": {
+              "ridge_realfit": 7
+            },
+            "potassium": {
+              "ridge_realfit": 7
+            },
+            "sodium": {
+              "ridge_realfit": 7
+            },
+            "urine_output": {
+              "persistence": 7
+            }
+          },
+          "target_router": {
+            "active_aki_only": {
+              "beats_persistence_count": 7,
+              "delta_max": -0.028532,
+              "delta_median": -0.032122,
+              "delta_min": -0.032675,
+              "significant_count": 7,
+              "splits": 7
+            },
+            "all_windows": {
+              "beats_persistence_count": 7,
+              "delta_max": -0.027216,
+              "delta_median": -0.028541,
+              "delta_min": -0.02989,
+              "significant_count": 7,
+              "splits": 7
+            }
+          }
+        },
+        "target_validation": {
+          "bicarbonate": {
+            "heldout_beats_persistence_splits": 7,
+            "heldout_significant_splits": 7,
+            "hospital_holdout_significant": true,
+            "move_validated": true,
+            "non_persistence_selected_splits": 7,
+            "selected_method_counts": {
+              "ridge_realfit": 7
+            }
+          },
+          "bun": {
+            "heldout_beats_persistence_splits": 0,
+            "heldout_significant_splits": 0,
+            "hospital_holdout_significant": false,
+            "move_validated": false,
+            "non_persistence_selected_splits": 0,
+            "selected_method_counts": {
+              "persistence": 7
+            }
+          },
+          "creatinine": {
+            "heldout_beats_persistence_splits": 0,
+            "heldout_significant_splits": 0,
+            "hospital_holdout_significant": false,
+            "move_validated": false,
+            "non_persistence_selected_splits": 0,
+            "selected_method_counts": {
+              "persistence": 7
+            }
+          },
+          "map": {
+            "heldout_beats_persistence_splits": 7,
+            "heldout_significant_splits": 7,
+            "hospital_holdout_significant": true,
+            "move_validated": true,
+            "non_persistence_selected_splits": 7,
+            "selected_method_counts": {
+              "ridge_realfit": 7
+            }
+          },
+          "potassium": {
+            "heldout_beats_persistence_splits": 7,
+            "heldout_significant_splits": 7,
+            "hospital_holdout_significant": true,
+            "move_validated": true,
+            "non_persistence_selected_splits": 7,
+            "selected_method_counts": {
+              "ridge_realfit": 7
+            }
+          },
+          "sodium": {
+            "heldout_beats_persistence_splits": 7,
+            "heldout_significant_splits": 7,
+            "hospital_holdout_significant": true,
+            "move_validated": true,
+            "non_persistence_selected_splits": 7,
+            "selected_method_counts": {
+              "ridge_realfit": 7
+            }
+          },
+          "urine_output": {
+            "heldout_beats_persistence_splits": 0,
+            "heldout_significant_splits": 0,
+            "hospital_holdout_significant": false,
+            "move_validated": false,
+            "non_persistence_selected_splits": 0,
+            "selected_method_counts": {
+              "persistence": 7
+            }
+          }
+        },
+        "transition_report": "eicu_aki_transition_report_3h.json",
+        "transition_summary": {
+          "active_transitions": 228130,
+          "hospitals": 204,
+          "stays": 45077,
+          "subjects": 38076,
+          "target_pair_counts": {
+            "bicarbonate": 83279,
+            "bun": 48581,
+            "creatinine": 48771,
+            "map": 684550,
+            "potassium": 72265,
+            "sodium": 60325,
+            "urine_output": 261849
+          },
+          "transitions": 694155
+        }
+      }
+    },
+    "sepsis": {
+      "12h": {
+        "cohort": "eicu_sepsis_transitions_12h.parquet",
+        "future_suffix": "tp12",
+        "hospital_holdout_available": true,
+        "router_report": "eicu_sepsis_target_router_12h.json",
+        "router_summary": {
+          "selected_method_counts_by_target": {
+            "creatinine": {
+              "persistence": 5,
+              "ridge_realfit": 2
+            },
+            "heart_rate": {
+              "ridge_realfit": 7
+            },
+            "lactate": {
+              "ridge_realfit": 7
+            },
+            "map": {
+              "ridge_realfit": 7
+            },
+            "o2sat": {
+              "ridge_realfit": 7
+            },
+            "respiratory_rate": {
+              "ridge_realfit": 7
+            },
+            "urine_output": {
+              "ridge_realfit": 7
+            },
+            "vasopressor_requirement": {
+              "persistence": 7
+            }
+          },
+          "target_router": {
+            "active_sepsis_only": {
+              "beats_persistence_count": 7,
+              "delta_max": -0.066448,
+              "delta_median": -0.068102,
+              "delta_min": -0.070094,
+              "significant_count": 7,
+              "splits": 7
+            },
+            "all_windows": {
+              "beats_persistence_count": 7,
+              "delta_max": -0.046541,
+              "delta_median": -0.047566,
+              "delta_min": -0.049742,
+              "significant_count": 7,
+              "splits": 7
+            }
+          }
+        },
+        "target_validation": {
+          "creatinine": {
+            "heldout_beats_persistence_splits": 1,
+            "heldout_significant_splits": 0,
+            "hospital_holdout_significant": false,
+            "move_validated": false,
+            "non_persistence_selected_splits": 2,
+            "selected_method_counts": {
+              "persistence": 5,
+              "ridge_realfit": 2
+            }
+          },
+          "heart_rate": {
+            "heldout_beats_persistence_splits": 7,
+            "heldout_significant_splits": 7,
+            "hospital_holdout_significant": true,
+            "move_validated": true,
+            "non_persistence_selected_splits": 7,
+            "selected_method_counts": {
+              "ridge_realfit": 7
+            }
+          },
+          "lactate": {
+            "heldout_beats_persistence_splits": 7,
+            "heldout_significant_splits": 7,
+            "hospital_holdout_significant": true,
+            "move_validated": true,
+            "non_persistence_selected_splits": 7,
+            "selected_method_counts": {
+              "ridge_realfit": 7
+            }
+          },
+          "map": {
+            "heldout_beats_persistence_splits": 7,
+            "heldout_significant_splits": 7,
+            "hospital_holdout_significant": true,
+            "move_validated": true,
+            "non_persistence_selected_splits": 7,
+            "selected_method_counts": {
+              "ridge_realfit": 7
+            }
+          },
+          "o2sat": {
+            "heldout_beats_persistence_splits": 7,
+            "heldout_significant_splits": 7,
+            "hospital_holdout_significant": true,
+            "move_validated": true,
+            "non_persistence_selected_splits": 7,
+            "selected_method_counts": {
+              "ridge_realfit": 7
+            }
+          },
+          "respiratory_rate": {
+            "heldout_beats_persistence_splits": 7,
+            "heldout_significant_splits": 7,
+            "hospital_holdout_significant": true,
+            "move_validated": true,
+            "non_persistence_selected_splits": 7,
+            "selected_method_counts": {
+              "ridge_realfit": 7
+            }
+          },
+          "urine_output": {
+            "heldout_beats_persistence_splits": 7,
+            "heldout_significant_splits": 7,
+            "hospital_holdout_significant": true,
+            "move_validated": true,
+            "non_persistence_selected_splits": 7,
+            "selected_method_counts": {
+              "ridge_realfit": 7
+            }
+          },
+          "vasopressor_requirement": {
+            "heldout_beats_persistence_splits": 0,
+            "heldout_significant_splits": 0,
+            "hospital_holdout_significant": false,
+            "move_validated": false,
+            "non_persistence_selected_splits": 0,
+            "selected_method_counts": {
+              "persistence": 7
+            }
+          }
+        },
+        "transition_report": "eicu_sepsis_transition_report_12h.json",
+        "transition_summary": {
+          "active_transitions": 233999,
+          "hospitals": 203,
+          "stays": 28648,
+          "subjects": 24027,
+          "target_pair_counts": {
+            "creatinine": 24872,
+            "heart_rate": 379495,
+            "lactate": 11758,
+            "map": 375969,
+            "o2sat": 367712,
+            "respiratory_rate": 341798,
+            "urine_output": 139207,
+            "vasopressor_requirement": 389075
+          },
+          "transitions": 389075
+        }
+      },
+      "1h": {
+        "cohort": "eicu_sepsis_transitions_1h.parquet",
+        "future_suffix": "tp1",
+        "hospital_holdout_available": true,
+        "router_report": "eicu_sepsis_target_router_1h.json",
+        "router_summary": {
+          "selected_method_counts_by_target": {
+            "creatinine": {
+              "persistence": 7
+            },
+            "heart_rate": {
+              "persistence": 7
+            },
+            "lactate": {
+              "persistence": 7
+            },
+            "map": {
+              "ridge_realfit": 7
+            },
+            "o2sat": {
+              "persistence": 5,
+              "ridge_realfit": 2
+            },
+            "respiratory_rate": {
+              "ridge_realfit": 7
+            },
+            "urine_output": {
+              "persistence": 7
+            },
+            "vasopressor_requirement": {
+              "persistence": 7
+            }
+          },
+          "target_router": {
+            "active_sepsis_only": {
+              "beats_persistence_count": 7,
+              "delta_max": -0.006794,
+              "delta_median": -0.007543,
+              "delta_min": -0.007915,
+              "significant_count": 7,
+              "splits": 7
+            },
+            "all_windows": {
+              "beats_persistence_count": 5,
+              "delta_max": 0.000714,
+              "delta_median": -0.004577,
+              "delta_min": -0.004941,
+              "significant_count": 5,
+              "splits": 7
+            }
+          }
+        },
+        "target_validation": {
+          "creatinine": {
+            "heldout_beats_persistence_splits": 0,
+            "heldout_significant_splits": 0,
+            "hospital_holdout_significant": false,
+            "move_validated": false,
+            "non_persistence_selected_splits": 0,
+            "selected_method_counts": {
+              "persistence": 7
+            }
+          },
+          "heart_rate": {
+            "heldout_beats_persistence_splits": 0,
+            "heldout_significant_splits": 0,
+            "hospital_holdout_significant": false,
+            "move_validated": false,
+            "non_persistence_selected_splits": 0,
+            "selected_method_counts": {
+              "persistence": 7
+            }
+          },
+          "lactate": {
+            "heldout_beats_persistence_splits": 0,
+            "heldout_significant_splits": 0,
+            "hospital_holdout_significant": false,
+            "move_validated": false,
+            "non_persistence_selected_splits": 0,
+            "selected_method_counts": {
+              "persistence": 7
+            }
+          },
+          "map": {
+            "heldout_beats_persistence_splits": 7,
+            "heldout_significant_splits": 7,
+            "hospital_holdout_significant": true,
+            "move_validated": true,
+            "non_persistence_selected_splits": 7,
+            "selected_method_counts": {
+              "ridge_realfit": 7
+            }
+          },
+          "o2sat": {
+            "heldout_beats_persistence_splits": 1,
+            "heldout_significant_splits": 0,
+            "hospital_holdout_significant": false,
+            "move_validated": false,
+            "non_persistence_selected_splits": 2,
+            "selected_method_counts": {
+              "persistence": 5,
+              "ridge_realfit": 2
+            }
+          },
+          "respiratory_rate": {
+            "heldout_beats_persistence_splits": 7,
+            "heldout_significant_splits": 2,
+            "hospital_holdout_significant": true,
+            "move_validated": false,
+            "non_persistence_selected_splits": 7,
+            "selected_method_counts": {
+              "ridge_realfit": 7
+            }
+          },
+          "urine_output": {
+            "heldout_beats_persistence_splits": 0,
+            "heldout_significant_splits": 0,
+            "hospital_holdout_significant": false,
+            "move_validated": false,
+            "non_persistence_selected_splits": 0,
+            "selected_method_counts": {
+              "persistence": 7
+            }
+          },
+          "vasopressor_requirement": {
+            "heldout_beats_persistence_splits": 0,
+            "heldout_significant_splits": 0,
+            "hospital_holdout_significant": false,
+            "move_validated": false,
+            "non_persistence_selected_splits": 0,
+            "selected_method_counts": {
+              "persistence": 7
+            }
+          }
+        },
+        "transition_report": "eicu_sepsis_transition_report_1h.json",
+        "transition_summary": {
+          "active_transitions": 266484,
+          "hospitals": 205,
+          "stays": 31298,
+          "subjects": 25897,
+          "target_pair_counts": {
+            "creatinine": 42997,
+            "heart_rate": 440683,
+            "lactate": 24759,
+            "map": 436662,
+            "o2sat": 428243,
+            "respiratory_rate": 399801,
+            "urine_output": 165604,
+            "vasopressor_requirement": 451009
+          },
+          "transitions": 451009
+        }
+      },
+      "3h": {
+        "cohort": "eicu_sepsis_transitions_3h.parquet",
+        "future_suffix": "tp3",
+        "hospital_holdout_available": true,
+        "router_report": "eicu_sepsis_target_router_3h.json",
+        "router_summary": {
+          "selected_method_counts_by_target": {
+            "creatinine": {
+              "persistence": 7
+            },
+            "heart_rate": {
+              "ridge_realfit": 7
+            },
+            "lactate": {
+              "ridge_realfit": 7
+            },
+            "map": {
+              "ridge_realfit": 7
+            },
+            "o2sat": {
+              "ridge_realfit": 7
+            },
+            "respiratory_rate": {
+              "ridge_realfit": 7
+            },
+            "urine_output": {
+              "ridge_realfit": 7
+            },
+            "vasopressor_requirement": {
+              "persistence": 7
+            }
+          },
+          "target_router": {
+            "active_sepsis_only": {
+              "beats_persistence_count": 7,
+              "delta_max": -0.027781,
+              "delta_median": -0.028564,
+              "delta_min": -0.030287,
+              "significant_count": 7,
+              "splits": 7
+            },
+            "all_windows": {
+              "beats_persistence_count": 7,
+              "delta_max": -0.01455,
+              "delta_median": -0.015623,
+              "delta_min": -0.017168,
+              "significant_count": 7,
+              "splits": 7
+            }
+          }
+        },
+        "target_validation": {
+          "creatinine": {
+            "heldout_beats_persistence_splits": 0,
+            "heldout_significant_splits": 0,
+            "hospital_holdout_significant": false,
+            "move_validated": false,
+            "non_persistence_selected_splits": 0,
+            "selected_method_counts": {
+              "persistence": 7
+            }
+          },
+          "heart_rate": {
+            "heldout_beats_persistence_splits": 7,
+            "heldout_significant_splits": 7,
+            "hospital_holdout_significant": true,
+            "move_validated": true,
+            "non_persistence_selected_splits": 7,
+            "selected_method_counts": {
+              "ridge_realfit": 7
+            }
+          },
+          "lactate": {
+            "heldout_beats_persistence_splits": 7,
+            "heldout_significant_splits": 7,
+            "hospital_holdout_significant": true,
+            "move_validated": true,
+            "non_persistence_selected_splits": 7,
+            "selected_method_counts": {
+              "ridge_realfit": 7
+            }
+          },
+          "map": {
+            "heldout_beats_persistence_splits": 7,
+            "heldout_significant_splits": 7,
+            "hospital_holdout_significant": true,
+            "move_validated": true,
+            "non_persistence_selected_splits": 7,
+            "selected_method_counts": {
+              "ridge_realfit": 7
+            }
+          },
+          "o2sat": {
+            "heldout_beats_persistence_splits": 7,
+            "heldout_significant_splits": 7,
+            "hospital_holdout_significant": true,
+            "move_validated": true,
+            "non_persistence_selected_splits": 7,
+            "selected_method_counts": {
+              "ridge_realfit": 7
+            }
+          },
+          "respiratory_rate": {
+            "heldout_beats_persistence_splits": 7,
+            "heldout_significant_splits": 7,
+            "hospital_holdout_significant": true,
+            "move_validated": true,
+            "non_persistence_selected_splits": 7,
+            "selected_method_counts": {
+              "ridge_realfit": 7
+            }
+          },
+          "urine_output": {
+            "heldout_beats_persistence_splits": 7,
+            "heldout_significant_splits": 7,
+            "hospital_holdout_significant": true,
+            "move_validated": true,
+            "non_persistence_selected_splits": 7,
+            "selected_method_counts": {
+              "ridge_realfit": 7
+            }
+          },
+          "vasopressor_requirement": {
+            "heldout_beats_persistence_splits": 0,
+            "heldout_significant_splits": 0,
+            "hospital_holdout_significant": false,
+            "move_validated": false,
+            "non_persistence_selected_splits": 0,
+            "selected_method_counts": {
+              "persistence": 7
+            }
+          }
+        },
+        "transition_report": "eicu_sepsis_transition_report_3h.json",
+        "transition_summary": {
+          "active_transitions": 261045,
+          "hospitals": 204,
+          "stays": 30890,
+          "subjects": 25650,
+          "target_pair_counts": {
+            "creatinine": 25424,
+            "heart_rate": 429179,
+            "lactate": 18649,
+            "map": 425326,
+            "o2sat": 416530,
+            "respiratory_rate": 388715,
+            "urine_output": 157072,
+            "vasopressor_requirement": 439458
+          },
+          "transitions": 439458
+        }
+      }
+    }
+  },
+  "safety_boundary": {
+    "causal_claim_allowed": false,
+    "clinical_claim_allowed": false,
+    "factual_prediction_only": true,
+    "patient_ids_included_in_report": false,
+    "row_level_outputs_committed": false,
+    "runtime_decision_authority": false
+  }
+}
