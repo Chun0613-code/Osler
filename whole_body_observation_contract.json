@@ -37,6 +37,32 @@
       "horizon_hours": [6]
     },
     {
+      "name": "whole_body_same_time_nowcasting",
+      "scope": "same-time observation completion",
+      "targets": [
+        "map",
+        "creatinine",
+        "heart_rate",
+        "respiratory_rate",
+        "vasopressor_requirement",
+        "potassium",
+        "bicarbonate",
+        "bun",
+        "sodium",
+        "hemoglobin",
+        "hematocrit",
+        "albumin",
+        "anion_gap",
+        "chloride",
+        "calcium",
+        "phosphate",
+        "total_protein",
+        "bilirubin_direct",
+        "platelets"
+      ],
+      "horizon_hours": [0]
+    },
+    {
       "name": "cardio_renal_long_horizon_coupling",
       "scope": "single-hop body coupling",
       "targets": ["creatinine", "bun"],
@@ -75,7 +101,8 @@
     "validated_multihop": "sepsis/immune -> MAP at 6h -> renal creatinine/BUN at 24h",
     "fallback": "persistence for unsupported, sparse, slow-at-wrong-horizon, or candidate-only targets",
     "selection_rule": "validated target and horizon only; otherwise abstain or fall back",
-    "uncertainty_rule": "numeric intervals require target-horizon-source conformal calibration; otherwise interval_status is needs_calibration_audit"
+    "uncertainty_rule": "numeric intervals require target-horizon-source conformal calibration; otherwise interval_status is needs_calibration_audit",
+    "nowcasting_rule": "same-time state completion is allowed only for validated module-target pairs; a validated nowcast does not imply validated future movement"
   },
   "safety_boundary": {
     "shadow_observation_allowed": true,
@@ -97,6 +124,8 @@
     "ICU_FACTUAL_ROUTER_CANONICAL_FINDINGS.md",
     "BODY_SYSTEM_FOCUSED_COUPLING_FINDINGS.md",
     "BODY_SYSTEM_MULTIHOP_COUPLING_FINDINGS.md",
-    "AKI_RENAL_BELIEF_STATE_V2_FINDINGS.md"
+    "AKI_RENAL_BELIEF_STATE_V2_FINDINGS.md",
+    "WHOLE_BODY_NOWCASTING_FINDINGS.md",
+    "whole_body_nowcasting_audit.json"
   ]
 }

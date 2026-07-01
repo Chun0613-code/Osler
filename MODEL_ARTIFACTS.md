@@ -113,6 +113,15 @@ all-window cells. The reports remain aggregate-only. Local 1h/3h/12h transition
 parquet cohorts generated for those audits are row-level artifacts and are not
 versioned.
 
+`whole_body_nowcasting_audit.json` and
+`WHOLE_BODY_NOWCASTING_FINDINGS.md` add the same-time state-completion axis.
+The audit validates 41 module-target nowcasts across 15 cohorts using
+discovery-only selection, seven patient split seeds, hospital-heldout
+validation, and a capacity-matched placebo ridge control.  It is current-state
+imputation only: a validated nowcast target does not imply validated future
+movement, causal treatment effect, clinical authority, checkpoint promotion, or
+active symbolic-rule promotion.
+
 Full eICU sepsis and AKI router artifacts follow the same aggregate/report
 boundary. Local transition parquet cohorts, including
 `eicu_aki_transitions_6h.parquet`, `eicu_aki_transitions_24h.parquet`,

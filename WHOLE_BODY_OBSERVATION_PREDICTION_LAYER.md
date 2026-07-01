@@ -13,7 +13,8 @@ symbolic-rule promotion.
 
 ## Validated Capabilities
 
-The layer now has four kinds of validated factual prediction capability:
+The layer now has five kinds of validated factual observation/prediction
+capability:
 
 1. Disease routers:
    - DKA: glucose, anion gap, potassium, bicarbonate, and MAP at 6h.
@@ -42,6 +43,15 @@ The layer now has four kinds of validated factual prediction capability:
    - AKI renal belief state v2 validates an online-compatible hidden renal
      reserve/GFR state for downstream creatinine and BUN prediction.
 
+5. Same-time nowcasting:
+   - Whole-body same-time imputation validates 41 module-target pairs across
+     15 cohorts.
+   - Validated targets include renal chemistry, electrolyte/acid-base panels,
+     hemoglobin/hematocrit, albumin/total protein, direct bilirubin, platelets,
+     and selected dense vital targets.
+   - This is current-state completion only. A validated nowcast does not imply
+     future movement or treatment-effect knowledge.
+
 ## Prediction Policy
 
 The policy is simple:
@@ -51,6 +61,8 @@ The policy is simple:
 - Use 24-48h for slow renal accumulation targets.
 - Use the validated multi-hop path only for sepsis -> MAP6 -> renal24
   creatinine/BUN prediction.
+- Use nowcasting only to fill currently unmeasured validated module-target
+  pairs at the anchor time.
 - Fall back to persistence for unsupported targets, sparse variables, wrong
   horizons, candidate-only edges, and any future UI/API request that falls
   outside the aggregate evidence.
@@ -85,6 +97,9 @@ In human terms:
   mechanism language.
 - The factual routers are the bedside observer who has learned which numbers
   usually move soon and which numbers usually do not.
+- The nowcasting layer is the clinician's cross-check: if one lab is missing
+  right now, it asks whether the rest of the current body state can estimate it
+  without pretending to know the future.
 - The renal belief state is the beginning of an internal hidden-organ estimate:
   not just "what is creatinine now," but "what renal reserve seems to be behind
   the observed curve."
@@ -103,21 +118,30 @@ The machine-readable readiness map lives in:
 - `whole_body_observation_contract.json`
 - `whole_body_rollout_uncertainty_contract.json`
 - `WHOLE_BODY_TRAJECTORY_UNCERTAINTY_LAYER.md`
+- `WHOLE_BODY_NOWCASTING_FINDINGS.md`
+- `whole_body_nowcasting_audit.json`
 
 The aggregate evidence comes from the already committed disease, body-system,
 coupling, multihop, and renal-belief findings.  No row-level cohorts, patient
 identifiers, timestamps, or treatment-policy claims are included in this
 artifact.
 
-## Trajectory Extension
+## Trajectory And Nowcasting Extension
 
-The next layer is not "make every variable move." It is a target x horizon map
-with explicit fallback. Current canonical horizons are 1h, 3h, 6h, 12h, 24h,
-and 48h. Fast physiology is currently allowed to move mainly at 6h; slow renal
-variables are allowed to move at 24-48h. Other cells stay at persistence or
-missing until their own held-out audit passes.
+The trajectory layer is not "make every variable move." It is a target x horizon
+map with explicit fallback. Current canonical horizons are 1h, 3h, 6h, 12h,
+24h, and 48h. Fast physiology is allowed to move only at validated short
+horizons; slow renal variables are allowed to move at validated 24-48h
+horizons. Other cells stay at persistence or missing until their own held-out
+audit passes.
 
 Numeric confidence intervals require a separate calibration gate. Until split
 conformal residual intervals pass patient-heldout and hospital-heldout coverage
 checks, a forecast cell may expose a point estimate and source but must mark the
 interval as `needs_calibration_audit`.
+
+Nowcasting is a separate current-state axis. It fills validated missing `target_t`
+values from same-time and historical features only. It excludes future columns,
+future action-window columns, active labels, and the target itself. It is useful
+for a more complete present-tense body state, but it does not authorize any
+future trajectory cell unless that cell separately passes the forecast gate.

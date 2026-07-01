@@ -32,6 +32,12 @@ class ObservationLayerTests(unittest.TestCase):
         )
         self.assertFalse(capabilities["sepsis_map6_renal48_multihop"].is_validated)
 
+        nowcast = capabilities["whole_body_same_time_nowcasting"]
+        self.assertTrue(nowcast.is_validated)
+        self.assertEqual(nowcast.horizon_hours, (0,))
+        self.assertIn("same_time_state_completion", nowcast.allowed_uses)
+        self.assertIn("bilirubin_direct", nowcast.targets)
+
     def test_readiness_is_observation_only_and_fail_closed(self):
         readiness = observation_readiness()
 
@@ -48,7 +54,10 @@ class ObservationLayerTests(unittest.TestCase):
         self.assertFalse(boundary["active_rule_promotion_allowed"])
 
         for capability in readiness["validated_capabilities"]:
-            self.assertIn("factual_prediction", capability["allowed_uses"])
+            self.assertTrue(
+                "factual_prediction" in capability["allowed_uses"]
+                or "same_time_state_completion" in capability["allowed_uses"]
+            )
             for authority in DENIED_AUTHORITIES:
                 self.assertIn(authority, capability["denied_authorities"])
 

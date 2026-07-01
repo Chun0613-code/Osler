@@ -67,7 +67,9 @@ documented in `WHOLE_BODY_TRAJECTORY_VALIDATION_FINDINGS.md`,
 `whole_body_intermediate_horizon_move_audit.json`, and
 `whole_body_conformal_coverage_audit.json`. The full-body expansion is recorded
 in `whole_body_all_modules_intermediate_horizon_move_audit.json` and
-`whole_body_all_modules_conformal_coverage_audit.json`.
+`whole_body_all_modules_conformal_coverage_audit.json`. The same-time
+state-completion axis is recorded in `WHOLE_BODY_NOWCASTING_FINDINGS.md` and
+`whole_body_nowcasting_audit.json`.
 
 Its allowed role is:
 
@@ -78,6 +80,8 @@ Its allowed role is:
   horizon, or candidate-only.
 - target-by-horizon trajectory cells with calibrated intervals only after a
   conformal coverage gate passes.
+- same-time nowcasting only for validated module-target pairs, without treating
+  those nowcasts as future forecasts.
 
 Its forbidden role remains:
 
