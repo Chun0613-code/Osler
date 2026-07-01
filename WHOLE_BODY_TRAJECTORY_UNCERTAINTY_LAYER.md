@@ -28,6 +28,9 @@ Current validation is sparse by design:
 - Slow renal accumulation validates at 12-48h when the target has enough
   observable movement.
 - Sparse or poorly observed variables remain fallback or missing.
+- The full eICU numeric-variable sweep adds 59 validated 6h module-target
+  forecast cells and 51 calibrated interval cells after every eligible numeric
+  `*_t` target in the configured 6h cohorts is evaluated.
 
 This means a full trajectory object can exist without pretending that every
 point is a learned prediction. The object is complete; the motion is selective.
@@ -58,6 +61,11 @@ Validated 6h fast-physiology cells include:
 - oxygen saturation
 - respiratory rate
 - lactate
+
+The full-variable 6h sweep additionally validates context-specific cells such
+as sepsis platelets/WBC/temperature, AKI WBC/temperature, heme hemoglobin and
+hematocrit, and selected module-specific potassium or oxygenation cells. These
+are recorded in `EICU_FULL_VARIABLE_COVERAGE_FINDINGS.md`.
 
 Validated 24-48h slow-renal cells include:
 
@@ -162,6 +170,8 @@ The implementation contract lives in:
 - `WHOLE_BODY_TRAJECTORY_VALIDATION_FINDINGS.md`
 - `whole_body_intermediate_horizon_move_audit.json`
 - `whole_body_conformal_coverage_audit.json`
+- `EICU_FULL_VARIABLE_COVERAGE_FINDINGS.md`
+- `eicu_full_variable_coverage_audit.json`
 - `WHOLE_BODY_STATE_FORECAST_OBJECT.md`
 - `whole_body_state_forecast_contract.json`
 - `test_observation_layer.py`

@@ -44,13 +44,21 @@ capability:
      reserve/GFR state for downstream creatinine and BUN prediction.
 
 5. Same-time nowcasting:
-   - Whole-body same-time imputation validates 41 module-target pairs across
-     15 cohorts.
+   - Whole-body same-time imputation validates 71 module-target pairs across
+     the full numeric-variable eICU sweep.
    - Validated targets include renal chemistry, electrolyte/acid-base panels,
      hemoglobin/hematocrit, albumin/total protein, direct bilirubin, platelets,
      and selected dense vital targets.
    - This is current-state completion only. A validated nowcast does not imply
      future movement or treatment-effect knowledge.
+
+6. Full numeric-variable coverage:
+   - All 242 eligible numeric `*_t` targets in the configured eICU 6h transition
+     cohorts were evaluated.
+   - 59 module-target 6h forecast cells passed the strict held-out forecast
+     gate, and 51 of those also passed the interval gate.
+   - Targets that failed are explicitly represented as fallback or missing,
+     rather than silently omitted.
 
 ## Prediction Policy
 
@@ -120,6 +128,8 @@ The machine-readable readiness map lives in:
 - `WHOLE_BODY_TRAJECTORY_UNCERTAINTY_LAYER.md`
 - `WHOLE_BODY_NOWCASTING_FINDINGS.md`
 - `whole_body_nowcasting_audit.json`
+- `EICU_FULL_VARIABLE_COVERAGE_FINDINGS.md`
+- `eicu_full_variable_coverage_audit.json`
 - `WHOLE_BODY_STATE_FORECAST_OBJECT.md`
 - `whole_body_state_forecast_contract.json`
 

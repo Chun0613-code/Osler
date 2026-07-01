@@ -53,9 +53,9 @@ nowcast/forecast source.
 
 ## Current-State Axis
 
-The nowcasting audit validates 41 module-target current-state completion cells
-across 15 cohorts.  These cells can estimate currently missing values from
-same-time and historical physiology:
+The full numeric-variable sweep validates 71 module-target current-state
+completion cells across 15 cohorts.  These cells can estimate currently missing
+values from same-time and historical physiology:
 
 - renal chemistry and electrolyte panels;
 - hemoglobin and hematocrit;
@@ -83,6 +83,7 @@ The template now includes:
 - validated core 6h fast-physiology cells;
 - validated 24-48h renal accumulation cells;
 - the 79 all-module intermediate-horizon move cells from the full-body audit.
+- the 59 full-variable 6h forecast cells from the eICU numeric coverage sweep.
 
 Unsupported target/horizon pairs fall back to persistence or missing.  This is
 the same humility reflex as before, now placed inside one object.
@@ -92,6 +93,7 @@ the same humility reflex as before, now placed inside one object.
 Numeric intervals are allowed only when a split-conformal coverage audit passes
 for the target, horizon, and source.  The current aggregate interval evidence is:
 
+- 51 full-variable 6h forecast cells pass;
 - 135/378 active-window full-body cells pass;
 - 151/378 all-window full-body cells pass.
 
@@ -146,8 +148,9 @@ The aggregate evidence comes from:
 
 - `WHOLE_BODY_NOWCASTING_FINDINGS.md`
 - `whole_body_nowcasting_audit.json`
+- `EICU_FULL_VARIABLE_COVERAGE_FINDINGS.md`
+- `eicu_full_variable_coverage_audit.json`
 - `WHOLE_BODY_TRAJECTORY_UNCERTAINTY_LAYER.md`
 - `whole_body_rollout_uncertainty_contract.json`
 - `whole_body_all_modules_intermediate_horizon_move_audit.json`
 - `whole_body_all_modules_conformal_coverage_audit.json`
-

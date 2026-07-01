@@ -115,7 +115,7 @@ versioned.
 
 `whole_body_nowcasting_audit.json` and
 `WHOLE_BODY_NOWCASTING_FINDINGS.md` add the same-time state-completion axis.
-The audit validates 41 module-target nowcasts across 15 cohorts using
+The curated-target audit validates 41 module-target nowcasts across 15 cohorts using
 discovery-only selection, seven patient split seeds, hospital-heldout
 validation, and a capacity-matched placebo ridge control.  It is current-state
 imputation only: a validated nowcast target does not imply validated future
@@ -129,6 +129,14 @@ nowcast cells, future trajectory cells, and calibrated interval metadata. These
 files are schema/readiness artifacts only. They include no row-level runtime
 predictions, timestamps, or patient identifiers, and they preserve the same
 non-causal, non-clinical safety boundary.
+
+`eicu_full_variable_coverage_audit.json` and
+`EICU_FULL_VARIABLE_COVERAGE_FINDINGS.md` record the strict eICU numeric-variable
+coverage sweep. The audit evaluates every numeric `*_t` target visible in the
+configured 6h eICU transition cohorts: 242 eligible module-targets for nowcast
+and 242 for 6h forecast. It validates 71 same-time nowcasts, 59 6h factual
+forecast cells, and 51 calibrated 6h interval cells. The report is
+aggregate-only and contains no row-level predictions or patient identifiers.
 
 Full eICU sepsis and AKI router artifacts follow the same aggregate/report
 boundary. Local transition parquet cohorts, including

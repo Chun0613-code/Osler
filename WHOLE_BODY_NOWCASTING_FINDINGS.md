@@ -47,6 +47,11 @@ hospital-heldout gate.
 The full audit covers 15 module cohorts and validates 41 module-target
 same-time nowcasts.
 
+Update: the later full numeric-variable sweep in
+`EICU_FULL_VARIABLE_COVERAGE_FINDINGS.md` supersedes this curated-target count
+for coverage accounting, expanding validated same-time nowcasts from 41 to 71.
+This file remains the canonical curated nowcasting pass.
+
 | Module | Validated nowcast targets |
 |---|---|
 | sepsis | MAP, creatinine, heart rate, respiratory rate, vasopressor requirement |
@@ -118,4 +123,3 @@ treatment decision.
 - Future prediction claims require separate target-horizon validation.
 - Causal, counterfactual, clinical, runtime-treatment, checkpoint-promotion,
   and active-rule-promotion claims remain closed.
-

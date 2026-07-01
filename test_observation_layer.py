@@ -87,7 +87,7 @@ class ObservationLayerTests(unittest.TestCase):
 
     def test_whole_body_state_forecast_template_unifies_three_objects(self):
         nowcasts = nowcast_state_grid()
-        self.assertEqual(len(nowcasts), 41)
+        self.assertEqual(len(nowcasts), 71)
         self.assertTrue(all(cell.time_axis == "current" for cell in nowcasts))
         self.assertTrue(all(cell.can_estimate for cell in nowcasts))
         self.assertTrue(all(not cell.can_move for cell in nowcasts))
@@ -101,11 +101,11 @@ class ObservationLayerTests(unittest.TestCase):
         self.assertFalse(template["runtime_values_included"])
         self.assertEqual(
             template["current_state"]["validated_nowcast_module_target_cells"],
-            41,
+            71,
         )
         self.assertGreaterEqual(
             template["future_trajectory"]["validated_cell_count"],
-            95,
+            154,
         )
         future_cells = template["future_trajectory"]["cells"]
         self.assertIn(
@@ -114,6 +114,22 @@ class ObservationLayerTests(unittest.TestCase):
                 (cell["module"], cell["target"], cell["horizon_hours"])
                 for cell in future_cells
                 if cell["status"] == "validated"
+            },
+        )
+        self.assertIn(
+            ("sepsis", "platelets", 6),
+            {
+                (cell["module"], cell["target"], cell["horizon_hours"])
+                for cell in future_cells
+                if cell["status"] == "validated"
+            },
+        )
+        self.assertIn(
+            ("sepsis", "platelets", 6),
+            {
+                (cell["module"], cell["target"], cell["horizon_hours"])
+                for cell in future_cells
+                if cell["interval_status"] == "calibrated"
             },
         )
         self.assertFalse(template["safety_boundary"]["causal_claim_allowed"])

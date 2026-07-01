@@ -4,6 +4,11 @@ import numpy as np
 import pandas as pd
 
 from eicu_conformal_coverage_audit import _module_api, conformal_quantile
+from eicu_full_variable_coverage_audit import (
+    eligible_current_targets,
+    eligible_forecast_targets,
+    forecast_feature_columns,
+)
 from eicu_intermediate_horizon_audit import horizon_label, horizon_suffix, module_paths
 from eicu_nowcasting_audit import is_future_column, module_targets, nowcast_feature_columns
 
@@ -72,6 +77,31 @@ class ForecastAuditHelperTests(unittest.TestCase):
         self.assertGreater(len(module_targets("cardiovascular_instability")), 0)
         with self.assertRaises(ValueError):
             module_targets("not_a_module")
+
+    def test_full_variable_coverage_target_inventory_excludes_labels(self):
+        frame = pd.DataFrame({
+            "subject_id": [1, 2],
+            "hospitalid": [1, 1],
+            "map_t": [70.0, 72.0],
+            "map_tp6": [75.0, 76.0],
+            "map_age_hr": [0.1, 0.2],
+            "bilirubin_t": [1.2, np.nan],
+            "sepsis_active": [True, False],
+            "respiratory_active_t": [True, True],
+            "act_fluid": [1.0, 0.0],
+            "glucose_tp6": [130.0, 140.0],
+            "hist_map_mean": [71.0, 73.0],
+        })
+        self.assertEqual(eligible_current_targets(frame), ("bilirubin", "map"))
+        self.assertEqual(eligible_forecast_targets(frame, "tp6"), ("map",))
+
+        features = forecast_feature_columns(frame, "map")
+        self.assertIn("map_t", features)
+        self.assertIn("map_age_hr", features)
+        self.assertIn("act_fluid", features)
+        self.assertIn("hist_map_mean", features)
+        self.assertNotIn("map_tp6", features)
+        self.assertNotIn("respiratory_active_t", features)
 
 
 if __name__ == "__main__":

@@ -16,26 +16,137 @@ from dataclasses import asdict, dataclass
 PREDICTION_HORIZONS_HOURS = (1, 3, 6, 12, 24, 48)
 
 VALIDATED_NOWCAST_MODULE_TARGETS: dict[str, tuple[str, ...]] = {
-    "sepsis": ("map", "creatinine", "heart_rate", "respiratory_rate", "vasopressor_requirement"),
-    "aki": ("creatinine", "potassium", "bicarbonate", "map", "bun", "sodium"),
-    "respiratory": ("respiratory_rate", "map", "bicarbonate"),
-    "integumentary_skin_wound": ("hemoglobin", "hematocrit", "albumin"),
-    "toxic_metabolic": ("anion_gap", "bicarbonate"),
-    "electrolyte_acid_base": (
-        "sodium",
-        "potassium",
-        "chloride",
+    "sepsis": (
         "bicarbonate",
-        "anion_gap",
-        "calcium",
-        "phosphate",
+        "bilirubin_direct",
+        "bun",
         "creatinine",
+        "heart_rate",
+        "map",
+        "ph",
+        "platelets",
+        "potassium",
+        "respiratory_rate",
+        "sodium",
+        "temperature",
+        "vasopressor_requirement",
+        "wbc",
     ),
-    "endocrine_stress": ("anion_gap", "bicarbonate", "potassium"),
-    "gi_pancreatic_nutrition": ("albumin", "total_protein", "calcium", "map"),
-    "cardiac_injury": ("potassium",),
-    "hepatic_failure": ("bilirubin_direct", "platelets", "bicarbonate", "creatinine"),
-    "coagulopathy_heme": ("hemoglobin", "hematocrit"),
+    "aki": (
+        "bicarbonate",
+        "bun",
+        "creatinine",
+        "heart_rate",
+        "map",
+        "potassium",
+        "respiratory_rate",
+        "sodium",
+        "temperature",
+    ),
+    "respiratory": ("bicarbonate", "bun", "creatinine", "map", "potassium", "respiratory_rate"),
+    "integumentary_skin_wound": ("albumin", "bun", "hematocrit", "hemoglobin", "potassium"),
+    "toxic_metabolic": ("anion_gap", "bicarbonate", "bun", "chloride", "sodium"),
+    "electrolyte_acid_base": (
+        "anion_gap",
+        "bicarbonate",
+        "bun",
+        "calcium",
+        "chloride",
+        "creatinine",
+        "phosphate",
+        "potassium",
+        "sodium",
+    ),
+    "endocrine_stress": ("anion_gap", "bicarbonate", "bun", "potassium"),
+    "gi_pancreatic_nutrition": ("albumin", "bicarbonate", "calcium", "map", "total_protein"),
+    "cardiac_injury": ("bun", "potassium"),
+    "hepatic_failure": ("bicarbonate", "bilirubin_direct", "bun", "creatinine", "ph", "platelets", "potassium", "wbc"),
+    "coagulopathy_heme": ("bun", "hematocrit", "hemoglobin", "potassium"),
+}
+
+VALIDATED_FULL_VARIABLE_FORECAST_6H_CELLS: dict[str, tuple[str, ...]] = {
+    "sepsis": (
+        "bicarbonate",
+        "glucose",
+        "heart_rate",
+        "lactate",
+        "map",
+        "o2sat",
+        "ph",
+        "platelets",
+        "potassium",
+        "respiratory_rate",
+        "sodium",
+        "temperature",
+        "wbc",
+    ),
+    "aki": (
+        "bicarbonate",
+        "glucose",
+        "heart_rate",
+        "lactate",
+        "map",
+        "o2sat",
+        "potassium",
+        "respiratory_rate",
+        "sodium",
+        "temperature",
+        "wbc",
+    ),
+    "respiratory": ("glucose", "heart_rate", "map", "o2sat", "potassium", "respiratory_rate"),
+    "integumentary_skin_wound": ("map", "potassium"),
+    "toxic_metabolic": ("heart_rate", "map", "potassium", "respiratory_rate"),
+    "electrolyte_acid_base": ("glucose", "potassium"),
+    "endocrine_stress": ("glucose", "map"),
+    "gi_pancreatic_nutrition": ("glucose", "map"),
+    "cardiac_injury": ("map", "o2sat", "respiratory_rate"),
+    "musculoskeletal_rhabdo": ("potassium",),
+    "cardiovascular_instability": ("heart_rate", "map", "o2sat", "potassium", "respiratory_rate"),
+    "acute_neuro": ("map", "potassium", "respiratory_rate"),
+    "hepatic_failure": ("map", "potassium"),
+    "coagulopathy_heme": ("hematocrit", "hemoglobin", "map"),
+}
+
+VALIDATED_FULL_VARIABLE_INTERVAL_6H_CELLS: dict[str, tuple[str, ...]] = {
+    "sepsis": (
+        "bicarbonate",
+        "glucose",
+        "heart_rate",
+        "lactate",
+        "map",
+        "o2sat",
+        "ph",
+        "platelets",
+        "potassium",
+        "respiratory_rate",
+        "sodium",
+        "temperature",
+        "wbc",
+    ),
+    "aki": (
+        "bicarbonate",
+        "glucose",
+        "heart_rate",
+        "lactate",
+        "map",
+        "o2sat",
+        "potassium",
+        "respiratory_rate",
+        "sodium",
+        "temperature",
+        "wbc",
+    ),
+    "respiratory": ("glucose", "heart_rate", "map", "o2sat", "potassium", "respiratory_rate"),
+    "integumentary_skin_wound": ("map",),
+    "toxic_metabolic": ("heart_rate", "map", "potassium", "respiratory_rate"),
+    "electrolyte_acid_base": ("glucose", "potassium"),
+    "endocrine_stress": ("map",),
+    "gi_pancreatic_nutrition": ("glucose", "map"),
+    "cardiac_injury": ("map", "respiratory_rate"),
+    "cardiovascular_instability": ("heart_rate", "map", "respiratory_rate"),
+    "acute_neuro": ("map", "respiratory_rate"),
+    "hepatic_failure": ("map", "potassium"),
+    "coagulopathy_heme": ("hemoglobin", "map"),
 }
 
 VALIDATED_INTERMEDIATE_MOVE_CELLS: dict[str, dict[int, tuple[str, ...]]] = {
@@ -247,12 +358,16 @@ def whole_body_observation_capabilities() -> tuple[ObservationCapability, ...]:
                 "map",
                 "creatinine",
                 "heart_rate",
+                "ph",
+                "platelets",
                 "respiratory_rate",
                 "vasopressor_requirement",
                 "potassium",
                 "bicarbonate",
                 "bun",
                 "sodium",
+                "temperature",
+                "wbc",
                 "hemoglobin",
                 "hematocrit",
                 "albumin",
@@ -262,11 +377,19 @@ def whole_body_observation_capabilities() -> tuple[ObservationCapability, ...]:
                 "phosphate",
                 "total_protein",
                 "bilirubin_direct",
-                "platelets",
             ),
             horizon_hours=(0,),
-            evidence="WHOLE_BODY_NOWCASTING_FINDINGS.md; 41 module-target same-time nowcasts pass patient and hospital held-out placebo gates",
+            evidence="EICU_FULL_VARIABLE_COVERAGE_FINDINGS.md; full numeric-variable sweep validates 71 module-target same-time nowcasts",
             allowed_uses=("shadow_observation", "same_time_state_completion", "capability_reporting"),
+        ),
+        ObservationCapability(
+            name="eicu_full_variable_6h_forecast_coverage",
+            status="validated",
+            scope="full_numeric_variable_forecast_sweep",
+            systems=("whole_body",),
+            targets=("59_module_target_forecast_cells", "51_calibrated_interval_cells"),
+            horizon_hours=(6,),
+            evidence="EICU_FULL_VARIABLE_COVERAGE_FINDINGS.md; 242 eligible numeric targets swept through forecast and interval gates",
         ),
         ObservationCapability(
             name="cardio_renal_long_horizon_coupling",
@@ -381,6 +504,7 @@ def _cell(
     context: str,
     can_move: bool,
     reason: str,
+    interval_status: str = "needs_calibration_audit",
 ) -> TrajectoryGridCell:
     return TrajectoryGridCell(
         target=target,
@@ -390,6 +514,7 @@ def _cell(
         context=context,
         can_move=can_move,
         reason=reason,
+        interval_status=interval_status,
     )
 
 
@@ -488,6 +613,22 @@ def trajectory_prediction_grid() -> tuple[TrajectoryGridCell, ...]:
                         "validated all-module intermediate-horizon move cell",
                     )
                 )
+
+    for module, targets in VALIDATED_FULL_VARIABLE_FORECAST_6H_CELLS.items():
+        calibrated_targets = set(VALIDATED_FULL_VARIABLE_INTERVAL_6H_CELLS.get(module, ()))
+        for target in targets:
+            cells.append(
+                _cell(
+                    target,
+                    6,
+                    "validated",
+                    f"{module}_full_variable_router",
+                    module,
+                    True,
+                    "validated full-variable 6h forecast cell",
+                    interval_status="calibrated" if target in calibrated_targets else "needs_calibration_audit",
+                )
+            )
 
     for target in ("bilirubin", "inr", "ptt", "fibrinogen", "paco2"):
         for horizon in PREDICTION_HORIZONS_HOURS:
