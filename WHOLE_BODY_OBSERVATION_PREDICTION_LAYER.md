@@ -120,6 +120,8 @@ The machine-readable readiness map lives in:
 - `WHOLE_BODY_TRAJECTORY_UNCERTAINTY_LAYER.md`
 - `WHOLE_BODY_NOWCASTING_FINDINGS.md`
 - `whole_body_nowcasting_audit.json`
+- `WHOLE_BODY_STATE_FORECAST_OBJECT.md`
+- `whole_body_state_forecast_contract.json`
 
 The aggregate evidence comes from the already committed disease, body-system,
 coupling, multihop, and renal-belief findings.  No row-level cohorts, patient
@@ -145,3 +147,16 @@ values from same-time and historical features only. It excludes future columns,
 future action-window columns, active labels, and the target itself. It is useful
 for a more complete present-tense body state, but it does not authorize any
 future trajectory cell unless that cell separately passes the forecast gate.
+
+## Unified Object
+
+The final observation output is `whole_body_state_forecast`. It combines:
+
+- current-state nowcast cells;
+- future target-horizon trajectory cells;
+- calibrated interval metadata.
+
+The object can be complete in schema while still leaving unsupported values as
+fallback or missing. Runtime code may fill numeric values only when the cell is
+directly observed, validated for nowcasting, validated for future forecasting,
+or calibrated for interval display.

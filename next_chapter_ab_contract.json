@@ -30,7 +30,9 @@
       "whole_body_all_modules_intermediate_horizon_move_audit.json",
       "whole_body_all_modules_conformal_coverage_audit.json",
       "WHOLE_BODY_NOWCASTING_FINDINGS.md",
-      "whole_body_nowcasting_audit.json"
+      "whole_body_nowcasting_audit.json",
+      "WHOLE_BODY_STATE_FORECAST_OBJECT.md",
+      "whole_body_state_forecast_contract.json"
     ],
     "goal": "ignore treatment planning for this layer and maximize validated body-state observation plus factual physiology prediction",
     "policy": {
@@ -115,9 +117,10 @@
       },
       "uncertainty_rule": "numeric confidence intervals require target/horizon/source conformal coverage validation",
       "nowcasting_rule": "same-time nowcasting is current-state completion only and is allowed only for validated module-target pairs",
+      "unified_object": "whole_body_state_forecast combines current nowcast, future forecast, and interval metadata while preserving fallback/missing states",
       "validated_multihop": "sepsis/immune -> MAP at 6h -> renal creatinine/BUN at 24h"
     },
-    "status": "trajectory_move_conformal_interval_and_nowcasting_validation_added"
+    "status": "unified_whole_body_state_forecast_object_added"
   },
   "chapter_a_causal": {
     "allowed_now": [

@@ -69,7 +69,9 @@ documented in `WHOLE_BODY_TRAJECTORY_VALIDATION_FINDINGS.md`,
 in `whole_body_all_modules_intermediate_horizon_move_audit.json` and
 `whole_body_all_modules_conformal_coverage_audit.json`. The same-time
 state-completion axis is recorded in `WHOLE_BODY_NOWCASTING_FINDINGS.md` and
-`whole_body_nowcasting_audit.json`.
+`whole_body_nowcasting_audit.json`. The final unified query object is recorded
+in `WHOLE_BODY_STATE_FORECAST_OBJECT.md` and
+`whole_body_state_forecast_contract.json`.
 
 Its allowed role is:
 
@@ -82,6 +84,8 @@ Its allowed role is:
   conformal coverage gate passes.
 - same-time nowcasting only for validated module-target pairs, without treating
   those nowcasts as future forecasts.
+- unified `whole_body_state_forecast` assembly of current-state completion,
+  future trajectory, and interval metadata.
 
 Its forbidden role remains:
 

@@ -1,0 +1,94 @@
+{
+  "artifact": "Osler-JEPA whole_body_state_forecast contract",
+  "date": "2026-07-01",
+  "goal": "Unify validated current-state nowcasting, future factual forecasting, and calibrated uncertainty into one fail-closed whole-body observation object.",
+  "object_name": "whole_body_state_forecast",
+  "runtime_values_included": false,
+  "axes": {
+    "current_state_nowcast": {
+      "horizon_hours": [0],
+      "validated_module_target_cells": 41,
+      "source_artifacts": [
+        "WHOLE_BODY_NOWCASTING_FINDINGS.md",
+        "whole_body_nowcasting_audit.json"
+      ],
+      "policy": {
+        "observed_values_preferred": true,
+        "nowcast_only_when_target_missing": true,
+        "validated_module_target_required": true,
+        "future_claim_from_nowcast_allowed": false
+      }
+    },
+    "future_trajectory_forecast": {
+      "horizons_hours": [1, 3, 6, 12, 24, 48],
+      "validated_all_module_intermediate_move_cells": 79,
+      "validated_core_fast_and_slow_cells_in_template": "core 6h fast physiology plus 24-48h renal accumulation",
+      "source_artifacts": [
+        "WHOLE_BODY_TRAJECTORY_UNCERTAINTY_LAYER.md",
+        "whole_body_rollout_uncertainty_contract.json",
+        "whole_body_all_modules_intermediate_horizon_move_audit.json"
+      ],
+      "policy": {
+        "move_rule": "only validated future cells may move away from persistence",
+        "fallback_rule": "unsupported target-horizon pairs stay at persistence or missing",
+        "no_recursive_unvalidated_rollout": true
+      }
+    },
+    "uncertainty_interval": {
+      "method": "split_conformal_residual_interval_per_target_horizon_source",
+      "primary_coverage_target": 0.9,
+      "accepted_90pct_coverage_range": [0.87, 0.93],
+      "validated_cells": {
+        "active_window": "135/378",
+        "all_windows": "151/378"
+      },
+      "source_artifacts": [
+        "whole_body_all_modules_conformal_coverage_audit.json",
+        "whole_body_conformal_coverage_audit.json"
+      ],
+      "policy": {
+        "numeric_interval_requires_calibration_gate": true,
+        "missing_calibration_status": "needs_calibration_audit",
+        "lower_upper_empty_until_calibrated": true
+      }
+    }
+  },
+  "cell_schema": {
+    "target": "physiology variable name",
+    "module": "validated module or context",
+    "horizon_hours": "0 for current nowcast, otherwise forecast horizon",
+    "time_axis": "current or future",
+    "status": "observed, validated_nowcast_available, validated, fallback, candidate_only, unsupported, or missing",
+    "source": "observed, same_time_nowcast_ridge, validated router, belief state, multihop path, persistence, or missing",
+    "point_estimate": "runtime numeric value or null in aggregate templates",
+    "lower": "runtime numeric lower interval bound or null",
+    "upper": "runtime numeric upper interval bound or null",
+    "interval_level": "coverage level or null",
+    "interval_status": "not_a_future_interval, calibrated, or needs_calibration_audit",
+    "can_estimate": "true only for directly observed, validated nowcast, or validated forecast cells",
+    "can_move": "true only for validated future forecast cells"
+  },
+  "allowed_uses": [
+    "shadow observation",
+    "validated same-time state completion",
+    "validated factual physiology prediction",
+    "validated uncertainty display",
+    "capability reporting"
+  ],
+  "safety_boundary": {
+    "row_level_outputs_committed": false,
+    "patient_identifiers_included": false,
+    "causal_claim_allowed": false,
+    "counterfactual_treatment_effect_allowed": false,
+    "clinical_claim_allowed": false,
+    "runtime_treatment_authority": false,
+    "checkpoint_promotion_allowed": false,
+    "active_rule_promotion_allowed": false,
+    "complete_human_simulation_claim_allowed": false
+  },
+  "implementation_files": [
+    "osler_jepa/observation_layer.py",
+    "WHOLE_BODY_STATE_FORECAST_OBJECT.md",
+    "test_observation_layer.py"
+  ]
+}

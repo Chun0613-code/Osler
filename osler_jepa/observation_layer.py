@@ -15,6 +15,89 @@ from dataclasses import asdict, dataclass
 
 PREDICTION_HORIZONS_HOURS = (1, 3, 6, 12, 24, 48)
 
+VALIDATED_NOWCAST_MODULE_TARGETS: dict[str, tuple[str, ...]] = {
+    "sepsis": ("map", "creatinine", "heart_rate", "respiratory_rate", "vasopressor_requirement"),
+    "aki": ("creatinine", "potassium", "bicarbonate", "map", "bun", "sodium"),
+    "respiratory": ("respiratory_rate", "map", "bicarbonate"),
+    "integumentary_skin_wound": ("hemoglobin", "hematocrit", "albumin"),
+    "toxic_metabolic": ("anion_gap", "bicarbonate"),
+    "electrolyte_acid_base": (
+        "sodium",
+        "potassium",
+        "chloride",
+        "bicarbonate",
+        "anion_gap",
+        "calcium",
+        "phosphate",
+        "creatinine",
+    ),
+    "endocrine_stress": ("anion_gap", "bicarbonate", "potassium"),
+    "gi_pancreatic_nutrition": ("albumin", "total_protein", "calcium", "map"),
+    "cardiac_injury": ("potassium",),
+    "hepatic_failure": ("bilirubin_direct", "platelets", "bicarbonate", "creatinine"),
+    "coagulopathy_heme": ("hemoglobin", "hematocrit"),
+}
+
+VALIDATED_INTERMEDIATE_MOVE_CELLS: dict[str, dict[int, tuple[str, ...]]] = {
+    "acute_neuro": {
+        1: ("map", "respiratory_rate"),
+        3: ("map", "respiratory_rate"),
+        12: ("heart_rate", "map", "o2sat", "respiratory_rate"),
+    },
+    "cardiac_injury": {
+        1: ("map",),
+        3: ("map",),
+        12: ("heart_rate", "map", "potassium"),
+    },
+    "cardiovascular_instability": {
+        1: ("map",),
+        3: ("heart_rate", "map"),
+        12: ("heart_rate", "map"),
+    },
+    "coagulopathy_heme": {
+        3: ("hemoglobin", "map"),
+        12: ("map",),
+    },
+    "electrolyte_acid_base": {
+        1: ("map",),
+        3: ("map", "potassium"),
+        12: ("anion_gap", "map", "potassium", "sodium"),
+    },
+    "endocrine_stress": {
+        3: ("glucose", "map"),
+        12: ("glucose", "map"),
+    },
+    "gi_pancreatic_nutrition": {
+        3: ("glucose", "map"),
+        12: ("glucose", "map"),
+    },
+    "hepatic_failure": {
+        3: ("map",),
+        12: ("map",),
+    },
+    "immune_inflammatory": {
+        12: ("map",),
+    },
+    "integumentary_skin_wound": {
+        1: ("map",),
+        3: ("glucose", "hematocrit", "map"),
+        12: ("glucose", "heart_rate", "map"),
+    },
+    "musculoskeletal_rhabdo": {
+        1: ("map",),
+    },
+    "respiratory": {
+        1: ("map", "o2sat", "respiratory_rate"),
+        3: ("bicarbonate", "heart_rate", "map", "o2sat", "paco2", "ph", "respiratory_rate"),
+        12: ("bicarbonate", "heart_rate", "map", "o2sat", "paco2", "ph", "respiratory_rate"),
+    },
+    "toxic_metabolic": {
+        1: ("map",),
+        3: ("anion_gap", "heart_rate", "map", "o2sat", "potassium", "respiratory_rate"),
+        12: ("anion_gap", "bicarbonate", "glucose", "heart_rate", "map", "o2sat", "potassium", "respiratory_rate"),
+    },
+}
+
 DENIED_AUTHORITIES = (
     "causal_claim",
     "counterfactual_treatment_effect",
@@ -65,6 +148,29 @@ class TrajectoryGridCell:
     can_move: bool
     reason: str
     interval_status: str = "needs_calibration_audit"
+
+    def to_dict(self) -> dict[str, object]:
+        return asdict(self)
+
+
+@dataclass(frozen=True)
+class WholeBodyStateForecastCell:
+    """One current-state or future-state cell in the unified output object."""
+
+    target: str
+    module: str
+    horizon_hours: int
+    time_axis: str
+    status: str
+    source: str
+    point_estimate: float | None
+    lower: float | None
+    upper: float | None
+    interval_level: float | None
+    interval_status: str
+    can_estimate: bool
+    can_move: bool
+    reason: str
 
     def to_dict(self) -> dict[str, object]:
         return asdict(self)
@@ -368,6 +474,21 @@ def trajectory_prediction_grid() -> tuple[TrajectoryGridCell, ...]:
                     )
                 )
 
+    for module, by_horizon in VALIDATED_INTERMEDIATE_MOVE_CELLS.items():
+        for horizon, targets in by_horizon.items():
+            for target in targets:
+                cells.append(
+                    _cell(
+                        target,
+                        horizon,
+                        "validated",
+                        f"{module}_intermediate_router",
+                        module,
+                        True,
+                        "validated all-module intermediate-horizon move cell",
+                    )
+                )
+
     for target in ("bilirubin", "inr", "ptt", "fibrinogen", "paco2"):
         for horizon in PREDICTION_HORIZONS_HOURS:
             cells.append(
@@ -382,6 +503,64 @@ def trajectory_prediction_grid() -> tuple[TrajectoryGridCell, ...]:
                 )
             )
 
+    return tuple(cells)
+
+
+def nowcast_state_grid() -> tuple[WholeBodyStateForecastCell, ...]:
+    """Return validated same-time state-completion cells.
+
+    These cells represent current-state estimates only.  They do not authorize
+    future movement, even when the same target also appears in a forecast grid.
+    """
+
+    cells: list[WholeBodyStateForecastCell] = []
+    for module, targets in VALIDATED_NOWCAST_MODULE_TARGETS.items():
+        for target in targets:
+            cells.append(
+                WholeBodyStateForecastCell(
+                    target=target,
+                    module=module,
+                    horizon_hours=0,
+                    time_axis="current",
+                    status="validated_nowcast_available",
+                    source="same_time_nowcast_ridge",
+                    point_estimate=None,
+                    lower=None,
+                    upper=None,
+                    interval_level=None,
+                    interval_status="not_a_future_interval",
+                    can_estimate=True,
+                    can_move=False,
+                    reason=(
+                        "validated same-time imputation; does not imply "
+                        "validated future forecasting"
+                    ),
+                )
+            )
+    return tuple(cells)
+
+
+def _trajectory_state_cells() -> tuple[WholeBodyStateForecastCell, ...]:
+    cells: list[WholeBodyStateForecastCell] = []
+    for cell in trajectory_prediction_grid():
+        cells.append(
+            WholeBodyStateForecastCell(
+                target=cell.target,
+                module=cell.context,
+                horizon_hours=cell.horizon_hours,
+                time_axis="future",
+                status=cell.status,
+                source=cell.source,
+                point_estimate=None,
+                lower=None,
+                upper=None,
+                interval_level=None,
+                interval_status=cell.interval_status,
+                can_estimate=cell.status == "validated",
+                can_move=cell.can_move,
+                reason=cell.reason,
+            )
+        )
     return tuple(cells)
 
 
@@ -419,6 +598,113 @@ def uncertainty_calibration_policy() -> dict[str, object]:
             "source": "validated router, belief state, multihop path, or persistence",
             "status": "validated, fallback, candidate_only, or missing",
             "can_move": "whether model is allowed to move the target away from persistence",
+        },
+    }
+
+
+def whole_body_state_forecast_schema() -> dict[str, object]:
+    """Return the unified object schema for current and future body state."""
+
+    return {
+        "object_name": "whole_body_state_forecast",
+        "patient_time": {
+            "patient_key": "runtime-local identifier, never committed in aggregate artifacts",
+            "anchor_time": "runtime timestamp or encounter-relative anchor",
+            "timezone": "runtime-local if displayed",
+        },
+        "current_state_cell": {
+            "target": "physiology variable name",
+            "module": "validated module context",
+            "horizon_hours": 0,
+            "time_axis": "current",
+            "point_estimate": "observed value or validated nowcast value",
+            "lower": None,
+            "upper": None,
+            "interval_level": None,
+            "interval_status": "not_a_future_interval",
+            "source": "observed, same_time_nowcast_ridge, or missing",
+            "status": "observed, validated_nowcast_available, unsupported, or missing",
+            "can_estimate": "true only for observed or validated nowcast cells",
+            "can_move": False,
+        },
+        "future_state_cell": {
+            "target": "physiology variable name",
+            "module": "validated forecast context",
+            "horizon_hours": "one of PREDICTION_HORIZONS_HOURS",
+            "time_axis": "future",
+            "point_estimate": "validated forecast value or runtime persistence value",
+            "lower": "numeric lower interval bound only when conformal calibration passes",
+            "upper": "numeric upper interval bound only when conformal calibration passes",
+            "interval_level": "coverage level, usually 0.9, or null",
+            "interval_status": "calibrated or needs_calibration_audit",
+            "source": "validated router, belief state, multihop path, persistence, or missing",
+            "status": "validated, fallback, candidate_only, or missing",
+            "can_estimate": "true only when point estimate is allowed",
+            "can_move": "true only when the target-horizon cell is validated",
+        },
+    }
+
+
+def whole_body_state_forecast_template() -> dict[str, object]:
+    """Return a complete fail-closed template for the unified output object.
+
+    This is a contract-level template, not a row-level patient forecast. Runtime
+    code may fill numeric values only when the corresponding cell is validated
+    or directly observed.
+    """
+
+    nowcast_cells = nowcast_state_grid()
+    trajectory_cells = _trajectory_state_cells()
+    validated_future = [cell for cell in trajectory_cells if cell.status == "validated"]
+    fallback_future = [cell for cell in trajectory_cells if cell.status != "validated"]
+    return {
+        "object_name": "whole_body_state_forecast",
+        "artifact_status": "schema_and_capability_template",
+        "runtime_values_included": False,
+        "schema": whole_body_state_forecast_schema(),
+        "patient_time": {
+            "patient_key": None,
+            "anchor_time": None,
+            "status": "runtime_required",
+        },
+        "current_state": {
+            "role": "present-tense body-state completion",
+            "validated_nowcast_module_target_cells": sum(
+                len(targets) for targets in VALIDATED_NOWCAST_MODULE_TARGETS.values()
+            ),
+            "cells": [cell.to_dict() for cell in nowcast_cells],
+            "policy": {
+                "observed_values_preferred": True,
+                "nowcast_only_when_target_missing": True,
+                "validated_module_target_required": True,
+                "future_claim_from_nowcast_allowed": False,
+            },
+        },
+        "future_trajectory": {
+            "role": "validated factual physiology rollout",
+            "horizons_hours": list(PREDICTION_HORIZONS_HOURS),
+            "validated_cell_count": len(validated_future),
+            "fallback_or_closed_cell_count": len(fallback_future),
+            "cells": [cell.to_dict() for cell in trajectory_cells],
+            "policy": {
+                "move_rule": "only validated future cells may move away from persistence",
+                "fallback_rule": "unsupported target-horizon pairs stay at persistence or missing",
+                "no_recursive_unvalidated_rollout": True,
+            },
+        },
+        "uncertainty": uncertainty_calibration_policy(),
+        "source_artifacts": [
+            "WHOLE_BODY_NOWCASTING_FINDINGS.md",
+            "whole_body_nowcasting_audit.json",
+            "WHOLE_BODY_TRAJECTORY_UNCERTAINTY_LAYER.md",
+            "whole_body_rollout_uncertainty_contract.json",
+            "whole_body_all_modules_intermediate_horizon_move_audit.json",
+            "whole_body_all_modules_conformal_coverage_audit.json",
+        ],
+        "safety_boundary": {
+            **observation_readiness()["safety_boundary"],
+            "same_time_state_completion_allowed": True,
+            "complete_human_simulation_claim_allowed": False,
         },
     }
 

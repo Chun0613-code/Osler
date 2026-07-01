@@ -122,6 +122,14 @@ imputation only: a validated nowcast target does not imply validated future
 movement, causal treatment effect, clinical authority, checkpoint promotion, or
 active symbolic-rule promotion.
 
+`whole_body_state_forecast_contract.json` and
+`WHOLE_BODY_STATE_FORECAST_OBJECT.md` assemble the validated observation axes
+into the final `whole_body_state_forecast` object contract: current-state
+nowcast cells, future trajectory cells, and calibrated interval metadata. These
+files are schema/readiness artifacts only. They include no row-level runtime
+predictions, timestamps, or patient identifiers, and they preserve the same
+non-causal, non-clinical safety boundary.
+
 Full eICU sepsis and AKI router artifacts follow the same aggregate/report
 boundary. Local transition parquet cohorts, including
 `eicu_aki_transitions_6h.parquet`, `eicu_aki_transitions_24h.parquet`,

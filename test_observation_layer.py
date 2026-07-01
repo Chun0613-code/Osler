@@ -4,8 +4,10 @@ from osler_jepa.observation_layer import (
     DENIED_AUTHORITIES,
     observation_readiness,
     rollout_readiness,
+    nowcast_state_grid,
     trajectory_prediction_grid,
     uncertainty_calibration_policy,
+    whole_body_state_forecast_template,
     whole_body_observation_capabilities,
 )
 
@@ -82,6 +84,41 @@ class ObservationLayerTests(unittest.TestCase):
             cells[("bilirubin", 24)].status,
             "fallback_observability_limited",
         )
+
+    def test_whole_body_state_forecast_template_unifies_three_objects(self):
+        nowcasts = nowcast_state_grid()
+        self.assertEqual(len(nowcasts), 41)
+        self.assertTrue(all(cell.time_axis == "current" for cell in nowcasts))
+        self.assertTrue(all(cell.can_estimate for cell in nowcasts))
+        self.assertTrue(all(not cell.can_move for cell in nowcasts))
+        self.assertIn(
+            ("hepatic_failure", "bilirubin_direct"),
+            {(cell.module, cell.target) for cell in nowcasts},
+        )
+
+        template = whole_body_state_forecast_template()
+        self.assertEqual(template["object_name"], "whole_body_state_forecast")
+        self.assertFalse(template["runtime_values_included"])
+        self.assertEqual(
+            template["current_state"]["validated_nowcast_module_target_cells"],
+            41,
+        )
+        self.assertGreaterEqual(
+            template["future_trajectory"]["validated_cell_count"],
+            95,
+        )
+        future_cells = template["future_trajectory"]["cells"]
+        self.assertIn(
+            ("respiratory", "paco2", 3),
+            {
+                (cell["module"], cell["target"], cell["horizon_hours"])
+                for cell in future_cells
+                if cell["status"] == "validated"
+            },
+        )
+        self.assertFalse(template["safety_boundary"]["causal_claim_allowed"])
+        self.assertFalse(template["safety_boundary"]["clinical_claim_allowed"])
+        self.assertFalse(template["safety_boundary"]["runtime_decision_authority"])
 
     def test_uncertainty_policy_requires_calibration_before_intervals(self):
         policy = uncertainty_calibration_policy()

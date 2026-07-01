@@ -115,14 +115,20 @@ say when it has not earned a calibrated confidence band.
 
 ## Output Shape
 
-The intended output object is:
+The implemented unified output object is:
 
 ```text
 whole_body_state_forecast
   patient_time
+  current_state
+    target/module:
+      point_estimate
+      source
+      status
+      can_estimate
   horizons: [1h, 3h, 6h, 12h, 24h, 48h]
-  variables:
-    target:
+  future_trajectory:
+    target/module:
       horizon:
         point_estimate
         lower
@@ -136,6 +142,11 @@ whole_body_state_forecast
 
 The important part is not that every cell contains a learned model output. The
 important part is that every cell has an honest state.
+
+The machine-readable object contract is recorded in
+`whole_body_state_forecast_contract.json`, and the runtime-safe template is
+exposed by `whole_body_state_forecast_template()` in
+`osler_jepa/observation_layer.py`.
 
 ## Boundary
 
@@ -151,4 +162,6 @@ The implementation contract lives in:
 - `WHOLE_BODY_TRAJECTORY_VALIDATION_FINDINGS.md`
 - `whole_body_intermediate_horizon_move_audit.json`
 - `whole_body_conformal_coverage_audit.json`
+- `WHOLE_BODY_STATE_FORECAST_OBJECT.md`
+- `whole_body_state_forecast_contract.json`
 - `test_observation_layer.py`
