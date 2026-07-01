@@ -25,7 +25,9 @@
       "WHOLE_BODY_TRAJECTORY_UNCERTAINTY_LAYER.md",
       "WHOLE_BODY_TRAJECTORY_VALIDATION_FINDINGS.md",
       "whole_body_intermediate_horizon_move_audit.json",
-      "whole_body_conformal_coverage_audit.json"
+      "whole_body_conformal_coverage_audit.json",
+      "whole_body_all_modules_intermediate_horizon_move_audit.json",
+      "whole_body_all_modules_conformal_coverage_audit.json"
     ],
     "goal": "ignore treatment planning for this layer and maximize validated body-state observation plus factual physiology prediction",
     "policy": {
@@ -87,8 +89,27 @@
         "sepsis 6h active-only: 8/8 targets pass 90% split-conformal coverage",
         "sepsis 6h all-windows: 7/8 targets pass; vasopressor proxy remains needs_calibration_audit",
         "AKI 24h active-only and all-windows: 7/7 targets pass",
-        "AKI 48h active-only and all-windows: 7/7 targets pass"
+        "AKI 48h active-only and all-windows: 7/7 targets pass",
+        "all-module expansion: 135/378 active-window cells and 151/378 all-window cells pass both patient-split and hospital-heldout conformal gates"
       ],
+      "whole_body_all_module_expansion": {
+        "modules": 13,
+        "module_horizon_cells": 39,
+        "validated_moving_target_cells": {
+          "total": 79,
+          "1h": 11,
+          "3h": 30,
+          "12h": 38
+        },
+        "strongest_module": "respiratory validates all targets at 3h and 12h",
+        "known_limits": [
+          "deep hepatic markers remain observability-limited",
+          "cardiac injury biomarkers remain sparse",
+          "endocrine hormone markers remain sparse",
+          "coagulation cascade targets remain mostly unvalidated",
+          "proxy systems expose bounded physiology rather than complete organ-specific simulation"
+        ]
+      },
       "uncertainty_rule": "numeric confidence intervals require target/horizon/source conformal coverage validation",
       "validated_multihop": "sepsis/immune -> MAP at 6h -> renal creatinine/BUN at 24h"
     },

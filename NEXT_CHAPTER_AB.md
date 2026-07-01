@@ -65,7 +65,9 @@ The trajectory and uncertainty extension is documented in
 `whole_body_rollout_uncertainty_contract.json`. The first validation pass is
 documented in `WHOLE_BODY_TRAJECTORY_VALIDATION_FINDINGS.md`,
 `whole_body_intermediate_horizon_move_audit.json`, and
-`whole_body_conformal_coverage_audit.json`.
+`whole_body_conformal_coverage_audit.json`. The full-body expansion is recorded
+in `whole_body_all_modules_intermediate_horizon_move_audit.json` and
+`whole_body_all_modules_conformal_coverage_audit.json`.
 
 Its allowed role is:
 

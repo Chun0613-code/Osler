@@ -14,9 +14,12 @@ import subprocess
 import sys
 from pathlib import Path
 
+from eicu_body_system_configs import BODY_SYSTEM_CONFIGS
+
 
 DEFAULT_HORIZONS = (1.0, 3.0, 12.0)
 DEFAULT_MODULES = ("sepsis", "aki")
+BODY_SYSTEM_MODULES = tuple(BODY_SYSTEM_CONFIGS)
 
 
 def horizon_suffix(horizon_hours: float) -> str:
@@ -51,6 +54,22 @@ def module_paths(module: str, horizon_hours: float) -> dict[str, Path]:
             "extractor": Path("eicu_aki_transition_extract.py"),
             "router": Path("eicu_aki_target_router.py"),
         }
+    if module == "respiratory":
+        return {
+            "cohort": Path(f"eicu_respiratory_transitions_{label}.parquet"),
+            "transition_report": Path(f"eicu_respiratory_transition_report_{label}.json"),
+            "router_report": Path(f"eicu_respiratory_target_router_{label}.json"),
+            "extractor": Path("eicu_respiratory_transition_extract.py"),
+            "router": Path("eicu_respiratory_target_router.py"),
+        }
+    if module in BODY_SYSTEM_CONFIGS:
+        return {
+            "cohort": Path(f"eicu_{module}_transitions_{label}.parquet"),
+            "transition_report": Path(f"eicu_{module}_transition_report_{label}.json"),
+            "router_report": Path(f"eicu_{module}_target_router_{label}.json"),
+            "extractor": Path("eicu_body_system_transition_extract.py"),
+            "router": Path("eicu_body_system_target_router.py"),
+        }
     raise ValueError(f"unsupported module: {module}")
 
 
@@ -64,10 +83,11 @@ def ensure_reports(
     data_root: Path,
     bootstrap_samples: int,
     force: bool,
+    body_max_stays: int | None,
 ) -> dict[str, Path]:
     paths = module_paths(module, horizon_hours)
     if force or not paths["cohort"].exists() or not paths["transition_report"].exists():
-        run_command([
+        command = [
             sys.executable,
             str(paths["extractor"]),
             "--data-root",
@@ -78,9 +98,14 @@ def ensure_reports(
             str(paths["transition_report"]),
             "--horizon-hours",
             str(horizon_hours),
-        ])
+        ]
+        if module in BODY_SYSTEM_CONFIGS:
+            command.extend(["--disease", module])
+            if body_max_stays is not None:
+                command.extend(["--max-stays", str(body_max_stays)])
+        run_command(command)
     if force or not paths["router_report"].exists():
-        run_command([
+        command = [
             sys.executable,
             str(paths["router"]),
             "--cohort",
@@ -91,12 +116,23 @@ def ensure_reports(
             horizon_suffix(horizon_hours),
             "--bootstrap-samples",
             str(bootstrap_samples),
-        ])
+        ]
+        if module in BODY_SYSTEM_CONFIGS:
+            command.extend(["--disease", module])
+        run_command(command)
     return paths
 
 
 def active_scope_name(module: str) -> str:
-    return "active_sepsis_only" if module == "sepsis" else "active_aki_only"
+    if module == "sepsis":
+        return "active_sepsis_only"
+    if module == "aki":
+        return "active_aki_only"
+    if module == "respiratory":
+        return "active_respiratory_only"
+    if module in BODY_SYSTEM_CONFIGS:
+        return "active_only"
+    raise ValueError(f"unsupported module: {module}")
 
 
 def target_validation_summary(module: str, router_report: dict[str, object]) -> dict[str, dict[str, object]]:
@@ -151,12 +187,13 @@ def build_audit(
     data_root: Path,
     bootstrap_samples: int,
     force: bool,
+    body_max_stays: int | None,
 ) -> dict[str, object]:
     results: dict[str, object] = {}
     for module in modules:
         module_results = {}
         for horizon in horizons:
-            paths = ensure_reports(module, horizon, data_root, bootstrap_samples, force)
+            paths = ensure_reports(module, horizon, data_root, bootstrap_samples, force, body_max_stays)
             transition_report = json.loads(paths["transition_report"].read_text(encoding="utf-8"))
             router_report = json.loads(paths["router_report"].read_text(encoding="utf-8"))
             module_results[horizon_label(horizon)] = {
@@ -201,6 +238,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--modules", default=",".join(DEFAULT_MODULES))
     parser.add_argument("--horizons", default=",".join(str(value) for value in DEFAULT_HORIZONS))
     parser.add_argument("--bootstrap-samples", type=int, default=300)
+    parser.add_argument(
+        "--body-max-stays",
+        type=int,
+        default=2500,
+        help="Bound body-system extraction cohorts; use -1 for unbounded.",
+    )
     parser.add_argument("--force", action="store_true")
     parser.add_argument("--output", type=Path, default=Path("whole_body_intermediate_horizon_move_audit.json"))
     return parser.parse_args()
@@ -210,12 +253,14 @@ def main() -> None:
     args = parse_args()
     modules = tuple(item.strip() for item in args.modules.split(",") if item.strip())
     horizons = tuple(float(item.strip()) for item in args.horizons.split(",") if item.strip())
+    body_max_stays = None if int(args.body_max_stays) < 0 else int(args.body_max_stays)
     report = build_audit(
         modules=modules,
         horizons=horizons,
         data_root=args.data_root,
         bootstrap_samples=args.bootstrap_samples,
         force=bool(args.force),
+        body_max_stays=body_max_stays,
     )
     args.output.write_text(json.dumps(report, indent=2, sort_keys=True), encoding="utf-8")
     print(json.dumps({

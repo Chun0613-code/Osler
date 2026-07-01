@@ -104,6 +104,14 @@ audit validates 90% residual intervals for sepsis 6h active-window forecasts and
 AKI 24h/48h forecasts, while rejecting the sepsis all-window vasopressor proxy
 interval for slight overcoverage. These reports are aggregate-only and contain
 no row-level patient identifiers.
+`whole_body_all_modules_intermediate_horizon_move_audit.json` and
+`whole_body_all_modules_conformal_coverage_audit.json` expand the same
+trajectory and interval audits to respiratory plus all 12 body-system modules.
+They validate 79 moving target-horizon cells across 39 module-horizon tasks and
+robust conformal intervals for 135/378 active-window cells and 151/378
+all-window cells. The reports remain aggregate-only. Local 1h/3h/12h transition
+parquet cohorts generated for those audits are row-level artifacts and are not
+versioned.
 
 Full eICU sepsis and AKI router artifacts follow the same aggregate/report
 boundary. Local transition parquet cohorts, including

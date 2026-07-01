@@ -9,8 +9,11 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+import eicu_body_system_target_router as body_router
 import eicu_aki_target_router as aki_router
+import eicu_respiratory_target_router as respiratory_router
 import eicu_sepsis_target_router as sepsis_router
+from eicu_body_system_configs import BODY_SYSTEM_CONFIGS, get_body_system_config
 
 
 DEFAULT_SEEDS = (7, 11, 19, 23, 37, 53, 71)
@@ -90,8 +93,10 @@ def _module_api(module: str):
     if module == "sepsis":
         return {
             "split_subjects": sepsis_router.split_subjects,
-            "attach_sources": sepsis_router.attach_sources,
-            "choose_selector": sepsis_router._choose_selector,
+            "attach_sources": lambda frame, discovery, heldout, **kwargs: sepsis_router.attach_sources(
+                frame, discovery, heldout, **kwargs
+            ),
+            "choose_selector": lambda discovery, **kwargs: sepsis_router._choose_selector(discovery, **kwargs),
             "active_scope": "active_sepsis",
             "future_suffix_arg": True,
             "hospital_scope": "hospitalid",
@@ -99,9 +104,36 @@ def _module_api(module: str):
     if module == "aki":
         return {
             "split_subjects": aki_router.split_subjects,
-            "attach_sources": aki_router.attach_sources,
-            "choose_selector": aki_router._choose_selector,
+            "attach_sources": lambda frame, discovery, heldout, **kwargs: aki_router.attach_sources(
+                frame, discovery, heldout, **kwargs
+            ),
+            "choose_selector": lambda discovery, **kwargs: aki_router._choose_selector(discovery, **kwargs),
             "active_scope": "active_aki",
+            "future_suffix_arg": True,
+            "hospital_scope": "hospitalid",
+        }
+    if module == "respiratory":
+        return {
+            "split_subjects": respiratory_router.split_subjects,
+            "attach_sources": lambda frame, discovery, heldout, **kwargs: respiratory_router.attach_sources(
+                frame, discovery, heldout, **kwargs
+            ),
+            "choose_selector": lambda discovery, **kwargs: respiratory_router._choose_selector(discovery, **kwargs),
+            "active_scope": "active_respiratory",
+            "future_suffix_arg": True,
+            "hospital_scope": "hospitalid",
+        }
+    if module in BODY_SYSTEM_CONFIGS:
+        config = get_body_system_config(module)
+        return {
+            "split_subjects": body_router.split_subjects,
+            "attach_sources": lambda frame, discovery, heldout, **kwargs: body_router.attach_sources(
+                frame, config, discovery, heldout, **kwargs
+            ),
+            "choose_selector": lambda discovery, **kwargs: body_router._choose_selector(
+                discovery, config, **kwargs
+            ),
+            "active_scope": "active",
             "future_suffix_arg": True,
             "hospital_scope": "hospitalid",
         }
