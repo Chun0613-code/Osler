@@ -67,6 +67,10 @@ A validated nowcast does not imply that the same variable can be moved into the
 future.  It only says the current body state contains enough information to
 estimate that value when it is missing.
 
+The MIMIC-IV cross-database pass independently validates 23 target-level
+same-time nowcasts on 63,307 subjects.  This is external-validity evidence, not
+a new disease-module runtime grant.
+
 ## Future Axis
 
 The future trajectory axis uses the canonical horizons:
@@ -85,6 +89,10 @@ The template now includes:
 - the 79 all-module intermediate-horizon move cells from the full-body audit.
 - the 59 full-variable 6h forecast cells from the eICU numeric coverage sweep.
 
+The MIMIC-IV cross-database pass independently validates 18 target-level 6h
+forecast cells using patient-heldout, first-careunit-heldout, and chronological
+heldout gates.
+
 Unsupported target/horizon pairs fall back to persistence or missing.  This is
 the same humility reflex as before, now placed inside one object.
 
@@ -96,6 +104,7 @@ for the target, horizon, and source.  The current aggregate interval evidence is
 - 51 full-variable 6h forecast cells pass;
 - 135/378 active-window full-body cells pass;
 - 151/378 all-window full-body cells pass.
+- 14 MIMIC-IV target-level 6h intervals pass external-database calibration.
 
 Cells without a passing interval gate must set `interval_status` to
 `needs_calibration_audit` and leave `lower`/`upper` empty.
@@ -154,3 +163,5 @@ The aggregate evidence comes from:
 - `whole_body_rollout_uncertainty_contract.json`
 - `whole_body_all_modules_intermediate_horizon_move_audit.json`
 - `whole_body_all_modules_conformal_coverage_audit.json`
+- `MIMICIV_CROSS_DATABASE_COVERAGE_FINDINGS.md`
+- `mimiciv_cross_database_coverage_audit.json`

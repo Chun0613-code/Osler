@@ -93,8 +93,9 @@ The unified `whole_body_state_forecast` object now uses:
 - 51 calibrated full-variable 6h interval cells;
 - explicit fallback/missing status for all non-validated numeric targets.
 
-The full sweep updates coverage only inside eICU.  It does not prove
-cross-database generalization; that is the next external-validity chapter.
+The full sweep updates coverage only inside eICU.  Cross-database
+generalization is evaluated separately in
+`MIMICIV_CROSS_DATABASE_COVERAGE_FINDINGS.md`.
 
 ## Safety Boundary
 
@@ -105,4 +106,3 @@ cross-database generalization; that is the next external-validity chapter.
 - Numeric intervals are allowed only for validated interval cells.
 - Causal, counterfactual, clinical, runtime-treatment, checkpoint-promotion,
   complete-human-simulation, and active-rule-promotion claims remain closed.
-

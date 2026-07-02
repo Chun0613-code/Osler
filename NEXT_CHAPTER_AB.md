@@ -73,7 +73,10 @@ state-completion axis is recorded in `WHOLE_BODY_NOWCASTING_FINDINGS.md` and
 in `WHOLE_BODY_STATE_FORECAST_OBJECT.md` and
 `whole_body_state_forecast_contract.json`. The eICU full numeric-variable
 coverage sweep is recorded in `EICU_FULL_VARIABLE_COVERAGE_FINDINGS.md` and
-`eicu_full_variable_coverage_audit.json`.
+`eicu_full_variable_coverage_audit.json`. The first independent database
+validation is recorded in `MIMICIV_CROSS_DATABASE_COVERAGE_FINDINGS.md`,
+`mimiciv_observation_transition_report.json`, and
+`mimiciv_cross_database_coverage_audit.json`.
 
 Its allowed role is:
 

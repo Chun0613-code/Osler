@@ -138,6 +138,21 @@ and 242 for 6h forecast. It validates 71 same-time nowcasts, 59 6h factual
 forecast cells, and 51 calibrated 6h interval cells. The report is
 aggregate-only and contains no row-level predictions or patient identifiers.
 
+`mimiciv_observation_transitions_6h.parquet` is local-only and ignored by git.
+It is the credentialed MIMIC-IV v3.1 all-ICU observation transition cohort used
+for cross-database validation of the whole-body observation layer. The aggregate
+reports `mimiciv_observation_transition_report.json`,
+`mimiciv_cross_database_coverage_audit.json`, and
+`MIMICIV_CROSS_DATABASE_COVERAGE_FINDINGS.md` record the external-validity pass:
+93,224 selected ICU stays, 640,164 evaluable 6h transition rows, 55 numeric
+targets swept, 23 validated same-time nowcasts, 18 validated 6h factual
+forecasts, and 14 calibrated 6h intervals. MIMIC-IV is treated as single-center,
+so the external stress gates are patient-heldout, first-careunit-heldout, and
+chronological heldout rather than hospital-heldout. These artifacts are
+aggregate-only and do not permit causal, counterfactual, clinical, runtime,
+checkpoint-promotion, complete-human-simulation, or active-rule-promotion
+claims.
+
 Full eICU sepsis and AKI router artifacts follow the same aggregate/report
 boundary. Local transition parquet cohorts, including
 `eicu_aki_transitions_6h.parquet`, `eicu_aki_transitions_24h.parquet`,

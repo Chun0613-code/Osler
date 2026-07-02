@@ -149,6 +149,70 @@ VALIDATED_FULL_VARIABLE_INTERVAL_6H_CELLS: dict[str, tuple[str, ...]] = {
     "coagulopathy_heme": ("hemoglobin", "map"),
 }
 
+MIMICIV_EXTERNAL_NOWCAST_TARGETS = (
+    "albumin",
+    "anion_gap",
+    "bicarbonate",
+    "bun",
+    "calcium",
+    "chloride",
+    "fibrinogen",
+    "heart_rate",
+    "hematocrit",
+    "hemoglobin",
+    "ionized_calcium",
+    "magnesium",
+    "map",
+    "minute_volume",
+    "paco2",
+    "pao2",
+    "ph",
+    "phosphate",
+    "platelets",
+    "potassium",
+    "respiratory_rate",
+    "serum_osmolality",
+    "sodium",
+)
+
+MIMICIV_EXTERNAL_FORECAST_6H_TARGETS = (
+    "anion_gap",
+    "bicarbonate",
+    "calcium",
+    "chloride",
+    "heart_rate",
+    "hemoglobin",
+    "magnesium",
+    "map",
+    "minute_volume",
+    "paco2",
+    "pao2",
+    "ph",
+    "phosphate",
+    "potassium",
+    "respiratory_rate",
+    "temperature",
+    "urine_output",
+    "wbc",
+)
+
+MIMICIV_EXTERNAL_INTERVAL_6H_TARGETS = (
+    "anion_gap",
+    "bicarbonate",
+    "calcium",
+    "heart_rate",
+    "magnesium",
+    "map",
+    "minute_volume",
+    "paco2",
+    "pao2",
+    "ph",
+    "phosphate",
+    "potassium",
+    "respiratory_rate",
+    "temperature",
+)
+
 VALIDATED_INTERMEDIATE_MOVE_CELLS: dict[str, dict[int, tuple[str, ...]]] = {
     "acute_neuro": {
         1: ("map", "respiratory_rate"),
@@ -390,6 +454,23 @@ def whole_body_observation_capabilities() -> tuple[ObservationCapability, ...]:
             targets=("59_module_target_forecast_cells", "51_calibrated_interval_cells"),
             horizon_hours=(6,),
             evidence="EICU_FULL_VARIABLE_COVERAGE_FINDINGS.md; 242 eligible numeric targets swept through forecast and interval gates",
+        ),
+        ObservationCapability(
+            name="mimiciv_cross_database_observation_validation",
+            status="validated",
+            scope="external_database_observation_validation",
+            systems=("whole_body",),
+            targets=(
+                "23_target_nowcast_cells",
+                "18_target_6h_forecast_cells",
+                "14_target_calibrated_interval_cells",
+            ),
+            horizon_hours=(0, 6),
+            evidence=(
+                "MIMICIV_CROSS_DATABASE_COVERAGE_FINDINGS.md; full MIMIC-IV "
+                "v3.1 target-level audit passes patient, careunit, and time "
+                "held-out gates for a bounded target subset"
+            ),
         ),
         ObservationCapability(
             name="cardio_renal_long_horizon_coupling",
@@ -841,6 +922,8 @@ def whole_body_state_forecast_template() -> dict[str, object]:
             "whole_body_rollout_uncertainty_contract.json",
             "whole_body_all_modules_intermediate_horizon_move_audit.json",
             "whole_body_all_modules_conformal_coverage_audit.json",
+            "MIMICIV_CROSS_DATABASE_COVERAGE_FINDINGS.md",
+            "mimiciv_cross_database_coverage_audit.json",
         ],
         "safety_boundary": {
             **observation_readiness()["safety_boundary"],

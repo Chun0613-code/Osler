@@ -40,6 +40,12 @@ class ObservationLayerTests(unittest.TestCase):
         self.assertIn("same_time_state_completion", nowcast.allowed_uses)
         self.assertIn("bilirubin_direct", nowcast.targets)
 
+        mimiciv = capabilities["mimiciv_cross_database_observation_validation"]
+        self.assertTrue(mimiciv.is_validated)
+        self.assertEqual(mimiciv.scope, "external_database_observation_validation")
+        self.assertEqual(mimiciv.horizon_hours, (0, 6))
+        self.assertIn("14_target_calibrated_interval_cells", mimiciv.targets)
+
     def test_readiness_is_observation_only_and_fail_closed(self):
         readiness = observation_readiness()
 
@@ -135,6 +141,10 @@ class ObservationLayerTests(unittest.TestCase):
         self.assertFalse(template["safety_boundary"]["causal_claim_allowed"])
         self.assertFalse(template["safety_boundary"]["clinical_claim_allowed"])
         self.assertFalse(template["safety_boundary"]["runtime_decision_authority"])
+        self.assertIn(
+            "mimiciv_cross_database_coverage_audit.json",
+            template["source_artifacts"],
+        )
 
     def test_uncertainty_policy_requires_calibration_before_intervals(self):
         policy = uncertainty_calibration_policy()

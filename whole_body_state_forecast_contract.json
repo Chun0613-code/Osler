@@ -11,6 +11,8 @@
       "source_artifacts": [
         "EICU_FULL_VARIABLE_COVERAGE_FINDINGS.md",
         "eicu_full_variable_coverage_audit.json",
+        "MIMICIV_CROSS_DATABASE_COVERAGE_FINDINGS.md",
+        "mimiciv_cross_database_coverage_audit.json",
         "WHOLE_BODY_NOWCASTING_FINDINGS.md",
         "whole_body_nowcasting_audit.json"
       ],
@@ -29,6 +31,8 @@
       "source_artifacts": [
         "EICU_FULL_VARIABLE_COVERAGE_FINDINGS.md",
         "eicu_full_variable_coverage_audit.json",
+        "MIMICIV_CROSS_DATABASE_COVERAGE_FINDINGS.md",
+        "mimiciv_cross_database_coverage_audit.json",
         "WHOLE_BODY_TRAJECTORY_UNCERTAINTY_LAYER.md",
         "whole_body_rollout_uncertainty_contract.json",
         "whole_body_all_modules_intermediate_horizon_move_audit.json"
@@ -46,11 +50,14 @@
       "validated_cells": {
         "full_variable_6h": "51",
         "active_window": "135/378",
-        "all_windows": "151/378"
+        "all_windows": "151/378",
+        "mimiciv_external_target_level_6h": "14"
       },
       "source_artifacts": [
         "EICU_FULL_VARIABLE_COVERAGE_FINDINGS.md",
         "eicu_full_variable_coverage_audit.json",
+        "MIMICIV_CROSS_DATABASE_COVERAGE_FINDINGS.md",
+        "mimiciv_cross_database_coverage_audit.json",
         "whole_body_all_modules_conformal_coverage_audit.json",
         "whole_body_conformal_coverage_audit.json"
       ],
@@ -58,6 +65,31 @@
         "numeric_interval_requires_calibration_gate": true,
         "missing_calibration_status": "needs_calibration_audit",
         "lower_upper_empty_until_calibrated": true
+      }
+    },
+    "external_database_validation": {
+      "database": "MIMIC-IV v3.1",
+      "scope": "target-level all-ICU observation validation",
+      "subjects": 63307,
+      "transition_rows": 640164,
+      "eligible_numeric_targets": 55,
+      "validated_nowcast_targets": 23,
+      "validated_6h_forecast_targets": 18,
+      "validated_6h_interval_targets": 14,
+      "holdout_gates": [
+        "7 random patient splits",
+        "first-careunit heldout",
+        "chronological heldout"
+      ],
+      "source_artifacts": [
+        "MIMICIV_CROSS_DATABASE_COVERAGE_FINDINGS.md",
+        "mimiciv_observation_transition_report.json",
+        "mimiciv_cross_database_coverage_audit.json"
+      ],
+      "policy": {
+        "external_validity_evidence": true,
+        "new_module_runtime_authority": false,
+        "causal_claim_allowed": false
       }
     }
   },
