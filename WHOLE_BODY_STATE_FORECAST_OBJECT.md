@@ -83,6 +83,10 @@ candidate-only: 0/6 same-time nowcast targets pass robust patient, hospital,
 and placebo gates. A timestamp-valid neuro finding may be displayed as observed
 evidence; an unobserved neuro-note target must remain missing.
 
+The all-ICU eICU neuro-note follow-up scales the same question to 100,862
+subjects and still validates 0/2 GCS/delirium nowcast targets. This rejects the
+simple explanation that the bounded acute-neuro miss was only a power problem.
+
 ## Future Axis
 
 The future trajectory axis uses the canonical horizons:
@@ -112,6 +116,9 @@ until a later audit passes.
 The eICU neuro-note pass does not validate any 6h future GCS, delirium, or
 structured neurologic-exam forecast cells. Those targets stay outside the
 future trajectory grid until a later audit passes.
+
+The all-ICU follow-up also validates 0/2 GCS/delirium 6h forecast targets;
+persistence remains stronger than the note-augmented ridge forecast.
 
 Unsupported target/horizon pairs fall back to persistence or missing.  This is
 the same humility reflex as before, now placed inside one object.
@@ -189,3 +196,5 @@ The aggregate evidence comes from:
 - `mimiciv_radiology_note_coverage_audit.json`
 - `EICU_NEURO_NOTE_OBSERVATION_FINDINGS.md`
 - `eicu_neuro_note_coverage_audit.json`
+- `EICU_NEURO_NOTE_ALL_ICU_FINDINGS.md`
+- `eicu_neuro_note_all_icu_coverage_audit.json`

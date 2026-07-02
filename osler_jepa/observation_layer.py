@@ -525,10 +525,11 @@ def whole_body_observation_capabilities() -> tuple[ObservationCapability, ...]:
             targets=EICU_NEURO_NOTE_TARGETS,
             horizon_hours=(0, 6),
             evidence=(
-                "EICU_NEURO_NOTE_OBSERVATION_FINDINGS.md; 108,418 "
-                "timestamped neuro-note/flowsheet events extracted, with GCS "
-                "and delirium support, but 0/6 nowcast, 0/6 forecast, and "
-                "0/6 interval targets pass robust held-out gates"
+                "EICU_NEURO_NOTE_OBSERVATION_FINDINGS.md and "
+                "EICU_NEURO_NOTE_ALL_ICU_FINDINGS.md; bounded and all-ICU "
+                "audits extract timestamped GCS/delirium evidence, but 0 "
+                "note-derived neuro targets pass robust nowcast, forecast, or "
+                "interval gates even after scaling to 100,862 subjects"
             ),
             allowed_uses=(
                 "shadow_observation",
@@ -996,6 +997,8 @@ def whole_body_state_forecast_template() -> dict[str, object]:
             "mimiciv_radiology_note_coverage_audit.json",
             "EICU_NEURO_NOTE_OBSERVATION_FINDINGS.md",
             "eicu_neuro_note_coverage_audit.json",
+            "EICU_NEURO_NOTE_ALL_ICU_FINDINGS.md",
+            "eicu_neuro_note_all_icu_coverage_audit.json",
         ],
         "safety_boundary": {
             **observation_readiness()["safety_boundary"],

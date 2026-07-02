@@ -128,6 +128,8 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--cohort", type=Path, default=Path("/private/tmp/eicu_acute_neuro_note_observation_transitions_6h.parquet"))
     parser.add_argument("--output", type=Path, default=Path("eicu_neuro_note_coverage_audit.json"))
+    parser.add_argument("--artifact-name", default="eICU neuro-note structured observation coverage audit")
+    parser.add_argument("--targets", default=",".join(TARGETS))
     parser.add_argument("--seeds", default=",".join(str(seed) for seed in DEFAULT_SEEDS))
     parser.add_argument("--discovery-fraction", type=float, default=0.67)
     parser.add_argument("--inner-folds", type=int, default=3)
@@ -145,8 +147,9 @@ def main() -> None:
     args = parse_args()
     frame = pd.read_parquet(args.cohort).reset_index(drop=True)
     seeds = tuple(int(item.strip()) for item in args.seeds.split(",") if item.strip())
+    targets = tuple(item.strip() for item in args.targets.split(",") if item.strip())
     target_reports: dict[str, dict[str, object]] = {}
-    for target in TARGETS:
+    for target in targets:
         print(f"Auditing neuro-note target: {target}", flush=True)
         target_reports[target] = audit_note_target(
             frame,
@@ -179,12 +182,12 @@ def main() -> None:
         if (report.get("forecast") or {}).get("interval_validated")
     )
     output = {
-        "artifact": "eICU neuro-note structured observation coverage audit",
+        "artifact": args.artifact_name,
         "cohort": "local-only eICU acute-neuro note-enhanced transition cohort",
-        "targets": list(TARGETS),
+        "targets": list(targets),
         "counts": {
-            "eligible_nowcast_targets": int(sum(bool((report.get("nowcast") or {}).get("support")) for report in target_reports.values())),
-            "eligible_forecast_targets": int(sum(bool((report.get("forecast") or {}).get("support")) for report in target_reports.values())),
+            "eligible_nowcast_targets": int(sum(((report.get("nowcast") or {}).get("support") or {}).get("rows", 0) > 0 for report in target_reports.values())),
+            "eligible_forecast_targets": int(sum(((report.get("forecast") or {}).get("support") or {}).get("rows", 0) > 0 for report in target_reports.values())),
             "validated_nowcast_targets": int(len(nowcast_validated)),
             "validated_forecast_targets": int(len(forecast_validated)),
             "validated_interval_targets": int(len(interval_validated)),

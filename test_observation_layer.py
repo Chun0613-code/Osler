@@ -58,6 +58,8 @@ class ObservationLayerTests(unittest.TestCase):
         self.assertIn("neuro_gcs", neuro_notes.targets)
         self.assertIn("neuro_delirium_present", neuro_notes.targets)
         self.assertNotIn("same_time_state_completion", neuro_notes.allowed_uses)
+        self.assertIn("EICU_NEURO_NOTE_ALL_ICU_FINDINGS.md", neuro_notes.evidence)
+        self.assertIn("100,862 subjects", neuro_notes.evidence)
 
     def test_readiness_is_observation_only_and_fail_closed(self):
         readiness = observation_readiness()

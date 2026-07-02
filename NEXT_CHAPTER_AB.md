@@ -88,7 +88,12 @@ note-backed pass is recorded in `EICU_NEURO_NOTE_OBSERVATION_FINDINGS.md`,
 `eicu_neuro_note_coverage_audit.json`; it extracts timestamp-valid GCS and
 delirium/CAM evidence in the acute-neuro cohort, but keeps the module
 candidate-only because no `neuro_*` nowcast, forecast, or interval target
-passes robust gates.
+passes robust gates. The all-ICU follow-up is recorded in
+`EICU_NEURO_NOTE_ALL_ICU_FINDINGS.md`,
+`eicu_neuro_note_all_icu_observation_report.json`, and
+`eicu_neuro_note_all_icu_coverage_audit.json`; it scales GCS/delirium support
+to 100,862 subjects and still keeps the module candidate-only, rejecting the
+simple power-limitation explanation.
 
 Its allowed role is:
 

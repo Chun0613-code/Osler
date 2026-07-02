@@ -1,0 +1,61 @@
+{
+  "anchor_policy": {
+    "max_anchors_per_stay": 16,
+    "source": "timestamped GCS/delirium observations",
+    "step_hours": 4.0
+  },
+  "artifact": "eICU all-ICU neuro-note structured observation extraction",
+  "causal_claim_allowed": false,
+  "clinical_claim_allowed": false,
+  "current_support": {
+    "neuro_delirium_present": 242527,
+    "neuro_gcs": 973906
+  },
+  "event_stays": 147728,
+  "events": 3749014,
+  "future_support": {
+    "neuro_delirium_present": 129181,
+    "neuro_gcs": 712957
+  },
+  "hospitals": 201,
+  "leakage_guard": {
+    "current_note_time_rule": "note_time <= anchor t, with 24h lookback",
+    "future_note_time_rule": "note_time > anchor t and nearest to t+6h within +/-2h",
+    "same_source_nowcast_rule": "all neuro_* features must be excluded from same-time nowcast features"
+  },
+  "measurement_rows": 389771740,
+  "output": "local-only all-ICU neuro-note transition parquet",
+  "pair_counts": {
+    "neuro_delirium_present": 120208,
+    "neuro_gcs": 710976
+  },
+  "patient_ids_included_in_report": false,
+  "row_level_outputs_committed": false,
+  "rows": 994134,
+  "state_variables": [
+    "map",
+    "lactate",
+    "creatinine",
+    "urine_output",
+    "o2sat",
+    "heart_rate",
+    "respiratory_rate",
+    "temperature",
+    "wbc",
+    "bilirubin",
+    "bilirubin_direct",
+    "platelets",
+    "bicarbonate",
+    "ph",
+    "sodium",
+    "potassium",
+    "bun",
+    "glucose"
+  ],
+  "stays": 133574,
+  "subjects": 100862,
+  "targets": [
+    "neuro_gcs",
+    "neuro_delirium_present"
+  ]
+}

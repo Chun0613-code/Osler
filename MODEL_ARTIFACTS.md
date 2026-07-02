@@ -183,6 +183,20 @@ forecast, or given uncertainty intervals. These artifacts are aggregate-only
 and do not permit causal, counterfactual, clinical, runtime, checkpoint,
 complete-human-simulation, or active-rule-promotion claims.
 
+`eicu_neuro_note_all_icu_transitions_6h.parquet` is local-only and ignored by
+git. It tests whether the GCS/delirium near-miss is rescued by scale. The
+committed aggregate artifacts `eicu_neuro_note_all_icu_observation_report.json`,
+`eicu_neuro_note_all_icu_coverage_audit.json`, and
+`EICU_NEURO_NOTE_ALL_ICU_FINDINGS.md` record the all-ICU pass: 3,749,014
+timestamped GCS/delirium events, 994,134 transition rows, 100,862 subjects,
+710,976 paired GCS rows, and 120,208 paired delirium rows. Despite that scale,
+0/2 same-time nowcast targets, 0/2 6h forecast targets, and 0/2 interval
+targets pass robust gates. This confirms that note-derived variables expand
+observed evidence, not validated predictive coverage, under the current
+contract. These artifacts are aggregate-only and do not permit causal,
+counterfactual, clinical, runtime, checkpoint, complete-human-simulation, or
+active-rule-promotion claims.
+
 Full eICU sepsis and AKI router artifacts follow the same aggregate/report
 boundary. Local transition parquet cohorts, including
 `eicu_aki_transitions_6h.parquet`, `eicu_aki_transitions_24h.parquet`,
