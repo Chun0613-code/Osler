@@ -168,6 +168,21 @@ forecast, or given uncertainty intervals. These artifacts are aggregate-only
 and do not permit causal, counterfactual, clinical, runtime, checkpoint,
 complete-human-simulation, or active-rule-promotion claims.
 
+`eicu_acute_neuro_note_observation_transitions_6h.parquet` is local-only and
+ignored by git. It augments the bounded acute-neuro eICU transition cohort with
+timestamped neurologic nursing/progress-note observations. The committed
+aggregate artifacts `eicu_neuro_note_observation_report.json`,
+`eicu_neuro_note_coverage_audit.json`, and
+`EICU_NEURO_NOTE_OBSERVATION_FINDINGS.md` record the note-backed neuro-depth
+pass: 108,418 neuro-note/flowsheet events were extracted, with usable support
+for GCS and delirium/CAM status, but 0/6 same-time nowcast targets, 0/6 6h
+forecast targets, and 0/6 interval targets passed robust held-out gates. The
+module remains candidate-only: timestamp-valid extracted neuro findings may be
+used as observed evidence, but unobserved `neuro_*` targets may not be imputed,
+forecast, or given uncertainty intervals. These artifacts are aggregate-only
+and do not permit causal, counterfactual, clinical, runtime, checkpoint,
+complete-human-simulation, or active-rule-promotion claims.
+
 Full eICU sepsis and AKI router artifacts follow the same aggregate/report
 boundary. Local transition parquet cohorts, including
 `eicu_aki_transitions_6h.parquet`, `eicu_aki_transitions_24h.parquet`,

@@ -53,6 +53,12 @@ class ObservationLayerTests(unittest.TestCase):
         self.assertNotIn("factual_prediction", radiology_notes.allowed_uses)
         self.assertIn("structured_note_observation", radiology_notes.allowed_uses)
 
+        neuro_notes = capabilities["eicu_neuro_note_structured_observation_candidate"]
+        self.assertFalse(neuro_notes.is_validated)
+        self.assertIn("neuro_gcs", neuro_notes.targets)
+        self.assertIn("neuro_delirium_present", neuro_notes.targets)
+        self.assertNotIn("same_time_state_completion", neuro_notes.allowed_uses)
+
     def test_readiness_is_observation_only_and_fail_closed(self):
         readiness = observation_readiness()
 

@@ -82,7 +82,13 @@ measurement-depth pass is recorded in
 `mimiciv_radiology_note_observation_report.json`, and
 `mimiciv_radiology_note_coverage_audit.json`; it extracts timestamp-valid chest
 radiology findings but keeps the module candidate-only because no `rad_*`
-nowcast, forecast, or interval target passes robust gates.
+nowcast, forecast, or interval target passes robust gates. The second
+note-backed pass is recorded in `EICU_NEURO_NOTE_OBSERVATION_FINDINGS.md`,
+`eicu_neuro_note_observation_report.json`, and
+`eicu_neuro_note_coverage_audit.json`; it extracts timestamp-valid GCS and
+delirium/CAM evidence in the acute-neuro cohort, but keeps the module
+candidate-only because no `neuro_*` nowcast, forecast, or interval target
+passes robust gates.
 
 Its allowed role is:
 

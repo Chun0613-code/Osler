@@ -226,6 +226,19 @@ MIMICIV_RADIOLOGY_NOTE_VALIDATED_NOWCAST_TARGETS: tuple[str, ...] = ()
 MIMICIV_RADIOLOGY_NOTE_VALIDATED_FORECAST_TARGETS: tuple[str, ...] = ()
 MIMICIV_RADIOLOGY_NOTE_VALIDATED_INTERVAL_TARGETS: tuple[str, ...] = ()
 
+EICU_NEURO_NOTE_TARGETS = (
+    "neuro_gcs",
+    "neuro_sedation_score",
+    "neuro_delirium_present",
+    "neuro_mental_abnormal",
+    "neuro_pupils_abnormal",
+    "neuro_motor_abnormal",
+)
+
+EICU_NEURO_NOTE_VALIDATED_NOWCAST_TARGETS: tuple[str, ...] = ()
+EICU_NEURO_NOTE_VALIDATED_FORECAST_TARGETS: tuple[str, ...] = ()
+EICU_NEURO_NOTE_VALIDATED_INTERVAL_TARGETS: tuple[str, ...] = ()
+
 VALIDATED_INTERMEDIATE_MOVE_CELLS: dict[str, dict[int, tuple[str, ...]]] = {
     "acute_neuro": {
         1: ("map", "respiratory_rate"),
@@ -496,6 +509,25 @@ def whole_body_observation_capabilities() -> tuple[ObservationCapability, ...]:
                 "MIMICIV_RADIOLOGY_NOTE_OBSERVATION_FINDINGS.md; "
                 "317,371 timestamped chest radiology reports extracted into "
                 "six structured findings, but 0/6 nowcast, 0/6 forecast, and "
+                "0/6 interval targets pass robust held-out gates"
+            ),
+            allowed_uses=(
+                "shadow_observation",
+                "structured_note_observation",
+                "capability_reporting",
+            ),
+        ),
+        ObservationCapability(
+            name="eicu_neuro_note_structured_observation_candidate",
+            status="candidate_only",
+            scope="note_backed_measurement_depth",
+            systems=("neurologic", "nursing_flowsheet", "progress_note_structured_exam"),
+            targets=EICU_NEURO_NOTE_TARGETS,
+            horizon_hours=(0, 6),
+            evidence=(
+                "EICU_NEURO_NOTE_OBSERVATION_FINDINGS.md; 108,418 "
+                "timestamped neuro-note/flowsheet events extracted, with GCS "
+                "and delirium support, but 0/6 nowcast, 0/6 forecast, and "
                 "0/6 interval targets pass robust held-out gates"
             ),
             allowed_uses=(
@@ -962,6 +994,8 @@ def whole_body_state_forecast_template() -> dict[str, object]:
             "mimiciv_cross_database_coverage_audit.json",
             "MIMICIV_RADIOLOGY_NOTE_OBSERVATION_FINDINGS.md",
             "mimiciv_radiology_note_coverage_audit.json",
+            "EICU_NEURO_NOTE_OBSERVATION_FINDINGS.md",
+            "eicu_neuro_note_coverage_audit.json",
         ],
         "safety_boundary": {
             **observation_readiness()["safety_boundary"],

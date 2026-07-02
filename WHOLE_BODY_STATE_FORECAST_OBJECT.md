@@ -77,6 +77,12 @@ nowcast targets pass robust patient, careunit, time, and placebo gates. A
 timestamp-valid report finding may be displayed as observed evidence; an
 unobserved radiology finding must remain missing.
 
+The eICU neuro-note pass extracts timestamped GCS and delirium/CAM evidence
+from nursing/progress-note flowsheets, but those `neuro_*` targets also remain
+candidate-only: 0/6 same-time nowcast targets pass robust patient, hospital,
+and placebo gates. A timestamp-valid neuro finding may be displayed as observed
+evidence; an unobserved neuro-note target must remain missing.
+
 ## Future Axis
 
 The future trajectory axis uses the canonical horizons:
@@ -102,6 +108,10 @@ heldout gates.
 The MIMIC-IV radiology note pass does not validate any 6h future imaging
 finding forecast cells. Those targets stay outside the future trajectory grid
 until a later audit passes.
+
+The eICU neuro-note pass does not validate any 6h future GCS, delirium, or
+structured neurologic-exam forecast cells. Those targets stay outside the
+future trajectory grid until a later audit passes.
 
 Unsupported target/horizon pairs fall back to persistence or missing.  This is
 the same humility reflex as before, now placed inside one object.
@@ -177,3 +187,5 @@ The aggregate evidence comes from:
 - `mimiciv_cross_database_coverage_audit.json`
 - `MIMICIV_RADIOLOGY_NOTE_OBSERVATION_FINDINGS.md`
 - `mimiciv_radiology_note_coverage_audit.json`
+- `EICU_NEURO_NOTE_OBSERVATION_FINDINGS.md`
+- `eicu_neuro_note_coverage_audit.json`
