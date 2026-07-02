@@ -153,6 +153,21 @@ aggregate-only and do not permit causal, counterfactual, clinical, runtime,
 checkpoint-promotion, complete-human-simulation, or active-rule-promotion
 claims.
 
+`mimiciv_observation_radiology_transitions_6h.parquet` is local-only and
+ignored by git. It augments the MIMIC-IV all-ICU observation cohort with
+timestamped MIMIC-IV Note v2.2 chest radiology findings extracted from reports.
+The committed aggregate artifacts `mimiciv_radiology_note_observation_report.json`,
+`mimiciv_radiology_note_coverage_audit.json`, and
+`MIMICIV_RADIOLOGY_NOTE_OBSERVATION_FINDINGS.md` record the note-backed
+measurement-depth pass: 317,371 chest radiology reports were parsed into six
+structured findings, but 0/6 same-time nowcast targets, 0/6 6h forecast
+targets, and 0/6 interval targets passed the robust held-out gates. The note
+stream is therefore candidate-only: timestamp-valid extracted findings may be
+used as observed evidence, but unobserved `rad_*` targets may not be imputed,
+forecast, or given uncertainty intervals. These artifacts are aggregate-only
+and do not permit causal, counterfactual, clinical, runtime, checkpoint,
+complete-human-simulation, or active-rule-promotion claims.
+
 Full eICU sepsis and AKI router artifacts follow the same aggregate/report
 boundary. Local transition parquet cohorts, including
 `eicu_aki_transitions_6h.parquet`, `eicu_aki_transitions_24h.parquet`,

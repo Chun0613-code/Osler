@@ -46,6 +46,13 @@ class ObservationLayerTests(unittest.TestCase):
         self.assertEqual(mimiciv.horizon_hours, (0, 6))
         self.assertIn("14_target_calibrated_interval_cells", mimiciv.targets)
 
+        radiology_notes = capabilities["mimiciv_radiology_note_structured_observation_candidate"]
+        self.assertFalse(radiology_notes.is_validated)
+        self.assertEqual(radiology_notes.scope, "note_backed_measurement_depth")
+        self.assertIn("rad_pleural_effusion", radiology_notes.targets)
+        self.assertNotIn("factual_prediction", radiology_notes.allowed_uses)
+        self.assertIn("structured_note_observation", radiology_notes.allowed_uses)
+
     def test_readiness_is_observation_only_and_fail_closed(self):
         readiness = observation_readiness()
 

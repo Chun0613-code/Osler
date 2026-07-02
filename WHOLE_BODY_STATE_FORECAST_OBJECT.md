@@ -71,6 +71,12 @@ The MIMIC-IV cross-database pass independently validates 23 target-level
 same-time nowcasts on 63,307 subjects.  This is external-validity evidence, not
 a new disease-module runtime grant.
 
+The first MIMIC-IV Note pass extracts timestamped chest radiology findings
+from free text, but those `rad_*` targets remain candidate-only: 0/6 same-time
+nowcast targets pass robust patient, careunit, time, and placebo gates. A
+timestamp-valid report finding may be displayed as observed evidence; an
+unobserved radiology finding must remain missing.
+
 ## Future Axis
 
 The future trajectory axis uses the canonical horizons:
@@ -92,6 +98,10 @@ The template now includes:
 The MIMIC-IV cross-database pass independently validates 18 target-level 6h
 forecast cells using patient-heldout, first-careunit-heldout, and chronological
 heldout gates.
+
+The MIMIC-IV radiology note pass does not validate any 6h future imaging
+finding forecast cells. Those targets stay outside the future trajectory grid
+until a later audit passes.
 
 Unsupported target/horizon pairs fall back to persistence or missing.  This is
 the same humility reflex as before, now placed inside one object.
@@ -165,3 +175,5 @@ The aggregate evidence comes from:
 - `whole_body_all_modules_conformal_coverage_audit.json`
 - `MIMICIV_CROSS_DATABASE_COVERAGE_FINDINGS.md`
 - `mimiciv_cross_database_coverage_audit.json`
+- `MIMICIV_RADIOLOGY_NOTE_OBSERVATION_FINDINGS.md`
+- `mimiciv_radiology_note_coverage_audit.json`

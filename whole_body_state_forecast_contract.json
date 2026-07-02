@@ -1,6 +1,6 @@
 {
   "artifact": "Osler-JEPA whole_body_state_forecast contract",
-  "date": "2026-07-01",
+  "date": "2026-07-02",
   "goal": "Unify validated current-state nowcasting, future factual forecasting, and calibrated uncertainty into one fail-closed whole-body observation object.",
   "object_name": "whole_body_state_forecast",
   "runtime_values_included": false,
@@ -91,6 +91,35 @@
         "new_module_runtime_authority": false,
         "causal_claim_allowed": false
       }
+    },
+    "note_backed_measurement_depth": {
+      "database": "MIMIC-IV Note v2.2 radiology reports",
+      "scope": "timestamp-valid structured text observation",
+      "status": "candidate_only",
+      "reports_parsed": 317371,
+      "targets": [
+        "rad_pulmonary_edema",
+        "rad_pleural_effusion",
+        "rad_consolidation",
+        "rad_atelectasis",
+        "rad_pneumothorax",
+        "rad_cardiomegaly"
+      ],
+      "validated_nowcast_targets": 0,
+      "validated_6h_forecast_targets": 0,
+      "validated_6h_interval_targets": 0,
+      "source_artifacts": [
+        "MIMICIV_RADIOLOGY_NOTE_OBSERVATION_FINDINGS.md",
+        "mimiciv_radiology_note_observation_report.json",
+        "mimiciv_radiology_note_coverage_audit.json"
+      ],
+      "policy": {
+        "timestamp_valid_observed_note_findings_allowed": true,
+        "same_time_imputation_allowed": false,
+        "future_forecast_allowed": false,
+        "uncertainty_interval_allowed": false,
+        "causal_claim_allowed": false
+      }
     }
   },
   "cell_schema": {
@@ -113,6 +142,7 @@
     "validated same-time state completion",
     "validated factual physiology prediction",
     "validated uncertainty display",
+    "timestamp-valid structured note observation",
     "capability reporting"
   ],
   "safety_boundary": {

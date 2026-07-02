@@ -213,6 +213,19 @@ MIMICIV_EXTERNAL_INTERVAL_6H_TARGETS = (
     "temperature",
 )
 
+MIMICIV_RADIOLOGY_NOTE_TARGETS = (
+    "rad_pulmonary_edema",
+    "rad_pleural_effusion",
+    "rad_consolidation",
+    "rad_atelectasis",
+    "rad_pneumothorax",
+    "rad_cardiomegaly",
+)
+
+MIMICIV_RADIOLOGY_NOTE_VALIDATED_NOWCAST_TARGETS: tuple[str, ...] = ()
+MIMICIV_RADIOLOGY_NOTE_VALIDATED_FORECAST_TARGETS: tuple[str, ...] = ()
+MIMICIV_RADIOLOGY_NOTE_VALIDATED_INTERVAL_TARGETS: tuple[str, ...] = ()
+
 VALIDATED_INTERMEDIATE_MOVE_CELLS: dict[str, dict[int, tuple[str, ...]]] = {
     "acute_neuro": {
         1: ("map", "respiratory_rate"),
@@ -473,6 +486,25 @@ def whole_body_observation_capabilities() -> tuple[ObservationCapability, ...]:
             ),
         ),
         ObservationCapability(
+            name="mimiciv_radiology_note_structured_observation_candidate",
+            status="candidate_only",
+            scope="note_backed_measurement_depth",
+            systems=("radiology_notes", "respiratory", "cardiovascular"),
+            targets=MIMICIV_RADIOLOGY_NOTE_TARGETS,
+            horizon_hours=(0, 6),
+            evidence=(
+                "MIMICIV_RADIOLOGY_NOTE_OBSERVATION_FINDINGS.md; "
+                "317,371 timestamped chest radiology reports extracted into "
+                "six structured findings, but 0/6 nowcast, 0/6 forecast, and "
+                "0/6 interval targets pass robust held-out gates"
+            ),
+            allowed_uses=(
+                "shadow_observation",
+                "structured_note_observation",
+                "capability_reporting",
+            ),
+        ),
+        ObservationCapability(
             name="cardio_renal_long_horizon_coupling",
             status="validated",
             scope="single_hop_body_coupling",
@@ -564,6 +596,10 @@ def observation_readiness() -> dict[str, object]:
             "fallback": "persistence for unsupported, sparse, or slow targets at the wrong horizon",
             "selection_rule": "use only capabilities validated by held-out aggregate gates; otherwise abstain or fall back",
             "nowcasting_rule": "same-time state completion is allowed only for validated module-target pairs and does not authorize future movement",
+            "note_observation_rule": (
+                "timestamp-valid note findings may be displayed as observed evidence, "
+                "but candidate-only note targets may not be imputed or forecast"
+            ),
         },
         "safety_boundary": {
             "observation_and_factual_prediction_allowed": True,
@@ -924,6 +960,8 @@ def whole_body_state_forecast_template() -> dict[str, object]:
             "whole_body_all_modules_conformal_coverage_audit.json",
             "MIMICIV_CROSS_DATABASE_COVERAGE_FINDINGS.md",
             "mimiciv_cross_database_coverage_audit.json",
+            "MIMICIV_RADIOLOGY_NOTE_OBSERVATION_FINDINGS.md",
+            "mimiciv_radiology_note_coverage_audit.json",
         ],
         "safety_boundary": {
             **observation_readiness()["safety_boundary"],

@@ -76,7 +76,13 @@ coverage sweep is recorded in `EICU_FULL_VARIABLE_COVERAGE_FINDINGS.md` and
 `eicu_full_variable_coverage_audit.json`. The first independent database
 validation is recorded in `MIMICIV_CROSS_DATABASE_COVERAGE_FINDINGS.md`,
 `mimiciv_observation_transition_report.json`, and
-`mimiciv_cross_database_coverage_audit.json`.
+`mimiciv_cross_database_coverage_audit.json`. The first note-backed
+measurement-depth pass is recorded in
+`MIMICIV_RADIOLOGY_NOTE_OBSERVATION_FINDINGS.md`,
+`mimiciv_radiology_note_observation_report.json`, and
+`mimiciv_radiology_note_coverage_audit.json`; it extracts timestamp-valid chest
+radiology findings but keeps the module candidate-only because no `rad_*`
+nowcast, forecast, or interval target passes robust gates.
 
 Its allowed role is:
 
@@ -93,6 +99,8 @@ Its allowed role is:
   future trajectory, and interval metadata.
 - audited status for every numeric `*_t` target visible in the configured 6h
   eICU transition cohorts.
+- timestamp-valid note-derived observations only when directly observed; no
+  imputation or forecasting of candidate-only note targets.
 
 Its forbidden role remains:
 
