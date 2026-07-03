@@ -1,11 +1,10 @@
 /**
- * Settings — LLM provider/key (persisted via expo-secure-store through
- * AppContext.setLlm), backend info, and an About blurb.
+ * Settings — Photon e-prescribing connection and an About blurb.
  */
 import { useFocusEffect } from 'expo-router';
 import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
@@ -15,34 +14,18 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from 'react-native';
 
 import {
-  API_BASE,
   disconnectPhoton,
   getPhotonAuthorizeUrl,
   getPhotonStatus,
-  type LlmSettings,
   type PhotonStatus,
 } from '@/api/osler';
-import { useApp } from '@/state/AppContext';
 import { colors, fonts, radius, shadow, spacing } from '@/theme/tokens';
 
-type Provider = NonNullable<LlmSettings['provider']>;
-
-const PROVIDERS: { value: Provider; label: string }[] = [
-  { value: 'openai', label: 'OpenAI' },
-  { value: 'gemini', label: 'Gemini' },
-];
-
 export default function SettingsScreen() {
-  const { llm, setLlm } = useApp();
-  const [provider, setProvider] = useState<Provider>(llm.provider ?? 'openai');
-  const [apiKey, setApiKey] = useState(llm.apiKey ?? '');
-  const [saved, setSaved] = useState(false);
-  const savedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // ── Photon e-prescribing connection ──────────────────────────────────────
   const [photon, setPhoton] = useState<PhotonStatus | null>(null);
@@ -100,27 +83,6 @@ export default function SettingsScreen() {
     }
   };
 
-  // Sync local form once the persisted settings finish loading.
-  useEffect(() => {
-    setProvider(llm.provider ?? 'openai');
-    setApiKey(llm.apiKey ?? '');
-  }, [llm.provider, llm.apiKey]);
-
-  useEffect(
-    () => () => {
-      if (savedTimer.current) clearTimeout(savedTimer.current);
-    },
-    [],
-  );
-
-  const save = async () => {
-    const trimmed = apiKey.trim();
-    await setLlm({ apiKey: trimmed || undefined, provider });
-    setSaved(true);
-    if (savedTimer.current) clearTimeout(savedTimer.current);
-    savedTimer.current = setTimeout(() => setSaved(false), 2000);
-  };
-
   return (
     <KeyboardAvoidingView
       style={styles.flex}
@@ -129,57 +91,6 @@ export default function SettingsScreen() {
         style={styles.flex}
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled">
-        {/* ── LLM ─────────────────────────────────────────────── */}
-        <Text style={styles.sectionLabel}>LLM (FOR CHAT & FREE-TEXT PARSING)</Text>
-        <View style={styles.card}>
-          <View style={styles.toggleRow}>
-            {PROVIDERS.map((p) => {
-              const active = provider === p.value;
-              return (
-                <Pressable
-                  key={p.value}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: active }}
-                  onPress={() => setProvider(p.value)}
-                  style={({ pressed }) => [
-                    styles.toggle,
-                    active && styles.toggleActive,
-                    pressed && { opacity: 0.8 },
-                  ]}>
-                  <Text style={[styles.toggleText, active && styles.toggleTextActive]}>
-                    {p.label}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
-          <TextInput
-            style={styles.input}
-            value={apiKey}
-            onChangeText={setApiKey}
-            placeholder="sk-..."
-            placeholderTextColor={colors.textMuted}
-            secureTextEntry
-            autoCapitalize="none"
-            autoCorrect={false}
-            accessibilityLabel="API key"
-          />
-          <View style={styles.saveRow}>
-            <Pressable
-              accessibilityRole="button"
-              onPress={save}
-              style={({ pressed }) => [styles.saveButton, pressed && { opacity: 0.85 }]}>
-              <Text style={styles.saveButtonText}>Save</Text>
-            </Pressable>
-            {saved && <Text style={styles.savedText}>Saved ✓</Text>}
-          </View>
-          <Text style={styles.note}>
-            Stored securely on-device (expo-secure-store). Without a key the demo
-            still works: rule-based parsing + symbolic engine; only chat falls back
-            to a notice.
-          </Text>
-        </View>
-
         {/* ── Photon (e-prescribing) ──────────────────────────── */}
         {photon?.enabled && (
           <>
@@ -242,19 +153,6 @@ export default function SettingsScreen() {
           </>
         )}
 
-        {/* ── Backend ─────────────────────────────────────────── */}
-        <Text style={styles.sectionLabel}>BACKEND</Text>
-        <View style={styles.card}>
-          <Text style={styles.apiBase}>{API_BASE}</Text>
-          <Text style={styles.note}>
-            iOS simulator shares the Mac&apos;s localhost. Start the backend with:{' '}
-            <Text style={styles.code}>python demo/demo_app.py</Text> (from the Osler
-            repo root, branch demo-rx). For a physical device set{' '}
-            <Text style={styles.code}>EXPO_PUBLIC_API_BASE</Text> to your Mac&apos;s
-            LAN IP.
-          </Text>
-        </View>
-
         {/* ── About ───────────────────────────────────────────── */}
         <Text style={styles.sectionLabel}>ABOUT</Text>
         <View style={styles.card}>
@@ -264,10 +162,9 @@ export default function SettingsScreen() {
             style={styles.aboutLogo}
           />
           <Text style={styles.note}>
-            Oslian·Rx — clinician-facing drug recommendation demo. The symbolic
-            engine makes every recommendation; the LLM only parses cases and
-            explains results. Decision support only — not a clinically validated
-            tool.
+            Oslian·Rx — clinician-facing drug recommendation demo. Every
+            recommendation comes from the symbolic engine, not a language model.
+            Decision support only — not a clinically validated tool.
           </Text>
         </View>
       </ScrollView>
@@ -398,16 +295,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 18,
     color: colors.textSecondary,
-  },
-  code: {
-    fontFamily: fonts.bodyMedium,
-    backgroundColor: colors.accentLight,
-    color: colors.accent,
-  },
-  apiBase: {
-    fontFamily: fonts.bodySemiBold,
-    fontSize: 14,
-    color: colors.text,
   },
   aboutLogo: {
     width: 52,

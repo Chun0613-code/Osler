@@ -39,10 +39,10 @@ export default function PrescriptionCard({ rx }: { rx: Prescription }) {
       <View style={styles.metaRow}>
         {!!qty && <Text style={styles.meta}>{qty}</Text>}
         {rx.days_supply != null && <Text style={styles.meta}>{rx.days_supply} d</Text>}
-        <Text style={styles.meta}>Refills {rx.refills ?? 0}</Text>
+        {!!rx.refills && rx.refills > 0 && <Text style={styles.meta}>Refills {rx.refills}</Text>}
       </View>
 
-      {!!rx.pharmacy?.name && <Text style={styles.pharmacy}>↳ {rx.pharmacy.name}</Text>}
+      {!!rx.pharmacy?.name && <Text style={styles.pharmacy}>{rx.pharmacy.name}</Text>}
     </View>
   );
 }

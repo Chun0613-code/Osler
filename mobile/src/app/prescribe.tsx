@@ -107,7 +107,7 @@ export default function PrescribeScreen() {
     } catch {
       return;
     }
-    if (msg.type === 'done') router.replace('/prescriptions');
+    if (msg.type === 'done') router.replace({ pathname: '/reasoning', params: { view: 'rx', t: String(Date.now()) } });
     else if (msg.type === 'cancel') router.back();
   };
 
@@ -138,7 +138,7 @@ export default function PrescribeScreen() {
         days_supply: d,
         refills: Number(refills) || 0,
       });
-      router.replace('/prescriptions');
+      router.replace({ pathname: '/reasoning', params: { view: 'rx', t: String(Date.now()) } });
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not sign the prescription.');
     } finally {

@@ -15,7 +15,7 @@ import React, {
   useState,
 } from 'react';
 
-import type { Bundle, ChatMessage, LlmSettings } from '@/api/osler';
+import type { Bundle, LlmSettings } from '@/api/osler';
 
 const KEY_API_KEY = 'oslian.llm.apiKey';
 const KEY_PROVIDER = 'oslian.llm.provider';
@@ -24,7 +24,6 @@ export interface Patient {
   id: string;
   title: string;
   bundle: Bundle;
-  chat: ChatMessage[];
 }
 
 interface AppState {
@@ -33,7 +32,6 @@ interface AppState {
   current: Patient | null;
   addPatient: (bundle: Bundle, title: string) => void;
   selectPatient: (id: string) => void;
-  appendChat: (id: string, msg: ChatMessage) => void;
   llm: LlmSettings;
   setLlm: (next: LlmSettings) => Promise<void>;
   /** highlight target for Reasoning → Drugs (set by graph node taps) */
@@ -86,7 +84,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         id,
         title,
         bundle,
-        chat: existing >= 0 ? prev[existing].chat : [],
       };
       const next =
         existing >= 0
@@ -98,12 +95,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const selectPatient = useCallback((id: string) => setCurrentId(id), []);
-
-  const appendChat = useCallback((id: string, msg: ChatMessage) => {
-    setPatients((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, chat: [...p.chat, msg] } : p)),
-    );
-  }, []);
 
   const current = useMemo(
     () => patients.find((p) => p.id === currentId) ?? null,
@@ -117,13 +108,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       current,
       addPatient,
       selectPatient,
-      appendChat,
       llm,
       setLlm,
       highlightDrug,
       setHighlightDrug,
     }),
-    [patients, currentId, current, addPatient, selectPatient, appendChat, llm, setLlm, highlightDrug],
+    [patients, currentId, current, addPatient, selectPatient, llm, setLlm, highlightDrug],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

@@ -6,7 +6,7 @@
  * setHighlightDrug(context) → this screen auto-switches to Drugs, scrolls to
  * the card and pulses a highlight for ~2.5s.
  */
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   FlatList,
@@ -21,21 +21,24 @@ import type { DrugCandidate } from '@/api/osler';
 import DiseaseModelPanel from '@/components/DiseaseModel';
 import DrugCard from '@/components/DrugCard';
 import GraphWebView from '@/components/GraphWebView';
+import RxPanel from '@/components/RxPanel';
 import { useApp } from '@/state/AppContext';
 import { colors, fonts, radius, shadow, spacing } from '@/theme/tokens';
 
-type Segment = 'drugs' | 'graph' | 'disease';
+type Segment = 'drugs' | 'graph' | 'disease' | 'rx';
 
 const SEGMENTS: { key: Segment; label: string }[] = [
   { key: 'drugs', label: 'Drugs' },
   { key: 'graph', label: 'Graph' },
   { key: 'disease', label: 'Disease' },
+  { key: 'rx', label: 'Rx' },
 ];
 
 export default function ReasoningScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ view?: string; t?: string }>();
   const { current, highlightDrug, setHighlightDrug } = useApp();
-  const [segment, setSegment] = useState<Segment>('drugs');
+  const [segment, setSegment] = useState<Segment>(params.view === 'rx' ? 'rx' : 'drugs');
   const [pulseDrug, setPulseDrug] = useState<string | null>(null);
   const listRef = useRef<FlatList<DrugCandidate>>(null);
 
@@ -76,6 +79,11 @@ export default function ReasoningScreen() {
       clearTimeout(clearTimer);
     };
   }, [highlightDrug, candidates, setHighlightDrug]);
+
+  // Land on the Rx segment when returning from a just-signed prescription.
+  useEffect(() => {
+    if (params.view === 'rx') setSegment('rx');
+  }, [params.view, params.t]);
 
   if (!bundle) {
     return (
@@ -203,6 +211,8 @@ export default function ReasoningScreen() {
           <DiseaseModelPanel model={bundle.disease_model} />
         </ScrollView>
       )}
+
+      {segment === 'rx' && <RxPanel />}
     </View>
   );
 }

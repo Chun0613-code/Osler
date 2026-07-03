@@ -142,11 +142,6 @@ export interface Bundle {
   patient_id: string;
 }
 
-export interface ChatMessage {
-  role: 'user' | 'assistant';
-  content: string;
-}
-
 export interface LlmSettings {
   apiKey?: string;
   provider?: 'openai' | 'gemini';
@@ -192,22 +187,6 @@ export async function analyze(req: AnalyzeRequest): Promise<Bundle> {
   });
 }
 
-export async function chat(
-  patientId: string,
-  messages: ChatMessage[],
-  bundle: Bundle | null,
-  llm?: LlmSettings,
-): Promise<{ reply: string; ok: boolean }> {
-  return post('/api/chat', {
-    patient_id: patientId,
-    messages,
-    // Send grounding with the request so chat survives backend restarts
-    result: bundle?.result,
-    disease_model: bundle?.disease_model,
-    api_key: llm?.apiKey ?? '',
-    provider: llm?.provider,
-  });
-}
 
 // ── voice case-note dictation ────────────────────────────────────────────
 // Record a clip (expo-audio) → upload here → transcript. The clinician reviews
