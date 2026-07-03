@@ -93,7 +93,11 @@ passes robust gates. The all-ICU follow-up is recorded in
 `eicu_neuro_note_all_icu_observation_report.json`, and
 `eicu_neuro_note_all_icu_coverage_audit.json`; it scales GCS/delirium support
 to 100,862 subjects and still keeps the module candidate-only, rejecting the
-simple power-limitation explanation.
+simple power-limitation explanation. The first pre-ICU scene extension is
+recorded in `MIMICIV_ED_OBSERVATION_FINDINGS.md` and the
+`mimiciv_ed_observation_coverage_audit_{1h,3h,6h}.json` artifacts; MIMIC-IV-ED
+table-based vitals validate ED-scene nowcast, forecast, and interval cells
+under patient, arrival-transport, and chronological heldout gates.
 
 Its allowed role is:
 

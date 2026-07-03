@@ -153,6 +153,23 @@ aggregate-only and do not permit causal, counterfactual, clinical, runtime,
 checkpoint-promotion, complete-human-simulation, or active-rule-promotion
 claims.
 
+`mimiciv_ed_observation_transitions_{1h,3h,6h}.parquet` are local-only and
+ignored by git. They adapt MIMIC-IV-ED v2.2 triage and ED vital-sign tables into
+the same non-causal observation contract for a pre-ICU ED scene. The committed
+aggregate artifacts `mimiciv_ed_observation_transition_report_1h.json`,
+`mimiciv_ed_observation_transition_report_3h.json`,
+`mimiciv_ed_observation_transition_report_6h.json`,
+`mimiciv_ed_observation_coverage_audit_1h.json`,
+`mimiciv_ed_observation_coverage_audit_3h.json`,
+`mimiciv_ed_observation_coverage_audit_6h.json`, and
+`MIMICIV_ED_OBSERVATION_FINDINGS.md` record validated ED-scene observation
+coverage: 1h validates 3 nowcast / 2 forecast / 2 interval targets; 3h validates
+5 / 5 / 5; 6h validates 4 / 6 / 6. This grants only shadow same-time state
+completion, factual ED vital-sign forecasting, calibrated interval display for
+validated cells, and capability reporting. It does not permit causal,
+counterfactual, clinical, runtime, checkpoint, complete-human-simulation, or
+active-rule-promotion claims.
+
 `mimiciv_observation_radiology_transitions_6h.parquet` is local-only and
 ignored by git. It augments the MIMIC-IV all-ICU observation cohort with
 timestamped MIMIC-IV Note v2.2 chest radiology findings extracted from reports.

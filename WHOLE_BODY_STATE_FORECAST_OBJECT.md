@@ -87,6 +87,11 @@ The all-ICU eICU neuro-note follow-up scales the same question to 100,862
 subjects and still validates 0/2 GCS/delirium nowcast targets. This rejects the
 simple explanation that the bounded acute-neuro miss was only a power problem.
 
+The MIMIC-IV-ED scene audit extends current-state completion to a pre-ICU ED
+setting. ED triage and vital-sign tables validate 3/9 same-time nowcast targets
+at 1h cohort support, 5/9 at 3h, and 4/9 at 6h. This is a scene extension for
+dense ED physiology, not a note-imputation or treatment-effect module.
+
 ## Future Axis
 
 The future trajectory axis uses the canonical horizons:
@@ -119,6 +124,11 @@ future trajectory grid until a later audit passes.
 
 The all-ICU follow-up also validates 0/2 GCS/delirium 6h forecast targets;
 persistence remains stronger than the note-augmented ridge forecast.
+
+The MIMIC-IV-ED scene audit validates ED factual vital-sign forecasting with
+calibrated intervals: 2/8 targets at 1h, 5/8 at 3h, and 6/8 at 6h. These cells
+are ED-scene factual predictions only; they do not imply ED medication effects
+or causal planning.
 
 Unsupported target/horizon pairs fall back to persistence or missing.  This is
 the same humility reflex as before, now placed inside one object.
@@ -192,6 +202,10 @@ The aggregate evidence comes from:
 - `whole_body_all_modules_conformal_coverage_audit.json`
 - `MIMICIV_CROSS_DATABASE_COVERAGE_FINDINGS.md`
 - `mimiciv_cross_database_coverage_audit.json`
+- `MIMICIV_ED_OBSERVATION_FINDINGS.md`
+- `mimiciv_ed_observation_coverage_audit_1h.json`
+- `mimiciv_ed_observation_coverage_audit_3h.json`
+- `mimiciv_ed_observation_coverage_audit_6h.json`
 - `MIMICIV_RADIOLOGY_NOTE_OBSERVATION_FINDINGS.md`
 - `mimiciv_radiology_note_coverage_audit.json`
 - `EICU_NEURO_NOTE_OBSERVATION_FINDINGS.md`

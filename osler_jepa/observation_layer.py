@@ -239,6 +239,14 @@ EICU_NEURO_NOTE_VALIDATED_NOWCAST_TARGETS: tuple[str, ...] = ()
 EICU_NEURO_NOTE_VALIDATED_FORECAST_TARGETS: tuple[str, ...] = ()
 EICU_NEURO_NOTE_VALIDATED_INTERVAL_TARGETS: tuple[str, ...] = ()
 
+MIMICIV_ED_FORECAST_TARGETS: dict[int, tuple[str, ...]] = {
+    1: ("map", "sbp"),
+    3: ("dbp", "map", "respiratory_rate", "sbp", "temperature"),
+    6: ("dbp", "heart_rate", "map", "respiratory_rate", "sbp", "temperature"),
+}
+
+MIMICIV_ED_NOWCAST_TARGETS = ("acuity", "dbp", "map", "pain", "sbp")
+
 VALIDATED_INTERMEDIATE_MOVE_CELLS: dict[str, dict[int, tuple[str, ...]]] = {
     "acute_neuro": {
         1: ("map", "respiratory_rate"),
@@ -496,6 +504,24 @@ def whole_body_observation_capabilities() -> tuple[ObservationCapability, ...]:
                 "MIMICIV_CROSS_DATABASE_COVERAGE_FINDINGS.md; full MIMIC-IV "
                 "v3.1 target-level audit passes patient, careunit, and time "
                 "held-out gates for a bounded target subset"
+            ),
+        ),
+        ObservationCapability(
+            name="mimiciv_ed_scene_observation_validation",
+            status="validated",
+            scope="ed_scene_observation_validation",
+            systems=("emergency_department", "pre_icu_acuity"),
+            targets=(
+                "5_target_nowcast_cells",
+                "1h_2_target_forecast_interval_cells",
+                "3h_5_target_forecast_interval_cells",
+                "6h_6_target_forecast_interval_cells",
+            ),
+            horizon_hours=(0, 1, 3, 6),
+            evidence=(
+                "MIMICIV_ED_OBSERVATION_FINDINGS.md; ED-scene table-based "
+                "vitals audit validates dense pre-ICU physiology across "
+                "patient, arrival-transport, and chronological held-out gates"
             ),
         ),
         ObservationCapability(
@@ -993,6 +1019,10 @@ def whole_body_state_forecast_template() -> dict[str, object]:
             "whole_body_all_modules_conformal_coverage_audit.json",
             "MIMICIV_CROSS_DATABASE_COVERAGE_FINDINGS.md",
             "mimiciv_cross_database_coverage_audit.json",
+            "MIMICIV_ED_OBSERVATION_FINDINGS.md",
+            "mimiciv_ed_observation_coverage_audit_1h.json",
+            "mimiciv_ed_observation_coverage_audit_3h.json",
+            "mimiciv_ed_observation_coverage_audit_6h.json",
             "MIMICIV_RADIOLOGY_NOTE_OBSERVATION_FINDINGS.md",
             "mimiciv_radiology_note_coverage_audit.json",
             "EICU_NEURO_NOTE_OBSERVATION_FINDINGS.md",

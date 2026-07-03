@@ -46,6 +46,12 @@ class ObservationLayerTests(unittest.TestCase):
         self.assertEqual(mimiciv.horizon_hours, (0, 6))
         self.assertIn("14_target_calibrated_interval_cells", mimiciv.targets)
 
+        ed = capabilities["mimiciv_ed_scene_observation_validation"]
+        self.assertTrue(ed.is_validated)
+        self.assertEqual(ed.scope, "ed_scene_observation_validation")
+        self.assertEqual(ed.horizon_hours, (0, 1, 3, 6))
+        self.assertIn("6h_6_target_forecast_interval_cells", ed.targets)
+
         radiology_notes = capabilities["mimiciv_radiology_note_structured_observation_candidate"]
         self.assertFalse(radiology_notes.is_validated)
         self.assertEqual(radiology_notes.scope, "note_backed_measurement_depth")
@@ -158,6 +164,10 @@ class ObservationLayerTests(unittest.TestCase):
         self.assertFalse(template["safety_boundary"]["runtime_decision_authority"])
         self.assertIn(
             "mimiciv_cross_database_coverage_audit.json",
+            template["source_artifacts"],
+        )
+        self.assertIn(
+            "mimiciv_ed_observation_coverage_audit_6h.json",
             template["source_artifacts"],
         )
 

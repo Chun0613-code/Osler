@@ -1,0 +1,1822 @@
+{
+  "arrival_transport_groups": 5,
+  "artifact": "MIMIC-IV-ED v2.2 ED-scene observation coverage audit",
+  "cohort": "local-only ED observation transition cohort",
+  "counts": {
+    "eligible_forecast_targets": 8,
+    "eligible_nowcast_targets": 9,
+    "validated_forecast_targets": 6,
+    "validated_interval_targets": 6,
+    "validated_nowcast_targets": 4
+  },
+  "disposition_groups": 8,
+  "eligible_current_numeric_targets": [
+    "acuity",
+    "dbp",
+    "heart_rate",
+    "map",
+    "o2sat",
+    "pain",
+    "respiratory_rate",
+    "sbp",
+    "temperature"
+  ],
+  "eligible_forecast_numeric_targets": [
+    "dbp",
+    "heart_rate",
+    "map",
+    "o2sat",
+    "pain",
+    "respiratory_rate",
+    "sbp",
+    "temperature"
+  ],
+  "future_suffix": "tp6",
+  "max_rows_per_target": 80000,
+  "patient_split_seeds": [
+    7,
+    11,
+    19,
+    23,
+    37,
+    53,
+    71
+  ],
+  "rows": 345629,
+  "safety_boundary": {
+    "causal_claim_allowed": false,
+    "clinical_claim_allowed": false,
+    "counterfactual_treatment_effect_allowed": false,
+    "factual_prediction_allowed_for_validated_targets": true,
+    "new_runtime_authority": false,
+    "patient_ids_included_in_report": false,
+    "row_level_outputs_committed": false,
+    "runtime_decision_authority": false,
+    "same_time_imputation_allowed_for_validated_targets": true
+  },
+  "stays": 167072,
+  "subjects": 93811,
+  "targets": {
+    "acuity": {
+      "eligible_forecast": false,
+      "eligible_nowcast": true,
+      "nowcast": {
+        "arrival_transport_holdout": {
+          "available": true,
+          "gate_passed": true,
+          "heldout": {
+            "delta_vs_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.251669,
+                -0.111468
+              ],
+              "point_delta": -0.192631,
+              "significant": true,
+              "subjects": 229
+            },
+            "delta_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.087111,
+                -0.036864
+              ],
+              "point_delta": -0.061301,
+              "significant": true,
+              "subjects": 229
+            },
+            "mae": {
+              "baseline": 0.814947,
+              "placebo_ridge": 0.661364,
+              "ridge": 0.595201
+            },
+            "rows": 281,
+            "subjects": 229
+          },
+          "interval": null,
+          "interval_gate_passed": null
+        },
+        "interval_validated": null,
+        "random_patient_splits": {
+          "evaluated_splits": 7,
+          "heldout_beats_baseline_splits": 7,
+          "heldout_beats_placebo_splits": 7,
+          "selected_ridge_splits": 7
+        },
+        "sampling": {
+          "max_rows_per_target": 80000,
+          "original_rows": 176687,
+          "original_subjects": 88389,
+          "row_cap_applied": true,
+          "sampled_rows": 80002,
+          "sampled_subjects": 40011
+        },
+        "support": {
+          "feature_count": 17,
+          "rows": 80002,
+          "subjects": 40011
+        },
+        "time_holdout": {
+          "available": true,
+          "gate_passed": true,
+          "heldout": {
+            "delta_vs_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.028231,
+                -0.011278
+              ],
+              "point_delta": -0.020024,
+              "significant": true,
+              "subjects": 12381
+            },
+            "delta_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.061449,
+                -0.056198
+              ],
+              "point_delta": -0.059027,
+              "significant": true,
+              "subjects": 12381
+            },
+            "mae": {
+              "baseline": 0.545287,
+              "placebo_ridge": 0.562613,
+              "ridge": 0.503881
+            },
+            "rows": 26520,
+            "subjects": 12381
+          },
+          "interval": null,
+          "interval_gate_passed": null
+        },
+        "validated": true
+      }
+    },
+    "dbp": {
+      "eligible_forecast": true,
+      "eligible_nowcast": true,
+      "forecast": {
+        "arrival_transport_holdout": {
+          "available": true,
+          "gate_passed": true,
+          "heldout": {
+            "delta_vs_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -3.737856,
+                -1.631853
+              ],
+              "point_delta": -2.582523,
+              "significant": true,
+              "subjects": 124
+            },
+            "delta_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -2.99787,
+                -1.380829
+              ],
+              "point_delta": -2.317064,
+              "significant": true,
+              "subjects": 124
+            },
+            "mae": {
+              "baseline": 10.76412,
+              "placebo_ridge": 10.754683,
+              "ridge": 9.274512
+            },
+            "rows": 301,
+            "subjects": 124
+          },
+          "interval": {
+            "calibration_rows": 79703,
+            "coverage": 0.906977,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "radius": 19.932977,
+            "test_rows": 301
+          },
+          "interval_gate_passed": true
+        },
+        "interval_validated": true,
+        "random_patient_splits": {
+          "evaluated_splits": 7,
+          "heldout_beats_baseline_splits": 7,
+          "heldout_beats_placebo_splits": 7,
+          "interval_pass_splits": 7,
+          "selected_ridge_splits": 7
+        },
+        "sampling": {
+          "max_rows_per_target": 80000,
+          "original_rows": 337158,
+          "original_subjects": 93158,
+          "row_cap_applied": true,
+          "sampled_rows": 80004,
+          "sampled_subjects": 21656
+        },
+        "support": {
+          "feature_count": 19,
+          "rows": 80004,
+          "subjects": 21656
+        },
+        "time_holdout": {
+          "available": true,
+          "gate_passed": true,
+          "heldout": {
+            "delta_vs_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -2.200234,
+                -1.951968
+              ],
+              "point_delta": -2.066187,
+              "significant": true,
+              "subjects": 6639
+            },
+            "delta_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -2.072336,
+                -1.825097
+              ],
+              "point_delta": -1.931644,
+              "significant": true,
+              "subjects": 6639
+            },
+            "mae": {
+              "baseline": 11.435943,
+              "placebo_ridge": 11.409695,
+              "ridge": 9.648797
+            },
+            "rows": 26258,
+            "subjects": 6639
+          },
+          "interval": {
+            "calibration_rows": 53746,
+            "coverage": 0.899193,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "radius": 19.942445,
+            "test_rows": 26258
+          },
+          "interval_gate_passed": true
+        },
+        "validated": true
+      },
+      "nowcast": {
+        "arrival_transport_holdout": {
+          "available": true,
+          "gate_passed": true,
+          "heldout": {
+            "delta_vs_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -12.748683,
+                -10.293308
+              ],
+              "point_delta": -11.492905,
+              "significant": true,
+              "subjects": 139
+            },
+            "delta_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -12.346072,
+                -10.093961
+              ],
+              "point_delta": -11.267861,
+              "significant": true,
+              "subjects": 139
+            },
+            "mae": {
+              "baseline": 12.029586,
+              "placebo_ridge": 11.855553,
+              "ridge": 0.172775
+            },
+            "rows": 338,
+            "subjects": 139
+          },
+          "interval": null,
+          "interval_gate_passed": null
+        },
+        "interval_validated": null,
+        "random_patient_splits": {
+          "evaluated_splits": 7,
+          "heldout_beats_baseline_splits": 7,
+          "heldout_beats_placebo_splits": 7,
+          "selected_ridge_splits": 7
+        },
+        "sampling": {
+          "max_rows_per_target": 80000,
+          "original_rows": 341356,
+          "original_subjects": 93536,
+          "row_cap_applied": true,
+          "sampled_rows": 80002,
+          "sampled_subjects": 21473
+        },
+        "support": {
+          "feature_count": 17,
+          "rows": 80002,
+          "subjects": 21473
+        },
+        "time_holdout": {
+          "available": true,
+          "gate_passed": true,
+          "heldout": {
+            "delta_vs_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -11.669744,
+                -11.354044
+              ],
+              "point_delta": -11.501033,
+              "significant": true,
+              "subjects": 6661
+            },
+            "delta_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -11.561018,
+                -11.246878
+              ],
+              "point_delta": -11.402204,
+              "significant": true,
+              "subjects": 6661
+            },
+            "mae": {
+              "baseline": 11.915299,
+              "placebo_ridge": 11.907979,
+              "ridge": 0.270058
+            },
+            "rows": 26694,
+            "subjects": 6661
+          },
+          "interval": null,
+          "interval_gate_passed": null
+        },
+        "validated": true
+      }
+    },
+    "heart_rate": {
+      "eligible_forecast": true,
+      "eligible_nowcast": true,
+      "forecast": {
+        "arrival_transport_holdout": {
+          "available": true,
+          "gate_passed": true,
+          "heldout": {
+            "delta_vs_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -3.816488,
+                -1.414496
+              ],
+              "point_delta": -2.618978,
+              "significant": true,
+              "subjects": 137
+            },
+            "delta_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -3.290798,
+                -1.161672
+              ],
+              "point_delta": -2.126969,
+              "significant": true,
+              "subjects": 137
+            },
+            "mae": {
+              "baseline": 9.368272,
+              "placebo_ridge": 9.270472,
+              "ridge": 7.976926
+            },
+            "rows": 353,
+            "subjects": 137
+          },
+          "interval": {
+            "calibration_rows": 79649,
+            "coverage": 0.903683,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "radius": 18.221061,
+            "test_rows": 353
+          },
+          "interval_gate_passed": true
+        },
+        "interval_validated": true,
+        "random_patient_splits": {
+          "evaluated_splits": 7,
+          "heldout_beats_baseline_splits": 7,
+          "heldout_beats_placebo_splits": 7,
+          "interval_pass_splits": 7,
+          "selected_ridge_splits": 7
+        },
+        "sampling": {
+          "max_rows_per_target": 80000,
+          "original_rows": 340673,
+          "original_subjects": 93403,
+          "row_cap_applied": true,
+          "sampled_rows": 80002,
+          "sampled_subjects": 22330
+        },
+        "support": {
+          "feature_count": 19,
+          "rows": 80002,
+          "subjects": 22330
+        },
+        "time_holdout": {
+          "available": true,
+          "gate_passed": true,
+          "heldout": {
+            "delta_vs_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -2.302325,
+                -2.058036
+              ],
+              "point_delta": -2.181329,
+              "significant": true,
+              "subjects": 6924
+            },
+            "delta_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -1.757823,
+                -1.558101
+              ],
+              "point_delta": -1.669687,
+              "significant": true,
+              "subjects": 6924
+            },
+            "mae": {
+              "baseline": 10.315735,
+              "placebo_ridge": 10.091294,
+              "ridge": 8.674049
+            },
+            "rows": 26362,
+            "subjects": 6924
+          },
+          "interval": {
+            "calibration_rows": 53640,
+            "coverage": 0.898794,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "radius": 18.21669,
+            "test_rows": 26362
+          },
+          "interval_gate_passed": true
+        },
+        "validated": true
+      },
+      "nowcast": {
+        "arrival_transport_holdout": {
+          "available": true,
+          "gate_passed": false,
+          "heldout": {
+            "delta_vs_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -2.229886,
+                0.25886
+              ],
+              "point_delta": -0.604337,
+              "significant": false,
+              "subjects": 130
+            },
+            "delta_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -1.863299,
+                0.069117
+              ],
+              "point_delta": -0.851677,
+              "significant": false,
+              "subjects": 130
+            },
+            "mae": {
+              "baseline": 12.663522,
+              "placebo_ridge": 13.067546,
+              "ridge": 11.678365
+            },
+            "rows": 318,
+            "subjects": 130
+          },
+          "interval": null,
+          "interval_gate_passed": null
+        },
+        "interval_validated": null,
+        "random_patient_splits": {
+          "evaluated_splits": 7,
+          "heldout_beats_baseline_splits": 7,
+          "heldout_beats_placebo_splits": 7,
+          "selected_ridge_splits": 7
+        },
+        "sampling": {
+          "max_rows_per_target": 80000,
+          "original_rows": 343217,
+          "original_subjects": 93676,
+          "row_cap_applied": true,
+          "sampled_rows": 80000,
+          "sampled_subjects": 21903
+        },
+        "support": {
+          "feature_count": 17,
+          "rows": 80000,
+          "subjects": 21903
+        },
+        "time_holdout": {
+          "available": true,
+          "gate_passed": true,
+          "heldout": {
+            "delta_vs_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -1.146954,
+                -0.901934
+              ],
+              "point_delta": -1.019845,
+              "significant": true,
+              "subjects": 6701
+            },
+            "delta_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -1.159686,
+                -0.930552
+              ],
+              "point_delta": -1.036135,
+              "significant": true,
+              "subjects": 6701
+            },
+            "mae": {
+              "baseline": 13.715539,
+              "placebo_ridge": 13.786769,
+              "ridge": 12.52344
+            },
+            "rows": 26211,
+            "subjects": 6701
+          },
+          "interval": null,
+          "interval_gate_passed": null
+        },
+        "validated": false
+      }
+    },
+    "map": {
+      "eligible_forecast": true,
+      "eligible_nowcast": true,
+      "forecast": {
+        "arrival_transport_holdout": {
+          "available": true,
+          "gate_passed": true,
+          "heldout": {
+            "delta_vs_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -3.687128,
+                -1.411965
+              ],
+              "point_delta": -2.408234,
+              "significant": true,
+              "subjects": 121
+            },
+            "delta_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -2.612731,
+                -0.633836
+              ],
+              "point_delta": -1.81863,
+              "significant": true,
+              "subjects": 121
+            },
+            "mae": {
+              "baseline": 10.782135,
+              "placebo_ridge": 10.68028,
+              "ridge": 9.092436
+            },
+            "rows": 306,
+            "subjects": 121
+          },
+          "interval": {
+            "calibration_rows": 79698,
+            "coverage": 0.898693,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "radius": 19.550348,
+            "test_rows": 306
+          },
+          "interval_gate_passed": true
+        },
+        "interval_validated": true,
+        "random_patient_splits": {
+          "evaluated_splits": 7,
+          "heldout_beats_baseline_splits": 7,
+          "heldout_beats_placebo_splits": 7,
+          "interval_pass_splits": 7,
+          "selected_ridge_splits": 7
+        },
+        "sampling": {
+          "max_rows_per_target": 80000,
+          "original_rows": 337237,
+          "original_subjects": 93164,
+          "row_cap_applied": true,
+          "sampled_rows": 80004,
+          "sampled_subjects": 21872
+        },
+        "support": {
+          "feature_count": 19,
+          "rows": 80004,
+          "subjects": 21872
+        },
+        "time_holdout": {
+          "available": true,
+          "gate_passed": true,
+          "heldout": {
+            "delta_vs_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -2.319477,
+                -2.055866
+              ],
+              "point_delta": -2.168948,
+              "significant": true,
+              "subjects": 6853
+            },
+            "delta_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -1.892827,
+                -1.686716
+              ],
+              "point_delta": -1.789036,
+              "significant": true,
+              "subjects": 6853
+            },
+            "mae": {
+              "baseline": 11.28089,
+              "placebo_ridge": 11.122639,
+              "ridge": 9.41426
+            },
+            "rows": 26238,
+            "subjects": 6853
+          },
+          "interval": {
+            "calibration_rows": 53766,
+            "coverage": 0.901822,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "radius": 19.607056,
+            "test_rows": 26238
+          },
+          "interval_gate_passed": true
+        },
+        "validated": true
+      },
+      "nowcast": {
+        "arrival_transport_holdout": {
+          "available": true,
+          "gate_passed": true,
+          "heldout": {
+            "delta_vs_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -13.272291,
+                -11.341552
+              ],
+              "point_delta": -12.099641,
+              "significant": true,
+              "subjects": 149
+            },
+            "delta_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -13.323232,
+                -11.140854
+              ],
+              "point_delta": -12.046424,
+              "significant": true,
+              "subjects": 149
+            },
+            "mae": {
+              "baseline": 12.020336,
+              "placebo_ridge": 12.040437,
+              "ridge": 0.033157
+            },
+            "rows": 377,
+            "subjects": 149
+          },
+          "interval": null,
+          "interval_gate_passed": null
+        },
+        "interval_validated": null,
+        "random_patient_splits": {
+          "evaluated_splits": 7,
+          "heldout_beats_baseline_splits": 7,
+          "heldout_beats_placebo_splits": 7,
+          "selected_ridge_splits": 7
+        },
+        "sampling": {
+          "max_rows_per_target": 80000,
+          "original_rows": 341396,
+          "original_subjects": 93537,
+          "row_cap_applied": true,
+          "sampled_rows": 80002,
+          "sampled_subjects": 22036
+        },
+        "support": {
+          "feature_count": 17,
+          "rows": 80002,
+          "subjects": 22036
+        },
+        "time_holdout": {
+          "available": true,
+          "gate_passed": true,
+          "heldout": {
+            "delta_vs_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -11.952309,
+                -11.611191
+              ],
+              "point_delta": -11.794005,
+              "significant": true,
+              "subjects": 6827
+            },
+            "delta_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -11.958091,
+                -11.606768
+              ],
+              "point_delta": -11.773266,
+              "significant": true,
+              "subjects": 6827
+            },
+            "mae": {
+              "baseline": 12.014434,
+              "placebo_ridge": 12.03919,
+              "ridge": 0.061065
+            },
+            "rows": 26234,
+            "subjects": 6827
+          },
+          "interval": null,
+          "interval_gate_passed": null
+        },
+        "validated": true
+      }
+    },
+    "o2sat": {
+      "eligible_forecast": true,
+      "eligible_nowcast": true,
+      "forecast": {
+        "arrival_transport_holdout": {
+          "available": true,
+          "gate_passed": false,
+          "heldout": {
+            "delta_vs_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.234479,
+                0.117292
+              ],
+              "point_delta": -0.069523,
+              "significant": false,
+              "subjects": 135
+            },
+            "delta_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.323229,
+                0.119171
+              ],
+              "point_delta": -0.104587,
+              "significant": false,
+              "subjects": 135
+            },
+            "mae": {
+              "baseline": 1.529032,
+              "placebo_ridge": 1.561648,
+              "ridge": 1.436793
+            },
+            "rows": 310,
+            "subjects": 135
+          },
+          "interval": {
+            "calibration_rows": 79693,
+            "coverage": 0.919355,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "radius": 2.790708,
+            "test_rows": 310
+          },
+          "interval_gate_passed": false
+        },
+        "interval_validated": false,
+        "random_patient_splits": {
+          "evaluated_splits": 7,
+          "heldout_beats_baseline_splits": 7,
+          "heldout_beats_placebo_splits": 7,
+          "interval_pass_splits": 7,
+          "selected_ridge_splits": 7
+        },
+        "sampling": {
+          "max_rows_per_target": 80000,
+          "original_rows": 323440,
+          "original_subjects": 90888,
+          "row_cap_applied": true,
+          "sampled_rows": 80003,
+          "sampled_subjects": 22400
+        },
+        "support": {
+          "feature_count": 19,
+          "rows": 80003,
+          "subjects": 22400
+        },
+        "time_holdout": {
+          "available": true,
+          "gate_passed": true,
+          "heldout": {
+            "delta_vs_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.122965,
+                -0.081645
+              ],
+              "point_delta": -0.104461,
+              "significant": true,
+              "subjects": 6865
+            },
+            "delta_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.154737,
+                -0.113677
+              ],
+              "point_delta": -0.132861,
+              "significant": true,
+              "subjects": 6865
+            },
+            "mae": {
+              "baseline": 1.601363,
+              "placebo_ridge": 1.633308,
+              "ridge": 1.465918
+            },
+            "rows": 25971,
+            "subjects": 6865
+          },
+          "interval": {
+            "calibration_rows": 54032,
+            "coverage": 0.89315,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "radius": 2.775857,
+            "test_rows": 25971
+          },
+          "interval_gate_passed": true
+        },
+        "validated": false
+      },
+      "nowcast": {
+        "arrival_transport_holdout": {
+          "available": true,
+          "gate_passed": false,
+          "heldout": {
+            "delta_vs_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.068805,
+                0.037995
+              ],
+              "point_delta": -0.005826,
+              "significant": false,
+              "subjects": 127
+            },
+            "delta_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.101147,
+                0.014928
+              ],
+              "point_delta": -0.051016,
+              "significant": false,
+              "subjects": 127
+            },
+            "mae": {
+              "baseline": 1.6997,
+              "placebo_ridge": 1.739613,
+              "ridge": 1.689138
+            },
+            "rows": 333,
+            "subjects": 127
+          },
+          "interval": null,
+          "interval_gate_passed": null
+        },
+        "interval_validated": null,
+        "random_patient_splits": {
+          "evaluated_splits": 7,
+          "heldout_beats_baseline_splits": 7,
+          "heldout_beats_placebo_splits": 7,
+          "selected_ridge_splits": 6
+        },
+        "sampling": {
+          "max_rows_per_target": 80000,
+          "original_rows": 336686,
+          "original_subjects": 93258,
+          "row_cap_applied": true,
+          "sampled_rows": 80005,
+          "sampled_subjects": 21884
+        },
+        "support": {
+          "feature_count": 17,
+          "rows": 80005,
+          "subjects": 21884
+        },
+        "time_holdout": {
+          "available": true,
+          "gate_passed": true,
+          "heldout": {
+            "delta_vs_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.014662,
+                -0.000878
+              ],
+              "point_delta": -0.00723,
+              "significant": true,
+              "subjects": 6806
+            },
+            "delta_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.051671,
+                -0.039062
+              ],
+              "point_delta": -0.044794,
+              "significant": true,
+              "subjects": 6806
+            },
+            "mae": {
+              "baseline": 1.628361,
+              "placebo_ridge": 1.657628,
+              "ridge": 1.637446
+            },
+            "rows": 26484,
+            "subjects": 6806
+          },
+          "interval": null,
+          "interval_gate_passed": null
+        },
+        "validated": false
+      }
+    },
+    "pain": {
+      "eligible_forecast": true,
+      "eligible_nowcast": true,
+      "forecast": {
+        "arrival_transport_holdout": {
+          "available": true,
+          "gate_passed": false,
+          "heldout": {
+            "delta_vs_baseline": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                -0.308123,
+                0.348835
+              ],
+              "point_delta": 0.010882,
+              "significant": false,
+              "subjects": 163
+            },
+            "delta_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.62308,
+                -0.134056
+              ],
+              "point_delta": -0.405885,
+              "significant": true,
+              "subjects": 163
+            },
+            "mae": {
+              "baseline": 1.872131,
+              "placebo_ridge": 2.331865,
+              "ridge": 1.94159
+            },
+            "rows": 305,
+            "subjects": 163
+          },
+          "interval": {
+            "calibration_rows": 79695,
+            "coverage": 0.839344,
+            "coverage_gate_passed": false,
+            "level": 0.9,
+            "radius": 4.196305,
+            "test_rows": 305
+          },
+          "interval_gate_passed": false
+        },
+        "interval_validated": false,
+        "random_patient_splits": {
+          "evaluated_splits": 7,
+          "heldout_beats_baseline_splits": 7,
+          "heldout_beats_placebo_splits": 7,
+          "interval_pass_splits": 7,
+          "selected_ridge_splits": 7
+        },
+        "sampling": {
+          "max_rows_per_target": 80000,
+          "original_rows": 189577,
+          "original_subjects": 71407,
+          "row_cap_applied": true,
+          "sampled_rows": 80000,
+          "sampled_subjects": 30231
+        },
+        "support": {
+          "feature_count": 19,
+          "rows": 80000,
+          "subjects": 30231
+        },
+        "time_holdout": {
+          "available": true,
+          "gate_passed": true,
+          "heldout": {
+            "delta_vs_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.574434,
+                -0.507006
+              ],
+              "point_delta": -0.542021,
+              "significant": true,
+              "subjects": 9487
+            },
+            "delta_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.766415,
+                -0.721231
+              ],
+              "point_delta": -0.744876,
+              "significant": true,
+              "subjects": 9487
+            },
+            "mae": {
+              "baseline": 2.071355,
+              "placebo_ridge": 2.388661,
+              "ridge": 1.686879
+            },
+            "rows": 26682,
+            "subjects": 9487
+          },
+          "interval": {
+            "calibration_rows": 53318,
+            "coverage": 0.901394,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "radius": 4.210114,
+            "test_rows": 26682
+          },
+          "interval_gate_passed": true
+        },
+        "validated": false
+      },
+      "nowcast": {
+        "arrival_transport_holdout": {
+          "available": true,
+          "gate_passed": false,
+          "heldout": {
+            "delta_vs_baseline": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                -0.235559,
+                0.384173
+              ],
+              "point_delta": 0.100534,
+              "significant": false,
+              "subjects": 156
+            },
+            "delta_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.24035,
+                -0.060011
+              ],
+              "point_delta": -0.148991,
+              "significant": true,
+              "subjects": 156
+            },
+            "mae": {
+              "baseline": 2.937908,
+              "placebo_ridge": 3.233912,
+              "ridge": 3.089415
+            },
+            "rows": 306,
+            "subjects": 156
+          },
+          "interval": null,
+          "interval_gate_passed": null
+        },
+        "interval_validated": null,
+        "random_patient_splits": {
+          "evaluated_splits": 7,
+          "heldout_beats_baseline_splits": 7,
+          "heldout_beats_placebo_splits": 7,
+          "selected_ridge_splits": 7
+        },
+        "sampling": {
+          "max_rows_per_target": 80000,
+          "original_rows": 272537,
+          "original_subjects": 89090,
+          "row_cap_applied": true,
+          "sampled_rows": 80009,
+          "sampled_subjects": 26026
+        },
+        "support": {
+          "feature_count": 17,
+          "rows": 80009,
+          "subjects": 26026
+        },
+        "time_holdout": {
+          "available": true,
+          "gate_passed": true,
+          "heldout": {
+            "delta_vs_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.323762,
+                -0.222264
+              ],
+              "point_delta": -0.271447,
+              "significant": true,
+              "subjects": 8025
+            },
+            "delta_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.195316,
+                -0.162545
+              ],
+              "point_delta": -0.178647,
+              "significant": true,
+              "subjects": 8025
+            },
+            "mae": {
+              "baseline": 3.214673,
+              "placebo_ridge": 3.333275,
+              "ridge": 3.134927
+            },
+            "rows": 26177,
+            "subjects": 8025
+          },
+          "interval": null,
+          "interval_gate_passed": null
+        },
+        "validated": false
+      }
+    },
+    "respiratory_rate": {
+      "eligible_forecast": true,
+      "eligible_nowcast": true,
+      "forecast": {
+        "arrival_transport_holdout": {
+          "available": true,
+          "gate_passed": true,
+          "heldout": {
+            "delta_vs_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.698649,
+                -0.209569
+              ],
+              "point_delta": -0.473097,
+              "significant": true,
+              "subjects": 133
+            },
+            "delta_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.809699,
+                -0.262133
+              ],
+              "point_delta": -0.536346,
+              "significant": true,
+              "subjects": 133
+            },
+            "mae": {
+              "baseline": 2.448485,
+              "placebo_ridge": 2.512959,
+              "ridge": 1.842452
+            },
+            "rows": 330,
+            "subjects": 133
+          },
+          "interval": {
+            "calibration_rows": 79706,
+            "coverage": 0.906061,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "radius": 3.45536,
+            "test_rows": 330
+          },
+          "interval_gate_passed": true
+        },
+        "interval_validated": true,
+        "random_patient_splits": {
+          "evaluated_splits": 7,
+          "heldout_beats_baseline_splits": 7,
+          "heldout_beats_placebo_splits": 7,
+          "interval_pass_splits": 7,
+          "selected_ridge_splits": 7
+        },
+        "sampling": {
+          "max_rows_per_target": 80000,
+          "original_rows": 338042,
+          "original_subjects": 93031,
+          "row_cap_applied": true,
+          "sampled_rows": 80036,
+          "sampled_subjects": 22147
+        },
+        "support": {
+          "feature_count": 19,
+          "rows": 80036,
+          "subjects": 22147
+        },
+        "time_holdout": {
+          "available": true,
+          "gate_passed": true,
+          "heldout": {
+            "delta_vs_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.416358,
+                -0.358546
+              ],
+              "point_delta": -0.382614,
+              "significant": true,
+              "subjects": 6874
+            },
+            "delta_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.451846,
+                -0.389728
+              ],
+              "point_delta": -0.420094,
+              "significant": true,
+              "subjects": 6874
+            },
+            "mae": {
+              "baseline": 2.067352,
+              "placebo_ridge": 2.104085,
+              "ridge": 1.661731
+            },
+            "rows": 26057,
+            "subjects": 6874
+          },
+          "interval": {
+            "calibration_rows": 53979,
+            "coverage": 0.902944,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "radius": 3.474816,
+            "test_rows": 26057
+          },
+          "interval_gate_passed": true
+        },
+        "validated": true
+      },
+      "nowcast": {
+        "arrival_transport_holdout": {
+          "available": true,
+          "gate_passed": false,
+          "heldout": {
+            "delta_vs_baseline": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                -0.053149,
+                0.160871
+              ],
+              "point_delta": 0.052369,
+              "significant": false,
+              "subjects": 140
+            },
+            "delta_vs_placebo": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                -0.084516,
+                0.131564
+              ],
+              "point_delta": 0.022779,
+              "significant": false,
+              "subjects": 140
+            },
+            "mae": {
+              "baseline": 1.909677,
+              "placebo_ridge": 1.961898,
+              "ridge": 2.007716
+            },
+            "rows": 310,
+            "subjects": 140
+          },
+          "interval": null,
+          "interval_gate_passed": null
+        },
+        "interval_validated": null,
+        "random_patient_splits": {
+          "evaluated_splits": 7,
+          "heldout_beats_baseline_splits": 0,
+          "heldout_beats_placebo_splits": 5,
+          "selected_ridge_splits": 0
+        },
+        "sampling": {
+          "max_rows_per_target": 80000,
+          "original_rows": 341731,
+          "original_subjects": 93426,
+          "row_cap_applied": true,
+          "sampled_rows": 80002,
+          "sampled_subjects": 22054
+        },
+        "support": {
+          "feature_count": 17,
+          "rows": 80002,
+          "subjects": 22054
+        },
+        "time_holdout": {
+          "available": true,
+          "gate_passed": false,
+          "heldout": {
+            "delta_vs_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.02575,
+                0.004009
+              ],
+              "point_delta": -0.009444,
+              "significant": false,
+              "subjects": 6857
+            },
+            "delta_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.052643,
+                -0.028051
+              ],
+              "point_delta": -0.041034,
+              "significant": true,
+              "subjects": 6857
+            },
+            "mae": {
+              "baseline": 1.845986,
+              "placebo_ridge": 1.877573,
+              "ridge": 1.82535
+            },
+            "rows": 26108,
+            "subjects": 6857
+          },
+          "interval": null,
+          "interval_gate_passed": null
+        },
+        "validated": false
+      }
+    },
+    "sbp": {
+      "eligible_forecast": true,
+      "eligible_nowcast": true,
+      "forecast": {
+        "arrival_transport_holdout": {
+          "available": true,
+          "gate_passed": true,
+          "heldout": {
+            "delta_vs_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -3.355665,
+                -1.210587
+              ],
+              "point_delta": -2.356137,
+              "significant": true,
+              "subjects": 163
+            },
+            "delta_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -2.981889,
+                -0.90459
+              ],
+              "point_delta": -2.051893,
+              "significant": true,
+              "subjects": 163
+            },
+            "mae": {
+              "baseline": 15.282857,
+              "placebo_ridge": 15.219846,
+              "ridge": 13.598084
+            },
+            "rows": 350,
+            "subjects": 163
+          },
+          "interval": {
+            "calibration_rows": 79651,
+            "coverage": 0.882857,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "radius": 26.318925,
+            "test_rows": 350
+          },
+          "interval_gate_passed": true
+        },
+        "interval_validated": true,
+        "random_patient_splits": {
+          "evaluated_splits": 7,
+          "heldout_beats_baseline_splits": 7,
+          "heldout_beats_placebo_splits": 7,
+          "interval_pass_splits": 7,
+          "selected_ridge_splits": 7
+        },
+        "sampling": {
+          "max_rows_per_target": 80000,
+          "original_rows": 337101,
+          "original_subjects": 93159,
+          "row_cap_applied": true,
+          "sampled_rows": 80001,
+          "sampled_subjects": 22238
+        },
+        "support": {
+          "feature_count": 19,
+          "rows": 80001,
+          "subjects": 22238
+        },
+        "time_holdout": {
+          "available": true,
+          "gate_passed": true,
+          "heldout": {
+            "delta_vs_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -2.817108,
+                -2.467585
+              ],
+              "point_delta": -2.66163,
+              "significant": true,
+              "subjects": 6821
+            },
+            "delta_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -2.265468,
+                -1.950982
+              ],
+              "point_delta": -2.098876,
+              "significant": true,
+              "subjects": 6821
+            },
+            "mae": {
+              "baseline": 15.312404,
+              "placebo_ridge": 15.096151,
+              "ridge": 12.929521
+            },
+            "rows": 27040,
+            "subjects": 6821
+          },
+          "interval": {
+            "calibration_rows": 52961,
+            "coverage": 0.889867,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "radius": 26.072937,
+            "test_rows": 27040
+          },
+          "interval_gate_passed": true
+        },
+        "validated": true
+      },
+      "nowcast": {
+        "arrival_transport_holdout": {
+          "available": true,
+          "gate_passed": true,
+          "heldout": {
+            "delta_vs_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -16.753801,
+                -14.203606
+              ],
+              "point_delta": -15.475895,
+              "significant": true,
+              "subjects": 123
+            },
+            "delta_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -17.58151,
+                -13.955193
+              ],
+              "point_delta": -15.769145,
+              "significant": true,
+              "subjects": 123
+            },
+            "mae": {
+              "baseline": 16.259259,
+              "placebo_ridge": 16.850126,
+              "ridge": 0.353554
+            },
+            "rows": 297,
+            "subjects": 123
+          },
+          "interval": null,
+          "interval_gate_passed": null
+        },
+        "interval_validated": null,
+        "random_patient_splits": {
+          "evaluated_splits": 7,
+          "heldout_beats_baseline_splits": 7,
+          "heldout_beats_placebo_splits": 7,
+          "selected_ridge_splits": 7
+        },
+        "sampling": {
+          "max_rows_per_target": 80000,
+          "original_rows": 341553,
+          "original_subjects": 93595,
+          "row_cap_applied": true,
+          "sampled_rows": 80000,
+          "sampled_subjects": 22030
+        },
+        "support": {
+          "feature_count": 17,
+          "rows": 80000,
+          "subjects": 22030
+        },
+        "time_holdout": {
+          "available": true,
+          "gate_passed": true,
+          "heldout": {
+            "delta_vs_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -16.987791,
+                -16.418128
+              ],
+              "point_delta": -16.699749,
+              "significant": true,
+              "subjects": 6797
+            },
+            "delta_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -16.991696,
+                -16.432896
+              ],
+              "point_delta": -16.695139,
+              "significant": true,
+              "subjects": 6797
+            },
+            "mae": {
+              "baseline": 17.963017,
+              "placebo_ridge": 18.000017,
+              "ridge": 0.554978
+            },
+            "rows": 26688,
+            "subjects": 6797
+          },
+          "interval": null,
+          "interval_gate_passed": null
+        },
+        "validated": true
+      }
+    },
+    "temperature": {
+      "eligible_forecast": true,
+      "eligible_nowcast": true,
+      "forecast": {
+        "arrival_transport_holdout": {
+          "available": true,
+          "gate_passed": true,
+          "heldout": {
+            "delta_vs_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.146195,
+                -0.076608
+              ],
+              "point_delta": -0.113256,
+              "significant": true,
+              "subjects": 149
+            },
+            "delta_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.153009,
+                -0.080009
+              ],
+              "point_delta": -0.117861,
+              "significant": true,
+              "subjects": 149
+            },
+            "mae": {
+              "baseline": 0.347417,
+              "placebo_ridge": 0.351043,
+              "ridge": 0.259632
+            },
+            "rows": 271,
+            "subjects": 149
+          },
+          "interval": {
+            "calibration_rows": 79739,
+            "coverage": 0.889299,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "radius": 0.48716,
+            "test_rows": 271
+          },
+          "interval_gate_passed": true
+        },
+        "interval_validated": true,
+        "random_patient_splits": {
+          "evaluated_splits": 7,
+          "heldout_beats_baseline_splits": 7,
+          "heldout_beats_placebo_splits": 7,
+          "interval_pass_splits": 7,
+          "selected_ridge_splits": 7
+        },
+        "sampling": {
+          "max_rows_per_target": 80000,
+          "original_rows": 223847,
+          "original_subjects": 83383,
+          "row_cap_applied": true,
+          "sampled_rows": 80010,
+          "sampled_subjects": 29884
+        },
+        "support": {
+          "feature_count": 19,
+          "rows": 80010,
+          "subjects": 29884
+        },
+        "time_holdout": {
+          "available": true,
+          "gate_passed": true,
+          "heldout": {
+            "delta_vs_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.149267,
+                -0.140512
+              ],
+              "point_delta": -0.144907,
+              "significant": true,
+              "subjects": 9227
+            },
+            "delta_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.15061,
+                -0.140336
+              ],
+              "point_delta": -0.145347,
+              "significant": true,
+              "subjects": 9227
+            },
+            "mae": {
+              "baseline": 0.374084,
+              "placebo_ridge": 0.374987,
+              "ridge": 0.240982
+            },
+            "rows": 26097,
+            "subjects": 9227
+          },
+          "interval": {
+            "calibration_rows": 53913,
+            "coverage": 0.901751,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "radius": 0.488027,
+            "test_rows": 26097
+          },
+          "interval_gate_passed": true
+        },
+        "validated": true
+      },
+      "nowcast": {
+        "arrival_transport_holdout": {
+          "available": true,
+          "gate_passed": false,
+          "heldout": {
+            "delta_vs_baseline": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                -0.015393,
+                0.019014
+              ],
+              "point_delta": 0.00032,
+              "significant": false,
+              "subjects": 156
+            },
+            "delta_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.023011,
+                0.007358
+              ],
+              "point_delta": -0.007459,
+              "significant": false,
+              "subjects": 156
+            },
+            "mae": {
+              "baseline": 0.323077,
+              "placebo_ridge": 0.333905,
+              "ridge": 0.32548
+            },
+            "rows": 325,
+            "subjects": 156
+          },
+          "interval": null,
+          "interval_gate_passed": null
+        },
+        "interval_validated": null,
+        "random_patient_splits": {
+          "evaluated_splits": 7,
+          "heldout_beats_baseline_splits": 0,
+          "heldout_beats_placebo_splits": 6,
+          "selected_ridge_splits": 0
+        },
+        "sampling": {
+          "max_rows_per_target": 80000,
+          "original_rows": 282848,
+          "original_subjects": 92095,
+          "row_cap_applied": true,
+          "sampled_rows": 80001,
+          "sampled_subjects": 25805
+        },
+        "support": {
+          "feature_count": 17,
+          "rows": 80001,
+          "subjects": 25805
+        },
+        "time_holdout": {
+          "available": true,
+          "gate_passed": false,
+          "heldout": {
+            "delta_vs_baseline": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                0.000185,
+                0.004587
+              ],
+              "point_delta": 0.002292,
+              "significant": false,
+              "subjects": 8008
+            },
+            "delta_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.00525,
+                -0.000836
+              ],
+              "point_delta": -0.002811,
+              "significant": true,
+              "subjects": 8008
+            },
+            "mae": {
+              "baseline": 0.346757,
+              "placebo_ridge": 0.351881,
+              "ridge": 0.347438
+            },
+            "rows": 26187,
+            "subjects": 8008
+          },
+          "interval": null,
+          "interval_gate_passed": null
+        },
+        "validated": false
+      }
+    }
+  },
+  "validated": {
+    "forecast_targets": [
+      "dbp",
+      "heart_rate",
+      "map",
+      "respiratory_rate",
+      "sbp",
+      "temperature"
+    ],
+    "interval_targets": [
+      "dbp",
+      "heart_rate",
+      "map",
+      "respiratory_rate",
+      "sbp",
+      "temperature"
+    ],
+    "nowcast_targets": [
+      "acuity",
+      "dbp",
+      "map",
+      "sbp"
+    ]
+  }
+}
