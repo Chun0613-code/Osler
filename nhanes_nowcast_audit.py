@@ -62,7 +62,8 @@ TARGETS = {
     "wbc": "LBXWBCSI",
     "platelets": "LBXPLTSI",
     "rbc": "LBXRBCSI",
-    # Vitals/body composition. MAP is derived from SBP/DBP and is leak-guarded.
+    # Vitals/body composition. MAP is derived from SBP/DBP, and body-size
+    # siblings are leak-guarded.
     "sbp": "SBP",
     "dbp": "DBP",
     "map": "MAP",
@@ -76,10 +77,13 @@ CONTEXT_FEATURES = {
     "sex": "RIAGENDR",
 }
 
-# Deterministic siblings are excluded from one another's feature sets. The raw
-# skeleton produced near-zero BP errors because MAP is calculated from SBP/DBP.
+# Deterministic or near-deterministic siblings are excluded from one another's
+# feature sets. Without this guard, the audit can mistake algebraic completion
+# for cross-system physiologic inference.
 LEAKAGE_GROUPS = [
     {"sbp", "dbp", "map"},
+    {"hemoglobin", "hematocrit", "rbc"},
+    {"bmi", "weight", "waist"},
 ]
 
 
@@ -237,7 +241,7 @@ def write_markdown(report, path):
         "- Baseline: train-set target median.",
         "- Placebo: ridge regression on the same number of random-noise features.",
         "- Validation rule: candidate beats both baseline and placebo in all 7 participant-heldout splits.",
-        "- Leakage guard: BP-derived siblings (`sbp`, `dbp`, `map`) are excluded from one another's feature sets.",
+        "- Leakage guard: deterministic or near-deterministic sibling groups are excluded from one another's feature sets: `sbp/dbp/map`, `hemoglobin/hematocrit/rbc`, and `bmi/weight/waist`.",
         "- Output is aggregate-only; no participant identifiers or row-level data are written.",
         "",
         "## Result",
@@ -250,7 +254,7 @@ def write_markdown(report, path):
         "",
         "## Interpretation",
         "",
-        "The same disciplined nowcast pattern seen in ICU data also appears in NHANES: many contemporaneous lab/body variables are constrained enough by the rest of the physiologic panel to beat both median and capacity-matched placebo baselines.",
+        "The same disciplined nowcast pattern seen in ICU data also appears in NHANES: many contemporaneous lab/body variables are constrained enough by the rest of the physiologic panel to beat both median and capacity-matched placebo baselines, even after excluding deterministic sibling variables.",
         "",
         "The negative targets are also informative: glucose and alkaline phosphatase do not pass this cross-sectional gate, so they should remain missing/fallback in the NHANES nowcast contract.",
         "",

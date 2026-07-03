@@ -10,7 +10,7 @@ NHANES has no per-person time axis, so this is **nowcast only**. It does not sup
 - Baseline: train-set target median.
 - Placebo: ridge regression on the same number of random-noise features.
 - Validation rule: candidate beats both baseline and placebo in all 7 participant-heldout splits.
-- Leakage guard: BP-derived siblings (`sbp`, `dbp`, `map`) are excluded from one another's feature sets.
+- Leakage guard: deterministic or near-deterministic sibling groups are excluded from one another's feature sets: `sbp/dbp/map`, `hemoglobin/hematocrit/rbc`, and `bmi/weight/waist`.
 - Output is aggregate-only; no participant identifiers or row-level data are written.
 
 ## Result
@@ -23,7 +23,7 @@ NHANES has no per-person time axis, so this is **nowcast only**. It does not sup
 
 ## Interpretation
 
-The same disciplined nowcast pattern seen in ICU data also appears in NHANES: many contemporaneous lab/body variables are constrained enough by the rest of the physiologic panel to beat both median and capacity-matched placebo baselines.
+The same disciplined nowcast pattern seen in ICU data also appears in NHANES: many contemporaneous lab/body variables are constrained enough by the rest of the physiologic panel to beat both median and capacity-matched placebo baselines, even after excluding deterministic sibling variables.
 
 The negative targets are also informative: glucose and alkaline phosphatase do not pass this cross-sectional gate, so they should remain missing/fallback in the NHANES nowcast contract.
 
@@ -49,14 +49,14 @@ This is a healthy-population observation result, not a clinical or causal result
 | ast | 5374 | 5.9980 | 3.8813 | 6.5709 | 7/7 | 7/7 | validated |
 | alk_phos | 5374 | 28.2722 | 29.6287 | 30.7496 | 1/7 | 7/7 | fallback |
 | uric_acid | 5374 | 1.1573 | 0.9151 | 1.1649 | 7/7 | 7/7 | validated |
-| hemoglobin | 5374 | 1.1921 | 0.2509 | 1.1995 | 7/7 | 7/7 | validated |
-| hematocrit | 5374 | 3.2241 | 0.6080 | 3.2410 | 7/7 | 7/7 | validated |
+| hemoglobin | 5374 | 1.1921 | 0.8618 | 1.1969 | 7/7 | 7/7 | validated |
+| hematocrit | 5374 | 3.2241 | 2.3636 | 3.2362 | 7/7 | 7/7 | validated |
 | wbc | 5374 | 1.8276 | 1.6802 | 1.8727 | 7/7 | 7/7 | validated |
 | platelets | 5374 | 47.3881 | 41.6286 | 47.8264 | 7/7 | 7/7 | validated |
-| rbc | 5374 | 0.3914 | 0.2079 | 0.3926 | 7/7 | 7/7 | validated |
+| rbc | 5374 | 0.3914 | 0.3018 | 0.3928 | 7/7 | 7/7 | validated |
 | sbp | 5374 | 14.8685 | 11.8266 | 15.1677 | 7/7 | 7/7 | validated |
 | dbp | 5374 | 9.8108 | 8.9068 | 9.8557 | 7/7 | 7/7 | validated |
 | map | 5374 | 10.0043 | 8.4799 | 10.0771 | 7/7 | 7/7 | validated |
-| bmi | 5374 | 5.5527 | 1.6384 | 5.6514 | 7/7 | 7/7 | validated |
-| weight | 5374 | 17.4625 | 5.0767 | 17.6832 | 7/7 | 7/7 | validated |
-| waist | 5374 | 14.3718 | 4.0872 | 14.4403 | 7/7 | 7/7 | validated |
+| bmi | 5521 | 5.5974 | 4.7152 | 5.7022 | 7/7 | 7/7 | validated |
+| weight | 5529 | 17.5123 | 14.5878 | 17.7645 | 7/7 | 7/7 | validated |
+| waist | 5382 | 14.2129 | 11.0388 | 14.2741 | 7/7 | 7/7 | validated |

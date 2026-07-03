@@ -556,7 +556,8 @@ def whole_body_observation_capabilities() -> tuple[ObservationCapability, ...]:
             evidence=(
                 "NHANES_NOWCAST_FINDINGS.md; NHANES 2017-2018 public "
                 "cross-sectional audit validates 25/27 targets with "
-                "participant-heldout median and capacity-matched placebo gates; "
+                "participant-heldout median, capacity-matched placebo, and "
+                "expanded sibling-variable leakage guards; "
                 "no forecast, treatment, or causal claim is supported"
             ),
             allowed_uses=(
