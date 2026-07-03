@@ -84,13 +84,20 @@ class ObservationLayerTests(unittest.TestCase):
         self.assertIn("EICU_NEURO_NOTE_ALL_ICU_FINDINGS.md", neuro_notes.evidence)
         self.assertIn("100,862 subjects", neuro_notes.evidence)
 
-        cardiovascular_belief = capabilities["cardiovascular_belief_state_candidate"]
-        self.assertFalse(cardiovascular_belief.is_validated)
+        cardiovascular_belief = capabilities["cardiovascular_heart_rate_belief_state"]
+        self.assertTrue(cardiovascular_belief.is_validated)
         self.assertEqual(cardiovascular_belief.scope, "predict_update_belief_state")
         self.assertEqual(cardiovascular_belief.horizon_hours, (6,))
-        self.assertIn("heart_rate_near_miss", cardiovascular_belief.targets)
-        self.assertIn("6/7 patient splits", cardiovascular_belief.evidence)
-        self.assertNotIn("factual_prediction", cardiovascular_belief.allowed_uses)
+        self.assertIn("heart_rate", cardiovascular_belief.targets)
+        self.assertIn("7/7 patient splits", cardiovascular_belief.evidence)
+        self.assertIn("factual_prediction", cardiovascular_belief.allowed_uses)
+
+        cardiovascular_remaining = capabilities["cardiovascular_belief_remaining_targets_candidate"]
+        self.assertFalse(cardiovascular_remaining.is_validated)
+        self.assertEqual(cardiovascular_remaining.scope, "predict_update_belief_state")
+        self.assertIn("map", cardiovascular_remaining.targets)
+        self.assertNotIn("heart_rate", cardiovascular_remaining.targets)
+        self.assertNotIn("factual_prediction", cardiovascular_remaining.allowed_uses)
 
     def test_readiness_is_observation_only_and_fail_closed(self):
         readiness = observation_readiness()

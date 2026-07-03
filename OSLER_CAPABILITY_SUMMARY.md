@@ -37,8 +37,10 @@ and the whole system was built without ever faking a small-sample win.
 - **Cross-organ coupling:** e.g. cardiovascular perfusion → kidney (24–48h), sepsis burden
   → blood pressure (6h), and a validated three-organ chain **sepsis → blood pressure →
   kidney**.
-- **Individualization:** an online hidden-state estimate of kidney reserve that improves
-  downstream prediction beyond a strong baseline.
+- **Individualization:** online hidden-state estimates now validate in two places:
+  kidney reserve for creatinine/BUN, and cardiovascular perfusion/shock state for
+  heart-rate prediction. Both improve downstream observable prediction beyond a strong
+  baseline and a capacity-matched placebo.
 - **Two care settings:** ICU **and** the pre-ICU emergency department.
 - **Three population/data axes:** multi-hospital ICU data (eICU), independent ICU data
   (MIMIC-IV), and healthy/general-population cross-sectional data (NHANES).

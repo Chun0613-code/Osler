@@ -643,17 +643,32 @@ def whole_body_observation_capabilities() -> tuple[ObservationCapability, ...]:
             evidence="AKI_RENAL_BELIEF_STATE_V2_FINDINGS.md; downstream observable gate beats baseline and capacity-matched placebo",
         ),
         ObservationCapability(
-            name="cardiovascular_belief_state_candidate",
+            name="cardiovascular_heart_rate_belief_state",
+            status="validated",
+            scope="predict_update_belief_state",
+            systems=("cardiovascular_perfusion",),
+            targets=("heart_rate", "patient_specific_perfusion_shock_state"),
+            horizon_hours=(6,),
+            evidence=(
+                "CARDIOVASCULAR_BELIEF_FINDINGS.md; full eICU cardiovascular "
+                "cohort validates heart-rate prediction with predict-update "
+                "perfusion belief across 7/7 patient splits and "
+                "hospital-heldout, beating baseline and capacity-matched "
+                "placebo; no direct hidden-state accuracy claim"
+            ),
+        ),
+        ObservationCapability(
+            name="cardiovascular_belief_remaining_targets_candidate",
             status="candidate_only",
             scope="predict_update_belief_state",
             systems=("cardiovascular_perfusion",),
-            targets=("heart_rate_near_miss", "map", "lactate", "o2sat", "respiratory_rate"),
+            targets=("map", "lactate", "o2sat", "respiratory_rate"),
             horizon_hours=(6,),
             evidence=(
-                "CARDIOVASCULAR_BELIEF_FINDINGS.md; predict-update perfusion "
-                "belief reaches 6/7 patient splits and hospital-heldout for "
-                "heart_rate, but fails the required 7/7 gate and remains "
-                "candidate-only"
+                "CARDIOVASCULAR_BELIEF_FINDINGS.md; bounded cohort failed "
+                "robust downstream observable gates for MAP, lactate, O2 "
+                "saturation, and respiratory rate; only heart_rate is "
+                "validated on the full cohort"
             ),
             allowed_uses=("capability_reporting",),
         ),
@@ -1100,6 +1115,8 @@ def whole_body_state_forecast_template() -> dict[str, object]:
             "eicu_neuro_note_all_icu_coverage_audit.json",
             "CARDIOVASCULAR_BELIEF_FINDINGS.md",
             "eicu_cardiovascular_belief_audit.json",
+            "eicu_cardiovascular_belief_full_heart_rate_audit.json",
+            "eicu_cardiovascular_instability_full_transition_report.json",
         ],
         "safety_boundary": {
             **observation_readiness()["safety_boundary"],

@@ -862,7 +862,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--disease", choices=sorted(BODY_SYSTEM_CONFIGS), required=True)
     parser.add_argument("--output", type=Path, default=None)
     parser.add_argument("--report", type=Path, default=None)
-    parser.add_argument("--max-stays", type=int, default=2500)
+    parser.add_argument(
+        "--max-stays",
+        type=int,
+        default=2500,
+        help="Maximum stays to extract; use a negative value for the full unbounded cohort.",
+    )
     parser.add_argument("--horizon-hours", type=float, default=DELTA_H)
     parser.add_argument("--restrict-stays-from", type=Path, default=None)
     return parser.parse_args()
@@ -873,11 +878,12 @@ def main() -> None:
     config = get_body_system_config(args.disease)
     output = args.output or Path(f"eicu_{config.name}_transitions_6h.parquet")
     report_path = args.report or Path(f"eicu_{config.name}_transition_report.json")
+    max_stays = None if args.max_stays is not None and args.max_stays < 0 else args.max_stays
     report = build_transitions(
         args.data_root,
         output,
         config,
-        max_stays=args.max_stays,
+        max_stays=max_stays,
         horizon_hours=args.horizon_hours,
         restrict_stays_from=args.restrict_stays_from,
     )

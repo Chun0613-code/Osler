@@ -9,7 +9,7 @@ The state is **not** a measured clinical variable.  It can only be used if it
 improves downstream observable prediction beyond both a population ridge
 baseline and a capacity-matched placebo.
 
-## Cohort
+## Bounded Cohort
 
 - Dataset: eICU cardiovascular instability / shock / heart-failure module.
 - Rows: `16,047`
@@ -18,6 +18,28 @@ baseline and a capacity-matched placebo.
 - Hospitals: `12`
 - Active cardiovascular-instability rows: `4,734`
 - Horizon: `6h`
+
+This bounded engineering cohort produced a heart-rate near-miss: `6/7`
+patient splits passed both baseline and capacity-matched placebo, and the
+hospital-heldout gate passed.  It was therefore kept candidate-only until the
+same test could be run on the full eICU cardiovascular cohort.
+
+## Full Cohort Replication
+
+- Dataset: full unbounded eICU cardiovascular instability / shock /
+  heart-failure module.
+- Rows: `682,172`
+- Subjects: `45,486`
+- Stays: `55,080`
+- Hospitals: `206`
+- Active cardiovascular-instability rows: `298,744`
+- Horizon: `6h`
+- Extraction report: `eicu_cardiovascular_instability_full_transition_report.json`
+- Audit report: `eicu_cardiovascular_belief_full_heart_rate_audit.json`
+
+Only `heart_rate` was re-tested on the full cohort, because it was the only
+bounded-cohort target with a real near-miss.  MAP, lactate, O2 saturation, and
+respiratory rate remain unsupported for cardiovascular belief promotion.
 
 ## Gate
 
@@ -28,7 +50,7 @@ baseline and a capacity-matched placebo.
   all 7 patient splits, plus hospital-heldout support before validation.
 - Output is aggregate-only; no row-level or patient identifiers are stored.
 
-## Result
+## Bounded Result
 
 | Target | Patient Splits Passing Both | Median Delta vs Baseline | Median Delta vs Placebo | Hospital-Heldout |
 |---|---:|---:|---:|---|
@@ -46,24 +68,44 @@ Hospital-heldout heart-rate details:
 - delta vs baseline: `-0.2685`, 95% CI `[-0.4454, -0.0964]`
 - delta vs placebo: `-0.2734`, 95% CI `[-0.4293, -0.0996]`
 
+## Full Cohort Heart-Rate Result
+
+| Target | Patient Splits Passing Both | Median Delta vs Baseline | Median Delta vs Placebo | Hospital-Heldout |
+|---|---:|---:|---:|---|
+| heart_rate | 7 / 7 | -0.1122 | -0.1125 | pass |
+
+Hospital-heldout full-cohort details:
+
+- held-out rows: `288,969`
+- held-out subjects: `18,671`
+- baseline MAE: `8.4157`
+- cardiovascular-belief MAE: `8.3192`
+- placebo MAE: `8.4160`
+- delta vs baseline: `-0.1087`, 95% CI `[-0.1224, -0.0954]`
+- delta vs placebo: `-0.1091`, 95% CI `[-0.1238, -0.0957]`
+
 ## Interpretation
 
 The cardiovascular belief state finds a real personalization signal for
-heart-rate forecasting, but it is not stable enough to validate: it reaches
-`6/7` patient splits and passes hospital-heldout, but misses the required
-`7/7` split gate.
+heart-rate forecasting.  The bounded cohort was underpowered by one split, but
+the full cohort passes the required `7/7` patient-split gate and the
+hospital-heldout gate while also beating a capacity-matched placebo.
 
-This is a useful near-miss, not a promotion.  It says the patient-specific
-perfusion/shock state carries individualized information, but not enough to
-become a validated online digital-twin component under the current cohort and
-6h horizon.
+This validates a second online personalized belief component after AKI renal
+belief: heart-rate forecasting can use a patient-specific perfusion/shock state
+when the cohort is large enough.  The result is target-specific.  It does not
+validate the hidden state as a directly measured clinical quantity, and it does
+not validate cardiovascular belief for MAP, lactate, O2 saturation, respiratory
+rate, causal effects, or treatment planning.
 
 ## Boundary
 
 Allowed:
 
-- candidate-only capability reporting;
-- future experiments on larger cardiovascular cohorts or alternate horizons.
+- factual heart-rate prediction with the validated cardiovascular belief state;
+- candidate-only reporting for unsupported cardiovascular belief targets;
+- future experiments on alternate horizons or additional dense cardiovascular
+  targets.
 
 Not allowed:
 
@@ -72,5 +114,7 @@ Not allowed:
 - checkpoint or active-rule promotion;
 - claiming direct hidden-state accuracy.
 
-The AKI renal belief state remains the only validated personalized
-predict-update belief component.  Cardiovascular belief is candidate-only.
+The validated personalized predict-update belief components are now:
+
+- AKI renal belief state for creatinine/BUN;
+- cardiovascular perfusion/shock belief state for heart rate.
