@@ -170,6 +170,23 @@ validated cells, and capability reporting. It does not permit causal,
 counterfactual, clinical, runtime, checkpoint, complete-human-simulation, or
 active-rule-promotion claims.
 
+`mimiciv_ed_to_icu_baseline_transitions_{1h,3h,6h}.parquet` are local-only and
+ignored by git. They link prior MIMIC-IV-ED trajectories to early MIMIC-IV ICU
+states only when the ED stay belongs to the same admission and ends before ICU
+`intime`. The committed aggregate artifacts
+`mimiciv_ed_to_icu_baseline_transition_report_1h.json`,
+`mimiciv_ed_to_icu_baseline_transition_report_3h.json`,
+`mimiciv_ed_to_icu_baseline_transition_report_6h.json`,
+`mimiciv_ed_to_icu_baseline_audit_1h.json`,
+`mimiciv_ed_to_icu_baseline_audit_3h.json`,
+`mimiciv_ed_to_icu_baseline_audit_6h.json`, and
+`MIMICIV_ED_TO_ICU_BASELINE_FINDINGS.md` record a candidate-only negative
+incremental test: 0/5 dense vital targets validate at 1h, 3h, or 6h when ED+ICU
+features must beat persistence, ICU-only ridge, and a capacity-matched ED
+placebo. Heart rate and MAP show near-miss signal at 3h-6h, but not enough for
+runtime forecasting, intervals, causal, counterfactual, clinical, checkpoint,
+or active-rule-promotion claims.
+
 `mimiciv_observation_radiology_transitions_6h.parquet` is local-only and
 ignored by git. It augments the MIMIC-IV all-ICU observation cohort with
 timestamped MIMIC-IV Note v2.2 chest radiology findings extracted from reports.

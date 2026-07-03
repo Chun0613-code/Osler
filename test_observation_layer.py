@@ -52,6 +52,13 @@ class ObservationLayerTests(unittest.TestCase):
         self.assertEqual(ed.horizon_hours, (0, 1, 3, 6))
         self.assertIn("6h_6_target_forecast_interval_cells", ed.targets)
 
+        ed_to_icu = capabilities["mimiciv_ed_to_icu_baseline_candidate"]
+        self.assertFalse(ed_to_icu.is_validated)
+        self.assertEqual(ed_to_icu.scope, "ed_to_early_icu_baseline")
+        self.assertEqual(ed_to_icu.horizon_hours, (1, 3, 6))
+        self.assertIn("heart_rate_map_3h_6h_near_miss", ed_to_icu.targets)
+        self.assertNotIn("factual_prediction", ed_to_icu.allowed_uses)
+
         radiology_notes = capabilities["mimiciv_radiology_note_structured_observation_candidate"]
         self.assertFalse(radiology_notes.is_validated)
         self.assertEqual(radiology_notes.scope, "note_backed_measurement_depth")
@@ -168,6 +175,10 @@ class ObservationLayerTests(unittest.TestCase):
         )
         self.assertIn(
             "mimiciv_ed_observation_coverage_audit_6h.json",
+            template["source_artifacts"],
+        )
+        self.assertIn(
+            "mimiciv_ed_to_icu_baseline_audit_6h.json",
             template["source_artifacts"],
         )
 

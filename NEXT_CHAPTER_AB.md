@@ -97,7 +97,12 @@ simple power-limitation explanation. The first pre-ICU scene extension is
 recorded in `MIMICIV_ED_OBSERVATION_FINDINGS.md` and the
 `mimiciv_ed_observation_coverage_audit_{1h,3h,6h}.json` artifacts; MIMIC-IV-ED
 table-based vitals validate ED-scene nowcast, forecast, and interval cells
-under patient, arrival-transport, and chronological heldout gates.
+under patient, arrival-transport, and chronological heldout gates. The
+ED-to-early-ICU follow-up is recorded in
+`MIMICIV_ED_TO_ICU_BASELINE_FINDINGS.md` and
+`mimiciv_ed_to_icu_baseline_audit_{1h,3h,6h}.json`; it keeps prior ED
+trajectory as candidate-only because no dense vital target validates as an
+incremental early-ICU baseline over persistence, ICU-only ridge, and ED-placebo.
 
 Its allowed role is:
 

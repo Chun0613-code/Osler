@@ -525,6 +525,24 @@ def whole_body_observation_capabilities() -> tuple[ObservationCapability, ...]:
             ),
         ),
         ObservationCapability(
+            name="mimiciv_ed_to_icu_baseline_candidate",
+            status="candidate_only",
+            scope="ed_to_early_icu_baseline",
+            systems=("emergency_department", "intensive_care_unit", "transition_of_care"),
+            targets=(
+                "0_validated_ed_increment_targets",
+                "heart_rate_map_3h_6h_near_miss",
+            ),
+            horizon_hours=(1, 3, 6),
+            evidence=(
+                "MIMICIV_ED_TO_ICU_BASELINE_FINDINGS.md; prior ED trajectory "
+                "does not robustly improve early ICU prediction beyond ICU "
+                "state, although heart_rate/MAP show candidate-only near-miss "
+                "signal at 3h-6h"
+            ),
+            allowed_uses=("capability_reporting",),
+        ),
+        ObservationCapability(
             name="mimiciv_radiology_note_structured_observation_candidate",
             status="candidate_only",
             scope="note_backed_measurement_depth",
@@ -1023,6 +1041,10 @@ def whole_body_state_forecast_template() -> dict[str, object]:
             "mimiciv_ed_observation_coverage_audit_1h.json",
             "mimiciv_ed_observation_coverage_audit_3h.json",
             "mimiciv_ed_observation_coverage_audit_6h.json",
+            "MIMICIV_ED_TO_ICU_BASELINE_FINDINGS.md",
+            "mimiciv_ed_to_icu_baseline_audit_1h.json",
+            "mimiciv_ed_to_icu_baseline_audit_3h.json",
+            "mimiciv_ed_to_icu_baseline_audit_6h.json",
             "MIMICIV_RADIOLOGY_NOTE_OBSERVATION_FINDINGS.md",
             "mimiciv_radiology_note_coverage_audit.json",
             "EICU_NEURO_NOTE_OBSERVATION_FINDINGS.md",

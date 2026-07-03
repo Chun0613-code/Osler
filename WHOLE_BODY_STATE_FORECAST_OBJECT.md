@@ -92,6 +92,12 @@ setting. ED triage and vital-sign tables validate 3/9 same-time nowcast targets
 at 1h cohort support, 5/9 at 3h, and 4/9 at 6h. This is a scene extension for
 dense ED physiology, not a note-imputation or treatment-effect module.
 
+The ED-to-early-ICU baseline audit tests a different question: whether prior ED
+trajectory improves early ICU prediction after the early ICU state is known. It
+validates 0/5 dense vital targets at 1h, 3h, and 6h. Heart rate and MAP show
+candidate-only near-miss signal at 3h-6h, but no ED-to-ICU transfer cell may
+move or display an interval until a later audit passes the full gate.
+
 ## Future Axis
 
 The future trajectory axis uses the canonical horizons:
@@ -129,6 +135,10 @@ The MIMIC-IV-ED scene audit validates ED factual vital-sign forecasting with
 calibrated intervals: 2/8 targets at 1h, 5/8 at 3h, and 6/8 at 6h. These cells
 are ED-scene factual predictions only; they do not imply ED medication effects
 or causal planning.
+
+The ED-to-ICU baseline pass validates no future ICU forecast cells. Prior ED
+trajectory stays outside the ICU future trajectory grid and remains
+candidate-only.
 
 Unsupported target/horizon pairs fall back to persistence or missing.  This is
 the same humility reflex as before, now placed inside one object.
@@ -206,6 +216,10 @@ The aggregate evidence comes from:
 - `mimiciv_ed_observation_coverage_audit_1h.json`
 - `mimiciv_ed_observation_coverage_audit_3h.json`
 - `mimiciv_ed_observation_coverage_audit_6h.json`
+- `MIMICIV_ED_TO_ICU_BASELINE_FINDINGS.md`
+- `mimiciv_ed_to_icu_baseline_audit_1h.json`
+- `mimiciv_ed_to_icu_baseline_audit_3h.json`
+- `mimiciv_ed_to_icu_baseline_audit_6h.json`
 - `MIMICIV_RADIOLOGY_NOTE_OBSERVATION_FINDINGS.md`
 - `mimiciv_radiology_note_coverage_audit.json`
 - `EICU_NEURO_NOTE_OBSERVATION_FINDINGS.md`
