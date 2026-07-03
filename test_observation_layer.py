@@ -59,6 +59,15 @@ class ObservationLayerTests(unittest.TestCase):
         self.assertIn("heart_rate_map_3h_6h_near_miss", ed_to_icu.targets)
         self.assertNotIn("factual_prediction", ed_to_icu.allowed_uses)
 
+        nhanes = capabilities["nhanes_healthy_population_nowcast_validation"]
+        self.assertTrue(nhanes.is_validated)
+        self.assertEqual(nhanes.scope, "external_population_nowcast_validation")
+        self.assertEqual(nhanes.horizon_hours, (0,))
+        self.assertIn("25_cross_sectional_nowcast_targets", nhanes.targets)
+        self.assertIn("same_time_state_completion", nhanes.allowed_uses)
+        self.assertNotIn("factual_prediction", nhanes.allowed_uses)
+        self.assertIn("no forecast", nhanes.evidence)
+
         radiology_notes = capabilities["mimiciv_radiology_note_structured_observation_candidate"]
         self.assertFalse(radiology_notes.is_validated)
         self.assertEqual(radiology_notes.scope, "note_backed_measurement_depth")
@@ -179,6 +188,10 @@ class ObservationLayerTests(unittest.TestCase):
         )
         self.assertIn(
             "mimiciv_ed_to_icu_baseline_audit_6h.json",
+            template["source_artifacts"],
+        )
+        self.assertIn(
+            "nhanes_2017_2018_nowcast_audit.json",
             template["source_artifacts"],
         )
 

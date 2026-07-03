@@ -543,6 +543,29 @@ def whole_body_observation_capabilities() -> tuple[ObservationCapability, ...]:
             allowed_uses=("capability_reporting",),
         ),
         ObservationCapability(
+            name="nhanes_healthy_population_nowcast_validation",
+            status="validated",
+            scope="external_population_nowcast_validation",
+            systems=("healthy_population", "non_icu", "whole_body"),
+            targets=(
+                "25_cross_sectional_nowcast_targets",
+                "glucose_fallback",
+                "alk_phos_fallback",
+            ),
+            horizon_hours=(0,),
+            evidence=(
+                "NHANES_NOWCAST_FINDINGS.md; NHANES 2017-2018 public "
+                "cross-sectional audit validates 25/27 targets with "
+                "participant-heldout median and capacity-matched placebo gates; "
+                "no forecast, treatment, or causal claim is supported"
+            ),
+            allowed_uses=(
+                "shadow_observation",
+                "same_time_state_completion",
+                "capability_reporting",
+            ),
+        ),
+        ObservationCapability(
             name="mimiciv_radiology_note_structured_observation_candidate",
             status="candidate_only",
             scope="note_backed_measurement_depth",
@@ -673,6 +696,11 @@ def observation_readiness() -> dict[str, object]:
             "fallback": "persistence for unsupported, sparse, or slow targets at the wrong horizon",
             "selection_rule": "use only capabilities validated by held-out aggregate gates; otherwise abstain or fall back",
             "nowcasting_rule": "same-time state completion is allowed only for validated module-target pairs and does not authorize future movement",
+            "external_population_nowcast_rule": (
+                "cross-sectional healthy-population audits may validate "
+                "same-time state completion, but they do not validate future "
+                "forecasting or ICU trajectory behavior"
+            ),
             "note_observation_rule": (
                 "timestamp-valid note findings may be displayed as observed evidence, "
                 "but candidate-only note targets may not be imputed or forecast"
@@ -1045,6 +1073,8 @@ def whole_body_state_forecast_template() -> dict[str, object]:
             "mimiciv_ed_to_icu_baseline_audit_1h.json",
             "mimiciv_ed_to_icu_baseline_audit_3h.json",
             "mimiciv_ed_to_icu_baseline_audit_6h.json",
+            "NHANES_NOWCAST_FINDINGS.md",
+            "nhanes_2017_2018_nowcast_audit.json",
             "MIMICIV_RADIOLOGY_NOTE_OBSERVATION_FINDINGS.md",
             "mimiciv_radiology_note_coverage_audit.json",
             "EICU_NEURO_NOTE_OBSERVATION_FINDINGS.md",

@@ -1,0 +1,402 @@
+{
+  "context_features": [
+    "age",
+    "sex"
+  ],
+  "data_source": "NHANES 2017-2018 public XPT files",
+  "failed_targets": [
+    "glucose",
+    "alk_phos"
+  ],
+  "gate": {
+    "baseline": "train_set_target_median",
+    "candidate": "ridge_on_contemporaneous_non_target_variables",
+    "pass_rule": "candidate beats both baseline and placebo in all 7 splits",
+    "placebo": "capacity_matched_random_noise_features",
+    "splits": "7 random participant-heldout splits"
+  },
+  "interpretation": {
+    "claim_not_supported": "NHANES has no per-person time axis, so this audit does not validate forecasting, intervention response, causality, or ICU trajectory behavior.",
+    "claim_supported": "The ICU nowcast recipe transfers to a healthy-population cross-sectional setting for many dense physiologic and laboratory variables."
+  },
+  "leakage_guards": [
+    {
+      "group": [
+        "dbp",
+        "map",
+        "sbp"
+      ],
+      "policy": "When any group member is the target, all group members are excluded from the feature set."
+    }
+  ],
+  "min_complete_rows": 500,
+  "mode": "cross_sectional_nowcast_only",
+  "participant_merge_n": 6401,
+  "results": {
+    "albumin": {
+      "baseline_mae": 0.259977,
+      "beats_baseline": "7/7",
+      "beats_placebo": "7/7",
+      "candidate_mae": 0.181341,
+      "delta_vs_baseline": -0.078636,
+      "leak_guard_excluded_features": [],
+      "n": 5374,
+      "placebo_mae": 0.263602,
+      "relative_mae_change": -0.302471,
+      "validated": true
+    },
+    "alk_phos": {
+      "baseline_mae": 28.272164,
+      "beats_baseline": "1/7",
+      "beats_placebo": "7/7",
+      "candidate_mae": 29.628692,
+      "delta_vs_baseline": 1.356528,
+      "leak_guard_excluded_features": [],
+      "n": 5374,
+      "placebo_mae": 30.749648,
+      "relative_mae_change": 0.047981,
+      "validated": false
+    },
+    "alt": {
+      "baseline_mae": 9.207688,
+      "beats_baseline": "7/7",
+      "beats_placebo": "7/7",
+      "candidate_mae": 5.522286,
+      "delta_vs_baseline": -3.685401,
+      "leak_guard_excluded_features": [],
+      "n": 5374,
+      "placebo_mae": 10.106288,
+      "relative_mae_change": -0.400253,
+      "validated": true
+    },
+    "ast": {
+      "baseline_mae": 5.997963,
+      "beats_baseline": "7/7",
+      "beats_placebo": "7/7",
+      "candidate_mae": 3.881337,
+      "delta_vs_baseline": -2.116626,
+      "leak_guard_excluded_features": [],
+      "n": 5374,
+      "placebo_mae": 6.570924,
+      "relative_mae_change": -0.352891,
+      "validated": true
+    },
+    "bicarbonate": {
+      "baseline_mae": 1.949163,
+      "beats_baseline": "7/7",
+      "beats_placebo": "7/7",
+      "candidate_mae": 1.599406,
+      "delta_vs_baseline": -0.349757,
+      "leak_guard_excluded_features": [],
+      "n": 5374,
+      "placebo_mae": 1.955673,
+      "relative_mae_change": -0.17944,
+      "validated": true
+    },
+    "bilirubin": {
+      "baseline_mae": 0.181941,
+      "beats_baseline": "7/7",
+      "beats_placebo": "7/7",
+      "candidate_mae": 0.175131,
+      "delta_vs_baseline": -0.00681,
+      "leak_guard_excluded_features": [],
+      "n": 5374,
+      "placebo_mae": 0.194108,
+      "relative_mae_change": -0.03743,
+      "validated": true
+    },
+    "bmi": {
+      "baseline_mae": 5.552688,
+      "beats_baseline": "7/7",
+      "beats_placebo": "7/7",
+      "candidate_mae": 1.638402,
+      "delta_vs_baseline": -3.914286,
+      "leak_guard_excluded_features": [],
+      "n": 5374,
+      "placebo_mae": 5.651407,
+      "relative_mae_change": -0.704935,
+      "validated": true
+    },
+    "bun": {
+      "baseline_mae": 4.006465,
+      "beats_baseline": "7/7",
+      "beats_placebo": "7/7",
+      "candidate_mae": 3.214942,
+      "delta_vs_baseline": -0.791523,
+      "leak_guard_excluded_features": [],
+      "n": 5374,
+      "placebo_mae": 4.110181,
+      "relative_mae_change": -0.197561,
+      "validated": true
+    },
+    "calcium": {
+      "baseline_mae": 0.287326,
+      "beats_baseline": "7/7",
+      "beats_placebo": "7/7",
+      "candidate_mae": 0.224102,
+      "delta_vs_baseline": -0.063224,
+      "leak_guard_excluded_features": [],
+      "n": 5374,
+      "placebo_mae": 0.289802,
+      "relative_mae_change": -0.220044,
+      "validated": true
+    },
+    "chloride": {
+      "baseline_mae": 2.067487,
+      "beats_baseline": "7/7",
+      "beats_placebo": "7/7",
+      "candidate_mae": 1.254808,
+      "delta_vs_baseline": -0.812679,
+      "leak_guard_excluded_features": [],
+      "n": 5374,
+      "placebo_mae": 2.096874,
+      "relative_mae_change": -0.393076,
+      "validated": true
+    },
+    "creatinine": {
+      "baseline_mae": 0.203472,
+      "beats_baseline": "7/7",
+      "beats_placebo": "7/7",
+      "candidate_mae": 0.173754,
+      "delta_vs_baseline": -0.029718,
+      "leak_guard_excluded_features": [],
+      "n": 5374,
+      "placebo_mae": 0.210896,
+      "relative_mae_change": -0.146054,
+      "validated": true
+    },
+    "dbp": {
+      "baseline_mae": 9.810793,
+      "beats_baseline": "7/7",
+      "beats_placebo": "7/7",
+      "candidate_mae": 8.906842,
+      "delta_vs_baseline": -0.903951,
+      "leak_guard_excluded_features": [
+        "map",
+        "sbp"
+      ],
+      "n": 5374,
+      "placebo_mae": 9.855683,
+      "relative_mae_change": -0.092138,
+      "validated": true
+    },
+    "glucose": {
+      "baseline_mae": 15.47746,
+      "beats_baseline": "0/7",
+      "beats_placebo": "5/7",
+      "candidate_mae": 17.652324,
+      "delta_vs_baseline": 2.174864,
+      "leak_guard_excluded_features": [],
+      "n": 5374,
+      "placebo_mae": 17.850543,
+      "relative_mae_change": 0.140518,
+      "validated": false
+    },
+    "hematocrit": {
+      "baseline_mae": 3.224108,
+      "beats_baseline": "7/7",
+      "beats_placebo": "7/7",
+      "candidate_mae": 0.607967,
+      "delta_vs_baseline": -2.616141,
+      "leak_guard_excluded_features": [],
+      "n": 5374,
+      "placebo_mae": 3.241018,
+      "relative_mae_change": -0.811431,
+      "validated": true
+    },
+    "hemoglobin": {
+      "baseline_mae": 1.192091,
+      "beats_baseline": "7/7",
+      "beats_placebo": "7/7",
+      "candidate_mae": 0.250912,
+      "delta_vs_baseline": -0.941179,
+      "leak_guard_excluded_features": [],
+      "n": 5374,
+      "placebo_mae": 1.199503,
+      "relative_mae_change": -0.789519,
+      "validated": true
+    },
+    "map": {
+      "baseline_mae": 10.00433,
+      "beats_baseline": "7/7",
+      "beats_placebo": "7/7",
+      "candidate_mae": 8.479919,
+      "delta_vs_baseline": -1.524411,
+      "leak_guard_excluded_features": [
+        "dbp",
+        "sbp"
+      ],
+      "n": 5374,
+      "placebo_mae": 10.077112,
+      "relative_mae_change": -0.152375,
+      "validated": true
+    },
+    "phosphorus": {
+      "baseline_mae": 0.454822,
+      "beats_baseline": "7/7",
+      "beats_placebo": "7/7",
+      "candidate_mae": 0.392741,
+      "delta_vs_baseline": -0.062081,
+      "leak_guard_excluded_features": [],
+      "n": 5374,
+      "placebo_mae": 0.45809,
+      "relative_mae_change": -0.136496,
+      "validated": true
+    },
+    "platelets": {
+      "baseline_mae": 47.388097,
+      "beats_baseline": "7/7",
+      "beats_placebo": "7/7",
+      "candidate_mae": 41.628571,
+      "delta_vs_baseline": -5.759526,
+      "leak_guard_excluded_features": [],
+      "n": 5374,
+      "placebo_mae": 47.826422,
+      "relative_mae_change": -0.12154,
+      "validated": true
+    },
+    "potassium": {
+      "baseline_mae": 0.27591,
+      "beats_baseline": "7/7",
+      "beats_placebo": "7/7",
+      "candidate_mae": 0.258583,
+      "delta_vs_baseline": -0.017327,
+      "leak_guard_excluded_features": [],
+      "n": 5374,
+      "placebo_mae": 0.279053,
+      "relative_mae_change": -0.062799,
+      "validated": true
+    },
+    "rbc": {
+      "baseline_mae": 0.391411,
+      "beats_baseline": "7/7",
+      "beats_placebo": "7/7",
+      "candidate_mae": 0.207858,
+      "delta_vs_baseline": -0.183553,
+      "leak_guard_excluded_features": [],
+      "n": 5374,
+      "placebo_mae": 0.392551,
+      "relative_mae_change": -0.468953,
+      "validated": true
+    },
+    "sbp": {
+      "baseline_mae": 14.868479,
+      "beats_baseline": "7/7",
+      "beats_placebo": "7/7",
+      "candidate_mae": 11.826588,
+      "delta_vs_baseline": -3.041891,
+      "leak_guard_excluded_features": [
+        "dbp",
+        "map"
+      ],
+      "n": 5374,
+      "placebo_mae": 15.167655,
+      "relative_mae_change": -0.204587,
+      "validated": true
+    },
+    "sodium": {
+      "baseline_mae": 2.139049,
+      "beats_baseline": "7/7",
+      "beats_placebo": "7/7",
+      "candidate_mae": 1.339977,
+      "delta_vs_baseline": -0.799071,
+      "leak_guard_excluded_features": [],
+      "n": 5374,
+      "placebo_mae": 2.161805,
+      "relative_mae_change": -0.373564,
+      "validated": true
+    },
+    "total_protein": {
+      "baseline_mae": 0.33842,
+      "beats_baseline": "7/7",
+      "beats_placebo": "7/7",
+      "candidate_mae": 0.279532,
+      "delta_vs_baseline": -0.058888,
+      "leak_guard_excluded_features": [],
+      "n": 5374,
+      "placebo_mae": 0.340115,
+      "relative_mae_change": -0.174007,
+      "validated": true
+    },
+    "uric_acid": {
+      "baseline_mae": 1.157285,
+      "beats_baseline": "7/7",
+      "beats_placebo": "7/7",
+      "candidate_mae": 0.915143,
+      "delta_vs_baseline": -0.242141,
+      "leak_guard_excluded_features": [],
+      "n": 5374,
+      "placebo_mae": 1.164941,
+      "relative_mae_change": -0.209232,
+      "validated": true
+    },
+    "waist": {
+      "baseline_mae": 14.371774,
+      "beats_baseline": "7/7",
+      "beats_placebo": "7/7",
+      "candidate_mae": 4.087166,
+      "delta_vs_baseline": -10.284608,
+      "leak_guard_excluded_features": [],
+      "n": 5374,
+      "placebo_mae": 14.440344,
+      "relative_mae_change": -0.715612,
+      "validated": true
+    },
+    "wbc": {
+      "baseline_mae": 1.827624,
+      "beats_baseline": "7/7",
+      "beats_placebo": "7/7",
+      "candidate_mae": 1.680164,
+      "delta_vs_baseline": -0.14746,
+      "leak_guard_excluded_features": [],
+      "n": 5374,
+      "placebo_mae": 1.872715,
+      "relative_mae_change": -0.080684,
+      "validated": true
+    },
+    "weight": {
+      "baseline_mae": 17.462475,
+      "beats_baseline": "7/7",
+      "beats_placebo": "7/7",
+      "candidate_mae": 5.076734,
+      "delta_vs_baseline": -12.385741,
+      "leak_guard_excluded_features": [],
+      "n": 5374,
+      "placebo_mae": 17.683238,
+      "relative_mae_change": -0.709278,
+      "validated": true
+    }
+  },
+  "row_level_data_written": false,
+  "schema": "nhanes_2017_2018_cross_sectional_nowcast_audit.v1",
+  "skipped_targets": {},
+  "targets_evaluated": 27,
+  "targets_validated": 25,
+  "validated_targets": [
+    "sodium",
+    "potassium",
+    "chloride",
+    "bicarbonate",
+    "bun",
+    "creatinine",
+    "calcium",
+    "phosphorus",
+    "albumin",
+    "total_protein",
+    "bilirubin",
+    "alt",
+    "ast",
+    "uric_acid",
+    "hemoglobin",
+    "hematocrit",
+    "wbc",
+    "platelets",
+    "rbc",
+    "sbp",
+    "dbp",
+    "map",
+    "bmi",
+    "weight",
+    "waist"
+  ]
+}
