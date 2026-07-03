@@ -372,17 +372,17 @@ function citationsHtml(c,dm){
   h+=`<a class="cite" href="${mechUrl}" target="_blank" rel="noopener"><b>Mechanism</b> — ${mech}. <span class="ext">Modeled effect (drugs_pkpd.json, unreviewed); verify pharmacology on DrugBank ↗</span></a>`;
   // Disease model: show the disease's own description + a clinical reference to verify
   if(dm){
-    const dzUrl=`https://en.wikipedia.org/w/index.php?search=${encodeURIComponent((dm.disease||'').replace(/\//g,' '))}`;
+    const dzUrl=`https://www.ncbi.nlm.nih.gov/mesh/?term=${encodeURIComponent((dm.disease||'').replace(/\//g,' '))}`;
     const desc=dm.description?esc(dm.description.slice(0,110)):('pushes '+(dm.perturbations||[]).slice(0,3).map(p=>esc(p.variable.replace(/_/g,' '))+(p.direction==='high'?'↑':'↓')).join(', '));
-    h+=`<a class="cite" href="${dzUrl}" target="_blank" rel="noopener"><b>Disease model</b> — ${desc}. <span class="ext">From ${dm.source_file?'data/'+esc(dm.source_file):'inferred'} (unreviewed); reference ↗</span></a>`;
+    h+=`<a class="cite" href="${dzUrl}" target="_blank" rel="noopener"><b>Disease model</b> — ${desc}. <span class="ext">From ${dm.source_file?'data/'+esc(dm.source_file):'inferred'} (unreviewed); NLM MeSH reference ↗</span></a>`;
   }
   if(realLabel)
     h+=`<a class="cite" href="${dmUrl}" target="_blank" rel="noopener"><b>FDA label</b> — DailyMed SPL${ev.set_id?' '+esc(String(ev.set_id).slice(0,8)):''}${ev.retrieved_at?' · '+esc(ev.retrieved_at):''} <span class="ext">↗</span></a>`;
   else
     h+=`<a class="cite" href="${dmUrl}" target="_blank" rel="noopener"><b>FDA label</b> — look up “${esc(c.drug)}” on DailyMed (official FDA source) <span class="ext">↗</span></a>`;
   if(c.faers_signals&&c.faers_signals.length){
-    const sfxUrl=`https://www.drugs.com/sfx/${encodeURIComponent(String(c.drug).toLowerCase().replace(/\s+/g,'-'))}-side-effects.html`;
-    h+=`<a class="cite" href="${sfxUrl}" target="_blank" rel="noopener"><b>Adverse events</b> — side-effect reference (Drugs.com) <span class="ext">↗</span></a>`;
+    const faersUrl=`https://api.fda.gov/drug/event.json?search=${encodeURIComponent('patient.drug.openfda.generic_name:"'+String(c.drug).toLowerCase()+'"')}&count=patient.reaction.reactionmeddrapt.exact`;
+    h+=`<a class="cite" href="${faersUrl}" target="_blank" rel="noopener"><b>Adverse events</b> — FDA FAERS post-market reports (openFDA) <span class="ext">↗</span></a>`;
   }
   h+=`</div>`;
   return h;

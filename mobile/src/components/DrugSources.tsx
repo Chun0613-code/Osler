@@ -3,9 +3,9 @@
  * citationsHtml() in demo/case_demo.html. Tells the clinician where each claim
  * comes from and links out to the authoritative database to verify:
  *   • Mechanism   → DrugBank (pharmacology authority)
- *   • Disease     → clinical reference for the modeled disease
+ *   • Disease     → NLM MeSH (National Library of Medicine controlled vocabulary)
  *   • FDA label   → DailyMed SPL (official FDA source; direct link when set_id known)
- *   • Adverse ev. → FAERS signals + a side-effect reference
+ *   • Adverse ev. → FDA FAERS post-market signals, linked to the openFDA event API
  * Links open in the system browser on tap (user-initiated).
  */
 import React from 'react';
@@ -53,8 +53,8 @@ function buildCitations(c: DrugCandidate, dm?: DiseaseModel | null): Cite[] {
     cites.push({
       label: 'Disease model',
       text: desc,
-      ext: `From ${dm.source_file ? 'data/' + dm.source_file : 'inferred'} (unreviewed); reference ↗`,
-      url: `https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(
+      ext: `From ${dm.source_file ? 'data/' + dm.source_file : 'inferred'} (unreviewed); NLM MeSH reference ↗`,
+      url: `https://www.ncbi.nlm.nih.gov/mesh/?term=${encodeURIComponent(
         (dm.disease || '').replace(/\//g, ' '),
       )}`,
     });
@@ -76,11 +76,11 @@ function buildCitations(c: DrugCandidate, dm?: DiseaseModel | null): Cite[] {
   if (c.faers_signals?.length) {
     cites.push({
       label: 'Adverse events',
-      text: 'side-effect reference (Drugs.com)',
-      ext: '↗',
-      url: `https://www.drugs.com/sfx/${encodeURIComponent(
-        c.drug.toLowerCase().replace(/\s+/g, '-'),
-      )}-side-effects.html`,
+      text: 'FDA FAERS post-market reports',
+      ext: 'open the exact openFDA query ↗',
+      url: `https://api.fda.gov/drug/event.json?search=${encodeURIComponent(
+        `patient.drug.openfda.generic_name:"${c.drug.toLowerCase()}"`,
+      )}&count=patient.reaction.reactionmeddrapt.exact`,
     });
   }
 

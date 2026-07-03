@@ -390,7 +390,7 @@ export default function AnalyzeScreen() {
   const [importedCase, setImportedCase] = useState<SampleCase | null>(null);
   const [manualFields, setManualFields] = useState<ManualCaseFields>(EMPTY_MANUAL_FIELDS);
   const [text, setText] = useState('');
-  const [useOpenFda, setUseOpenFda] = useState(false);
+  const [useOpenFda, setUseOpenFda] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   // overlay state
