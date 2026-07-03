@@ -92,7 +92,6 @@ export default function VoiceDictation({
           accessibilityLabel="Dictate case note"
           onPress={voice.start}
           style={({ pressed }) => [styles.micBtn, pressed && { opacity: 0.85 }]}>
-          <Text style={styles.micIcon}>🎙</Text>
           <Text style={styles.micText}>Dictate case note</Text>
         </Pressable>
         {!!voice.error && <Text style={styles.error}>{voice.error}</Text>}
@@ -149,7 +148,6 @@ const styles = StyleSheet.create({
     borderColor: colors.orange,
     backgroundColor: '#FFF7F4',
   },
-  micIcon: { fontSize: 16 },
   micText: {
     fontFamily: fonts.bodySemiBold,
     fontSize: 14,

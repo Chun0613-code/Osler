@@ -7,6 +7,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -24,6 +25,7 @@ import {
   API_BASE,
   getCases,
   parseCase,
+  type Indication,
   type ParseCaseResult,
   type SampleCase,
   type TraceStep,
@@ -35,10 +37,10 @@ import { useApp } from '@/state/AppContext';
 import { colors, fonts, radius, shadow, spacing } from '@/theme/tokens';
 
 const PLACEHOLDER_STEPS: TraceStep[] = [
-  { icon: '🧩', title: 'Parsing case…' },
-  { icon: '🎯', title: 'Mapping indication → treatment targets…' },
-  { icon: '⚙️', title: 'Symbolic engine ranking drugs…' },
-  { icon: '📖', title: 'Loading disease world-model…' },
+  { icon: '', title: 'Parsing case…' },
+  { icon: '', title: 'Mapping indication → treatment targets…' },
+  { icon: '', title: 'Symbolic engine ranking drugs…' },
+  { icon: '', title: 'Loading disease world-model…' },
 ];
 
 const PLACEHOLDER_MS = 900;
@@ -334,6 +336,26 @@ function titleFromManualFields(fields: Partial<SampleCase>): string | null {
   return title || null;
 }
 
+// Team policy (2026-07-02, agreed with Chun): the clinical fields needed for correct dosing
+// must be filled before Analyze — even ones the symbolic engine treats as optional:
+// indication, age, sex, weight, eGFR (precise dose + 未成年/minor + sex distinctions).
+// Allergies and current meds are NOT required — an empty field just means "none" (per Alphonse).
+const REQUIRED_FIELDS: { key: keyof SampleCase; label: string }[] = [
+  { key: 'indication', label: 'Indication' },
+  { key: 'age', label: 'Age' },
+  { key: 'sex', label: 'Sex' },
+  { key: 'weight_kg', label: 'Weight' },
+  { key: 'egfr', label: 'eGFR' },
+];
+
+function missingRequiredFields(fields: Record<string, unknown>): string[] {
+  const filled = (v: unknown) =>
+    v != null &&
+    !(typeof v === 'string' && !v.trim()) &&
+    !(Array.isArray(v) && v.length === 0);
+  return REQUIRED_FIELDS.filter((f) => !filled(fields[f.key])).map((f) => f.label);
+}
+
 function summarizeCase(c: SampleCase): string {
   const parts: string[] = [];
   if (c.age != null || c.sex) parts.push([c.age, c.sex].filter((x) => x != null).join(''));
@@ -362,6 +384,7 @@ export default function AnalyzeScreen() {
   const { patients, addPatient, llm } = useApp();
 
   const [cases, setCases] = useState<SampleCase[]>([]);
+  const [indications, setIndications] = useState<Indication[]>([]);
   const [bannerVisible, setBannerVisible] = useState(false);
   const [selected, setSelected] = useState<SampleCase | null>(null);
   const [importedCase, setImportedCase] = useState<SampleCase | null>(null);
@@ -386,6 +409,7 @@ export default function AnalyzeScreen() {
         const res = await getCases();
         if (!mountedRef.current) return;
         setCases(res.cases);
+        setIndications(res.indications ?? []);
         setBannerVisible(false);
       } catch {
         if (mountedRef.current) setBannerVisible(true);
@@ -512,7 +536,34 @@ export default function AnalyzeScreen() {
     capturedKeys(parsed).forEach(confirmField);
   }, [parsed, confirmField]);
 
-  const onAnalyze = useCallback(async (overrideCase?: SampleCase) => {
+  // Pick a known indication when the dictated one didn't map → fill the form + confirm.
+  const pickIndication = useCallback(
+    (value: string) => {
+      setManualField('indication', value);
+      setConfirmed((prev) => new Set(prev).add('indication'));
+    },
+    [setManualField],
+  );
+
+  // Merge preset/imported source fields with the manual form → the fields sent to Analyze.
+  // Shared by the required-field gate (onAnalyze) and the request itself (runAnalyze).
+  const collectAnalyzeInput = useCallback(
+    (overrideCase?: SampleCase) => {
+      const sourceCase = overrideCase ?? importedCase ?? selected;
+      const { id, title: sourceTitle, ...sourceFields } = sourceCase ?? ({} as SampleCase);
+      void id;
+      void sourceTitle;
+      const manualCaseFields = overrideCase ? {} : buildManualCaseFields(manualFields);
+      const fields = {
+        ...(sourceCase ? (sourceFields as unknown as Record<string, unknown>) : {}),
+        ...(manualCaseFields as Record<string, unknown>),
+      };
+      return { sourceCase, manualCaseFields, fields };
+    },
+    [importedCase, selected, manualFields],
+  );
+
+  const runAnalyze = useCallback(async (overrideCase?: SampleCase) => {
     if (busy) return;
     setBusy(true);
     setError(null);
@@ -527,15 +578,7 @@ export default function AnalyzeScreen() {
       timersRef.current.push(t);
     });
 
-    const sourceCase = overrideCase ?? importedCase ?? selected;
-    const { id, title: sourceTitle, ...sourceFields } = sourceCase ?? ({} as SampleCase);
-    void id;
-    void sourceTitle;
-    const manualCaseFields = overrideCase ? {} : buildManualCaseFields(manualFields);
-    const fields = {
-      ...(sourceCase ? (sourceFields as unknown as Record<string, unknown>) : {}),
-      ...(manualCaseFields as Record<string, unknown>),
-    };
+    const { sourceCase, manualCaseFields, fields } = collectAnalyzeInput(overrideCase);
 
     try {
       const bundle = await analyze({
@@ -580,7 +623,47 @@ export default function AnalyzeScreen() {
       setBusy(false);
       setError(e instanceof Error ? e.message : 'Analyze failed');
     }
-  }, [busy, importedCase, selected, manualFields, text, useOpenFda, llm, patients.length, addPatient, router, clearTimers]);
+  }, [busy, collectAnalyzeInput, text, useOpenFda, llm, patients.length, addPatient, router, clearTimers]);
+
+  // #3 soft guard: if the note was structured but some captured values are still
+  // unconfirmed, nudge the clinician to review first — non-blocking ("Analyze anyway"
+  // proceeds). Skipped for imported/preset cases (overrideCase), which have no voice chips.
+  const onAnalyze = useCallback(
+    (overrideCase?: SampleCase) => {
+      if (busy) return;
+      // Hard gate (team policy): every case field must be filled before Analyze — precise
+      // dose (weight/eGFR/age), minor & sex distinctions. Blocks; not a soft nudge.
+      const { fields } = collectAnalyzeInput(overrideCase);
+      const missing = missingRequiredFields(fields);
+      if (missing.length > 0) {
+        setError(
+          `Complete the required fields before analyzing — missing: ${missing.join(', ')}. ` +
+            'Precise dose, minor & sex distinctions need indication, age, sex, weight and eGFR.',
+        );
+        return;
+      }
+      setError(null);
+      const pending =
+        parsed && !overrideCase ? capturedKeys(parsed).filter((k) => !confirmed.has(k)) : [];
+      if (pending.length > 0) {
+        Alert.alert(
+          'Unconfirmed values',
+          `${pending.length} captured value${pending.length > 1 ? 's are' : ' is'} not confirmed yet. Review before analyzing?`,
+          [
+            { text: 'Review', style: 'cancel' },
+            {
+              text: 'Analyze anyway',
+              style: 'destructive',
+              onPress: () => void runAnalyze(overrideCase),
+            },
+          ],
+        );
+        return;
+      }
+      void runAnalyze(overrideCase);
+    },
+    [busy, collectAnalyzeInput, parsed, confirmed, runAnalyze],
+  );
 
   useEffect(() => {
     const raw = firstString(params.payload) ?? firstString(params.patient);
@@ -636,6 +719,10 @@ export default function AnalyzeScreen() {
         )}
 
         <Text style={styles.sectionLabel}>CASE DETAILS</Text>
+        <Text style={styles.requiredHint}>
+          Indication, age, sex, weight &amp; eGFR required — for precise dose, minor &amp; sex
+          distinctions. Allergies &amp; meds optional (empty = none).
+        </Text>
         <View style={styles.formCard}>
           <View style={styles.fieldBlock}>
             <Text style={styles.fieldLabel}>Indication</Text>
@@ -762,7 +849,7 @@ export default function AnalyzeScreen() {
           {parsing ? (
             <ActivityIndicator size="small" color={colors.accent} />
           ) : (
-            <Text style={styles.structureBtnText}>⚙ Structure note</Text>
+            <Text style={styles.structureBtnText}>Structure note</Text>
           )}
         </Pressable>
 
@@ -772,6 +859,8 @@ export default function AnalyzeScreen() {
             confirmed={confirmed}
             onConfirm={confirmField}
             onConfirmAll={confirmAllFields}
+            indicationOptions={indications}
+            onPickIndication={pickIndication}
           />
         )}
 
@@ -803,13 +892,13 @@ export default function AnalyzeScreen() {
         <View style={styles.overlayBackdrop}>
           <View style={styles.traceCard}>
             <View style={styles.traceHeader}>
-              <Text style={styles.traceHeaderText}>⚡ AGENT WORKFLOW</Text>
+              <Text style={styles.traceHeaderText}>AGENT WORKFLOW</Text>
               <ActivityIndicator size="small" color={colors.traceText} />
             </View>
             <ScrollView style={styles.traceBody}>
               {steps.map((s, i) => (
                 <View key={`${i}-${s.title}`} style={styles.traceStep}>
-                  <Text style={styles.traceIcon}>{s.icon || '•'}</Text>
+                  <Text style={styles.traceIcon}>•</Text>
                   <View style={styles.traceStepBody}>
                     <Text style={styles.traceTitle}>{s.title}</Text>
                     {!!s.detail && <Text style={styles.traceDetail}>{s.detail}</Text>}
@@ -869,6 +958,14 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     textTransform: 'uppercase',
     marginTop: spacing.lg,
+    marginBottom: spacing.sm,
+  },
+  requiredHint: {
+    fontFamily: fonts.body,
+    fontSize: 11.5,
+    lineHeight: 16,
+    color: colors.textMuted,
+    marginTop: -4,
     marginBottom: spacing.sm,
   },
   formCard: {

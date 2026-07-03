@@ -1,7 +1,7 @@
 # VOICE_INPUT_HANDOFF —— 语音病历录入
 
-> 更新于 2026-07-02(SESSION 2)。**本版覆盖 2026-06-22 初版**——架构从"设备端实时识别"改成了
-> "录音+云端转写"(原因见 §2)。给新 session 接手用:先读这份 + 记忆里的 [[oslian-osler-project]]、
+> 更新于 2026-07-02(SESSION 3:3A 转写 + 3B 结构化确认均完成并验证)。**架构从"设备端实时识别"改成了
+> "录音+云端转写"(SESSION 2,原因见 §2)。给新 session 接手用:先读这份 + 记忆里的 [[oslian-osler-project]]、
 > [[oslian-eprescribing]]。文中 file:line / 函数名动手前对现有代码验一遍。
 
 ---
@@ -18,9 +18,18 @@
 文本被 `agent.analyze` **重解析**送进引擎,Reasoning 页确实带 hypotension/tachycardia 旗标(预览==引擎实际所见)。
 详见 **§3B**。
 
-**下一步 = 阶段 4**(commit + push + PR,base=`feature/mobile-demo`;`/api/parse_case` 是 Chun 的后端范围,走 PR review)。
+**阶段 4 进行中**:3A + 3B 已 commit(`cd49217`)+ push 到 `origin/feat/voice-input`。**只差在浏览器点建 PR**
+(base=`feature/mobile-demo`,compare URL 见 §8;`/api/parse_case` 是 Chun 的后端范围,PR 里请他 review)。
 
-- 分支 **`feat/voice-input`**(从 feature/mobile-demo 切),**3A + 3B 所有改动尚未 commit**。
+**3B 微调(SESSION 3 续,已提交)**:缺字段提示 / indication 建议 chip / 未确认轻提醒 / **五字段必填门槛**(过敏·用药可空)
+/ 去装饰 emoji —— 详见 **§3B › 3B 微调 + 微调②**。均已在模拟器验证并 commit(在 `cd49217` 之后)。
+
+**⏭️ 下个 session = 前端设计重构**:用户觉得 Analyze 屏"功能全挤一块儿了太杂"(sample cases + 表单 + 语音 + CAPTURED
+卡 + openFDA + Analyze 全堆一页)。下次要重排信息层级 / 分屏 / 收纳。**功能已齐且验证过,重构别把上面这些逻辑改坏**。
+
+- 分支 **`feat/voice-input`**(从 feature/mobile-demo 切);已推送。PR(base=`feature/mobile-demo`)仍待在浏览器点建(见 §8)。
+- ⚙️ **本机当前运行态**(agent 起的,可能已停):app 指向 **:5000**(用户真后端,Photon 已连,但**旧代码→语音 parse_case 404**);
+  Metro :8081(watch);另有 agent 的测试后端 :5055(新代码)。要语音也通:**重启 :5000 后端加载新代码**(会清 Photon 登录、需重连一次)。
 - 怎么跑:见 **§4**。踩过的坑:见 **§6**(尤其 5000 端口 AirPlay + 模拟器打字触发重音弹窗 → 用剪贴板粘贴)。
 - ⚠️ **要用这功能,用户的 5000 后端必须重启**加载新 `/api/parse_case` 路由(agent 起的是 5055 测试实例)。
 
@@ -108,6 +117,34 @@ error: audio-capture: Failed to initialize recognizer
 旗标)→Confirm all(全变 ✓ 且表单填好 indication/age/sex/eGFR/allergies/meds)→Analyze→Reasoning 带 hypotension+
 tachycardia**。截图在 scratchpad(`verify_captured_card.png`、`verify_reasoning_flags.png`)。
 
+### 3B 微调(同 SESSION 3,**在 `cd49217` 之上,尚未 commit**)—— 三个"后端已有数据/接口、补前端"的小项
+1. **缺字段提示**:CAPTURED 卡渲染 `missing_core`("⊘ Not captured: weight · eGFR — optional…")。数据早在
+   `/api/parse_case` 返回,只是之前没显示。`CapturedFields.tsx`。
+2. **indication 建议 chip**:`indication_known=false` 时,除了 amber 提示,再给一排**可点的已知病种**(横向滚动,
+   `getCases` 返回的 `indications` 之前被 analyze.tsx 忽略,现在存下来传进去);点一个 → 填进表单 indication +
+   标 `confirmed('indication')` → 提示塌成 "✓ Indication set"。**消灭唯一会 400 的硬卡点**。另:`capturedKeys` 改成
+   **只在 `indication_known` 时才给顶部 indication chip**(否则确认一个映射不了的诊断只会让 Analyze 400)。
+   `analyze.tsx`(state `indications` + `pickIndication`)、`CapturedFields.tsx`(props `indicationOptions`/`onPickIndication`)。
+3. **未确认轻提醒**:带 pending chip 点 Analyze → `Alert.alert("Unconfirmed values","N … not confirmed yet")`
+   [Analyze anyway]/[Review]。**不阻断**(兑现安全铁律 §7.1"可见确认")。`analyze.tsx`:`onAnalyze` 拆成 guard
+   包 `runAnalyze`;imported/preset(overrideCase)跳过提醒。
+
+**验证**:`tsc` exit 0;fresh Metro bundle 1282 modules 无错;模拟器实测三条全过(ACS→缺 weight 提示 + 4 项未确认
+Alert;58F 无诊断→picker→点 ACS→表单 indication 填成深色实值 + "✓ Indication set")。截图 `verify_batch_indication_set.png`。
+
+### 3B 微调② —— 必填门槛 + 去 emoji(SESSION 3 续,同一批未 commit → 本次一起提交)
+4. **必填硬门槛**(`analyze.tsx`):`onAnalyze` 加校验 —— **Indication / Age / Sex / Weight / eGFR 五个必填**才能
+   Analyze(`REQUIRED_FIELDS` + `missingRequiredFields`;缺 → 红字列出、不分析、不弹覆盖层)。**团队策略(和 Chun 定,
+   2026-07-02)**:精确剂量要 weight/eGFR,未成年区分要 age,性别区分要 sex。⚠️**过敏 / 当前用药不必填**(留空=无,
+   Alphonse 明确纠正过——别再把这俩设成必填)。提取 `collectAnalyzeInput` 给门槛与请求共用字段合并。CASE DETAILS 下加必填提示行。
+5. **去装饰 emoji**(用户嫌"太 AI",见记忆 [[avoid-decorative-emoji-in-ui]]):按钮 `Structure note`(去 ⚙)、
+   `Dictate case note`(去 🎙,`VoiceDictation.tsx`);AGENT WORKFLOW 覆盖层去 ⚡ + 每步图标统一渲染中性 `•`
+   (`analyze.tsx` 里直接渲染 `•`、忽略 `s.icon`,连 Chun 后端 trace 发来的 emoji 也一并盖掉,不用改后端)。**保留 ⚠️**
+   (VITALS 临床告警,功能性)。`✓`/`⊘`/`→` 暂留(待用户定夺,见对话)。
+
+**验证②**:`tsc` exit 0;模拟器实测 —— 26F asthma(**meds 空**)→ Analyze 放行(不再拦 meds);缺字段案例点 Analyze →
+红字 "missing: …";覆盖层 `•` 圆点无 emoji。
+
 ---
 
 ## 4. 怎么跑 / 验证
@@ -148,11 +185,11 @@ npx expo run:ios --device AF02103D-2418-45DE-85C5-AED1472E0A54   # 首次/加库
 CASE NOTE textarea 显示原文可编辑。要做逐字高亮得 tokenize 转写并渲染富文本,成本高、收益低,留作以后。
 
 **注意(仍成立,非 bug)**:Analyze 引擎**必须**有能映射的 indication(固定已知表:ACS、acute heart failure、
-hypertension、asthma…)。CAPTURED 卡在 `indication_known=false` 时会给 amber 提示让医生改。纯症状("shortness
-of breath")→ 可能推不出 indication → 需手改后才能 Analyze。(实测 "wheezing" 被 rules 命中 asthma 别名。)
+hypertension、asthma…)。CAPTURED 卡在 `indication_known=false` 时会给 amber 提示 **+ 一排可点的已知病种 chip**(点一个直接填进表单 indication,
+见 §3B 微调 #2)。纯症状("shortness of breath")→ 推不出 → 点个建议病种即可 Analyze。(实测 "wheezing" 被 rules 命中 asthma。)
 
-**下一步 = 阶段 4**:`cd mobile && npx tsc --noEmit`(已过)→ commit(3A + 3B 一起或分两个 commit)→ push →
-开 PR(base=`feature/mobile-demo`;`/api/parse_case` 属 Chun 后端范围,PR 里让他 review)。
+**阶段 4 状态**:`tsc --noEmit` 已过;已 commit `cd49217`(3A+3B 一个 commit)+ push `origin/feat/voice-input`。
+**剩:浏览器点建 PR**(base=`feature/mobile-demo`,URL 见 §8;`/api/parse_case` 属 Chun 后端,PR 里让他 review)。
 
 ---
 

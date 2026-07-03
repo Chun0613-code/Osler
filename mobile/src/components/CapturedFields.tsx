@@ -13,9 +13,9 @@
  * clinician confirms every value, then reviews the filled form before Analyze.
  */
 import React, { useMemo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import type { ParseCaseResult } from '@/api/osler';
+import type { Indication, ParseCaseResult } from '@/api/osler';
 import { colors, fonts, radius, shadow, spacing } from '@/theme/tokens';
 
 /** Fields the clinician can confirm into the Case-details form (mirrors ManualCaseFields). */
@@ -50,12 +50,21 @@ function humanizeFlag(flag: string): string {
   );
 }
 
+// missing_core only ever contains these three (engine/patient_profile.missing_core).
+const MISSING_LABEL: Record<string, string> = { age: 'age', weight_kg: 'weight', eGFR: 'eGFR' };
+
+function humanizeMissing(k: string): string {
+  return MISSING_LABEL[k] ?? k.replace(/_/g, ' ');
+}
+
 /** Which fields the parser captured — a chip is shown, and can be confirmed, for each.
  * Exported so analyze.tsx's "Confirm all" confirms exactly the chips rendered here. */
 export function capturedKeys(parsed: ParseCaseResult): CapturedKey[] {
   const f = parsed.fields;
   const keys: CapturedKey[] = [];
-  if (f.indication) keys.push('indication');
+  // Only offer to confirm the indication when it actually maps — an unmappable one
+  // would only make Analyze 400. The indication picker (below) handles the rest.
+  if (f.indication && parsed.indication_known) keys.push('indication');
   if (f.age != null) keys.push('age');
   if (f.sex) keys.push('sex');
   if (f.egfr != null) keys.push('egfr');
@@ -89,23 +98,34 @@ export default function CapturedFields({
   confirmed,
   onConfirm,
   onConfirmAll,
+  indicationOptions,
+  onPickIndication,
 }: {
   parsed: ParseCaseResult;
   confirmed: Set<CapturedKey>;
   onConfirm: (key: CapturedKey) => void;
   onConfirmAll: () => void;
+  /** The engine's known indications, for the picker shown when none maps. */
+  indicationOptions?: Indication[];
+  /** Pick a known indication → fills the Case-details form + marks it confirmed. */
+  onPickIndication?: (value: string) => void;
 }) {
   const chips = useMemo(
     () => capturedKeys(parsed).map((key) => ({ key, label: chipLabel(key, parsed.fields) })),
     [parsed],
   );
   const flags = parsed.flags ?? [];
+  const missingCore = parsed.missing_core ?? [];
   const pendingKeys = chips.filter((c) => !confirmed.has(c.key)).map((c) => c.key);
   const indicationIssue = !parsed.fields.indication
     ? 'empty'
     : !parsed.indication_known
       ? 'unmappable'
       : null;
+  // Once the clinician picks a mappable indication, the note/picker collapses to a check.
+  const indicationPicked = confirmed.has('indication');
+  const canPickIndication =
+    !!indicationIssue && !!onPickIndication && !!indicationOptions?.length;
 
   return (
     <View style={styles.card}>
@@ -183,13 +203,46 @@ export default function CapturedFields({
         </View>
       )}
 
-      {indicationIssue && (
+      {missingCore.length > 0 && (
+        <Text style={styles.missingNote}>
+          ⊘ Not captured: {missingCore.map(humanizeMissing).join(' · ')} — optional; add in Case
+          details for fuller checks.
+        </Text>
+      )}
+
+      {indicationIssue && indicationPicked && (
+        <View style={styles.indicationPicked}>
+          <Text style={styles.indicationPickedText}>✓ Indication set — see Case details above.</Text>
+        </View>
+      )}
+
+      {indicationIssue && !indicationPicked && (
         <View style={styles.indicationNote}>
           <Text style={styles.indicationNoteText}>
             {indicationIssue === 'empty'
-              ? 'No indication detected — add one in Case details so the engine can map treatment targets.'
-              : `“${parsed.fields.indication}” isn’t a mappable indication yet — edit it in Case details before Analyze.`}
+              ? 'No indication detected — the engine needs one to map treatment targets.'
+              : `“${parsed.fields.indication}” isn’t a mappable indication.`}
           </Text>
+          {canPickIndication && (
+            <>
+              <Text style={styles.pickLabel}>Pick a known indication:</Text>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.pickRow}>
+                {indicationOptions!.map((ind) => (
+                  <Pressable
+                    key={ind.value}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Use indication ${ind.label}`}
+                    onPress={() => onPickIndication!(ind.value)}
+                    style={({ pressed }) => [styles.pickChip, pressed && { opacity: 0.75 }]}>
+                    <Text style={styles.pickChipText}>{ind.label}</Text>
+                  </Pressable>
+                ))}
+              </ScrollView>
+            </>
+          )}
         </View>
       )}
 
@@ -327,6 +380,53 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 17,
     color: '#9A3412',
+  },
+  missingNote: {
+    fontFamily: fonts.body,
+    fontSize: 11.5,
+    lineHeight: 16,
+    color: colors.textMuted,
+  },
+  pickLabel: {
+    fontFamily: fonts.heading,
+    fontSize: 10,
+    letterSpacing: 0.8,
+    color: '#9A3412',
+    textTransform: 'uppercase',
+    marginTop: 8,
+    marginBottom: 6,
+  },
+  pickRow: {
+    gap: 8,
+    paddingRight: spacing.md,
+  },
+  pickChip: {
+    minHeight: 32,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 6,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.accent,
+    backgroundColor: colors.bgCard,
+    justifyContent: 'center',
+  },
+  pickChipText: {
+    fontFamily: fonts.bodySemiBold,
+    fontSize: 12,
+    color: colors.accent,
+  },
+  indicationPicked: {
+    backgroundColor: '#ECFDF5',
+    borderLeftWidth: 3,
+    borderLeftColor: colors.green,
+    borderRadius: radius.sm,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 9,
+  },
+  indicationPickedText: {
+    fontFamily: fonts.bodySemiBold,
+    fontSize: 12,
+    color: '#065F46',
   },
   footer: {
     fontFamily: fonts.body,
