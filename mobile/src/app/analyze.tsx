@@ -14,7 +14,6 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Switch,
   Text,
   TextInput,
   View,
@@ -390,7 +389,8 @@ export default function AnalyzeScreen() {
   const [importedCase, setImportedCase] = useState<SampleCase | null>(null);
   const [manualFields, setManualFields] = useState<ManualCaseFields>(EMPTY_MANUAL_FIELDS);
   const [text, setText] = useState('');
-  const [useOpenFda, setUseOpenFda] = useState(true);
+  const [showExamples, setShowExamples] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // overlay state
@@ -585,7 +585,7 @@ export default function AnalyzeScreen() {
         fields,
         text,
         patient_id: sourceCase?.id ?? `case-${patients.length + 1}`,
-        use_openfda: useOpenFda,
+        use_openfda: true,
         llm,
       });
       if (!mountedRef.current) return;
@@ -623,7 +623,7 @@ export default function AnalyzeScreen() {
       setBusy(false);
       setError(e instanceof Error ? e.message : 'Analyze failed');
     }
-  }, [busy, collectAnalyzeInput, text, useOpenFda, llm, patients.length, addPatient, router, clearTimers]);
+  }, [busy, collectAnalyzeInput, text, llm, patients.length, addPatient, router, clearTimers]);
 
   // #3 soft guard: if the note was structured but some captured values are still
   // unconfirmed, nudge the clinician to review first — non-blocking ("Analyze anyway"
@@ -705,135 +705,14 @@ export default function AnalyzeScreen() {
           </View>
         )}
 
-        <Text style={styles.sectionLabel}>SAMPLE CASES</Text>
-        <CasePresetChips
-          cases={cases}
-          selectedId={selected?.id ?? null}
-          onSelect={onSelectPreset}
-        />
-        {selected && (
-          <View style={styles.summaryCard}>
-            <Text style={styles.summaryTitle}>{selected.title}</Text>
-            <Text style={styles.summaryText}>{summarizeCase(selected)}</Text>
-          </View>
-        )}
+        <Text style={styles.title}>New case</Text>
+        <Text style={styles.subtitle}>Tell me about your patient — type or dictate.</Text>
 
-        <Text style={styles.sectionLabel}>CASE DETAILS</Text>
-        <Text style={styles.requiredHint}>
-          Indication, age, sex, weight &amp; eGFR required — for precise dose, minor &amp; sex
-          distinctions. Allergies &amp; meds optional (empty = none).
-        </Text>
-        <View style={styles.formCard}>
-          <View style={styles.fieldBlock}>
-            <Text style={styles.fieldLabel}>Indication</Text>
-            <TextInput
-              style={styles.fieldInput}
-              value={manualFields.indication}
-              onChangeText={(value) => setManualField('indication', value)}
-              placeholder="acute coronary syndrome"
-              placeholderTextColor={colors.textMuted}
-              autoCapitalize="none"
-            />
-          </View>
-
-          <View style={styles.fieldRow}>
-            <View style={styles.ageField}>
-              <Text style={styles.fieldLabel}>Age</Text>
-              <TextInput
-                style={styles.fieldInput}
-                value={manualFields.age}
-                onChangeText={(value) => setManualField('age', value)}
-                keyboardType="number-pad"
-                placeholder="64"
-                placeholderTextColor={colors.textMuted}
-              />
-            </View>
-            <View style={styles.sexField}>
-              <Text style={styles.fieldLabel}>Sex</Text>
-              <View style={styles.sexPicker}>
-                {SEX_OPTIONS.map((option) => {
-                  const active = manualFields.sex === option;
-                  return (
-                    <Pressable
-                      key={option}
-                      accessibilityRole="button"
-                      accessibilityState={{ selected: active }}
-                      onPress={() => setManualField('sex', active ? '' : option)}
-                      style={({ pressed }) => [
-                        styles.sexOption,
-                        active && styles.sexOptionActive,
-                        pressed && { opacity: 0.82 },
-                      ]}>
-                      <Text style={[styles.sexOptionText, active && styles.sexOptionTextActive]}>
-                        {option}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-              </View>
-            </View>
-          </View>
-
-          <View style={styles.fieldRow}>
-            <View style={styles.compactField}>
-              <Text style={styles.fieldLabel}>Weight kg</Text>
-              <TextInput
-                style={styles.fieldInput}
-                value={manualFields.weightKg}
-                onChangeText={(value) => setManualField('weightKg', value)}
-                keyboardType="decimal-pad"
-                placeholder="82"
-                placeholderTextColor={colors.textMuted}
-              />
-            </View>
-            <View style={styles.compactField}>
-              <Text style={styles.fieldLabel}>eGFR</Text>
-              <TextInput
-                style={styles.fieldInput}
-                value={manualFields.egfr}
-                onChangeText={(value) => setManualField('egfr', value)}
-                keyboardType="decimal-pad"
-                placeholder="72"
-                placeholderTextColor={colors.textMuted}
-              />
-            </View>
-          </View>
-
-          <View style={styles.fieldBlock}>
-            <Text style={styles.fieldLabel}>Allergies</Text>
-            <TextInput
-              style={styles.fieldInput}
-              value={manualFields.allergies}
-              onChangeText={(value) => setManualField('allergies', value)}
-              placeholder="aspirin, penicillin"
-              placeholderTextColor={colors.textMuted}
-              autoCapitalize="none"
-            />
-          </View>
-
-          <View style={styles.fieldBlock}>
-            <Text style={styles.fieldLabel}>Current meds</Text>
-            <TextInput
-              style={styles.fieldInput}
-              value={manualFields.meds}
-              onChangeText={(value) => setManualField('meds', value)}
-              placeholder="metoprolol, warfarin"
-              placeholderTextColor={colors.textMuted}
-              autoCapitalize="none"
-            />
-          </View>
-        </View>
-
-        <Text style={styles.sectionLabel}>CASE NOTE</Text>
-        <VoiceDictation onTranscript={handleTranscript} />
-        <TextInput
-          style={styles.textarea}
-          multiline
-          textAlignVertical="top"
+        <VoiceDictation
+          onTranscript={handleTranscript}
           value={text}
           onChangeText={setText}
-          placeholder="BP 88/54, HR 112, crushing chest pain."
-          placeholderTextColor={colors.textMuted}
+          placeholder="64yo man, crushing chest pain, BP 88/54, HR 112…"
         />
 
         {/* Structure a typed or edited note into confirmable fields (voice auto-structures). */}
@@ -864,15 +743,144 @@ export default function AnalyzeScreen() {
           />
         )}
 
-        <View style={styles.switchRow}>
-          <Text style={styles.switchLabel}>Fetch live openFDA labels</Text>
-          <Switch
-            value={useOpenFda}
-            onValueChange={setUseOpenFda}
-            trackColor={{ false: colors.silverLight, true: colors.accent }}
-            thumbColor="#FFFFFF"
-          />
+        {/* Alternate paths, tucked away — pick a sample case, or fill fields by hand. */}
+        <View style={styles.disclosureRow}>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => setShowExamples((v) => !v)}
+            hitSlop={8}>
+            <Text style={styles.disclosureLink}>
+              {showExamples ? 'Hide examples' : 'Start from an example'}
+            </Text>
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => setShowDetails((v) => !v)}
+            hitSlop={8}>
+            <Text style={styles.disclosureLink}>
+              {showDetails ? 'Hide details' : 'Enter details'}
+            </Text>
+          </Pressable>
         </View>
+
+        {showExamples && (
+          <View style={styles.disclosureBody}>
+            <CasePresetChips
+              cases={cases}
+              selectedId={selected?.id ?? null}
+              onSelect={onSelectPreset}
+            />
+            {selected && (
+              <View style={styles.summaryCard}>
+                <Text style={styles.summaryTitle}>{selected.title}</Text>
+                <Text style={styles.summaryText}>{summarizeCase(selected)}</Text>
+              </View>
+            )}
+          </View>
+        )}
+
+        {showDetails && (
+          <View style={[styles.formCard, styles.disclosureBody]}>
+            <View style={styles.fieldBlock}>
+              <Text style={styles.fieldLabel}>Indication</Text>
+              <TextInput
+                style={styles.fieldInput}
+                value={manualFields.indication}
+                onChangeText={(value) => setManualField('indication', value)}
+                placeholder="acute coronary syndrome"
+                placeholderTextColor={colors.textMuted}
+                autoCapitalize="none"
+              />
+            </View>
+
+            <View style={styles.fieldRow}>
+              <View style={styles.ageField}>
+                <Text style={styles.fieldLabel}>Age</Text>
+                <TextInput
+                  style={styles.fieldInput}
+                  value={manualFields.age}
+                  onChangeText={(value) => setManualField('age', value)}
+                  keyboardType="number-pad"
+                  placeholder="64"
+                  placeholderTextColor={colors.textMuted}
+                />
+              </View>
+              <View style={styles.sexField}>
+                <Text style={styles.fieldLabel}>Sex</Text>
+                <View style={styles.sexPicker}>
+                  {SEX_OPTIONS.map((option) => {
+                    const active = manualFields.sex === option;
+                    return (
+                      <Pressable
+                        key={option}
+                        accessibilityRole="button"
+                        accessibilityState={{ selected: active }}
+                        onPress={() => setManualField('sex', active ? '' : option)}
+                        style={({ pressed }) => [
+                          styles.sexOption,
+                          active && styles.sexOptionActive,
+                          pressed && { opacity: 0.82 },
+                        ]}>
+                        <Text style={[styles.sexOptionText, active && styles.sexOptionTextActive]}>
+                          {option}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              </View>
+            </View>
+
+            <View style={styles.fieldRow}>
+              <View style={styles.compactField}>
+                <Text style={styles.fieldLabel}>Weight kg</Text>
+                <TextInput
+                  style={styles.fieldInput}
+                  value={manualFields.weightKg}
+                  onChangeText={(value) => setManualField('weightKg', value)}
+                  keyboardType="decimal-pad"
+                  placeholder="82"
+                  placeholderTextColor={colors.textMuted}
+                />
+              </View>
+              <View style={styles.compactField}>
+                <Text style={styles.fieldLabel}>eGFR</Text>
+                <TextInput
+                  style={styles.fieldInput}
+                  value={manualFields.egfr}
+                  onChangeText={(value) => setManualField('egfr', value)}
+                  keyboardType="decimal-pad"
+                  placeholder="72"
+                  placeholderTextColor={colors.textMuted}
+                />
+              </View>
+            </View>
+
+            <View style={styles.fieldBlock}>
+              <Text style={styles.fieldLabel}>Allergies</Text>
+              <TextInput
+                style={styles.fieldInput}
+                value={manualFields.allergies}
+                onChangeText={(value) => setManualField('allergies', value)}
+                placeholder="aspirin, penicillin"
+                placeholderTextColor={colors.textMuted}
+                autoCapitalize="none"
+              />
+            </View>
+
+            <View style={styles.fieldBlock}>
+              <Text style={styles.fieldLabel}>Current meds</Text>
+              <TextInput
+                style={styles.fieldInput}
+                value={manualFields.meds}
+                onChangeText={(value) => setManualField('meds', value)}
+                placeholder="metoprolol, warfarin"
+                placeholderTextColor={colors.textMuted}
+                autoCapitalize="none"
+              />
+            </View>
+          </View>
+        )}
 
         {error && <Text style={styles.errorText}>{error}</Text>}
 
@@ -884,7 +892,7 @@ export default function AnalyzeScreen() {
             styles.primaryBtn,
             (pressed || busy) && { opacity: 0.7 },
           ]}>
-          <Text style={styles.primaryBtnText}>Analyze case →</Text>
+          <Text style={styles.primaryBtnText}>Get recommendations</Text>
         </Pressable>
       </ScrollView>
 
@@ -921,6 +929,34 @@ const styles = StyleSheet.create({
   content: {
     padding: spacing.lg,
     paddingBottom: 40,
+  },
+  title: {
+    fontFamily: fonts.headingBold,
+    fontSize: 27,
+    letterSpacing: -0.5,
+    color: colors.text,
+    marginTop: spacing.sm,
+  },
+  subtitle: {
+    fontFamily: fonts.body,
+    fontSize: 15,
+    color: colors.textSecondary,
+    marginTop: 4,
+    marginBottom: spacing.lg,
+  },
+  disclosureRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: spacing.xl,
+    marginTop: spacing.lg,
+  },
+  disclosureLink: {
+    fontFamily: fonts.bodySemiBold,
+    fontSize: 14,
+    color: colors.accentBright,
+  },
+  disclosureBody: {
+    marginTop: spacing.md,
   },
   banner: {
     flexDirection: 'row',
@@ -1091,18 +1127,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.accent,
   },
-  switchRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    minHeight: 44,
-    marginTop: spacing.lg,
-  },
-  switchLabel: {
-    fontFamily: fonts.bodyMedium,
-    fontSize: 13.5,
-    color: colors.textSecondary,
-  },
   errorText: {
     fontFamily: fonts.bodyMedium,
     fontSize: 13,
@@ -1111,8 +1135,8 @@ const styles = StyleSheet.create({
   },
   primaryBtn: {
     backgroundColor: colors.accent,
-    borderRadius: radius.pill,
-    minHeight: 50,
+    borderRadius: radius.card,
+    minHeight: 52,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: spacing.lg,

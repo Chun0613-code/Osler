@@ -40,15 +40,18 @@ interface Props {
 }
 
 export default function DrugCard({ candidate: c, rank, highlighted, mechanismOnly, disease, onPrescribe }: Props) {
-  const [showMech, setShowMech] = useState(false);
+  const [showWhy, setShowWhy] = useState(false);
+  const [showSources, setShowSources] = useState(false);
   const safety = colorForSafety(c.safety?.decision);
   const reasons = (c.safety?.reasons ?? []).filter((r) => r.message);
   const decision = (c.safety?.decision ?? '').toLowerCase();
   const isBad = ['avoid', 'block'].includes(decision);
+  const hasWhy =
+    !!c.rationale || reasons.length > 0 || !!c.mechanism_chain || !!c.matched_targets?.length;
 
-  const toggleMech = () => {
+  const toggle = (fn: React.Dispatch<React.SetStateAction<boolean>>) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setShowMech((s) => !s);
+    fn((s) => !s);
   };
 
   return (
@@ -83,17 +86,10 @@ export default function DrugCard({ candidate: c, rank, highlighted, mechanismOnl
           <Text style={styles.doseText}>{c.dose.verbatim}</Text>
         </View>
       ) : (
-        // Mirrors the web demo's `.dose.blocked` box: the safety gate withheld
-        // patient-specific dosing — say so explicitly instead of hiding it.
-        <View style={styles.doseBoxBlocked}>
-          <Text style={styles.doseLabelBlocked}>DOSE</Text>
-          <Text style={styles.doseTextBlocked}>
-            not shown —{' '}
-            {mechanismOnly
-              ? 'no label loaded'
-              : 'blocked by safety gate / validation'}
-          </Text>
-        </View>
+        <Text style={styles.doseNote}>
+          Dose withheld —{' '}
+          {mechanismOnly ? 'no label loaded' : 'needs clinician validation'}.
+        </Text>
       )}
 
       {onPrescribe && !isBad && (
@@ -107,72 +103,70 @@ export default function DrugCard({ candidate: c, rank, highlighted, mechanismOnl
         </Pressable>
       )}
 
-      {!!c.rationale && <Text style={styles.rationale}>{c.rationale}</Text>}
-
-      {reasons.length > 0 && (
-        <View style={styles.reasons}>
-          {reasons.map((r, i) => (
-            <View key={i} style={styles.reasonRow}>
-              <Text
-                style={[
-                  styles.reasonIcon,
-                  { color: isBad ? colors.red : colors.amber },
-                ]}>
-                ⚠
-              </Text>
-              <Text
-                style={[
-                  styles.reasonText,
-                  { color: isBad ? colors.red : colors.amber },
-                ]}>
-                {r.message}
-              </Text>
-            </View>
-          ))}
-        </View>
-      )}
-
-      {/* Collapsible mechanism details */}
-      <Pressable
-        onPress={toggleMech}
-        style={styles.mechToggle}
-        hitSlop={6}
-        accessibilityRole="button"
-        accessibilityLabel="Toggle mechanism details">
-        <Ionicons
-          name={showMech ? 'chevron-down' : 'chevron-forward'}
-          size={14}
-          color={colors.textSecondary}
-        />
-        <Text style={styles.mechToggleText}>Mechanism details</Text>
-        {typeof c.mechanism_score === 'number' && (
-          <Text style={styles.mechScore}>
-            score {c.mechanism_score.toFixed(2)}
-          </Text>
-        )}
-      </Pressable>
-
-      {showMech && (
-        <View style={styles.mechBody}>
-          {!!c.mechanism_chain && (
-            <Text style={styles.mechChain}>{c.mechanism_chain}</Text>
-          )}
-          {!!c.matched_targets?.length && (
-            <View style={styles.targetWrap}>
-              {c.matched_targets.map((t, i) => (
-                <View key={`${t.target}-${i}`} style={styles.targetPill}>
-                  <Text style={styles.targetText}>
-                    {t.target}
-                    {t.effect_type ? ` · ${t.effect_type}` : ''}
+      {/* Why this — rationale, safety detail, mechanism (collapsed by default) */}
+      {hasWhy && (
+        <>
+          <Pressable
+            onPress={() => toggle(setShowWhy)}
+            style={styles.disc}
+            hitSlop={6}
+            accessibilityRole="button"
+            accessibilityLabel="Toggle why this drug">
+            <Text style={styles.discText}>Why this</Text>
+            <Ionicons
+              name={showWhy ? 'chevron-up' : 'chevron-down'}
+              size={16}
+              color={colors.textMuted}
+            />
+          </Pressable>
+          {showWhy && (
+            <View style={styles.discBody}>
+              {!!c.rationale && <Text style={styles.rationale}>{c.rationale}</Text>}
+              {reasons.map((r, i) => (
+                <View key={i} style={styles.reasonRow}>
+                  <Text style={[styles.reasonIcon, { color: isBad ? colors.red : colors.amber }]}>
+                    ⚠
+                  </Text>
+                  <Text style={[styles.reasonText, { color: isBad ? colors.red : colors.amber }]}>
+                    {r.message}
                   </Text>
                 </View>
               ))}
+              {!!c.mechanism_chain && (
+                <Text style={styles.mechChain}>{c.mechanism_chain}</Text>
+              )}
+              {!!c.matched_targets?.length && (
+                <View style={styles.targetWrap}>
+                  {c.matched_targets.map((t, i) => (
+                    <View key={`${t.target}-${i}`} style={styles.targetPill}>
+                      <Text style={styles.targetText}>
+                        {t.target}
+                        {t.effect_type ? ` · ${t.effect_type}` : ''}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              )}
             </View>
           )}
-        </View>
+        </>
       )}
 
-      <DrugSources candidate={c} disease={disease} />
+      {/* Sources · evidence (collapsed by default) */}
+      <Pressable
+        onPress={() => toggle(setShowSources)}
+        style={styles.disc}
+        hitSlop={6}
+        accessibilityRole="button"
+        accessibilityLabel="Toggle sources">
+        <Text style={styles.discText}>Sources · evidence</Text>
+        <Ionicons
+          name={showSources ? 'chevron-up' : 'chevron-down'}
+          size={16}
+          color={colors.textMuted}
+        />
+      </Pressable>
+      {showSources && <DrugSources candidate={c} disease={disease} />}
     </View>
   );
 }
@@ -323,25 +317,29 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 19,
   },
-  mechToggle: {
+  doseNote: {
+    fontFamily: fonts.body,
+    fontSize: 13,
+    color: colors.textMuted,
+    marginTop: spacing.md,
+  },
+  disc: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
     marginTop: spacing.md,
     paddingTop: spacing.sm,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: colors.borderSolid,
   },
-  mechToggleText: {
+  discText: {
+    flex: 1,
     fontFamily: fonts.bodySemiBold,
-    fontSize: 12.5,
-    color: colors.textSecondary,
+    fontSize: 13.5,
+    color: colors.accent,
   },
-  mechScore: {
-    marginLeft: 'auto',
-    fontFamily: fonts.body,
-    fontSize: 11.5,
-    color: colors.textMuted,
+  discBody: {
+    marginTop: spacing.sm,
+    gap: spacing.sm,
   },
   mechBody: {
     marginTop: spacing.sm,

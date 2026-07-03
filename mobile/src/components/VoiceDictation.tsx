@@ -10,6 +10,7 @@
  * v1 is record-then-transcribe (the transcript appears when you stop), not live
  * word-by-word streaming — matching the confirmed MVP. The waveform is decorative.
  */
+import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useRef } from 'react';
 import {
   ActivityIndicator,
@@ -17,6 +18,7 @@ import {
   Pressable,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from 'react-native';
 
@@ -79,21 +81,39 @@ function Waveform() {
 
 export default function VoiceDictation({
   onTranscript,
+  value,
+  onChangeText,
+  placeholder,
 }: {
   onTranscript: (text: string) => void;
+  value: string;
+  onChangeText: (text: string) => void;
+  placeholder?: string;
 }) {
   const voice = useVoiceCapture(onTranscript);
 
   if (voice.status === 'idle') {
     return (
       <View style={styles.idleWrap}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Dictate case note"
-          onPress={voice.start}
-          style={({ pressed }) => [styles.micBtn, pressed && { opacity: 0.85 }]}>
-          <Text style={styles.micText}>Dictate case note</Text>
-        </Pressable>
+        <View style={styles.inputCard}>
+          <TextInput
+            style={styles.input}
+            multiline
+            textAlignVertical="top"
+            value={value}
+            onChangeText={onChangeText}
+            placeholder={placeholder}
+            placeholderTextColor={colors.textMuted}
+          />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Dictate case note"
+            onPress={voice.start}
+            hitSlop={8}
+            style={({ pressed }) => [styles.micCircle, pressed && { opacity: 0.85 }]}>
+            <Ionicons name="mic" size={20} color="#FFFFFF" />
+          </Pressable>
+        </View>
         {!!voice.error && <Text style={styles.error}>{voice.error}</Text>}
       </View>
     );
@@ -137,21 +157,34 @@ export default function VoiceDictation({
 
 const styles = StyleSheet.create({
   idleWrap: { marginBottom: spacing.sm },
-  micBtn: {
+  inputCard: {
     flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: spacing.sm,
+    backgroundColor: colors.bgCard,
+    borderWidth: 1,
+    borderColor: colors.borderSolid,
+    borderRadius: radius.card,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 10,
+  },
+  input: {
+    flex: 1,
+    minHeight: 72,
+    paddingTop: 4,
+    fontFamily: fonts.body,
+    fontSize: 14,
+    lineHeight: 20,
+    color: colors.text,
+  },
+  micCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.accent,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
-    minHeight: 46,
-    borderRadius: radius.pill,
-    borderWidth: 1,
-    borderColor: colors.orange,
-    backgroundColor: '#FFF7F4',
-  },
-  micText: {
-    fontFamily: fonts.bodySemiBold,
-    fontSize: 14,
-    color: colors.orange,
+    marginBottom: 2,
   },
   error: {
     fontFamily: fonts.bodyMedium,
