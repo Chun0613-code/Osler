@@ -673,6 +673,52 @@ def whole_body_observation_capabilities() -> tuple[ObservationCapability, ...]:
             allowed_uses=("capability_reporting",),
         ),
         ObservationCapability(
+            name="electrolyte_acid_base_belief_state",
+            status="validated",
+            scope="predict_update_belief_state",
+            systems=("electrolyte_acid_base", "renal_urinary", "osmotic_fluid"),
+            targets=(
+                "potassium",
+                "bicarbonate",
+                "anion_gap",
+                "creatinine",
+                "patient_specific_electrolyte_acid_base_state",
+            ),
+            horizon_hours=(6,),
+            evidence=(
+                "ELECTROLYTE_BELIEF_FINDINGS.md; full eICU electrolyte "
+                "cohort validates predict-update belief for potassium, "
+                "bicarbonate, anion_gap, and creatinine across 7/7 patient "
+                "splits and hospital-heldout, beating baseline and "
+                "capacity-matched placebo; no direct hidden-state accuracy "
+                "claim"
+            ),
+        ),
+        ObservationCapability(
+            name="electrolyte_belief_remaining_targets_candidate",
+            status="candidate_only",
+            scope="predict_update_belief_state",
+            systems=("electrolyte_acid_base", "osmotic_fluid"),
+            targets=(
+                "sodium_near_miss",
+                "chloride_near_miss",
+                "magnesium_hospital_fail",
+                "calcium",
+                "phosphate",
+                "ionized_calcium",
+                "serum_osmolality",
+                "map",
+            ),
+            horizon_hours=(6,),
+            evidence=(
+                "ELECTROLYTE_BELIEF_FINDINGS.md; sodium/chloride are "
+                "near-miss, magnesium fails hospital-heldout despite 7/7 "
+                "patient splits, and remaining sparse/deep targets do not "
+                "pass the robust downstream observable gate"
+            ),
+            allowed_uses=("capability_reporting",),
+        ),
+        ObservationCapability(
             name="respiratory_acid_base_observed_coupling",
             status="candidate_only",
             scope="single_hop_body_coupling",
@@ -1117,6 +1163,9 @@ def whole_body_state_forecast_template() -> dict[str, object]:
             "eicu_cardiovascular_belief_audit.json",
             "eicu_cardiovascular_belief_full_heart_rate_audit.json",
             "eicu_cardiovascular_instability_full_transition_report.json",
+            "ELECTROLYTE_BELIEF_FINDINGS.md",
+            "eicu_electrolyte_belief_full_audit.json",
+            "eicu_electrolyte_acid_base_full_transition_report.json",
         ],
         "safety_boundary": {
             **observation_readiness()["safety_boundary"],

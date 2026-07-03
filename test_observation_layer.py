@@ -99,6 +99,22 @@ class ObservationLayerTests(unittest.TestCase):
         self.assertNotIn("heart_rate", cardiovascular_remaining.targets)
         self.assertNotIn("factual_prediction", cardiovascular_remaining.allowed_uses)
 
+        electrolyte_belief = capabilities["electrolyte_acid_base_belief_state"]
+        self.assertTrue(electrolyte_belief.is_validated)
+        self.assertEqual(electrolyte_belief.scope, "predict_update_belief_state")
+        self.assertEqual(electrolyte_belief.horizon_hours, (6,))
+        self.assertIn("potassium", electrolyte_belief.targets)
+        self.assertIn("bicarbonate", electrolyte_belief.targets)
+        self.assertIn("anion_gap", electrolyte_belief.targets)
+        self.assertIn("7/7 patient", electrolyte_belief.evidence)
+        self.assertIn("factual_prediction", electrolyte_belief.allowed_uses)
+
+        electrolyte_remaining = capabilities["electrolyte_belief_remaining_targets_candidate"]
+        self.assertFalse(electrolyte_remaining.is_validated)
+        self.assertIn("sodium_near_miss", electrolyte_remaining.targets)
+        self.assertIn("magnesium_hospital_fail", electrolyte_remaining.targets)
+        self.assertNotIn("factual_prediction", electrolyte_remaining.allowed_uses)
+
     def test_readiness_is_observation_only_and_fail_closed(self):
         readiness = observation_readiness()
 
@@ -208,6 +224,10 @@ class ObservationLayerTests(unittest.TestCase):
         )
         self.assertIn(
             "nhanes_2017_2018_nowcast_audit.json",
+            template["source_artifacts"],
+        )
+        self.assertIn(
+            "eicu_electrolyte_belief_full_audit.json",
             template["source_artifacts"],
         )
 
