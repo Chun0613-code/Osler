@@ -209,6 +209,71 @@ export async function chat(
   });
 }
 
+// ── voice case-note dictation ────────────────────────────────────────────
+// Record a clip (expo-audio) → upload here → transcript. The clinician reviews
+// the text in the case note before Analyze; voice never analyzes or prescribes.
+
+/** Upload a recorded audio file URI to /api/voice/transcribe → transcript text.
+ * Multipart FormData — do NOT set Content-Type; fetch adds the boundary itself. */
+export async function transcribeVoice(uri: string, format: 'm4a' = 'm4a'): Promise<string> {
+  const form = new FormData();
+  // React Native FormData file part: { uri, name, type }.
+  form.append('audio', { uri, name: `dictation.${format}`, type: 'audio/m4a' } as unknown as Blob);
+  form.append('format', format);
+  const r = await fetch(`${API_BASE}/api/voice/transcribe`, { method: 'POST', body: form });
+  const j = await r.json();
+  if (!r.ok) throw new Error((j as { error?: string }).error ?? `HTTP ${r.status}`);
+  return ((j as { text?: string }).text ?? '').trim();
+}
+
+// ── structure a dictated / free-text note (voice stage 3B) ────────────────
+// After a transcript lands, /api/parse_case previews the SAME parse Analyze runs
+// server-side: structured fields for the clinician to confirm + the engine's amber
+// vitals flags. Nothing is analyzed or prescribed here — every value is confirmed first.
+
+/** A caution flag PatientProfile.flags() raised (mirrors engine/patient_profile.py). */
+export interface CaseFlag {
+  flag: string; // e.g. "hypotension", "tachycardia"
+  detail: string; // e.g. "SBP 88 < 90"
+  keywords?: string[];
+}
+
+/** Structured fields extracted from the note (same shape agent.build_patient expects). */
+export interface ParsedCaseFields {
+  age?: number | null;
+  sex?: string | null;
+  weight_kg?: number | null;
+  egfr?: number | null;
+  hepatic_status?: string;
+  allergies?: string[];
+  current_medications?: string[];
+  symptoms?: string[];
+  indication?: string;
+  vitals?: Record<string, number>;
+  labs?: Record<string, number>;
+}
+
+export interface ParseCaseResult {
+  fields: ParsedCaseFields;
+  parser: string; // "rules" | "llm"
+  indication: string;
+  indication_label: string;
+  /** false → not one of the engine's mappable indications; edit before Analyze. */
+  indication_known: boolean;
+  flags: CaseFlag[];
+  missing_core: string[];
+}
+
+/** Structure a case note into confirmable fields + the engine's vitals flags.
+ * Sends the same api_key/provider as analyze() so the preview matches Analyze. */
+export async function parseCase(text: string, llm?: LlmSettings): Promise<ParseCaseResult> {
+  return post<ParseCaseResult>('/api/parse_case', {
+    text,
+    api_key: llm?.apiKey ?? '',
+    provider: llm?.provider,
+  });
+}
+
 // ── e-prescribing (Photon sandbox / mock) ────────────────────────────────
 // The symbolic engine recommends a drug; the clinician reviews & signs the actual
 // prescription in a WebView (Photon's certified UI, or a local mock). Photon sends it

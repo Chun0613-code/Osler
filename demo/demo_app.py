@@ -49,15 +49,19 @@ from flask import Flask, request, jsonify, Response, redirect
 
 import reasoning_engine as RE
 import case_targets
+import case_parser
 import agent
 import llm_client
 import prescription
 import photon_client
 import photon_oauth
+import transcribe
 
 _HERE = Path(__file__).parent
 app = Flask(__name__)
-app.config["MAX_CONTENT_LENGTH"] = int(os.environ.get("MAX_REQUEST_BYTES", "1048576"))
+# 8 MB default: voice case-note clips (m4a/AAC ~1 MB/min) would 413 at the old
+# 1 MB cap. JSON routes stay tiny regardless.
+app.config["MAX_CONTENT_LENGTH"] = int(os.environ.get("MAX_REQUEST_BYTES", "8388608"))
 
 
 def _allowed_origins() -> set[str]:
@@ -122,6 +126,70 @@ def index():
 def api_cases():
     return jsonify({"cases": SAMPLE_CASES, "indications": case_targets.list_indications(),
                     "env_llm": llm_client.available()})
+
+
+@app.route("/api/voice/transcribe", methods=["POST"])
+def api_voice_transcribe():
+    """Voice case-note dictation: multipart audio → transcript text. This only turns
+    speech into text; the clinician reviews/edits it before Analyze, and nothing is
+    analyzed or prescribed from voice here. Provider lives in demo/transcribe.py."""
+    if not transcribe.transcribe_available():
+        return jsonify({"error": "Voice transcription is not configured "
+                                 "(set GEMINI_API_KEY in demo/.env)."}), 503
+    f = request.files.get("audio")
+    if f is None:
+        return jsonify({"error": "no audio (send multipart field 'audio')"}), 400
+    fmt = (request.form.get("format") or "").strip().lstrip(".") or "m4a"
+    audio_bytes = f.read()
+    if not audio_bytes:
+        return jsonify({"error": "empty audio"}), 400
+    try:
+        text = transcribe.transcribe_audio(audio_bytes, fmt)
+    except Exception as e:  # noqa: BLE001 — normalize provider errors to one shape
+        return jsonify({"error": f"transcription failed: {type(e).__name__}: {e}"}), 502
+    return jsonify({"text": text})
+
+
+def _indication_label(canon: str) -> str:
+    """Human label for a canonical indication key (same lookup agent.py uses)."""
+    return next((i["label"] for i in case_targets.list_indications()
+                 if i["value"] == canon), canon)
+
+
+@app.route("/api/parse_case", methods=["POST"])
+def api_parse_case():
+    """Structure a dictated / free-text note into fields the clinician CONFIRMS before
+    Analyze — the second half of voice case-note entry (transcribe → structure → confirm).
+
+    This is a *preview* of the exact parse the Analyze pipeline runs server-side: it reuses
+    the same case_parser (with the same provider) and the same PatientProfile.flags() the
+    engine acts on, so the captured chips and amber vitals flags shown for confirmation
+    match what Analyze will see. Nothing is analyzed, ranked, or prescribed here."""
+    d = request.get_json(force=True) or {}
+    text = (d.get("text") or "").strip()
+    if not text:
+        return jsonify({"error": "no text (send {\"text\": ...})"}), 400
+    # Pass the caller's key/provider straight through, identical to /api/analyze, so the
+    # preview and the real analyze parse the note the same way (LLM if a key is available,
+    # else deterministic rules). Set LLM_PROVIDER=gemini in demo/.env to use the same
+    # Gemini key as transcription for both.
+    api_key = (d.get("api_key") or "").strip() or None
+    provider = d.get("provider") or None
+    fields = case_parser.parse(text, api_key, provider)
+    parser_used = fields.pop("_parser", "rules")
+    patient = agent.build_patient(fields)
+    indication = fields.get("indication") or ""
+    canon = case_targets.resolve(indication)
+    return jsonify({
+        "fields": fields,
+        "parser": parser_used,
+        "indication": indication,
+        "indication_label": _indication_label(canon) if canon else indication,
+        "indication_known": bool(canon),
+        # Same amber safety flags the engine raises (hypotension, tachycardia, …).
+        "flags": patient.flags(),
+        "missing_core": patient.missing_core(),
+    })
 
 
 @app.route("/api/analyze", methods=["POST"])

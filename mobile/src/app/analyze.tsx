@@ -23,10 +23,14 @@ import {
   analyze,
   API_BASE,
   getCases,
+  parseCase,
+  type ParseCaseResult,
   type SampleCase,
   type TraceStep,
 } from '@/api/osler';
+import CapturedFields, { capturedKeys, type CapturedKey } from '@/components/CapturedFields';
 import CasePresetChips from '@/components/CasePresetChips';
+import VoiceDictation from '@/components/VoiceDictation';
 import { useApp } from '@/state/AppContext';
 import { colors, fonts, radius, shadow, spacing } from '@/theme/tokens';
 
@@ -425,6 +429,89 @@ export default function AnalyzeScreen() {
     [],
   );
 
+  // ── voice stage 3B: structure the dictated note → confirmable fields + flags ──
+  const [parsed, setParsed] = useState<ParseCaseResult | null>(null);
+  const [parsing, setParsing] = useState(false);
+  const [confirmed, setConfirmed] = useState<Set<CapturedKey>>(new Set());
+  const textRef = useRef(text);
+  useEffect(() => {
+    textRef.current = text;
+  }, [text]);
+
+  // Structure the note via /api/parse_case — the same parse Analyze runs server-side,
+  // surfaced for confirmation. Never analyzes or prescribes; the clinician confirms.
+  const runParse = useCallback(
+    async (note: string) => {
+      const trimmed = note.trim();
+      if (!trimmed) return;
+      setParsing(true);
+      setError(null);
+      try {
+        const res = await parseCase(trimmed, llm);
+        if (!mountedRef.current) return;
+        setParsed(res);
+        setConfirmed(new Set());
+      } catch (e) {
+        if (mountedRef.current) {
+          setError(e instanceof Error ? e.message : 'Could not structure the note');
+        }
+      } finally {
+        if (mountedRef.current) setParsing(false);
+      }
+    },
+    [llm],
+  );
+
+  // Voice transcript → append to the case note, then structure it for confirmation.
+  const handleTranscript = useCallback(
+    (t: string) => {
+      const prev = textRef.current.trim();
+      const next = prev ? `${prev} ${t}` : t;
+      setText(next);
+      void runParse(next);
+    },
+    [runParse],
+  );
+
+  // Confirm one captured value into the Case-details form (voice is never silently adopted).
+  const confirmField = useCallback(
+    (key: CapturedKey) => {
+      const f = parsed?.fields;
+      if (!f) return;
+      switch (key) {
+        case 'indication':
+          setManualField('indication', f.indication ?? '');
+          break;
+        case 'age':
+          setManualField('age', f.age != null ? String(f.age) : '');
+          break;
+        case 'sex':
+          setManualField('sex', f.sex === 'M' || f.sex === 'F' ? f.sex : f.sex ? 'Other' : '');
+          break;
+        case 'egfr':
+          setManualField('egfr', f.egfr != null ? String(f.egfr) : '');
+          break;
+        case 'weight_kg':
+          setManualField('weightKg', f.weight_kg != null ? String(f.weight_kg) : '');
+          break;
+        case 'allergies':
+          setManualField('allergies', (f.allergies ?? []).join(', '));
+          break;
+        case 'meds':
+          setManualField('meds', (f.current_medications ?? []).join(', '));
+          break;
+      }
+      setConfirmed((prev) => new Set(prev).add(key));
+    },
+    [parsed, setManualField],
+  );
+
+  // Confirm exactly the chips CapturedFields renders (shared capturedKeys → no drift).
+  const confirmAllFields = useCallback(() => {
+    if (!parsed) return;
+    capturedKeys(parsed).forEach(confirmField);
+  }, [parsed, confirmField]);
+
   const onAnalyze = useCallback(async (overrideCase?: SampleCase) => {
     if (busy) return;
     setBusy(true);
@@ -651,6 +738,7 @@ export default function AnalyzeScreen() {
         </View>
 
         <Text style={styles.sectionLabel}>CASE NOTE</Text>
+        <VoiceDictation onTranscript={handleTranscript} />
         <TextInput
           style={styles.textarea}
           multiline
@@ -660,6 +748,32 @@ export default function AnalyzeScreen() {
           placeholder="BP 88/54, HR 112, crushing chest pain."
           placeholderTextColor={colors.textMuted}
         />
+
+        {/* Structure a typed or edited note into confirmable fields (voice auto-structures). */}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Structure note into fields"
+          onPress={() => void runParse(text)}
+          disabled={parsing || !text.trim()}
+          style={({ pressed }) => [
+            styles.structureBtn,
+            (pressed || parsing || !text.trim()) && { opacity: 0.6 },
+          ]}>
+          {parsing ? (
+            <ActivityIndicator size="small" color={colors.accent} />
+          ) : (
+            <Text style={styles.structureBtnText}>⚙ Structure note</Text>
+          )}
+        </Pressable>
+
+        {parsed && (
+          <CapturedFields
+            parsed={parsed}
+            confirmed={confirmed}
+            onConfirm={confirmField}
+            onConfirmAll={confirmAllFields}
+          />
+        )}
 
         <View style={styles.switchRow}>
           <Text style={styles.switchLabel}>Fetch live openFDA labels</Text>
@@ -862,6 +976,23 @@ const styles = StyleSheet.create({
     fontSize: 13.5,
     lineHeight: 20,
     color: colors.text,
+  },
+  structureBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 40,
+    marginTop: spacing.sm,
+    marginBottom: spacing.sm,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.borderSolid,
+    backgroundColor: colors.bgCard,
+  },
+  structureBtnText: {
+    fontFamily: fonts.bodySemiBold,
+    fontSize: 13,
+    color: colors.accent,
   },
   switchRow: {
     flexDirection: 'row',
