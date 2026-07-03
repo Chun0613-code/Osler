@@ -643,6 +643,21 @@ def whole_body_observation_capabilities() -> tuple[ObservationCapability, ...]:
             evidence="AKI_RENAL_BELIEF_STATE_V2_FINDINGS.md; downstream observable gate beats baseline and capacity-matched placebo",
         ),
         ObservationCapability(
+            name="cardiovascular_belief_state_candidate",
+            status="candidate_only",
+            scope="predict_update_belief_state",
+            systems=("cardiovascular_perfusion",),
+            targets=("heart_rate_near_miss", "map", "lactate", "o2sat", "respiratory_rate"),
+            horizon_hours=(6,),
+            evidence=(
+                "CARDIOVASCULAR_BELIEF_FINDINGS.md; predict-update perfusion "
+                "belief reaches 6/7 patient splits and hospital-heldout for "
+                "heart_rate, but fails the required 7/7 gate and remains "
+                "candidate-only"
+            ),
+            allowed_uses=("capability_reporting",),
+        ),
+        ObservationCapability(
             name="respiratory_acid_base_observed_coupling",
             status="candidate_only",
             scope="single_hop_body_coupling",
@@ -1083,6 +1098,8 @@ def whole_body_state_forecast_template() -> dict[str, object]:
             "eicu_neuro_note_coverage_audit.json",
             "EICU_NEURO_NOTE_ALL_ICU_FINDINGS.md",
             "eicu_neuro_note_all_icu_coverage_audit.json",
+            "CARDIOVASCULAR_BELIEF_FINDINGS.md",
+            "eicu_cardiovascular_belief_audit.json",
         ],
         "safety_boundary": {
             **observation_readiness()["safety_boundary"],
