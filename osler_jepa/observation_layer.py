@@ -548,14 +548,15 @@ def whole_body_observation_capabilities() -> tuple[ObservationCapability, ...]:
             scope="external_population_nowcast_validation",
             systems=("healthy_population", "non_icu", "whole_body"),
             targets=(
-                "25_cross_sectional_nowcast_targets",
+                "29_cross_sectional_nowcast_targets",
                 "glucose_fallback",
                 "alk_phos_fallback",
+                "hs_crp_fallback",
             ),
             horizon_hours=(0,),
             evidence=(
                 "NHANES_NOWCAST_FINDINGS.md; NHANES 2017-2018 public "
-                "cross-sectional audit validates 25/27 targets with "
+                "cross-sectional audit validates 29/32 targets with "
                 "participant-heldout median, capacity-matched placebo, and "
                 "expanded sibling-variable leakage guards; "
                 "no forecast, treatment, or causal claim is supported"

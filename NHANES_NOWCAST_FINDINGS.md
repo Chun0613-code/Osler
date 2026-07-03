@@ -16,16 +16,17 @@ NHANES has no per-person time axis, so this is **nowcast only**. It does not sup
 ## Result
 
 - Merged participants: `6401`
-- Evaluated targets: `27`
-- Validated nowcast targets: `25 / 27`
-- Validated: `sodium, potassium, chloride, bicarbonate, bun, creatinine, calcium, phosphorus, albumin, total_protein, bilirubin, alt, ast, uric_acid, hemoglobin, hematocrit, wbc, platelets, rbc, sbp, dbp, map, bmi, weight, waist`
-- Failed: `glucose, alk_phos`
+- Evaluated targets: `32`
+- Validated nowcast targets: `29 / 32`
+- NHANES-unique targets tested: `hba1c, hdl_cholesterol, hs_crp, total_cholesterol, triglycerides`
+- Validated: `sodium, potassium, chloride, bicarbonate, bun, creatinine, calcium, phosphorus, albumin, total_protein, bilirubin, alt, ast, uric_acid, hemoglobin, hematocrit, wbc, platelets, rbc, sbp, dbp, map, bmi, weight, waist, total_cholesterol, hdl_cholesterol, triglycerides, hba1c`
+- Failed: `glucose, alk_phos, hs_crp`
 
 ## Interpretation
 
 The same disciplined nowcast pattern seen in ICU data also appears in NHANES: many contemporaneous lab/body variables are constrained enough by the rest of the physiologic panel to beat both median and capacity-matched placebo baselines, even after excluding deterministic sibling variables.
 
-The negative targets are also informative: glucose and alkaline phosphatase do not pass this cross-sectional gate, so they should remain missing/fallback in the NHANES nowcast contract.
+The negative targets are also informative: `glucose, alk_phos, hs_crp` do not pass this cross-sectional gate, so they should remain missing/fallback in the NHANES nowcast contract.
 
 This is a healthy-population observation result, not a clinical or causal result.
 
@@ -60,3 +61,8 @@ This is a healthy-population observation result, not a clinical or causal result
 | bmi | 5521 | 5.5974 | 4.7152 | 5.7022 | 7/7 | 7/7 | validated |
 | weight | 5529 | 17.5123 | 14.5878 | 17.7645 | 7/7 | 7/7 | validated |
 | waist | 5382 | 14.2129 | 11.0388 | 14.2741 | 7/7 | 7/7 | validated |
+| total_cholesterol | 5368 | 32.6856 | 29.2917 | 32.9182 | 7/7 | 7/7 | validated |
+| hdl_cholesterol | 5368 | 11.3316 | 9.7063 | 11.5485 | 7/7 | 7/7 | validated |
+| triglycerides | 2575 | 49.8201 | 45.3275 | 52.2153 | 7/7 | 7/7 | validated |
+| hba1c | 5370 | 0.5699 | 0.3696 | 0.6231 | 7/7 | 7/7 | validated |
+| hs_crp | 5360 | 2.9946 | 3.1608 | 3.5520 | 0/7 | 7/7 | fallback |

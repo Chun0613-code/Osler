@@ -36,9 +36,14 @@ SOURCE_FILES = {
     "cbc": "CBC_J.XPT",
     "bpx": "BPX_J.XPT",
     "bmx": "BMX_J.XPT",
+    "tchol": "TCHOL_J.XPT",
+    "hdl": "HDL_J.XPT",
+    "trigly": "TRIGLY_J.XPT",
+    "ghb": "GHB_J.XPT",
+    "hscrp": "HSCRP_J.XPT",
 }
 
-TARGETS = {
+CORE_TARGETS = {
     # Biochemistry (BIOPRO_J).
     "sodium": "LBXSNASI",
     "potassium": "LBXSKSI",
@@ -72,6 +77,16 @@ TARGETS = {
     "waist": "BMXWAIST",
 }
 
+NHANES_UNIQUE_TARGETS = {
+    "total_cholesterol": "LBXTC",
+    "hdl_cholesterol": "LBDHDD",
+    "triglycerides": "LBXTR",
+    "hba1c": "LBXGH",
+    "hs_crp": "LBXHSCRP",
+}
+
+TARGETS = {**CORE_TARGETS, **NHANES_UNIQUE_TARGETS}
+
 CONTEXT_FEATURES = {
     "age": "RIDAGEYR",
     "sex": "RIAGENDR",
@@ -97,12 +112,22 @@ def build_matrix(data_path):
     cbc = load(data_path, SOURCE_FILES["cbc"])
     bpx = load(data_path, SOURCE_FILES["bpx"])
     bmx = load(data_path, SOURCE_FILES["bmx"])
+    tchol = load(data_path, SOURCE_FILES["tchol"])
+    hdl = load(data_path, SOURCE_FILES["hdl"])
+    trigly = load(data_path, SOURCE_FILES["trigly"])
+    ghb = load(data_path, SOURCE_FILES["ghb"])
+    hscrp = load(data_path, SOURCE_FILES["hscrp"])
 
     df = (
         demo.merge(bio, on="SEQN", how="inner")
         .merge(cbc, on="SEQN", how="inner")
         .merge(bpx, on="SEQN", how="inner")
         .merge(bmx, on="SEQN", how="inner")
+        .merge(tchol[["SEQN", "LBXTC"]], on="SEQN", how="left")
+        .merge(hdl[["SEQN", "LBDHDD"]], on="SEQN", how="left")
+        .merge(trigly[["SEQN", "LBXTR"]], on="SEQN", how="left")
+        .merge(ghb[["SEQN", "LBXGH"]], on="SEQN", how="left")
+        .merge(hscrp[["SEQN", "LBXHSCRP"]], on="SEQN", how="left")
     )
 
     df["SBP"] = df[["BPXSY1", "BPXSY2", "BPXSY3"]].replace(0, np.nan).mean(axis=1)
@@ -124,7 +149,11 @@ def leak_guarded_features(target, columns):
 
 
 def nowcast_gate(matrix, target, seeds=range(7), min_rows=500):
-    cols, leak_guard_excluded = leak_guarded_features(target, matrix.columns)
+    # NHANES-unique labs are evaluated as targets, not as extra predictors for
+    # the routine panel. This keeps the audit question clean: can a standard
+    # contemporaneous physiology panel estimate special population-health labs?
+    feature_pool = [*CORE_TARGETS.keys(), *CONTEXT_FEATURES.keys()]
+    cols, leak_guard_excluded = leak_guarded_features(target, feature_pool)
     d = matrix[[target] + cols].dropna()
     if len(d) < min_rows:
         return None, len(d), leak_guard_excluded
@@ -199,6 +228,10 @@ def run_audit(data_path, min_rows=500):
             "pass_rule": "candidate beats both baseline and placebo in all 7 splits",
         },
         "context_features": sorted(CONTEXT_FEATURES),
+        "target_groups": {
+            "core_targets": sorted(CORE_TARGETS),
+            "nhanes_unique_targets": sorted(NHANES_UNIQUE_TARGETS),
+        },
         "leakage_guards": [
             {
                 "group": sorted(group),
@@ -249,6 +282,7 @@ def write_markdown(report, path):
         f"- Merged participants: `{report['participant_merge_n']}`",
         f"- Evaluated targets: `{report['targets_evaluated']}`",
         f"- Validated nowcast targets: `{report['targets_validated']} / {report['targets_evaluated']}`",
+        f"- NHANES-unique targets tested: `{', '.join(report['target_groups']['nhanes_unique_targets'])}`",
         f"- Validated: `{', '.join(validated)}`",
         f"- Failed: `{', '.join(failed) if failed else 'none'}`",
         "",
@@ -256,7 +290,7 @@ def write_markdown(report, path):
         "",
         "The same disciplined nowcast pattern seen in ICU data also appears in NHANES: many contemporaneous lab/body variables are constrained enough by the rest of the physiologic panel to beat both median and capacity-matched placebo baselines, even after excluding deterministic sibling variables.",
         "",
-        "The negative targets are also informative: glucose and alkaline phosphatase do not pass this cross-sectional gate, so they should remain missing/fallback in the NHANES nowcast contract.",
+        f"The negative targets are also informative: `{', '.join(failed) if failed else 'none'}` do not pass this cross-sectional gate, so they should remain missing/fallback in the NHANES nowcast contract.",
         "",
         "This is a healthy-population observation result, not a clinical or causal result.",
         "",

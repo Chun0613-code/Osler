@@ -6,7 +6,8 @@
   "data_source": "NHANES 2017-2018 public XPT files",
   "failed_targets": [
     "glucose",
-    "alk_phos"
+    "alk_phos",
+    "hs_crp"
   ],
   "gate": {
     "baseline": "train_set_target_median",
@@ -211,6 +212,30 @@
       "relative_mae_change": 0.140518,
       "validated": false
     },
+    "hba1c": {
+      "baseline_mae": 0.569895,
+      "beats_baseline": "7/7",
+      "beats_placebo": "7/7",
+      "candidate_mae": 0.36961,
+      "delta_vs_baseline": -0.200285,
+      "leak_guard_excluded_features": [],
+      "n": 5370,
+      "placebo_mae": 0.623118,
+      "relative_mae_change": -0.351442,
+      "validated": true
+    },
+    "hdl_cholesterol": {
+      "baseline_mae": 11.33156,
+      "beats_baseline": "7/7",
+      "beats_placebo": "7/7",
+      "candidate_mae": 9.706264,
+      "delta_vs_baseline": -1.625296,
+      "leak_guard_excluded_features": [],
+      "n": 5368,
+      "placebo_mae": 11.548535,
+      "relative_mae_change": -0.143431,
+      "validated": true
+    },
     "hematocrit": {
       "baseline_mae": 3.224108,
       "beats_baseline": "7/7",
@@ -240,6 +265,18 @@
       "placebo_mae": 1.196928,
       "relative_mae_change": -0.277046,
       "validated": true
+    },
+    "hs_crp": {
+      "baseline_mae": 2.994611,
+      "beats_baseline": "0/7",
+      "beats_placebo": "7/7",
+      "candidate_mae": 3.160806,
+      "delta_vs_baseline": 0.166195,
+      "leak_guard_excluded_features": [],
+      "n": 5360,
+      "placebo_mae": 3.552019,
+      "relative_mae_change": 0.055498,
+      "validated": false
     },
     "map": {
       "baseline_mae": 10.00433,
@@ -334,6 +371,18 @@
       "relative_mae_change": -0.373564,
       "validated": true
     },
+    "total_cholesterol": {
+      "baseline_mae": 32.685555,
+      "beats_baseline": "7/7",
+      "beats_placebo": "7/7",
+      "candidate_mae": 29.291726,
+      "delta_vs_baseline": -3.393829,
+      "leak_guard_excluded_features": [],
+      "n": 5368,
+      "placebo_mae": 32.918201,
+      "relative_mae_change": -0.103833,
+      "validated": true
+    },
     "total_protein": {
       "baseline_mae": 0.33842,
       "beats_baseline": "7/7",
@@ -344,6 +393,18 @@
       "n": 5374,
       "placebo_mae": 0.340115,
       "relative_mae_change": -0.174007,
+      "validated": true
+    },
+    "triglycerides": {
+      "baseline_mae": 49.820089,
+      "beats_baseline": "7/7",
+      "beats_placebo": "7/7",
+      "candidate_mae": 45.327543,
+      "delta_vs_baseline": -4.492546,
+      "leak_guard_excluded_features": [],
+      "n": 2575,
+      "placebo_mae": 52.215317,
+      "relative_mae_change": -0.090175,
       "validated": true
     },
     "uric_acid": {
@@ -404,8 +465,46 @@
   "row_level_data_written": false,
   "schema": "nhanes_2017_2018_cross_sectional_nowcast_audit.v1",
   "skipped_targets": {},
-  "targets_evaluated": 27,
-  "targets_validated": 25,
+  "target_groups": {
+    "core_targets": [
+      "albumin",
+      "alk_phos",
+      "alt",
+      "ast",
+      "bicarbonate",
+      "bilirubin",
+      "bmi",
+      "bun",
+      "calcium",
+      "chloride",
+      "creatinine",
+      "dbp",
+      "glucose",
+      "hematocrit",
+      "hemoglobin",
+      "map",
+      "phosphorus",
+      "platelets",
+      "potassium",
+      "rbc",
+      "sbp",
+      "sodium",
+      "total_protein",
+      "uric_acid",
+      "waist",
+      "wbc",
+      "weight"
+    ],
+    "nhanes_unique_targets": [
+      "hba1c",
+      "hdl_cholesterol",
+      "hs_crp",
+      "total_cholesterol",
+      "triglycerides"
+    ]
+  },
+  "targets_evaluated": 32,
+  "targets_validated": 29,
   "validated_targets": [
     "sodium",
     "potassium",
@@ -431,6 +530,10 @@
     "map",
     "bmi",
     "weight",
-    "waist"
+    "waist",
+    "total_cholesterol",
+    "hdl_cholesterol",
+    "triglycerides",
+    "hba1c"
   ]
 }
