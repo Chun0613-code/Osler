@@ -12,42 +12,12 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 
+from osler_jepa.state_completion import (
+    DERIVED_COMPLETION_RULES,
+    SAME_GROUP_CALIBRATED_COMPLETION_GROUPS,
+)
 
 PREDICTION_HORIZONS_HOURS = (1, 3, 6, 12, 24, 48)
-
-DERIVED_COMPLETION_RULES: dict[str, dict[str, object]] = {
-    "map": {
-        "source": "derived_formula_completion",
-        "inputs": ("sbp", "dbp"),
-        "formula": "dbp + (sbp - dbp) / 3",
-        "confidence": "high_when_inputs_observed",
-    },
-    "anion_gap": {
-        "source": "derived_formula_completion",
-        "inputs": ("sodium", "chloride", "bicarbonate"),
-        "formula": "sodium - chloride - bicarbonate",
-        "confidence": "high_when_inputs_observed",
-    },
-    "serum_osmolality": {
-        "source": "derived_formula_completion",
-        "inputs": ("sodium", "glucose", "bun"),
-        "formula": "2*sodium + glucose/18 + bun/2.8",
-        "confidence": "moderate_formula_estimate",
-    },
-}
-
-SAME_GROUP_CALIBRATED_COMPLETION_GROUPS: dict[str, dict[str, object]] = {
-    "red_cell_indices": {
-        "source": "same_group_calibrated_completion",
-        "targets": ("hemoglobin", "hematocrit", "rbc"),
-        "rationale": "near-linear red-cell measurement family; not cross-system inference",
-    },
-    "body_size": {
-        "source": "same_group_calibrated_completion",
-        "targets": ("bmi", "weight", "waist"),
-        "rationale": "body-size measurement family with deterministic or near-deterministic relationships",
-    },
-}
 
 VALIDATED_NOWCAST_MODULE_TARGETS: dict[str, tuple[str, ...]] = {
     "sepsis": (

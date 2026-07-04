@@ -28,6 +28,8 @@ from sklearn.linear_model import Ridge
 from sklearn.metrics import mean_absolute_error
 from sklearn.preprocessing import StandardScaler
 
+from osler_jepa.state_completion import LEAKAGE_SIBLING_GROUPS
+
 DEFAULT_DATA = Path("./nhanes_2017_2018")
 
 SOURCE_FILES = {
@@ -95,11 +97,7 @@ CONTEXT_FEATURES = {
 # Deterministic or near-deterministic siblings are excluded from one another's
 # feature sets. Without this guard, the audit can mistake algebraic completion
 # for cross-system physiologic inference.
-LEAKAGE_GROUPS = [
-    {"sbp", "dbp", "map"},
-    {"hemoglobin", "hematocrit", "rbc"},
-    {"bmi", "weight", "waist"},
-]
+LEAKAGE_GROUPS = [set(group) for group in LEAKAGE_SIBLING_GROUPS]
 
 
 def load(data_path, name):
@@ -274,7 +272,7 @@ def write_markdown(report, path):
         "- Baseline: train-set target median.",
         "- Placebo: ridge regression on the same number of random-noise features.",
         "- Validation rule: candidate beats both baseline and placebo in all 7 participant-heldout splits.",
-        "- Leakage guard: deterministic or near-deterministic sibling groups are excluded from one another's feature sets: `sbp/dbp/map`, `hemoglobin/hematocrit/rbc`, and `bmi/weight/waist`.",
+        "- Leakage guard: deterministic or near-deterministic sibling groups are excluded from one another's feature sets. The report lists the active registry groups.",
         "- Output is aggregate-only; no participant identifiers or row-level data are written.",
         "",
         "## Result",

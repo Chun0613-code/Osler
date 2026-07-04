@@ -27,6 +27,7 @@ from eicu_body_system_configs import BODY_SYSTEM_CONFIGS, get_body_system_config
 from eicu_respiratory_transition_extract import TARGET_VARS as RESPIRATORY_TARGETS
 from eicu_sepsis_target_router import _bootstrap_ci, _group_folds, split_subjects
 from eicu_sepsis_transition_extract import TARGET_VARS as SEPSIS_TARGETS
+from osler_jepa.state_completion import LEAKAGE_SIBLING_GROUPS
 
 
 DEFAULT_SEEDS = (7, 11, 19, 23, 37, 53, 71)
@@ -40,13 +41,7 @@ DEFAULT_TASKS = (
     ),
 )
 
-LEAKAGE_GROUPS = (
-    frozenset(("sbp", "dbp", "map")),
-    frozenset(("hemoglobin", "hematocrit", "rbc")),
-    frozenset(("bmi", "weight", "waist")),
-    frozenset(("anion_gap", "sodium", "chloride", "bicarbonate")),
-    frozenset(("serum_osmolality", "sodium", "glucose", "bun")),
-)
+LEAKAGE_GROUPS = LEAKAGE_SIBLING_GROUPS
 
 
 def _round(value, digits: int = 6):

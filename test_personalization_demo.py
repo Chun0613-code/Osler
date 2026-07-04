@@ -70,6 +70,49 @@ class PersonalizationDemoTests(unittest.TestCase):
         )
         self.assertFalse(completions["hematocrit"]["clinical_claim_allowed"])
 
+    def test_completion_layer_handles_more_formula_sibling_families(self):
+        completions = complete_current_state({
+            "bilirubin_total": 3.2,
+            "bilirubin_direct": 1.1,
+            "total_protein": 7.0,
+            "albumin": 3.1,
+            "total_cholesterol": 180.0,
+            "hdl_cholesterol": 45.0,
+            "triglycerides": 150.0,
+            "ck_mb": 5.0,
+            "cpk": 250.0,
+            "pao2": 80.0,
+            "fio2": 0.4,
+            "respiratory_rate": 20.0,
+            "tidal_volume": 500.0,
+        })
+
+        self.assertAlmostEqual(completions["bilirubin_indirect"]["point_estimate"], 2.1)
+        self.assertAlmostEqual(completions["globulin"]["point_estimate"], 3.9)
+        self.assertAlmostEqual(completions["non_hdl_cholesterol"]["point_estimate"], 135.0)
+        self.assertAlmostEqual(completions["ldl_cholesterol"]["point_estimate"], 105.0)
+        self.assertAlmostEqual(completions["ck_mb_index"]["point_estimate"], 2.0)
+        self.assertAlmostEqual(completions["pf_ratio"]["point_estimate"], 200.0)
+        self.assertAlmostEqual(completions["minute_ventilation"]["point_estimate"], 10.0)
+        for key in (
+            "bilirubin_indirect",
+            "globulin",
+            "non_hdl_cholesterol",
+            "ldl_cholesterol",
+            "ck_mb_index",
+            "pf_ratio",
+            "minute_ventilation",
+        ):
+            self.assertFalse(completions[key]["clinical_claim_allowed"])
+
+    def test_completion_layer_handles_red_cell_indices(self):
+        completions = complete_current_state({"rbc": 4.5, "mcv": 90.0, "mch": 30.0})
+        self.assertAlmostEqual(completions["hematocrit"]["point_estimate"], 40.5)
+        self.assertAlmostEqual(completions["hemoglobin"]["point_estimate"], 13.5)
+
+        completions = complete_current_state({"hemoglobin": 13.5, "hematocrit": 40.5})
+        self.assertAlmostEqual(completions["mchc"]["point_estimate"], 33.3333333333)
+
 
 if __name__ == "__main__":
     unittest.main()
