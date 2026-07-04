@@ -759,6 +759,51 @@ def whole_body_observation_capabilities() -> tuple[ObservationCapability, ...]:
             allowed_uses=("capability_reporting",),
         ),
         ObservationCapability(
+            name="endocrine_glycemic_stress_belief_state",
+            status="validated",
+            scope="predict_update_belief_state",
+            systems=("endocrine_metabolic", "glycemic_stress", "osmotic_fluid", "acid_base"),
+            targets=(
+                "glucose",
+                "anion_gap",
+                "bicarbonate",
+                "sodium",
+                "potassium",
+                "map",
+                "patient_specific_endocrine_glycemic_stress_state",
+            ),
+            horizon_hours=(6,),
+            evidence=(
+                "ENDOCRINE_BELIEF_FINDINGS.md; full eICU endocrine "
+                "cohort validates predict-update belief for glucose, "
+                "anion gap, bicarbonate, sodium, potassium, and MAP across "
+                "7/7 patient splits and hospital-heldout, beating baseline "
+                "and capacity-matched placebo; no direct hidden-state "
+                "accuracy claim"
+            ),
+        ),
+        ObservationCapability(
+            name="endocrine_belief_remaining_targets_candidate",
+            status="candidate_only",
+            scope="predict_update_belief_state",
+            systems=("endocrine_metabolic", "glycemic_stress", "hormonal_axis"),
+            targets=(
+                "serum_ketones_sparse",
+                "serum_osmolality",
+                "temperature",
+                "tsh_sparse",
+                "free_t4_sparse",
+                "cortisol_sparse",
+            ),
+            horizon_hours=(6,),
+            evidence=(
+                "ENDOCRINE_BELIEF_FINDINGS.md; sparse endocrine hormone, "
+                "ketone, osmolality, and temperature targets do not pass "
+                "the strict downstream observable gate"
+            ),
+            allowed_uses=("capability_reporting",),
+        ),
+        ObservationCapability(
             name="respiratory_acid_base_observed_coupling",
             status="candidate_only",
             scope="single_hop_body_coupling",
@@ -1209,6 +1254,9 @@ def whole_body_state_forecast_template() -> dict[str, object]:
             "RESPIRATORY_BELIEF_FINDINGS.md",
             "eicu_respiratory_belief_full_audit.json",
             "eicu_respiratory_full_transition_report.json",
+            "ENDOCRINE_BELIEF_FINDINGS.md",
+            "eicu_endocrine_belief_full_audit.json",
+            "eicu_endocrine_stress_full_transition_report.json",
         ],
         "safety_boundary": {
             **observation_readiness()["safety_boundary"],

@@ -37,12 +37,14 @@ and the whole system was built without ever faking a small-sample win.
 - **Cross-organ coupling:** e.g. cardiovascular perfusion → kidney (24–48h), sepsis burden
   → blood pressure (6h), and a validated three-organ chain **sepsis → blood pressure →
   kidney**.
-- **Individualization:** online hidden-state estimates now validate in four places:
+- **Individualization:** online hidden-state estimates now validate in five places:
   kidney reserve for creatinine/BUN, cardiovascular perfusion/shock state for
   heart-rate prediction, and electrolyte/acid-base state for potassium, bicarbonate,
   anion gap, and creatinine, plus respiratory/gas-exchange state for O2 saturation,
-  respiratory rate, heart rate, and bicarbonate. Each improves downstream observable
-  prediction beyond a strong baseline and a capacity-matched placebo.
+  respiratory rate, heart rate, and bicarbonate, and endocrine/glycemic-stress state
+  for glucose, anion gap, bicarbonate, sodium, potassium, and MAP. Each improves
+  downstream observable prediction beyond a strong baseline and a capacity-matched
+  placebo.
 - **Two care settings:** ICU **and** the pre-ICU emergency department.
 - **Three population/data axes:** multi-hospital ICU data (eICU), independent ICU data
   (MIMIC-IV), and healthy/general-population cross-sectional data (NHANES).

@@ -132,6 +132,23 @@ class ObservationLayerTests(unittest.TestCase):
         self.assertIn("ph", respiratory_remaining.targets)
         self.assertNotIn("factual_prediction", respiratory_remaining.allowed_uses)
 
+        endocrine_belief = capabilities["endocrine_glycemic_stress_belief_state"]
+        self.assertTrue(endocrine_belief.is_validated)
+        self.assertEqual(endocrine_belief.scope, "predict_update_belief_state")
+        self.assertEqual(endocrine_belief.horizon_hours, (6,))
+        self.assertIn("glucose", endocrine_belief.targets)
+        self.assertIn("anion_gap", endocrine_belief.targets)
+        self.assertIn("bicarbonate", endocrine_belief.targets)
+        self.assertIn("7/7 patient", endocrine_belief.evidence)
+        self.assertIn("factual_prediction", endocrine_belief.allowed_uses)
+
+        endocrine_remaining = capabilities["endocrine_belief_remaining_targets_candidate"]
+        self.assertFalse(endocrine_remaining.is_validated)
+        self.assertIn("serum_ketones_sparse", endocrine_remaining.targets)
+        self.assertIn("tsh_sparse", endocrine_remaining.targets)
+        self.assertIn("cortisol_sparse", endocrine_remaining.targets)
+        self.assertNotIn("factual_prediction", endocrine_remaining.allowed_uses)
+
     def test_readiness_is_observation_only_and_fail_closed(self):
         readiness = observation_readiness()
 
@@ -249,6 +266,10 @@ class ObservationLayerTests(unittest.TestCase):
         )
         self.assertIn(
             "eicu_respiratory_belief_full_audit.json",
+            template["source_artifacts"],
+        )
+        self.assertIn(
+            "eicu_endocrine_belief_full_audit.json",
             template["source_artifacts"],
         )
 
