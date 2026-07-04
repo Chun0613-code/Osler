@@ -115,6 +115,23 @@ class ObservationLayerTests(unittest.TestCase):
         self.assertIn("magnesium_hospital_fail", electrolyte_remaining.targets)
         self.assertNotIn("factual_prediction", electrolyte_remaining.allowed_uses)
 
+        respiratory_belief = capabilities["respiratory_gas_exchange_belief_state"]
+        self.assertTrue(respiratory_belief.is_validated)
+        self.assertEqual(respiratory_belief.scope, "predict_update_belief_state")
+        self.assertEqual(respiratory_belief.horizon_hours, (6,))
+        self.assertIn("o2sat", respiratory_belief.targets)
+        self.assertIn("respiratory_rate", respiratory_belief.targets)
+        self.assertIn("bicarbonate", respiratory_belief.targets)
+        self.assertIn("7/7 patient", respiratory_belief.evidence)
+        self.assertIn("factual_prediction", respiratory_belief.allowed_uses)
+
+        respiratory_remaining = capabilities["respiratory_belief_remaining_targets_candidate"]
+        self.assertFalse(respiratory_remaining.is_validated)
+        self.assertIn("map_near_miss", respiratory_remaining.targets)
+        self.assertIn("paco2", respiratory_remaining.targets)
+        self.assertIn("ph", respiratory_remaining.targets)
+        self.assertNotIn("factual_prediction", respiratory_remaining.allowed_uses)
+
     def test_readiness_is_observation_only_and_fail_closed(self):
         readiness = observation_readiness()
 
@@ -228,6 +245,10 @@ class ObservationLayerTests(unittest.TestCase):
         )
         self.assertIn(
             "eicu_electrolyte_belief_full_audit.json",
+            template["source_artifacts"],
+        )
+        self.assertIn(
+            "eicu_respiratory_belief_full_audit.json",
             template["source_artifacts"],
         )
 

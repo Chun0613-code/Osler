@@ -1,0 +1,1944 @@
+{
+  "audit": {
+    "belief_columns": [
+      "resp_belief_oxygenation_mean",
+      "resp_belief_oxygenation_sd",
+      "resp_belief_oxygenation_innovation",
+      "resp_belief_oxygenation_confidence",
+      "resp_belief_ventilation_co2_mean",
+      "resp_belief_ventilation_co2_sd",
+      "resp_belief_ventilation_co2_innovation",
+      "resp_belief_ventilation_co2_confidence",
+      "resp_belief_acid_base_compensation_mean",
+      "resp_belief_acid_base_compensation_sd",
+      "resp_belief_acid_base_compensation_innovation",
+      "resp_belief_acid_base_compensation_confidence",
+      "resp_belief_o2sat_slope_per_hr",
+      "resp_belief_o2sat_innovation",
+      "resp_belief_respiratory_rate_slope_per_hr",
+      "resp_belief_respiratory_rate_innovation",
+      "resp_belief_paco2_slope_per_hr",
+      "resp_belief_paco2_innovation",
+      "resp_belief_ph_slope_per_hr",
+      "resp_belief_ph_innovation",
+      "resp_belief_bicarbonate_slope_per_hr",
+      "resp_belief_bicarbonate_innovation",
+      "resp_belief_minute_ventilation_slope_per_hr",
+      "resp_belief_minute_ventilation_innovation",
+      "resp_belief_hypoxemia_burden",
+      "resp_belief_tachypnea_burden",
+      "resp_belief_bradypnea_burden",
+      "resp_belief_co2_retention_burden",
+      "resp_belief_low_co2_burden",
+      "resp_belief_acidemia_burden",
+      "resp_belief_alkalemia_burden",
+      "resp_belief_fio2_support",
+      "resp_belief_peep_support",
+      "resp_belief_minute_ventilation_burden",
+      "resp_belief_ventilation_context",
+      "resp_belief_bronchodilator_context",
+      "resp_belief_steroid_context"
+    ],
+    "cohort": "eicu_respiratory_full_transitions_6h.parquet",
+    "cohort_summary": {
+      "active_rows": 214130,
+      "hospitals": 200,
+      "rows": 310172,
+      "stays": 22077,
+      "subjects": 19438
+    },
+    "future_suffix": "tp6",
+    "hospital_holdout": {
+      "discovery_groups": 134,
+      "group_column": "hospitalid",
+      "heldout_groups": 66,
+      "overlap": 0,
+      "passed_count": 4,
+      "passed_targets": [
+        "o2sat",
+        "respiratory_rate",
+        "heart_rate",
+        "bicarbonate"
+      ],
+      "seed": 9001,
+      "targets": {
+        "bicarbonate": {
+          "candidate_vs_baseline": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.043706,
+              -0.021461
+            ],
+            "point_delta": -0.032081,
+            "significant": true,
+            "subjects": 3723
+          },
+          "candidate_vs_placebo": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.046924,
+              -0.024266
+            ],
+            "point_delta": -0.035697,
+            "significant": true,
+            "subjects": 3723
+          },
+          "mae": {
+            "baseline_ridge": 2.132781,
+            "placebo_belief_ridge": 2.136095,
+            "respiratory_belief_ridge": 2.105294
+          },
+          "rows": 13074,
+          "subjects": 3723
+        },
+        "heart_rate": {
+          "candidate_vs_baseline": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.033153,
+              -0.014935
+            ],
+            "point_delta": -0.024388,
+            "significant": true,
+            "subjects": 7762
+          },
+          "candidate_vs_placebo": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.034975,
+              -0.017199
+            ],
+            "point_delta": -0.02654,
+            "significant": true,
+            "subjects": 7762
+          },
+          "mae": {
+            "baseline_ridge": 8.432626,
+            "placebo_belief_ridge": 8.434937,
+            "respiratory_belief_ridge": 8.412765
+          },
+          "rows": 128257,
+          "subjects": 7762
+        },
+        "map": {
+          "candidate_vs_baseline": {
+            "beats_baseline": false,
+            "bootstrap_95_ci": [
+              -0.0077,
+              0.010326
+            ],
+            "point_delta": 0.000795,
+            "significant": false,
+            "subjects": 7715
+          },
+          "candidate_vs_placebo": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.009742,
+              0.008629
+            ],
+            "point_delta": -0.000757,
+            "significant": false,
+            "subjects": 7715
+          },
+          "mae": {
+            "baseline_ridge": 10.391982,
+            "placebo_belief_ridge": 10.393977,
+            "respiratory_belief_ridge": 10.397398
+          },
+          "rows": 126633,
+          "subjects": 7715
+        },
+        "o2sat": {
+          "candidate_vs_baseline": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.165583,
+              -0.136509
+            ],
+            "point_delta": -0.149977,
+            "significant": true,
+            "subjects": 7685
+          },
+          "candidate_vs_placebo": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.164363,
+              -0.136727
+            ],
+            "point_delta": -0.151293,
+            "significant": true,
+            "subjects": 7685
+          },
+          "mae": {
+            "baseline_ridge": 2.920065,
+            "placebo_belief_ridge": 2.921167,
+            "respiratory_belief_ridge": 2.745684
+          },
+          "rows": 124474,
+          "subjects": 7685
+        },
+        "paco2": {
+          "candidate_vs_baseline": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.097744,
+              0.006566
+            ],
+            "point_delta": -0.045731,
+            "significant": false,
+            "subjects": 1896
+          },
+          "candidate_vs_placebo": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.114719,
+              -0.001227
+            ],
+            "point_delta": -0.060001,
+            "significant": true,
+            "subjects": 1896
+          },
+          "mae": {
+            "baseline_ridge": 5.914099,
+            "placebo_belief_ridge": 5.931789,
+            "respiratory_belief_ridge": 5.832287
+          },
+          "rows": 5843,
+          "subjects": 1896
+        },
+        "ph": {
+          "candidate_vs_baseline": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.000736,
+              0.00013
+            ],
+            "point_delta": -0.000272,
+            "significant": false,
+            "subjects": 1903
+          },
+          "candidate_vs_placebo": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.000951,
+              -9e-06
+            ],
+            "point_delta": -0.000463,
+            "significant": true,
+            "subjects": 1903
+          },
+          "mae": {
+            "baseline_ridge": 0.056994,
+            "placebo_belief_ridge": 0.057172,
+            "respiratory_belief_ridge": 0.056401
+          },
+          "rows": 5865,
+          "subjects": 1903
+        },
+        "respiratory_rate": {
+          "candidate_vs_baseline": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.20491,
+              -0.170559
+            ],
+            "point_delta": -0.188014,
+            "significant": true,
+            "subjects": 6849
+          },
+          "candidate_vs_placebo": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.205878,
+              -0.17087
+            ],
+            "point_delta": -0.18805,
+            "significant": true,
+            "subjects": 6849
+          },
+          "mae": {
+            "baseline_ridge": 4.009301,
+            "placebo_belief_ridge": 4.009411,
+            "respiratory_belief_ridge": 3.767697
+          },
+          "rows": 109298,
+          "subjects": 6849
+        }
+      }
+    },
+    "random_patient_splits": {
+      "runs": [
+        {
+          "discovery_groups": 13023,
+          "group_column": "subject_id",
+          "heldout_groups": 6415,
+          "overlap": 0,
+          "passed_count": 5,
+          "passed_targets": [
+            "o2sat",
+            "respiratory_rate",
+            "heart_rate",
+            "map",
+            "bicarbonate"
+          ],
+          "seed": 7,
+          "targets": {
+            "bicarbonate": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.036922,
+                  -0.011808
+                ],
+                "point_delta": -0.024853,
+                "significant": true,
+                "subjects": 2937
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.039177,
+                  -0.012139
+                ],
+                "point_delta": -0.026564,
+                "significant": true,
+                "subjects": 2937
+              },
+              "mae": {
+                "baseline_ridge": 2.170039,
+                "placebo_belief_ridge": 2.172321,
+                "respiratory_belief_ridge": 2.150722
+              },
+              "rows": 9880,
+              "subjects": 2937
+            },
+            "heart_rate": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.030748,
+                  -0.012576
+                ],
+                "point_delta": -0.021428,
+                "significant": true,
+                "subjects": 6375
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.034094,
+                  -0.01474
+                ],
+                "point_delta": -0.024208,
+                "significant": true,
+                "subjects": 6375
+              },
+              "mae": {
+                "baseline_ridge": 8.594786,
+                "placebo_belief_ridge": 8.596789,
+                "respiratory_belief_ridge": 8.575558
+              },
+              "rows": 101378,
+              "subjects": 6375
+            },
+            "map": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.020578,
+                  -0.005052
+                ],
+                "point_delta": -0.012857,
+                "significant": true,
+                "subjects": 6349
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.022097,
+                  -0.006678
+                ],
+                "point_delta": -0.014493,
+                "significant": true,
+                "subjects": 6349
+              },
+              "mae": {
+                "baseline_ridge": 10.410676,
+                "placebo_belief_ridge": 10.412094,
+                "respiratory_belief_ridge": 10.402075
+              },
+              "rows": 100136,
+              "subjects": 6349
+            },
+            "o2sat": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.14831,
+                  -0.11533
+                ],
+                "point_delta": -0.132723,
+                "significant": true,
+                "subjects": 6315
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.146901,
+                  -0.11803
+                ],
+                "point_delta": -0.133133,
+                "significant": true,
+                "subjects": 6315
+              },
+              "mae": {
+                "baseline_ridge": 2.991469,
+                "placebo_belief_ridge": 2.992084,
+                "respiratory_belief_ridge": 2.829967
+              },
+              "rows": 98310,
+              "subjects": 6315
+            },
+            "paco2": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.093422,
+                  0.030026
+                ],
+                "point_delta": -0.03186,
+                "significant": false,
+                "subjects": 1491
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.124179,
+                  0.00652
+                ],
+                "point_delta": -0.060307,
+                "significant": false,
+                "subjects": 1491
+              },
+              "mae": {
+                "baseline_ridge": 6.253845,
+                "placebo_belief_ridge": 6.277818,
+                "respiratory_belief_ridge": 6.197522
+              },
+              "rows": 4448,
+              "subjects": 1491
+            },
+            "ph": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.000595,
+                  0.000447
+                ],
+                "point_delta": -9.9e-05,
+                "significant": false,
+                "subjects": 1498
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.000729,
+                  0.000336
+                ],
+                "point_delta": -0.000213,
+                "significant": false,
+                "subjects": 1498
+              },
+              "mae": {
+                "baseline_ridge": 0.057969,
+                "placebo_belief_ridge": 0.058105,
+                "respiratory_belief_ridge": 0.057363
+              },
+              "rows": 4459,
+              "subjects": 1498
+            },
+            "respiratory_rate": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.217715,
+                  -0.17458
+                ],
+                "point_delta": -0.196379,
+                "significant": true,
+                "subjects": 5817
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.217377,
+                  -0.176169
+                ],
+                "point_delta": -0.196637,
+                "significant": true,
+                "subjects": 5817
+              },
+              "mae": {
+                "baseline_ridge": 3.987141,
+                "placebo_belief_ridge": 3.987521,
+                "respiratory_belief_ridge": 3.738819
+              },
+              "rows": 89135,
+              "subjects": 5817
+            }
+          }
+        },
+        {
+          "discovery_groups": 13023,
+          "group_column": "subject_id",
+          "heldout_groups": 6415,
+          "overlap": 0,
+          "passed_count": 5,
+          "passed_targets": [
+            "o2sat",
+            "respiratory_rate",
+            "heart_rate",
+            "map",
+            "bicarbonate"
+          ],
+          "seed": 11,
+          "targets": {
+            "bicarbonate": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.029269,
+                  -0.001138
+                ],
+                "point_delta": -0.015289,
+                "significant": true,
+                "subjects": 3039
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.030187,
+                  -0.002399
+                ],
+                "point_delta": -0.017947,
+                "significant": true,
+                "subjects": 3039
+              },
+              "mae": {
+                "baseline_ridge": 2.176248,
+                "placebo_belief_ridge": 2.1787,
+                "respiratory_belief_ridge": 2.162143
+              },
+              "rows": 10625,
+              "subjects": 3039
+            },
+            "heart_rate": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.037013,
+                  -0.01754
+                ],
+                "point_delta": -0.027332,
+                "significant": true,
+                "subjects": 6372
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.039603,
+                  -0.018672
+                ],
+                "point_delta": -0.029618,
+                "significant": true,
+                "subjects": 6372
+              },
+              "mae": {
+                "baseline_ridge": 8.550262,
+                "placebo_belief_ridge": 8.552019,
+                "respiratory_belief_ridge": 8.530214
+              },
+              "rows": 101829,
+              "subjects": 6372
+            },
+            "map": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.01914,
+                  -0.002912
+                ],
+                "point_delta": -0.010846,
+                "significant": true,
+                "subjects": 6341
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.01843,
+                  -0.002189
+                ],
+                "point_delta": -0.010478,
+                "significant": true,
+                "subjects": 6341
+              },
+              "mae": {
+                "baseline_ridge": 10.500325,
+                "placebo_belief_ridge": 10.500752,
+                "respiratory_belief_ridge": 10.493148
+              },
+              "rows": 100652,
+              "subjects": 6341
+            },
+            "o2sat": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.14372,
+                  -0.11313
+                ],
+                "point_delta": -0.127103,
+                "significant": true,
+                "subjects": 6305
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.143315,
+                  -0.111975
+                ],
+                "point_delta": -0.128105,
+                "significant": true,
+                "subjects": 6305
+              },
+              "mae": {
+                "baseline_ridge": 2.993063,
+                "placebo_belief_ridge": 2.993987,
+                "respiratory_belief_ridge": 2.831056
+              },
+              "rows": 98795,
+              "subjects": 6305
+            },
+            "paco2": {
+              "candidate_vs_baseline": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  -0.045431,
+                  0.084865
+                ],
+                "point_delta": 0.018049,
+                "significant": false,
+                "subjects": 1592
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.107415,
+                  0.038566
+                ],
+                "point_delta": -0.034768,
+                "significant": false,
+                "subjects": 1592
+              },
+              "mae": {
+                "baseline_ridge": 6.051837,
+                "placebo_belief_ridge": 6.086451,
+                "respiratory_belief_ridge": 5.986638
+              },
+              "rows": 4648,
+              "subjects": 1592
+            },
+            "ph": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.000758,
+                  0.000159
+                ],
+                "point_delta": -0.00031,
+                "significant": false,
+                "subjects": 1591
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.001007,
+                  5.3e-05
+                ],
+                "point_delta": -0.000484,
+                "significant": false,
+                "subjects": 1591
+              },
+              "mae": {
+                "baseline_ridge": 0.055876,
+                "placebo_belief_ridge": 0.056137,
+                "respiratory_belief_ridge": 0.055427
+              },
+              "rows": 4677,
+              "subjects": 1591
+            },
+            "respiratory_rate": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.203386,
+                  -0.159223
+                ],
+                "point_delta": -0.181015,
+                "significant": true,
+                "subjects": 5846
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.199889,
+                  -0.158856
+                ],
+                "point_delta": -0.181579,
+                "significant": true,
+                "subjects": 5846
+              },
+              "mae": {
+                "baseline_ridge": 3.958351,
+                "placebo_belief_ridge": 3.958944,
+                "respiratory_belief_ridge": 3.716354
+              },
+              "rows": 89523,
+              "subjects": 5846
+            }
+          }
+        },
+        {
+          "discovery_groups": 13023,
+          "group_column": "subject_id",
+          "heldout_groups": 6415,
+          "overlap": 0,
+          "passed_count": 4,
+          "passed_targets": [
+            "o2sat",
+            "respiratory_rate",
+            "heart_rate",
+            "bicarbonate"
+          ],
+          "seed": 19,
+          "targets": {
+            "bicarbonate": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.027704,
+                  -0.000115
+                ],
+                "point_delta": -0.014674,
+                "significant": true,
+                "subjects": 3098
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.031248,
+                  -0.001878
+                ],
+                "point_delta": -0.017583,
+                "significant": true,
+                "subjects": 3098
+              },
+              "mae": {
+                "baseline_ridge": 2.161139,
+                "placebo_belief_ridge": 2.163117,
+                "respiratory_belief_ridge": 2.153028
+              },
+              "rows": 11095,
+              "subjects": 3098
+            },
+            "heart_rate": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.038634,
+                  -0.016599
+                ],
+                "point_delta": -0.027984,
+                "significant": true,
+                "subjects": 6379
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.037232,
+                  -0.018282
+                ],
+                "point_delta": -0.028175,
+                "significant": true,
+                "subjects": 6379
+              },
+              "mae": {
+                "baseline_ridge": 8.548601,
+                "placebo_belief_ridge": 8.549172,
+                "respiratory_belief_ridge": 8.526509
+              },
+              "rows": 102628,
+              "subjects": 6379
+            },
+            "map": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.012516,
+                  0.002553
+                ],
+                "point_delta": -0.00542,
+                "significant": false,
+                "subjects": 6323
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.017604,
+                  0.000954
+                ],
+                "point_delta": -0.008082,
+                "significant": false,
+                "subjects": 6323
+              },
+              "mae": {
+                "baseline_ridge": 10.409248,
+                "placebo_belief_ridge": 10.410608,
+                "respiratory_belief_ridge": 10.40474
+              },
+              "rows": 101374,
+              "subjects": 6323
+            },
+            "o2sat": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.164954,
+                  -0.133779
+                ],
+                "point_delta": -0.149179,
+                "significant": true,
+                "subjects": 6300
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.16426,
+                  -0.133642
+                ],
+                "point_delta": -0.150019,
+                "significant": true,
+                "subjects": 6300
+              },
+              "mae": {
+                "baseline_ridge": 3.01849,
+                "placebo_belief_ridge": 3.019425,
+                "respiratory_belief_ridge": 2.848057
+              },
+              "rows": 99257,
+              "subjects": 6300
+            },
+            "paco2": {
+              "candidate_vs_baseline": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  -0.006767,
+                  0.111105
+                ],
+                "point_delta": 0.053782,
+                "significant": false,
+                "subjects": 1597
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  -0.040838,
+                  0.089676
+                ],
+                "point_delta": 0.028539,
+                "significant": false,
+                "subjects": 1597
+              },
+              "mae": {
+                "baseline_ridge": 5.951806,
+                "placebo_belief_ridge": 5.97503,
+                "respiratory_belief_ridge": 5.921008
+              },
+              "rows": 4880,
+              "subjects": 1597
+            },
+            "ph": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.00062,
+                  0.000323
+                ],
+                "point_delta": -0.000146,
+                "significant": false,
+                "subjects": 1595
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.000799,
+                  0.000218
+                ],
+                "point_delta": -0.000288,
+                "significant": false,
+                "subjects": 1595
+              },
+              "mae": {
+                "baseline_ridge": 0.056636,
+                "placebo_belief_ridge": 0.056771,
+                "respiratory_belief_ridge": 0.055985
+              },
+              "rows": 4882,
+              "subjects": 1595
+            },
+            "respiratory_rate": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.191558,
+                  -0.152733
+                ],
+                "point_delta": -0.172696,
+                "significant": true,
+                "subjects": 5854
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.193249,
+                  -0.155501
+                ],
+                "point_delta": -0.173478,
+                "significant": true,
+                "subjects": 5854
+              },
+              "mae": {
+                "baseline_ridge": 3.948201,
+                "placebo_belief_ridge": 3.948937,
+                "respiratory_belief_ridge": 3.707549
+              },
+              "rows": 90790,
+              "subjects": 5854
+            }
+          }
+        },
+        {
+          "discovery_groups": 13023,
+          "group_column": "subject_id",
+          "heldout_groups": 6415,
+          "overlap": 0,
+          "passed_count": 4,
+          "passed_targets": [
+            "o2sat",
+            "respiratory_rate",
+            "heart_rate",
+            "bicarbonate"
+          ],
+          "seed": 23,
+          "targets": {
+            "bicarbonate": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.038829,
+                  -0.009905
+                ],
+                "point_delta": -0.023749,
+                "significant": true,
+                "subjects": 3022
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.042749,
+                  -0.014897
+                ],
+                "point_delta": -0.028227,
+                "significant": true,
+                "subjects": 3022
+              },
+              "mae": {
+                "baseline_ridge": 2.155745,
+                "placebo_belief_ridge": 2.15886,
+                "respiratory_belief_ridge": 2.135099
+              },
+              "rows": 10238,
+              "subjects": 3022
+            },
+            "heart_rate": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.044539,
+                  -0.024913
+                ],
+                "point_delta": -0.034467,
+                "significant": true,
+                "subjects": 6378
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.044066,
+                  -0.025084
+                ],
+                "point_delta": -0.035084,
+                "significant": true,
+                "subjects": 6378
+              },
+              "mae": {
+                "baseline_ridge": 8.577941,
+                "placebo_belief_ridge": 8.578713,
+                "respiratory_belief_ridge": 8.551026
+              },
+              "rows": 101843,
+              "subjects": 6378
+            },
+            "map": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.012988,
+                  0.001635
+                ],
+                "point_delta": -0.005517,
+                "significant": false,
+                "subjects": 6347
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.016544,
+                  -0.000611
+                ],
+                "point_delta": -0.008903,
+                "significant": true,
+                "subjects": 6347
+              },
+              "mae": {
+                "baseline_ridge": 10.408712,
+                "placebo_belief_ridge": 10.409767,
+                "respiratory_belief_ridge": 10.404742
+              },
+              "rows": 100557,
+              "subjects": 6347
+            },
+            "o2sat": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.15077,
+                  -0.120461
+                ],
+                "point_delta": -0.135795,
+                "significant": true,
+                "subjects": 6293
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.151134,
+                  -0.120076
+                ],
+                "point_delta": -0.135704,
+                "significant": true,
+                "subjects": 6293
+              },
+              "mae": {
+                "baseline_ridge": 3.026113,
+                "placebo_belief_ridge": 3.026794,
+                "respiratory_belief_ridge": 2.85586
+              },
+              "rows": 98587,
+              "subjects": 6293
+            },
+            "paco2": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.070511,
+                  0.072761
+                ],
+                "point_delta": -0.003078,
+                "significant": false,
+                "subjects": 1526
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.09658,
+                  0.051182
+                ],
+                "point_delta": -0.018592,
+                "significant": false,
+                "subjects": 1526
+              },
+              "mae": {
+                "baseline_ridge": 6.165272,
+                "placebo_belief_ridge": 6.187644,
+                "respiratory_belief_ridge": 6.105326
+              },
+              "rows": 4353,
+              "subjects": 1526
+            },
+            "ph": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.000626,
+                  0.000351
+                ],
+                "point_delta": -0.000144,
+                "significant": false,
+                "subjects": 1523
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.00072,
+                  0.000312
+                ],
+                "point_delta": -0.000194,
+                "significant": false,
+                "subjects": 1523
+              },
+              "mae": {
+                "baseline_ridge": 0.057683,
+                "placebo_belief_ridge": 0.057822,
+                "respiratory_belief_ridge": 0.056917
+              },
+              "rows": 4342,
+              "subjects": 1523
+            },
+            "respiratory_rate": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.213093,
+                  -0.174447
+                ],
+                "point_delta": -0.194385,
+                "significant": true,
+                "subjects": 5848
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.213797,
+                  -0.174887
+                ],
+                "point_delta": -0.19448,
+                "significant": true,
+                "subjects": 5848
+              },
+              "mae": {
+                "baseline_ridge": 3.981426,
+                "placebo_belief_ridge": 3.981869,
+                "respiratory_belief_ridge": 3.732424
+              },
+              "rows": 90037,
+              "subjects": 5848
+            }
+          }
+        },
+        {
+          "discovery_groups": 13023,
+          "group_column": "subject_id",
+          "heldout_groups": 6415,
+          "overlap": 0,
+          "passed_count": 5,
+          "passed_targets": [
+            "o2sat",
+            "respiratory_rate",
+            "heart_rate",
+            "map",
+            "bicarbonate"
+          ],
+          "seed": 37,
+          "targets": {
+            "bicarbonate": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.038197,
+                  -0.010114
+                ],
+                "point_delta": -0.023028,
+                "significant": true,
+                "subjects": 2981
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.038462,
+                  -0.013189
+                ],
+                "point_delta": -0.025116,
+                "significant": true,
+                "subjects": 2981
+              },
+              "mae": {
+                "baseline_ridge": 2.163415,
+                "placebo_belief_ridge": 2.166426,
+                "respiratory_belief_ridge": 2.13822
+              },
+              "rows": 10303,
+              "subjects": 2981
+            },
+            "heart_rate": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.033193,
+                  -0.014077
+                ],
+                "point_delta": -0.023963,
+                "significant": true,
+                "subjects": 6372
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.033586,
+                  -0.013647
+                ],
+                "point_delta": -0.024201,
+                "significant": true,
+                "subjects": 6372
+              },
+              "mae": {
+                "baseline_ridge": 8.549909,
+                "placebo_belief_ridge": 8.550287,
+                "respiratory_belief_ridge": 8.527578
+              },
+              "rows": 101539,
+              "subjects": 6372
+            },
+            "map": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.020702,
+                  -0.003404
+                ],
+                "point_delta": -0.011937,
+                "significant": true,
+                "subjects": 6340
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.022754,
+                  -0.004498
+                ],
+                "point_delta": -0.013363,
+                "significant": true,
+                "subjects": 6340
+              },
+              "mae": {
+                "baseline_ridge": 10.37667,
+                "placebo_belief_ridge": 10.377915,
+                "respiratory_belief_ridge": 10.374429
+              },
+              "rows": 100308,
+              "subjects": 6340
+            },
+            "o2sat": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.145213,
+                  -0.111335
+                ],
+                "point_delta": -0.127899,
+                "significant": true,
+                "subjects": 6303
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.143557,
+                  -0.111287
+                ],
+                "point_delta": -0.128695,
+                "significant": true,
+                "subjects": 6303
+              },
+              "mae": {
+                "baseline_ridge": 2.99974,
+                "placebo_belief_ridge": 3.000547,
+                "respiratory_belief_ridge": 2.834629
+              },
+              "rows": 98393,
+              "subjects": 6303
+            },
+            "paco2": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.098294,
+                  0.020953
+                ],
+                "point_delta": -0.041446,
+                "significant": false,
+                "subjects": 1495
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.141952,
+                  -0.012266
+                ],
+                "point_delta": -0.075521,
+                "significant": true,
+                "subjects": 1495
+              },
+              "mae": {
+                "baseline_ridge": 6.134919,
+                "placebo_belief_ridge": 6.158471,
+                "respiratory_belief_ridge": 6.06261
+              },
+              "rows": 4337,
+              "subjects": 1495
+            },
+            "ph": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.000869,
+                  0.000109
+                ],
+                "point_delta": -0.000337,
+                "significant": false,
+                "subjects": 1494
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.00143,
+                  -0.000424
+                ],
+                "point_delta": -0.000947,
+                "significant": true,
+                "subjects": 1494
+              },
+              "mae": {
+                "baseline_ridge": 0.057411,
+                "placebo_belief_ridge": 0.057844,
+                "respiratory_belief_ridge": 0.056681
+              },
+              "rows": 4343,
+              "subjects": 1494
+            },
+            "respiratory_rate": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.206342,
+                  -0.169425
+                ],
+                "point_delta": -0.187853,
+                "significant": true,
+                "subjects": 5844
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.207818,
+                  -0.1696
+                ],
+                "point_delta": -0.188498,
+                "significant": true,
+                "subjects": 5844
+              },
+              "mae": {
+                "baseline_ridge": 3.966642,
+                "placebo_belief_ridge": 3.96691,
+                "respiratory_belief_ridge": 3.721515
+              },
+              "rows": 89132,
+              "subjects": 5844
+            }
+          }
+        },
+        {
+          "discovery_groups": 13023,
+          "group_column": "subject_id",
+          "heldout_groups": 6415,
+          "overlap": 0,
+          "passed_count": 5,
+          "passed_targets": [
+            "o2sat",
+            "respiratory_rate",
+            "heart_rate",
+            "map",
+            "bicarbonate"
+          ],
+          "seed": 53,
+          "targets": {
+            "bicarbonate": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.052381,
+                  -0.026988
+                ],
+                "point_delta": -0.040289,
+                "significant": true,
+                "subjects": 2992
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.05426,
+                  -0.028043
+                ],
+                "point_delta": -0.041166,
+                "significant": true,
+                "subjects": 2992
+              },
+              "mae": {
+                "baseline_ridge": 2.146911,
+                "placebo_belief_ridge": 2.148376,
+                "respiratory_belief_ridge": 2.113426
+              },
+              "rows": 10210,
+              "subjects": 2992
+            },
+            "heart_rate": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.032631,
+                  -0.012486
+                ],
+                "point_delta": -0.021347,
+                "significant": true,
+                "subjects": 6373
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.032508,
+                  -0.012025
+                ],
+                "point_delta": -0.022217,
+                "significant": true,
+                "subjects": 6373
+              },
+              "mae": {
+                "baseline_ridge": 8.486132,
+                "placebo_belief_ridge": 8.487851,
+                "respiratory_belief_ridge": 8.466717
+              },
+              "rows": 101382,
+              "subjects": 6373
+            },
+            "map": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.021903,
+                  -0.004039
+                ],
+                "point_delta": -0.012691,
+                "significant": true,
+                "subjects": 6342
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.023946,
+                  -0.006753
+                ],
+                "point_delta": -0.014608,
+                "significant": true,
+                "subjects": 6342
+              },
+              "mae": {
+                "baseline_ridge": 10.428804,
+                "placebo_belief_ridge": 10.4302,
+                "respiratory_belief_ridge": 10.420154
+              },
+              "rows": 100260,
+              "subjects": 6342
+            },
+            "o2sat": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.139562,
+                  -0.109679
+                ],
+                "point_delta": -0.124338,
+                "significant": true,
+                "subjects": 6297
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.139237,
+                  -0.108176
+                ],
+                "point_delta": -0.125066,
+                "significant": true,
+                "subjects": 6297
+              },
+              "mae": {
+                "baseline_ridge": 2.97654,
+                "placebo_belief_ridge": 2.977048,
+                "respiratory_belief_ridge": 2.818371
+              },
+              "rows": 98231,
+              "subjects": 6297
+            },
+            "paco2": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.10031,
+                  0.018872
+                ],
+                "point_delta": -0.040395,
+                "significant": false,
+                "subjects": 1531
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.113217,
+                  0.000773
+                ],
+                "point_delta": -0.056079,
+                "significant": false,
+                "subjects": 1531
+              },
+              "mae": {
+                "baseline_ridge": 6.312166,
+                "placebo_belief_ridge": 6.332857,
+                "respiratory_belief_ridge": 6.231325
+              },
+              "rows": 4328,
+              "subjects": 1531
+            },
+            "ph": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.000701,
+                  0.000218
+                ],
+                "point_delta": -0.000251,
+                "significant": false,
+                "subjects": 1529
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.00077,
+                  0.00034
+                ],
+                "point_delta": -0.000247,
+                "significant": false,
+                "subjects": 1529
+              },
+              "mae": {
+                "baseline_ridge": 0.059076,
+                "placebo_belief_ridge": 0.059166,
+                "respiratory_belief_ridge": 0.05859
+              },
+              "rows": 4317,
+              "subjects": 1529
+            },
+            "respiratory_rate": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.211709,
+                  -0.174022
+                ],
+                "point_delta": -0.193134,
+                "significant": true,
+                "subjects": 5811
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.212166,
+                  -0.173857
+                ],
+                "point_delta": -0.193375,
+                "significant": true,
+                "subjects": 5811
+              },
+              "mae": {
+                "baseline_ridge": 3.975579,
+                "placebo_belief_ridge": 3.97653,
+                "respiratory_belief_ridge": 3.729601
+              },
+              "rows": 88908,
+              "subjects": 5811
+            }
+          }
+        },
+        {
+          "discovery_groups": 13023,
+          "group_column": "subject_id",
+          "heldout_groups": 6415,
+          "overlap": 0,
+          "passed_count": 5,
+          "passed_targets": [
+            "o2sat",
+            "respiratory_rate",
+            "heart_rate",
+            "map",
+            "bicarbonate"
+          ],
+          "seed": 71,
+          "targets": {
+            "bicarbonate": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.048765,
+                  -0.023934
+                ],
+                "point_delta": -0.036075,
+                "significant": true,
+                "subjects": 3032
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.050599,
+                  -0.022554
+                ],
+                "point_delta": -0.036192,
+                "significant": true,
+                "subjects": 3032
+              },
+              "mae": {
+                "baseline_ridge": 2.149087,
+                "placebo_belief_ridge": 2.150152,
+                "respiratory_belief_ridge": 2.12201
+              },
+              "rows": 10735,
+              "subjects": 3032
+            },
+            "heart_rate": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.029512,
+                  -0.010179
+                ],
+                "point_delta": -0.01971,
+                "significant": true,
+                "subjects": 6382
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.030862,
+                  -0.009669
+                ],
+                "point_delta": -0.020062,
+                "significant": true,
+                "subjects": 6382
+              },
+              "mae": {
+                "baseline_ridge": 8.611983,
+                "placebo_belief_ridge": 8.612639,
+                "respiratory_belief_ridge": 8.592538
+              },
+              "rows": 102952,
+              "subjects": 6382
+            },
+            "map": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.018419,
+                  -0.002725
+                ],
+                "point_delta": -0.010996,
+                "significant": true,
+                "subjects": 6344
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.019152,
+                  -0.003645
+                ],
+                "point_delta": -0.011821,
+                "significant": true,
+                "subjects": 6344
+              },
+              "mae": {
+                "baseline_ridge": 10.511708,
+                "placebo_belief_ridge": 10.512513,
+                "respiratory_belief_ridge": 10.504889
+              },
+              "rows": 101748,
+              "subjects": 6344
+            },
+            "o2sat": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.157291,
+                  -0.123775
+                ],
+                "point_delta": -0.141199,
+                "significant": true,
+                "subjects": 6298
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.157047,
+                  -0.126844
+                ],
+                "point_delta": -0.141555,
+                "significant": true,
+                "subjects": 6298
+              },
+              "mae": {
+                "baseline_ridge": 3.006903,
+                "placebo_belief_ridge": 3.007421,
+                "respiratory_belief_ridge": 2.837792
+              },
+              "rows": 99760,
+              "subjects": 6298
+            },
+            "paco2": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.080181,
+                  0.034701
+                ],
+                "point_delta": -0.020118,
+                "significant": false,
+                "subjects": 1565
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.104522,
+                  0.025845
+                ],
+                "point_delta": -0.037053,
+                "significant": false,
+                "subjects": 1565
+              },
+              "mae": {
+                "baseline_ridge": 6.166428,
+                "placebo_belief_ridge": 6.186937,
+                "respiratory_belief_ridge": 6.094594
+              },
+              "rows": 4673,
+              "subjects": 1565
+            },
+            "ph": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.000876,
+                  0.00012
+                ],
+                "point_delta": -0.000382,
+                "significant": false,
+                "subjects": 1564
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.001265,
+                  -7.8e-05
+                ],
+                "point_delta": -0.00066,
+                "significant": true,
+                "subjects": 1564
+              },
+              "mae": {
+                "baseline_ridge": 0.058327,
+                "placebo_belief_ridge": 0.058648,
+                "respiratory_belief_ridge": 0.057651
+              },
+              "rows": 4680,
+              "subjects": 1564
+            },
+            "respiratory_rate": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.211318,
+                  -0.170924
+                ],
+                "point_delta": -0.192376,
+                "significant": true,
+                "subjects": 5862
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.210837,
+                  -0.175191
+                ],
+                "point_delta": -0.192345,
+                "significant": true,
+                "subjects": 5862
+              },
+              "mae": {
+                "baseline_ridge": 3.993863,
+                "placebo_belief_ridge": 3.994118,
+                "respiratory_belief_ridge": 3.748834
+              },
+              "rows": 91188,
+              "subjects": 5862
+            }
+          }
+        }
+      ],
+      "seeds": [
+        7,
+        11,
+        19,
+        23,
+        37,
+        53,
+        71
+      ],
+      "summary": {
+        "bicarbonate": {
+          "candidate_beats_baseline_significant_count": 7,
+          "candidate_beats_placebo_significant_count": 7,
+          "candidate_passes_both_count": 7,
+          "median_delta_vs_baseline": -0.023749,
+          "median_delta_vs_placebo": -0.026564
+        },
+        "heart_rate": {
+          "candidate_beats_baseline_significant_count": 7,
+          "candidate_beats_placebo_significant_count": 7,
+          "candidate_passes_both_count": 7,
+          "median_delta_vs_baseline": -0.023963,
+          "median_delta_vs_placebo": -0.024208
+        },
+        "map": {
+          "candidate_beats_baseline_significant_count": 5,
+          "candidate_beats_placebo_significant_count": 6,
+          "candidate_passes_both_count": 5,
+          "median_delta_vs_baseline": -0.010996,
+          "median_delta_vs_placebo": -0.011821
+        },
+        "o2sat": {
+          "candidate_beats_baseline_significant_count": 7,
+          "candidate_beats_placebo_significant_count": 7,
+          "candidate_passes_both_count": 7,
+          "median_delta_vs_baseline": -0.132723,
+          "median_delta_vs_placebo": -0.133133
+        },
+        "paco2": {
+          "candidate_beats_baseline_significant_count": 0,
+          "candidate_beats_placebo_significant_count": 1,
+          "candidate_passes_both_count": 0,
+          "median_delta_vs_baseline": -0.020118,
+          "median_delta_vs_placebo": -0.037053
+        },
+        "ph": {
+          "candidate_beats_baseline_significant_count": 0,
+          "candidate_beats_placebo_significant_count": 2,
+          "candidate_passes_both_count": 0,
+          "median_delta_vs_baseline": -0.000251,
+          "median_delta_vs_placebo": -0.000288
+        },
+        "respiratory_rate": {
+          "candidate_beats_baseline_significant_count": 7,
+          "candidate_beats_placebo_significant_count": 7,
+          "candidate_passes_both_count": 7,
+          "median_delta_vs_baseline": -0.192376,
+          "median_delta_vs_placebo": -0.192345
+        }
+      }
+    }
+  },
+  "belief": {
+    "columns": [
+      "resp_belief_oxygenation_mean",
+      "resp_belief_oxygenation_sd",
+      "resp_belief_oxygenation_innovation",
+      "resp_belief_oxygenation_confidence",
+      "resp_belief_ventilation_co2_mean",
+      "resp_belief_ventilation_co2_sd",
+      "resp_belief_ventilation_co2_innovation",
+      "resp_belief_ventilation_co2_confidence",
+      "resp_belief_acid_base_compensation_mean",
+      "resp_belief_acid_base_compensation_sd",
+      "resp_belief_acid_base_compensation_innovation",
+      "resp_belief_acid_base_compensation_confidence",
+      "resp_belief_o2sat_slope_per_hr",
+      "resp_belief_o2sat_innovation",
+      "resp_belief_respiratory_rate_slope_per_hr",
+      "resp_belief_respiratory_rate_innovation",
+      "resp_belief_paco2_slope_per_hr",
+      "resp_belief_paco2_innovation",
+      "resp_belief_ph_slope_per_hr",
+      "resp_belief_ph_innovation",
+      "resp_belief_bicarbonate_slope_per_hr",
+      "resp_belief_bicarbonate_innovation",
+      "resp_belief_minute_ventilation_slope_per_hr",
+      "resp_belief_minute_ventilation_innovation",
+      "resp_belief_hypoxemia_burden",
+      "resp_belief_tachypnea_burden",
+      "resp_belief_bradypnea_burden",
+      "resp_belief_co2_retention_burden",
+      "resp_belief_low_co2_burden",
+      "resp_belief_acidemia_burden",
+      "resp_belief_alkalemia_burden",
+      "resp_belief_fio2_support",
+      "resp_belief_peep_support",
+      "resp_belief_minute_ventilation_burden",
+      "resp_belief_ventilation_context",
+      "resp_belief_bronchodilator_context",
+      "resp_belief_steroid_context"
+    ],
+    "direct_hidden_state_accuracy_claim_allowed": false,
+    "name": "respiratory_gas_exchange_patient_specific_state",
+    "requires_capacity_matched_placebo": true,
+    "targets": [
+      "paco2",
+      "o2sat",
+      "respiratory_rate",
+      "heart_rate",
+      "map",
+      "bicarbonate",
+      "ph"
+    ]
+  },
+  "experiment": "eICU respiratory predict-update belief downstream observable audit",
+  "gate": {
+    "baseline": "ridge_realfit",
+    "candidate": "ridge_realfit_plus_respiratory_belief_features",
+    "pass_rule": "candidate must significantly beat both baseline and placebo on held-out patients",
+    "placebo": "ridge_realfit_plus_capacity_matched_noise_features"
+  },
+  "safety_boundary": {
+    "active_rule_promotion_allowed": false,
+    "causal_claim_allowed": false,
+    "checkpoint_promotion_allowed": false,
+    "clinical_claim_allowed": false,
+    "counterfactual_claim_allowed": false,
+    "direct_hidden_state_accuracy_claim_allowed": false,
+    "factual_observed_treatment_only": true,
+    "patient_ids_included_in_report": false,
+    "raw_rows_included": false
+  }
+}

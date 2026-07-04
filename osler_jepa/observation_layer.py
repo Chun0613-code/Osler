@@ -719,6 +719,46 @@ def whole_body_observation_capabilities() -> tuple[ObservationCapability, ...]:
             allowed_uses=("capability_reporting",),
         ),
         ObservationCapability(
+            name="respiratory_gas_exchange_belief_state",
+            status="validated",
+            scope="predict_update_belief_state",
+            systems=("respiratory", "gas_exchange", "acid_base"),
+            targets=(
+                "o2sat",
+                "respiratory_rate",
+                "heart_rate",
+                "bicarbonate",
+                "patient_specific_respiratory_gas_exchange_state",
+            ),
+            horizon_hours=(6,),
+            evidence=(
+                "RESPIRATORY_BELIEF_FINDINGS.md; full eICU respiratory "
+                "cohort validates predict-update belief for O2 saturation, "
+                "respiratory rate, heart rate, and bicarbonate across 7/7 "
+                "patient splits and hospital-heldout, beating baseline and "
+                "capacity-matched placebo; no direct hidden-state accuracy "
+                "claim"
+            ),
+        ),
+        ObservationCapability(
+            name="respiratory_belief_remaining_targets_candidate",
+            status="candidate_only",
+            scope="predict_update_belief_state",
+            systems=("respiratory", "gas_exchange", "acid_base"),
+            targets=(
+                "map_near_miss",
+                "paco2",
+                "ph",
+            ),
+            horizon_hours=(6,),
+            evidence=(
+                "RESPIRATORY_BELIEF_FINDINGS.md; MAP is a near-miss that "
+                "fails hospital-heldout, while PaCO2 and pH show partial "
+                "signal but fail the strict 7/7 patient-split gate"
+            ),
+            allowed_uses=("capability_reporting",),
+        ),
+        ObservationCapability(
             name="respiratory_acid_base_observed_coupling",
             status="candidate_only",
             scope="single_hop_body_coupling",
@@ -1166,6 +1206,9 @@ def whole_body_state_forecast_template() -> dict[str, object]:
             "ELECTROLYTE_BELIEF_FINDINGS.md",
             "eicu_electrolyte_belief_full_audit.json",
             "eicu_electrolyte_acid_base_full_transition_report.json",
+            "RESPIRATORY_BELIEF_FINDINGS.md",
+            "eicu_respiratory_belief_full_audit.json",
+            "eicu_respiratory_full_transition_report.json",
         ],
         "safety_boundary": {
             **observation_readiness()["safety_boundary"],
