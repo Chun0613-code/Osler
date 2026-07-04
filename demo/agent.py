@@ -26,6 +26,26 @@ import disease_world
 from patient_profile import PatientProfile
 
 
+def attach_jepa_shadow(canonical_indication: str, fields: Dict, result: Dict) -> Dict:
+    """Observe the final symbolic result without allowing JEPA to modify it."""
+    try:
+        from osler_jepa.shadow import observe_live_recommendation
+        return observe_live_recommendation(canonical_indication, fields, result)
+    except Exception as exc:
+        return {
+            "schema_version": "1.0.0",
+            "mode": "shadow",
+            "enabled": True,
+            "status": "error",
+            "reason": "shadow bridge failed closed",
+            "error": f"{type(exc).__name__}: {exc}",
+            "research_only": True,
+            "decision_authority": False,
+            "affects_live_recommendation": False,
+            "recommendation_integrity_verified": True,
+        }
+
+
 def _attach_rationale(result: Dict, drugs_pkpd: Dict) -> None:
     """Surface each drug's human-readable rationale (from drugs_pkpd.json) onto the
     candidate, so the UI can show WHY the mechanism, not just a filename."""
@@ -133,11 +153,19 @@ def analyze_stream(fields: Dict, drugs_pkpd: Dict, clinical: Dict,
             yield {"type": "step", "icon": "🌐", "title": "openFDA · no live labels",
                    "detail": "offline or no match; using bundled demo labels"}
 
+    jepa_shadow = attach_jepa_shadow(canon, fields, result)
+    if jepa_shadow.get("enabled"):
+        yield {
+            "type": "step", "icon": "JEPA",
+            "title": f"JEPA shadow · {jepa_shadow.get('status')}",
+            "detail": "read-only observation; symbolic ranking unchanged",
+        }
+
     graph = build_graph(result, disease_model, targets)
     yield {"type": "final", "bundle": {
         "indication": canon, "parser": parser_used, "fields": fields,
         "result": result, "disease_model": disease_model, "graph": graph,
-        "openfda_loaded": openfda_loaded}}
+        "openfda_loaded": openfda_loaded, "jepa_shadow": jepa_shadow}}
 
 
 def analyze(fields: Dict, drugs_pkpd: Dict, clinical: Dict,

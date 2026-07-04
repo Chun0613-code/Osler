@@ -1,0 +1,390 @@
+{
+  "action_evidence": {
+    "by_action": {
+      "antiarrhythmic": 3484,
+      "anticoagulant": 4380,
+      "antiplatelet": 2449,
+      "diuretics": 3127,
+      "fluids": 7980,
+      "vasopressor": 317,
+      "ventilation": 771
+    },
+    "dose_observed_fraction": 0.0,
+    "rows": 22508,
+    "sources": {
+      "eicu_medication": 21737,
+      "eicu_respiratorycare": 771
+    }
+  },
+  "action_support": {
+    "antiarrhythmic": {
+      "active_stays": 704,
+      "active_windows": 6607,
+      "dose_observed_windows": 0,
+      "stays": 736,
+      "windows": 6995
+    },
+    "anticoagulant": {
+      "active_stays": 781,
+      "active_windows": 6103,
+      "dose_observed_windows": 0,
+      "stays": 907,
+      "windows": 9736
+    },
+    "antiplatelet": {
+      "active_stays": 728,
+      "active_windows": 5632,
+      "dose_observed_windows": 0,
+      "stays": 813,
+      "windows": 8147
+    },
+    "diuretics": {
+      "active_stays": 581,
+      "active_windows": 3640,
+      "dose_observed_windows": 0,
+      "stays": 678,
+      "windows": 5748
+    },
+    "fluids": {
+      "active_stays": 939,
+      "active_windows": 8414,
+      "dose_observed_windows": 0,
+      "stays": 1066,
+      "windows": 13372
+    },
+    "inotrope": {
+      "active_stays": 0,
+      "active_windows": 0,
+      "dose_observed_windows": 0,
+      "stays": 0,
+      "windows": 0
+    },
+    "vasopressor": {
+      "active_stays": 195,
+      "active_windows": 2171,
+      "dose_observed_windows": 0,
+      "stays": 200,
+      "windows": 2222
+    },
+    "ventilation": {
+      "active_stays": 193,
+      "active_windows": 393,
+      "dose_observed_windows": 0,
+      "stays": 241,
+      "windows": 577
+    }
+  },
+  "active_transitions": 10824,
+  "body_system": "cardiac_myocardial",
+  "bounded_max_stays": 1500,
+  "candidate_stay_count_before_bound": 51285,
+  "criteria_counts_before_filter": {
+    "diagnosis_text_or_code:admissionDx.csv.gz": 553,
+    "diagnosis_text_or_code:diagnosis.csv.gz": 947
+  },
+  "data_root": "eicu-collaborative-research-database-2.0",
+  "dataset": "PhysioNet eICU Collaborative Research Database 2.0",
+  "disease": "cardiac_injury",
+  "display_name": "Cardiac injury / myocardial stress biomarkers",
+  "hospitals": 12,
+  "measurements": {
+    "by_var": {
+      "albumin": 4109,
+      "alkaline_phos": 4015,
+      "alt": 4001,
+      "amylase": 93,
+      "anion_gap": 10790,
+      "ast": 4014,
+      "bicarbonate": 16400,
+      "bilirubin": 4014,
+      "bilirubin_direct": 534,
+      "bnp": 1382,
+      "bun": 10766,
+      "calcium": 10774,
+      "chloride": 10863,
+      "ck_mb": 243,
+      "cortisol": 83,
+      "cpk": 469,
+      "creatinine": 10952,
+      "crp": 159,
+      "crp_hs": 5,
+      "esr": 139,
+      "ferritin": 128,
+      "fibrinogen": 385,
+      "free_t4": 76,
+      "glucose": 47184,
+      "heart_rate": 1449168,
+      "hematocrit": 11422,
+      "hemoglobin": 11214,
+      "inr": 4454,
+      "ionized_calcium": 103,
+      "lactate": 1097,
+      "ldh": 160,
+      "lipase": 340,
+      "magnesium": 5682,
+      "map": 630014,
+      "myoglobin": 24,
+      "o2sat": 1275235,
+      "ph": 5566,
+      "phosphate": 2447,
+      "platelets": 10481,
+      "potassium": 15336,
+      "prealbumin": 255,
+      "ptt": 4090,
+      "respiratory_rate": 1026570,
+      "serum_osmolality": 76,
+      "sodium": 11131,
+      "temperature": 267055,
+      "total_protein": 4029,
+      "triglycerides": 809,
+      "troponin_i": 2559,
+      "tsh": 480,
+      "uric_acid": 100,
+      "urine_output": 19071,
+      "wbc": 10231
+    },
+    "rows": 4910777,
+    "stays": 1500
+  },
+  "output": "eicu_cardiac_injury_transitions_6h.parquet",
+  "restricted_stay_count": null,
+  "restricted_stay_source": null,
+  "safety_boundary": {
+    "bounded_engineering_cohort": true,
+    "causal_claim_allowed": false,
+    "clinical_claim_allowed": false,
+    "coarse_treatment_rows_used_as_numeric_administrations": false,
+    "counterfactual_claim_allowed": false,
+    "factual_observed_treatment_only": true,
+    "medication_orders_used_as_numeric_administrations": false,
+    "patient_ids_included_in_report": false,
+    "raw_rows_included": false,
+    "restricted_stay_ids_used_internally": false
+  },
+  "schema": {
+    "action_channels": [
+      "vasopressor",
+      "inotrope",
+      "antiarrhythmic",
+      "anticoagulant",
+      "antiplatelet",
+      "diuretics",
+      "fluids",
+      "ventilation"
+    ],
+    "active_column": "cardiac_injury_active_t",
+    "anchor_step_hours": 4.0,
+    "config": {
+      "action_keys": [
+        "vasopressor",
+        "inotrope",
+        "antiarrhythmic",
+        "anticoagulant",
+        "antiplatelet",
+        "diuretics",
+        "fluids",
+        "ventilation"
+      ],
+      "action_terms": {
+        "antiarrhythmic": [
+          "amiodarone",
+          "lidocaine",
+          "procainamide",
+          "diltiazem",
+          "verapamil",
+          "metoprolol",
+          "esmolol"
+        ],
+        "anticoagulant": [
+          "heparin",
+          "enoxaparin",
+          "lovenox",
+          "warfarin",
+          "argatroban",
+          "bivalirudin"
+        ],
+        "antiplatelet": [
+          "aspirin",
+          "clopidogrel",
+          "plavix",
+          "ticagrelor",
+          "prasugrel"
+        ],
+        "diuretics": [
+          "furosemide",
+          "lasix",
+          "bumetanide",
+          "bumex",
+          "torsemide",
+          "chlorothiazide",
+          "metolazone",
+          "hydrochlorothiazide",
+          "hctz"
+        ],
+        "fluids": [
+          "normal saline",
+          "sodium chloride",
+          "nacl",
+          "lactated",
+          "ringer",
+          "crystalloid",
+          "fluid bolus",
+          "iv fluid",
+          "saline bolus"
+        ],
+        "inotrope": [
+          "dobutamine",
+          "milrinone",
+          "inamrinone",
+          "isoproterenol"
+        ],
+        "vasopressor": [
+          "norepinephrine",
+          "levophed",
+          "epinephrine",
+          "vasopressin",
+          "phenylephrine",
+          "neosynephrine",
+          "dopamine"
+        ],
+        "ventilation": [
+          "ventilator",
+          "mechanical ventilation",
+          "intub",
+          "ett",
+          "bipap",
+          "cpap"
+        ]
+      },
+      "active_actions": [
+        "hist_vasopressor",
+        "hist_inotrope",
+        "hist_antiarrhythmic"
+      ],
+      "active_high": {
+        "bnp": 500.0,
+        "ck_mb": 10.0,
+        "cpk": 1000.0,
+        "heart_rate": 120.0,
+        "lactate": 2.0,
+        "troponin_i": 0.1,
+        "troponin_t": 0.1
+      },
+      "active_low": {
+        "map": 65.0,
+        "o2sat": 92.0
+      },
+      "body_system": "cardiac_myocardial",
+      "diagnosis_patterns": [
+        "myocardial infarction",
+        "acute coronary",
+        "nstemi",
+        "stemi",
+        "troponin",
+        "myocarditis",
+        "cardiac injury",
+        "heart failure",
+        "cardiomyopathy",
+        "cardiac arrest",
+        "410",
+        "411",
+        "412",
+        "i21",
+        "i22",
+        "i50"
+      ],
+      "display_name": "Cardiac injury / myocardial stress biomarkers",
+      "name": "cardiac_injury",
+      "notes": [
+        "Separates myocardial biomarker forecasting from the broader hemodynamic cardiovascular module.",
+        "No ACS, anticoagulation, or catheterization treatment-effect claim is allowed."
+      ],
+      "state_vars": [
+        "troponin_i",
+        "troponin_t",
+        "bnp",
+        "ck_mb",
+        "ck_mb_index",
+        "cpk",
+        "ldh",
+        "map",
+        "heart_rate",
+        "lactate",
+        "potassium",
+        "sodium",
+        "bicarbonate",
+        "ph",
+        "creatinine",
+        "bun",
+        "o2sat",
+        "respiratory_rate"
+      ],
+      "targets": [
+        "troponin_i",
+        "troponin_t",
+        "bnp",
+        "ck_mb",
+        "ck_mb_index",
+        "cpk",
+        "map",
+        "heart_rate",
+        "lactate",
+        "potassium",
+        "creatinine"
+      ]
+    },
+    "future_suffix": "tp6",
+    "horizon_hours": 6.0,
+    "lookback_hours": 6.0,
+    "state_vars": [
+      "troponin_i",
+      "troponin_t",
+      "bnp",
+      "ck_mb",
+      "ck_mb_index",
+      "cpk",
+      "ldh",
+      "map",
+      "heart_rate",
+      "lactate",
+      "potassium",
+      "sodium",
+      "bicarbonate",
+      "ph",
+      "creatinine",
+      "bun",
+      "o2sat",
+      "respiratory_rate"
+    ],
+    "target_tolerance_hours": 2.0,
+    "targets": [
+      "troponin_i",
+      "troponin_t",
+      "bnp",
+      "ck_mb",
+      "ck_mb_index",
+      "cpk",
+      "map",
+      "heart_rate",
+      "lactate",
+      "potassium",
+      "creatinine"
+    ]
+  },
+  "stays": 1386,
+  "subjects": 1199,
+  "target_pair_counts": {
+    "bnp": 16,
+    "ck_mb": 33,
+    "ck_mb_index": 0,
+    "cpk": 35,
+    "creatinine": 761,
+    "heart_rate": 17092,
+    "lactate": 141,
+    "map": 16700,
+    "potassium": 2478,
+    "troponin_i": 688,
+    "troponin_t": 0
+  },
+  "transitions": 17231
+}

@@ -1,0 +1,162 @@
+{
+  "action_evidence": {
+    "by_action": {
+      "antibiotics": 24619,
+      "bronchodilator": 13168,
+      "fluids": 25569,
+      "systemic_steroid": 6416,
+      "vasopressor": 91851,
+      "ventilation": 35029
+    },
+    "dose_observed_fraction": 0.422116,
+    "rows": 196652,
+    "sources": {
+      "eicu_infusiondrug": 84325,
+      "eicu_medication": 34456,
+      "eicu_respiratorycare": 8958,
+      "eicu_respiratorycharting": 2598,
+      "eicu_treatment": 66315
+    }
+  },
+  "action_support": {
+    "antibiotics": {
+      "active_stays": 1907,
+      "active_windows": 8529,
+      "dose_observed_windows": 10,
+      "stays": 2304,
+      "windows": 16923
+    },
+    "bronchodilator": {
+      "active_stays": 2030,
+      "active_windows": 13573,
+      "dose_observed_windows": 0,
+      "stays": 2250,
+      "windows": 28913
+    },
+    "fluids": {
+      "active_stays": 2403,
+      "active_windows": 13663,
+      "dose_observed_windows": 66,
+      "stays": 2726,
+      "windows": 30186
+    },
+    "systemic_steroid": {
+      "active_stays": 901,
+      "active_windows": 5112,
+      "dose_observed_windows": 0,
+      "stays": 1043,
+      "windows": 10505
+    },
+    "vasopressor": {
+      "active_stays": 1021,
+      "active_windows": 6130,
+      "dose_observed_windows": 6310,
+      "stays": 1118,
+      "windows": 11143
+    },
+    "ventilation": {
+      "active_stays": 1287,
+      "active_windows": 4548,
+      "dose_observed_windows": 0,
+      "stays": 1410,
+      "windows": 6359
+    }
+  },
+  "active_respiratory_transitions": 26558,
+  "data_root": "eicu-collaborative-research-database-2.0",
+  "dataset": "PhysioNet eICU Collaborative Research Database 2.0",
+  "hospitals": 55,
+  "measurements": {
+    "by_var": {
+      "bicarbonate": 68558,
+      "bilirubin": 14397,
+      "bilirubin_direct": 2522,
+      "bun": 42503,
+      "creatinine": 42945,
+      "glucose": 183399,
+      "heart_rate": 7282179,
+      "lactate": 5473,
+      "map": 2786482,
+      "o2sat": 6603197,
+      "ph": 26260,
+      "platelets": 39238,
+      "potassium": 53515,
+      "respiratory_rate": 5689290,
+      "sodium": 45355,
+      "temperature": 877289,
+      "urine_output": 154325,
+      "wbc": 38923
+    },
+    "rows": 23955850,
+    "stays": 4998
+  },
+  "output": "eicu_respiratory_transitions_6h.parquet",
+  "respiratory_criteria_counts_before_filter": {
+    "diagnosis_and_objective_respiratory_evidence": 451,
+    "diagnosis_text_or_code:admissionDx.csv.gz": 144,
+    "diagnosis_text_or_code:diagnosis.csv.gz": 2206,
+    "objective_severe_hypoxemia_o2sat_le_60": 2199
+  },
+  "respiratory_like_stay_count_before_evaluable_filter": 5000,
+  "safety_boundary": {
+    "causal_claim_allowed": false,
+    "clinical_claim_allowed": false,
+    "coarse_treatment_rows_used_as_numeric_administrations": false,
+    "counterfactual_claim_allowed": false,
+    "factual_observed_treatment_only": true,
+    "medication_orders_used_as_numeric_administrations": false,
+    "patient_ids_included_in_report": false,
+    "raw_rows_included": false
+  },
+  "schema": {
+    "action_channels": [
+      "ventilation",
+      "bronchodilator",
+      "systemic_steroid",
+      "antibiotics",
+      "fluids",
+      "vasopressor"
+    ],
+    "anchor_step_hours": 4.0,
+    "future_suffix": "tp6",
+    "horizon_hours": 6.0,
+    "lookback_hours": 6.0,
+    "state_vars": [
+      "o2sat",
+      "respiratory_rate",
+      "heart_rate",
+      "map",
+      "temperature",
+      "wbc",
+      "lactate",
+      "bicarbonate",
+      "ph",
+      "creatinine",
+      "bun",
+      "sodium",
+      "potassium",
+      "glucose",
+      "urine_output"
+    ],
+    "target_tolerance_hours": 2.0,
+    "targets": [
+      "o2sat",
+      "respiratory_rate",
+      "heart_rate",
+      "map",
+      "bicarbonate",
+      "ph"
+    ]
+  },
+  "stays": 4170,
+  "subjects": 3618,
+  "target_pair_counts": {
+    "bicarbonate": 4847,
+    "heart_rate": 57453,
+    "map": 56549,
+    "o2sat": 54525,
+    "ph": 2337,
+    "respiratory_rate": 46379
+  },
+  "transitions": 57673
+}

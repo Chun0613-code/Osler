@@ -3,7 +3,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 import torch
+
+from dka_action_contract import ACTION_INDEX, INSULIN_KEYS
+from dka_world_model_contract import STATE_KEYS
+from osler_jepa.embodied_logic import parse_program
 
 
 @dataclass(frozen=True)
@@ -19,6 +24,9 @@ class TransitionRule:
     blocker_action_index: int | None = None
     blocker_action_indices: tuple[int, ...] = ()
     blocker_max: float = 0.05
+    min_hours: float = 0.0
+    max_hours: float = 24.0
+    confidence: float = 1.0
     rationale: str = ""
     provenance: str = "DKABody mechanistic equation"
 
@@ -27,7 +35,8 @@ class OslerTransitionValidator:
     def __init__(self, rules):
         self.rules = tuple(rules)
 
-    def consistency_loss(self, predicted_effect, action_exposure, valid_mask=None):
+    def consistency_loss(self, predicted_effect, action_exposure, valid_mask=None,
+                         horizon_hours=None):
         """Hinge penalty for effects that violate symbolic action directions.
 
         predicted_effect is normalized state difference versus no treatment.
@@ -44,6 +53,13 @@ class OslerTransitionValidator:
                 active = active & (
                     action_exposure[..., blocker_index] <= rule.blocker_max
                 )
+            if horizon_hours is not None:
+                hours = torch.as_tensor(
+                    horizon_hours,
+                    dtype=predicted_effect.dtype,
+                    device=predicted_effect.device,
+                )
+                active = active & (hours >= rule.min_hours) & (hours <= rule.max_hours)
             if valid_mask is not None:
                 active = active & valid_mask.bool()
             if not active.any():
@@ -51,16 +67,22 @@ class OslerTransitionValidator:
             effect = predicted_effect[..., rule.state_index]
             signed = effect * float(rule.expected_sign)
             margin = predicted_effect.new_tensor(rule.min_effect)
-            losses.append(torch.relu(margin - signed)[active].mean())
+            losses.append(
+                torch.relu(margin - signed)[active].mean() * rule.confidence
+            )
         return torch.stack(losses).mean() if losses else predicted_effect.new_tensor(0.0)
 
-    def validate(self, action, future, baseline_future) -> dict:
+    def validate(self, action, future, baseline_future, horizon_hours=None) -> dict:
         effect = {
             name: float(future[name]) - float(baseline_future[name])
             for name in future.keys() & baseline_future.keys()
         }
         checks = []
         for rule in self.rules:
+            if horizon_hours is not None and not (
+                rule.min_hours <= float(horizon_hours) <= rule.max_hours
+            ):
+                continue
             action_value = float(action[rule.action_index])
             if action_value <= rule.min_action:
                 continue
@@ -83,6 +105,8 @@ class OslerTransitionValidator:
                 "expected": "increase" if rule.expected_sign > 0 else "decrease",
                 "observed_effect": round(value, 6),
                 "status": "verified" if verified else "contradicted",
+                "expected_window_hours": [rule.min_hours, rule.max_hours],
+                "confidence": round(rule.confidence, 6),
                 "rationale": rule.rationale,
                 "provenance": rule.provenance,
             })
@@ -95,35 +119,73 @@ class OslerTransitionValidator:
         return {"status": status, "checks": checks, "effect": effect}
 
 
-OSLER_DKA_VALIDATOR = OslerTransitionValidator((
-    TransitionRule("iv_insulin_lowers_glucose", 0, "insulin_iv", 0, "G", -1,
-                   blocker_action_index=7, min_effect=0.001,
-                   rationale="Insulin increases glucose uptake and suppresses hepatic output."),
-    TransitionRule("rapid_sc_insulin_lowers_glucose", 1, "insulin_rapid_sc", 0, "G", -1,
-                   blocker_action_index=7, min_effect=0.0001,
-                   rationale="Rapid subcutaneous insulin is absorbed from a depot and lowers glucose."),
-    TransitionRule("iv_insulin_lowers_potassium_without_kcl", 0, "insulin_iv", 4, "Ke", -1,
-                   blocker_action_index=5, min_effect=0.0005,
-                   rationale="Insulin shifts extracellular potassium into cells."),
-    TransitionRule("fluids_raise_map", 4, "fluids", 5, "MAP", 1,
-                   min_effect=0.0005,
-                   rationale="Volume expansion raises effective circulating volume and MAP."),
-    TransitionRule("fluids_raise_volume", 4, "fluids", 6, "V", 1,
-                   min_effect=0.0005,
-                   rationale="Administered crystalloid increases extracellular volume."),
-    TransitionRule("kcl_raises_potassium_without_iv_insulin", 5, "kcl", 4, "Ke", 1,
-                   blocker_action_indices=(0, 1, 2, 3), min_effect=0.0005,
-                   rationale="Potassium chloride replaces extracellular and total-body potassium."),
-    TransitionRule("kcl_raises_total_body_store", 5, "kcl", 13, "K_store", 1,
-                   min_effect=0.0005,
-                   rationale="Potassium replacement replenishes the latent total-body reserve."),
-    TransitionRule("bicarbonate_raises_hco3", 6, "bicarbonate", 2, "HCO3", 1,
-                   min_effect=0.0005,
-                   rationale="Administered bicarbonate directly increases bicarbonate availability."),
-    TransitionRule("bicarbonate_raises_ph", 6, "bicarbonate", 1, "pH", 1,
-                   min_effect=0.0001,
-                   rationale="Higher bicarbonate raises pH under the simulator acid-base relation."),
-    TransitionRule("dextrose_raises_glucose_without_iv_insulin", 7, "dextrose", 0, "G", 1,
-                   blocker_action_indices=(0, 1, 2, 3), min_effect=0.0005,
-                   rationale="Administered dextrose supplies exogenous glucose."),
-))
+CONSTRAINT_SCALE = 1_000_000.0
+DEFAULT_RULE_PATH = (
+    Path(__file__).resolve().parents[1] / "rules" / "active" / "dka_embodied.pl"
+)
+
+
+def compile_transition_rules(rule_path=DEFAULT_RULE_PATH):
+    """Compile differentiable effect constraints from the active Prolog file."""
+    path = Path(rule_path)
+    clauses = parse_program(path.read_text(encoding="utf-8"))
+    expected = {
+        clause.head.arguments[3]: clause
+        for clause in clauses
+        if clause.head.predicate == "expected" and len(clause.head.arguments) == 4
+    }
+    declarations = {
+        clause.head.arguments[0]: clause.head.arguments[1:]
+        for clause in clauses
+        if clause.head.predicate == "training_constraint"
+        and len(clause.head.arguments) == 3
+    }
+    temporal = {
+        clause.head.arguments[0]: clause.head.arguments[1:]
+        for clause in clauses
+        if clause.head.predicate == "temporal_constraint"
+        and len(clause.head.arguments) == 4
+    }
+    state_lookup = {name.lower(): (index, name) for index, name in enumerate(STATE_KEYS)}
+    rules = []
+    for rule_id, thresholds in declarations.items():
+        if rule_id not in expected:
+            raise ValueError(f"Training constraint has no expected/4 rule: {rule_id}")
+        if rule_id not in temporal:
+            raise ValueError(f"Training constraint has no temporal metadata: {rule_id}")
+        clause = expected[rule_id]
+        action_name, state_atom, direction, _ = clause.head.arguments
+        if action_name not in ACTION_INDEX:
+            raise ValueError(f"Unknown action in active Prolog rule: {action_name}")
+        if state_atom not in state_lookup:
+            raise ValueError(f"Unknown state in active Prolog rule: {state_atom}")
+        blockers = []
+        for literal in clause.body:
+            if not literal.negated:
+                continue
+            if literal.atom.predicate == "requested" and literal.atom.arguments:
+                blockers.append(ACTION_INDEX[literal.atom.arguments[0]])
+            elif literal.atom.predicate == "insulin_requested":
+                blockers.extend(ACTION_INDEX[name] for name in INSULIN_KEYS)
+        state_index, state_name = state_lookup[state_atom]
+        min_minutes, max_minutes, confidence_ppm = temporal[rule_id]
+        rules.append(TransitionRule(
+            rule_id=rule_id,
+            action_index=ACTION_INDEX[action_name],
+            action_name=action_name,
+            state_index=state_index,
+            state_name=state_name,
+            expected_sign=1 if direction == "increase" else -1,
+            min_action=float(thresholds[0]) / CONSTRAINT_SCALE,
+            min_effect=float(thresholds[1]) / CONSTRAINT_SCALE,
+            blocker_action_indices=tuple(sorted(set(blockers))),
+            min_hours=float(min_minutes) / 60.0,
+            max_hours=float(max_minutes) / 60.0,
+            confidence=float(confidence_ppm) / CONSTRAINT_SCALE,
+            rationale=f"Compiled from active Prolog expected/4 rule {rule_id}.",
+            provenance=str(path),
+        ))
+    return tuple(rules)
+
+
+OSLER_DKA_VALIDATOR = OslerTransitionValidator(compile_transition_rules())

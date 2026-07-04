@@ -1,0 +1,360 @@
+{
+  "action_evidence": {
+    "by_action": {
+      "bicarbonate": 241,
+      "calcium_repletion": 1070,
+      "diuretics": 2977,
+      "fluids": 9364,
+      "potassium_repletion": 6657,
+      "renal_replacement": 65,
+      "vasopressor": 1307
+    },
+    "dose_observed_fraction": 0.045524,
+    "rows": 21681,
+    "sources": {
+      "eicu_infusiondrug": 1058,
+      "eicu_medication": 18754,
+      "eicu_treatment": 1869
+    }
+  },
+  "action_support": {
+    "bicarbonate": {
+      "active_stays": 75,
+      "active_windows": 490,
+      "dose_observed_windows": 0,
+      "stays": 76,
+      "windows": 519
+    },
+    "calcium_repletion": {
+      "active_stays": 503,
+      "active_windows": 5367,
+      "dose_observed_windows": 0,
+      "stays": 557,
+      "windows": 6058
+    },
+    "diuretics": {
+      "active_stays": 509,
+      "active_windows": 3877,
+      "dose_observed_windows": 5,
+      "stays": 570,
+      "windows": 4592
+    },
+    "fluids": {
+      "active_stays": 1130,
+      "active_windows": 12793,
+      "dose_observed_windows": 34,
+      "stays": 1146,
+      "windows": 13068
+    },
+    "potassium_repletion": {
+      "active_stays": 785,
+      "active_windows": 8419,
+      "dose_observed_windows": 21,
+      "stays": 857,
+      "windows": 9549
+    },
+    "renal_replacement": {
+      "active_stays": 7,
+      "active_windows": 33,
+      "dose_observed_windows": 0,
+      "stays": 7,
+      "windows": 34
+    },
+    "vasopressor": {
+      "active_stays": 152,
+      "active_windows": 1392,
+      "dose_observed_windows": 297,
+      "stays": 155,
+      "windows": 1617
+    }
+  },
+  "active_transitions": 13751,
+  "body_system": "musculoskeletal",
+  "bounded_max_stays": 1500,
+  "candidate_stay_count_before_bound": 18181,
+  "criteria_counts_before_filter": {
+    "diagnosis_text_or_code:admissionDx.csv.gz": 550,
+    "diagnosis_text_or_code:diagnosis.csv.gz": 950
+  },
+  "data_root": "eicu-collaborative-research-database-2.0",
+  "dataset": "PhysioNet eICU Collaborative Research Database 2.0",
+  "disease": "musculoskeletal_rhabdo",
+  "display_name": "Musculoskeletal injury / rhabdomyolysis",
+  "hospitals": 22,
+  "measurements": {
+    "by_var": {
+      "albumin": 4020,
+      "alkaline_phos": 3645,
+      "alt": 3649,
+      "amylase": 124,
+      "anion_gap": 10825,
+      "ast": 3654,
+      "bicarbonate": 16005,
+      "bilirubin": 3640,
+      "bilirubin_direct": 348,
+      "bnp": 925,
+      "bun": 10920,
+      "calcium": 10926,
+      "chloride": 11036,
+      "ck_mb": 223,
+      "ck_mb_index": 103,
+      "cortisol": 66,
+      "cpk": 638,
+      "creatinine": 11120,
+      "crp": 147,
+      "crp_hs": 5,
+      "esr": 104,
+      "ferritin": 118,
+      "fibrinogen": 424,
+      "free_t4": 98,
+      "glucose": 46688,
+      "heart_rate": 1439866,
+      "hematocrit": 11787,
+      "hemoglobin": 11732,
+      "inr": 4953,
+      "ionized_calcium": 99,
+      "lactate": 867,
+      "ldh": 150,
+      "lipase": 297,
+      "magnesium": 4858,
+      "map": 632054,
+      "myoglobin": 9,
+      "o2sat": 1282078,
+      "ph": 5003,
+      "phosphate": 2570,
+      "platelets": 10362,
+      "potassium": 15392,
+      "prealbumin": 278,
+      "ptt": 3542,
+      "respiratory_rate": 1129477,
+      "serum_osmolality": 418,
+      "sodium": 12034,
+      "temperature": 210341,
+      "total_protein": 3641,
+      "triglycerides": 508,
+      "troponin_i": 1177,
+      "troponin_t": 160,
+      "tsh": 391,
+      "uric_acid": 75,
+      "urine_output": 23825,
+      "wbc": 10220
+    },
+    "rows": 4957615,
+    "stays": 1499
+  },
+  "output": "eicu_musculoskeletal_rhabdo_transitions_6h.parquet",
+  "restricted_stay_count": null,
+  "restricted_stay_source": null,
+  "safety_boundary": {
+    "bounded_engineering_cohort": true,
+    "causal_claim_allowed": false,
+    "clinical_claim_allowed": false,
+    "coarse_treatment_rows_used_as_numeric_administrations": false,
+    "counterfactual_claim_allowed": false,
+    "factual_observed_treatment_only": true,
+    "medication_orders_used_as_numeric_administrations": false,
+    "patient_ids_included_in_report": false,
+    "raw_rows_included": false,
+    "restricted_stay_ids_used_internally": false
+  },
+  "schema": {
+    "action_channels": [
+      "fluids",
+      "bicarbonate",
+      "renal_replacement",
+      "diuretics",
+      "calcium_repletion",
+      "potassium_repletion",
+      "vasopressor"
+    ],
+    "active_column": "musculoskeletal_rhabdo_active_t",
+    "anchor_step_hours": 4.0,
+    "config": {
+      "action_keys": [
+        "fluids",
+        "bicarbonate",
+        "renal_replacement",
+        "diuretics",
+        "calcium_repletion",
+        "potassium_repletion",
+        "vasopressor"
+      ],
+      "action_terms": {
+        "bicarbonate": [
+          "sodium bicarbonate",
+          "bicarbonate",
+          "bicarb"
+        ],
+        "calcium_repletion": [
+          "calcium chloride",
+          "calcium gluconate",
+          "calcium"
+        ],
+        "diuretics": [
+          "furosemide",
+          "lasix",
+          "bumetanide",
+          "bumex",
+          "torsemide",
+          "chlorothiazide",
+          "metolazone",
+          "hydrochlorothiazide",
+          "hctz"
+        ],
+        "fluids": [
+          "normal saline",
+          "sodium chloride",
+          "nacl",
+          "lactated",
+          "ringer",
+          "crystalloid",
+          "fluid bolus",
+          "iv fluid",
+          "saline bolus"
+        ],
+        "potassium_repletion": [
+          "potassium chloride",
+          "kcl",
+          "potassium"
+        ],
+        "renal_replacement": [
+          "dialysis",
+          "crrt",
+          "cvvh",
+          "cvvhd",
+          "hemofiltration",
+          "renal replacement"
+        ],
+        "vasopressor": [
+          "norepinephrine",
+          "levophed",
+          "epinephrine",
+          "vasopressin",
+          "phenylephrine",
+          "neosynephrine",
+          "dopamine"
+        ]
+      },
+      "active_actions": [
+        "hist_fluids",
+        "hist_renal_replacement"
+      ],
+      "active_high": {
+        "cpk": 1000.0,
+        "creatinine": 2.0,
+        "ldh": 500.0,
+        "myoglobin": 500.0,
+        "phosphate": 5.0,
+        "potassium": 5.5
+      },
+      "active_low": {
+        "bicarbonate": 18.0,
+        "calcium": 7.5,
+        "map": 65.0,
+        "urine_output": 30.0
+      },
+      "body_system": "musculoskeletal",
+      "diagnosis_patterns": [
+        "rhabdomyolysis",
+        "rhabdo",
+        "crush",
+        "compartment syndrome",
+        "muscle injury",
+        "myopathy",
+        "trauma",
+        "burn",
+        "728.88",
+        "m62",
+        "t79.6"
+      ],
+      "display_name": "Musculoskeletal injury / rhabdomyolysis",
+      "name": "musculoskeletal_rhabdo",
+      "notes": [
+        "Muscle injury coverage uses CPK/myoglobin/LDH and renal/electrolyte downstream targets.",
+        "No fluid or bicarbonate treatment-effect claim is allowed."
+      ],
+      "state_vars": [
+        "cpk",
+        "myoglobin",
+        "ldh",
+        "potassium",
+        "creatinine",
+        "bun",
+        "phosphate",
+        "calcium",
+        "ionized_calcium",
+        "bicarbonate",
+        "ph",
+        "urine_output",
+        "map",
+        "lactate",
+        "sodium",
+        "chloride"
+      ],
+      "targets": [
+        "cpk",
+        "myoglobin",
+        "ldh",
+        "potassium",
+        "creatinine",
+        "bun",
+        "phosphate",
+        "calcium",
+        "bicarbonate",
+        "urine_output",
+        "map"
+      ]
+    },
+    "future_suffix": "tp6",
+    "horizon_hours": 6.0,
+    "lookback_hours": 6.0,
+    "state_vars": [
+      "cpk",
+      "myoglobin",
+      "ldh",
+      "potassium",
+      "creatinine",
+      "bun",
+      "phosphate",
+      "calcium",
+      "ionized_calcium",
+      "bicarbonate",
+      "ph",
+      "urine_output",
+      "map",
+      "lactate",
+      "sodium",
+      "chloride"
+    ],
+    "target_tolerance_hours": 2.0,
+    "targets": [
+      "cpk",
+      "myoglobin",
+      "ldh",
+      "potassium",
+      "creatinine",
+      "bun",
+      "phosphate",
+      "calcium",
+      "bicarbonate",
+      "urine_output",
+      "map"
+    ]
+  },
+  "stays": 1397,
+  "subjects": 1205,
+  "target_pair_counts": {
+    "bicarbonate": 1621,
+    "bun": 560,
+    "calcium": 562,
+    "cpk": 60,
+    "creatinine": 566,
+    "ldh": 5,
+    "map": 16603,
+    "myoglobin": 0,
+    "phosphate": 116,
+    "potassium": 2063,
+    "urine_output": 3336
+  },
+  "transitions": 16837
+}

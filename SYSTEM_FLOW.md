@@ -36,6 +36,40 @@ tools, but every clinical decision still comes from the symbolic functions.
 
 ## Numerical JEPA-to-Osler Path
 
+The control loop is now explicitly neuro-symbolic and embodied: patient state is
+the environment observation, an intervention is the action, JEPA predicts the
+continuous future state, and `rules/active/dka_embodied.pl` decides whether the
+action is allowed, blocked, or requires a co-intervention. The grounded Prolog
+engine returns a proof tree for every conclusion and checks JEPA's predicted
+effect direction. `osler_jepa/validator.py` compiles the differentiable training
+constraints directly from the human-owned Prolog rule pack.
+
+Before state encoding, `observation_context()` creates a 15-variable value vector,
+observed mask, and measurement-age vector. Missing normalized values are imputed
+at the population mean but cannot masquerade as measurements because the mask and
+age are supplied to the zero-compatible observation encoder. JEPA rollouts consume
+the actual interval of each action event and accumulate elapsed time. During
+runtime, `PotassiumStoreBelief` predicts the hidden reserve from KCl exposure and
+estimated renal loss, then updates it with the serum/pH proxy and JEPA estimate.
+Osler and Prolog consume the posterior belief and its provenance, not a fabricated
+laboratory value.
+
+The treatment stream contains both continuous dose/rate channels and explicit
+start/stop lifecycle channels. MIMIC intervals are converted into aggregate
+events that handle carried-in infusions and overlapping administrations without
+creating false stops. The event encoder is zero-compatible with older checkpoints.
+
+Active effect rules also carry temporal windows and confidence in
+`temporal_constraint/4`. The same metadata controls differentiable loss,
+symbolic proof supervision, runtime validation, and deferred checks outside the
+effect window.
+
+Simulator terminal events use reversible critical burdens for pH, potassium,
+MAP, and glucose. Protocol mortality and response quantiles are emitted as
+calibration diagnostics. `dka_causal_evaluation.py` is a separate EHR audit path:
+it performs grouped AIPW and matched-control analyses but cannot promote rules or
+authorize causal intervention claims.
+
 1. `dka_body.py` defines the continuous physiological state and transition rules.
    Each simulated patient has sampled body size, renal reserve, insulin response,
    stress drive, fluid response, vascular tone, potassium store, and endogenous
@@ -110,7 +144,24 @@ tools, but every clinical decision still comes from the symbolic functions.
 26. The rebuilt MIMIC-IV demo has 12 DKA stays and 187 transitions. It confirms
     exact route-aware extraction works. V4 beats persistence for active-DKA anion
     gap and MAP, but not glucose or the remaining targets. DKABody replay still
-    produces 12/12 simulated deaths, so real-data fine-tuning remains blocked.
+   produces 12/12 simulated deaths, so real-data fine-tuning remains blocked.
+27. `osler_jepa/shadow.py` can attach the DKA JEPA to the completed live Osler
+   bundle in read-only shadow mode. It fingerprints protected recommendation
+   fields before and after inference, accepts only symbolic-approved candidates,
+   and fails closed on missing state, checkpoint, or inference errors. Shadow
+   output cannot rerank drugs, authorize a dose, bypass Prolog, or make a causal
+   claim. Enable it with `OSLER_JEPA_SHADOW=1`; optionally set
+   `OSLER_JEPA_CHECKPOINT`, `OSLER_JEPA_DEVICE`, and `OSLER_JEPA_SHADOW_LOG`.
+28. `osler_jepa/shadow_outcomes.py` closes the observational audit loop. A later
+   outcome is scored only when its elapsed time, mean action exposure, and exact
+   start/stop schedule match the forecast. It compares JEPA with persistence per measured state and
+   records changed-state direction accuracy. Reconciliations are review evidence
+   only: online learning, causal claims, and automatic rule promotion stay off.
+29. `osler_jepa/shadow_cohort.py` groups reconciliations by checkpoint digest and
+   candidate, averages repeated episodes within an HMAC-pseudonymized subject,
+   and bootstraps subjects rather than rows. Small cohorts, insufficient core-state
+   coverage, symbolic disagreement, or a confidence interval that crosses zero
+   fail the retrospective gate. Even a passing report cannot promote clinically.
 
 ## Highest-Value Improvements
 

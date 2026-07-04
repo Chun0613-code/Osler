@@ -1,0 +1,3797 @@
+{
+  "audit": "DKABody viability falsification from real replay trajectories",
+  "trajectory_source": "dka_maintenance_trajectories.jsonl",
+  "greybox_can_edit_these": [
+    "G",
+    "Ket",
+    "HCO3",
+    "Ke",
+    "Na",
+    "Cr"
+  ],
+  "death_drivers_are_hard_mechanisms": [
+    "volume_map",
+    "osmotic_injury",
+    "potassium_mass"
+  ],
+  "summary": {
+    "trajectory_count": 16,
+    "simulated_death_count": 11,
+    "falsified_death_count": 11,
+    "death_causes": {
+      "cumulative hyperosmolar injury": 6,
+      "hypokalemia (K<2.5)": 5
+    },
+    "hard_mechanism_subsystems": {
+      "osmotic_injury": 6,
+      "potassium_mass": 5
+    },
+    "first_threshold_crossing_counts": {
+      "hypokalemia (K<2.5)": 7,
+      "cumulative hyperosmolar injury": 4
+    },
+    "repair_backlog": {
+      "osmotic_injury": {
+        "death_count": 6,
+        "hard_mechanism_terms": [
+          "effective osmolality calculation",
+          "osmotic injury accumulation/recovery",
+          "hyperosmolar death threshold"
+        ],
+        "repair_hypotheses": [
+          "Separate instantaneous osmolality from injury burden and calibrate injury half-life.",
+          "Audit sodium/free-water balance before changing residual dynamics.",
+          "Use real-survived high-osmolality stays as negative death labels for the OI threshold."
+        ]
+      },
+      "potassium_mass": {
+        "death_count": 5,
+        "hard_mechanism_terms": [
+          "total-body potassium reserve",
+          "renal potassium loss",
+          "insulin/acidosis serum potassium shift",
+          "KCl retention into total store"
+        ],
+        "repair_hypotheses": [
+          "Trace serum K drop into insulin shift, renal K loss, and KCl replacement terms.",
+          "Add a patient-level potassium-store correction using survived hypokalemia replays as constraints.",
+          "Do not let grey-box residual directly write total-body K; repair the mass equation itself."
+        ]
+      }
+    }
+  },
+  "cases": [
+    {
+      "stay_id": 30932571,
+      "simulated_alive": false,
+      "simulated_death_cause": "cumulative hyperosmolar injury",
+      "simulated_death_time_hours": 21.267,
+      "hard_mechanism_subsystem": "osmotic_injury",
+      "hard_mechanism_terms": [
+        "effective osmolality calculation",
+        "osmotic injury accumulation/recovery",
+        "hyperosmolar death threshold"
+      ],
+      "falsified_by_observed_later_measurements": true,
+      "observed_hours_after_sim_death": 2.116,
+      "first_threshold_crossings": {
+        "hypokalemia (K<2.5)": {
+          "t": 21.0,
+          "excess": 0.03517,
+          "state": {
+            "t": 21.0,
+            "G": 773.65607,
+            "pH": 7.19547,
+            "HCO3": 6.80541,
+            "anion_gap": 48.35611,
+            "Ke": 2.46483,
+            "MAP": 56.87017,
+            "V": 6.71754,
+            "Na": 161.47691,
+            "osmolality": 365.93471,
+            "creatinine": 1.9089,
+            "urine_output": 598.80617,
+            "BHB": 27.26708,
+            "K_store": 79.37942,
+            "osmotic_injury": 10.96122,
+            "critical_burden": 0.05816
+          }
+        },
+        "cumulative hyperosmolar injury": {
+          "t": 21.267,
+          "excess": 0.05157,
+          "state": {
+            "t": 21.26667,
+            "G": 790.69102,
+            "pH": 7.18913,
+            "HCO3": 6.5852,
+            "anion_gap": 49.3345,
+            "Ke": 2.40577,
+            "MAP": 56.41658,
+            "V": 6.60415,
+            "Na": 161.87691,
+            "osmolality": 367.6811,
+            "creatinine": 1.92979,
+            "urine_output": 606.61888,
+            "BHB": 28.00087,
+            "K_store": 78.22671,
+            "osmotic_injury": 12.05157,
+            "critical_burden": 0.1869
+          }
+        }
+      },
+      "first_osmolar_risk": {
+        "t": 13.0,
+        "osmolality": 321.30529
+      },
+      "death_snapshot": {
+        "t": 21.26667,
+        "G": 790.69102,
+        "pH": 7.18913,
+        "HCO3": 6.5852,
+        "anion_gap": 49.3345,
+        "Ke": 2.40577,
+        "MAP": 56.41658,
+        "V": 6.60415,
+        "Na": 161.87691,
+        "osmolality": 367.6811,
+        "creatinine": 1.92979,
+        "urine_output": 606.61888,
+        "BHB": 28.00087,
+        "K_store": 78.22671,
+        "osmotic_injury": 12.05157,
+        "critical_burden": 0.1869
+      },
+      "predeath_curve_tail": [
+        {
+          "t": 19.0,
+          "state": {
+            "t": 19.0,
+            "G": 664.44903,
+            "pH": 7.23787,
+            "HCO3": 8.63308,
+            "anion_gap": 42.04978,
+            "Ke": 2.89556,
+            "MAP": 59.8871,
+            "V": 7.47178,
+            "Na": 158.47691,
+            "osmolality": 353.86765,
+            "creatinine": 1.79007,
+            "urine_output": 545.73891,
+            "BHB": 22.53733,
+            "K_store": 87.89914,
+            "osmotic_injury": 4.76594,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 19.5,
+          "state": {
+            "t": 19.5,
+            "G": 691.67703,
+            "pH": 7.22871,
+            "HCO3": 8.17664,
+            "anion_gap": 43.59591,
+            "Ke": 2.80109,
+            "MAP": 59.09197,
+            "V": 7.27299,
+            "Na": 159.22691,
+            "osmolality": 356.88032,
+            "creatinine": 1.82108,
+            "urine_output": 560.99344,
+            "BHB": 23.69693,
+            "K_store": 85.80541,
+            "osmotic_injury": 6.00506,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 20.0,
+          "state": {
+            "t": 20.0,
+            "G": 720.3251,
+            "pH": 7.21899,
+            "HCO3": 7.73331,
+            "anion_gap": 45.2263,
+            "Ke": 2.70172,
+            "MAP": 58.27124,
+            "V": 7.06781,
+            "Na": 159.97691,
+            "osmolality": 359.97188,
+            "creatinine": 1.85459,
+            "urine_output": 576.10275,
+            "BHB": 24.91972,
+            "K_store": 83.67906,
+            "osmotic_injury": 7.44509,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 20.5,
+          "state": {
+            "t": 20.5,
+            "G": 747.07153,
+            "pH": 7.20782,
+            "HCO3": 7.26928,
+            "anion_gap": 46.78712,
+            "Ke": 2.58653,
+            "MAP": 57.55533,
+            "V": 6.88883,
+            "Na": 160.72691,
+            "osmolality": 362.95779,
+            "creatinine": 1.88224,
+            "urine_output": 588.01993,
+            "BHB": 26.09034,
+            "K_store": 81.53264,
+            "osmotic_injury": 9.09587,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 21.0,
+          "state": {
+            "t": 21.0,
+            "G": 773.65607,
+            "pH": 7.19547,
+            "HCO3": 6.80541,
+            "anion_gap": 48.35611,
+            "Ke": 2.46483,
+            "MAP": 56.87017,
+            "V": 6.71754,
+            "Na": 161.47691,
+            "osmolality": 365.93471,
+            "creatinine": 1.9089,
+            "urine_output": 598.80617,
+            "BHB": 27.26708,
+            "K_store": 79.37942,
+            "osmotic_injury": 10.96122,
+            "critical_burden": 0.05816
+          }
+        },
+        {
+          "t": 21.267,
+          "state": {
+            "t": 21.26667,
+            "G": 790.69102,
+            "pH": 7.18913,
+            "HCO3": 6.5852,
+            "anion_gap": 49.3345,
+            "Ke": 2.40577,
+            "MAP": 56.41658,
+            "V": 6.60415,
+            "Na": 161.87691,
+            "osmolality": 367.6811,
+            "creatinine": 1.92979,
+            "urine_output": 606.61888,
+            "BHB": 28.00087,
+            "K_store": 78.22671,
+            "osmotic_injury": 12.05157,
+            "critical_burden": 0.1869
+          }
+        }
+      ],
+      "observed_labs_after_death_count": 4,
+      "observed_labs_after_death_sample": [
+        {
+          "t": 21.383,
+          "var": "MAP",
+          "value": 63.0
+        },
+        {
+          "t": 22.383,
+          "var": "MAP",
+          "value": 66.0
+        },
+        {
+          "t": 22.383,
+          "var": "urine_output",
+          "value": 82.5
+        },
+        {
+          "t": 23.383,
+          "var": "MAP",
+          "value": 65.0
+        }
+      ],
+      "action_totals_to_death_or_end": {
+        "insulin_rapid_sc": 2.0,
+        "fluids": 4296.90949,
+        "dextrose": 2.49
+      },
+      "action_coverage": {
+        "insulin_iv": 0,
+        "insulin_rapid_sc": 3,
+        "insulin_intermediate_sc": 0,
+        "insulin_basal_sc": 0,
+        "fluids": 46,
+        "kcl": 0,
+        "bicarbonate": 0,
+        "dextrose": 5
+      },
+      "repair_hypotheses": [
+        "Separate instantaneous osmolality from injury burden and calibrate injury half-life.",
+        "Audit sodium/free-water balance before changing residual dynamics.",
+        "Use real-survived high-osmolality stays as negative death labels for the OI threshold."
+      ]
+    },
+    {
+      "stay_id": 31316840,
+      "simulated_alive": false,
+      "simulated_death_cause": "cumulative hyperosmolar injury",
+      "simulated_death_time_hours": 18.8,
+      "hard_mechanism_subsystem": "osmotic_injury",
+      "hard_mechanism_terms": [
+        "effective osmolality calculation",
+        "osmotic injury accumulation/recovery",
+        "hyperosmolar death threshold"
+      ],
+      "falsified_by_observed_later_measurements": true,
+      "observed_hours_after_sim_death": 4.217,
+      "first_threshold_crossings": {
+        "cumulative hyperosmolar injury": {
+          "t": 18.8,
+          "excess": 0.06305,
+          "state": {
+            "t": 18.8,
+            "G": 713.83646,
+            "pH": 7.53473,
+            "HCO3": 32.65234,
+            "anion_gap": 38.71794,
+            "Ke": 2.99158,
+            "MAP": 52.02538,
+            "V": 5.50634,
+            "Na": 163.45997,
+            "osmolality": 366.57753,
+            "creatinine": 2.18268,
+            "urine_output": 467.19556,
+            "BHB": 20.03846,
+            "K_store": 78.96621,
+            "osmotic_injury": 12.06305,
+            "critical_burden": 0.0
+          }
+        }
+      },
+      "first_osmolar_risk": {
+        "t": 10.5,
+        "osmolality": 321.60943
+      },
+      "death_snapshot": {
+        "t": 18.8,
+        "G": 713.83646,
+        "pH": 7.53473,
+        "HCO3": 32.65234,
+        "anion_gap": 38.71794,
+        "Ke": 2.99158,
+        "MAP": 52.02538,
+        "V": 5.50634,
+        "Na": 163.45997,
+        "osmolality": 366.57753,
+        "creatinine": 2.18268,
+        "urine_output": 467.19556,
+        "BHB": 20.03846,
+        "K_store": 78.96621,
+        "osmotic_injury": 12.06305,
+        "critical_burden": 0.0
+      },
+      "predeath_curve_tail": [
+        {
+          "t": 16.5,
+          "state": {
+            "t": 16.5,
+            "G": 599.78456,
+            "pH": 7.41462,
+            "HCO3": 24.76282,
+            "anion_gap": 35.93775,
+            "Ke": 3.33039,
+            "MAP": 56.86753,
+            "V": 6.71688,
+            "Na": 160.00997,
+            "osmolality": 353.34131,
+            "creatinine": 1.92618,
+            "urine_output": 437.25534,
+            "BHB": 17.95331,
+            "K_store": 85.5617,
+            "osmotic_injury": 4.49187,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 17.0,
+          "state": {
+            "t": 17.0,
+            "G": 631.72925,
+            "pH": 7.41884,
+            "HCO3": 25.00474,
+            "anion_gap": 37.59739,
+            "Ke": 3.2995,
+            "MAP": 55.85574,
+            "V": 6.46393,
+            "Na": 160.75997,
+            "osmolality": 356.61602,
+            "creatinine": 1.97443,
+            "urine_output": 453.97626,
+            "BHB": 19.19805,
+            "K_store": 84.15572,
+            "osmotic_injury": 5.71272,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 17.5,
+          "state": {
+            "t": 17.5,
+            "G": 671.02334,
+            "pH": 7.42413,
+            "HCO3": 25.31098,
+            "anion_gap": 39.3701,
+            "Ke": 3.26082,
+            "MAP": 54.83302,
+            "V": 6.20825,
+            "Na": 161.50997,
+            "osmolality": 360.29902,
+            "creatinine": 2.02547,
+            "urine_output": 474.85868,
+            "BHB": 20.52757,
+            "K_store": 82.71205,
+            "osmotic_injury": 7.17181,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 18.0,
+          "state": {
+            "t": 18.0,
+            "G": 708.87378,
+            "pH": 7.43171,
+            "HCO3": 25.75685,
+            "anion_gap": 41.3299,
+            "Ke": 3.22132,
+            "MAP": 53.74575,
+            "V": 5.93644,
+            "Na": 162.25997,
+            "osmolality": 363.90183,
+            "creatinine": 2.08418,
+            "urine_output": 491.67224,
+            "BHB": 21.99743,
+            "K_store": 81.23511,
+            "osmotic_injury": 8.90172,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 18.5,
+          "state": {
+            "t": 18.5,
+            "G": 720.7563,
+            "pH": 7.48541,
+            "HCO3": 29.14669,
+            "anion_gap": 40.54998,
+            "Ke": 3.09674,
+            "MAP": 52.66797,
+            "V": 5.66699,
+            "Na": 163.00997,
+            "osmolality": 366.06197,
+            "creatinine": 2.14497,
+            "urine_output": 484.5552,
+            "BHB": 21.41249,
+            "K_store": 79.7747,
+            "osmotic_injury": 10.86605,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 18.8,
+          "state": {
+            "t": 18.8,
+            "G": 713.83646,
+            "pH": 7.53473,
+            "HCO3": 32.65234,
+            "anion_gap": 38.71794,
+            "Ke": 2.99158,
+            "MAP": 52.02538,
+            "V": 5.50634,
+            "Na": 163.45997,
+            "osmolality": 366.57753,
+            "creatinine": 2.18268,
+            "urine_output": 467.19556,
+            "BHB": 20.03846,
+            "K_store": 78.96621,
+            "osmotic_injury": 12.06305,
+            "critical_burden": 0.0
+          }
+        }
+      ],
+      "observed_labs_after_death_count": 8,
+      "observed_labs_after_death_sample": [
+        {
+          "t": 19.0,
+          "var": "urine_output",
+          "value": 18.75
+        },
+        {
+          "t": 19.017,
+          "var": "MAP",
+          "value": 84.0
+        },
+        {
+          "t": 20.017,
+          "var": "MAP",
+          "value": 78.0
+        },
+        {
+          "t": 21.0,
+          "var": "urine_output",
+          "value": 25.0
+        },
+        {
+          "t": 21.017,
+          "var": "MAP",
+          "value": 74.0
+        },
+        {
+          "t": 22.017,
+          "var": "MAP",
+          "value": 77.0
+        },
+        {
+          "t": 23.0,
+          "var": "urine_output",
+          "value": 17.5
+        },
+        {
+          "t": 23.017,
+          "var": "MAP",
+          "value": 99.0
+        }
+      ],
+      "action_totals_to_death_or_end": {
+        "insulin_rapid_sc": 16.0,
+        "fluids": 41.8335,
+        "dextrose": 0.3335
+      },
+      "action_coverage": {
+        "insulin_iv": 0,
+        "insulin_rapid_sc": 5,
+        "insulin_intermediate_sc": 0,
+        "insulin_basal_sc": 0,
+        "fluids": 6,
+        "kcl": 0,
+        "bicarbonate": 0,
+        "dextrose": 1
+      },
+      "repair_hypotheses": [
+        "Separate instantaneous osmolality from injury burden and calibrate injury half-life.",
+        "Audit sodium/free-water balance before changing residual dynamics.",
+        "Use real-survived high-osmolality stays as negative death labels for the OI threshold."
+      ]
+    },
+    {
+      "stay_id": 32359580,
+      "simulated_alive": false,
+      "simulated_death_cause": "hypokalemia (K<2.5)",
+      "simulated_death_time_hours": 9.317,
+      "hard_mechanism_subsystem": "potassium_mass",
+      "hard_mechanism_terms": [
+        "total-body potassium reserve",
+        "renal potassium loss",
+        "insulin/acidosis serum potassium shift",
+        "KCl retention into total store"
+      ],
+      "falsified_by_observed_later_measurements": true,
+      "observed_hours_after_sim_death": 14.366,
+      "first_threshold_crossings": {
+        "hypokalemia (K<2.5)": {
+          "t": 8.5,
+          "excess": 0.12647,
+          "state": {
+            "t": 8.5,
+            "G": 819.70221,
+            "pH": 7.21531,
+            "HCO3": 7.57536,
+            "anion_gap": 53.88597,
+            "Ke": 2.37353,
+            "MAP": 62.67037,
+            "V": 8.16759,
+            "Na": 143.46101,
+            "osmolality": 332.461,
+            "creatinine": 2.25463,
+            "urine_output": 820.22864,
+            "BHB": 31.41448,
+            "K_store": 85.20998,
+            "osmotic_injury": 0.20709,
+            "critical_burden": 0.1203
+          }
+        }
+      },
+      "first_osmolar_risk": {
+        "t": 7.0,
+        "osmolality": 321.8941
+      },
+      "death_snapshot": {
+        "t": 9.31667,
+        "G": 911.70966,
+        "pH": 7.21747,
+        "HCO3": 7.66737,
+        "anion_gap": 58.31929,
+        "Ke": 1.89039,
+        "MAP": 59.96431,
+        "V": 7.49108,
+        "Na": 144.68601,
+        "osmolality": 340.02255,
+        "creatinine": 2.30401,
+        "urine_output": 869.56146,
+        "BHB": 34.73947,
+        "K_store": 77.92166,
+        "osmotic_injury": 0.74156,
+        "critical_burden": 1.00409
+      },
+      "predeath_curve_tail": [
+        {
+          "t": 7.0,
+          "state": {
+            "t": 7.0,
+            "G": 710.49792,
+            "pH": 7.21848,
+            "HCO3": 7.71118,
+            "anion_gap": 47.02002,
+            "Ke": 3.09387,
+            "MAP": 67.7189,
+            "V": 9.42972,
+            "Na": 141.21101,
+            "osmolality": 321.8941,
+            "creatinine": 2.2215,
+            "urine_output": 760.6507,
+            "BHB": 26.26501,
+            "K_store": 98.42394,
+            "osmotic_injury": 0.00076,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 7.5,
+          "state": {
+            "t": 7.5,
+            "G": 743.28162,
+            "pH": 7.21649,
+            "HCO3": 7.62568,
+            "anion_gap": 49.09376,
+            "Ke": 2.86805,
+            "MAP": 66.07585,
+            "V": 9.01896,
+            "Na": 141.96101,
+            "osmolality": 325.21542,
+            "creatinine": 2.22125,
+            "urine_output": 781.45386,
+            "BHB": 27.82032,
+            "K_store": 94.0462,
+            "osmotic_injury": 0.01671,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 8.0,
+          "state": {
+            "t": 8.0,
+            "G": 779.53607,
+            "pH": 7.21532,
+            "HCO3": 7.5758,
+            "anion_gap": 51.37275,
+            "Ke": 2.62863,
+            "MAP": 64.39247,
+            "V": 8.59812,
+            "Na": 142.71101,
+            "osmolality": 328.72955,
+            "creatinine": 2.23218,
+            "urine_output": 801.20026,
+            "BHB": 29.52956,
+            "K_store": 89.63204,
+            "osmotic_injury": 0.07504,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 8.5,
+          "state": {
+            "t": 8.5,
+            "G": 819.70221,
+            "pH": 7.21531,
+            "HCO3": 7.57536,
+            "anion_gap": 53.88597,
+            "Ke": 2.37353,
+            "MAP": 62.67037,
+            "V": 8.16759,
+            "Na": 143.46101,
+            "osmolality": 332.461,
+            "creatinine": 2.25463,
+            "urine_output": 820.22864,
+            "BHB": 31.41448,
+            "K_store": 85.20998,
+            "osmotic_injury": 0.20709,
+            "critical_burden": 0.1203
+          }
+        },
+        {
+          "t": 9.0,
+          "state": {
+            "t": 9.0,
+            "G": 871.98413,
+            "pH": 7.21608,
+            "HCO3": 7.60824,
+            "anion_gap": 56.50571,
+            "Ke": 2.0878,
+            "MAP": 61.02892,
+            "V": 7.75723,
+            "Na": 144.21101,
+            "osmolality": 336.86557,
+            "creatinine": 2.28076,
+            "urine_output": 847.81177,
+            "BHB": 33.37928,
+            "K_store": 80.76773,
+            "osmotic_injury": 0.46743,
+            "critical_burden": 0.56719
+          }
+        },
+        {
+          "t": 9.317,
+          "state": {
+            "t": 9.31667,
+            "G": 911.70966,
+            "pH": 7.21747,
+            "HCO3": 7.66737,
+            "anion_gap": 58.31929,
+            "Ke": 1.89039,
+            "MAP": 59.96431,
+            "V": 7.49108,
+            "Na": 144.68601,
+            "osmolality": 340.02255,
+            "creatinine": 2.30401,
+            "urine_output": 869.56146,
+            "BHB": 34.73947,
+            "K_store": 77.92166,
+            "osmotic_injury": 0.74156,
+            "critical_burden": 1.00409
+          }
+        }
+      ],
+      "observed_labs_after_death_count": 54,
+      "observed_labs_after_death_sample": [
+        {
+          "t": 10.1,
+          "var": "MAP",
+          "value": 55.0
+        },
+        {
+          "t": 10.383,
+          "var": "creatinine",
+          "value": 3.0
+        },
+        {
+          "t": 10.383,
+          "var": "glucose",
+          "value": 99.0
+        },
+        {
+          "t": 10.383,
+          "var": "anion_gap",
+          "value": 36.0
+        },
+        {
+          "t": 10.383,
+          "var": "HCO3",
+          "value": 11.0
+        },
+        {
+          "t": 10.383,
+          "var": "K",
+          "value": 3.7
+        },
+        {
+          "t": 10.383,
+          "var": "Na",
+          "value": 141.0
+        },
+        {
+          "t": 10.433,
+          "var": "pH",
+          "value": 7.14
+        }
+      ],
+      "action_totals_to_death_or_end": {
+        "fluids": 1007.09549,
+        "dextrose": 27.645
+      },
+      "action_coverage": {
+        "insulin_iv": 0,
+        "insulin_rapid_sc": 0,
+        "insulin_intermediate_sc": 0,
+        "insulin_basal_sc": 0,
+        "fluids": 45,
+        "kcl": 6,
+        "bicarbonate": 1,
+        "dextrose": 24
+      },
+      "repair_hypotheses": [
+        "Trace serum K drop into insulin shift, renal K loss, and KCl replacement terms.",
+        "Add a patient-level potassium-store correction using survived hypokalemia replays as constraints.",
+        "Do not let grey-box residual directly write total-body K; repair the mass equation itself."
+      ]
+    },
+    {
+      "stay_id": 32587226,
+      "simulated_alive": false,
+      "simulated_death_cause": "cumulative hyperosmolar injury",
+      "simulated_death_time_hours": 13.267,
+      "hard_mechanism_subsystem": "osmotic_injury",
+      "hard_mechanism_terms": [
+        "effective osmolality calculation",
+        "osmotic injury accumulation/recovery",
+        "hyperosmolar death threshold"
+      ],
+      "falsified_by_observed_later_measurements": true,
+      "observed_hours_after_sim_death": 9.783,
+      "first_threshold_crossings": {
+        "cumulative hyperosmolar injury": {
+          "t": 13.267,
+          "excess": 0.03566,
+          "state": {
+            "t": 13.26667,
+            "G": 1066.47868,
+            "pH": 7.33173,
+            "HCO3": 17.58168,
+            "anion_gap": 47.5246,
+            "Ke": 2.99434,
+            "MAP": 47.77255,
+            "V": 4.44314,
+            "Na": 156.77081,
+            "osmolality": 372.79044,
+            "creatinine": 2.49426,
+            "urine_output": 642.94517,
+            "BHB": 26.64345,
+            "K_store": 91.86754,
+            "osmotic_injury": 12.03566,
+            "critical_burden": 0.0
+          }
+        }
+      },
+      "first_osmolar_risk": {
+        "t": 7.0,
+        "osmolality": 322.98714
+      },
+      "death_snapshot": {
+        "t": 13.26667,
+        "G": 1066.47868,
+        "pH": 7.33173,
+        "HCO3": 17.58168,
+        "anion_gap": 47.5246,
+        "Ke": 2.99434,
+        "MAP": 47.77255,
+        "V": 4.44314,
+        "Na": 156.77081,
+        "osmolality": 372.79044,
+        "creatinine": 2.49426,
+        "urine_output": 642.94517,
+        "BHB": 26.64345,
+        "K_store": 91.86754,
+        "osmotic_injury": 12.03566,
+        "critical_burden": 0.0
+      },
+      "predeath_curve_tail": [
+        {
+          "t": 11.0,
+          "state": {
+            "t": 11.0,
+            "G": 818.3958,
+            "pH": 7.32418,
+            "HCO3": 16.34973,
+            "anion_gap": 36.1481,
+            "Ke": 3.35897,
+            "MAP": 53.29172,
+            "V": 5.82293,
+            "Na": 153.37081,
+            "osmolality": 352.20806,
+            "creatinine": 2.1017,
+            "urine_output": 577.12507,
+            "BHB": 18.11108,
+            "K_store": 100.08989,
+            "osmotic_injury": 3.23693,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 11.5,
+          "state": {
+            "t": 11.5,
+            "G": 862.14502,
+            "pH": 7.32457,
+            "HCO3": 16.40986,
+            "anion_gap": 38.23419,
+            "Ke": 3.28133,
+            "MAP": 52.12447,
+            "V": 5.53112,
+            "Na": 154.12081,
+            "osmolality": 356.13857,
+            "creatinine": 2.1731,
+            "urine_output": 591.50344,
+            "BHB": 19.67564,
+            "K_store": 98.25162,
+            "osmotic_injury": 4.47164,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 12.0,
+          "state": {
+            "t": 12.0,
+            "G": 912.28583,
+            "pH": 7.32555,
+            "HCO3": 16.56172,
+            "anion_gap": 40.51475,
+            "Ke": 3.20108,
+            "MAP": 50.93433,
+            "V": 5.23358,
+            "Na": 154.87081,
+            "osmolality": 360.42417,
+            "creatinine": 2.25105,
+            "urine_output": 606.71312,
+            "BHB": 21.38606,
+            "K_store": 96.41956,
+            "osmotic_injury": 6.02663,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 12.5,
+          "state": {
+            "t": 12.5,
+            "G": 967.24841,
+            "pH": 7.3273,
+            "HCO3": 16.841,
+            "anion_gap": 43.04612,
+            "Ke": 3.12035,
+            "MAP": 49.7081,
+            "V": 4.92703,
+            "Na": 155.62081,
+            "osmolality": 364.97765,
+            "creatinine": 2.33849,
+            "urine_output": 620.91259,
+            "BHB": 23.28459,
+            "K_store": 94.60223,
+            "osmotic_injury": 7.98805,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 13.0,
+          "state": {
+            "t": 13.0,
+            "G": 1029.59668,
+            "pH": 7.32993,
+            "HCO3": 17.27401,
+            "anion_gap": 45.8723,
+            "Ke": 3.03846,
+            "MAP": 48.45346,
+            "V": 4.61336,
+            "Na": 156.37081,
+            "osmolality": 369.94144,
+            "creatinine": 2.43664,
+            "urine_output": 635.19091,
+            "BHB": 25.40422,
+            "K_store": 92.81027,
+            "osmotic_injury": 10.46045,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 13.267,
+          "state": {
+            "t": 13.26667,
+            "G": 1066.47868,
+            "pH": 7.33173,
+            "HCO3": 17.58168,
+            "anion_gap": 47.5246,
+            "Ke": 2.99434,
+            "MAP": 47.77255,
+            "V": 4.44314,
+            "Na": 156.77081,
+            "osmolality": 372.79044,
+            "creatinine": 2.49426,
+            "urine_output": 642.94517,
+            "BHB": 26.64345,
+            "K_store": 91.86754,
+            "osmotic_injury": 12.03566,
+            "critical_burden": 0.0
+          }
+        }
+      ],
+      "observed_labs_after_death_count": 39,
+      "observed_labs_after_death_sample": [
+        {
+          "t": 13.267,
+          "var": "MAP",
+          "value": 52.0
+        },
+        {
+          "t": 14.017,
+          "var": "MAP",
+          "value": 59.0
+        },
+        {
+          "t": 14.017,
+          "var": "urine_output",
+          "value": 15.75
+        },
+        {
+          "t": 14.167,
+          "var": "MAP",
+          "value": 52.0
+        },
+        {
+          "t": 15.017,
+          "var": "MAP",
+          "value": 59.0
+        },
+        {
+          "t": 15.017,
+          "var": "MAP",
+          "value": 62.0
+        },
+        {
+          "t": 16.017,
+          "var": "MAP",
+          "value": 60.0
+        },
+        {
+          "t": 16.017,
+          "var": "MAP",
+          "value": 74.0
+        }
+      ],
+      "action_totals_to_death_or_end": {
+        "fluids": 1036.47051,
+        "dextrose": 21.0415
+      },
+      "action_coverage": {
+        "insulin_iv": 0,
+        "insulin_rapid_sc": 0,
+        "insulin_intermediate_sc": 0,
+        "insulin_basal_sc": 0,
+        "fluids": 25,
+        "kcl": 0,
+        "bicarbonate": 0,
+        "dextrose": 21
+      },
+      "repair_hypotheses": [
+        "Separate instantaneous osmolality from injury burden and calibrate injury half-life.",
+        "Audit sodium/free-water balance before changing residual dynamics.",
+        "Use real-survived high-osmolality stays as negative death labels for the OI threshold."
+      ]
+    },
+    {
+      "stay_id": 33281088,
+      "simulated_alive": false,
+      "simulated_death_cause": "hypokalemia (K<2.5)",
+      "simulated_death_time_hours": 6.2,
+      "hard_mechanism_subsystem": "potassium_mass",
+      "hard_mechanism_terms": [
+        "total-body potassium reserve",
+        "renal potassium loss",
+        "insulin/acidosis serum potassium shift",
+        "KCl retention into total store"
+      ],
+      "falsified_by_observed_later_measurements": true,
+      "observed_hours_after_sim_death": 16.95,
+      "first_threshold_crossings": {
+        "hypokalemia (K<2.5)": {
+          "t": 5.0,
+          "excess": 0.05381,
+          "state": {
+            "t": 5.0,
+            "G": 438.07452,
+            "pH": 7.34564,
+            "HCO3": 20.3369,
+            "anion_gap": 16.54108,
+            "Ke": 2.44619,
+            "MAP": 89.5361,
+            "V": 14.88402,
+            "Na": 148.5,
+            "osmolality": 321.33747,
+            "creatinine": 1.2767,
+            "urine_output": 567.65787,
+            "BHB": 3.40581,
+            "K_store": 100.70324,
+            "osmotic_injury": 0.00047,
+            "critical_burden": 0.0815
+          }
+        }
+      },
+      "first_osmolar_risk": {
+        "t": 5.0,
+        "osmolality": 321.33747
+      },
+      "death_snapshot": {
+        "t": 6.2,
+        "G": 470.75248,
+        "pH": 7.37922,
+        "HCO3": 22.82475,
+        "anion_gap": 16.89925,
+        "Ke": 2.13507,
+        "MAP": 87.36551,
+        "V": 14.34138,
+        "Na": 150.3,
+        "osmolality": 326.75292,
+        "creatinine": 1.22214,
+        "urine_output": 622.86768,
+        "BHB": 3.67443,
+        "K_store": 90.4387,
+        "osmotic_injury": 0.05189,
+        "critical_burden": 1.00459
+      },
+      "predeath_curve_tail": [
+        {
+          "t": 4.0,
+          "state": {
+            "t": 4.0,
+            "G": 427.12461,
+            "pH": 7.33342,
+            "HCO3": 17.8812,
+            "anion_gap": 16.87207,
+            "Ke": 2.7457,
+            "MAP": 91.03951,
+            "V": 15.25988,
+            "Na": 147.0,
+            "osmolality": 317.72914,
+            "creatinine": 1.34681,
+            "urine_output": 546.63896,
+            "BHB": 3.65405,
+            "K_store": 108.49444,
+            "osmotic_injury": 0.0,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 4.5,
+          "state": {
+            "t": 4.5,
+            "G": 431.02372,
+            "pH": 7.34035,
+            "HCO3": 19.20281,
+            "anion_gap": 16.62232,
+            "Ke": 2.58834,
+            "MAP": 90.23668,
+            "V": 15.05917,
+            "Na": 147.75,
+            "osmolality": 319.44576,
+            "creatinine": 1.31078,
+            "urine_output": 554.15141,
+            "BHB": 3.46674,
+            "K_store": 104.65466,
+            "osmotic_injury": 0.0,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 5.0,
+          "state": {
+            "t": 5.0,
+            "G": 438.07452,
+            "pH": 7.34564,
+            "HCO3": 20.3369,
+            "anion_gap": 16.54108,
+            "Ke": 2.44619,
+            "MAP": 89.5361,
+            "V": 14.88402,
+            "Na": 148.5,
+            "osmolality": 321.33747,
+            "creatinine": 1.2767,
+            "urine_output": 567.65787,
+            "BHB": 3.40581,
+            "K_store": 100.70324,
+            "osmotic_injury": 0.00047,
+            "critical_burden": 0.0815
+          }
+        },
+        {
+          "t": 5.5,
+          "state": {
+            "t": 5.5,
+            "G": 449.64276,
+            "pH": 7.35152,
+            "HCO3": 21.41427,
+            "anion_gap": 16.61275,
+            "Ke": 2.31896,
+            "MAP": 88.66382,
+            "V": 14.66596,
+            "Na": 149.25,
+            "osmolality": 323.48015,
+            "creatinine": 1.25041,
+            "urine_output": 588.04968,
+            "BHB": 3.45956,
+            "K_store": 96.58074,
+            "osmotic_injury": 0.00772,
+            "critical_burden": 0.3763
+          }
+        },
+        {
+          "t": 6.0,
+          "state": {
+            "t": 6.0,
+            "G": 464.20035,
+            "pH": 7.37163,
+            "HCO3": 22.42924,
+            "anion_gap": 16.79819,
+            "Ke": 2.18946,
+            "MAP": 87.74656,
+            "V": 14.43664,
+            "Na": 150.0,
+            "osmolality": 325.78891,
+            "creatinine": 1.22918,
+            "urine_output": 612.30107,
+            "BHB": 3.59865,
+            "K_store": 92.24149,
+            "osmotic_injury": 0.03345,
+            "critical_burden": 0.79866
+          }
+        },
+        {
+          "t": 6.2,
+          "state": {
+            "t": 6.2,
+            "G": 470.75248,
+            "pH": 7.37922,
+            "HCO3": 22.82475,
+            "anion_gap": 16.89925,
+            "Ke": 2.13507,
+            "MAP": 87.36551,
+            "V": 14.34138,
+            "Na": 150.3,
+            "osmolality": 326.75292,
+            "creatinine": 1.22214,
+            "urine_output": 622.86768,
+            "BHB": 3.67443,
+            "K_store": 90.4387,
+            "osmotic_injury": 0.05189,
+            "critical_burden": 1.00459
+          }
+        }
+      ],
+      "observed_labs_after_death_count": 41,
+      "observed_labs_after_death_sample": [
+        {
+          "t": 6.4,
+          "var": "pH",
+          "value": 7.37
+        },
+        {
+          "t": 7.65,
+          "var": "MAP",
+          "value": 66.0
+        },
+        {
+          "t": 8.15,
+          "var": "MAP",
+          "value": 70.0
+        },
+        {
+          "t": 8.15,
+          "var": "urine_output",
+          "value": 31.25
+        },
+        {
+          "t": 9.167,
+          "var": "MAP",
+          "value": 81.0
+        },
+        {
+          "t": 10.15,
+          "var": "MAP",
+          "value": 69.0
+        },
+        {
+          "t": 11.283,
+          "var": "Na",
+          "value": 140.0
+        },
+        {
+          "t": 11.283,
+          "var": "glucose",
+          "value": 219.0
+        }
+      ],
+      "action_totals_to_death_or_end": {
+        "insulin_rapid_sc": 8.0,
+        "fluids": 1499.42154,
+        "kcl": 20.0,
+        "bicarbonate": 166.375,
+        "dextrose": 57.4085
+      },
+      "action_coverage": {
+        "insulin_iv": 0,
+        "insulin_rapid_sc": 4,
+        "insulin_intermediate_sc": 0,
+        "insulin_basal_sc": 0,
+        "fluids": 36,
+        "kcl": 10,
+        "bicarbonate": 6,
+        "dextrose": 9
+      },
+      "repair_hypotheses": [
+        "Trace serum K drop into insulin shift, renal K loss, and KCl replacement terms.",
+        "Add a patient-level potassium-store correction using survived hypokalemia replays as constraints.",
+        "Do not let grey-box residual directly write total-body K; repair the mass equation itself."
+      ]
+    },
+    {
+      "stay_id": 33846653,
+      "simulated_alive": true,
+      "simulated_death_cause": null,
+      "simulated_death_time_hours": null,
+      "hard_mechanism_subsystem": "none",
+      "hard_mechanism_terms": [],
+      "falsified_by_observed_later_measurements": false,
+      "observed_hours_after_sim_death": null,
+      "first_threshold_crossings": {},
+      "first_osmolar_risk": {
+        "t": 19.5,
+        "osmolality": 321.25049
+      },
+      "death_snapshot": {
+        "t": 24.5,
+        "G": 179.7275,
+        "pH": 7.33738,
+        "HCO3": 18.61623,
+        "anion_gap": 15.04532,
+        "Ke": 3.59606,
+        "MAP": 60.23235,
+        "V": 7.55809,
+        "Na": 163.62357,
+        "osmolality": 337.23199,
+        "creatinine": 1.72538,
+        "urine_output": 26.8948,
+        "BHB": 2.28399,
+        "K_store": 150.09678,
+        "osmotic_injury": 1.15547,
+        "critical_burden": 0.0
+      },
+      "predeath_curve_tail": [
+        {
+          "t": 22.0,
+          "state": {
+            "t": 22.0,
+            "G": 175.44828,
+            "pH": 7.33296,
+            "HCO3": 17.79916,
+            "anion_gap": 15.1961,
+            "Ke": 3.69697,
+            "MAP": 61.1051,
+            "V": 7.77627,
+            "Na": 159.91967,
+            "osmolality": 329.58647,
+            "creatinine": 1.69728,
+            "urine_output": 27.66118,
+            "BHB": 2.39707,
+            "K_store": 150.3802,
+            "osmotic_injury": 0.19924,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 22.5,
+          "state": {
+            "t": 22.5,
+            "G": 175.61399,
+            "pH": 7.33416,
+            "HCO3": 18.01358,
+            "anion_gap": 15.11342,
+            "Ke": 3.65922,
+            "MAP": 60.92993,
+            "V": 7.73248,
+            "Na": 160.64685,
+            "osmolality": 331.05003,
+            "creatinine": 1.70299,
+            "urine_output": 27.50755,
+            "BHB": 2.33507,
+            "K_store": 150.32223,
+            "osmotic_injury": 0.31688,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 23.0,
+          "state": {
+            "t": 23.0,
+            "G": 175.24147,
+            "pH": 7.33542,
+            "HCO3": 18.24522,
+            "anion_gap": 15.01417,
+            "Ke": 3.62191,
+            "MAP": 60.75508,
+            "V": 7.68877,
+            "Na": 161.38169,
+            "osmolality": 332.49902,
+            "creatinine": 1.70865,
+            "urine_output": 27.35406,
+            "BHB": 2.26063,
+            "K_store": 150.26492,
+            "osmotic_injury": 0.46637,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 23.5,
+          "state": {
+            "t": 23.5,
+            "G": 175.86761,
+            "pH": 7.33633,
+            "HCO3": 18.41603,
+            "anion_gap": 14.9765,
+            "Ke": 3.60117,
+            "MAP": 60.58053,
+            "V": 7.64513,
+            "Na": 162.12432,
+            "osmolality": 334.01906,
+            "creatinine": 1.71426,
+            "urine_output": 27.20076,
+            "BHB": 2.23238,
+            "K_store": 150.20824,
+            "osmotic_injury": 0.65214,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 24.0,
+          "state": {
+            "t": 24.0,
+            "G": 177.44186,
+            "pH": 7.33695,
+            "HCO3": 18.53443,
+            "anion_gap": 14.99211,
+            "Ke": 3.59404,
+            "MAP": 60.40628,
+            "V": 7.60157,
+            "Na": 162.87357,
+            "osmolality": 335.60501,
+            "creatinine": 1.71984,
+            "urine_output": 27.04767,
+            "BHB": 2.24409,
+            "K_store": 150.15219,
+            "osmotic_injury": 0.88,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 24.5,
+          "state": {
+            "t": 24.5,
+            "G": 179.7275,
+            "pH": 7.33738,
+            "HCO3": 18.61623,
+            "anion_gap": 15.04532,
+            "Ke": 3.59606,
+            "MAP": 60.23235,
+            "V": 7.55809,
+            "Na": 163.62357,
+            "osmolality": 337.23199,
+            "creatinine": 1.72538,
+            "urine_output": 26.8948,
+            "BHB": 2.28399,
+            "K_store": 150.09678,
+            "osmotic_injury": 1.15547,
+            "critical_burden": 0.0
+          }
+        }
+      ],
+      "observed_labs_after_death_count": 0,
+      "observed_labs_after_death_sample": [],
+      "action_totals_to_death_or_end": {
+        "insulin_iv": 28.726,
+        "insulin_rapid_sc": 22.0,
+        "insulin_basal_sc": 30.0,
+        "fluids": 532.0595,
+        "kcl": 40.0
+      },
+      "action_coverage": {
+        "insulin_iv": 8,
+        "insulin_rapid_sc": 4,
+        "insulin_intermediate_sc": 0,
+        "insulin_basal_sc": 2,
+        "fluids": 12,
+        "kcl": 1,
+        "bicarbonate": 0,
+        "dextrose": 0
+      },
+      "repair_hypotheses": []
+    },
+    {
+      "stay_id": 34100191,
+      "simulated_alive": false,
+      "simulated_death_cause": "hypokalemia (K<2.5)",
+      "simulated_death_time_hours": 3.25,
+      "hard_mechanism_subsystem": "potassium_mass",
+      "hard_mechanism_terms": [
+        "total-body potassium reserve",
+        "renal potassium loss",
+        "insulin/acidosis serum potassium shift",
+        "KCl retention into total store"
+      ],
+      "falsified_by_observed_later_measurements": true,
+      "observed_hours_after_sim_death": 20.433,
+      "first_threshold_crossings": {
+        "hypokalemia (K<2.5)": {
+          "t": 2.5,
+          "excess": 0.06224,
+          "state": {
+            "t": 2.5,
+            "G": 717.15055,
+            "pH": 7.32509,
+            "HCO3": 16.48987,
+            "anion_gap": 29.50406,
+            "Ke": 2.43776,
+            "MAP": 87.71754,
+            "V": 14.42938,
+            "Na": 135.75,
+            "osmolality": 311.3417,
+            "creatinine": 5.05233,
+            "urine_output": 1115.47441,
+            "BHB": 13.12805,
+            "K_store": 106.65944,
+            "osmotic_injury": 0.0,
+            "critical_burden": 0.02815
+          }
+        }
+      },
+      "first_osmolar_risk": null,
+      "death_snapshot": {
+        "t": 3.25,
+        "G": 791.24738,
+        "pH": 7.32635,
+        "HCO3": 16.68814,
+        "anion_gap": 31.14271,
+        "Ke": 1.59621,
+        "MAP": 84.82408,
+        "V": 13.70602,
+        "Na": 136.875,
+        "osmolality": 317.70819,
+        "creatinine": 4.57175,
+        "urine_output": 1233.70888,
+        "BHB": 14.35703,
+        "K_store": 89.32389,
+        "osmotic_injury": 0.0,
+        "critical_burden": 1.01415
+      },
+      "predeath_curve_tail": [
+        {
+          "t": 1.0,
+          "state": {
+            "t": 1.0,
+            "G": 551.9839,
+            "pH": 7.31821,
+            "HCO3": 15.47841,
+            "anion_gap": 27.09663,
+            "Ke": 3.75249,
+            "MAP": 91.76924,
+            "V": 15.44231,
+            "Na": 133.5,
+            "osmolality": 297.66577,
+            "creatinine": 6.47395,
+            "urine_output": 792.41344,
+            "BHB": 11.32247,
+            "K_store": 134.45564,
+            "osmotic_injury": 0.0,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 1.5,
+          "state": {
+            "t": 1.5,
+            "G": 622.25745,
+            "pH": 7.32388,
+            "HCO3": 16.30499,
+            "anion_gap": 27.74061,
+            "Ke": 3.37689,
+            "MAP": 90.86789,
+            "V": 15.21697,
+            "Na": 134.25,
+            "osmolality": 303.06986,
+            "creatinine": 5.90339,
+            "urine_output": 932.31057,
+            "BHB": 11.80546,
+            "K_store": 126.77825,
+            "osmotic_injury": 0.0,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 2.0,
+          "state": {
+            "t": 2.0,
+            "G": 670.46552,
+            "pH": 7.32472,
+            "HCO3": 16.4335,
+            "anion_gap": 28.56667,
+            "Ke": 2.93938,
+            "MAP": 89.40392,
+            "V": 14.85098,
+            "Na": 135.0,
+            "osmolality": 307.24808,
+            "creatinine": 5.4444,
+            "urine_output": 1029.6348,
+            "BHB": 12.425,
+            "K_store": 117.35117,
+            "osmotic_injury": 0.0,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 2.5,
+          "state": {
+            "t": 2.5,
+            "G": 717.15055,
+            "pH": 7.32509,
+            "HCO3": 16.48987,
+            "anion_gap": 29.50406,
+            "Ke": 2.43776,
+            "MAP": 87.71754,
+            "V": 14.42938,
+            "Na": 135.75,
+            "osmolality": 311.3417,
+            "creatinine": 5.05233,
+            "urine_output": 1115.47441,
+            "BHB": 13.12805,
+            "K_store": 106.65944,
+            "osmotic_injury": 0.0,
+            "critical_burden": 0.02815
+          }
+        },
+        {
+          "t": 3.0,
+          "state": {
+            "t": 3.0,
+            "G": 765.83,
+            "pH": 7.32583,
+            "HCO3": 16.60666,
+            "anion_gap": 30.56399,
+            "Ke": 1.89031,
+            "MAP": 85.83189,
+            "V": 13.95797,
+            "Na": 136.5,
+            "osmolality": 315.54611,
+            "creatinine": 4.71888,
+            "urine_output": 1195.42793,
+            "BHB": 13.92299,
+            "K_store": 95.24859,
+            "osmotic_injury": 0.0,
+            "critical_burden": 0.544
+          }
+        },
+        {
+          "t": 3.25,
+          "state": {
+            "t": 3.25,
+            "G": 791.24738,
+            "pH": 7.32635,
+            "HCO3": 16.68814,
+            "anion_gap": 31.14271,
+            "Ke": 1.59621,
+            "MAP": 84.82408,
+            "V": 13.70602,
+            "Na": 136.875,
+            "osmolality": 317.70819,
+            "creatinine": 4.57175,
+            "urine_output": 1233.70888,
+            "BHB": 14.35703,
+            "K_store": 89.32389,
+            "osmotic_injury": 0.0,
+            "critical_burden": 1.01415
+          }
+        }
+      ],
+      "observed_labs_after_death_count": 69,
+      "observed_labs_after_death_sample": [
+        {
+          "t": 3.317,
+          "var": "MAP",
+          "value": 77.0
+        },
+        {
+          "t": 3.317,
+          "var": "urine_output",
+          "value": 58.75
+        },
+        {
+          "t": 4.317,
+          "var": "MAP",
+          "value": 73.0
+        },
+        {
+          "t": 4.317,
+          "var": "urine_output",
+          "value": 41.25
+        },
+        {
+          "t": 5.317,
+          "var": "MAP",
+          "value": 79.0
+        },
+        {
+          "t": 5.317,
+          "var": "urine_output",
+          "value": 53.75
+        },
+        {
+          "t": 5.883,
+          "var": "glucose",
+          "value": 315.0
+        },
+        {
+          "t": 5.883,
+          "var": "creatinine",
+          "value": 7.3
+        }
+      ],
+      "action_totals_to_death_or_end": {
+        "fluids": 1231.61949,
+        "bicarbonate": 47.0,
+        "dextrose": 58.4445
+      },
+      "action_coverage": {
+        "insulin_iv": 5,
+        "insulin_rapid_sc": 1,
+        "insulin_intermediate_sc": 0,
+        "insulin_basal_sc": 0,
+        "fluids": 64,
+        "kcl": 0,
+        "bicarbonate": 2,
+        "dextrose": 52
+      },
+      "repair_hypotheses": [
+        "Trace serum K drop into insulin shift, renal K loss, and KCl replacement terms.",
+        "Add a patient-level potassium-store correction using survived hypokalemia replays as constraints.",
+        "Do not let grey-box residual directly write total-body K; repair the mass equation itself."
+      ]
+    },
+    {
+      "stay_id": 34107647,
+      "simulated_alive": false,
+      "simulated_death_cause": "cumulative hyperosmolar injury",
+      "simulated_death_time_hours": 18.883,
+      "hard_mechanism_subsystem": "osmotic_injury",
+      "hard_mechanism_terms": [
+        "effective osmolality calculation",
+        "osmotic injury accumulation/recovery",
+        "hyperosmolar death threshold"
+      ],
+      "falsified_by_observed_later_measurements": true,
+      "observed_hours_after_sim_death": 4.85,
+      "first_threshold_crossings": {
+        "cumulative hyperosmolar injury": {
+          "t": 18.883,
+          "excess": 0.0009,
+          "state": {
+            "t": 18.88333,
+            "G": 608.29535,
+            "pH": 7.38445,
+            "HCO3": 23.10087,
+            "anion_gap": 21.99642,
+            "Ke": 4.47133,
+            "MAP": 59.17947,
+            "V": 7.29487,
+            "Na": 165.88922,
+            "osmolality": 365.57262,
+            "creatinine": 1.80848,
+            "urine_output": 467.48058,
+            "BHB": 7.49732,
+            "K_store": 143.84011,
+            "osmotic_injury": 12.0009,
+            "critical_burden": 0.0
+          }
+        }
+      },
+      "first_osmolar_risk": {
+        "t": 8.5,
+        "osmolality": 320.49237
+      },
+      "death_snapshot": {
+        "t": 18.88333,
+        "G": 608.29535,
+        "pH": 7.38445,
+        "HCO3": 23.10087,
+        "anion_gap": 21.99642,
+        "Ke": 4.47133,
+        "MAP": 59.17947,
+        "V": 7.29487,
+        "Na": 165.88922,
+        "osmolality": 365.57262,
+        "creatinine": 1.80848,
+        "urine_output": 467.48058,
+        "BHB": 7.49732,
+        "K_store": 143.84011,
+        "osmotic_injury": 12.0009,
+        "critical_burden": 0.0
+      },
+      "predeath_curve_tail": [
+        {
+          "t": 16.5,
+          "state": {
+            "t": 16.5,
+            "G": 439.41378,
+            "pH": 7.34839,
+            "HCO3": 20.97253,
+            "anion_gap": 20.91944,
+            "Ke": 3.0835,
+            "MAP": 62.28695,
+            "V": 8.07174,
+            "Na": 162.31422,
+            "osmolality": 349.04031,
+            "creatinine": 1.67269,
+            "urine_output": 306.16614,
+            "BHB": 6.68958,
+            "K_store": 126.56604,
+            "osmotic_injury": 5.89118,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 17.0,
+          "state": {
+            "t": 17.0,
+            "G": 443.89517,
+            "pH": 7.35269,
+            "HCO3": 21.47187,
+            "anion_gap": 21.11282,
+            "Ke": 3.09984,
+            "MAP": 61.56133,
+            "V": 7.89033,
+            "Na": 163.06422,
+            "osmolality": 350.78928,
+            "creatinine": 1.70651,
+            "urine_output": 309.99197,
+            "BHB": 6.83461,
+            "K_store": 125.63027,
+            "osmotic_injury": 6.6319,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 17.5,
+          "state": {
+            "t": 17.5,
+            "G": 502.19721,
+            "pH": 7.35482,
+            "HCO3": 21.57772,
+            "anion_gap": 21.44566,
+            "Ke": 3.08658,
+            "MAP": 61.12014,
+            "V": 7.78003,
+            "Na": 163.81422,
+            "osmolality": 355.52828,
+            "creatinine": 1.72345,
+            "urine_output": 367.9711,
+            "BHB": 7.08424,
+            "K_store": 124.57006,
+            "osmotic_injury": 7.57714,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 18.0,
+          "state": {
+            "t": 18.0,
+            "G": 567.45393,
+            "pH": 7.35441,
+            "HCO3": 21.55738,
+            "anion_gap": 21.84148,
+            "Ke": 3.1829,
+            "MAP": 60.75294,
+            "V": 7.68824,
+            "Na": 164.56422,
+            "osmolality": 360.65366,
+            "creatinine": 1.73579,
+            "urine_output": 433.42565,
+            "BHB": 7.38111,
+            "K_store": 125.36934,
+            "osmotic_injury": 8.89517,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 18.5,
+          "state": {
+            "t": 18.5,
+            "G": 609.16749,
+            "pH": 7.36652,
+            "HCO3": 22.16659,
+            "anion_gap": 22.03967,
+            "Ke": 3.98905,
+            "MAP": 59.9857,
+            "V": 7.49643,
+            "Na": 165.31422,
+            "osmolality": 364.47107,
+            "creatinine": 1.76999,
+            "urine_output": 472.92445,
+            "BHB": 7.52975,
+            "K_store": 136.5694,
+            "osmotic_injury": 10.57848,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 18.883,
+          "state": {
+            "t": 18.88333,
+            "G": 608.29535,
+            "pH": 7.38445,
+            "HCO3": 23.10087,
+            "anion_gap": 21.99642,
+            "Ke": 4.47133,
+            "MAP": 59.17947,
+            "V": 7.29487,
+            "Na": 165.88922,
+            "osmolality": 365.57262,
+            "creatinine": 1.80848,
+            "urine_output": 467.48058,
+            "BHB": 7.49732,
+            "K_store": 143.84011,
+            "osmotic_injury": 12.0009,
+            "critical_burden": 0.0
+          }
+        }
+      ],
+      "observed_labs_after_death_count": 9,
+      "observed_labs_after_death_sample": [
+        {
+          "t": 19.733,
+          "var": "MAP",
+          "value": 65.0
+        },
+        {
+          "t": 19.733,
+          "var": "urine_output",
+          "value": 131.25
+        },
+        {
+          "t": 20.733,
+          "var": "MAP",
+          "value": 65.0
+        },
+        {
+          "t": 21.733,
+          "var": "urine_output",
+          "value": 156.25
+        },
+        {
+          "t": 21.767,
+          "var": "MAP",
+          "value": 66.0
+        },
+        {
+          "t": 22.733,
+          "var": "MAP",
+          "value": 67.0
+        },
+        {
+          "t": 22.733,
+          "var": "urine_output",
+          "value": 168.75
+        },
+        {
+          "t": 23.733,
+          "var": "MAP",
+          "value": 67.0
+        }
+      ],
+      "action_totals_to_death_or_end": {
+        "insulin_rapid_sc": 16.0,
+        "fluids": 3258.01849,
+        "kcl": 66.0005,
+        "dextrose": 25.334
+      },
+      "action_coverage": {
+        "insulin_iv": 0,
+        "insulin_rapid_sc": 5,
+        "insulin_intermediate_sc": 0,
+        "insulin_basal_sc": 0,
+        "fluids": 15,
+        "kcl": 4,
+        "bicarbonate": 0,
+        "dextrose": 3
+      },
+      "repair_hypotheses": [
+        "Separate instantaneous osmolality from injury burden and calibrate injury half-life.",
+        "Audit sodium/free-water balance before changing residual dynamics.",
+        "Use real-survived high-osmolality stays as negative death labels for the OI threshold."
+      ]
+    },
+    {
+      "stay_id": 34499716,
+      "simulated_alive": true,
+      "simulated_death_cause": null,
+      "simulated_death_time_hours": null,
+      "hard_mechanism_subsystem": "none",
+      "hard_mechanism_terms": [],
+      "falsified_by_observed_later_measurements": false,
+      "observed_hours_after_sim_death": null,
+      "first_threshold_crossings": {},
+      "first_osmolar_risk": {
+        "t": 15.5,
+        "osmolality": 320.64219
+      },
+      "death_snapshot": {
+        "t": 24.5,
+        "G": 152.00775,
+        "pH": 7.65793,
+        "HCO3": 43.36253,
+        "anion_gap": 14.33939,
+        "Ke": 3.30676,
+        "MAP": 61.9304,
+        "V": 7.9826,
+        "Na": 168.66768,
+        "osmolality": 345.78023,
+        "creatinine": 1.67398,
+        "urine_output": 28.36588,
+        "BHB": 1.75455,
+        "K_store": 124.6903,
+        "osmotic_injury": 3.51687,
+        "critical_burden": 0.0
+      },
+      "predeath_curve_tail": [
+        {
+          "t": 22.0,
+          "state": {
+            "t": 22.0,
+            "G": 127.13322,
+            "pH": 7.65748,
+            "HCO3": 43.3173,
+            "anion_gap": 13.43897,
+            "Ke": 3.10064,
+            "MAP": 62.75709,
+            "V": 8.18927,
+            "Na": 165.01732,
+            "osmolality": 337.0976,
+            "creatinine": 1.64832,
+            "urine_output": 29.08482,
+            "BHB": 1.07923,
+            "K_store": 125.00464,
+            "osmotic_injury": 1.24259,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 22.5,
+          "state": {
+            "t": 22.5,
+            "G": 140.13032,
+            "pH": 7.65492,
+            "HCO3": 43.06284,
+            "anion_gap": 13.85026,
+            "Ke": 3.20942,
+            "MAP": 62.61181,
+            "V": 8.15295,
+            "Na": 165.71759,
+            "osmolality": 339.2202,
+            "creatinine": 1.65247,
+            "urine_output": 28.9414,
+            "BHB": 1.38769,
+            "K_store": 124.94052,
+            "osmotic_injury": 1.56992,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 23.0,
+          "state": {
+            "t": 23.0,
+            "G": 145.32097,
+            "pH": 7.65453,
+            "HCO3": 43.02447,
+            "anion_gap": 14.08192,
+            "Ke": 3.26293,
+            "MAP": 62.44186,
+            "V": 8.11047,
+            "Na": 166.44458,
+            "osmolality": 340.96256,
+            "creatinine": 1.65788,
+            "urine_output": 28.79974,
+            "BHB": 1.56144,
+            "K_store": 124.87702,
+            "osmotic_injury": 1.96886,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 23.5,
+          "state": {
+            "t": 23.5,
+            "G": 146.38358,
+            "pH": 7.65616,
+            "HCO3": 43.18604,
+            "anion_gap": 14.11244,
+            "Ke": 3.26335,
+            "MAP": 62.27442,
+            "V": 8.06861,
+            "Na": 167.17773,
+            "osmolality": 342.48789,
+            "creatinine": 1.66312,
+            "urine_output": 28.6563,
+            "BHB": 1.58433,
+            "K_store": 124.81415,
+            "osmotic_injury": 2.42728,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 24.0,
+          "state": {
+            "t": 24.0,
+            "G": 146.42435,
+            "pH": 7.65828,
+            "HCO3": 43.39678,
+            "anion_gap": 14.09537,
+            "Ke": 3.2527,
+            "MAP": 62.10727,
+            "V": 8.02682,
+            "Na": 167.91792,
+            "osmolality": 343.97053,
+            "creatinine": 1.66832,
+            "urine_output": 28.51199,
+            "BHB": 1.57153,
+            "K_store": 124.75191,
+            "osmotic_injury": 2.94029,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 24.5,
+          "state": {
+            "t": 24.5,
+            "G": 152.00775,
+            "pH": 7.65793,
+            "HCO3": 43.36253,
+            "anion_gap": 14.33939,
+            "Ke": 3.30676,
+            "MAP": 61.9304,
+            "V": 7.9826,
+            "Na": 168.66768,
+            "osmolality": 345.78023,
+            "creatinine": 1.67398,
+            "urine_output": 28.36588,
+            "BHB": 1.75455,
+            "K_store": 124.6903,
+            "osmotic_injury": 3.51687,
+            "critical_burden": 0.0
+          }
+        }
+      ],
+      "observed_labs_after_death_count": 0,
+      "observed_labs_after_death_sample": [],
+      "action_totals_to_death_or_end": {
+        "insulin_iv": 115.145,
+        "fluids": 347.2225,
+        "kcl": 39.9995,
+        "dextrose": 1.167
+      },
+      "action_coverage": {
+        "insulin_iv": 11,
+        "insulin_rapid_sc": 2,
+        "insulin_intermediate_sc": 0,
+        "insulin_basal_sc": 0,
+        "fluids": 26,
+        "kcl": 2,
+        "bicarbonate": 0,
+        "dextrose": 6
+      },
+      "repair_hypotheses": []
+    },
+    {
+      "stay_id": 34600477,
+      "simulated_alive": true,
+      "simulated_death_cause": null,
+      "simulated_death_time_hours": null,
+      "hard_mechanism_subsystem": "none",
+      "hard_mechanism_terms": [],
+      "falsified_by_observed_later_measurements": false,
+      "observed_hours_after_sim_death": null,
+      "first_threshold_crossings": {
+        "hypokalemia (K<2.5)": {
+          "t": 24.0,
+          "excess": 0.03271,
+          "state": {
+            "t": 24.0,
+            "G": 484.89727,
+            "pH": 7.41847,
+            "HCO3": 24.98322,
+            "anion_gap": 29.60518,
+            "Ke": 2.46729,
+            "MAP": 65.78703,
+            "V": 8.94676,
+            "Na": 161.26877,
+            "osmolality": 349.47629,
+            "creatinine": 1.54683,
+            "urine_output": 422.23286,
+            "BHB": 13.20389,
+            "K_store": 43.18144,
+            "osmotic_injury": 3.77516,
+            "critical_burden": 0.10202
+          }
+        }
+      },
+      "first_osmolar_risk": {
+        "t": 17.5,
+        "osmolality": 321.42576
+      },
+      "death_snapshot": {
+        "t": 24.5,
+        "G": 505.47671,
+        "pH": 7.41921,
+        "HCO3": 25.02599,
+        "anion_gap": 30.75864,
+        "Ke": 2.39658,
+        "MAP": 64.80637,
+        "V": 8.70159,
+        "Na": 162.01877,
+        "osmolality": 352.11959,
+        "creatinine": 1.582,
+        "urine_output": 438.00284,
+        "BHB": 14.06898,
+        "K_store": 41.44787,
+        "osmotic_injury": 4.7048,
+        "critical_burden": 0.34553
+      },
+      "predeath_curve_tail": [
+        {
+          "t": 22.0,
+          "state": {
+            "t": 22.0,
+            "G": 418.4618,
+            "pH": 7.41845,
+            "HCO3": 24.98245,
+            "anion_gap": 25.73596,
+            "Ke": 2.67686,
+            "MAP": 69.37708,
+            "V": 9.84427,
+            "Na": 158.26877,
+            "osmolality": 339.78543,
+            "creatinine": 1.42684,
+            "urine_output": 366.75391,
+            "BHB": 10.30197,
+            "K_store": 49.63732,
+            "osmotic_injury": 1.31041,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 22.5,
+          "state": {
+            "t": 22.5,
+            "G": 433.01109,
+            "pH": 7.41821,
+            "HCO3": 24.96868,
+            "anion_gap": 26.60739,
+            "Ke": 2.63452,
+            "MAP": 68.52049,
+            "V": 9.63012,
+            "Na": 159.01877,
+            "osmolality": 342.09372,
+            "creatinine": 1.45435,
+            "urine_output": 379.53114,
+            "BHB": 10.95554,
+            "K_store": 48.09229,
+            "osmotic_injury": 1.76539,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 23.0,
+          "state": {
+            "t": 23.0,
+            "G": 448.85066,
+            "pH": 7.41811,
+            "HCO3": 24.96258,
+            "anion_gap": 27.53849,
+            "Ke": 2.58588,
+            "MAP": 67.63759,
+            "V": 9.4094,
+            "Na": 159.76877,
+            "osmolality": 344.4737,
+            "creatinine": 1.48341,
+            "urine_output": 393.03491,
+            "BHB": 11.65387,
+            "K_store": 46.50238,
+            "osmotic_injury": 2.3195,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 23.5,
+          "state": {
+            "t": 23.5,
+            "G": 466.10919,
+            "pH": 7.41817,
+            "HCO3": 24.96617,
+            "anion_gap": 28.53575,
+            "Ke": 2.53036,
+            "MAP": 66.72692,
+            "V": 9.18173,
+            "Na": 160.51877,
+            "osmolality": 346.9325,
+            "creatinine": 1.51418,
+            "urine_output": 407.27966,
+            "BHB": 12.40181,
+            "K_store": 44.86587,
+            "osmotic_injury": 2.98499,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 24.0,
+          "state": {
+            "t": 24.0,
+            "G": 484.89727,
+            "pH": 7.41847,
+            "HCO3": 24.98322,
+            "anion_gap": 29.60518,
+            "Ke": 2.46729,
+            "MAP": 65.78703,
+            "V": 8.94676,
+            "Na": 161.26877,
+            "osmolality": 349.47629,
+            "creatinine": 1.54683,
+            "urine_output": 422.23286,
+            "BHB": 13.20389,
+            "K_store": 43.18144,
+            "osmotic_injury": 3.77516,
+            "critical_burden": 0.10202
+          }
+        },
+        {
+          "t": 24.5,
+          "state": {
+            "t": 24.5,
+            "G": 505.47671,
+            "pH": 7.41921,
+            "HCO3": 25.02599,
+            "anion_gap": 30.75864,
+            "Ke": 2.39658,
+            "MAP": 64.80637,
+            "V": 8.70159,
+            "Na": 162.01877,
+            "osmolality": 352.11959,
+            "creatinine": 1.582,
+            "urine_output": 438.00284,
+            "BHB": 14.06898,
+            "K_store": 41.44787,
+            "osmotic_injury": 4.7048,
+            "critical_burden": 0.34553
+          }
+        }
+      ],
+      "observed_labs_after_death_count": 0,
+      "observed_labs_after_death_sample": [],
+      "action_totals_to_death_or_end": {
+        "insulin_rapid_sc": 20.0,
+        "fluids": 123.3335,
+        "dextrose": 50.0
+      },
+      "action_coverage": {
+        "insulin_iv": 0,
+        "insulin_rapid_sc": 2,
+        "insulin_intermediate_sc": 0,
+        "insulin_basal_sc": 0,
+        "fluids": 4,
+        "kcl": 0,
+        "bicarbonate": 0,
+        "dextrose": 2
+      },
+      "repair_hypotheses": []
+    },
+    {
+      "stay_id": 34617352,
+      "simulated_alive": false,
+      "simulated_death_cause": "cumulative hyperosmolar injury",
+      "simulated_death_time_hours": 11.15,
+      "hard_mechanism_subsystem": "osmotic_injury",
+      "hard_mechanism_terms": [
+        "effective osmolality calculation",
+        "osmotic injury accumulation/recovery",
+        "hyperosmolar death threshold"
+      ],
+      "falsified_by_observed_later_measurements": true,
+      "observed_hours_after_sim_death": 12.35,
+      "first_threshold_crossings": {
+        "hypokalemia (K<2.5)": {
+          "t": 11.0,
+          "excess": 0.08424,
+          "state": {
+            "t": 11.0,
+            "G": 903.33466,
+            "pH": 7.36188,
+            "HCO3": 21.93103,
+            "anion_gap": 36.31398,
+            "Ke": 2.41576,
+            "MAP": 61.66496,
+            "V": 7.91624,
+            "Na": 162.39235,
+            "osmolality": 374.96997,
+            "creatinine": 1.76963,
+            "urine_output": 866.66011,
+            "BHB": 18.23548,
+            "K_store": 81.7719,
+            "osmotic_injury": 11.04593,
+            "critical_burden": 0.05876
+          }
+        },
+        "cumulative hyperosmolar injury": {
+          "t": 11.15,
+          "excess": 0.03201,
+          "state": {
+            "t": 11.15,
+            "G": 931.43099,
+            "pH": 7.3636,
+            "HCO3": 22.01811,
+            "anion_gap": 36.87372,
+            "Ke": 2.31073,
+            "MAP": 61.22846,
+            "V": 7.80711,
+            "Na": 162.61735,
+            "osmolality": 376.98087,
+            "creatinine": 1.78706,
+            "urine_output": 890.59419,
+            "BHB": 18.65529,
+            "K_store": 80.38515,
+            "osmotic_injury": 12.03201,
+            "critical_burden": 0.15388
+          }
+        }
+      },
+      "first_osmolar_risk": {
+        "t": 3.5,
+        "osmolality": 320.51924
+      },
+      "death_snapshot": {
+        "t": 11.15,
+        "G": 931.43099,
+        "pH": 7.3636,
+        "HCO3": 22.01811,
+        "anion_gap": 36.87372,
+        "Ke": 2.31073,
+        "MAP": 61.22846,
+        "V": 7.80711,
+        "Na": 162.61735,
+        "osmolality": 376.98087,
+        "creatinine": 1.78706,
+        "urine_output": 890.59419,
+        "BHB": 18.65529,
+        "K_store": 80.38515,
+        "osmotic_injury": 12.03201,
+        "critical_burden": 0.15388
+      },
+      "predeath_curve_tail": [
+        {
+          "t": 9.0,
+          "state": {
+            "t": 9.0,
+            "G": 577.39027,
+            "pH": 7.36308,
+            "HCO3": 21.99201,
+            "anion_gap": 30.64687,
+            "Ke": 3.33023,
+            "MAP": 66.02025,
+            "V": 9.00506,
+            "Na": 159.39235,
+            "osmolality": 350.86195,
+            "creatinine": 1.62962,
+            "urine_output": 541.54671,
+            "BHB": 13.98515,
+            "K_store": 95.81881,
+            "osmotic_injury": 3.24148,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 9.5,
+          "state": {
+            "t": 9.5,
+            "G": 659.00331,
+            "pH": 7.35887,
+            "HCO3": 21.77986,
+            "anion_gap": 31.76255,
+            "Ke": 3.16783,
+            "MAP": 65.24085,
+            "V": 8.81021,
+            "Na": 160.14235,
+            "osmolality": 356.896,
+            "creatinine": 1.64733,
+            "urine_output": 630.60382,
+            "BHB": 14.82191,
+            "K_store": 93.09248,
+            "osmotic_injury": 4.44292,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 10.0,
+          "state": {
+            "t": 10.0,
+            "G": 734.80993,
+            "pH": 7.35744,
+            "HCO3": 21.70824,
+            "anion_gap": 33.0902,
+            "Ke": 2.96883,
+            "MAP": 64.21016,
+            "V": 8.55254,
+            "Na": 160.89235,
+            "osmolality": 362.60748,
+            "creatinine": 1.67836,
+            "urine_output": 709.42065,
+            "BHB": 15.81765,
+            "K_store": 89.82945,
+            "osmotic_injury": 6.09762,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 10.5,
+          "state": {
+            "t": 10.5,
+            "G": 815.51132,
+            "pH": 7.35827,
+            "HCO3": 21.74949,
+            "anion_gap": 34.5995,
+            "Ke": 2.72154,
+            "MAP": 63.0169,
+            "V": 8.25422,
+            "Na": 161.64235,
+            "osmolality": 368.59089,
+            "creatinine": 1.71888,
+            "urine_output": 787.68884,
+            "BHB": 16.94962,
+            "K_store": 86.05812,
+            "osmotic_injury": 8.25998,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 11.0,
+          "state": {
+            "t": 11.0,
+            "G": 903.33466,
+            "pH": 7.36188,
+            "HCO3": 21.93103,
+            "anion_gap": 36.31398,
+            "Ke": 2.41576,
+            "MAP": 61.66496,
+            "V": 7.91624,
+            "Na": 162.39235,
+            "osmolality": 374.96997,
+            "creatinine": 1.76963,
+            "urine_output": 866.66011,
+            "BHB": 18.23548,
+            "K_store": 81.7719,
+            "osmotic_injury": 11.04593,
+            "critical_burden": 0.05876
+          }
+        },
+        {
+          "t": 11.15,
+          "state": {
+            "t": 11.15,
+            "G": 931.43099,
+            "pH": 7.3636,
+            "HCO3": 22.01811,
+            "anion_gap": 36.87372,
+            "Ke": 2.31073,
+            "MAP": 61.22846,
+            "V": 7.80711,
+            "Na": 162.61735,
+            "osmolality": 376.98087,
+            "creatinine": 1.78706,
+            "urine_output": 890.59419,
+            "BHB": 18.65529,
+            "K_store": 80.38515,
+            "osmotic_injury": 12.03201,
+            "critical_burden": 0.15388
+          }
+        }
+      ],
+      "observed_labs_after_death_count": 34,
+      "observed_labs_after_death_sample": [
+        {
+          "t": 11.5,
+          "var": "MAP",
+          "value": 59.0
+        },
+        {
+          "t": 12.5,
+          "var": "MAP",
+          "value": 61.0
+        },
+        {
+          "t": 12.5,
+          "var": "urine_output",
+          "value": 52.5
+        },
+        {
+          "t": 13.5,
+          "var": "MAP",
+          "value": 56.0
+        },
+        {
+          "t": 13.5,
+          "var": "urine_output",
+          "value": 55.0
+        },
+        {
+          "t": 14.5,
+          "var": "MAP",
+          "value": 59.0
+        },
+        {
+          "t": 14.5,
+          "var": "MAP",
+          "value": 214.0
+        },
+        {
+          "t": 14.5,
+          "var": "urine_output",
+          "value": 45.0
+        }
+      ],
+      "action_totals_to_death_or_end": {
+        "insulin_rapid_sc": 3.3335,
+        "fluids": 1184.5925,
+        "dextrose": 47.7185
+      },
+      "action_coverage": {
+        "insulin_iv": 0,
+        "insulin_rapid_sc": 1,
+        "insulin_intermediate_sc": 0,
+        "insulin_basal_sc": 0,
+        "fluids": 48,
+        "kcl": 0,
+        "bicarbonate": 1,
+        "dextrose": 37
+      },
+      "repair_hypotheses": [
+        "Separate instantaneous osmolality from injury burden and calibrate injury half-life.",
+        "Audit sodium/free-water balance before changing residual dynamics.",
+        "Use real-survived high-osmolality stays as negative death labels for the OI threshold."
+      ]
+    },
+    {
+      "stay_id": 35024147,
+      "simulated_alive": true,
+      "simulated_death_cause": null,
+      "simulated_death_time_hours": null,
+      "hard_mechanism_subsystem": "none",
+      "hard_mechanism_terms": [],
+      "falsified_by_observed_later_measurements": false,
+      "observed_hours_after_sim_death": null,
+      "first_threshold_crossings": {
+        "hypokalemia (K<2.5)": {
+          "t": 7.0,
+          "excess": 0.01243,
+          "state": {
+            "t": 7.0,
+            "G": 138.37059,
+            "pH": 7.3545,
+            "HCO3": 21.56172,
+            "anion_gap": 12.97377,
+            "Ke": 2.48757,
+            "MAP": 78.53642,
+            "V": 12.13411,
+            "Na": 141.88202,
+            "osmolality": 291.45129,
+            "creatinine": 1.19383,
+            "urine_output": 42.44953,
+            "BHB": 0.73033,
+            "K_store": 102.3796,
+            "osmotic_injury": 0.0,
+            "critical_burden": 0.12697
+          }
+        }
+      },
+      "first_osmolar_risk": {
+        "t": 24.0,
+        "osmolality": 320.85042
+      },
+      "death_snapshot": {
+        "t": 24.0,
+        "G": 86.76913,
+        "pH": 7.3531,
+        "HCO3": 21.49207,
+        "anion_gap": 13.53746,
+        "Ke": 3.61387,
+        "MAP": 77.79146,
+        "V": 11.94786,
+        "Na": 158.01496,
+        "osmolality": 320.85042,
+        "creatinine": 1.23396,
+        "urine_output": 41.33618,
+        "BHB": 1.15309,
+        "K_store": 183.08715,
+        "osmotic_injury": 0.00016,
+        "critical_burden": 0.0
+      },
+      "predeath_curve_tail": [
+        {
+          "t": 21.5,
+          "state": {
+            "t": 21.5,
+            "G": 63.02447,
+            "pH": 7.38225,
+            "HCO3": 22.98455,
+            "anion_gap": 12.53918,
+            "Ke": 3.37198,
+            "MAP": 76.73652,
+            "V": 11.68413,
+            "Na": 155.65585,
+            "osmolality": 314.81307,
+            "creatinine": 1.25441,
+            "urine_output": 40.65998,
+            "BHB": 0.40438,
+            "K_store": 183.72649,
+            "osmotic_injury": 0.0,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 22.0,
+          "state": {
+            "t": 22.0,
+            "G": 62.24581,
+            "pH": 7.38004,
+            "HCO3": 22.86784,
+            "anion_gap": 12.55095,
+            "Ke": 3.32424,
+            "MAP": 76.95254,
+            "V": 11.73814,
+            "Na": 156.13553,
+            "osmolality": 315.72917,
+            "creatinine": 1.25009,
+            "urine_output": 40.75645,
+            "BHB": 0.41321,
+            "K_store": 183.60024,
+            "osmotic_injury": 0.0,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 22.5,
+          "state": {
+            "t": 22.5,
+            "G": 65.16799,
+            "pH": 7.37518,
+            "HCO3": 22.61292,
+            "anion_gap": 12.70575,
+            "Ke": 3.36523,
+            "MAP": 77.16186,
+            "V": 11.79047,
+            "Na": 156.61144,
+            "osmolality": 316.84333,
+            "creatinine": 1.24608,
+            "urine_output": 40.87955,
+            "BHB": 0.52931,
+            "K_store": 183.4733,
+            "osmotic_injury": 0.0,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 23.0,
+          "state": {
+            "t": 23.0,
+            "G": 70.9706,
+            "pH": 7.36807,
+            "HCO3": 22.246,
+            "anion_gap": 12.97461,
+            "Ke": 3.45797,
+            "MAP": 77.37092,
+            "V": 11.84273,
+            "Na": 157.08346,
+            "osmolality": 318.10974,
+            "creatinine": 1.2421,
+            "urine_output": 41.02044,
+            "BHB": 0.73095,
+            "K_store": 183.34553,
+            "osmotic_injury": 0.0,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 23.5,
+          "state": {
+            "t": 23.5,
+            "G": 77.10286,
+            "pH": 7.36066,
+            "HCO3": 21.86964,
+            "anion_gap": 13.25512,
+            "Ke": 3.54179,
+            "MAP": 77.57968,
+            "V": 11.89492,
+            "Na": 157.55169,
+            "osmolality": 319.38688,
+            "creatinine": 1.2381,
+            "urine_output": 41.17377,
+            "BHB": 0.94134,
+            "K_store": 183.21683,
+            "osmotic_injury": 0.0,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 24.0,
+          "state": {
+            "t": 24.0,
+            "G": 86.76913,
+            "pH": 7.3531,
+            "HCO3": 21.49207,
+            "anion_gap": 13.53746,
+            "Ke": 3.61387,
+            "MAP": 77.79146,
+            "V": 11.94786,
+            "Na": 158.01496,
+            "osmolality": 320.85042,
+            "creatinine": 1.23396,
+            "urine_output": 41.33618,
+            "BHB": 1.15309,
+            "K_store": 183.08715,
+            "osmotic_injury": 0.00016,
+            "critical_burden": 0.0
+          }
+        }
+      ],
+      "observed_labs_after_death_count": 0,
+      "observed_labs_after_death_sample": [],
+      "action_totals_to_death_or_end": {
+        "insulin_iv": 319.146,
+        "fluids": 3852.75047,
+        "kcl": 85.1345,
+        "dextrose": 0.4165
+      },
+      "action_coverage": {
+        "insulin_iv": 22,
+        "insulin_rapid_sc": 2,
+        "insulin_intermediate_sc": 0,
+        "insulin_basal_sc": 0,
+        "fluids": 31,
+        "kcl": 7,
+        "bicarbonate": 0,
+        "dextrose": 1
+      },
+      "repair_hypotheses": []
+    },
+    {
+      "stay_id": 35396193,
+      "simulated_alive": true,
+      "simulated_death_cause": null,
+      "simulated_death_time_hours": null,
+      "hard_mechanism_subsystem": "none",
+      "hard_mechanism_terms": [],
+      "falsified_by_observed_later_measurements": false,
+      "observed_hours_after_sim_death": null,
+      "first_threshold_crossings": {},
+      "first_osmolar_risk": null,
+      "death_snapshot": {
+        "t": 4.5,
+        "G": 191.48343,
+        "pH": 7.32984,
+        "HCO3": 17.25871,
+        "anion_gap": 15.22172,
+        "Ke": 3.38443,
+        "MAP": 84.36419,
+        "V": 13.59105,
+        "Na": 139.58928,
+        "osmolality": 289.81652,
+        "creatinine": 1.03513,
+        "urine_output": 68.55723,
+        "BHB": 2.41629,
+        "K_store": 109.84716,
+        "osmotic_injury": 0.0,
+        "critical_burden": 0.0
+      },
+      "predeath_curve_tail": [
+        {
+          "t": 2.0,
+          "state": {
+            "t": 2.0,
+            "G": 212.61163,
+            "pH": 7.32366,
+            "HCO3": 16.27122,
+            "anion_gap": 16.00572,
+            "Ke": 3.58267,
+            "MAP": 84.56631,
+            "V": 13.64158,
+            "Na": 137.14732,
+            "osmolality": 286.1064,
+            "creatinine": 1.02095,
+            "urine_output": 108.01334,
+            "BHB": 3.00429,
+            "K_store": 111.40047,
+            "osmotic_injury": 0.0,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 2.5,
+          "state": {
+            "t": 2.5,
+            "G": 204.45514,
+            "pH": 7.32642,
+            "HCO3": 16.69948,
+            "anion_gap": 15.63098,
+            "Ke": 3.48687,
+            "MAP": 84.4962,
+            "V": 13.62405,
+            "Na": 137.66301,
+            "osmolality": 286.68465,
+            "creatinine": 1.02462,
+            "urine_output": 92.9284,
+            "BHB": 2.72323,
+            "K_store": 111.00654,
+            "osmotic_injury": 0.0,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 3.0,
+          "state": {
+            "t": 3.0,
+            "G": 198.36421,
+            "pH": 7.32824,
+            "HCO3": 16.99368,
+            "anion_gap": 15.37905,
+            "Ke": 3.42268,
+            "MAP": 84.45281,
+            "V": 13.6132,
+            "Na": 138.16131,
+            "osmolality": 287.34285,
+            "creatinine": 1.02762,
+            "urine_output": 81.56765,
+            "BHB": 2.53429,
+            "K_store": 110.67203,
+            "osmotic_injury": 0.0,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 3.5,
+          "state": {
+            "t": 3.5,
+            "G": 194.44979,
+            "pH": 7.32926,
+            "HCO3": 17.16166,
+            "anion_gap": 15.24559,
+            "Ke": 3.38876,
+            "MAP": 84.42785,
+            "V": 13.60696,
+            "Na": 138.64731,
+            "osmolality": 288.09738,
+            "creatinine": 1.03017,
+            "urine_output": 74.23473,
+            "BHB": 2.43419,
+            "K_store": 110.37735,
+            "osmotic_injury": 0.0,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 4.0,
+          "state": {
+            "t": 4.0,
+            "G": 192.2586,
+            "pH": 7.32971,
+            "HCO3": 17.23631,
+            "anion_gap": 15.20081,
+            "Ke": 3.37754,
+            "MAP": 84.41412,
+            "V": 13.60353,
+            "Na": 139.12568,
+            "osmolality": 288.9324,
+            "creatinine": 1.03238,
+            "urine_output": 70.0946,
+            "BHB": 2.4006,
+            "K_store": 110.10649,
+            "osmotic_injury": 0.0,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 4.5,
+          "state": {
+            "t": 4.5,
+            "G": 191.48343,
+            "pH": 7.32984,
+            "HCO3": 17.25871,
+            "anion_gap": 15.22172,
+            "Ke": 3.38443,
+            "MAP": 84.36419,
+            "V": 13.59105,
+            "Na": 139.58928,
+            "osmolality": 289.81652,
+            "creatinine": 1.03513,
+            "urine_output": 68.55723,
+            "BHB": 2.41629,
+            "K_store": 109.84716,
+            "osmotic_injury": 0.0,
+            "critical_burden": 0.0
+          }
+        }
+      ],
+      "observed_labs_after_death_count": 0,
+      "observed_labs_after_death_sample": [],
+      "action_totals_to_death_or_end": {
+        "insulin_rapid_sc": 4.0,
+        "fluids": 552.0835
+      },
+      "action_coverage": {
+        "insulin_iv": 0,
+        "insulin_rapid_sc": 1,
+        "insulin_intermediate_sc": 0,
+        "insulin_basal_sc": 1,
+        "fluids": 2,
+        "kcl": 0,
+        "bicarbonate": 0,
+        "dextrose": 0
+      },
+      "repair_hypotheses": []
+    },
+    {
+      "stay_id": 36059427,
+      "simulated_alive": false,
+      "simulated_death_cause": "hypokalemia (K<2.5)",
+      "simulated_death_time_hours": 10.0,
+      "hard_mechanism_subsystem": "potassium_mass",
+      "hard_mechanism_terms": [
+        "total-body potassium reserve",
+        "renal potassium loss",
+        "insulin/acidosis serum potassium shift",
+        "KCl retention into total store"
+      ],
+      "falsified_by_observed_later_measurements": true,
+      "observed_hours_after_sim_death": 14.0,
+      "first_threshold_crossings": {
+        "hypokalemia (K<2.5)": {
+          "t": 8.5,
+          "excess": 0.04584,
+          "state": {
+            "t": 8.5,
+            "G": 420.04269,
+            "pH": 7.45325,
+            "HCO3": 27.06659,
+            "anion_gap": 20.20882,
+            "Ke": 2.45416,
+            "MAP": 71.34123,
+            "V": 10.33531,
+            "Na": 157.75,
+            "osmolality": 338.8357,
+            "creatinine": 1.47325,
+            "urine_output": 387.59737,
+            "BHB": 6.15661,
+            "K_store": 84.25011,
+            "osmotic_injury": 1.4037,
+            "critical_burden": 0.12629
+          }
+        }
+      },
+      "first_osmolar_risk": {
+        "t": 3.5,
+        "osmolality": 320.9403
+      },
+      "death_snapshot": {
+        "t": 10.0,
+        "G": 446.87229,
+        "pH": 7.48174,
+        "HCO3": 28.90137,
+        "anion_gap": 20.50034,
+        "Ke": 2.33178,
+        "MAP": 68.95201,
+        "V": 9.738,
+        "Na": 160.0,
+        "osmolality": 344.82624,
+        "creatinine": 1.5172,
+        "urine_output": 402.48548,
+        "BHB": 6.37525,
+        "K_store": 79.18831,
+        "osmotic_injury": 2.79593,
+        "critical_burden": 1.00213
+      },
+      "predeath_curve_tail": [
+        {
+          "t": 7.5,
+          "state": {
+            "t": 7.5,
+            "G": 425.9051,
+            "pH": 7.41134,
+            "HCO3": 24.5763,
+            "anion_gap": 21.3722,
+            "Ke": 2.64049,
+            "MAP": 72.97192,
+            "V": 10.74298,
+            "Na": 156.25,
+            "osmolality": 336.16139,
+            "creatinine": 1.45242,
+            "urine_output": 411.03915,
+            "BHB": 7.02915,
+            "K_store": 87.87399,
+            "osmotic_injury": 0.77311,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 8.0,
+          "state": {
+            "t": 8.0,
+            "G": 421.03282,
+            "pH": 7.43508,
+            "HCO3": 25.95762,
+            "anion_gap": 20.65373,
+            "Ke": 2.53394,
+            "MAP": 72.14383,
+            "V": 10.53596,
+            "Na": 157.0,
+            "osmolality": 337.39071,
+            "creatinine": 1.46218,
+            "urine_output": 396.49077,
+            "BHB": 6.4903,
+            "K_store": 86.00774,
+            "osmotic_injury": 1.06916,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 8.5,
+          "state": {
+            "t": 8.5,
+            "G": 420.04269,
+            "pH": 7.45325,
+            "HCO3": 27.06659,
+            "anion_gap": 20.20882,
+            "Ke": 2.45416,
+            "MAP": 71.34123,
+            "V": 10.33531,
+            "Na": 157.75,
+            "osmolality": 338.8357,
+            "creatinine": 1.47325,
+            "urine_output": 387.59737,
+            "BHB": 6.15661,
+            "K_store": 84.25011,
+            "osmotic_injury": 1.4037,
+            "critical_burden": 0.12629
+          }
+        },
+        {
+          "t": 9.0,
+          "state": {
+            "t": 9.0,
+            "G": 423.39668,
+            "pH": 7.46625,
+            "HCO3": 27.88883,
+            "anion_gap": 20.07055,
+            "Ke": 2.39985,
+            "MAP": 70.54294,
+            "V": 10.13573,
+            "Na": 158.5,
+            "osmolality": 340.52204,
+            "creatinine": 1.48617,
+            "urine_output": 385.03867,
+            "BHB": 6.05291,
+            "K_store": 82.55731,
+            "osmotic_injury": 1.79045,
+            "critical_burden": 0.37697
+          }
+        },
+        {
+          "t": 9.5,
+          "state": {
+            "t": 9.5,
+            "G": 432.88861,
+            "pH": 7.47532,
+            "HCO3": 28.47756,
+            "anion_gap": 20.18322,
+            "Ke": 2.36162,
+            "MAP": 69.75378,
+            "V": 9.93845,
+            "Na": 159.25,
+            "osmolality": 342.54937,
+            "creatinine": 1.50061,
+            "urine_output": 390.87319,
+            "BHB": 6.13741,
+            "K_store": 80.88395,
+            "osmotic_injury": 2.24747,
+            "critical_burden": 0.6729
+          }
+        },
+        {
+          "t": 10.0,
+          "state": {
+            "t": 10.0,
+            "G": 446.87229,
+            "pH": 7.48174,
+            "HCO3": 28.90137,
+            "anion_gap": 20.50034,
+            "Ke": 2.33178,
+            "MAP": 68.95201,
+            "V": 9.738,
+            "Na": 160.0,
+            "osmolality": 344.82624,
+            "creatinine": 1.5172,
+            "urine_output": 402.48548,
+            "BHB": 6.37525,
+            "K_store": 79.18831,
+            "osmotic_injury": 2.79593,
+            "critical_burden": 1.00213
+          }
+        }
+      ],
+      "observed_labs_after_death_count": 52,
+      "observed_labs_after_death_sample": [
+        {
+          "t": 10.25,
+          "var": "MAP",
+          "value": 79.0
+        },
+        {
+          "t": 10.5,
+          "var": "MAP",
+          "value": 80.0
+        },
+        {
+          "t": 10.75,
+          "var": "MAP",
+          "value": 80.0
+        },
+        {
+          "t": 11.0,
+          "var": "MAP",
+          "value": 72.0
+        },
+        {
+          "t": 11.0,
+          "var": "urine_output",
+          "value": 28.75
+        },
+        {
+          "t": 11.25,
+          "var": "MAP",
+          "value": 78.0
+        },
+        {
+          "t": 11.5,
+          "var": "MAP",
+          "value": 74.0
+        },
+        {
+          "t": 11.75,
+          "var": "MAP",
+          "value": 77.0
+        }
+      ],
+      "action_totals_to_death_or_end": {
+        "insulin_rapid_sc": 12.0,
+        "fluids": 728.394,
+        "bicarbonate": 11.25,
+        "dextrose": 26.203
+      },
+      "action_coverage": {
+        "insulin_iv": 0,
+        "insulin_rapid_sc": 3,
+        "insulin_intermediate_sc": 0,
+        "insulin_basal_sc": 0,
+        "fluids": 38,
+        "kcl": 0,
+        "bicarbonate": 4,
+        "dextrose": 27
+      },
+      "repair_hypotheses": [
+        "Trace serum K drop into insulin shift, renal K loss, and KCl replacement terms.",
+        "Add a patient-level potassium-store correction using survived hypokalemia replays as constraints.",
+        "Do not let grey-box residual directly write total-body K; repair the mass equation itself."
+      ]
+    },
+    {
+      "stay_id": 36753294,
+      "simulated_alive": false,
+      "simulated_death_cause": "cumulative hyperosmolar injury",
+      "simulated_death_time_hours": 20.367,
+      "hard_mechanism_subsystem": "osmotic_injury",
+      "hard_mechanism_terms": [
+        "effective osmolality calculation",
+        "osmotic injury accumulation/recovery",
+        "hyperosmolar death threshold"
+      ],
+      "falsified_by_observed_later_measurements": true,
+      "observed_hours_after_sim_death": 3.25,
+      "first_threshold_crossings": {
+        "cumulative hyperosmolar injury": {
+          "t": 20.367,
+          "excess": 0.0195,
+          "state": {
+            "t": 20.36667,
+            "G": 928.27945,
+            "pH": 7.8644,
+            "HCO3": 69.75543,
+            "anion_gap": 34.50091,
+            "Ke": 3.48824,
+            "MAP": 40.37267,
+            "V": 2.59317,
+            "Na": 159.28953,
+            "osmolality": 370.15013,
+            "creatinine": 3.08432,
+            "urine_output": 320.93309,
+            "BHB": 16.87568,
+            "K_store": 83.0987,
+            "osmotic_injury": 12.0195,
+            "critical_burden": 0.0
+          }
+        }
+      },
+      "first_osmolar_risk": {
+        "t": 10.5,
+        "osmolality": 320.03148
+      },
+      "death_snapshot": {
+        "t": 20.36667,
+        "G": 928.27945,
+        "pH": 7.8644,
+        "HCO3": 69.75543,
+        "anion_gap": 34.50091,
+        "Ke": 3.48824,
+        "MAP": 40.37267,
+        "V": 2.59317,
+        "Na": 159.28953,
+        "osmolality": 370.15013,
+        "creatinine": 3.08432,
+        "urine_output": 320.93309,
+        "BHB": 16.87568,
+        "K_store": 83.0987,
+        "osmotic_injury": 12.0195,
+        "critical_burden": 0.0
+      },
+      "predeath_curve_tail": [
+        {
+          "t": 18.0,
+          "state": {
+            "t": 18.0,
+            "G": 704.14515,
+            "pH": 7.75794,
+            "HCO3": 54.59042,
+            "anion_gap": 27.14408,
+            "Ke": 3.02445,
+            "MAP": 43.75915,
+            "V": 3.43979,
+            "Na": 155.73953,
+            "osmolality": 350.59823,
+            "creatinine": 2.70522,
+            "urine_output": 290.52724,
+            "BHB": 11.35806,
+            "K_store": 85.03458,
+            "osmotic_injury": 4.76684,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 18.5,
+          "state": {
+            "t": 18.5,
+            "G": 736.46869,
+            "pH": 7.77907,
+            "HCO3": 57.31226,
+            "anion_gap": 28.08421,
+            "Ke": 3.09325,
+            "MAP": 43.06549,
+            "V": 3.26637,
+            "Na": 156.48953,
+            "osmolality": 353.89398,
+            "creatinine": 2.76746,
+            "urine_output": 293.47281,
+            "BHB": 12.06316,
+            "K_store": 84.60749,
+            "osmotic_injury": 5.74704,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 19.0,
+          "state": {
+            "t": 19.0,
+            "G": 776.46029,
+            "pH": 7.80011,
+            "HCO3": 60.15718,
+            "anion_gap": 29.364,
+            "Ke": 3.17868,
+            "MAP": 42.36346,
+            "V": 3.09087,
+            "Na": 157.23953,
+            "osmolality": 357.61574,
+            "creatinine": 2.83711,
+            "urine_output": 298.71456,
+            "BHB": 13.023,
+            "K_store": 84.19227,
+            "osmotic_injury": 6.95909,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 19.5,
+          "state": {
+            "t": 19.5,
+            "G": 824.35636,
+            "pH": 7.82199,
+            "HCO3": 63.26577,
+            "anion_gap": 30.9636,
+            "Ke": 3.27893,
+            "MAP": 41.64905,
+            "V": 2.91226,
+            "Na": 157.98953,
+            "osmolality": 361.77663,
+            "creatinine": 2.91631,
+            "urine_output": 305.71717,
+            "BHB": 14.2227,
+            "K_store": 83.78598,
+            "osmotic_injury": 8.461,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 20.0,
+          "state": {
+            "t": 20.0,
+            "G": 880.79891,
+            "pH": 7.84556,
+            "HCO3": 66.79451,
+            "anion_gap": 32.88161,
+            "Ke": 3.39383,
+            "MAP": 40.91917,
+            "V": 2.72979,
+            "Na": 158.73953,
+            "osmolality": 366.41233,
+            "creatinine": 3.00768,
+            "urine_output": 314.08513,
+            "BHB": 15.66121,
+            "K_store": 83.387,
+            "osmotic_injury": 10.33648,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 20.367,
+          "state": {
+            "t": 20.36667,
+            "G": 928.27945,
+            "pH": 7.8644,
+            "HCO3": 69.75543,
+            "anion_gap": 34.50091,
+            "Ke": 3.48824,
+            "MAP": 40.37267,
+            "V": 2.59317,
+            "Na": 159.28953,
+            "osmolality": 370.15013,
+            "creatinine": 3.08432,
+            "urine_output": 320.93309,
+            "BHB": 16.87568,
+            "K_store": 83.0987,
+            "osmotic_injury": 12.0195,
+            "critical_burden": 0.0
+          }
+        }
+      ],
+      "observed_labs_after_death_count": 14,
+      "observed_labs_after_death_sample": [
+        {
+          "t": 20.5,
+          "var": "MAP",
+          "value": 58.0
+        },
+        {
+          "t": 20.55,
+          "var": "MAP",
+          "value": 59.0
+        },
+        {
+          "t": 20.617,
+          "var": "MAP",
+          "value": 64.0
+        },
+        {
+          "t": 20.7,
+          "var": "MAP",
+          "value": 65.0
+        },
+        {
+          "t": 20.8,
+          "var": "MAP",
+          "value": 64.0
+        },
+        {
+          "t": 20.883,
+          "var": "MAP",
+          "value": 68.0
+        },
+        {
+          "t": 21.3,
+          "var": "MAP",
+          "value": 64.0
+        },
+        {
+          "t": 21.45,
+          "var": "MAP",
+          "value": 62.0
+        }
+      ],
+      "action_totals_to_death_or_end": {
+        "insulin_rapid_sc": 18.0,
+        "fluids": 172.905,
+        "dextrose": 2.6865
+      },
+      "action_coverage": {
+        "insulin_iv": 0,
+        "insulin_rapid_sc": 4,
+        "insulin_intermediate_sc": 0,
+        "insulin_basal_sc": 0,
+        "fluids": 15,
+        "kcl": 0,
+        "bicarbonate": 0,
+        "dextrose": 10
+      },
+      "repair_hypotheses": [
+        "Separate instantaneous osmolality from injury burden and calibrate injury half-life.",
+        "Audit sodium/free-water balance before changing residual dynamics.",
+        "Use real-survived high-osmolality stays as negative death labels for the OI threshold."
+      ]
+    },
+    {
+      "stay_id": 38554095,
+      "simulated_alive": false,
+      "simulated_death_cause": "hypokalemia (K<2.5)",
+      "simulated_death_time_hours": 17.517,
+      "hard_mechanism_subsystem": "potassium_mass",
+      "hard_mechanism_terms": [
+        "total-body potassium reserve",
+        "renal potassium loss",
+        "insulin/acidosis serum potassium shift",
+        "KCl retention into total store"
+      ],
+      "falsified_by_observed_later_measurements": true,
+      "observed_hours_after_sim_death": 6.216,
+      "first_threshold_crossings": {
+        "hypokalemia (K<2.5)": {
+          "t": 16.5,
+          "excess": 0.04073,
+          "state": {
+            "t": 16.5,
+            "G": 668.99925,
+            "pH": 7.54797,
+            "HCO3": 33.66253,
+            "anion_gap": 39.48467,
+            "Ke": 2.45927,
+            "MAP": 69.80879,
+            "V": 9.9522,
+            "Na": 155.75362,
+            "osmolality": 348.67386,
+            "creatinine": 1.44487,
+            "urine_output": 746.43047,
+            "BHB": 20.6135,
+            "K_store": 81.17694,
+            "osmotic_injury": 2.60777,
+            "critical_burden": 0.03917
+          }
+        }
+      },
+      "first_osmolar_risk": {
+        "t": 12.0,
+        "osmolality": 321.40624
+      },
+      "death_snapshot": {
+        "t": 17.51667,
+        "G": 753.9193,
+        "pH": 7.5701,
+        "HCO3": 35.4229,
+        "anion_gap": 42.95315,
+        "Ke": 1.91494,
+        "MAP": 66.63422,
+        "V": 9.15855,
+        "Na": 157.27862,
+        "osmolality": 356.44164,
+        "creatinine": 1.54103,
+        "urine_output": 813.96092,
+        "BHB": 23.21486,
+        "K_store": 71.73751,
+        "osmotic_injury": 4.84974,
+        "critical_burden": 1.01992
+      },
+      "predeath_curve_tail": [
+        {
+          "t": 15.5,
+          "state": {
+            "t": 15.5,
+            "G": 598.81712,
+            "pH": 7.53183,
+            "HCO3": 32.43508,
+            "anion_gap": 36.6743,
+            "Ke": 2.89451,
+            "MAP": 72.66561,
+            "V": 10.6664,
+            "Na": 154.25362,
+            "osmolality": 341.77485,
+            "creatinine": 1.37129,
+            "urine_output": 681.13701,
+            "BHB": 18.50572,
+            "K_store": 89.76054,
+            "osmotic_injury": 1.24383,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 16.0,
+          "state": {
+            "t": 16.0,
+            "G": 632.47259,
+            "pH": 7.53931,
+            "HCO3": 32.99852,
+            "anion_gap": 38.01338,
+            "Ke": 2.68736,
+            "MAP": 71.26985,
+            "V": 10.31746,
+            "Na": 155.00362,
+            "osmolality": 345.1446,
+            "creatinine": 1.40571,
+            "urine_output": 713.6344,
+            "BHB": 19.51004,
+            "K_store": 85.56185,
+            "osmotic_injury": 1.8379,
+            "critical_burden": 0.0
+          }
+        },
+        {
+          "t": 16.5,
+          "state": {
+            "t": 16.5,
+            "G": 668.99925,
+            "pH": 7.54797,
+            "HCO3": 33.66253,
+            "anion_gap": 39.48467,
+            "Ke": 2.45927,
+            "MAP": 69.80879,
+            "V": 9.9522,
+            "Na": 155.75362,
+            "osmolality": 348.67386,
+            "creatinine": 1.44487,
+            "urine_output": 746.43047,
+            "BHB": 20.6135,
+            "K_store": 81.17694,
+            "osmotic_injury": 2.60777,
+            "critical_burden": 0.03917
+          }
+        },
+        {
+          "t": 17.0,
+          "state": {
+            "t": 17.0,
+            "G": 708.80247,
+            "pH": 7.55801,
+            "HCO3": 34.44994,
+            "anion_gap": 41.10376,
+            "Ke": 2.20658,
+            "MAP": 68.28185,
+            "V": 9.57046,
+            "Na": 156.50362,
+            "osmolality": 352.38515,
+            "creatinine": 1.48921,
+            "urine_output": 779.50129,
+            "BHB": 21.82782,
+            "K_store": 76.61744,
+            "osmotic_injury": 3.58464,
+            "critical_burden": 0.38324
+          }
+        },
+        {
+          "t": 17.5,
+          "state": {
+            "t": 17.5,
+            "G": 752.39397,
+            "pH": 7.56968,
+            "HCO3": 35.38862,
+            "anion_gap": 42.89043,
+            "Ke": 1.92488,
+            "MAP": 66.68848,
+            "V": 9.17212,
+            "Na": 157.25362,
+            "osmolality": 356.3069,
+            "creatinine": 1.53926,
+            "urine_output": 812.84461,
+            "BHB": 23.16782,
+            "K_store": 71.89742,
+            "osmotic_injury": 4.80443,
+            "critical_burden": 0.99459
+          }
+        },
+        {
+          "t": 17.517,
+          "state": {
+            "t": 17.51667,
+            "G": 753.9193,
+            "pH": 7.5701,
+            "HCO3": 35.4229,
+            "anion_gap": 42.95315,
+            "Ke": 1.91494,
+            "MAP": 66.63422,
+            "V": 9.15855,
+            "Na": 157.27862,
+            "osmolality": 356.44164,
+            "creatinine": 1.54103,
+            "urine_output": 813.96092,
+            "BHB": 23.21486,
+            "K_store": 71.73751,
+            "osmotic_injury": 4.84974,
+            "critical_burden": 1.01992
+          }
+        }
+      ],
+      "observed_labs_after_death_count": 19,
+      "observed_labs_after_death_sample": [
+        {
+          "t": 17.533,
+          "var": "MAP",
+          "value": 68.0
+        },
+        {
+          "t": 18.033,
+          "var": "MAP",
+          "value": 68.0
+        },
+        {
+          "t": 18.033,
+          "var": "urine_output",
+          "value": 343.75
+        },
+        {
+          "t": 19.033,
+          "var": "MAP",
+          "value": 72.0
+        },
+        {
+          "t": 19.033,
+          "var": "urine_output",
+          "value": 425.0
+        },
+        {
+          "t": 20.033,
+          "var": "MAP",
+          "value": 73.0
+        },
+        {
+          "t": 20.033,
+          "var": "urine_output",
+          "value": 393.75
+        },
+        {
+          "t": 21.033,
+          "var": "MAP",
+          "value": 68.0
+        }
+      ],
+      "action_totals_to_death_or_end": {
+        "fluids": 981.92499,
+        "kcl": 20.0,
+        "bicarbonate": 105.0,
+        "dextrose": 27.34
+      },
+      "action_coverage": {
+        "insulin_iv": 0,
+        "insulin_rapid_sc": 1,
+        "insulin_intermediate_sc": 0,
+        "insulin_basal_sc": 0,
+        "fluids": 24,
+        "kcl": 2,
+        "bicarbonate": 4,
+        "dextrose": 13
+      },
+      "repair_hypotheses": [
+        "Trace serum K drop into insulin shift, renal K loss, and KCl replacement terms.",
+        "Add a patient-level potassium-store correction using survived hypokalemia replays as constraints.",
+        "Do not let grey-box residual directly write total-body K; repair the mass equation itself."
+      ]
+    }
+  ],
+  "conclusion": "Real trajectories that survive beyond simulated death are direct falsifications of the hard viability mechanism. Repair should target the owning equations, not widen the grey-box residual write set."
+}

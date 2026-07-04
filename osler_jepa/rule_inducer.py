@@ -21,7 +21,11 @@ def _active_conflict(action_index, state_index, direction_index):
 
 
 def induce_candidates(records, action_keys, state_keys, canonical_states,
-                      min_support=3, min_confidence=0.55):
+                      min_support=3, min_confidence=0.55,
+                      population="MIMIC-IV ICU DKA-like anchors",
+                      provenance_source=(
+                          "JEPA symbolic RuleProposalHead + MIMIC-IV demo"
+                      )):
     grouped = defaultdict(list)
     pair_totals = defaultdict(int)
     for record in records:
@@ -85,7 +89,7 @@ def induce_candidates(records, action_keys, state_keys, canonical_states,
             "level": "observational_association",
             "context": {
                 "disease": "DKA",
-                "population": "MIMIC-IV ICU DKA-like anchors",
+                "population": population,
                 "cointerventions_observed": dict(sorted(cointervention_counts.items())),
             },
             "action": {"type": "intervention", "name": action},
@@ -106,7 +110,7 @@ def induce_candidates(records, action_keys, state_keys, canonical_states,
                 "isolated_action_support_count": isolated_support,
             },
             "provenance": {
-                "source": "JEPA symbolic RuleProposalHead + MIMIC-IV demo",
+                "source": provenance_source,
                 "causal_claim": False,
                 "confounding_warning": True,
             },

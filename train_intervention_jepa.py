@@ -24,22 +24,30 @@ from dka_world_model import (
     A_DIM,
     ACTION_KEYS,
     A_SCALE,
+    DKA_STATE_COMPILER,
     DT,
     H_DIM,
     HISTORY_HOURS,
+    MAX_OBSERVATION_AGE_HOURS,
     S_DIM,
     S_MEAN,
     S_STD,
     STATE_KEYS,
     WorldModel,
     a2vec,
+    load_checkpoint,
     randomized_dka,
     save_checkpoint,
     s2vec,
+    observation_context,
     treatment_history_features,
     vicreg,
 )
-from osler_jepa.curriculum import STAGES, stage_for_epoch
+from osler_jepa.curriculum import STAGES, stage_for_epoch, weights_for_stage
+from osler_jepa.persistence_gate import load_persistence_gate
+from osler_jepa.action_prior import load_or_fit_action_prior
+from osler_jepa.actions import TREATMENT_EVENT_DIM, treatment_event_features
+from osler_jepa.greybox_residual import GreyBoxResidualRuntime
 from osler_jepa.ontology import OSLER_STATE_ONTOLOGY
 from osler_jepa.symbolic import (
     RULE_IDS,
@@ -51,6 +59,8 @@ from osler_jepa.symbolic import (
     schema as symbolic_schema,
 )
 from osler_jepa.validator import OSLER_DKA_VALIDATOR
+from osler_jepa.viability import HomeostaticWorldModelObjective
+from dka_physionet_calibration import PhysioNetDkaCalibration
 
 
 PROTOCOLS = (
@@ -80,6 +90,8 @@ BASE_ACTIONS = {
     "dextrose": expand_action([3, 100, 0, 0, 5]),
 }
 
+HOMEOSTATIC_OBJECTIVE = HomeostaticWorldModelObjective(DKA_STATE_COMPILER)
+
 
 def choose_device(requested):
     if requested != "auto":
@@ -91,22 +103,25 @@ def choose_device(requested):
     return torch.device("cpu")
 
 
-def protocol_action(name, observation, intensity, rng, step=0):
+def protocol_action(name, observation, intensity, rng, step=0, action_prior=None):
     if name == "randomized":
-        action = np.zeros(A_DIM, dtype=np.float32)
-        insulin_channel = int(rng.integers(0, 5))
-        if insulin_channel < 4:
-            choices = (
-                [0.0, 2.0, 4.0, 6.0, 10.0, 20.0],
-                [0.0, 8.0, 16.0, 24.0],
-                [0.0, 20.0, 40.0],
-                [0.0, 20.0, 40.0, 60.0],
-            )[insulin_channel]
-            action[insulin_channel] = rng.choice(choices)
-        action[ACTION_INDEX["fluids"]] = rng.choice([0.0, 250.0, 500.0])
-        action[ACTION_INDEX["kcl"]] = rng.choice([0.0, 10.0, 20.0])
-        action[ACTION_INDEX["bicarbonate"]] = rng.choice([0.0, 0.0, 25.0, 50.0])
-        action[ACTION_INDEX["dextrose"]] = rng.choice([0.0, 0.0, 5.0, 10.0])
+        if action_prior is not None:
+            action = action_prior.sample(rng)
+        else:
+            action = np.zeros(A_DIM, dtype=np.float32)
+            insulin_channel = int(rng.integers(0, 5))
+            if insulin_channel < 4:
+                choices = (
+                    [0.0, 2.0, 4.0, 6.0, 10.0, 20.0],
+                    [0.0, 8.0, 16.0, 24.0],
+                    [0.0, 20.0, 40.0],
+                    [0.0, 20.0, 40.0, 60.0],
+                )[insulin_channel]
+                action[insulin_channel] = rng.choice(choices)
+            action[ACTION_INDEX["fluids"]] = rng.choice([0.0, 250.0, 500.0])
+            action[ACTION_INDEX["kcl"]] = rng.choice([0.0, 10.0, 20.0])
+            action[ACTION_INDEX["bicarbonate"]] = rng.choice([0.0, 0.0, 25.0, 50.0])
+            action[ACTION_INDEX["dextrose"]] = rng.choice([0.0, 0.0, 5.0, 10.0])
     else:
         action = BASE_ACTIONS[name] * intensity
         if name in {"rapid_sc", "basal_sc"} and step > 0:
@@ -129,27 +144,39 @@ def protocol_action(name, observation, intensity, rng, step=0):
     if observation["G"] > 350 and name != "dextrose":
         action[ACTION_INDEX["dextrose"]] = 0.0
 
-    upper = A_SCALE * 2.0
-    return np.clip(action, 0.0, upper)
+    action = np.clip(action, 0.0, A_SCALE * 2.0)
+    return action_prior.constrain(action) if action_prior is not None else action
 
 
-def prepare_base_body(rng):
-    body = DKABody(rng=rng)
-    observation = randomized_dka(body, rng)
+def prepare_base_body(rng, action_prior=None, residual_model=None,
+                      physionet_calibration=None):
+    profile = (
+        physionet_calibration.sample_profile(rng)
+        if physionet_calibration is not None else None
+    )
+    body = DKABody(rng=rng, profile=profile, residual_model=residual_model)
+    observation = (
+        physionet_calibration.apply_presentation(body, rng)
+        if physionet_calibration is not None else randomized_dka(body, rng)
+    )
     # Branch at different points in the treatment course, not only presentation.
     # This exposes the model to partially corrected glucose/acidosis and residual
     # treatment effects that resemble later EHR anchors.
     prior_actions = []
+    prior_durations = []
     for _ in range(int(rng.integers(0, 13))):
-        warmup = np.zeros(A_DIM, dtype=np.float32)
-        route = int(rng.choice([0, 0, 0, 1, 2, 3]))
-        warmup[route] = float(rng.choice(
-            [0.0, 2.0, 4.0, 6.0, 10.0, 20.0] if route == 0 else
-            [0.0, 8.0, 16.0] if route == 1 else
-            [0.0, 20.0, 40.0]
-        ))
-        warmup[ACTION_INDEX["fluids"]] = float(rng.choice([0.0, 250.0, 500.0]))
-        warmup[ACTION_INDEX["kcl"]] = float(rng.choice([0.0, 0.0, 10.0, 20.0]))
+        if action_prior is not None:
+            warmup = action_prior.sample(rng)
+        else:
+            warmup = np.zeros(A_DIM, dtype=np.float32)
+            route = int(rng.choice([0, 0, 0, 1, 2, 3]))
+            warmup[route] = float(rng.choice(
+                [0.0, 2.0, 4.0, 6.0, 10.0, 20.0] if route == 0 else
+                [0.0, 8.0, 16.0] if route == 1 else
+                [0.0, 20.0, 40.0]
+            ))
+            warmup[ACTION_INDEX["fluids"]] = float(rng.choice([0.0, 250.0, 500.0]))
+            warmup[ACTION_INDEX["kcl"]] = float(rng.choice([0.0, 0.0, 10.0, 20.0]))
         if observation["Ke"] < 3.3:
             warmup[:4] = 0.0
             warmup[ACTION_INDEX["kcl"]] = 20.0
@@ -159,59 +186,143 @@ def prepare_base_body(rng):
             warmup[ACTION_INDEX["dextrose"]] = float(rng.choice([5.0, 10.0]))
         observation, _, dead, _ = body.step(warmup, dt=DT)
         prior_actions.append(warmup.tolist())
+        prior_durations.append(DT)
         if dead:
             observation = randomized_dka(body, rng)
             prior_actions = []
+            prior_durations = []
             break
-    return body, observation, prior_actions
+    return body, observation, prior_actions, prior_durations
 
 
-def generate_branched_dataset(n_scenarios=600, seq_len=12, seed=0):
+def generate_branched_dataset(n_scenarios=600, seq_len=12, seed=0,
+                              action_prior=None, residual_model=None,
+                              physionet_calibration=None):
     rng = np.random.default_rng(seed)
     n_protocols = len(PROTOCOLS)
     states = np.zeros((n_scenarios, n_protocols, seq_len + 1, S_DIM), np.float32)
     actions = np.zeros((n_scenarios, n_protocols, seq_len, A_DIM), np.float32)
+    action_events = np.zeros(
+        (n_scenarios, n_protocols, seq_len, TREATMENT_EVENT_DIM), np.float32
+    )
     histories = np.zeros((n_scenarios, n_protocols, seq_len, H_DIM), np.float32)
     valid = np.zeros((n_scenarios, n_protocols, seq_len), np.float32)
     alive = np.zeros((n_scenarios, n_protocols, seq_len), np.float32)
+    time_deltas = np.zeros((n_scenarios, n_protocols, seq_len), np.float32)
     death_causes = {}
+    death_causes_by_protocol = {protocol: {} for protocol in PROTOCOLS}
 
     for scenario in range(n_scenarios):
-        base_body, base_observation, base_history = prepare_base_body(rng)
+        base_body, base_observation, base_history, base_durations = prepare_base_body(
+            rng, action_prior=action_prior, residual_model=residual_model,
+            physionet_calibration=physionet_calibration,
+        )
+        scenario_deltas = rng.choice(
+            np.array([0.25, 0.5, 0.75, 1.0], dtype=np.float32),
+            size=seq_len,
+            p=[0.10, 0.65, 0.15, 0.10],
+        )
         intensities = rng.uniform(0.75, 1.25, size=(n_protocols, A_DIM)).astype(np.float32)
         for protocol_index, protocol in enumerate(PROTOCOLS):
             body = copy.deepcopy(base_body)
             observation = dict(base_observation)
             prior_actions = list(base_history)
+            prior_durations = list(base_durations)
             states[scenario, protocol_index, 0] = s2vec(observation)
             for step in range(seq_len):
                 histories[scenario, protocol_index, step] = treatment_history_features(
-                    prior_actions, DT, HISTORY_HOURS
+                    prior_actions, DT, HISTORY_HOURS, prior_durations
                 )
                 action = protocol_action(
-                    protocol, observation, intensities[protocol_index], rng, step
+                    protocol, observation, intensities[protocol_index], rng, step,
+                    action_prior=action_prior,
                 )
-                next_observation, _, dead, info = body.step(action, dt=DT)
+                previous_action = prior_actions[-1] if prior_actions else None
+                action_events[scenario, protocol_index, step] = (
+                    treatment_event_features(
+                        [action], initial_action=previous_action
+                    )[0]
+                )
+                step_hours = float(scenario_deltas[step])
+                next_observation, _, dead, info = body.step(action, dt=step_hours)
                 actions[scenario, protocol_index, step] = a2vec(action)
+                time_deltas[scenario, protocol_index, step] = step_hours
                 states[scenario, protocol_index, step + 1] = s2vec(next_observation)
                 valid[scenario, protocol_index, step] = 1.0
                 alive[scenario, protocol_index, step] = 0.0 if dead else 1.0
                 observation = next_observation
                 prior_actions.append(action.tolist())
+                prior_durations.append(step_hours)
                 if dead:
                     cause = info.get("cause") or "unknown"
                     death_causes[cause] = death_causes.get(cause, 0) + 1
+                    protocol_causes = death_causes_by_protocol[protocol]
+                    protocol_causes[cause] = protocol_causes.get(cause, 0) + 1
                     states[scenario, protocol_index, step + 1:] = s2vec(observation)
                     break
 
     return {
         "states": states,
         "actions": actions,
+        "action_events": action_events,
         "histories": histories,
+        "time_deltas": time_deltas,
         "valid": valid,
         "alive": alive,
         "protocols": list(PROTOCOLS),
         "death_causes": death_causes,
+        "death_causes_by_protocol": death_causes_by_protocol,
+    }
+
+
+def simulator_calibration_audit(dataset):
+    """Summarize mortality and intervention-response magnitude by protocol."""
+    physical = dataset["states"] * S_STD + S_MEAN
+    initial = physical[:, :, 0]
+    final = physical[:, :, -1]
+    alive = dataset["alive"][:, :, -1]
+    state_indices = {
+        name: STATE_KEYS.index(name)
+        for name in ("G", "HCO3", "Ke", "MAP", "V", "K_store", "osmolality")
+    }
+    protocol_report = {}
+    for protocol_index, protocol in enumerate(PROTOCOLS):
+        changes = final[:, protocol_index] - initial[:, protocol_index]
+        protocol_report[protocol] = {
+            "mortality_rate": round(float((1.0 - alive[:, protocol_index]).mean()), 6),
+            "death_causes": dataset["death_causes_by_protocol"][protocol],
+            "change_quantiles": {
+                name: {
+                    "p10": round(float(np.quantile(changes[:, index], 0.10)), 4),
+                    "median": round(float(np.quantile(changes[:, index], 0.50)), 4),
+                    "p90": round(float(np.quantile(changes[:, index], 0.90)), 4),
+                }
+                for name, index in state_indices.items()
+            },
+        }
+    median = lambda protocol, state: protocol_report[protocol][
+        "change_quantiles"
+    ][state]["median"]
+    gates = {
+        "full_protocol_not_more_lethal_than_no_treatment": (
+            protocol_report["full_protocol"]["mortality_rate"]
+            <= protocol_report["no_treatment"]["mortality_rate"]
+        ),
+        "iv_insulin_reduces_glucose_vs_no_treatment": (
+            median("insulin", "G") < median("no_treatment", "G")
+        ),
+        "fluids_raise_map_vs_no_treatment": (
+            median("fluids", "MAP") > median("no_treatment", "MAP")
+        ),
+        "kcl_replenishes_store_vs_no_treatment": (
+            median("potassium", "K_store") > median("no_treatment", "K_store")
+        ),
+    }
+    return {
+        "protocols": protocol_report,
+        "mechanistic_direction_gates": gates,
+        "all_direction_gates_pass": bool(all(gates.values())),
+        "clinical_calibration_claim_allowed": False,
     }
 
 
@@ -233,19 +344,74 @@ def masked_mean(values, mask):
     return (values * mask).sum() / mask.sum().clamp_min(1.0) / values.shape[-1]
 
 
-def batch_losses(model, states, actions, histories, valid, alive, weights=None):
+def _partial_observation_context(state, drop_probability, observation_model=None):
+    if drop_probability <= 0 and observation_model is None:
+        return torch.ones_like(state), torch.zeros_like(state)
+    if observation_model is None:
+        mask = (torch.rand_like(state) > drop_probability).to(state.dtype)
+        measured_age = torch.rand_like(state) * 6.0
+    else:
+        probabilities = torch.as_tensor(
+            observation_model["probabilities"],
+            dtype=state.dtype,
+            device=state.device,
+        ).reshape(1, -1)
+        probabilities = probabilities.expand_as(state)
+        if drop_probability > 0:
+            probabilities = probabilities * (1.0 - drop_probability)
+        mask = (torch.rand_like(state) < probabilities.clamp(0.01, 1.0)).to(
+            state.dtype
+        )
+        age_p90 = torch.as_tensor(
+            observation_model["age_p90_hours"],
+            dtype=state.dtype,
+            device=state.device,
+        ).reshape(1, -1).expand_as(state)
+        measured_age = torch.rand_like(state) * age_p90.clamp(1.0, MAX_OBSERVATION_AGE_HOURS)
+    # Keep at least one directly observed variable in every state vector.
+    empty = mask.sum(dim=-1) == 0
+    if empty.any():
+        mask[empty, 0] = 1.0
+    age = torch.where(
+        mask > 0,
+        measured_age,
+        torch.full_like(state, MAX_OBSERVATION_AGE_HOURS),
+    )
+    return mask, age
+
+
+def _time_weighted_exposure(actions, time_deltas, horizon):
+    durations = time_deltas[:, :, :horizon + 1]
+    weighted = actions[:, :, :horizon + 1] * durations.unsqueeze(-1)
+    return weighted.sum(dim=2) / durations.sum(dim=2).clamp_min(1e-6).unsqueeze(-1)
+
+
+def batch_losses(model, states, actions, action_events, histories, time_deltas,
+                 valid, alive, weights=None, observation_dropout=0.0,
+                 observation_model=None):
     weights = weights or STAGES[-1].weights
     batch, protocols, steps, _ = actions.shape
     current = states[:, :, :-1].reshape(-1, S_DIM)
     target = states[:, :, 1:].reshape(-1, S_DIM)
     flat_actions = actions.reshape(-1, A_DIM)
+    flat_action_events = action_events.reshape(-1, TREATMENT_EVENT_DIM)
     flat_histories = histories.reshape(-1, H_DIM)
+    flat_deltas = time_deltas.reshape(-1)
+    elapsed = torch.cumsum(time_deltas, dim=2) - time_deltas
+    flat_elapsed = elapsed.reshape(-1)
     flat_valid = valid.reshape(-1)
 
-    latent = model.encode_state(current, flat_histories)
-    predicted_latent = model.predict_latent(latent, flat_actions)
+    current_mask, current_age = _partial_observation_context(
+        current, observation_dropout, observation_model
+    )
+    latent = model.encode_state(
+        current * current_mask, flat_histories, current_mask, current_age
+    )
+    predicted_latent = model.predict_latent(
+        latent, flat_actions, flat_deltas, flat_elapsed, flat_action_events
+    )
     with torch.no_grad():
-        target_latent = model.Ebar(target)
+        target_latent = model.encode_target_state(target)
 
     one_step_latent = masked_mean((predicted_latent - target_latent).square(), flat_valid)
     one_step_state = masked_mean((model.D(predicted_latent) - target).square(), flat_valid)
@@ -253,9 +419,19 @@ def batch_losses(model, states, actions, histories, valid, alive, weights=None):
 
     initial = states[:, :, 0].reshape(batch * protocols, S_DIM)
     action_sequences = actions.reshape(batch * protocols, steps, A_DIM)
+    event_sequences = action_events.reshape(
+        batch * protocols, steps, TREATMENT_EVENT_DIM
+    )
     initial_history = histories[:, :, 0].reshape(batch * protocols, H_DIM)
+    initial_mask, initial_age = _partial_observation_context(
+        initial, observation_dropout, observation_model
+    )
     predicted, risk_logits, rollout_latents = model.rollout(
-        initial, action_sequences, initial_history
+        initial * initial_mask, action_sequences, initial_history,
+        observation_mask=initial_mask,
+        observation_age=initial_age,
+        delta_hours=time_deltas.reshape(batch * protocols, steps),
+        treatment_events=event_sequences,
     )
     predicted = predicted.reshape(batch, protocols, steps, S_DIM)
     risk_logits = risk_logits.reshape(batch, protocols, steps)
@@ -263,10 +439,16 @@ def batch_losses(model, states, actions, histories, valid, alive, weights=None):
 
     rollout_state = masked_mean((predicted - states[:, :, 1:]).square(), valid)
     with torch.no_grad():
-        rollout_targets = model.Ebar(states[:, :, 1:].reshape(-1, S_DIM)).reshape_as(
-            rollout_latents
-        )
+        rollout_targets = model.encode_target_state(
+            states[:, :, 1:].reshape(-1, S_DIM)
+        ).reshape_as(rollout_latents)
     rollout_latent = masked_mean((rollout_latents - rollout_targets).square(), valid)
+    world_components = HOMEOSTATIC_OBJECTIVE.components(
+        predicted,
+        states[:, :, 1:],
+        model.uncertainty_logits(rollout_latents.detach()),
+        valid,
+    )
 
     death_target = 1.0 - alive
     positive = (death_target * valid).sum()
@@ -287,19 +469,29 @@ def batch_losses(model, states, actions, histories, valid, alive, weights=None):
         predicted_effect = predicted[:, 1:, horizon] - predicted[:, :1, horizon]
         true_effect = states[:, 1:, horizon + 1] - states[:, :1, horizon + 1]
         effect_losses.append(masked_mean((predicted_effect - true_effect).square(), pair_valid))
-        action_exposure = actions[:, 1:, :horizon + 1].mean(dim=2)
-        control_exposure = actions[:, :1, :horizon + 1].mean(dim=2)
+        action_exposure = _time_weighted_exposure(
+            actions[:, 1:], time_deltas[:, 1:], horizon
+        )
+        control_exposure = _time_weighted_exposure(
+            actions[:, :1], time_deltas[:, :1], horizon
+        )
         osler_losses.append(OSLER_DKA_VALIDATOR.consistency_loss(
             predicted_effect,
             action_exposure - control_exposure,
             pair_valid,
+            horizon_hours=time_deltas[:, 1:, :horizon + 1].sum(dim=2),
         ))
     effect = torch.stack(effect_losses).mean()
     osler = torch.stack(osler_losses).mean()
 
-    initial_latent = model.encode_state(initial, initial_history).reshape(
+    initial_latent = model.encode_state(
+        initial * initial_mask, initial_history, initial_mask, initial_age
+    ).reshape(
         batch, protocols, -1
     )
+    initial_compiled = DKA_STATE_COMPILER.tensor_context(
+        initial * initial_mask, initial_mask
+    ).reshape(batch, protocols, -1)
     direction_losses = []
     status_losses = []
     proof_losses = []
@@ -308,11 +500,19 @@ def batch_losses(model, states, actions, histories, valid, alive, weights=None):
     contrastive_losses = []
     for horizon in (0, min(5, steps - 1), steps - 1):
         horizon_valid = valid[:, :, horizon]
-        action_exposure = actions[:, :, :horizon + 1].mean(dim=2)
+        action_exposure = _time_weighted_exposure(
+            actions, time_deltas, horizon
+        )
+        horizon_hours = time_deltas[:, :, :horizon + 1].sum(dim=2)
+        horizon_events = action_events[:, :, :horizon + 1].amax(dim=2)
         outputs = model.symbolic_outputs(
             initial_latent.reshape(-1, initial_latent.shape[-1]),
             action_exposure.reshape(-1, A_DIM),
-            delta_hours=(horizon + 1) * DT,
+            delta_hours=horizon_hours.reshape(-1),
+            treatment_events=horizon_events.reshape(-1, TREATMENT_EVENT_DIM),
+            compiled_context=initial_compiled.reshape(
+                -1, initial_compiled.shape[-1]
+            ),
         )
         direction_logits = outputs["direction_logits"].reshape(
             batch, protocols, S_DIM, 3
@@ -337,7 +537,7 @@ def batch_losses(model, states, actions, histories, valid, alive, weights=None):
         ))
 
         status_label, proof_label = rule_supervision(
-            true_effect, action_difference, pair_valid
+            true_effect, action_difference, pair_valid, horizon_hours[:, 1:]
         )
         status_logits = outputs["status_logits"].reshape(
             batch, protocols, 3
@@ -352,7 +552,7 @@ def batch_losses(model, states, actions, histories, valid, alive, weights=None):
             proof_logits, proof_label, pair_valid
         ))
         contradiction_losses.append(contradiction_penalty(
-            proposal_logits, action_difference, pair_valid
+            proposal_logits, action_difference, pair_valid, horizon_hours[:, 1:]
         ))
 
         predicted_effect = predicted[:, 1:, horizon] - predicted[:, :1, horizon]
@@ -393,6 +593,14 @@ def batch_losses(model, states, actions, histories, valid, alive, weights=None):
         + weights["rule_proposal"] * rule_proposal
         + weights["contradiction"] * contradiction
         + weights["action_contrastive"] * action_contrastive
+        + weights["world_truth"] * world_components["world_truth"]
+        + weights["viability"] * world_components["viability"]
+        + weights["intervention_sensitivity"]
+        * world_components["intervention_sensitivity"]
+        + weights["trajectory_consistency"]
+        * world_components["trajectory_consistency"]
+        + weights["uncertainty_calibration"]
+        * world_components["uncertainty_calibration"]
     )
     return {
         "total": total,
@@ -411,30 +619,37 @@ def batch_losses(model, states, actions, histories, valid, alive, weights=None):
         "rule_proposal": rule_proposal,
         "contradiction": contradiction,
         "action_contrastive": action_contrastive,
+        **world_components,
     }
 
 
 def tensor_batch(dataset, indices, device):
     return tuple(
         torch.as_tensor(dataset[key][indices], dtype=torch.float32, device=device)
-        for key in ("states", "actions", "histories", "valid", "alive")
+        for key in (
+            "states", "actions", "action_events", "histories", "time_deltas",
+            "valid", "alive"
+        )
     )
 
 
 @torch.no_grad()
-def validation_loss(model, dataset, indices, batch_size, device, weights=None):
+def validation_loss(model, dataset, indices, batch_size, device, weights=None,
+                    observation_model=None):
     model.eval()
     totals = []
     for start in range(0, len(indices), batch_size):
         selection = indices[start:start + batch_size]
         losses = batch_losses(
-            model, *tensor_batch(dataset, selection, device), weights=weights
+            model, *tensor_batch(dataset, selection, device), weights=weights,
+            observation_model=observation_model,
         )
         totals.append(float(losses["total"]))
     return float(np.mean(totals)) if totals else math.inf
 
 
-def train_model(model, dataset, splits, epochs, batch_size, learning_rate, device):
+def train_model(model, dataset, splits, epochs, batch_size, learning_rate, device,
+                viability_dynamics_enabled=False, observation_model=None):
     optimizer = torch.optim.AdamW(
         [parameter for parameter in model.parameters() if parameter.requires_grad],
         lr=learning_rate,
@@ -449,6 +664,7 @@ def train_model(model, dataset, splits, epochs, batch_size, learning_rate, devic
 
     for epoch in range(1, epochs + 1):
         stage = stage_for_epoch(epoch, epochs)
+        stage_weights = weights_for_stage(stage, viability_dynamics_enabled)
         model.train()
         order = rng.permutation(splits["train"])
         epoch_parts = []
@@ -457,7 +673,9 @@ def train_model(model, dataset, splits, epochs, batch_size, learning_rate, devic
             losses = batch_losses(
                 model,
                 *tensor_batch(dataset, selection, device),
-                weights=stage.weights,
+                weights=stage_weights,
+                observation_dropout=0.25,
+                observation_model=observation_model,
             )
             optimizer.zero_grad(set_to_none=True)
             losses["total"].backward()
@@ -469,7 +687,8 @@ def train_model(model, dataset, splits, epochs, batch_size, learning_rate, devic
 
         validation = validation_loss(
             model, dataset, splits["validation"], batch_size, device,
-            weights=STAGES[-1].weights,
+            weights=weights_for_stage(STAGES[-1], viability_dynamics_enabled),
+            observation_model=observation_model,
         )
         summary = {
             name: float(np.mean([part[name] for part in epoch_parts]))
@@ -491,6 +710,8 @@ def train_model(model, dataset, splits, epochs, batch_size, learning_rate, devic
                 f"epoch {epoch:03d}/{epochs} train={summary['total']:.4f} "
                 f"val={validation:.4f} roll={summary['rollout_state']:.4f} "
                 f"effect={summary['effect']:.4f} osler={summary['osler']:.4f} "
+                f"viability={summary['viability']:.4f} "
+                f"uncertainty={summary['uncertainty_calibration']:.4f} "
                 f"symbolic={summary['rule_proposal']:.4f} "
                 f"stage={stage.name}"
             )
@@ -505,12 +726,18 @@ def predict_split(model, dataset, indices, device, batch_size=32):
     predictions, risks = [], []
     for start in range(0, len(indices), batch_size):
         selection = indices[start:start + batch_size]
-        states, actions, histories, _, _ = tensor_batch(dataset, selection, device)
+        states, actions, action_events, histories, time_deltas, _, _ = tensor_batch(
+            dataset, selection, device
+        )
         batch, protocols, steps, _ = actions.shape
         predicted, risk, _ = model.rollout(
             states[:, :, 0].reshape(batch * protocols, S_DIM),
             actions.reshape(batch * protocols, steps, A_DIM),
             histories[:, :, 0].reshape(batch * protocols, H_DIM),
+            delta_hours=time_deltas.reshape(batch * protocols, steps),
+            treatment_events=action_events.reshape(
+                batch * protocols, steps, TREATMENT_EVENT_DIM
+            ),
         )
         predictions.append(predicted.reshape(batch, protocols, steps, S_DIM).cpu().numpy())
         risks.append(torch.sigmoid(risk).reshape(batch, protocols, steps).cpu().numpy())
@@ -588,7 +815,7 @@ def counterfactual_metrics(prediction, states, valid):
     return report
 
 
-def osler_validator_audit(prediction, states, actions, valid):
+def osler_validator_audit(prediction, states, actions, time_deltas, valid):
     horizon = prediction.shape[2] - 1
     status_counts = {"verified": 0, "contradicted": 0, "unexplained": 0}
     rule_counts = {}
@@ -609,8 +836,17 @@ def osler_validator_audit(prediction, states, actions, valid):
                 STATE_KEYS,
                 (prediction[scenario, protocol, horizon] * S_STD + S_MEAN).tolist(),
             ))
-            action = actions[scenario, protocol, :horizon + 1].mean(axis=0)
-            audit = OSLER_DKA_VALIDATOR.validate(action, future, baseline)
+            durations = time_deltas[scenario, protocol, :horizon + 1]
+            action = (
+                actions[scenario, protocol, :horizon + 1]
+                * durations[:, None]
+            ).sum(axis=0) / max(float(durations.sum()), 1e-6)
+            audit = OSLER_DKA_VALIDATOR.validate(
+                action, future, baseline,
+                horizon_hours=float(
+                    time_deltas[scenario, protocol, :horizon + 1].sum()
+                ),
+            )
             status_counts[audit["status"]] += 1
             for check in audit["checks"]:
                 counts = rule_counts.setdefault(
@@ -637,17 +873,25 @@ def osler_validator_audit(prediction, states, actions, valid):
 
 @torch.no_grad()
 def symbolic_head_metrics(model, dataset, indices, device):
-    states, actions, histories, valid, _ = tensor_batch(dataset, indices, device)
+    states, actions, action_events, histories, time_deltas, valid, _ = tensor_batch(
+        dataset, indices, device
+    )
     batch, protocols, steps, _ = actions.shape
     initial = states[:, :, 0]
     initial_latent = model.encode_state(
         initial.reshape(-1, S_DIM), histories[:, :, 0].reshape(-1, H_DIM)
     )
-    action_exposure = actions.mean(dim=2)
+    action_exposure = _time_weighted_exposure(
+        actions, time_deltas, actions.shape[2] - 1
+    )
+    total_hours = time_deltas.sum(dim=2)
     outputs = model.symbolic_outputs(
         initial_latent,
         action_exposure.reshape(-1, A_DIM),
-        delta_hours=steps * DT,
+        delta_hours=total_hours.reshape(-1),
+        treatment_events=action_events.amax(dim=2).reshape(
+            -1, TREATMENT_EVENT_DIM
+        ),
     )
 
     direction_prediction = outputs["direction_logits"].argmax(dim=-1).reshape(
@@ -668,7 +912,7 @@ def symbolic_head_metrics(model, dataset, indices, device):
     proposal_changed = proposal_mask & (proposal_truth != 1)
 
     status_truth, proof_truth = rule_supervision(
-        true_effect, action_difference, pair_valid
+        true_effect, action_difference, pair_valid, total_hours[:, 1:]
     )
     status_prediction = outputs["status_logits"].argmax(dim=-1).reshape(
         batch, protocols
@@ -742,7 +986,9 @@ def evaluate_model(model, dataset, indices, device):
     prediction, risk = predict_split(model, dataset, indices, device)
     states = dataset["states"][indices]
     actions = dataset["actions"][indices]
+    action_events = dataset["action_events"][indices]
     histories = dataset["histories"][indices]
+    time_deltas = dataset["time_deltas"][indices]
     valid = dataset["valid"][indices]
     alive = dataset["alive"][indices]
     horizons = [0, min(5, prediction.shape[2] - 1), prediction.shape[2] - 1]
@@ -757,14 +1003,25 @@ def evaluate_model(model, dataset, indices, device):
     factual_mse = ((prediction[:, :, -1] - states[:, :, -1]) ** 2)[final_mask].mean()
     flat_actions = actions.reshape(-1, actions.shape[2], A_DIM).copy()
     rng = np.random.default_rng(991)
-    shuffled = flat_actions[rng.permutation(len(flat_actions))]
+    permutation = rng.permutation(len(flat_actions))
+    shuffled = flat_actions[permutation]
+    shuffled_events = action_events.reshape(
+        -1, action_events.shape[2], TREATMENT_EVENT_DIM
+    )[permutation]
     initial = states[:, :, 0].reshape(-1, S_DIM)
     initial_history = histories[:, :, 0].reshape(-1, H_DIM)
+    flat_time_deltas = time_deltas.reshape(-1, time_deltas.shape[2])
     with torch.no_grad():
         shuffled_prediction, _, _ = model.rollout(
             torch.as_tensor(initial, dtype=torch.float32, device=device),
             torch.as_tensor(shuffled, dtype=torch.float32, device=device),
             torch.as_tensor(initial_history, dtype=torch.float32, device=device),
+            delta_hours=torch.as_tensor(
+                flat_time_deltas, dtype=torch.float32, device=device
+            ),
+            treatment_events=torch.as_tensor(
+                shuffled_events, dtype=torch.float32, device=device
+            ),
         )
     shuffled_prediction = shuffled_prediction[:, -1].cpu().numpy().reshape(
         states.shape[0], states.shape[1], S_DIM
@@ -790,7 +1047,7 @@ def evaluate_model(model, dataset, indices, device):
         },
         "counterfactual": counterfactual_metrics(prediction, states, valid),
         "osler_validator": osler_validator_audit(
-            prediction, states, actions, valid
+            prediction, states, actions, time_deltas, valid
         ),
         "symbolic_heads": symbolic_head_metrics(
             model, dataset, indices, device
@@ -852,9 +1109,11 @@ def evaluate_mimic_proxy(model, path, device):
         if any(np.isnan(value) for value in (glucose, potassium, map_value, bicarbonate)):
             continue
         ph = row.get("ph_t")
+        ph_observed = not np.isnan(ph)
         if np.isnan(ph):
             ph = henderson(float(bicarbonate))
         anion_gap = row.get("anion_gap_t")
+        anion_gap_observed = not np.isnan(anion_gap)
         if np.isnan(anion_gap):
             anion_gap = S_MEAN[3]
         volume = np.clip((float(map_value) - 30.0) / 60.0 * 15.0, 5.0, 18.0)
@@ -864,20 +1123,25 @@ def evaluate_mimic_proxy(model, path, device):
             "V": volume, "I": 1.0,
         }
         sodium = row.get("sodium_t", 138.0)
+        sodium_observed = not np.isnan(sodium)
         if np.isnan(sodium):
             sodium = 138.0
         creatinine = row.get("creatinine_t", 1.2)
+        creatinine_observed = not np.isnan(creatinine)
         if np.isnan(creatinine):
             creatinine = 1.2
         osmolality = row.get("osmolality_t", np.nan)
+        osmolality_observed = not np.isnan(osmolality)
         if np.isnan(osmolality):
             osmolality = row.get("osmolality_derived_t", np.nan)
         if np.isnan(osmolality):
             osmolality = 2.0 * float(sodium) + float(glucose) / 18.0
         urine_output = row.get("urine_output_t", 100.0)
+        urine_output_observed = not np.isnan(urine_output)
         if np.isnan(urine_output):
             urine_output = 100.0
         bhb = row.get("BHB_t", np.nan)
+        bhb_observed = not np.isnan(bhb)
         if np.isnan(bhb):
             bhb = max(0.0, float(anion_gap) - 12.0) * 0.75
         state.update({
@@ -893,6 +1157,39 @@ def evaluate_mimic_proxy(model, path, device):
             )),
             "osmotic_injury": 0.0,
         })
+        reported_state = {
+            "G": float(glucose), "HCO3": float(bicarbonate),
+            "Ke": float(potassium), "MAP": float(map_value),
+        }
+        for observed, name, value in (
+            (ph_observed, "pH", ph),
+            (anion_gap_observed, "anion_gap", anion_gap),
+            (sodium_observed, "Na", sodium),
+            (osmolality_observed, "osmolality", osmolality),
+            (creatinine_observed, "creatinine", creatinine),
+            (urine_output_observed, "urine_output", urine_output),
+            (bhb_observed, "BHB", bhb),
+        ):
+            if observed:
+                reported_state[name] = float(value)
+        age_map = {
+            model_name: float(row[column])
+            for model_name, column in (
+                ("G", "glucose_age_hr"), ("pH", "ph_age_hr"),
+                ("HCO3", "bicarbonate_age_hr"),
+                ("anion_gap", "anion_gap_age_hr"),
+                ("Ke", "potassium_age_hr"), ("MAP", "map_age_hr"),
+                ("Na", "sodium_age_hr"),
+                ("osmolality", "osmolality_age_hr"),
+                ("creatinine", "creatinine_age_hr"),
+                ("urine_output", "urine_output_age_hr"),
+                ("BHB", "BHB_age_hr"),
+            )
+            if column in frame and not pd.isna(row.get(column))
+        }
+        _, observed_mask, observed_age = observation_context(
+            reported_state, age_map
+        )
         detailed_actions = "future_action_grid" in frame.columns
         if detailed_actions and isinstance(row.get("future_action_grid"), str):
             physical_sequence = np.asarray(
@@ -906,6 +1203,13 @@ def evaluate_mimic_proxy(model, path, device):
                     positive[positive > 0].astype(float).tolist()
                 )
             sequence = np.asarray([a2vec(action) for action in physical_sequence])
+            if isinstance(row.get("future_treatment_event_grid"), str):
+                event_sequence = np.asarray(
+                    json.loads(row["future_treatment_event_grid"]),
+                    dtype=np.float32,
+                )
+            else:
+                event_sequence = treatment_event_features(physical_sequence)
         else:
             action = np.array([
                 4.0 if row.get("act_insulin", 0) else 0.0,
@@ -915,6 +1219,9 @@ def evaluate_mimic_proxy(model, path, device):
                 5.0 if row.get("act_dextrose", 0) else 0.0,
             ], dtype=np.float32)
             sequence = np.repeat(a2vec(action)[None, :], 12, axis=0)
+            event_sequence = treatment_event_features(
+                np.repeat(expand_action(action)[None, :], 12, axis=0)
+            )
         history = None
         if "history_action_grid" in frame.columns and isinstance(
             row.get("history_action_grid"), str
@@ -928,6 +1235,15 @@ def evaluate_mimic_proxy(model, path, device):
             torch.as_tensor(sequence, dtype=torch.float32, device=device).unsqueeze(0),
             None if history is None else torch.as_tensor(
                 history, dtype=torch.float32, device=device
+            ).unsqueeze(0),
+            observation_mask=torch.as_tensor(
+                observed_mask, dtype=torch.float32, device=device
+            ).unsqueeze(0),
+            observation_age=torch.as_tensor(
+                observed_age, dtype=torch.float32, device=device
+            ).unsqueeze(0),
+            treatment_events=torch.as_tensor(
+                event_sequence, dtype=torch.float32, device=device
             ).unsqueeze(0),
         )
         physical = predicted[0, -1].cpu().numpy() * S_STD + S_MEAN
@@ -986,6 +1302,7 @@ def evaluate_mimic_proxy(model, path, device):
         ) if column in frame
     ]
     detailed = "future_action_grid" in frame.columns
+    lifecycle_events = "future_treatment_event_grid" in frame.columns
     stays = int(frame["stay_id"].nunique())
     return {
         "available": True,
@@ -1025,6 +1342,7 @@ def evaluate_mimic_proxy(model, path, device):
                 for column in action_columns if column in frame
             },
             "has_exact_dose_and_timing": detailed,
+            "has_explicit_start_stop_events": lifecycle_events,
             "has_pre_anchor_treatment_history": bool("history_action_grid" in frame.columns),
             "sufficient_for_causal_validation": False,
         },
@@ -1074,7 +1392,72 @@ def main():
     parser.add_argument("--checkpoint", default="dka_intervention_jepa.pt")
     parser.add_argument("--report", default="dka_intervention_jepa_report.json")
     parser.add_argument("--mimic", default="dka_transitions_6h.parquet")
+    parser.add_argument(
+        "--init-checkpoint",
+        help=(
+            "Optional full DKA WorldModel checkpoint used only as training "
+            "initialization. It does not imply promotion over the runtime model."
+        ),
+    )
+    parser.add_argument("--enable-viability-dynamics", action="store_true")
+    parser.add_argument("--viability-gate-report")
+    parser.add_argument("--action-prior")
+    parser.add_argument(
+        "--greybox-residual",
+        help=(
+            "Optional candidate residual ODE artifact. When provided, synthetic "
+            "training branches are generated from DKABody + residual dynamics."
+        ),
+    )
+    parser.add_argument(
+        "--physionet-calibration",
+        help=(
+            "Optional aggregate PhysioNet 2019 calibration JSON. When provided, "
+            "synthetic DKABody presentations, observable patient-variability "
+            "proxies, and observation masks/ages are sampled from this artifact. "
+            "It does not provide treatment-effect supervision."
+        ),
+    )
+    parser.add_argument(
+        "--disable-physionet-measurement-model",
+        action="store_true",
+        help=(
+            "Ablation flag: keep PhysioNet presentation/profile priors but use "
+            "the default synthetic observation dropout instead of the real ICU "
+            "mask/age model."
+        ),
+    )
+    parser.add_argument(
+        "--dynamics-cell",
+        choices=("residual_mlp", "ltc"),
+        default="residual_mlp",
+        help=(
+            "Research-only latent dynamics cell. 'ltc' enables a Liquid "
+            "Time-Constant candidate and does not imply runtime promotion."
+        ),
+    )
     args = parser.parse_args()
+
+    if args.init_checkpoint and args.dynamics_cell != "residual_mlp":
+        parser.error(
+            "--dynamics-cell ltc cannot be combined with --init-checkpoint "
+            "until an explicit transfer mapping is implemented"
+        )
+
+    gate = {
+        "passed": False,
+        "reasons": ["viability dynamics were not requested"],
+    }
+    if args.enable_viability_dynamics:
+        if not args.viability_gate_report:
+            parser.error(
+                "--enable-viability-dynamics requires --viability-gate-report"
+            )
+        gate = load_persistence_gate(args.viability_gate_report)
+        if not gate["passed"]:
+            parser.error(
+                "viability dynamics gate failed: " + "; ".join(gate["reasons"])
+            )
 
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
@@ -1085,18 +1468,44 @@ def main():
         f"intervention branches x {args.sequence_length} steps"
     )
     started = time.time()
-    dataset = generate_branched_dataset(args.scenarios, args.sequence_length, args.seed)
+    action_prior = load_or_fit_action_prior(args.action_prior, args.mimic)
+    residual_model = (
+        GreyBoxResidualRuntime.load(args.greybox_residual, device="cpu")
+        if args.greybox_residual else None
+    )
+    physionet_calibration = PhysioNetDkaCalibration.load(
+        args.physionet_calibration
+    )
+    observation_model = (
+        physionet_calibration.observation_model_for_state_keys()
+        if (
+            physionet_calibration is not None
+            and not args.disable_physionet_measurement_model
+        ) else None
+    )
+    dataset = generate_branched_dataset(
+        args.scenarios, args.sequence_length, args.seed,
+        action_prior=action_prior, residual_model=residual_model,
+        physionet_calibration=physionet_calibration,
+    )
     splits = split_scenarios(args.scenarios, args.seed)
     print(
         f"split by scenario: train={len(splits['train'])}, "
         f"validation={len(splits['validation'])}, test={len(splits['test'])}"
     )
     print(f"simulated deaths by cause: {dataset['death_causes']}")
+    simulator_audit = simulator_calibration_audit(dataset)
 
-    model = WorldModel()
+    if args.init_checkpoint:
+        model, init_payload = load_checkpoint(args.init_checkpoint, device="cpu")
+    else:
+        model = WorldModel(dynamics_cell=args.dynamics_cell)
+        init_payload = {}
     history, best_validation = train_model(
         model, dataset, splits, args.epochs, args.batch_size,
         args.learning_rate, device,
+        viability_dynamics_enabled=args.enable_viability_dynamics,
+        observation_model=observation_model,
     )
     test_report = evaluate_model(model, dataset, splits["test"], device)
     mimic_report = evaluate_mimic_proxy(model, args.mimic, device)
@@ -1105,14 +1514,50 @@ def main():
         "trained_at_unix": int(time.time()),
         "device": str(device),
         "seed": args.seed,
+        "initial_checkpoint": (
+            {
+                "path": args.init_checkpoint,
+                "metadata": init_payload.get("metadata", {}),
+                "runtime_promotion_implied": False,
+            }
+            if args.init_checkpoint else None
+        ),
         "scenario_count": args.scenarios,
         "protocols": list(PROTOCOLS),
+        "action_prior": action_prior.payload if action_prior is not None else None,
         "state_ontology_version": OSLER_STATE_ONTOLOGY.version,
         "symbolic_interface": symbolic_schema(
             STATE_KEYS, ACTION_KEYS, OSLER_STATE_ONTOLOGY
         ),
+        "state_compiler": DKA_STATE_COMPILER.schema(),
+        "world_model_objective": {
+            "name": "grounded_homeostatic_world_model",
+            "components": [
+                "future_state_truth",
+                "physiologic_burden_fidelity",
+                "intervention_effect_sensitivity",
+                "counterfactual_burden_ordering",
+                "heteroscedastic_uncertainty_calibration",
+                "prolog_contradiction_penalty",
+            ],
+            "viability_reward_source": "observed_or_simulated_outcome_only",
+            "prediction_error_is_clinical_reward": False,
+            "dynamics_optimization_enabled": args.enable_viability_dynamics,
+            "persistence_gate": gate,
+            "disabled_reason": None if args.enable_viability_dynamics else (
+                "held-out MIMIC persistence gate has not passed"
+            ),
+            "uncertainty_head_trains_on_detached_dynamics": True,
+            "policy_optimization": False,
+            "clinical_authority": False,
+        },
+        "model_architecture": {
+            "dynamics_cell": args.dynamics_cell,
+            "ltc_candidate_only": args.dynamics_cell == "ltc",
+            "runtime_promotion_implied": False,
+        },
         "simulator": {
-            "version": "route_pk_belief_risk_dka_v4",
+            "version": "temporal_causal_audit_dka_v6",
             "patient_domain_randomization": [
                 "weight_kg", "renal_reserve", "insulin_sensitivity",
                 "counterregulatory_drive", "fluid_retention",
@@ -1128,17 +1573,60 @@ def main():
             ],
             "history_hours": HISTORY_HOURS,
             "hidden_belief_states": ["K_store", "osmotic_injury"],
+            "observation_contract": {
+                "mask": "per-state observed indicator",
+                "age_hours": True,
+                "training_dropout_probability": 0.25,
+                "potassium_store_filter": "predict_update_gaussian_belief",
+            },
+            "time_intervals_hours": [0.25, 0.5, 0.75, 1.0],
             "insulin_pk": [
                 "iv", "rapid_subcutaneous", "intermediate_nph", "basal",
             ],
+            "calibration_audit": simulator_audit,
+            "greybox_residual": (
+                {
+                    "path": Path(args.greybox_residual).name,
+                    "schema": residual_model.schema(),
+                    "used_for_synthetic_training_data": True,
+                    "candidate_only": True,
+                    "clinical_or_causal_claim_allowed": False,
+                }
+                if residual_model is not None else None
+            ),
+            "physionet_calibration": (
+                {
+                    "path": Path(args.physionet_calibration).name,
+                    "patients_scanned": physionet_calibration.payload.get(
+                        "patients_scanned"
+                    ),
+                    "presentation_records": physionet_calibration.payload[
+                        "presentation_model"
+                    ]["selection"],
+                    "uses_presentation_prior": True,
+                    "uses_patient_variability_proxies": True,
+                    "uses_measurement_model": observation_model is not None,
+                    "measurement_model_disabled_for_ablation": (
+                        args.disable_physionet_measurement_model
+                    ),
+                    "uses_action_unobserved_drift_as_training_target": False,
+                    "action_unobserved_drift_is_review_only": True,
+                    "treatment_effect_claim_allowed": False,
+                    "causal_no_treatment_claim_allowed": False,
+                }
+                if physionet_calibration is not None else None
+            ),
         },
         "curriculum": [
             {"name": stage.name, "end_fraction": stage.end_fraction,
-             "weights": stage.weights}
+             "weights": weights_for_stage(stage, args.enable_viability_dynamics)}
             for stage in STAGES
         ],
         "sequence_length": args.sequence_length,
-        "hours_predicted": args.sequence_length * DT,
+        "hours_predicted_range": [
+            args.sequence_length * 0.25,
+            args.sequence_length * 1.0,
+        ],
         "split_by_scenario": {name: len(value) for name, value in splits.items()},
         "best_validation_loss": best_validation,
         "test": test_report,

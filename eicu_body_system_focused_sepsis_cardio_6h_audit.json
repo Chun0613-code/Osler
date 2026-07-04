@@ -1,0 +1,3255 @@
+{
+  "experiment": "eICU focused body-system deep coupling audit",
+  "focused_specs": [
+    {
+      "candidate": "focused_deep_coupling_features",
+      "cohort": "eicu_sepsis_transitions_6h.parquet",
+      "future_suffix": "tp6",
+      "hospital_holdout": {
+        "discovery_groups": 137,
+        "focused_coupling_feature_count": 25,
+        "group_column": "hospitalid",
+        "heldout_groups": 67,
+        "overlap": 0,
+        "seed": 2029,
+        "targets": {
+          "heart_rate": {
+            "active_only": {
+              "active_only": true,
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.002025,
+                  -0.000184
+                ],
+                "point_delta": -0.001139,
+                "significant": true,
+                "subjects": 7245
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.002144,
+                  -0.000242
+                ],
+                "point_delta": -0.001147,
+                "significant": true,
+                "subjects": 7245
+              },
+              "feature_counts": {
+                "baseline": 65,
+                "candidate": 90,
+                "focused_coupling": 25,
+                "placebo": 25
+              },
+              "focused_coupling_features": [
+                "fbc_sepsis_inflammatory_burden_mean",
+                "fbc_sepsis_inflammatory_burden_sd",
+                "fbc_sepsis_inflammatory_burden_observation",
+                "fbc_sepsis_inflammatory_burden_innovation",
+                "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                "fbc_sepsis_inflammatory_burden_observation_confidence",
+                "fbc_sepsis_vasoplegia_burden_mean",
+                "fbc_sepsis_vasoplegia_burden_sd",
+                "fbc_sepsis_vasoplegia_burden_observation",
+                "fbc_sepsis_vasoplegia_burden_innovation",
+                "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                "fbc_sepsis_capillary_leak_mean",
+                "fbc_sepsis_capillary_leak_sd",
+                "fbc_sepsis_capillary_leak_observation",
+                "fbc_sepsis_capillary_leak_innovation",
+                "fbc_sepsis_capillary_leak_delta_since_prior",
+                "fbc_sepsis_capillary_leak_observation_confidence",
+                "fbc_sepsis_inflammation_x_low_map",
+                "fbc_sepsis_inflammation_x_lactate",
+                "fbc_sepsis_vasoplegia_x_tachycardia",
+                "fbc_sepsis_leak_x_lactate",
+                "fbc_sepsis_leak_x_hypoalbumin",
+                "fbc_sepsis_respiratory_stress",
+                "fbc_sepsis_treatment_context"
+              ],
+              "mae": {
+                "baseline_ridge": 0.464142,
+                "focused_coupled_ridge": 0.462429,
+                "placebo_ridge": 0.464201
+              },
+              "rows": 69768,
+              "subjects": 7245
+            },
+            "all_windows": {
+              "active_only": false,
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.002173,
+                  -0.000643
+                ],
+                "point_delta": -0.00138,
+                "significant": true,
+                "subjects": 7637
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.002172,
+                  -0.000659
+                ],
+                "point_delta": -0.00139,
+                "significant": true,
+                "subjects": 7637
+              },
+              "feature_counts": {
+                "baseline": 65,
+                "candidate": 90,
+                "focused_coupling": 25,
+                "placebo": 25
+              },
+              "focused_coupling_features": [
+                "fbc_sepsis_inflammatory_burden_mean",
+                "fbc_sepsis_inflammatory_burden_sd",
+                "fbc_sepsis_inflammatory_burden_observation",
+                "fbc_sepsis_inflammatory_burden_innovation",
+                "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                "fbc_sepsis_inflammatory_burden_observation_confidence",
+                "fbc_sepsis_vasoplegia_burden_mean",
+                "fbc_sepsis_vasoplegia_burden_sd",
+                "fbc_sepsis_vasoplegia_burden_observation",
+                "fbc_sepsis_vasoplegia_burden_innovation",
+                "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                "fbc_sepsis_capillary_leak_mean",
+                "fbc_sepsis_capillary_leak_sd",
+                "fbc_sepsis_capillary_leak_observation",
+                "fbc_sepsis_capillary_leak_innovation",
+                "fbc_sepsis_capillary_leak_delta_since_prior",
+                "fbc_sepsis_capillary_leak_observation_confidence",
+                "fbc_sepsis_inflammation_x_low_map",
+                "fbc_sepsis_inflammation_x_lactate",
+                "fbc_sepsis_vasoplegia_x_tachycardia",
+                "fbc_sepsis_leak_x_lactate",
+                "fbc_sepsis_leak_x_hypoalbumin",
+                "fbc_sepsis_respiratory_stress",
+                "fbc_sepsis_treatment_context"
+              ],
+              "mae": {
+                "baseline_ridge": 0.463822,
+                "focused_coupled_ridge": 0.461403,
+                "placebo_ridge": 0.463873
+              },
+              "rows": 121511,
+              "subjects": 7637
+            }
+          },
+          "lactate": {
+            "active_only": {
+              "active_only": true,
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.004634,
+                  0.001079
+                ],
+                "point_delta": -0.001713,
+                "significant": false,
+                "subjects": 1742
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.005305,
+                  -0.00034
+                ],
+                "point_delta": -0.002779,
+                "significant": true,
+                "subjects": 1742
+              },
+              "feature_counts": {
+                "baseline": 65,
+                "candidate": 90,
+                "focused_coupling": 25,
+                "placebo": 25
+              },
+              "focused_coupling_features": [
+                "fbc_sepsis_inflammatory_burden_mean",
+                "fbc_sepsis_inflammatory_burden_sd",
+                "fbc_sepsis_inflammatory_burden_observation",
+                "fbc_sepsis_inflammatory_burden_innovation",
+                "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                "fbc_sepsis_inflammatory_burden_observation_confidence",
+                "fbc_sepsis_vasoplegia_burden_mean",
+                "fbc_sepsis_vasoplegia_burden_sd",
+                "fbc_sepsis_vasoplegia_burden_observation",
+                "fbc_sepsis_vasoplegia_burden_innovation",
+                "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                "fbc_sepsis_capillary_leak_mean",
+                "fbc_sepsis_capillary_leak_sd",
+                "fbc_sepsis_capillary_leak_observation",
+                "fbc_sepsis_capillary_leak_innovation",
+                "fbc_sepsis_capillary_leak_delta_since_prior",
+                "fbc_sepsis_capillary_leak_observation_confidence",
+                "fbc_sepsis_inflammation_x_low_map",
+                "fbc_sepsis_inflammation_x_lactate",
+                "fbc_sepsis_vasoplegia_x_tachycardia",
+                "fbc_sepsis_leak_x_lactate",
+                "fbc_sepsis_leak_x_hypoalbumin",
+                "fbc_sepsis_respiratory_stress",
+                "fbc_sepsis_treatment_context"
+              ],
+              "mae": {
+                "baseline_ridge": 0.329648,
+                "focused_coupled_ridge": 0.329751,
+                "placebo_ridge": 0.330666
+              },
+              "rows": 4014,
+              "subjects": 1742
+            },
+            "all_windows": {
+              "active_only": false,
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.00448,
+                  0.00087
+                ],
+                "point_delta": -0.001695,
+                "significant": false,
+                "subjects": 1881
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.005275,
+                  -0.000631
+                ],
+                "point_delta": -0.002639,
+                "significant": true,
+                "subjects": 1881
+              },
+              "feature_counts": {
+                "baseline": 65,
+                "candidate": 90,
+                "focused_coupling": 25,
+                "placebo": 25
+              },
+              "focused_coupling_features": [
+                "fbc_sepsis_inflammatory_burden_mean",
+                "fbc_sepsis_inflammatory_burden_sd",
+                "fbc_sepsis_inflammatory_burden_observation",
+                "fbc_sepsis_inflammatory_burden_innovation",
+                "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                "fbc_sepsis_inflammatory_burden_observation_confidence",
+                "fbc_sepsis_vasoplegia_burden_mean",
+                "fbc_sepsis_vasoplegia_burden_sd",
+                "fbc_sepsis_vasoplegia_burden_observation",
+                "fbc_sepsis_vasoplegia_burden_innovation",
+                "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                "fbc_sepsis_capillary_leak_mean",
+                "fbc_sepsis_capillary_leak_sd",
+                "fbc_sepsis_capillary_leak_observation",
+                "fbc_sepsis_capillary_leak_innovation",
+                "fbc_sepsis_capillary_leak_delta_since_prior",
+                "fbc_sepsis_capillary_leak_observation_confidence",
+                "fbc_sepsis_inflammation_x_low_map",
+                "fbc_sepsis_inflammation_x_lactate",
+                "fbc_sepsis_vasoplegia_x_tachycardia",
+                "fbc_sepsis_leak_x_lactate",
+                "fbc_sepsis_leak_x_hypoalbumin",
+                "fbc_sepsis_respiratory_stress",
+                "fbc_sepsis_treatment_context"
+              ],
+              "mae": {
+                "baseline_ridge": 0.311524,
+                "focused_coupled_ridge": 0.311212,
+                "placebo_ridge": 0.312439
+              },
+              "rows": 4449,
+              "subjects": 1881
+            }
+          },
+          "map": {
+            "active_only": {
+              "active_only": true,
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.003119,
+                  -0.001954
+                ],
+                "point_delta": -0.002505,
+                "significant": true,
+                "subjects": 7233
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.003316,
+                  -0.001964
+                ],
+                "point_delta": -0.002596,
+                "significant": true,
+                "subjects": 7233
+              },
+              "feature_counts": {
+                "baseline": 65,
+                "candidate": 90,
+                "focused_coupling": 25,
+                "placebo": 25
+              },
+              "focused_coupling_features": [
+                "fbc_sepsis_inflammatory_burden_mean",
+                "fbc_sepsis_inflammatory_burden_sd",
+                "fbc_sepsis_inflammatory_burden_observation",
+                "fbc_sepsis_inflammatory_burden_innovation",
+                "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                "fbc_sepsis_inflammatory_burden_observation_confidence",
+                "fbc_sepsis_vasoplegia_burden_mean",
+                "fbc_sepsis_vasoplegia_burden_sd",
+                "fbc_sepsis_vasoplegia_burden_observation",
+                "fbc_sepsis_vasoplegia_burden_innovation",
+                "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                "fbc_sepsis_capillary_leak_mean",
+                "fbc_sepsis_capillary_leak_sd",
+                "fbc_sepsis_capillary_leak_observation",
+                "fbc_sepsis_capillary_leak_innovation",
+                "fbc_sepsis_capillary_leak_delta_since_prior",
+                "fbc_sepsis_capillary_leak_observation_confidence",
+                "fbc_sepsis_inflammation_x_low_map",
+                "fbc_sepsis_inflammation_x_lactate",
+                "fbc_sepsis_vasoplegia_x_tachycardia",
+                "fbc_sepsis_leak_x_lactate",
+                "fbc_sepsis_leak_x_hypoalbumin",
+                "fbc_sepsis_respiratory_stress",
+                "fbc_sepsis_treatment_context"
+              ],
+              "mae": {
+                "baseline_ridge": 0.601961,
+                "focused_coupled_ridge": 0.599762,
+                "placebo_ridge": 0.60207
+              },
+              "rows": 69359,
+              "subjects": 7233
+            },
+            "all_windows": {
+              "active_only": false,
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.002443,
+                  -0.001492
+                ],
+                "point_delta": -0.002016,
+                "significant": true,
+                "subjects": 7625
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.002638,
+                  -0.001551
+                ],
+                "point_delta": -0.0021,
+                "significant": true,
+                "subjects": 7625
+              },
+              "feature_counts": {
+                "baseline": 65,
+                "candidate": 90,
+                "focused_coupling": 25,
+                "placebo": 25
+              },
+              "focused_coupling_features": [
+                "fbc_sepsis_inflammatory_burden_mean",
+                "fbc_sepsis_inflammatory_burden_sd",
+                "fbc_sepsis_inflammatory_burden_observation",
+                "fbc_sepsis_inflammatory_burden_innovation",
+                "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                "fbc_sepsis_inflammatory_burden_observation_confidence",
+                "fbc_sepsis_vasoplegia_burden_mean",
+                "fbc_sepsis_vasoplegia_burden_sd",
+                "fbc_sepsis_vasoplegia_burden_observation",
+                "fbc_sepsis_vasoplegia_burden_innovation",
+                "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                "fbc_sepsis_capillary_leak_mean",
+                "fbc_sepsis_capillary_leak_sd",
+                "fbc_sepsis_capillary_leak_observation",
+                "fbc_sepsis_capillary_leak_innovation",
+                "fbc_sepsis_capillary_leak_delta_since_prior",
+                "fbc_sepsis_capillary_leak_observation_confidence",
+                "fbc_sepsis_inflammation_x_low_map",
+                "fbc_sepsis_inflammation_x_lactate",
+                "fbc_sepsis_vasoplegia_x_tachycardia",
+                "fbc_sepsis_leak_x_lactate",
+                "fbc_sepsis_leak_x_hypoalbumin",
+                "fbc_sepsis_respiratory_stress",
+                "fbc_sepsis_treatment_context"
+              ],
+              "mae": {
+                "baseline_ridge": 0.617686,
+                "focused_coupled_ridge": 0.615922,
+                "placebo_ridge": 0.617775
+              },
+              "rows": 120577,
+              "subjects": 7625
+            }
+          }
+        }
+      },
+      "hospitals": 204,
+      "name": "sepsis_cardio_6h",
+      "random_patient_splits": {
+        "runs": [
+          {
+            "discovery_groups": 16867,
+            "focused_coupling_feature_count": 25,
+            "group_column": "subject_id",
+            "heldout_groups": 8308,
+            "overlap": 0,
+            "seed": 7,
+            "targets": {
+              "heart_rate": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002135,
+                      -0.000359
+                    ],
+                    "point_delta": -0.001198,
+                    "significant": true,
+                    "subjects": 7815
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.00215,
+                      -0.000511
+                    ],
+                    "point_delta": -0.001253,
+                    "significant": true,
+                    "subjects": 7815
+                  },
+                  "feature_counts": {
+                    "baseline": 65,
+                    "candidate": 90,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.464153,
+                    "focused_coupled_ridge": 0.462942,
+                    "placebo_ridge": 0.464227
+                  },
+                  "rows": 82324,
+                  "subjects": 7815
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002131,
+                      -0.000632
+                    ],
+                    "point_delta": -0.001285,
+                    "significant": true,
+                    "subjects": 8217
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002043,
+                      -0.000703
+                    ],
+                    "point_delta": -0.00133,
+                    "significant": true,
+                    "subjects": 8217
+                  },
+                  "feature_counts": {
+                    "baseline": 65,
+                    "candidate": 90,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.461418,
+                    "focused_coupled_ridge": 0.459564,
+                    "placebo_ridge": 0.46147
+                  },
+                  "rows": 136859,
+                  "subjects": 8217
+                }
+              },
+              "lactate": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.003017,
+                      0.001488
+                    ],
+                    "point_delta": -0.000753,
+                    "significant": false,
+                    "subjects": 2000
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.004656,
+                      8.9e-05
+                    ],
+                    "point_delta": -0.00231,
+                    "significant": false,
+                    "subjects": 2000
+                  },
+                  "feature_counts": {
+                    "baseline": 65,
+                    "candidate": 90,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.351368,
+                    "focused_coupled_ridge": 0.349963,
+                    "placebo_ridge": 0.353033
+                  },
+                  "rows": 4916,
+                  "subjects": 2000
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002573,
+                      0.001464
+                    ],
+                    "point_delta": -0.000608,
+                    "significant": false,
+                    "subjects": 2118
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.004758,
+                      -0.00026
+                    ],
+                    "point_delta": -0.002233,
+                    "significant": true,
+                    "subjects": 2118
+                  },
+                  "feature_counts": {
+                    "baseline": 65,
+                    "candidate": 90,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.335212,
+                    "focused_coupled_ridge": 0.333679,
+                    "placebo_ridge": 0.337044
+                  },
+                  "rows": 5325,
+                  "subjects": 2118
+                }
+              },
+              "map": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002706,
+                      -0.001328
+                    ],
+                    "point_delta": -0.001984,
+                    "significant": true,
+                    "subjects": 7782
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002614,
+                      -0.001289
+                    ],
+                    "point_delta": -0.001989,
+                    "significant": true,
+                    "subjects": 7782
+                  },
+                  "feature_counts": {
+                    "baseline": 65,
+                    "candidate": 90,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.594017,
+                    "focused_coupled_ridge": 0.591929,
+                    "placebo_ridge": 0.594033
+                  },
+                  "rows": 81772,
+                  "subjects": 7782
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002403,
+                      -0.001367
+                    ],
+                    "point_delta": -0.001874,
+                    "significant": true,
+                    "subjects": 8204
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002351,
+                      -0.001318
+                    ],
+                    "point_delta": -0.001857,
+                    "significant": true,
+                    "subjects": 8204
+                  },
+                  "feature_counts": {
+                    "baseline": 65,
+                    "candidate": 90,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.609947,
+                    "focused_coupled_ridge": 0.608202,
+                    "placebo_ridge": 0.609958
+                  },
+                  "rows": 135603,
+                  "subjects": 8204
+                }
+              }
+            }
+          },
+          {
+            "discovery_groups": 16867,
+            "focused_coupling_feature_count": 25,
+            "group_column": "subject_id",
+            "heldout_groups": 8308,
+            "overlap": 0,
+            "seed": 11,
+            "targets": {
+              "heart_rate": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002173,
+                      -0.000793
+                    ],
+                    "point_delta": -0.001467,
+                    "significant": true,
+                    "subjects": 7780
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002221,
+                      -0.000756
+                    ],
+                    "point_delta": -0.001512,
+                    "significant": true,
+                    "subjects": 7780
+                  },
+                  "feature_counts": {
+                    "baseline": 65,
+                    "candidate": 90,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.461801,
+                    "focused_coupled_ridge": 0.460176,
+                    "placebo_ridge": 0.461837
+                  },
+                  "rows": 81249,
+                  "subjects": 7780
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002249,
+                      -0.001088
+                    ],
+                    "point_delta": -0.001692,
+                    "significant": true,
+                    "subjects": 8213
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002318,
+                      -0.001052
+                    ],
+                    "point_delta": -0.001731,
+                    "significant": true,
+                    "subjects": 8213
+                  },
+                  "feature_counts": {
+                    "baseline": 65,
+                    "candidate": 90,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.457737,
+                    "focused_coupled_ridge": 0.455488,
+                    "placebo_ridge": 0.457762
+                  },
+                  "rows": 134782,
+                  "subjects": 8213
+                }
+              },
+              "lactate": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.007327,
+                      -0.002724
+                    ],
+                    "point_delta": -0.005108,
+                    "significant": true,
+                    "subjects": 2037
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.01026,
+                      -0.00404
+                    ],
+                    "point_delta": -0.007287,
+                    "significant": true,
+                    "subjects": 2037
+                  },
+                  "feature_counts": {
+                    "baseline": 65,
+                    "candidate": 90,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.342674,
+                    "focused_coupled_ridge": 0.340492,
+                    "placebo_ridge": 0.344596
+                  },
+                  "rows": 5097,
+                  "subjects": 2037
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.007309,
+                      -0.002807
+                    ],
+                    "point_delta": -0.004942,
+                    "significant": true,
+                    "subjects": 2176
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.009345,
+                      -0.004455
+                    ],
+                    "point_delta": -0.006976,
+                    "significant": true,
+                    "subjects": 2176
+                  },
+                  "feature_counts": {
+                    "baseline": 65,
+                    "candidate": 90,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.326627,
+                    "focused_coupled_ridge": 0.324229,
+                    "placebo_ridge": 0.328476
+                  },
+                  "rows": 5531,
+                  "subjects": 2176
+                }
+              },
+              "map": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002167,
+                      -0.000956
+                    ],
+                    "point_delta": -0.001532,
+                    "significant": true,
+                    "subjects": 7759
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002205,
+                      -0.000884
+                    ],
+                    "point_delta": -0.001491,
+                    "significant": true,
+                    "subjects": 7759
+                  },
+                  "feature_counts": {
+                    "baseline": 65,
+                    "candidate": 90,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.586669,
+                    "focused_coupled_ridge": 0.584641,
+                    "placebo_ridge": 0.586682
+                  },
+                  "rows": 80623,
+                  "subjects": 7759
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.001888,
+                      -0.000743
+                    ],
+                    "point_delta": -0.001321,
+                    "significant": true,
+                    "subjects": 8199
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.00185,
+                      -0.000765
+                    ],
+                    "point_delta": -0.001322,
+                    "significant": true,
+                    "subjects": 8199
+                  },
+                  "feature_counts": {
+                    "baseline": 65,
+                    "candidate": 90,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.602782,
+                    "focused_coupled_ridge": 0.601059,
+                    "placebo_ridge": 0.602824
+                  },
+                  "rows": 133435,
+                  "subjects": 8199
+                }
+              }
+            }
+          },
+          {
+            "discovery_groups": 16867,
+            "focused_coupling_feature_count": 25,
+            "group_column": "subject_id",
+            "heldout_groups": 8308,
+            "overlap": 0,
+            "seed": 19,
+            "targets": {
+              "heart_rate": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.001182,
+                      0.000663
+                    ],
+                    "point_delta": -0.000219,
+                    "significant": false,
+                    "subjects": 7820
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.001094,
+                      0.000664
+                    ],
+                    "point_delta": -0.000254,
+                    "significant": false,
+                    "subjects": 7820
+                  },
+                  "feature_counts": {
+                    "baseline": 65,
+                    "candidate": 90,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.457212,
+                    "focused_coupled_ridge": 0.456353,
+                    "placebo_ridge": 0.457252
+                  },
+                  "rows": 81164,
+                  "subjects": 7820
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.001304,
+                      0.000243
+                    ],
+                    "point_delta": -0.000503,
+                    "significant": false,
+                    "subjects": 8220
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.00123,
+                      0.000261
+                    ],
+                    "point_delta": -0.000518,
+                    "significant": false,
+                    "subjects": 8220
+                  },
+                  "feature_counts": {
+                    "baseline": 65,
+                    "candidate": 90,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.455707,
+                    "focused_coupled_ridge": 0.453982,
+                    "placebo_ridge": 0.455731
+                  },
+                  "rows": 135866,
+                  "subjects": 8220
+                }
+              },
+              "lactate": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.003613,
+                      0.001121
+                    ],
+                    "point_delta": -0.001248,
+                    "significant": false,
+                    "subjects": 2027
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.00625,
+                      -0.001156
+                    ],
+                    "point_delta": -0.003664,
+                    "significant": true,
+                    "subjects": 2027
+                  },
+                  "feature_counts": {
+                    "baseline": 65,
+                    "candidate": 90,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.349922,
+                    "focused_coupled_ridge": 0.348833,
+                    "placebo_ridge": 0.352283
+                  },
+                  "rows": 4974,
+                  "subjects": 2027
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.003273,
+                      0.001165
+                    ],
+                    "point_delta": -0.001135,
+                    "significant": false,
+                    "subjects": 2156
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.006062,
+                      -0.001136
+                    ],
+                    "point_delta": -0.003508,
+                    "significant": true,
+                    "subjects": 2156
+                  },
+                  "feature_counts": {
+                    "baseline": 65,
+                    "candidate": 90,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.333361,
+                    "focused_coupled_ridge": 0.33215,
+                    "placebo_ridge": 0.335711
+                  },
+                  "rows": 5410,
+                  "subjects": 2156
+                }
+              },
+              "map": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.00244,
+                      -0.001223
+                    ],
+                    "point_delta": -0.001818,
+                    "significant": true,
+                    "subjects": 7790
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002528,
+                      -0.00115
+                    ],
+                    "point_delta": -0.001869,
+                    "significant": true,
+                    "subjects": 7790
+                  },
+                  "feature_counts": {
+                    "baseline": 65,
+                    "candidate": 90,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.58131,
+                    "focused_coupled_ridge": 0.579514,
+                    "placebo_ridge": 0.581339
+                  },
+                  "rows": 80561,
+                  "subjects": 7790
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.001966,
+                      -0.001099
+                    ],
+                    "point_delta": -0.001468,
+                    "significant": true,
+                    "subjects": 8205
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.001957,
+                      -0.001071
+                    ],
+                    "point_delta": -0.001522,
+                    "significant": true,
+                    "subjects": 8205
+                  },
+                  "feature_counts": {
+                    "baseline": 65,
+                    "candidate": 90,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.598371,
+                    "focused_coupled_ridge": 0.596946,
+                    "placebo_ridge": 0.598406
+                  },
+                  "rows": 134584,
+                  "subjects": 8205
+                }
+              }
+            }
+          },
+          {
+            "discovery_groups": 16867,
+            "focused_coupling_feature_count": 25,
+            "group_column": "subject_id",
+            "heldout_groups": 8308,
+            "overlap": 0,
+            "seed": 23,
+            "targets": {
+              "heart_rate": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002159,
+                      -0.000528
+                    ],
+                    "point_delta": -0.001395,
+                    "significant": true,
+                    "subjects": 7815
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002219,
+                      -0.000653
+                    ],
+                    "point_delta": -0.001435,
+                    "significant": true,
+                    "subjects": 7815
+                  },
+                  "feature_counts": {
+                    "baseline": 65,
+                    "candidate": 90,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.460518,
+                    "focused_coupled_ridge": 0.458822,
+                    "placebo_ridge": 0.460532
+                  },
+                  "rows": 81394,
+                  "subjects": 7815
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002307,
+                      -0.000899
+                    ],
+                    "point_delta": -0.001604,
+                    "significant": true,
+                    "subjects": 8230
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002362,
+                      -0.000996
+                    ],
+                    "point_delta": -0.001663,
+                    "significant": true,
+                    "subjects": 8230
+                  },
+                  "feature_counts": {
+                    "baseline": 65,
+                    "candidate": 90,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.457161,
+                    "focused_coupled_ridge": 0.454885,
+                    "placebo_ridge": 0.457174
+                  },
+                  "rows": 136204,
+                  "subjects": 8230
+                }
+              },
+              "lactate": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.004987,
+                      -0.000435
+                    ],
+                    "point_delta": -0.002611,
+                    "significant": true,
+                    "subjects": 1983
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.005238,
+                      -0.001038
+                    ],
+                    "point_delta": -0.003069,
+                    "significant": true,
+                    "subjects": 1983
+                  },
+                  "feature_counts": {
+                    "baseline": 65,
+                    "candidate": 90,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.333311,
+                    "focused_coupled_ridge": 0.332045,
+                    "placebo_ridge": 0.333927
+                  },
+                  "rows": 4830,
+                  "subjects": 1983
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.004926,
+                      -0.000507
+                    ],
+                    "point_delta": -0.002742,
+                    "significant": true,
+                    "subjects": 2112
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.00558,
+                      -0.000693
+                    ],
+                    "point_delta": -0.003064,
+                    "significant": true,
+                    "subjects": 2112
+                  },
+                  "feature_counts": {
+                    "baseline": 65,
+                    "candidate": 90,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.316893,
+                    "focused_coupled_ridge": 0.315419,
+                    "placebo_ridge": 0.317519
+                  },
+                  "rows": 5262,
+                  "subjects": 2112
+                }
+              },
+              "map": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.00265,
+                      -0.001424
+                    ],
+                    "point_delta": -0.002078,
+                    "significant": true,
+                    "subjects": 7775
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002723,
+                      -0.001479
+                    ],
+                    "point_delta": -0.00207,
+                    "significant": true,
+                    "subjects": 7775
+                  },
+                  "feature_counts": {
+                    "baseline": 65,
+                    "candidate": 90,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.587229,
+                    "focused_coupled_ridge": 0.585378,
+                    "placebo_ridge": 0.587231
+                  },
+                  "rows": 80791,
+                  "subjects": 7775
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002355,
+                      -0.001283
+                    ],
+                    "point_delta": -0.00183,
+                    "significant": true,
+                    "subjects": 8208
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002238,
+                      -0.001304
+                    ],
+                    "point_delta": -0.001829,
+                    "significant": true,
+                    "subjects": 8208
+                  },
+                  "feature_counts": {
+                    "baseline": 65,
+                    "candidate": 90,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.604362,
+                    "focused_coupled_ridge": 0.6027,
+                    "placebo_ridge": 0.604375
+                  },
+                  "rows": 134888,
+                  "subjects": 8208
+                }
+              }
+            }
+          },
+          {
+            "discovery_groups": 16867,
+            "focused_coupling_feature_count": 25,
+            "group_column": "subject_id",
+            "heldout_groups": 8308,
+            "overlap": 0,
+            "seed": 37,
+            "targets": {
+              "heart_rate": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002458,
+                      -0.001053
+                    ],
+                    "point_delta": -0.001723,
+                    "significant": true,
+                    "subjects": 7786
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002579,
+                      -0.001046
+                    ],
+                    "point_delta": -0.001764,
+                    "significant": true,
+                    "subjects": 7786
+                  },
+                  "feature_counts": {
+                    "baseline": 65,
+                    "candidate": 90,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.4638,
+                    "focused_coupled_ridge": 0.46167,
+                    "placebo_ridge": 0.46384
+                  },
+                  "rows": 81125,
+                  "subjects": 7786
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002297,
+                      -0.001256
+                    ],
+                    "point_delta": -0.001771,
+                    "significant": true,
+                    "subjects": 8227
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002407,
+                      -0.001141
+                    ],
+                    "point_delta": -0.001784,
+                    "significant": true,
+                    "subjects": 8227
+                  },
+                  "feature_counts": {
+                    "baseline": 65,
+                    "candidate": 90,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.462239,
+                    "focused_coupled_ridge": 0.459698,
+                    "placebo_ridge": 0.462267
+                  },
+                  "rows": 136893,
+                  "subjects": 8227
+                }
+              },
+              "lactate": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.005236,
+                      -0.001171
+                    ],
+                    "point_delta": -0.003197,
+                    "significant": true,
+                    "subjects": 1975
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.005843,
+                      -0.00162
+                    ],
+                    "point_delta": -0.003756,
+                    "significant": true,
+                    "subjects": 1975
+                  },
+                  "feature_counts": {
+                    "baseline": 65,
+                    "candidate": 90,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.352444,
+                    "focused_coupled_ridge": 0.350023,
+                    "placebo_ridge": 0.3531
+                  },
+                  "rows": 4833,
+                  "subjects": 1975
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.005265,
+                      -0.000993
+                    ],
+                    "point_delta": -0.003246,
+                    "significant": true,
+                    "subjects": 2121
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.005848,
+                      -0.001703
+                    ],
+                    "point_delta": -0.003918,
+                    "significant": true,
+                    "subjects": 2121
+                  },
+                  "feature_counts": {
+                    "baseline": 65,
+                    "candidate": 90,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.334168,
+                    "focused_coupled_ridge": 0.331675,
+                    "placebo_ridge": 0.334882
+                  },
+                  "rows": 5308,
+                  "subjects": 2121
+                }
+              },
+              "map": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002534,
+                      -0.001313
+                    ],
+                    "point_delta": -0.00186,
+                    "significant": true,
+                    "subjects": 7756
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002439,
+                      -0.00125
+                    ],
+                    "point_delta": -0.001828,
+                    "significant": true,
+                    "subjects": 7756
+                  },
+                  "feature_counts": {
+                    "baseline": 65,
+                    "candidate": 90,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.585649,
+                    "focused_coupled_ridge": 0.58396,
+                    "placebo_ridge": 0.585658
+                  },
+                  "rows": 80561,
+                  "subjects": 7756
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002213,
+                      -0.001195
+                    ],
+                    "point_delta": -0.001715,
+                    "significant": true,
+                    "subjects": 8210
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002253,
+                      -0.001146
+                    ],
+                    "point_delta": -0.001707,
+                    "significant": true,
+                    "subjects": 8210
+                  },
+                  "feature_counts": {
+                    "baseline": 65,
+                    "candidate": 90,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.599541,
+                    "focused_coupled_ridge": 0.59795,
+                    "placebo_ridge": 0.599554
+                  },
+                  "rows": 135620,
+                  "subjects": 8210
+                }
+              }
+            }
+          },
+          {
+            "discovery_groups": 16867,
+            "focused_coupling_feature_count": 25,
+            "group_column": "subject_id",
+            "heldout_groups": 8308,
+            "overlap": 0,
+            "seed": 53,
+            "targets": {
+              "heart_rate": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.001825,
+                      -0.000291
+                    ],
+                    "point_delta": -0.001013,
+                    "significant": true,
+                    "subjects": 7785
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.00175,
+                      -9.7e-05
+                    ],
+                    "point_delta": -0.000995,
+                    "significant": true,
+                    "subjects": 7785
+                  },
+                  "feature_counts": {
+                    "baseline": 65,
+                    "candidate": 90,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.46228,
+                    "focused_coupled_ridge": 0.461143,
+                    "placebo_ridge": 0.462285
+                  },
+                  "rows": 81241,
+                  "subjects": 7785
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.001655,
+                      -0.000254
+                    ],
+                    "point_delta": -0.001023,
+                    "significant": true,
+                    "subjects": 8222
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.001727,
+                      -0.000401
+                    ],
+                    "point_delta": -0.001078,
+                    "significant": true,
+                    "subjects": 8222
+                  },
+                  "feature_counts": {
+                    "baseline": 65,
+                    "candidate": 90,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.459209,
+                    "focused_coupled_ridge": 0.457358,
+                    "placebo_ridge": 0.459236
+                  },
+                  "rows": 134331,
+                  "subjects": 8222
+                }
+              },
+              "lactate": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.00343,
+                      0.00167
+                    ],
+                    "point_delta": -0.000822,
+                    "significant": false,
+                    "subjects": 1999
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.003509,
+                      0.001305
+                    ],
+                    "point_delta": -0.001459,
+                    "significant": false,
+                    "subjects": 1999
+                  },
+                  "feature_counts": {
+                    "baseline": 65,
+                    "candidate": 90,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.325357,
+                    "focused_coupled_ridge": 0.325983,
+                    "placebo_ridge": 0.325885
+                  },
+                  "rows": 5080,
+                  "subjects": 1999
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.00359,
+                      0.001604
+                    ],
+                    "point_delta": -0.000801,
+                    "significant": false,
+                    "subjects": 2124
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.003784,
+                      0.001169
+                    ],
+                    "point_delta": -0.001362,
+                    "significant": false,
+                    "subjects": 2124
+                  },
+                  "feature_counts": {
+                    "baseline": 65,
+                    "candidate": 90,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.310731,
+                    "focused_coupled_ridge": 0.311095,
+                    "placebo_ridge": 0.311238
+                  },
+                  "rows": 5527,
+                  "subjects": 2124
+                }
+              },
+              "map": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002563,
+                      -0.001331
+                    ],
+                    "point_delta": -0.001883,
+                    "significant": true,
+                    "subjects": 7746
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002544,
+                      -0.001244
+                    ],
+                    "point_delta": -0.001833,
+                    "significant": true,
+                    "subjects": 7746
+                  },
+                  "feature_counts": {
+                    "baseline": 65,
+                    "candidate": 90,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.593302,
+                    "focused_coupled_ridge": 0.591856,
+                    "placebo_ridge": 0.593302
+                  },
+                  "rows": 80646,
+                  "subjects": 7746
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002041,
+                      -0.001082
+                    ],
+                    "point_delta": -0.001561,
+                    "significant": true,
+                    "subjects": 8188
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.00215,
+                      -0.001078
+                    ],
+                    "point_delta": -0.001604,
+                    "significant": true,
+                    "subjects": 8188
+                  },
+                  "feature_counts": {
+                    "baseline": 65,
+                    "candidate": 90,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.609492,
+                    "focused_coupled_ridge": 0.608107,
+                    "placebo_ridge": 0.609544
+                  },
+                  "rows": 132976,
+                  "subjects": 8188
+                }
+              }
+            }
+          },
+          {
+            "discovery_groups": 16867,
+            "focused_coupling_feature_count": 25,
+            "group_column": "subject_id",
+            "heldout_groups": 8308,
+            "overlap": 0,
+            "seed": 71,
+            "targets": {
+              "heart_rate": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.001519,
+                      0.000108
+                    ],
+                    "point_delta": -0.000741,
+                    "significant": false,
+                    "subjects": 7799
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.001508,
+                      3.8e-05
+                    ],
+                    "point_delta": -0.000758,
+                    "significant": false,
+                    "subjects": 7799
+                  },
+                  "feature_counts": {
+                    "baseline": 65,
+                    "candidate": 90,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.457967,
+                    "focused_coupled_ridge": 0.456663,
+                    "placebo_ridge": 0.457969
+                  },
+                  "rows": 81293,
+                  "subjects": 7799
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.001446,
+                      -0.000215
+                    ],
+                    "point_delta": -0.00083,
+                    "significant": true,
+                    "subjects": 8219
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.001568,
+                      -0.000106
+                    ],
+                    "point_delta": -0.000872,
+                    "significant": true,
+                    "subjects": 8219
+                  },
+                  "feature_counts": {
+                    "baseline": 65,
+                    "candidate": 90,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.456883,
+                    "focused_coupled_ridge": 0.45492,
+                    "placebo_ridge": 0.456912
+                  },
+                  "rows": 136186,
+                  "subjects": 8219
+                }
+              },
+              "lactate": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.00611,
+                      -0.001798
+                    ],
+                    "point_delta": -0.003875,
+                    "significant": true,
+                    "subjects": 2064
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.006703,
+                      -0.002538
+                    ],
+                    "point_delta": -0.004777,
+                    "significant": true,
+                    "subjects": 2064
+                  },
+                  "feature_counts": {
+                    "baseline": 65,
+                    "candidate": 90,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.335459,
+                    "focused_coupled_ridge": 0.33229,
+                    "placebo_ridge": 0.336255
+                  },
+                  "rows": 4898,
+                  "subjects": 2064
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.005672,
+                      -0.00199
+                    ],
+                    "point_delta": -0.003818,
+                    "significant": true,
+                    "subjects": 2207
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.006923,
+                      -0.002766
+                    ],
+                    "point_delta": -0.004631,
+                    "significant": true,
+                    "subjects": 2207
+                  },
+                  "feature_counts": {
+                    "baseline": 65,
+                    "candidate": 90,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.318072,
+                    "focused_coupled_ridge": 0.315102,
+                    "placebo_ridge": 0.318734
+                  },
+                  "rows": 5377,
+                  "subjects": 2207
+                }
+              },
+              "map": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002658,
+                      -0.00135
+                    ],
+                    "point_delta": -0.00197,
+                    "significant": true,
+                    "subjects": 7770
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002626,
+                      -0.001382
+                    ],
+                    "point_delta": -0.002025,
+                    "significant": true,
+                    "subjects": 7770
+                  },
+                  "feature_counts": {
+                    "baseline": 65,
+                    "candidate": 90,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.587645,
+                    "focused_coupled_ridge": 0.585696,
+                    "placebo_ridge": 0.587753
+                  },
+                  "rows": 80762,
+                  "subjects": 7770
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002245,
+                      -0.001153
+                    ],
+                    "point_delta": -0.001671,
+                    "significant": true,
+                    "subjects": 8197
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002263,
+                      -0.001232
+                    ],
+                    "point_delta": -0.001741,
+                    "significant": true,
+                    "subjects": 8197
+                  },
+                  "feature_counts": {
+                    "baseline": 65,
+                    "candidate": 90,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.604172,
+                    "focused_coupled_ridge": 0.602682,
+                    "placebo_ridge": 0.604271
+                  },
+                  "rows": 135018,
+                  "subjects": 8197
+                }
+              }
+            }
+          }
+        ],
+        "seeds": [
+          7,
+          11,
+          19,
+          23,
+          37,
+          53,
+          71
+        ],
+        "summary": {
+          "heart_rate": {
+            "active_only": {
+              "candidate_beats_baseline_significant_count": 5,
+              "candidate_beats_placebo_significant_count": 5,
+              "candidate_passes_both_count": 5,
+              "median_delta_vs_baseline": -0.001198,
+              "median_delta_vs_placebo": -0.001253
+            },
+            "all_windows": {
+              "candidate_beats_baseline_significant_count": 6,
+              "candidate_beats_placebo_significant_count": 6,
+              "candidate_passes_both_count": 6,
+              "median_delta_vs_baseline": -0.001285,
+              "median_delta_vs_placebo": -0.00133
+            }
+          },
+          "lactate": {
+            "active_only": {
+              "candidate_beats_baseline_significant_count": 4,
+              "candidate_beats_placebo_significant_count": 5,
+              "candidate_passes_both_count": 4,
+              "median_delta_vs_baseline": -0.002611,
+              "median_delta_vs_placebo": -0.003664
+            },
+            "all_windows": {
+              "candidate_beats_baseline_significant_count": 4,
+              "candidate_beats_placebo_significant_count": 6,
+              "candidate_passes_both_count": 4,
+              "median_delta_vs_baseline": -0.002742,
+              "median_delta_vs_placebo": -0.003508
+            }
+          },
+          "map": {
+            "active_only": {
+              "candidate_beats_baseline_significant_count": 7,
+              "candidate_beats_placebo_significant_count": 7,
+              "candidate_passes_both_count": 7,
+              "median_delta_vs_baseline": -0.001883,
+              "median_delta_vs_placebo": -0.001869
+            },
+            "all_windows": {
+              "candidate_beats_baseline_significant_count": 7,
+              "candidate_beats_placebo_significant_count": 7,
+              "candidate_passes_both_count": 7,
+              "median_delta_vs_baseline": -0.001671,
+              "median_delta_vs_placebo": -0.001707
+            }
+          }
+        }
+      },
+      "rationale": "sepsis inflammatory burden, capillary leak, and vasoplegia coupled to cardiovascular targets at 6h",
+      "rows": 422244,
+      "source_system": "sepsis_immune_inflammatory",
+      "stays": 30198,
+      "subjects": 25175,
+      "target_system": "cardiovascular_perfusion",
+      "targets": [
+        "map",
+        "lactate",
+        "heart_rate"
+      ]
+    }
+  ],
+  "gate": {
+    "baseline": "ridge_without_focused_coupling_features",
+    "candidate": "focused_deep_coupling_features",
+    "pass_rule": "candidate must significantly beat both baseline and placebo on held-out patients",
+    "placebo": "ridge_plus_capacity_matched_random_features"
+  },
+  "safety_boundary": {
+    "active_rule_promotion_allowed": false,
+    "causal_claim_allowed": false,
+    "checkpoint_promotion_allowed": false,
+    "clinical_claim_allowed": false,
+    "counterfactual_claim_allowed": false,
+    "factual_predictive_signal_only": true,
+    "patient_ids_included_in_report": false,
+    "raw_rows_included": false,
+    "runtime_decision_authority": false
+  }
+}

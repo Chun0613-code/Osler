@@ -6,7 +6,7 @@ lab-defined DKA mini-body cohort from MIMIC-IV.
 
 Current scope:
   - Delta = 6h, with 30-minute action grids
-  - Cohort = lab-based DKA only (no ICD)
+  - Cohort = tightly co-occurring lab DKA, with ICD support recorded separately
   - State includes sodium/osmolality, creatinine, urine output, and BHB
   - Actions combine inputevents and eMAR administration records for insulin,
     fluids, KCl, bicarbonate, and dextrose
@@ -25,12 +25,12 @@ and ports over by swapping the read_csv_auto(...) source for the table name.
 import argparse
 import json
 import os
-import duckdb
 import numpy as np
 import pandas as pd
 
 from mimic_action_history import (
-    ACTION_NAMES, action_window_summary, deduplicate_events, normalize_events,
+    ACTION_NAMES, action_window_summary, deduplicate_events,
+    maintenance_window_summary, normalize_events, normalize_maintenance_events,
 )
 
 # ----------------------------------------------------------------------------
@@ -48,24 +48,26 @@ TARGET_TOL_H = 2.0      # state_{t+6h} = nearest measurement within t+6h +/- thi
 EPISODE_MAX_H = 72.0    # build anchors from DKA onset up to onset + this
 
 # Lab-based DKA criteria (co-occurring within DKA_COOCCUR_H)
-DKA_GLUCOSE_MIN = 250.0
+DKA_GLUCOSE_MIN = 200.0
 DKA_HCO3_MAX = 18.0
 DKA_ANIONGAP_MIN = 12.0
-DKA_COOCCUR_H = 12.0
+DKA_PH_MAX = 7.30
+DKA_BHB_MIN = 3.0
+DKA_COOCCUR_H = 4.0
 
 # --- itemids: VERIFY against YOUR d_labitems / d_items (run --discover first) ---
 # labevents (hosp). Lists allowed: serum + blood-gas variants where relevant.
 LAB_ITEMIDS = {
-    "glucose":    [50931, 50809],
+    "glucose":    [50931, 50809, 52027, 52569],
     "ph":         [50820],
     "bicarbonate":[50882, 50803],
-    "anion_gap":  [50868],
-    "potassium":  [50971, 50822],
-    "lactate":    [50813],
-    "creatinine": [50912],
-    "sodium":     [50983, 50824],
-    "osmolality": [50964],
-    "BHB":        [],
+    "anion_gap":  [50868, 52500],
+    "potassium":  [50971, 50822, 52452, 52610],
+    "lactate":    [50813, 52442, 53154],
+    "creatinine": [50912, 52024, 52546],
+    "sodium":     [50983, 50824, 52455, 52623],
+    "osmolality": [50964, 51701, 52031],
+    "BHB":        [51567],
 }
 # chartevents (icu). Vitals.
 VITAL_ITEMIDS = {
@@ -76,13 +78,16 @@ VITAL_ITEMIDS = {
 }
 # inputevents (icu). Actions -- THESE ARE THE LEAST RELIABLE, VERIFY CAREFULLY.
 ACTION_ITEMIDS = {
-    "insulin":     [223257, 223258, 223259, 223260, 223261, 223262],
+    "insulin":     [223257, 223258, 223259, 223260, 223261, 223262, 229299, 229619],
     "fluids":      [225158, 225828, 225823, 220949, 225159],  # NaCl/LR/D5/etc
     "potassium":   [225166],   # KCl
-    "bicarbonate": [227533],   # Na bicarb 8.4%  (uncertain -- verify)
+    "bicarbonate": [220995, 221211, 227533],   # Na bicarb variants
 }
 # vasopressors for the deterioration/viability outcome
-VASO_ITEMIDS = [221906, 221289, 221662, 221653, 229617]  # norepi/epi/dopa/dobut/phenyl (verify)
+VASO_ITEMIDS = [
+    221906, 221289, 229617, 221662, 221653,
+    222315, 221749, 229630, 229631, 229632,
+]  # norepi/epi/dopa/dobut/vasopressin/phenylephrine variants
 
 PLAUSIBLE = {  # crude physiologic bounds; values outside -> set NaN
     "glucose": (10, 2000), "ph": (6.5, 7.9), "bicarbonate": (1, 60),
@@ -101,6 +106,8 @@ TARGET_VARS = [
 
 # ----------------------------------------------------------------------------
 def con():
+    import duckdb
+
     c = duckdb.connect()
     c.execute("PRAGMA threads=4;")
     return c
@@ -108,6 +115,26 @@ def con():
 
 def f(module, name):
     return f"read_csv_auto('{os.path.join(module, name)}.csv.gz')"
+
+
+def fv(module, name):
+    return f"read_csv_auto('{os.path.join(module, name)}.csv.gz', all_varchar=true)"
+
+
+def _install_stay_filter(c, stay_ids):
+    if stay_ids is None:
+        return False
+    ids = pd.Series(stay_ids).dropna().astype("int64").drop_duplicates()
+    if ids.empty:
+        return False
+    c.execute("DROP TABLE IF EXISTS target_stays")
+    c.register("_target_stays_df", pd.DataFrame({"stay_id": ids}))
+    c.execute("CREATE TEMP TABLE target_stays AS SELECT stay_id FROM _target_stays_df")
+    return True
+
+
+def _stay_join(alias, enabled):
+    return f"JOIN target_stays ts ON {alias}.stay_id = ts.stay_id" if enabled else ""
 
 
 def discover(c):
@@ -150,15 +177,185 @@ def resolved_lab_itemids(c):
     return {name: sorted(set(ids)) for name, ids in mapping.items()}
 
 
-def pull_measurements(c):
-    """Long table: subject_id, stay_id, charttime, var, valuenum (labs + vitals)."""
-    lab_itemids = resolved_lab_itemids(c)
-    lab_ids = sorted({i for v in lab_itemids.values() for i in v})
-    vit_ids = sorted({i for v in VITAL_ITEMIDS.values() for i in v})
-    lab_case = " ".join(
+def _lab_case(lab_itemids):
+    return " ".join(
         f"WHEN le.itemid IN ({','.join(map(str,v))}) THEN '{k}'"
         for k, v in lab_itemids.items() if v
     )
+
+
+def _plausibility_filter(frame):
+    for var, (lo, hi) in PLAUSIBLE.items():
+        bad = (frame["var"] == var) & ((frame["valuenum"] < lo) | (frame["valuenum"] > hi))
+        frame = frame[~bad]
+    return frame
+
+
+def pull_dka_onset_measurements(c):
+    """Only abnormal lab rows needed to locate lab-defined DKA onset."""
+    lab_itemids = resolved_lab_itemids(c)
+    onset_vars = ("glucose", "ph", "bicarbonate", "anion_gap", "BHB")
+    onset_ids = sorted({i for name in onset_vars for i in lab_itemids.get(name, [])})
+    lab_case = _lab_case(lab_itemids)
+    labs = c.execute(f"""
+        SELECT * FROM (
+            SELECT ie.subject_id, ie.stay_id, le.charttime,
+                   CASE {lab_case} END AS var, le.valuenum
+            FROM {f(HOSP,'labevents')} le
+            JOIN {f(ICU,'icustays')} ie
+              ON le.hadm_id = ie.hadm_id
+             AND le.charttime BETWEEN ie.intime AND ie.outtime
+            WHERE le.itemid IN ({','.join(map(str,onset_ids))})
+              AND le.valuenum IS NOT NULL
+        ) lab
+        WHERE (var = 'glucose' AND valuenum >= {DKA_GLUCOSE_MIN})
+           OR (var = 'bicarbonate' AND valuenum < {DKA_HCO3_MAX})
+           OR (var = 'ph' AND valuenum < {DKA_PH_MAX})
+           OR (var = 'BHB' AND valuenum >= {DKA_BHB_MIN})
+           OR (var = 'anion_gap' AND valuenum > {DKA_ANIONGAP_MIN})
+    """).df()
+    labs["charttime"] = pd.to_datetime(labs["charttime"])
+    labs = _plausibility_filter(labs)
+    return labs.dropna(subset=["valuenum"]).sort_values(["stay_id", "charttime"])
+
+
+def find_dka_onset_sql(c, cooccur_hours=DKA_COOCCUR_H):
+    """DuckDB implementation of the DKA co-occurrence onset search."""
+    lab_itemids = resolved_lab_itemids(c)
+    onset_vars = ("glucose", "ph", "bicarbonate", "anion_gap", "BHB")
+    onset_ids = sorted({i for name in onset_vars for i in lab_itemids.get(name, [])})
+    lab_case = _lab_case(lab_itemids)
+    window_minutes = int(round(float(cooccur_hours) * 60.0))
+    df = c.execute(f"""
+        WITH lab AS (
+            SELECT ie.stay_id, le.charttime,
+                   CASE {lab_case} END AS var, le.valuenum
+            FROM {f(HOSP,'labevents')} le
+            JOIN {f(ICU,'icustays')} ie
+              ON le.hadm_id = ie.hadm_id
+             AND le.charttime BETWEEN ie.intime AND ie.outtime
+            WHERE le.itemid IN ({','.join(map(str,onset_ids))})
+              AND le.valuenum IS NOT NULL
+        ),
+        abn AS (
+            SELECT *
+            FROM lab
+            WHERE (var = 'glucose' AND valuenum BETWEEN 10 AND 2000
+                   AND valuenum >= {DKA_GLUCOSE_MIN})
+               OR (var = 'bicarbonate' AND valuenum BETWEEN 1 AND 60
+                   AND valuenum < {DKA_HCO3_MAX})
+               OR (var = 'ph' AND valuenum BETWEEN 6.5 AND 7.9
+                   AND valuenum < {DKA_PH_MAX})
+               OR (var = 'BHB' AND valuenum BETWEEN 0 AND 20
+                   AND valuenum >= {DKA_BHB_MIN})
+               OR (var = 'anion_gap' AND valuenum BETWEEN 0 AND 60
+                   AND valuenum > {DKA_ANIONGAP_MIN})
+        ),
+        candidate AS (
+            SELECT DISTINCT stay_id, charttime AS end_time
+            FROM abn
+        ),
+        windowed AS (
+            SELECT
+                c.stay_id,
+                c.end_time AS onset,
+                max(CASE WHEN a.var = 'glucose'
+                          AND a.valuenum >= {DKA_GLUCOSE_MIN}
+                         THEN 1 ELSE 0 END) AS has_glucose,
+                max(CASE WHEN (a.var = 'bicarbonate' AND a.valuenum < {DKA_HCO3_MAX})
+                          OR (a.var = 'ph' AND a.valuenum < {DKA_PH_MAX})
+                         THEN 1 ELSE 0 END) AS has_acidosis,
+                max(CASE WHEN (a.var = 'BHB' AND a.valuenum >= {DKA_BHB_MIN})
+                          OR (a.var = 'anion_gap' AND a.valuenum > {DKA_ANIONGAP_MIN})
+                         THEN 1 ELSE 0 END) AS has_ketosis,
+                max(CASE WHEN a.var = 'BHB'
+                          AND a.valuenum >= {DKA_BHB_MIN}
+                         THEN 1 ELSE 0 END) AS has_bhb,
+                max(a.charttime) FILTER (
+                    WHERE a.var = 'glucose' AND a.valuenum >= {DKA_GLUCOSE_MIN}
+                ) AS glucose_time,
+                arg_max(a.valuenum, a.charttime) FILTER (
+                    WHERE a.var = 'glucose' AND a.valuenum >= {DKA_GLUCOSE_MIN}
+                ) AS glucose_value,
+                max(a.charttime) FILTER (
+                    WHERE (a.var = 'bicarbonate' AND a.valuenum < {DKA_HCO3_MAX})
+                       OR (a.var = 'ph' AND a.valuenum < {DKA_PH_MAX})
+                ) AS acidosis_time,
+                arg_max(a.var, a.charttime) FILTER (
+                    WHERE (a.var = 'bicarbonate' AND a.valuenum < {DKA_HCO3_MAX})
+                       OR (a.var = 'ph' AND a.valuenum < {DKA_PH_MAX})
+                ) AS acidosis_var,
+                arg_max(a.valuenum, a.charttime) FILTER (
+                    WHERE (a.var = 'bicarbonate' AND a.valuenum < {DKA_HCO3_MAX})
+                       OR (a.var = 'ph' AND a.valuenum < {DKA_PH_MAX})
+                ) AS acidosis_value,
+                max(a.charttime) FILTER (
+                    WHERE (a.var = 'BHB' AND a.valuenum >= {DKA_BHB_MIN})
+                       OR (a.var = 'anion_gap' AND a.valuenum > {DKA_ANIONGAP_MIN})
+                ) AS ketosis_time,
+                arg_max(a.var, a.charttime) FILTER (
+                    WHERE (a.var = 'BHB' AND a.valuenum >= {DKA_BHB_MIN})
+                       OR (a.var = 'anion_gap' AND a.valuenum > {DKA_ANIONGAP_MIN})
+                ) AS ketosis_var,
+                arg_max(a.valuenum, a.charttime) FILTER (
+                    WHERE (a.var = 'BHB' AND a.valuenum >= {DKA_BHB_MIN})
+                       OR (a.var = 'anion_gap' AND a.valuenum > {DKA_ANIONGAP_MIN})
+                ) AS ketosis_value
+            FROM candidate c
+            JOIN abn a
+              ON a.stay_id = c.stay_id
+             AND a.charttime BETWEEN c.end_time - INTERVAL '{window_minutes} minutes'
+                                 AND c.end_time
+            GROUP BY c.stay_id, c.end_time
+        ),
+        valid AS (
+            SELECT *,
+                   row_number() OVER (PARTITION BY stay_id ORDER BY onset) AS rn
+            FROM windowed
+            WHERE has_glucose = 1 AND has_acidosis = 1 AND has_ketosis = 1
+        )
+        SELECT *
+        FROM valid
+        WHERE rn = 1
+        ORDER BY stay_id
+    """).df()
+    if df.empty:
+        return pd.DataFrame(columns=[
+            "stay_id", "onset", "onset_evidence", "onset_evidence_span_hours",
+            "ketosis_evidence",
+        ])
+    for column in ("onset", "glucose_time", "acidosis_time", "ketosis_time"):
+        df[column] = pd.to_datetime(df[column])
+    rows = []
+    for record in df.to_dict("records"):
+        evidence = [
+            {"var": "glucose", "value": float(record["glucose_value"]),
+             "charttime": record["glucose_time"].isoformat()},
+            {"var": record["acidosis_var"], "value": float(record["acidosis_value"]),
+             "charttime": record["acidosis_time"].isoformat()},
+            {"var": record["ketosis_var"], "value": float(record["ketosis_value"]),
+             "charttime": record["ketosis_time"].isoformat()},
+        ]
+        times = [record["glucose_time"], record["acidosis_time"], record["ketosis_time"]]
+        rows.append({
+            "stay_id": int(record["stay_id"]),
+            "onset": record["onset"],
+            "onset_evidence": json.dumps(evidence),
+            "onset_evidence_span_hours": (
+                max(times) - min(times)
+            ).total_seconds() / 3600.0,
+            "ketosis_evidence": "BHB" if int(record["has_bhb"]) else "anion_gap_proxy",
+        })
+    return pd.DataFrame(rows)
+
+
+def pull_measurements(c, stay_ids=None):
+    """Long table: subject_id, stay_id, charttime, var, valuenum (labs + vitals)."""
+    has_filter = _install_stay_filter(c, stay_ids)
+    lab_itemids = resolved_lab_itemids(c)
+    lab_ids = sorted({i for v in lab_itemids.values() for i in v})
+    vit_ids = sorted({i for v in VITAL_ITEMIDS.values() for i in v})
+    lab_case = _lab_case(lab_itemids)
     vit_case = " ".join(
         f"WHEN ce.itemid IN ({','.join(map(str,v))}) THEN '{k}'" for k, v in VITAL_ITEMIDS.items()
     )
@@ -169,6 +366,7 @@ def pull_measurements(c):
         JOIN {f(ICU,'icustays')} ie
           ON le.hadm_id = ie.hadm_id
          AND le.charttime BETWEEN ie.intime AND ie.outtime
+        {_stay_join('ie', has_filter)}
         WHERE le.itemid IN ({','.join(map(str,lab_ids))})
           AND le.valuenum IS NOT NULL
     """).df()
@@ -176,6 +374,7 @@ def pull_measurements(c):
         SELECT ce.subject_id, ce.stay_id, ce.charttime,
                CASE {vit_case} END AS var, ce.valuenum
         FROM {f(ICU,'chartevents')} ce
+        {_stay_join('ce', has_filter)}
         WHERE ce.itemid IN ({','.join(map(str,vit_ids))})
           AND ce.valuenum IS NOT NULL
     """).df()
@@ -184,6 +383,7 @@ def pull_measurements(c):
             SELECT oe.subject_id, oe.stay_id, oe.charttime, SUM(oe.value) AS value
             FROM {f(ICU,'outputevents')} oe
             JOIN {f(ICU,'d_items')} di ON oe.itemid = di.itemid
+            {_stay_join('oe', has_filter)}
             WHERE lower(di.linksto) = 'outputevents'
               AND (
                     lower(di.label) IN ('foley', 'void', 'condom cath', 'straight cath')
@@ -209,15 +409,13 @@ def pull_measurements(c):
         urine = pd.DataFrame(columns=labs.columns)
     m = pd.concat([labs, vits, urine], ignore_index=True)
     m["charttime"] = pd.to_datetime(m["charttime"])
-    # plausibility clip -> NaN, then drop
-    for var, (lo, hi) in PLAUSIBLE.items():
-        bad = (m["var"] == var) & ((m["valuenum"] < lo) | (m["valuenum"] > hi))
-        m = m[~bad]
+    m = _plausibility_filter(m)
     return m.dropna(subset=["valuenum"]).sort_values(["stay_id", "charttime"])
 
 
-def pull_actions(c):
+def pull_actions(c, stay_ids=None):
     """Dose/time-resolved administrations from inputevents plus eMAR."""
+    has_filter = _install_stay_filter(c, stay_ids)
     label_filter = " OR ".join(
         f"lower(di.label) LIKE '%{term}%'" for term in (
             "insulin", "saline", "sodium chloride", "nacl", "lactated ringer",
@@ -230,9 +428,11 @@ def pull_actions(c):
         SELECT ie.subject_id, ie.stay_id, ie.starttime, ie.endtime,
                di.label, ie.amount, lower(ie.amountuom) AS uom,
                ie.rate, lower(ie.rateuom) AS rate_uom,
-               NULL AS route, NULL AS product_description, 'inputevents' AS source
+               NULL AS route, NULL AS product_description, ie.itemid, ie.orderid,
+               'inputevents' AS source
         FROM {f(ICU,'inputevents')} ie
         JOIN {f(ICU,'d_items')} di ON ie.itemid = di.itemid
+        {_stay_join('ie', has_filter)}
         WHERE ie.itemid IN ({','.join(map(str, known_action_ids))}) OR {label_filter}
     """).df()
 
@@ -245,22 +445,30 @@ def pull_actions(c):
             )
         )
         raw_emar = c.execute(f"""
-            SELECT e.subject_id, i.stay_id, e.charttime AS starttime,
-                   e.charttime AS endtime, e.medication AS label,
+            SELECT TRY_CAST(e.subject_id AS BIGINT) AS subject_id,
+                   i.stay_id,
+                   TRY_CAST(e.charttime AS TIMESTAMP) AS starttime,
+                   TRY_CAST(e.charttime AS TIMESTAMP) AS endtime,
+                   e.medication AS label,
                    d.dose_given AS amount, lower(d.dose_given_unit) AS uom,
                    d.infusion_rate AS rate,
                    lower(d.infusion_rate_unit) AS rate_uom,
-                   d.route, d.product_description, 'emar' AS source
-            FROM {f(HOSP,'emar')} e
+                   d.route, d.product_description, NULL AS itemid,
+                   e.pharmacy_id AS orderid, 'emar' AS source
+            FROM {fv(HOSP,'emar')} e
             JOIN {f(ICU,'icustays')} i
-              ON e.hadm_id = i.hadm_id
-             AND e.charttime BETWEEN i.intime AND i.outtime
-            LEFT JOIN {f(HOSP,'emar_detail')} d
+              ON TRY_CAST(e.hadm_id AS BIGINT) = i.hadm_id
+             AND TRY_CAST(e.charttime AS TIMESTAMP) BETWEEN i.intime AND i.outtime
+            {_stay_join('i', has_filter)}
+            LEFT JOIN {fv(HOSP,'emar_detail')} d
               ON e.subject_id = d.subject_id
              AND e.emar_id = d.emar_id
              AND e.emar_seq = d.emar_seq
             WHERE ({med_filter})
               AND lower(coalesce(e.event_txt, 'administered')) NOT LIKE '%not given%'
+              AND TRY_CAST(e.subject_id AS BIGINT) IS NOT NULL
+              AND TRY_CAST(e.hadm_id AS BIGINT) IS NOT NULL
+              AND TRY_CAST(e.charttime AS TIMESTAMP) IS NOT NULL
         """).df()
     except Exception as error:
         print(f"WARNING: eMAR unavailable, using inputevents only: {str(error)[:160]}")
@@ -272,19 +480,48 @@ def pull_actions(c):
 
     vaso_ids = ",".join(map(str, VASO_ITEMIDS))
     vaso = c.execute(f"""
-        SELECT subject_id, stay_id, starttime, endtime, 'vasopressor' AS action,
-               amount, lower(amountuom) AS uom, 'inputevents' AS source
-        FROM {f(ICU,'inputevents')}
-        WHERE itemid IN ({vaso_ids})
+        SELECT ie.subject_id, ie.stay_id, ie.starttime, ie.endtime,
+               'vasopressor' AS action, ie.amount, lower(ie.amountuom) AS uom,
+               'inputevents' AS source
+        FROM {f(ICU,'inputevents')} ie
+        {_stay_join('ie', has_filter)}
+        WHERE ie.itemid IN ({vaso_ids})
     """).df()
     for column in ("starttime", "endtime"):
         vaso[column] = pd.to_datetime(vaso[column])
     return actions.sort_values(["stay_id", "starttime"]), vaso
 
 
+def pull_maintenance_events(c, stay_ids=None):
+    """Observed maintenance/nutrition inputs from ingredientevents."""
+    has_filter = _install_stay_filter(c, stay_ids)
+    try:
+        raw = c.execute(f"""
+            SELECT g.subject_id, g.stay_id, g.starttime, g.endtime,
+                   g.itemid AS ingredient_itemid, g.amount,
+                   lower(g.amountuom) AS uom, g.orderid,
+                   di.label AS ingredient_label, parent.label AS input_label
+            FROM {f(ICU,'ingredientevents')} g
+            JOIN {f(ICU,'d_items')} di ON g.itemid = di.itemid
+            {_stay_join('g', has_filter)}
+            LEFT JOIN {f(ICU,'inputevents')} ie
+              ON g.stay_id = ie.stay_id AND g.orderid = ie.orderid
+            LEFT JOIN {f(ICU,'d_items')} parent ON ie.itemid = parent.itemid
+            WHERE g.itemid IN (226221, 227079, 227075, 220395)
+              AND lower(coalesce(g.statusdescription, 'finishedrunning'))
+                  NOT LIKE '%cancel%'
+        """).df()
+    except Exception as error:
+        print(f"WARNING: ingredientevents unavailable: {str(error)[:160]}")
+        return normalize_maintenance_events(pd.DataFrame())
+    return normalize_maintenance_events(raw).drop_duplicates(
+        ["stay_id", "orderid", "maintenance", "starttime", "amount"]
+    ).sort_values(["stay_id", "starttime"])
+
+
 def pull_stay_meta(c):
     df = c.execute(f"""
-        SELECT i.subject_id, i.stay_id, i.intime, i.outtime, a.deathtime
+        SELECT i.subject_id, i.hadm_id, i.stay_id, i.intime, i.outtime, a.deathtime
         FROM {f(ICU,'icustays')} i
         JOIN {f(HOSP,'admissions')} a ON i.hadm_id = a.hadm_id
     """).df()
@@ -293,30 +530,76 @@ def pull_stay_meta(c):
     return df
 
 
-def find_dka_onset(meas):
-    """Return DataFrame[stay_id, onset] for stays meeting co-occurring lab DKA criteria."""
-    g = meas[(meas["var"] == "glucose") & (meas["valuenum"] > DKA_GLUCOSE_MIN)][["stay_id", "charttime"]]
-    h = meas[(meas["var"] == "bicarbonate") & (meas["valuenum"] < DKA_HCO3_MAX)][["stay_id", "charttime"]]
-    a = meas[(meas["var"] == "anion_gap") & (meas["valuenum"] > DKA_ANIONGAP_MIN)][["stay_id", "charttime"]]
-    tol = pd.Timedelta(hours=DKA_COOCCUR_H)
+def pull_dka_icd_support(c):
+    """Admission-level DKA diagnosis support; never substitutes for lab onset."""
+    try:
+        diagnoses = c.execute(f"""
+            SELECT hadm_id, upper(replace(icd_code, '.', '')) AS code, icd_version
+            FROM {f(HOSP,'diagnoses_icd')}
+        """).df()
+    except Exception:
+        return set()
+    code = diagnoses["code"].fillna("").astype(str)
+    version = pd.to_numeric(diagnoses["icd_version"], errors="coerce")
+    icd9 = (version == 9) & code.str.startswith("2501")
+    icd10 = (version == 10) & code.str.match(r"E(?:08|09|10|11|13)1")
+    return set(diagnoses.loc[icd9 | icd10, "hadm_id"].dropna().astype(int))
+
+
+def find_dka_onset(meas, cooccur_hours=DKA_COOCCUR_H):
+    """Earliest time glucose, acidosis and ketosis evidence share one window."""
     onsets = []
-    for sid, gg in g.groupby("stay_id"):
-        hh = h[h["stay_id"] == sid]["charttime"].values
-        aa = a[a["stay_id"] == sid]["charttime"].values
-        if len(hh) == 0 or len(aa) == 0:
-            continue
-        for t in gg["charttime"]:
-            tv = np.datetime64(t)
-            if (np.abs(hh - tv) <= tol).any() and (np.abs(aa - tv) <= tol).any():
-                onsets.append((sid, t))
-                break
-    return pd.DataFrame(onsets, columns=["stay_id", "onset"])
+    window = pd.Timedelta(hours=float(cooccur_hours))
+    for stay_id, stay in meas.groupby("stay_id"):
+        stay = stay.sort_values("charttime")
+        candidate_times = stay.loc[
+            ((stay["var"] == "glucose") & (stay["valuenum"] >= DKA_GLUCOSE_MIN))
+            | ((stay["var"] == "bicarbonate") & (stay["valuenum"] < DKA_HCO3_MAX))
+            | ((stay["var"] == "ph") & (stay["valuenum"] < DKA_PH_MAX))
+            | ((stay["var"] == "BHB") & (stay["valuenum"] >= DKA_BHB_MIN))
+            | ((stay["var"] == "anion_gap") & (stay["valuenum"] > DKA_ANIONGAP_MIN)),
+            "charttime",
+        ].drop_duplicates().sort_values()
+        for end_time in candidate_times:
+            sample = stay[
+                (stay["charttime"] >= end_time - window)
+                & (stay["charttime"] <= end_time)
+            ]
+            glucose = sample[(sample["var"] == "glucose") & (sample["valuenum"] >= DKA_GLUCOSE_MIN)]
+            acidosis = sample[
+                ((sample["var"] == "bicarbonate") & (sample["valuenum"] < DKA_HCO3_MAX))
+                | ((sample["var"] == "ph") & (sample["valuenum"] < DKA_PH_MAX))
+            ]
+            ketosis = sample[
+                ((sample["var"] == "BHB") & (sample["valuenum"] >= DKA_BHB_MIN))
+                | ((sample["var"] == "anion_gap") & (sample["valuenum"] > DKA_ANIONGAP_MIN))
+            ]
+            if glucose.empty or acidosis.empty or ketosis.empty:
+                continue
+            evidence = [group.iloc[-1] for group in (glucose, acidosis, ketosis)]
+            times = [row["charttime"] for row in evidence]
+            onsets.append({
+                "stay_id": stay_id,
+                "onset": max(times),
+                "onset_evidence": json.dumps([
+                    {"var": row["var"], "value": float(row["valuenum"]),
+                     "charttime": row["charttime"].isoformat()}
+                    for row in evidence
+                ]),
+                "onset_evidence_span_hours": (
+                    max(times) - min(times)
+                ).total_seconds() / 3600.0,
+                "ketosis_evidence": "BHB" if any(row["var"] == "BHB" for row in evidence) else "anion_gap_proxy",
+            })
+            break
+    return pd.DataFrame(onsets)
 
 
 def build_anchors(onsets, meta):
     rows = []
     meta_i = meta.set_index("stay_id")
-    for sid, onset in onsets.itertuples(index=False):
+    for record in onsets.itertuples(index=False):
+        sid, onset = record.stay_id, record.onset
         outtime = meta_i.loc[sid, "outtime"]
         last = min(onset + pd.Timedelta(hours=EPISODE_MAX_H), outtime - pd.Timedelta(hours=DELTA_H))
         t = onset
@@ -338,6 +621,9 @@ def assemble_state(anchors, meas, suffix, when_col, direction, tol_h):
                 out[f"{var}_age_hr"] = np.nan
             continue
         left = anchors[["stay_id", when_col]].sort_values(when_col)
+        left[when_col] = pd.to_datetime(left[when_col]).astype("datetime64[ns]")
+        mv = mv.copy()
+        mv["charttime"] = pd.to_datetime(mv["charttime"]).astype("datetime64[ns]")
         merged = pd.merge_asof(
             left, mv, left_on=when_col, right_on="charttime",
             by="stay_id", direction=direction, tolerance=tol,
@@ -350,15 +636,23 @@ def assemble_state(anchors, meas, suffix, when_col, direction, tol_h):
     return out
 
 
-def assemble_actions(anchors, actions):
+def assemble_actions(anchors, actions, maintenance=None):
     """Exact future action grids and six-hour pre-anchor treatment history."""
     rows = []
     grouped = {stay: frame for stay, frame in actions.groupby("stay_id")}
     empty = actions.iloc[0:0]
+    maintenance = normalize_maintenance_events(pd.DataFrame()) if maintenance is None else maintenance
+    maintenance_grouped = {
+        stay: frame for stay, frame in maintenance.groupby("stay_id")
+    }
+    empty_maintenance = maintenance.iloc[0:0]
     for anchor in anchors.itertuples():
         summary = action_window_summary(grouped.get(anchor.stay_id, empty), anchor.t)
+        summary.update(maintenance_window_summary(
+            maintenance_grouped.get(anchor.stay_id, empty_maintenance), anchor.t
+        ))
         row = {
-            key: json.dumps(value) if key.endswith("_grid") else value
+            key: json.dumps(value) if isinstance(value, (dict, list)) else value
             for key, value in summary.items()
         }
         for action in ACTION_NAMES:
@@ -393,28 +687,54 @@ def assemble_outcomes(anchors, vasopressors, meta):
 
 
 def main():
+    global MIMIC_DIR, HOSP, ICU, OUT_PATH
     ap = argparse.ArgumentParser()
     ap.add_argument("--discover", action="store_true")
+    ap.add_argument("--mimic-dir", default=MIMIC_DIR)
+    ap.add_argument("--out", default=OUT_PATH)
+    ap.add_argument("--cohort-report", default=None)
+    ap.add_argument("--cooccurrence-hours", type=float, default=DKA_COOCCUR_H)
+    ap.add_argument("--min-stays", type=int, default=30)
+    ap.add_argument("--min-transitions", type=int, default=200)
+    ap.add_argument("--min-core-pairs", type=int, default=20)
+    ap.add_argument("--require-icd-support", action="store_true")
+    ap.add_argument("--allow-small-cohort", action="store_true")
     args = ap.parse_args()
+    MIMIC_DIR = os.path.abspath(args.mimic_dir)
+    HOSP = os.path.join(MIMIC_DIR, "hosp")
+    ICU = os.path.join(MIMIC_DIR, "icu")
+    OUT_PATH = args.out
     c = con()
 
     if args.discover:
         discover(c)
         return
 
-    print("Pulling measurements...")
-    meas = pull_measurements(c)
-    print(f"  {len(meas):,} measurement rows, {meas['stay_id'].nunique():,} stays")
-
-    print("Finding DKA onsets...")
-    onsets = find_dka_onset(meas)
+    print("Finding DKA onsets with SQL lab co-occurrence...")
+    onsets = find_dka_onset_sql(c, args.cooccurrence_hours)
     print(f"  DKA stays: {len(onsets):,}")
     if len(onsets) == 0:
         print("  No DKA stays found -- check thresholds and itemids (run --discover).")
         return
 
     meta = pull_stay_meta(c)
-    actions, vasopressors = pull_actions(c)
+    icd_support = pull_dka_icd_support(c)
+    onsets["hadm_id"] = onsets["stay_id"].map(meta.set_index("stay_id")["hadm_id"])
+    onsets["icd_dka_support"] = onsets["hadm_id"].isin(icd_support)
+    if args.require_icd_support:
+        onsets = onsets[onsets["icd_dka_support"]].reset_index(drop=True)
+        print(f"  DKA stays after ICD-support requirement: {len(onsets):,}")
+        if onsets.empty:
+            return
+
+    cohort_stay_ids = onsets["stay_id"].dropna().astype(int).tolist()
+    print("Pulling measurements for DKA stays...")
+    meas = pull_measurements(c, cohort_stay_ids)
+    print(f"  {len(meas):,} measurement rows, {meas['stay_id'].nunique():,} stays")
+
+    print("Pulling treatments for DKA stays...")
+    actions, vasopressors = pull_actions(c, cohort_stay_ids)
+    maintenance = pull_maintenance_events(c, cohort_stay_ids)
 
     print("Building anchors...")
     anchors = build_anchors(onsets, meta).reset_index(drop=True)
@@ -424,6 +744,8 @@ def main():
     ).dt.total_seconds() / 3600.0
     anchors["subject_id"] = anchors["stay_id"].map(
         meta.set_index("stay_id")["subject_id"])
+    for column in ("onset_evidence", "onset_evidence_span_hours", "ketosis_evidence", "icd_dka_support"):
+        anchors[column] = anchors["stay_id"].map(onsets.set_index("stay_id")[column])
     anchors["t_plus"] = anchors["t"] + pd.Timedelta(hours=DELTA_H)
     print(f"  anchors (transitions): {len(anchors):,}")
 
@@ -431,11 +753,15 @@ def main():
     st = assemble_state(anchors, meas, "_t", "t", "backward", LOOKBACK_H)
     sf = assemble_state(anchors.rename(columns={"t_plus": "t_plus"}), meas,
                         "_tp6", "t_plus", "nearest", TARGET_TOL_H)
-    ac = assemble_actions(anchors, actions)
+    ac = assemble_actions(anchors, actions, maintenance)
     oc = assemble_outcomes(anchors, vasopressors, meta)
 
     df = pd.concat([
-        anchors[["subject_id", "stay_id", "onset", "hours_since_onset", "t", "t_plus"]],
+        anchors[[
+            "subject_id", "stay_id", "onset", "onset_evidence",
+            "onset_evidence_span_hours", "ketosis_evidence", "icd_dka_support",
+            "hours_since_onset", "t", "t_plus",
+        ]],
         st.drop(columns=["stay_id", "t"]),
         sf.drop(columns=["stay_id", "t_plus"]),
         ac, oc,
@@ -457,7 +783,48 @@ def main():
     df = df[has_pair].reset_index(drop=True)
 
     df.to_parquet(OUT_PATH, index=False)
+
+    core_pair_counts = {
+        var: int((df[f"{var}_t"].notna() & df[f"{var}_tp6"].notna()).sum())
+        for var in ("glucose", "potassium", "bicarbonate", "map")
+    }
+    gate_failures = []
+    if df["stay_id"].nunique() < args.min_stays:
+        gate_failures.append(f"stays<{args.min_stays}")
+    if len(df) < args.min_transitions:
+        gate_failures.append(f"transitions<{args.min_transitions}")
+    for var, count in core_pair_counts.items():
+        if count < args.min_core_pairs:
+            gate_failures.append(f"{var}_pairs<{args.min_core_pairs}")
+    report = {
+        "mimic_dir": MIMIC_DIR,
+        "output": os.path.abspath(OUT_PATH),
+        "subjects": int(df["subject_id"].nunique()),
+        "stays": int(df["stay_id"].nunique()),
+        "transitions": int(len(df)),
+        "core_pair_counts": core_pair_counts,
+        "cooccurrence_hours": float(args.cooccurrence_hours),
+        "icd_supported_stays": int(onsets["icd_dka_support"].sum()),
+        "has_exact_action_grids": "future_action_grid" in df,
+        "has_treatment_lifecycle": "future_treatment_events" in df,
+        "has_treatment_history": "history_action_grid" in df,
+        "has_maintenance_context": "future_maintenance_grid" in df,
+        "maintenance_event_count": int(maintenance[
+            maintenance["stay_id"].isin(onsets["stay_id"])
+        ].shape[0]),
+        "evaluation_ready": not gate_failures,
+        "causal_claim_allowed": False,
+        "gate_failures": gate_failures,
+    }
+    report_path = args.cohort_report or f"{OUT_PATH}.cohort.json"
+    with open(report_path, "w") as handle:
+        json.dump(report, handle, indent=2)
+    if gate_failures and not args.allow_small_cohort:
+        raise RuntimeError(
+            "Cohort failed evaluation gate: " + ", ".join(gate_failures)
+        )
     print(f"\nWrote {len(df):,} transitions -> {OUT_PATH}")
+    print(f"Cohort report -> {report_path}")
     print("Action prevalence:\n", df[[c for c in df if c.startswith('act_')]].mean())
     print("Death-after-window rate:", round(df["died_after_window"].mean(), 4))
     print("Vaso-onset-after-window rate:", round(df["vaso_onset_after_window"].mean(), 4))

@@ -1,0 +1,3351 @@
+{
+  "experiment": "eICU focused body-system deep coupling audit",
+  "focused_specs": [
+    {
+      "candidate": "focused_deep_coupling_features",
+      "cohort": "eicu_aki_transitions_24h.parquet",
+      "future_suffix": "tp24",
+      "hospital_holdout": {
+        "discovery_groups": 136,
+        "focused_coupling_feature_count": 27,
+        "group_column": "hospitalid",
+        "heldout_groups": 67,
+        "overlap": 0,
+        "seed": 2029,
+        "targets": {
+          "bun": {
+            "active_only": {
+              "active_only": true,
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.015232,
+                  -0.010259
+                ],
+                "point_delta": -0.012574,
+                "significant": true,
+                "subjects": 4783
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.015386,
+                  -0.010443
+                ],
+                "point_delta": -0.012885,
+                "significant": true,
+                "subjects": 4783
+              },
+              "feature_counts": {
+                "baseline": 56,
+                "candidate": 83,
+                "focused_coupling": 27,
+                "placebo": 27
+              },
+              "focused_coupling_features": [
+                "fbc_cardio_shock_burden_mean",
+                "fbc_cardio_shock_burden_sd",
+                "fbc_cardio_shock_burden_observation",
+                "fbc_cardio_shock_burden_innovation",
+                "fbc_cardio_shock_burden_delta_since_prior",
+                "fbc_cardio_shock_burden_observation_confidence",
+                "fbc_cardio_renal_afterload_mean",
+                "fbc_cardio_renal_afterload_sd",
+                "fbc_cardio_renal_afterload_observation",
+                "fbc_cardio_renal_afterload_innovation",
+                "fbc_cardio_renal_afterload_delta_since_prior",
+                "fbc_cardio_renal_afterload_observation_confidence",
+                "fbc_cardio_renal_recovery_drive_mean",
+                "fbc_cardio_renal_recovery_drive_sd",
+                "fbc_cardio_renal_recovery_drive_observation",
+                "fbc_cardio_renal_recovery_drive_innovation",
+                "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                "fbc_cardio_renal_recovery_drive_observation_confidence",
+                "fbc_vector_renal_reserve",
+                "fbc_vector_creatinine_slope",
+                "fbc_vector_renal_stress",
+                "fbc_vector_hypoperfusion",
+                "fbc_shock_x_low_renal_reserve",
+                "fbc_hypoperfusion_x_creatinine_slope",
+                "fbc_afterload_x_current_creatinine",
+                "fbc_afterload_x_oliguria",
+                "fbc_recovery_x_low_reserve"
+              ],
+              "mae": {
+                "baseline_ridge": 0.410416,
+                "focused_coupled_ridge": 0.399468,
+                "placebo_ridge": 0.410662
+              },
+              "rows": 13080,
+              "subjects": 4783
+            },
+            "all_windows": {
+              "active_only": false,
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.01011,
+                  -0.005951
+                ],
+                "point_delta": -0.007934,
+                "significant": true,
+                "subjects": 6315
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.01001,
+                  -0.006604
+                ],
+                "point_delta": -0.00829,
+                "significant": true,
+                "subjects": 6315
+              },
+              "feature_counts": {
+                "baseline": 56,
+                "candidate": 83,
+                "focused_coupling": 27,
+                "placebo": 27
+              },
+              "focused_coupling_features": [
+                "fbc_cardio_shock_burden_mean",
+                "fbc_cardio_shock_burden_sd",
+                "fbc_cardio_shock_burden_observation",
+                "fbc_cardio_shock_burden_innovation",
+                "fbc_cardio_shock_burden_delta_since_prior",
+                "fbc_cardio_shock_burden_observation_confidence",
+                "fbc_cardio_renal_afterload_mean",
+                "fbc_cardio_renal_afterload_sd",
+                "fbc_cardio_renal_afterload_observation",
+                "fbc_cardio_renal_afterload_innovation",
+                "fbc_cardio_renal_afterload_delta_since_prior",
+                "fbc_cardio_renal_afterload_observation_confidence",
+                "fbc_cardio_renal_recovery_drive_mean",
+                "fbc_cardio_renal_recovery_drive_sd",
+                "fbc_cardio_renal_recovery_drive_observation",
+                "fbc_cardio_renal_recovery_drive_innovation",
+                "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                "fbc_cardio_renal_recovery_drive_observation_confidence",
+                "fbc_vector_renal_reserve",
+                "fbc_vector_creatinine_slope",
+                "fbc_vector_renal_stress",
+                "fbc_vector_hypoperfusion",
+                "fbc_shock_x_low_renal_reserve",
+                "fbc_hypoperfusion_x_creatinine_slope",
+                "fbc_afterload_x_current_creatinine",
+                "fbc_afterload_x_oliguria",
+                "fbc_recovery_x_low_reserve"
+              ],
+              "mae": {
+                "baseline_ridge": 0.344391,
+                "focused_coupled_ridge": 0.336302,
+                "placebo_ridge": 0.344734
+              },
+              "rows": 18680,
+              "subjects": 6315
+            }
+          },
+          "creatinine": {
+            "active_only": {
+              "active_only": true,
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.02102,
+                  -0.015509
+                ],
+                "point_delta": -0.018607,
+                "significant": true,
+                "subjects": 4789
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.021827,
+                  -0.015881
+                ],
+                "point_delta": -0.018827,
+                "significant": true,
+                "subjects": 4789
+              },
+              "feature_counts": {
+                "baseline": 56,
+                "candidate": 83,
+                "focused_coupling": 27,
+                "placebo": 27
+              },
+              "focused_coupling_features": [
+                "fbc_cardio_shock_burden_mean",
+                "fbc_cardio_shock_burden_sd",
+                "fbc_cardio_shock_burden_observation",
+                "fbc_cardio_shock_burden_innovation",
+                "fbc_cardio_shock_burden_delta_since_prior",
+                "fbc_cardio_shock_burden_observation_confidence",
+                "fbc_cardio_renal_afterload_mean",
+                "fbc_cardio_renal_afterload_sd",
+                "fbc_cardio_renal_afterload_observation",
+                "fbc_cardio_renal_afterload_innovation",
+                "fbc_cardio_renal_afterload_delta_since_prior",
+                "fbc_cardio_renal_afterload_observation_confidence",
+                "fbc_cardio_renal_recovery_drive_mean",
+                "fbc_cardio_renal_recovery_drive_sd",
+                "fbc_cardio_renal_recovery_drive_observation",
+                "fbc_cardio_renal_recovery_drive_innovation",
+                "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                "fbc_cardio_renal_recovery_drive_observation_confidence",
+                "fbc_vector_renal_reserve",
+                "fbc_vector_creatinine_slope",
+                "fbc_vector_renal_stress",
+                "fbc_vector_hypoperfusion",
+                "fbc_shock_x_low_renal_reserve",
+                "fbc_hypoperfusion_x_creatinine_slope",
+                "fbc_afterload_x_current_creatinine",
+                "fbc_afterload_x_oliguria",
+                "fbc_recovery_x_low_reserve"
+              ],
+              "mae": {
+                "baseline_ridge": 0.369162,
+                "focused_coupled_ridge": 0.355042,
+                "placebo_ridge": 0.369399
+              },
+              "rows": 13117,
+              "subjects": 4789
+            },
+            "all_windows": {
+              "active_only": false,
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.008983,
+                  -0.004748
+                ],
+                "point_delta": -0.006986,
+                "significant": true,
+                "subjects": 6329
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.009331,
+                  -0.005074
+                ],
+                "point_delta": -0.007282,
+                "significant": true,
+                "subjects": 6329
+              },
+              "feature_counts": {
+                "baseline": 56,
+                "candidate": 83,
+                "focused_coupling": 27,
+                "placebo": 27
+              },
+              "focused_coupling_features": [
+                "fbc_cardio_shock_burden_mean",
+                "fbc_cardio_shock_burden_sd",
+                "fbc_cardio_shock_burden_observation",
+                "fbc_cardio_shock_burden_innovation",
+                "fbc_cardio_shock_burden_delta_since_prior",
+                "fbc_cardio_shock_burden_observation_confidence",
+                "fbc_cardio_renal_afterload_mean",
+                "fbc_cardio_renal_afterload_sd",
+                "fbc_cardio_renal_afterload_observation",
+                "fbc_cardio_renal_afterload_innovation",
+                "fbc_cardio_renal_afterload_delta_since_prior",
+                "fbc_cardio_renal_afterload_observation_confidence",
+                "fbc_cardio_renal_recovery_drive_mean",
+                "fbc_cardio_renal_recovery_drive_sd",
+                "fbc_cardio_renal_recovery_drive_observation",
+                "fbc_cardio_renal_recovery_drive_innovation",
+                "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                "fbc_cardio_renal_recovery_drive_observation_confidence",
+                "fbc_vector_renal_reserve",
+                "fbc_vector_creatinine_slope",
+                "fbc_vector_renal_stress",
+                "fbc_vector_hypoperfusion",
+                "fbc_shock_x_low_renal_reserve",
+                "fbc_hypoperfusion_x_creatinine_slope",
+                "fbc_afterload_x_current_creatinine",
+                "fbc_afterload_x_oliguria",
+                "fbc_recovery_x_low_reserve"
+              ],
+              "mae": {
+                "baseline_ridge": 0.291453,
+                "focused_coupled_ridge": 0.284288,
+                "placebo_ridge": 0.291772
+              },
+              "rows": 18734,
+              "subjects": 6329
+            }
+          },
+          "urine_output": {
+            "active_only": {
+              "active_only": true,
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.008369,
+                  -0.003232
+                ],
+                "point_delta": -0.005925,
+                "significant": true,
+                "subjects": 2519
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.008836,
+                  -0.003074
+                ],
+                "point_delta": -0.00619,
+                "significant": true,
+                "subjects": 2519
+              },
+              "feature_counts": {
+                "baseline": 56,
+                "candidate": 83,
+                "focused_coupling": 27,
+                "placebo": 27
+              },
+              "focused_coupling_features": [
+                "fbc_cardio_shock_burden_mean",
+                "fbc_cardio_shock_burden_sd",
+                "fbc_cardio_shock_burden_observation",
+                "fbc_cardio_shock_burden_innovation",
+                "fbc_cardio_shock_burden_delta_since_prior",
+                "fbc_cardio_shock_burden_observation_confidence",
+                "fbc_cardio_renal_afterload_mean",
+                "fbc_cardio_renal_afterload_sd",
+                "fbc_cardio_renal_afterload_observation",
+                "fbc_cardio_renal_afterload_innovation",
+                "fbc_cardio_renal_afterload_delta_since_prior",
+                "fbc_cardio_renal_afterload_observation_confidence",
+                "fbc_cardio_renal_recovery_drive_mean",
+                "fbc_cardio_renal_recovery_drive_sd",
+                "fbc_cardio_renal_recovery_drive_observation",
+                "fbc_cardio_renal_recovery_drive_innovation",
+                "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                "fbc_cardio_renal_recovery_drive_observation_confidence",
+                "fbc_vector_renal_reserve",
+                "fbc_vector_creatinine_slope",
+                "fbc_vector_renal_stress",
+                "fbc_vector_hypoperfusion",
+                "fbc_shock_x_low_renal_reserve",
+                "fbc_hypoperfusion_x_creatinine_slope",
+                "fbc_afterload_x_current_creatinine",
+                "fbc_afterload_x_oliguria",
+                "fbc_recovery_x_low_reserve"
+              ],
+              "mae": {
+                "baseline_ridge": 0.48008,
+                "focused_coupled_ridge": 0.468281,
+                "placebo_ridge": 0.480224
+              },
+              "rows": 13644,
+              "subjects": 2519
+            },
+            "all_windows": {
+              "active_only": false,
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.007328,
+                  -0.003066
+                ],
+                "point_delta": -0.005296,
+                "significant": true,
+                "subjects": 3428
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.007348,
+                  -0.003285
+                ],
+                "point_delta": -0.005255,
+                "significant": true,
+                "subjects": 3428
+              },
+              "feature_counts": {
+                "baseline": 56,
+                "candidate": 83,
+                "focused_coupling": 27,
+                "placebo": 27
+              },
+              "focused_coupling_features": [
+                "fbc_cardio_shock_burden_mean",
+                "fbc_cardio_shock_burden_sd",
+                "fbc_cardio_shock_burden_observation",
+                "fbc_cardio_shock_burden_innovation",
+                "fbc_cardio_shock_burden_delta_since_prior",
+                "fbc_cardio_shock_burden_observation_confidence",
+                "fbc_cardio_renal_afterload_mean",
+                "fbc_cardio_renal_afterload_sd",
+                "fbc_cardio_renal_afterload_observation",
+                "fbc_cardio_renal_afterload_innovation",
+                "fbc_cardio_renal_afterload_delta_since_prior",
+                "fbc_cardio_renal_afterload_observation_confidence",
+                "fbc_cardio_renal_recovery_drive_mean",
+                "fbc_cardio_renal_recovery_drive_sd",
+                "fbc_cardio_renal_recovery_drive_observation",
+                "fbc_cardio_renal_recovery_drive_innovation",
+                "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                "fbc_cardio_renal_recovery_drive_observation_confidence",
+                "fbc_vector_renal_reserve",
+                "fbc_vector_creatinine_slope",
+                "fbc_vector_renal_stress",
+                "fbc_vector_hypoperfusion",
+                "fbc_shock_x_low_renal_reserve",
+                "fbc_hypoperfusion_x_creatinine_slope",
+                "fbc_afterload_x_current_creatinine",
+                "fbc_afterload_x_oliguria",
+                "fbc_recovery_x_low_reserve"
+              ],
+              "mae": {
+                "baseline_ridge": 0.567539,
+                "focused_coupled_ridge": 0.560327,
+                "placebo_ridge": 0.567527
+              },
+              "rows": 33504,
+              "subjects": 3428
+            }
+          }
+        }
+      },
+      "hospitals": 203,
+      "name": "cardio_renal_24h",
+      "random_patient_splits": {
+        "runs": [
+          {
+            "discovery_groups": 19770,
+            "focused_coupling_feature_count": 27,
+            "group_column": "subject_id",
+            "heldout_groups": 9738,
+            "overlap": 0,
+            "seed": 7,
+            "targets": {
+              "bun": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.01549,
+                      -0.01134
+                    ],
+                    "point_delta": -0.013353,
+                    "significant": true,
+                    "subjects": 5955
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.01576,
+                      -0.011369
+                    ],
+                    "point_delta": -0.013443,
+                    "significant": true,
+                    "subjects": 5955
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 83,
+                    "focused_coupling": 27,
+                    "placebo": 27
+                  },
+                  "focused_coupling_features": [
+                    "fbc_cardio_shock_burden_mean",
+                    "fbc_cardio_shock_burden_sd",
+                    "fbc_cardio_shock_burden_observation",
+                    "fbc_cardio_shock_burden_innovation",
+                    "fbc_cardio_shock_burden_delta_since_prior",
+                    "fbc_cardio_shock_burden_observation_confidence",
+                    "fbc_cardio_renal_afterload_mean",
+                    "fbc_cardio_renal_afterload_sd",
+                    "fbc_cardio_renal_afterload_observation",
+                    "fbc_cardio_renal_afterload_innovation",
+                    "fbc_cardio_renal_afterload_delta_since_prior",
+                    "fbc_cardio_renal_afterload_observation_confidence",
+                    "fbc_cardio_renal_recovery_drive_mean",
+                    "fbc_cardio_renal_recovery_drive_sd",
+                    "fbc_cardio_renal_recovery_drive_observation",
+                    "fbc_cardio_renal_recovery_drive_innovation",
+                    "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                    "fbc_cardio_renal_recovery_drive_observation_confidence",
+                    "fbc_vector_renal_reserve",
+                    "fbc_vector_creatinine_slope",
+                    "fbc_vector_renal_stress",
+                    "fbc_vector_hypoperfusion",
+                    "fbc_shock_x_low_renal_reserve",
+                    "fbc_hypoperfusion_x_creatinine_slope",
+                    "fbc_afterload_x_current_creatinine",
+                    "fbc_afterload_x_oliguria",
+                    "fbc_recovery_x_low_reserve"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.412479,
+                    "focused_coupled_ridge": 0.400489,
+                    "placebo_ridge": 0.412557
+                  },
+                  "rows": 17002,
+                  "subjects": 5955
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.009553,
+                      -0.006595
+                    ],
+                    "point_delta": -0.008025,
+                    "significant": true,
+                    "subjects": 7913
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.010036,
+                      -0.006637
+                    ],
+                    "point_delta": -0.008205,
+                    "significant": true,
+                    "subjects": 7913
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 83,
+                    "focused_coupling": 27,
+                    "placebo": 27
+                  },
+                  "focused_coupling_features": [
+                    "fbc_cardio_shock_burden_mean",
+                    "fbc_cardio_shock_burden_sd",
+                    "fbc_cardio_shock_burden_observation",
+                    "fbc_cardio_shock_burden_innovation",
+                    "fbc_cardio_shock_burden_delta_since_prior",
+                    "fbc_cardio_shock_burden_observation_confidence",
+                    "fbc_cardio_renal_afterload_mean",
+                    "fbc_cardio_renal_afterload_sd",
+                    "fbc_cardio_renal_afterload_observation",
+                    "fbc_cardio_renal_afterload_innovation",
+                    "fbc_cardio_renal_afterload_delta_since_prior",
+                    "fbc_cardio_renal_afterload_observation_confidence",
+                    "fbc_cardio_renal_recovery_drive_mean",
+                    "fbc_cardio_renal_recovery_drive_sd",
+                    "fbc_cardio_renal_recovery_drive_observation",
+                    "fbc_cardio_renal_recovery_drive_innovation",
+                    "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                    "fbc_cardio_renal_recovery_drive_observation_confidence",
+                    "fbc_vector_renal_reserve",
+                    "fbc_vector_creatinine_slope",
+                    "fbc_vector_renal_stress",
+                    "fbc_vector_hypoperfusion",
+                    "fbc_shock_x_low_renal_reserve",
+                    "fbc_hypoperfusion_x_creatinine_slope",
+                    "fbc_afterload_x_current_creatinine",
+                    "fbc_afterload_x_oliguria",
+                    "fbc_recovery_x_low_reserve"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.342399,
+                    "focused_coupled_ridge": 0.333477,
+                    "placebo_ridge": 0.342562
+                  },
+                  "rows": 24521,
+                  "subjects": 7913
+                }
+              },
+              "creatinine": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.022557,
+                      -0.01723
+                    ],
+                    "point_delta": -0.019874,
+                    "significant": true,
+                    "subjects": 5966
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.022696,
+                      -0.017376
+                    ],
+                    "point_delta": -0.020141,
+                    "significant": true,
+                    "subjects": 5966
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 83,
+                    "focused_coupling": 27,
+                    "placebo": 27
+                  },
+                  "focused_coupling_features": [
+                    "fbc_cardio_shock_burden_mean",
+                    "fbc_cardio_shock_burden_sd",
+                    "fbc_cardio_shock_burden_observation",
+                    "fbc_cardio_shock_burden_innovation",
+                    "fbc_cardio_shock_burden_delta_since_prior",
+                    "fbc_cardio_shock_burden_observation_confidence",
+                    "fbc_cardio_renal_afterload_mean",
+                    "fbc_cardio_renal_afterload_sd",
+                    "fbc_cardio_renal_afterload_observation",
+                    "fbc_cardio_renal_afterload_innovation",
+                    "fbc_cardio_renal_afterload_delta_since_prior",
+                    "fbc_cardio_renal_afterload_observation_confidence",
+                    "fbc_cardio_renal_recovery_drive_mean",
+                    "fbc_cardio_renal_recovery_drive_sd",
+                    "fbc_cardio_renal_recovery_drive_observation",
+                    "fbc_cardio_renal_recovery_drive_innovation",
+                    "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                    "fbc_cardio_renal_recovery_drive_observation_confidence",
+                    "fbc_vector_renal_reserve",
+                    "fbc_vector_creatinine_slope",
+                    "fbc_vector_renal_stress",
+                    "fbc_vector_hypoperfusion",
+                    "fbc_shock_x_low_renal_reserve",
+                    "fbc_hypoperfusion_x_creatinine_slope",
+                    "fbc_afterload_x_current_creatinine",
+                    "fbc_afterload_x_oliguria",
+                    "fbc_recovery_x_low_reserve"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.359706,
+                    "focused_coupled_ridge": 0.344156,
+                    "placebo_ridge": 0.359807
+                  },
+                  "rows": 17053,
+                  "subjects": 5966
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.00949,
+                      -0.005554
+                    ],
+                    "point_delta": -0.007448,
+                    "significant": true,
+                    "subjects": 7935
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.009558,
+                      -0.005436
+                    ],
+                    "point_delta": -0.007738,
+                    "significant": true,
+                    "subjects": 7935
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 83,
+                    "focused_coupling": 27,
+                    "placebo": 27
+                  },
+                  "focused_coupling_features": [
+                    "fbc_cardio_shock_burden_mean",
+                    "fbc_cardio_shock_burden_sd",
+                    "fbc_cardio_shock_burden_observation",
+                    "fbc_cardio_shock_burden_innovation",
+                    "fbc_cardio_shock_burden_delta_since_prior",
+                    "fbc_cardio_shock_burden_observation_confidence",
+                    "fbc_cardio_renal_afterload_mean",
+                    "fbc_cardio_renal_afterload_sd",
+                    "fbc_cardio_renal_afterload_observation",
+                    "fbc_cardio_renal_afterload_innovation",
+                    "fbc_cardio_renal_afterload_delta_since_prior",
+                    "fbc_cardio_renal_afterload_observation_confidence",
+                    "fbc_cardio_renal_recovery_drive_mean",
+                    "fbc_cardio_renal_recovery_drive_sd",
+                    "fbc_cardio_renal_recovery_drive_observation",
+                    "fbc_cardio_renal_recovery_drive_innovation",
+                    "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                    "fbc_cardio_renal_recovery_drive_observation_confidence",
+                    "fbc_vector_renal_reserve",
+                    "fbc_vector_creatinine_slope",
+                    "fbc_vector_renal_stress",
+                    "fbc_vector_hypoperfusion",
+                    "fbc_shock_x_low_renal_reserve",
+                    "fbc_hypoperfusion_x_creatinine_slope",
+                    "fbc_afterload_x_current_creatinine",
+                    "fbc_afterload_x_oliguria",
+                    "fbc_recovery_x_low_reserve"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.280959,
+                    "focused_coupled_ridge": 0.272973,
+                    "placebo_ridge": 0.281123
+                  },
+                  "rows": 24592,
+                  "subjects": 7935
+                }
+              },
+              "urine_output": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.005954,
+                      -0.002137
+                    ],
+                    "point_delta": -0.003904,
+                    "significant": true,
+                    "subjects": 4121
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.005665,
+                      -0.002209
+                    ],
+                    "point_delta": -0.004088,
+                    "significant": true,
+                    "subjects": 4121
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 83,
+                    "focused_coupling": 27,
+                    "placebo": 27
+                  },
+                  "focused_coupling_features": [
+                    "fbc_cardio_shock_burden_mean",
+                    "fbc_cardio_shock_burden_sd",
+                    "fbc_cardio_shock_burden_observation",
+                    "fbc_cardio_shock_burden_innovation",
+                    "fbc_cardio_shock_burden_delta_since_prior",
+                    "fbc_cardio_shock_burden_observation_confidence",
+                    "fbc_cardio_renal_afterload_mean",
+                    "fbc_cardio_renal_afterload_sd",
+                    "fbc_cardio_renal_afterload_observation",
+                    "fbc_cardio_renal_afterload_innovation",
+                    "fbc_cardio_renal_afterload_delta_since_prior",
+                    "fbc_cardio_renal_afterload_observation_confidence",
+                    "fbc_cardio_renal_recovery_drive_mean",
+                    "fbc_cardio_renal_recovery_drive_sd",
+                    "fbc_cardio_renal_recovery_drive_observation",
+                    "fbc_cardio_renal_recovery_drive_innovation",
+                    "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                    "fbc_cardio_renal_recovery_drive_observation_confidence",
+                    "fbc_vector_renal_reserve",
+                    "fbc_vector_creatinine_slope",
+                    "fbc_vector_renal_stress",
+                    "fbc_vector_hypoperfusion",
+                    "fbc_shock_x_low_renal_reserve",
+                    "fbc_hypoperfusion_x_creatinine_slope",
+                    "fbc_afterload_x_current_creatinine",
+                    "fbc_afterload_x_oliguria",
+                    "fbc_recovery_x_low_reserve"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.413124,
+                    "focused_coupled_ridge": 0.405688,
+                    "placebo_ridge": 0.413298
+                  },
+                  "rows": 24809,
+                  "subjects": 4121
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.005984,
+                      -0.003237
+                    ],
+                    "point_delta": -0.004638,
+                    "significant": true,
+                    "subjects": 5442
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.006093,
+                      -0.003066
+                    ],
+                    "point_delta": -0.004654,
+                    "significant": true,
+                    "subjects": 5442
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 83,
+                    "focused_coupling": 27,
+                    "placebo": 27
+                  },
+                  "focused_coupling_features": [
+                    "fbc_cardio_shock_burden_mean",
+                    "fbc_cardio_shock_burden_sd",
+                    "fbc_cardio_shock_burden_observation",
+                    "fbc_cardio_shock_burden_innovation",
+                    "fbc_cardio_shock_burden_delta_since_prior",
+                    "fbc_cardio_shock_burden_observation_confidence",
+                    "fbc_cardio_renal_afterload_mean",
+                    "fbc_cardio_renal_afterload_sd",
+                    "fbc_cardio_renal_afterload_observation",
+                    "fbc_cardio_renal_afterload_innovation",
+                    "fbc_cardio_renal_afterload_delta_since_prior",
+                    "fbc_cardio_renal_afterload_observation_confidence",
+                    "fbc_cardio_renal_recovery_drive_mean",
+                    "fbc_cardio_renal_recovery_drive_sd",
+                    "fbc_cardio_renal_recovery_drive_observation",
+                    "fbc_cardio_renal_recovery_drive_innovation",
+                    "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                    "fbc_cardio_renal_recovery_drive_observation_confidence",
+                    "fbc_vector_renal_reserve",
+                    "fbc_vector_creatinine_slope",
+                    "fbc_vector_renal_stress",
+                    "fbc_vector_hypoperfusion",
+                    "fbc_shock_x_low_renal_reserve",
+                    "fbc_hypoperfusion_x_creatinine_slope",
+                    "fbc_afterload_x_current_creatinine",
+                    "fbc_afterload_x_oliguria",
+                    "fbc_recovery_x_low_reserve"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.495849,
+                    "focused_coupled_ridge": 0.490948,
+                    "placebo_ridge": 0.495953
+                  },
+                  "rows": 64878,
+                  "subjects": 5442
+                }
+              }
+            }
+          },
+          {
+            "discovery_groups": 19770,
+            "focused_coupling_feature_count": 27,
+            "group_column": "subject_id",
+            "heldout_groups": 9738,
+            "overlap": 0,
+            "seed": 11,
+            "targets": {
+              "bun": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.013614,
+                      -0.009362
+                    ],
+                    "point_delta": -0.0114,
+                    "significant": true,
+                    "subjects": 5925
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.013822,
+                      -0.00936
+                    ],
+                    "point_delta": -0.011539,
+                    "significant": true,
+                    "subjects": 5925
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 83,
+                    "focused_coupling": 27,
+                    "placebo": 27
+                  },
+                  "focused_coupling_features": [
+                    "fbc_cardio_shock_burden_mean",
+                    "fbc_cardio_shock_burden_sd",
+                    "fbc_cardio_shock_burden_observation",
+                    "fbc_cardio_shock_burden_innovation",
+                    "fbc_cardio_shock_burden_delta_since_prior",
+                    "fbc_cardio_shock_burden_observation_confidence",
+                    "fbc_cardio_renal_afterload_mean",
+                    "fbc_cardio_renal_afterload_sd",
+                    "fbc_cardio_renal_afterload_observation",
+                    "fbc_cardio_renal_afterload_innovation",
+                    "fbc_cardio_renal_afterload_delta_since_prior",
+                    "fbc_cardio_renal_afterload_observation_confidence",
+                    "fbc_cardio_renal_recovery_drive_mean",
+                    "fbc_cardio_renal_recovery_drive_sd",
+                    "fbc_cardio_renal_recovery_drive_observation",
+                    "fbc_cardio_renal_recovery_drive_innovation",
+                    "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                    "fbc_cardio_renal_recovery_drive_observation_confidence",
+                    "fbc_vector_renal_reserve",
+                    "fbc_vector_creatinine_slope",
+                    "fbc_vector_renal_stress",
+                    "fbc_vector_hypoperfusion",
+                    "fbc_shock_x_low_renal_reserve",
+                    "fbc_hypoperfusion_x_creatinine_slope",
+                    "fbc_afterload_x_current_creatinine",
+                    "fbc_afterload_x_oliguria",
+                    "fbc_recovery_x_low_reserve"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.405932,
+                    "focused_coupled_ridge": 0.395457,
+                    "placebo_ridge": 0.406019
+                  },
+                  "rows": 16561,
+                  "subjects": 5925
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.008958,
+                      -0.005311
+                    ],
+                    "point_delta": -0.007137,
+                    "significant": true,
+                    "subjects": 7863
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.00901,
+                      -0.005648
+                    ],
+                    "point_delta": -0.007283,
+                    "significant": true,
+                    "subjects": 7863
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 83,
+                    "focused_coupling": 27,
+                    "placebo": 27
+                  },
+                  "focused_coupling_features": [
+                    "fbc_cardio_shock_burden_mean",
+                    "fbc_cardio_shock_burden_sd",
+                    "fbc_cardio_shock_burden_observation",
+                    "fbc_cardio_shock_burden_innovation",
+                    "fbc_cardio_shock_burden_delta_since_prior",
+                    "fbc_cardio_shock_burden_observation_confidence",
+                    "fbc_cardio_renal_afterload_mean",
+                    "fbc_cardio_renal_afterload_sd",
+                    "fbc_cardio_renal_afterload_observation",
+                    "fbc_cardio_renal_afterload_innovation",
+                    "fbc_cardio_renal_afterload_delta_since_prior",
+                    "fbc_cardio_renal_afterload_observation_confidence",
+                    "fbc_cardio_renal_recovery_drive_mean",
+                    "fbc_cardio_renal_recovery_drive_sd",
+                    "fbc_cardio_renal_recovery_drive_observation",
+                    "fbc_cardio_renal_recovery_drive_innovation",
+                    "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                    "fbc_cardio_renal_recovery_drive_observation_confidence",
+                    "fbc_vector_renal_reserve",
+                    "fbc_vector_creatinine_slope",
+                    "fbc_vector_renal_stress",
+                    "fbc_vector_hypoperfusion",
+                    "fbc_shock_x_low_renal_reserve",
+                    "fbc_hypoperfusion_x_creatinine_slope",
+                    "fbc_afterload_x_current_creatinine",
+                    "fbc_afterload_x_oliguria",
+                    "fbc_recovery_x_low_reserve"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.339013,
+                    "focused_coupled_ridge": 0.330121,
+                    "placebo_ridge": 0.339126
+                  },
+                  "rows": 23952,
+                  "subjects": 7863
+                }
+              },
+              "creatinine": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.021804,
+                      -0.016729
+                    ],
+                    "point_delta": -0.019332,
+                    "significant": true,
+                    "subjects": 5931
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.022028,
+                      -0.016897
+                    ],
+                    "point_delta": -0.019409,
+                    "significant": true,
+                    "subjects": 5931
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 83,
+                    "focused_coupling": 27,
+                    "placebo": 27
+                  },
+                  "focused_coupling_features": [
+                    "fbc_cardio_shock_burden_mean",
+                    "fbc_cardio_shock_burden_sd",
+                    "fbc_cardio_shock_burden_observation",
+                    "fbc_cardio_shock_burden_innovation",
+                    "fbc_cardio_shock_burden_delta_since_prior",
+                    "fbc_cardio_shock_burden_observation_confidence",
+                    "fbc_cardio_renal_afterload_mean",
+                    "fbc_cardio_renal_afterload_sd",
+                    "fbc_cardio_renal_afterload_observation",
+                    "fbc_cardio_renal_afterload_innovation",
+                    "fbc_cardio_renal_afterload_delta_since_prior",
+                    "fbc_cardio_renal_afterload_observation_confidence",
+                    "fbc_cardio_renal_recovery_drive_mean",
+                    "fbc_cardio_renal_recovery_drive_sd",
+                    "fbc_cardio_renal_recovery_drive_observation",
+                    "fbc_cardio_renal_recovery_drive_innovation",
+                    "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                    "fbc_cardio_renal_recovery_drive_observation_confidence",
+                    "fbc_vector_renal_reserve",
+                    "fbc_vector_creatinine_slope",
+                    "fbc_vector_renal_stress",
+                    "fbc_vector_hypoperfusion",
+                    "fbc_shock_x_low_renal_reserve",
+                    "fbc_hypoperfusion_x_creatinine_slope",
+                    "fbc_afterload_x_current_creatinine",
+                    "fbc_afterload_x_oliguria",
+                    "fbc_recovery_x_low_reserve"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.360738,
+                    "focused_coupled_ridge": 0.345703,
+                    "placebo_ridge": 0.360786
+                  },
+                  "rows": 16589,
+                  "subjects": 5931
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.008589,
+                      -0.004964
+                    ],
+                    "point_delta": -0.00688,
+                    "significant": true,
+                    "subjects": 7879
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.009026,
+                      -0.005194
+                    ],
+                    "point_delta": -0.007096,
+                    "significant": true,
+                    "subjects": 7879
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 83,
+                    "focused_coupling": 27,
+                    "placebo": 27
+                  },
+                  "focused_coupling_features": [
+                    "fbc_cardio_shock_burden_mean",
+                    "fbc_cardio_shock_burden_sd",
+                    "fbc_cardio_shock_burden_observation",
+                    "fbc_cardio_shock_burden_innovation",
+                    "fbc_cardio_shock_burden_delta_since_prior",
+                    "fbc_cardio_shock_burden_observation_confidence",
+                    "fbc_cardio_renal_afterload_mean",
+                    "fbc_cardio_renal_afterload_sd",
+                    "fbc_cardio_renal_afterload_observation",
+                    "fbc_cardio_renal_afterload_innovation",
+                    "fbc_cardio_renal_afterload_delta_since_prior",
+                    "fbc_cardio_renal_afterload_observation_confidence",
+                    "fbc_cardio_renal_recovery_drive_mean",
+                    "fbc_cardio_renal_recovery_drive_sd",
+                    "fbc_cardio_renal_recovery_drive_observation",
+                    "fbc_cardio_renal_recovery_drive_innovation",
+                    "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                    "fbc_cardio_renal_recovery_drive_observation_confidence",
+                    "fbc_vector_renal_reserve",
+                    "fbc_vector_creatinine_slope",
+                    "fbc_vector_renal_stress",
+                    "fbc_vector_hypoperfusion",
+                    "fbc_shock_x_low_renal_reserve",
+                    "fbc_hypoperfusion_x_creatinine_slope",
+                    "fbc_afterload_x_current_creatinine",
+                    "fbc_afterload_x_oliguria",
+                    "fbc_recovery_x_low_reserve"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.281828,
+                    "focused_coupled_ridge": 0.273898,
+                    "placebo_ridge": 0.282007
+                  },
+                  "rows": 23995,
+                  "subjects": 7879
+                }
+              },
+              "urine_output": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002773,
+                      0.000853
+                    ],
+                    "point_delta": -0.00091,
+                    "significant": false,
+                    "subjects": 4176
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.003097,
+                      0.000973
+                    ],
+                    "point_delta": -0.001187,
+                    "significant": false,
+                    "subjects": 4176
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 83,
+                    "focused_coupling": 27,
+                    "placebo": 27
+                  },
+                  "focused_coupling_features": [
+                    "fbc_cardio_shock_burden_mean",
+                    "fbc_cardio_shock_burden_sd",
+                    "fbc_cardio_shock_burden_observation",
+                    "fbc_cardio_shock_burden_innovation",
+                    "fbc_cardio_shock_burden_delta_since_prior",
+                    "fbc_cardio_shock_burden_observation_confidence",
+                    "fbc_cardio_renal_afterload_mean",
+                    "fbc_cardio_renal_afterload_sd",
+                    "fbc_cardio_renal_afterload_observation",
+                    "fbc_cardio_renal_afterload_innovation",
+                    "fbc_cardio_renal_afterload_delta_since_prior",
+                    "fbc_cardio_renal_afterload_observation_confidence",
+                    "fbc_cardio_renal_recovery_drive_mean",
+                    "fbc_cardio_renal_recovery_drive_sd",
+                    "fbc_cardio_renal_recovery_drive_observation",
+                    "fbc_cardio_renal_recovery_drive_innovation",
+                    "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                    "fbc_cardio_renal_recovery_drive_observation_confidence",
+                    "fbc_vector_renal_reserve",
+                    "fbc_vector_creatinine_slope",
+                    "fbc_vector_renal_stress",
+                    "fbc_vector_hypoperfusion",
+                    "fbc_shock_x_low_renal_reserve",
+                    "fbc_hypoperfusion_x_creatinine_slope",
+                    "fbc_afterload_x_current_creatinine",
+                    "fbc_afterload_x_oliguria",
+                    "fbc_recovery_x_low_reserve"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.421843,
+                    "focused_coupled_ridge": 0.417715,
+                    "placebo_ridge": 0.421954
+                  },
+                  "rows": 25095,
+                  "subjects": 4176
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.004973,
+                      -0.002093
+                    ],
+                    "point_delta": -0.003678,
+                    "significant": true,
+                    "subjects": 5510
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.005325,
+                      -0.002369
+                    ],
+                    "point_delta": -0.003844,
+                    "significant": true,
+                    "subjects": 5510
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 83,
+                    "focused_coupling": 27,
+                    "placebo": 27
+                  },
+                  "focused_coupling_features": [
+                    "fbc_cardio_shock_burden_mean",
+                    "fbc_cardio_shock_burden_sd",
+                    "fbc_cardio_shock_burden_observation",
+                    "fbc_cardio_shock_burden_innovation",
+                    "fbc_cardio_shock_burden_delta_since_prior",
+                    "fbc_cardio_shock_burden_observation_confidence",
+                    "fbc_cardio_renal_afterload_mean",
+                    "fbc_cardio_renal_afterload_sd",
+                    "fbc_cardio_renal_afterload_observation",
+                    "fbc_cardio_renal_afterload_innovation",
+                    "fbc_cardio_renal_afterload_delta_since_prior",
+                    "fbc_cardio_renal_afterload_observation_confidence",
+                    "fbc_cardio_renal_recovery_drive_mean",
+                    "fbc_cardio_renal_recovery_drive_sd",
+                    "fbc_cardio_renal_recovery_drive_observation",
+                    "fbc_cardio_renal_recovery_drive_innovation",
+                    "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                    "fbc_cardio_renal_recovery_drive_observation_confidence",
+                    "fbc_vector_renal_reserve",
+                    "fbc_vector_creatinine_slope",
+                    "fbc_vector_renal_stress",
+                    "fbc_vector_hypoperfusion",
+                    "fbc_shock_x_low_renal_reserve",
+                    "fbc_hypoperfusion_x_creatinine_slope",
+                    "fbc_afterload_x_current_creatinine",
+                    "fbc_afterload_x_oliguria",
+                    "fbc_recovery_x_low_reserve"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.507301,
+                    "focused_coupled_ridge": 0.504305,
+                    "placebo_ridge": 0.507395
+                  },
+                  "rows": 66378,
+                  "subjects": 5510
+                }
+              }
+            }
+          },
+          {
+            "discovery_groups": 19770,
+            "focused_coupling_feature_count": 27,
+            "group_column": "subject_id",
+            "heldout_groups": 9738,
+            "overlap": 0,
+            "seed": 19,
+            "targets": {
+              "bun": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.014486,
+                      -0.010168
+                    ],
+                    "point_delta": -0.012082,
+                    "significant": true,
+                    "subjects": 5884
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.01411,
+                      -0.009873
+                    ],
+                    "point_delta": -0.012057,
+                    "significant": true,
+                    "subjects": 5884
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 83,
+                    "focused_coupling": 27,
+                    "placebo": 27
+                  },
+                  "focused_coupling_features": [
+                    "fbc_cardio_shock_burden_mean",
+                    "fbc_cardio_shock_burden_sd",
+                    "fbc_cardio_shock_burden_observation",
+                    "fbc_cardio_shock_burden_innovation",
+                    "fbc_cardio_shock_burden_delta_since_prior",
+                    "fbc_cardio_shock_burden_observation_confidence",
+                    "fbc_cardio_renal_afterload_mean",
+                    "fbc_cardio_renal_afterload_sd",
+                    "fbc_cardio_renal_afterload_observation",
+                    "fbc_cardio_renal_afterload_innovation",
+                    "fbc_cardio_renal_afterload_delta_since_prior",
+                    "fbc_cardio_renal_afterload_observation_confidence",
+                    "fbc_cardio_renal_recovery_drive_mean",
+                    "fbc_cardio_renal_recovery_drive_sd",
+                    "fbc_cardio_renal_recovery_drive_observation",
+                    "fbc_cardio_renal_recovery_drive_innovation",
+                    "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                    "fbc_cardio_renal_recovery_drive_observation_confidence",
+                    "fbc_vector_renal_reserve",
+                    "fbc_vector_creatinine_slope",
+                    "fbc_vector_renal_stress",
+                    "fbc_vector_hypoperfusion",
+                    "fbc_shock_x_low_renal_reserve",
+                    "fbc_hypoperfusion_x_creatinine_slope",
+                    "fbc_afterload_x_current_creatinine",
+                    "fbc_afterload_x_oliguria",
+                    "fbc_recovery_x_low_reserve"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.415051,
+                    "focused_coupled_ridge": 0.40453,
+                    "placebo_ridge": 0.41515
+                  },
+                  "rows": 17005,
+                  "subjects": 5884
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.008143,
+                      -0.005018
+                    ],
+                    "point_delta": -0.006498,
+                    "significant": true,
+                    "subjects": 7840
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.008145,
+                      -0.004929
+                    ],
+                    "point_delta": -0.006491,
+                    "significant": true,
+                    "subjects": 7840
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 83,
+                    "focused_coupling": 27,
+                    "placebo": 27
+                  },
+                  "focused_coupling_features": [
+                    "fbc_cardio_shock_burden_mean",
+                    "fbc_cardio_shock_burden_sd",
+                    "fbc_cardio_shock_burden_observation",
+                    "fbc_cardio_shock_burden_innovation",
+                    "fbc_cardio_shock_burden_delta_since_prior",
+                    "fbc_cardio_shock_burden_observation_confidence",
+                    "fbc_cardio_renal_afterload_mean",
+                    "fbc_cardio_renal_afterload_sd",
+                    "fbc_cardio_renal_afterload_observation",
+                    "fbc_cardio_renal_afterload_innovation",
+                    "fbc_cardio_renal_afterload_delta_since_prior",
+                    "fbc_cardio_renal_afterload_observation_confidence",
+                    "fbc_cardio_renal_recovery_drive_mean",
+                    "fbc_cardio_renal_recovery_drive_sd",
+                    "fbc_cardio_renal_recovery_drive_observation",
+                    "fbc_cardio_renal_recovery_drive_innovation",
+                    "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                    "fbc_cardio_renal_recovery_drive_observation_confidence",
+                    "fbc_vector_renal_reserve",
+                    "fbc_vector_creatinine_slope",
+                    "fbc_vector_renal_stress",
+                    "fbc_vector_hypoperfusion",
+                    "fbc_shock_x_low_renal_reserve",
+                    "fbc_hypoperfusion_x_creatinine_slope",
+                    "fbc_afterload_x_current_creatinine",
+                    "fbc_afterload_x_oliguria",
+                    "fbc_recovery_x_low_reserve"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.344568,
+                    "focused_coupled_ridge": 0.336936,
+                    "placebo_ridge": 0.344643
+                  },
+                  "rows": 24479,
+                  "subjects": 7840
+                }
+              },
+              "creatinine": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.020475,
+                      -0.015414
+                    ],
+                    "point_delta": -0.017952,
+                    "significant": true,
+                    "subjects": 5894
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.020815,
+                      -0.015886
+                    ],
+                    "point_delta": -0.018187,
+                    "significant": true,
+                    "subjects": 5894
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 83,
+                    "focused_coupling": 27,
+                    "placebo": 27
+                  },
+                  "focused_coupling_features": [
+                    "fbc_cardio_shock_burden_mean",
+                    "fbc_cardio_shock_burden_sd",
+                    "fbc_cardio_shock_burden_observation",
+                    "fbc_cardio_shock_burden_innovation",
+                    "fbc_cardio_shock_burden_delta_since_prior",
+                    "fbc_cardio_shock_burden_observation_confidence",
+                    "fbc_cardio_renal_afterload_mean",
+                    "fbc_cardio_renal_afterload_sd",
+                    "fbc_cardio_renal_afterload_observation",
+                    "fbc_cardio_renal_afterload_innovation",
+                    "fbc_cardio_renal_afterload_delta_since_prior",
+                    "fbc_cardio_renal_afterload_observation_confidence",
+                    "fbc_cardio_renal_recovery_drive_mean",
+                    "fbc_cardio_renal_recovery_drive_sd",
+                    "fbc_cardio_renal_recovery_drive_observation",
+                    "fbc_cardio_renal_recovery_drive_innovation",
+                    "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                    "fbc_cardio_renal_recovery_drive_observation_confidence",
+                    "fbc_vector_renal_reserve",
+                    "fbc_vector_creatinine_slope",
+                    "fbc_vector_renal_stress",
+                    "fbc_vector_hypoperfusion",
+                    "fbc_shock_x_low_renal_reserve",
+                    "fbc_hypoperfusion_x_creatinine_slope",
+                    "fbc_afterload_x_current_creatinine",
+                    "fbc_afterload_x_oliguria",
+                    "fbc_recovery_x_low_reserve"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.353476,
+                    "focused_coupled_ridge": 0.339387,
+                    "placebo_ridge": 0.353712
+                  },
+                  "rows": 17052,
+                  "subjects": 5894
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.007485,
+                      -0.003831
+                    ],
+                    "point_delta": -0.005746,
+                    "significant": true,
+                    "subjects": 7860
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.007736,
+                      -0.003953
+                    ],
+                    "point_delta": -0.006049,
+                    "significant": true,
+                    "subjects": 7860
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 83,
+                    "focused_coupling": 27,
+                    "placebo": 27
+                  },
+                  "focused_coupling_features": [
+                    "fbc_cardio_shock_burden_mean",
+                    "fbc_cardio_shock_burden_sd",
+                    "fbc_cardio_shock_burden_observation",
+                    "fbc_cardio_shock_burden_innovation",
+                    "fbc_cardio_shock_burden_delta_since_prior",
+                    "fbc_cardio_shock_burden_observation_confidence",
+                    "fbc_cardio_renal_afterload_mean",
+                    "fbc_cardio_renal_afterload_sd",
+                    "fbc_cardio_renal_afterload_observation",
+                    "fbc_cardio_renal_afterload_innovation",
+                    "fbc_cardio_renal_afterload_delta_since_prior",
+                    "fbc_cardio_renal_afterload_observation_confidence",
+                    "fbc_cardio_renal_recovery_drive_mean",
+                    "fbc_cardio_renal_recovery_drive_sd",
+                    "fbc_cardio_renal_recovery_drive_observation",
+                    "fbc_cardio_renal_recovery_drive_innovation",
+                    "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                    "fbc_cardio_renal_recovery_drive_observation_confidence",
+                    "fbc_vector_renal_reserve",
+                    "fbc_vector_creatinine_slope",
+                    "fbc_vector_renal_stress",
+                    "fbc_vector_hypoperfusion",
+                    "fbc_shock_x_low_renal_reserve",
+                    "fbc_hypoperfusion_x_creatinine_slope",
+                    "fbc_afterload_x_current_creatinine",
+                    "fbc_afterload_x_oliguria",
+                    "fbc_recovery_x_low_reserve"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.276929,
+                    "focused_coupled_ridge": 0.270086,
+                    "placebo_ridge": 0.277186
+                  },
+                  "rows": 24561,
+                  "subjects": 7860
+                }
+              },
+              "urine_output": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.003118,
+                      0.000584
+                    ],
+                    "point_delta": -0.001226,
+                    "significant": false,
+                    "subjects": 4085
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.003582,
+                      0.001056
+                    ],
+                    "point_delta": -0.001224,
+                    "significant": false,
+                    "subjects": 4085
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 83,
+                    "focused_coupling": 27,
+                    "placebo": 27
+                  },
+                  "focused_coupling_features": [
+                    "fbc_cardio_shock_burden_mean",
+                    "fbc_cardio_shock_burden_sd",
+                    "fbc_cardio_shock_burden_observation",
+                    "fbc_cardio_shock_burden_innovation",
+                    "fbc_cardio_shock_burden_delta_since_prior",
+                    "fbc_cardio_shock_burden_observation_confidence",
+                    "fbc_cardio_renal_afterload_mean",
+                    "fbc_cardio_renal_afterload_sd",
+                    "fbc_cardio_renal_afterload_observation",
+                    "fbc_cardio_renal_afterload_innovation",
+                    "fbc_cardio_renal_afterload_delta_since_prior",
+                    "fbc_cardio_renal_afterload_observation_confidence",
+                    "fbc_cardio_renal_recovery_drive_mean",
+                    "fbc_cardio_renal_recovery_drive_sd",
+                    "fbc_cardio_renal_recovery_drive_observation",
+                    "fbc_cardio_renal_recovery_drive_innovation",
+                    "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                    "fbc_cardio_renal_recovery_drive_observation_confidence",
+                    "fbc_vector_renal_reserve",
+                    "fbc_vector_creatinine_slope",
+                    "fbc_vector_renal_stress",
+                    "fbc_vector_hypoperfusion",
+                    "fbc_shock_x_low_renal_reserve",
+                    "fbc_hypoperfusion_x_creatinine_slope",
+                    "fbc_afterload_x_current_creatinine",
+                    "fbc_afterload_x_oliguria",
+                    "fbc_recovery_x_low_reserve"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.399343,
+                    "focused_coupled_ridge": 0.392057,
+                    "placebo_ridge": 0.399544
+                  },
+                  "rows": 24623,
+                  "subjects": 4085
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.004229,
+                      -0.001405
+                    ],
+                    "point_delta": -0.002837,
+                    "significant": true,
+                    "subjects": 5431
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.004512,
+                      -0.00165
+                    ],
+                    "point_delta": -0.00286,
+                    "significant": true,
+                    "subjects": 5431
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 83,
+                    "focused_coupling": 27,
+                    "placebo": 27
+                  },
+                  "focused_coupling_features": [
+                    "fbc_cardio_shock_burden_mean",
+                    "fbc_cardio_shock_burden_sd",
+                    "fbc_cardio_shock_burden_observation",
+                    "fbc_cardio_shock_burden_innovation",
+                    "fbc_cardio_shock_burden_delta_since_prior",
+                    "fbc_cardio_shock_burden_observation_confidence",
+                    "fbc_cardio_renal_afterload_mean",
+                    "fbc_cardio_renal_afterload_sd",
+                    "fbc_cardio_renal_afterload_observation",
+                    "fbc_cardio_renal_afterload_innovation",
+                    "fbc_cardio_renal_afterload_delta_since_prior",
+                    "fbc_cardio_renal_afterload_observation_confidence",
+                    "fbc_cardio_renal_recovery_drive_mean",
+                    "fbc_cardio_renal_recovery_drive_sd",
+                    "fbc_cardio_renal_recovery_drive_observation",
+                    "fbc_cardio_renal_recovery_drive_innovation",
+                    "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                    "fbc_cardio_renal_recovery_drive_observation_confidence",
+                    "fbc_vector_renal_reserve",
+                    "fbc_vector_creatinine_slope",
+                    "fbc_vector_renal_stress",
+                    "fbc_vector_hypoperfusion",
+                    "fbc_shock_x_low_renal_reserve",
+                    "fbc_hypoperfusion_x_creatinine_slope",
+                    "fbc_afterload_x_current_creatinine",
+                    "fbc_afterload_x_oliguria",
+                    "fbc_recovery_x_low_reserve"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.498103,
+                    "focused_coupled_ridge": 0.493656,
+                    "placebo_ridge": 0.498251
+                  },
+                  "rows": 64708,
+                  "subjects": 5431
+                }
+              }
+            }
+          },
+          {
+            "discovery_groups": 19770,
+            "focused_coupling_feature_count": 27,
+            "group_column": "subject_id",
+            "heldout_groups": 9738,
+            "overlap": 0,
+            "seed": 23,
+            "targets": {
+              "bun": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.013105,
+                      -0.008928
+                    ],
+                    "point_delta": -0.011064,
+                    "significant": true,
+                    "subjects": 5892
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.013193,
+                      -0.008994
+                    ],
+                    "point_delta": -0.011084,
+                    "significant": true,
+                    "subjects": 5892
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 83,
+                    "focused_coupling": 27,
+                    "placebo": 27
+                  },
+                  "focused_coupling_features": [
+                    "fbc_cardio_shock_burden_mean",
+                    "fbc_cardio_shock_burden_sd",
+                    "fbc_cardio_shock_burden_observation",
+                    "fbc_cardio_shock_burden_innovation",
+                    "fbc_cardio_shock_burden_delta_since_prior",
+                    "fbc_cardio_shock_burden_observation_confidence",
+                    "fbc_cardio_renal_afterload_mean",
+                    "fbc_cardio_renal_afterload_sd",
+                    "fbc_cardio_renal_afterload_observation",
+                    "fbc_cardio_renal_afterload_innovation",
+                    "fbc_cardio_renal_afterload_delta_since_prior",
+                    "fbc_cardio_renal_afterload_observation_confidence",
+                    "fbc_cardio_renal_recovery_drive_mean",
+                    "fbc_cardio_renal_recovery_drive_sd",
+                    "fbc_cardio_renal_recovery_drive_observation",
+                    "fbc_cardio_renal_recovery_drive_innovation",
+                    "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                    "fbc_cardio_renal_recovery_drive_observation_confidence",
+                    "fbc_vector_renal_reserve",
+                    "fbc_vector_creatinine_slope",
+                    "fbc_vector_renal_stress",
+                    "fbc_vector_hypoperfusion",
+                    "fbc_shock_x_low_renal_reserve",
+                    "fbc_hypoperfusion_x_creatinine_slope",
+                    "fbc_afterload_x_current_creatinine",
+                    "fbc_afterload_x_oliguria",
+                    "fbc_recovery_x_low_reserve"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.403592,
+                    "focused_coupled_ridge": 0.393567,
+                    "placebo_ridge": 0.40363
+                  },
+                  "rows": 16506,
+                  "subjects": 5892
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.008217,
+                      -0.005091
+                    ],
+                    "point_delta": -0.006679,
+                    "significant": true,
+                    "subjects": 7822
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.008409,
+                      -0.005086
+                    ],
+                    "point_delta": -0.006789,
+                    "significant": true,
+                    "subjects": 7822
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 83,
+                    "focused_coupling": 27,
+                    "placebo": 27
+                  },
+                  "focused_coupling_features": [
+                    "fbc_cardio_shock_burden_mean",
+                    "fbc_cardio_shock_burden_sd",
+                    "fbc_cardio_shock_burden_observation",
+                    "fbc_cardio_shock_burden_innovation",
+                    "fbc_cardio_shock_burden_delta_since_prior",
+                    "fbc_cardio_shock_burden_observation_confidence",
+                    "fbc_cardio_renal_afterload_mean",
+                    "fbc_cardio_renal_afterload_sd",
+                    "fbc_cardio_renal_afterload_observation",
+                    "fbc_cardio_renal_afterload_innovation",
+                    "fbc_cardio_renal_afterload_delta_since_prior",
+                    "fbc_cardio_renal_afterload_observation_confidence",
+                    "fbc_cardio_renal_recovery_drive_mean",
+                    "fbc_cardio_renal_recovery_drive_sd",
+                    "fbc_cardio_renal_recovery_drive_observation",
+                    "fbc_cardio_renal_recovery_drive_innovation",
+                    "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                    "fbc_cardio_renal_recovery_drive_observation_confidence",
+                    "fbc_vector_renal_reserve",
+                    "fbc_vector_creatinine_slope",
+                    "fbc_vector_renal_stress",
+                    "fbc_vector_hypoperfusion",
+                    "fbc_shock_x_low_renal_reserve",
+                    "fbc_hypoperfusion_x_creatinine_slope",
+                    "fbc_afterload_x_current_creatinine",
+                    "fbc_afterload_x_oliguria",
+                    "fbc_recovery_x_low_reserve"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.335939,
+                    "focused_coupled_ridge": 0.328312,
+                    "placebo_ridge": 0.336028
+                  },
+                  "rows": 23811,
+                  "subjects": 7822
+                }
+              },
+              "creatinine": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.021583,
+                      -0.016157
+                    ],
+                    "point_delta": -0.01887,
+                    "significant": true,
+                    "subjects": 5895
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.021532,
+                      -0.016683
+                    ],
+                    "point_delta": -0.019101,
+                    "significant": true,
+                    "subjects": 5895
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 83,
+                    "focused_coupling": 27,
+                    "placebo": 27
+                  },
+                  "focused_coupling_features": [
+                    "fbc_cardio_shock_burden_mean",
+                    "fbc_cardio_shock_burden_sd",
+                    "fbc_cardio_shock_burden_observation",
+                    "fbc_cardio_shock_burden_innovation",
+                    "fbc_cardio_shock_burden_delta_since_prior",
+                    "fbc_cardio_shock_burden_observation_confidence",
+                    "fbc_cardio_renal_afterload_mean",
+                    "fbc_cardio_renal_afterload_sd",
+                    "fbc_cardio_renal_afterload_observation",
+                    "fbc_cardio_renal_afterload_innovation",
+                    "fbc_cardio_renal_afterload_delta_since_prior",
+                    "fbc_cardio_renal_afterload_observation_confidence",
+                    "fbc_cardio_renal_recovery_drive_mean",
+                    "fbc_cardio_renal_recovery_drive_sd",
+                    "fbc_cardio_renal_recovery_drive_observation",
+                    "fbc_cardio_renal_recovery_drive_innovation",
+                    "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                    "fbc_cardio_renal_recovery_drive_observation_confidence",
+                    "fbc_vector_renal_reserve",
+                    "fbc_vector_creatinine_slope",
+                    "fbc_vector_renal_stress",
+                    "fbc_vector_hypoperfusion",
+                    "fbc_shock_x_low_renal_reserve",
+                    "fbc_hypoperfusion_x_creatinine_slope",
+                    "fbc_afterload_x_current_creatinine",
+                    "fbc_afterload_x_oliguria",
+                    "fbc_recovery_x_low_reserve"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.35827,
+                    "focused_coupled_ridge": 0.343872,
+                    "placebo_ridge": 0.358515
+                  },
+                  "rows": 16539,
+                  "subjects": 5895
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.007448,
+                      -0.003495
+                    ],
+                    "point_delta": -0.005758,
+                    "significant": true,
+                    "subjects": 7836
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.008058,
+                      -0.004066
+                    ],
+                    "point_delta": -0.005999,
+                    "significant": true,
+                    "subjects": 7836
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 83,
+                    "focused_coupling": 27,
+                    "placebo": 27
+                  },
+                  "focused_coupling_features": [
+                    "fbc_cardio_shock_burden_mean",
+                    "fbc_cardio_shock_burden_sd",
+                    "fbc_cardio_shock_burden_observation",
+                    "fbc_cardio_shock_burden_innovation",
+                    "fbc_cardio_shock_burden_delta_since_prior",
+                    "fbc_cardio_shock_burden_observation_confidence",
+                    "fbc_cardio_renal_afterload_mean",
+                    "fbc_cardio_renal_afterload_sd",
+                    "fbc_cardio_renal_afterload_observation",
+                    "fbc_cardio_renal_afterload_innovation",
+                    "fbc_cardio_renal_afterload_delta_since_prior",
+                    "fbc_cardio_renal_afterload_observation_confidence",
+                    "fbc_cardio_renal_recovery_drive_mean",
+                    "fbc_cardio_renal_recovery_drive_sd",
+                    "fbc_cardio_renal_recovery_drive_observation",
+                    "fbc_cardio_renal_recovery_drive_innovation",
+                    "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                    "fbc_cardio_renal_recovery_drive_observation_confidence",
+                    "fbc_vector_renal_reserve",
+                    "fbc_vector_creatinine_slope",
+                    "fbc_vector_renal_stress",
+                    "fbc_vector_hypoperfusion",
+                    "fbc_shock_x_low_renal_reserve",
+                    "fbc_hypoperfusion_x_creatinine_slope",
+                    "fbc_afterload_x_current_creatinine",
+                    "fbc_afterload_x_oliguria",
+                    "fbc_recovery_x_low_reserve"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.27994,
+                    "focused_coupled_ridge": 0.272983,
+                    "placebo_ridge": 0.280197
+                  },
+                  "rows": 23857,
+                  "subjects": 7836
+                }
+              },
+              "urine_output": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.006377,
+                      -0.002566
+                    ],
+                    "point_delta": -0.004641,
+                    "significant": true,
+                    "subjects": 4205
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.006612,
+                      -0.002934
+                    ],
+                    "point_delta": -0.004665,
+                    "significant": true,
+                    "subjects": 4205
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 83,
+                    "focused_coupling": 27,
+                    "placebo": 27
+                  },
+                  "focused_coupling_features": [
+                    "fbc_cardio_shock_burden_mean",
+                    "fbc_cardio_shock_burden_sd",
+                    "fbc_cardio_shock_burden_observation",
+                    "fbc_cardio_shock_burden_innovation",
+                    "fbc_cardio_shock_burden_delta_since_prior",
+                    "fbc_cardio_shock_burden_observation_confidence",
+                    "fbc_cardio_renal_afterload_mean",
+                    "fbc_cardio_renal_afterload_sd",
+                    "fbc_cardio_renal_afterload_observation",
+                    "fbc_cardio_renal_afterload_innovation",
+                    "fbc_cardio_renal_afterload_delta_since_prior",
+                    "fbc_cardio_renal_afterload_observation_confidence",
+                    "fbc_cardio_renal_recovery_drive_mean",
+                    "fbc_cardio_renal_recovery_drive_sd",
+                    "fbc_cardio_renal_recovery_drive_observation",
+                    "fbc_cardio_renal_recovery_drive_innovation",
+                    "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                    "fbc_cardio_renal_recovery_drive_observation_confidence",
+                    "fbc_vector_renal_reserve",
+                    "fbc_vector_creatinine_slope",
+                    "fbc_vector_renal_stress",
+                    "fbc_vector_hypoperfusion",
+                    "fbc_shock_x_low_renal_reserve",
+                    "fbc_hypoperfusion_x_creatinine_slope",
+                    "fbc_afterload_x_current_creatinine",
+                    "fbc_afterload_x_oliguria",
+                    "fbc_recovery_x_low_reserve"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.418993,
+                    "focused_coupled_ridge": 0.41044,
+                    "placebo_ridge": 0.419056
+                  },
+                  "rows": 25008,
+                  "subjects": 4205
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.005513,
+                      -0.002862
+                    ],
+                    "point_delta": -0.00411,
+                    "significant": true,
+                    "subjects": 5557
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.005592,
+                      -0.002674
+                    ],
+                    "point_delta": -0.004132,
+                    "significant": true,
+                    "subjects": 5557
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 83,
+                    "focused_coupling": 27,
+                    "placebo": 27
+                  },
+                  "focused_coupling_features": [
+                    "fbc_cardio_shock_burden_mean",
+                    "fbc_cardio_shock_burden_sd",
+                    "fbc_cardio_shock_burden_observation",
+                    "fbc_cardio_shock_burden_innovation",
+                    "fbc_cardio_shock_burden_delta_since_prior",
+                    "fbc_cardio_shock_burden_observation_confidence",
+                    "fbc_cardio_renal_afterload_mean",
+                    "fbc_cardio_renal_afterload_sd",
+                    "fbc_cardio_renal_afterload_observation",
+                    "fbc_cardio_renal_afterload_innovation",
+                    "fbc_cardio_renal_afterload_delta_since_prior",
+                    "fbc_cardio_renal_afterload_observation_confidence",
+                    "fbc_cardio_renal_recovery_drive_mean",
+                    "fbc_cardio_renal_recovery_drive_sd",
+                    "fbc_cardio_renal_recovery_drive_observation",
+                    "fbc_cardio_renal_recovery_drive_innovation",
+                    "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                    "fbc_cardio_renal_recovery_drive_observation_confidence",
+                    "fbc_vector_renal_reserve",
+                    "fbc_vector_creatinine_slope",
+                    "fbc_vector_renal_stress",
+                    "fbc_vector_hypoperfusion",
+                    "fbc_shock_x_low_renal_reserve",
+                    "fbc_hypoperfusion_x_creatinine_slope",
+                    "fbc_afterload_x_current_creatinine",
+                    "fbc_afterload_x_oliguria",
+                    "fbc_recovery_x_low_reserve"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.505417,
+                    "focused_coupled_ridge": 0.500944,
+                    "placebo_ridge": 0.505513
+                  },
+                  "rows": 66774,
+                  "subjects": 5557
+                }
+              }
+            }
+          },
+          {
+            "discovery_groups": 19770,
+            "focused_coupling_feature_count": 27,
+            "group_column": "subject_id",
+            "heldout_groups": 9738,
+            "overlap": 0,
+            "seed": 37,
+            "targets": {
+              "bun": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.015114,
+                      -0.01092
+                    ],
+                    "point_delta": -0.013058,
+                    "significant": true,
+                    "subjects": 5899
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.015167,
+                      -0.011293
+                    ],
+                    "point_delta": -0.012951,
+                    "significant": true,
+                    "subjects": 5899
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 83,
+                    "focused_coupling": 27,
+                    "placebo": 27
+                  },
+                  "focused_coupling_features": [
+                    "fbc_cardio_shock_burden_mean",
+                    "fbc_cardio_shock_burden_sd",
+                    "fbc_cardio_shock_burden_observation",
+                    "fbc_cardio_shock_burden_innovation",
+                    "fbc_cardio_shock_burden_delta_since_prior",
+                    "fbc_cardio_shock_burden_observation_confidence",
+                    "fbc_cardio_renal_afterload_mean",
+                    "fbc_cardio_renal_afterload_sd",
+                    "fbc_cardio_renal_afterload_observation",
+                    "fbc_cardio_renal_afterload_innovation",
+                    "fbc_cardio_renal_afterload_delta_since_prior",
+                    "fbc_cardio_renal_afterload_observation_confidence",
+                    "fbc_cardio_renal_recovery_drive_mean",
+                    "fbc_cardio_renal_recovery_drive_sd",
+                    "fbc_cardio_renal_recovery_drive_observation",
+                    "fbc_cardio_renal_recovery_drive_innovation",
+                    "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                    "fbc_cardio_renal_recovery_drive_observation_confidence",
+                    "fbc_vector_renal_reserve",
+                    "fbc_vector_creatinine_slope",
+                    "fbc_vector_renal_stress",
+                    "fbc_vector_hypoperfusion",
+                    "fbc_shock_x_low_renal_reserve",
+                    "fbc_hypoperfusion_x_creatinine_slope",
+                    "fbc_afterload_x_current_creatinine",
+                    "fbc_afterload_x_oliguria",
+                    "fbc_recovery_x_low_reserve"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.409244,
+                    "focused_coupled_ridge": 0.397175,
+                    "placebo_ridge": 0.409329
+                  },
+                  "rows": 16530,
+                  "subjects": 5899
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.008691,
+                      -0.005224
+                    ],
+                    "point_delta": -0.007056,
+                    "significant": true,
+                    "subjects": 7867
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.008433,
+                      -0.005503
+                    ],
+                    "point_delta": -0.007006,
+                    "significant": true,
+                    "subjects": 7867
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 83,
+                    "focused_coupling": 27,
+                    "placebo": 27
+                  },
+                  "focused_coupling_features": [
+                    "fbc_cardio_shock_burden_mean",
+                    "fbc_cardio_shock_burden_sd",
+                    "fbc_cardio_shock_burden_observation",
+                    "fbc_cardio_shock_burden_innovation",
+                    "fbc_cardio_shock_burden_delta_since_prior",
+                    "fbc_cardio_shock_burden_observation_confidence",
+                    "fbc_cardio_renal_afterload_mean",
+                    "fbc_cardio_renal_afterload_sd",
+                    "fbc_cardio_renal_afterload_observation",
+                    "fbc_cardio_renal_afterload_innovation",
+                    "fbc_cardio_renal_afterload_delta_since_prior",
+                    "fbc_cardio_renal_afterload_observation_confidence",
+                    "fbc_cardio_renal_recovery_drive_mean",
+                    "fbc_cardio_renal_recovery_drive_sd",
+                    "fbc_cardio_renal_recovery_drive_observation",
+                    "fbc_cardio_renal_recovery_drive_innovation",
+                    "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                    "fbc_cardio_renal_recovery_drive_observation_confidence",
+                    "fbc_vector_renal_reserve",
+                    "fbc_vector_creatinine_slope",
+                    "fbc_vector_renal_stress",
+                    "fbc_vector_hypoperfusion",
+                    "fbc_shock_x_low_renal_reserve",
+                    "fbc_hypoperfusion_x_creatinine_slope",
+                    "fbc_afterload_x_current_creatinine",
+                    "fbc_afterload_x_oliguria",
+                    "fbc_recovery_x_low_reserve"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.337789,
+                    "focused_coupled_ridge": 0.329038,
+                    "placebo_ridge": 0.337891
+                  },
+                  "rows": 24259,
+                  "subjects": 7867
+                }
+              },
+              "creatinine": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.02366,
+                      -0.018701
+                    ],
+                    "point_delta": -0.021252,
+                    "significant": true,
+                    "subjects": 5902
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.023856,
+                      -0.018865
+                    ],
+                    "point_delta": -0.021445,
+                    "significant": true,
+                    "subjects": 5902
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 83,
+                    "focused_coupling": 27,
+                    "placebo": 27
+                  },
+                  "focused_coupling_features": [
+                    "fbc_cardio_shock_burden_mean",
+                    "fbc_cardio_shock_burden_sd",
+                    "fbc_cardio_shock_burden_observation",
+                    "fbc_cardio_shock_burden_innovation",
+                    "fbc_cardio_shock_burden_delta_since_prior",
+                    "fbc_cardio_shock_burden_observation_confidence",
+                    "fbc_cardio_renal_afterload_mean",
+                    "fbc_cardio_renal_afterload_sd",
+                    "fbc_cardio_renal_afterload_observation",
+                    "fbc_cardio_renal_afterload_innovation",
+                    "fbc_cardio_renal_afterload_delta_since_prior",
+                    "fbc_cardio_renal_afterload_observation_confidence",
+                    "fbc_cardio_renal_recovery_drive_mean",
+                    "fbc_cardio_renal_recovery_drive_sd",
+                    "fbc_cardio_renal_recovery_drive_observation",
+                    "fbc_cardio_renal_recovery_drive_innovation",
+                    "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                    "fbc_cardio_renal_recovery_drive_observation_confidence",
+                    "fbc_vector_renal_reserve",
+                    "fbc_vector_creatinine_slope",
+                    "fbc_vector_renal_stress",
+                    "fbc_vector_hypoperfusion",
+                    "fbc_shock_x_low_renal_reserve",
+                    "fbc_hypoperfusion_x_creatinine_slope",
+                    "fbc_afterload_x_current_creatinine",
+                    "fbc_afterload_x_oliguria",
+                    "fbc_recovery_x_low_reserve"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.364231,
+                    "focused_coupled_ridge": 0.347578,
+                    "placebo_ridge": 0.364457
+                  },
+                  "rows": 16583,
+                  "subjects": 5902
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.010023,
+                      -0.006271
+                    ],
+                    "point_delta": -0.008039,
+                    "significant": true,
+                    "subjects": 7881
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.010187,
+                      -0.00641
+                    ],
+                    "point_delta": -0.008328,
+                    "significant": true,
+                    "subjects": 7881
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 83,
+                    "focused_coupling": 27,
+                    "placebo": 27
+                  },
+                  "focused_coupling_features": [
+                    "fbc_cardio_shock_burden_mean",
+                    "fbc_cardio_shock_burden_sd",
+                    "fbc_cardio_shock_burden_observation",
+                    "fbc_cardio_shock_burden_innovation",
+                    "fbc_cardio_shock_burden_delta_since_prior",
+                    "fbc_cardio_shock_burden_observation_confidence",
+                    "fbc_cardio_renal_afterload_mean",
+                    "fbc_cardio_renal_afterload_sd",
+                    "fbc_cardio_renal_afterload_observation",
+                    "fbc_cardio_renal_afterload_innovation",
+                    "fbc_cardio_renal_afterload_delta_since_prior",
+                    "fbc_cardio_renal_afterload_observation_confidence",
+                    "fbc_cardio_renal_recovery_drive_mean",
+                    "fbc_cardio_renal_recovery_drive_sd",
+                    "fbc_cardio_renal_recovery_drive_observation",
+                    "fbc_cardio_renal_recovery_drive_innovation",
+                    "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                    "fbc_cardio_renal_recovery_drive_observation_confidence",
+                    "fbc_vector_renal_reserve",
+                    "fbc_vector_creatinine_slope",
+                    "fbc_vector_renal_stress",
+                    "fbc_vector_hypoperfusion",
+                    "fbc_shock_x_low_renal_reserve",
+                    "fbc_hypoperfusion_x_creatinine_slope",
+                    "fbc_afterload_x_current_creatinine",
+                    "fbc_afterload_x_oliguria",
+                    "fbc_recovery_x_low_reserve"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.280857,
+                    "focused_coupled_ridge": 0.272197,
+                    "placebo_ridge": 0.281159
+                  },
+                  "rows": 24332,
+                  "subjects": 7881
+                }
+              },
+              "urine_output": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.004178,
+                      -0.000315
+                    ],
+                    "point_delta": -0.002227,
+                    "significant": true,
+                    "subjects": 4147
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.00457,
+                      -0.000393
+                    ],
+                    "point_delta": -0.002361,
+                    "significant": true,
+                    "subjects": 4147
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 83,
+                    "focused_coupling": 27,
+                    "placebo": 27
+                  },
+                  "focused_coupling_features": [
+                    "fbc_cardio_shock_burden_mean",
+                    "fbc_cardio_shock_burden_sd",
+                    "fbc_cardio_shock_burden_observation",
+                    "fbc_cardio_shock_burden_innovation",
+                    "fbc_cardio_shock_burden_delta_since_prior",
+                    "fbc_cardio_shock_burden_observation_confidence",
+                    "fbc_cardio_renal_afterload_mean",
+                    "fbc_cardio_renal_afterload_sd",
+                    "fbc_cardio_renal_afterload_observation",
+                    "fbc_cardio_renal_afterload_innovation",
+                    "fbc_cardio_renal_afterload_delta_since_prior",
+                    "fbc_cardio_renal_afterload_observation_confidence",
+                    "fbc_cardio_renal_recovery_drive_mean",
+                    "fbc_cardio_renal_recovery_drive_sd",
+                    "fbc_cardio_renal_recovery_drive_observation",
+                    "fbc_cardio_renal_recovery_drive_innovation",
+                    "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                    "fbc_cardio_renal_recovery_drive_observation_confidence",
+                    "fbc_vector_renal_reserve",
+                    "fbc_vector_creatinine_slope",
+                    "fbc_vector_renal_stress",
+                    "fbc_vector_hypoperfusion",
+                    "fbc_shock_x_low_renal_reserve",
+                    "fbc_hypoperfusion_x_creatinine_slope",
+                    "fbc_afterload_x_current_creatinine",
+                    "fbc_afterload_x_oliguria",
+                    "fbc_recovery_x_low_reserve"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.413363,
+                    "focused_coupled_ridge": 0.406043,
+                    "placebo_ridge": 0.413623
+                  },
+                  "rows": 24877,
+                  "subjects": 4147
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.005515,
+                      -0.002894
+                    ],
+                    "point_delta": -0.00419,
+                    "significant": true,
+                    "subjects": 5525
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.005681,
+                      -0.002955
+                    ],
+                    "point_delta": -0.004267,
+                    "significant": true,
+                    "subjects": 5525
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 83,
+                    "focused_coupling": 27,
+                    "placebo": 27
+                  },
+                  "focused_coupling_features": [
+                    "fbc_cardio_shock_burden_mean",
+                    "fbc_cardio_shock_burden_sd",
+                    "fbc_cardio_shock_burden_observation",
+                    "fbc_cardio_shock_burden_innovation",
+                    "fbc_cardio_shock_burden_delta_since_prior",
+                    "fbc_cardio_shock_burden_observation_confidence",
+                    "fbc_cardio_renal_afterload_mean",
+                    "fbc_cardio_renal_afterload_sd",
+                    "fbc_cardio_renal_afterload_observation",
+                    "fbc_cardio_renal_afterload_innovation",
+                    "fbc_cardio_renal_afterload_delta_since_prior",
+                    "fbc_cardio_renal_afterload_observation_confidence",
+                    "fbc_cardio_renal_recovery_drive_mean",
+                    "fbc_cardio_renal_recovery_drive_sd",
+                    "fbc_cardio_renal_recovery_drive_observation",
+                    "fbc_cardio_renal_recovery_drive_innovation",
+                    "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                    "fbc_cardio_renal_recovery_drive_observation_confidence",
+                    "fbc_vector_renal_reserve",
+                    "fbc_vector_creatinine_slope",
+                    "fbc_vector_renal_stress",
+                    "fbc_vector_hypoperfusion",
+                    "fbc_shock_x_low_renal_reserve",
+                    "fbc_hypoperfusion_x_creatinine_slope",
+                    "fbc_afterload_x_current_creatinine",
+                    "fbc_afterload_x_oliguria",
+                    "fbc_recovery_x_low_reserve"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.505558,
+                    "focused_coupled_ridge": 0.501273,
+                    "placebo_ridge": 0.505668
+                  },
+                  "rows": 66915,
+                  "subjects": 5525
+                }
+              }
+            }
+          },
+          {
+            "discovery_groups": 19770,
+            "focused_coupling_feature_count": 27,
+            "group_column": "subject_id",
+            "heldout_groups": 9738,
+            "overlap": 0,
+            "seed": 53,
+            "targets": {
+              "bun": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.014709,
+                      -0.010374
+                    ],
+                    "point_delta": -0.012734,
+                    "significant": true,
+                    "subjects": 5835
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.014998,
+                      -0.01085
+                    ],
+                    "point_delta": -0.012875,
+                    "significant": true,
+                    "subjects": 5835
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 83,
+                    "focused_coupling": 27,
+                    "placebo": 27
+                  },
+                  "focused_coupling_features": [
+                    "fbc_cardio_shock_burden_mean",
+                    "fbc_cardio_shock_burden_sd",
+                    "fbc_cardio_shock_burden_observation",
+                    "fbc_cardio_shock_burden_innovation",
+                    "fbc_cardio_shock_burden_delta_since_prior",
+                    "fbc_cardio_shock_burden_observation_confidence",
+                    "fbc_cardio_renal_afterload_mean",
+                    "fbc_cardio_renal_afterload_sd",
+                    "fbc_cardio_renal_afterload_observation",
+                    "fbc_cardio_renal_afterload_innovation",
+                    "fbc_cardio_renal_afterload_delta_since_prior",
+                    "fbc_cardio_renal_afterload_observation_confidence",
+                    "fbc_cardio_renal_recovery_drive_mean",
+                    "fbc_cardio_renal_recovery_drive_sd",
+                    "fbc_cardio_renal_recovery_drive_observation",
+                    "fbc_cardio_renal_recovery_drive_innovation",
+                    "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                    "fbc_cardio_renal_recovery_drive_observation_confidence",
+                    "fbc_vector_renal_reserve",
+                    "fbc_vector_creatinine_slope",
+                    "fbc_vector_renal_stress",
+                    "fbc_vector_hypoperfusion",
+                    "fbc_shock_x_low_renal_reserve",
+                    "fbc_hypoperfusion_x_creatinine_slope",
+                    "fbc_afterload_x_current_creatinine",
+                    "fbc_afterload_x_oliguria",
+                    "fbc_recovery_x_low_reserve"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.418011,
+                    "focused_coupled_ridge": 0.407094,
+                    "placebo_ridge": 0.418099
+                  },
+                  "rows": 16385,
+                  "subjects": 5835
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.009222,
+                      -0.006142
+                    ],
+                    "point_delta": -0.007545,
+                    "significant": true,
+                    "subjects": 7806
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.009237,
+                      -0.006023
+                    ],
+                    "point_delta": -0.007728,
+                    "significant": true,
+                    "subjects": 7806
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 83,
+                    "focused_coupling": 27,
+                    "placebo": 27
+                  },
+                  "focused_coupling_features": [
+                    "fbc_cardio_shock_burden_mean",
+                    "fbc_cardio_shock_burden_sd",
+                    "fbc_cardio_shock_burden_observation",
+                    "fbc_cardio_shock_burden_innovation",
+                    "fbc_cardio_shock_burden_delta_since_prior",
+                    "fbc_cardio_shock_burden_observation_confidence",
+                    "fbc_cardio_renal_afterload_mean",
+                    "fbc_cardio_renal_afterload_sd",
+                    "fbc_cardio_renal_afterload_observation",
+                    "fbc_cardio_renal_afterload_innovation",
+                    "fbc_cardio_renal_afterload_delta_since_prior",
+                    "fbc_cardio_renal_afterload_observation_confidence",
+                    "fbc_cardio_renal_recovery_drive_mean",
+                    "fbc_cardio_renal_recovery_drive_sd",
+                    "fbc_cardio_renal_recovery_drive_observation",
+                    "fbc_cardio_renal_recovery_drive_innovation",
+                    "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                    "fbc_cardio_renal_recovery_drive_observation_confidence",
+                    "fbc_vector_renal_reserve",
+                    "fbc_vector_creatinine_slope",
+                    "fbc_vector_renal_stress",
+                    "fbc_vector_hypoperfusion",
+                    "fbc_shock_x_low_renal_reserve",
+                    "fbc_hypoperfusion_x_creatinine_slope",
+                    "fbc_afterload_x_current_creatinine",
+                    "fbc_afterload_x_oliguria",
+                    "fbc_recovery_x_low_reserve"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.346425,
+                    "focused_coupled_ridge": 0.338007,
+                    "placebo_ridge": 0.346553
+                  },
+                  "rows": 23733,
+                  "subjects": 7806
+                }
+              },
+              "creatinine": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.022105,
+                      -0.016796
+                    ],
+                    "point_delta": -0.019508,
+                    "significant": true,
+                    "subjects": 5848
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.022029,
+                      -0.016881
+                    ],
+                    "point_delta": -0.019657,
+                    "significant": true,
+                    "subjects": 5848
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 83,
+                    "focused_coupling": 27,
+                    "placebo": 27
+                  },
+                  "focused_coupling_features": [
+                    "fbc_cardio_shock_burden_mean",
+                    "fbc_cardio_shock_burden_sd",
+                    "fbc_cardio_shock_burden_observation",
+                    "fbc_cardio_shock_burden_innovation",
+                    "fbc_cardio_shock_burden_delta_since_prior",
+                    "fbc_cardio_shock_burden_observation_confidence",
+                    "fbc_cardio_renal_afterload_mean",
+                    "fbc_cardio_renal_afterload_sd",
+                    "fbc_cardio_renal_afterload_observation",
+                    "fbc_cardio_renal_afterload_innovation",
+                    "fbc_cardio_renal_afterload_delta_since_prior",
+                    "fbc_cardio_renal_afterload_observation_confidence",
+                    "fbc_cardio_renal_recovery_drive_mean",
+                    "fbc_cardio_renal_recovery_drive_sd",
+                    "fbc_cardio_renal_recovery_drive_observation",
+                    "fbc_cardio_renal_recovery_drive_innovation",
+                    "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                    "fbc_cardio_renal_recovery_drive_observation_confidence",
+                    "fbc_vector_renal_reserve",
+                    "fbc_vector_creatinine_slope",
+                    "fbc_vector_renal_stress",
+                    "fbc_vector_hypoperfusion",
+                    "fbc_shock_x_low_renal_reserve",
+                    "fbc_hypoperfusion_x_creatinine_slope",
+                    "fbc_afterload_x_current_creatinine",
+                    "fbc_afterload_x_oliguria",
+                    "fbc_recovery_x_low_reserve"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.360168,
+                    "focused_coupled_ridge": 0.345442,
+                    "placebo_ridge": 0.360294
+                  },
+                  "rows": 16434,
+                  "subjects": 5848
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.00879,
+                      -0.004802
+                    ],
+                    "point_delta": -0.00683,
+                    "significant": true,
+                    "subjects": 7830
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.009242,
+                      -0.004981
+                    ],
+                    "point_delta": -0.006996,
+                    "significant": true,
+                    "subjects": 7830
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 83,
+                    "focused_coupling": 27,
+                    "placebo": 27
+                  },
+                  "focused_coupling_features": [
+                    "fbc_cardio_shock_burden_mean",
+                    "fbc_cardio_shock_burden_sd",
+                    "fbc_cardio_shock_burden_observation",
+                    "fbc_cardio_shock_burden_innovation",
+                    "fbc_cardio_shock_burden_delta_since_prior",
+                    "fbc_cardio_shock_burden_observation_confidence",
+                    "fbc_cardio_renal_afterload_mean",
+                    "fbc_cardio_renal_afterload_sd",
+                    "fbc_cardio_renal_afterload_observation",
+                    "fbc_cardio_renal_afterload_innovation",
+                    "fbc_cardio_renal_afterload_delta_since_prior",
+                    "fbc_cardio_renal_afterload_observation_confidence",
+                    "fbc_cardio_renal_recovery_drive_mean",
+                    "fbc_cardio_renal_recovery_drive_sd",
+                    "fbc_cardio_renal_recovery_drive_observation",
+                    "fbc_cardio_renal_recovery_drive_innovation",
+                    "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                    "fbc_cardio_renal_recovery_drive_observation_confidence",
+                    "fbc_vector_renal_reserve",
+                    "fbc_vector_creatinine_slope",
+                    "fbc_vector_renal_stress",
+                    "fbc_vector_hypoperfusion",
+                    "fbc_shock_x_low_renal_reserve",
+                    "fbc_hypoperfusion_x_creatinine_slope",
+                    "fbc_afterload_x_current_creatinine",
+                    "fbc_afterload_x_oliguria",
+                    "fbc_recovery_x_low_reserve"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.280508,
+                    "focused_coupled_ridge": 0.272934,
+                    "placebo_ridge": 0.280659
+                  },
+                  "rows": 23803,
+                  "subjects": 7830
+                }
+              },
+              "urine_output": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.005228,
+                      -0.001114
+                    ],
+                    "point_delta": -0.003012,
+                    "significant": true,
+                    "subjects": 4044
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.005134,
+                      -0.000876
+                    ],
+                    "point_delta": -0.003077,
+                    "significant": true,
+                    "subjects": 4044
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 83,
+                    "focused_coupling": 27,
+                    "placebo": 27
+                  },
+                  "focused_coupling_features": [
+                    "fbc_cardio_shock_burden_mean",
+                    "fbc_cardio_shock_burden_sd",
+                    "fbc_cardio_shock_burden_observation",
+                    "fbc_cardio_shock_burden_innovation",
+                    "fbc_cardio_shock_burden_delta_since_prior",
+                    "fbc_cardio_shock_burden_observation_confidence",
+                    "fbc_cardio_renal_afterload_mean",
+                    "fbc_cardio_renal_afterload_sd",
+                    "fbc_cardio_renal_afterload_observation",
+                    "fbc_cardio_renal_afterload_innovation",
+                    "fbc_cardio_renal_afterload_delta_since_prior",
+                    "fbc_cardio_renal_afterload_observation_confidence",
+                    "fbc_cardio_renal_recovery_drive_mean",
+                    "fbc_cardio_renal_recovery_drive_sd",
+                    "fbc_cardio_renal_recovery_drive_observation",
+                    "fbc_cardio_renal_recovery_drive_innovation",
+                    "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                    "fbc_cardio_renal_recovery_drive_observation_confidence",
+                    "fbc_vector_renal_reserve",
+                    "fbc_vector_creatinine_slope",
+                    "fbc_vector_renal_stress",
+                    "fbc_vector_hypoperfusion",
+                    "fbc_shock_x_low_renal_reserve",
+                    "fbc_hypoperfusion_x_creatinine_slope",
+                    "fbc_afterload_x_current_creatinine",
+                    "fbc_afterload_x_oliguria",
+                    "fbc_recovery_x_low_reserve"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.416301,
+                    "focused_coupled_ridge": 0.407486,
+                    "placebo_ridge": 0.416385
+                  },
+                  "rows": 24573,
+                  "subjects": 4044
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.005809,
+                      -0.002805
+                    ],
+                    "point_delta": -0.004201,
+                    "significant": true,
+                    "subjects": 5369
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.005679,
+                      -0.002922
+                    ],
+                    "point_delta": -0.00425,
+                    "significant": true,
+                    "subjects": 5369
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 83,
+                    "focused_coupling": 27,
+                    "placebo": 27
+                  },
+                  "focused_coupling_features": [
+                    "fbc_cardio_shock_burden_mean",
+                    "fbc_cardio_shock_burden_sd",
+                    "fbc_cardio_shock_burden_observation",
+                    "fbc_cardio_shock_burden_innovation",
+                    "fbc_cardio_shock_burden_delta_since_prior",
+                    "fbc_cardio_shock_burden_observation_confidence",
+                    "fbc_cardio_renal_afterload_mean",
+                    "fbc_cardio_renal_afterload_sd",
+                    "fbc_cardio_renal_afterload_observation",
+                    "fbc_cardio_renal_afterload_innovation",
+                    "fbc_cardio_renal_afterload_delta_since_prior",
+                    "fbc_cardio_renal_afterload_observation_confidence",
+                    "fbc_cardio_renal_recovery_drive_mean",
+                    "fbc_cardio_renal_recovery_drive_sd",
+                    "fbc_cardio_renal_recovery_drive_observation",
+                    "fbc_cardio_renal_recovery_drive_innovation",
+                    "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                    "fbc_cardio_renal_recovery_drive_observation_confidence",
+                    "fbc_vector_renal_reserve",
+                    "fbc_vector_creatinine_slope",
+                    "fbc_vector_renal_stress",
+                    "fbc_vector_hypoperfusion",
+                    "fbc_shock_x_low_renal_reserve",
+                    "fbc_hypoperfusion_x_creatinine_slope",
+                    "fbc_afterload_x_current_creatinine",
+                    "fbc_afterload_x_oliguria",
+                    "fbc_recovery_x_low_reserve"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.505986,
+                    "focused_coupled_ridge": 0.500409,
+                    "placebo_ridge": 0.506086
+                  },
+                  "rows": 64861,
+                  "subjects": 5369
+                }
+              }
+            }
+          },
+          {
+            "discovery_groups": 19770,
+            "focused_coupling_feature_count": 27,
+            "group_column": "subject_id",
+            "heldout_groups": 9738,
+            "overlap": 0,
+            "seed": 71,
+            "targets": {
+              "bun": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.013879,
+                      -0.009793
+                    ],
+                    "point_delta": -0.011708,
+                    "significant": true,
+                    "subjects": 5839
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.014022,
+                      -0.009721
+                    ],
+                    "point_delta": -0.011787,
+                    "significant": true,
+                    "subjects": 5839
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 83,
+                    "focused_coupling": 27,
+                    "placebo": 27
+                  },
+                  "focused_coupling_features": [
+                    "fbc_cardio_shock_burden_mean",
+                    "fbc_cardio_shock_burden_sd",
+                    "fbc_cardio_shock_burden_observation",
+                    "fbc_cardio_shock_burden_innovation",
+                    "fbc_cardio_shock_burden_delta_since_prior",
+                    "fbc_cardio_shock_burden_observation_confidence",
+                    "fbc_cardio_renal_afterload_mean",
+                    "fbc_cardio_renal_afterload_sd",
+                    "fbc_cardio_renal_afterload_observation",
+                    "fbc_cardio_renal_afterload_innovation",
+                    "fbc_cardio_renal_afterload_delta_since_prior",
+                    "fbc_cardio_renal_afterload_observation_confidence",
+                    "fbc_cardio_renal_recovery_drive_mean",
+                    "fbc_cardio_renal_recovery_drive_sd",
+                    "fbc_cardio_renal_recovery_drive_observation",
+                    "fbc_cardio_renal_recovery_drive_innovation",
+                    "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                    "fbc_cardio_renal_recovery_drive_observation_confidence",
+                    "fbc_vector_renal_reserve",
+                    "fbc_vector_creatinine_slope",
+                    "fbc_vector_renal_stress",
+                    "fbc_vector_hypoperfusion",
+                    "fbc_shock_x_low_renal_reserve",
+                    "fbc_hypoperfusion_x_creatinine_slope",
+                    "fbc_afterload_x_current_creatinine",
+                    "fbc_afterload_x_oliguria",
+                    "fbc_recovery_x_low_reserve"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.413306,
+                    "focused_coupled_ridge": 0.401239,
+                    "placebo_ridge": 0.413366
+                  },
+                  "rows": 16334,
+                  "subjects": 5839
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.008593,
+                      -0.005095
+                    ],
+                    "point_delta": -0.00676,
+                    "significant": true,
+                    "subjects": 7804
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.008644,
+                      -0.005302
+                    ],
+                    "point_delta": -0.006849,
+                    "significant": true,
+                    "subjects": 7804
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 83,
+                    "focused_coupling": 27,
+                    "placebo": 27
+                  },
+                  "focused_coupling_features": [
+                    "fbc_cardio_shock_burden_mean",
+                    "fbc_cardio_shock_burden_sd",
+                    "fbc_cardio_shock_burden_observation",
+                    "fbc_cardio_shock_burden_innovation",
+                    "fbc_cardio_shock_burden_delta_since_prior",
+                    "fbc_cardio_shock_burden_observation_confidence",
+                    "fbc_cardio_renal_afterload_mean",
+                    "fbc_cardio_renal_afterload_sd",
+                    "fbc_cardio_renal_afterload_observation",
+                    "fbc_cardio_renal_afterload_innovation",
+                    "fbc_cardio_renal_afterload_delta_since_prior",
+                    "fbc_cardio_renal_afterload_observation_confidence",
+                    "fbc_cardio_renal_recovery_drive_mean",
+                    "fbc_cardio_renal_recovery_drive_sd",
+                    "fbc_cardio_renal_recovery_drive_observation",
+                    "fbc_cardio_renal_recovery_drive_innovation",
+                    "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                    "fbc_cardio_renal_recovery_drive_observation_confidence",
+                    "fbc_vector_renal_reserve",
+                    "fbc_vector_creatinine_slope",
+                    "fbc_vector_renal_stress",
+                    "fbc_vector_hypoperfusion",
+                    "fbc_shock_x_low_renal_reserve",
+                    "fbc_hypoperfusion_x_creatinine_slope",
+                    "fbc_afterload_x_current_creatinine",
+                    "fbc_afterload_x_oliguria",
+                    "fbc_recovery_x_low_reserve"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.342078,
+                    "focused_coupled_ridge": 0.33313,
+                    "placebo_ridge": 0.342122
+                  },
+                  "rows": 23685,
+                  "subjects": 7804
+                }
+              },
+              "creatinine": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.020384,
+                      -0.015117
+                    ],
+                    "point_delta": -0.017737,
+                    "significant": true,
+                    "subjects": 5843
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.02027,
+                      -0.015438
+                    ],
+                    "point_delta": -0.017806,
+                    "significant": true,
+                    "subjects": 5843
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 83,
+                    "focused_coupling": 27,
+                    "placebo": 27
+                  },
+                  "focused_coupling_features": [
+                    "fbc_cardio_shock_burden_mean",
+                    "fbc_cardio_shock_burden_sd",
+                    "fbc_cardio_shock_burden_observation",
+                    "fbc_cardio_shock_burden_innovation",
+                    "fbc_cardio_shock_burden_delta_since_prior",
+                    "fbc_cardio_shock_burden_observation_confidence",
+                    "fbc_cardio_renal_afterload_mean",
+                    "fbc_cardio_renal_afterload_sd",
+                    "fbc_cardio_renal_afterload_observation",
+                    "fbc_cardio_renal_afterload_innovation",
+                    "fbc_cardio_renal_afterload_delta_since_prior",
+                    "fbc_cardio_renal_afterload_observation_confidence",
+                    "fbc_cardio_renal_recovery_drive_mean",
+                    "fbc_cardio_renal_recovery_drive_sd",
+                    "fbc_cardio_renal_recovery_drive_observation",
+                    "fbc_cardio_renal_recovery_drive_innovation",
+                    "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                    "fbc_cardio_renal_recovery_drive_observation_confidence",
+                    "fbc_vector_renal_reserve",
+                    "fbc_vector_creatinine_slope",
+                    "fbc_vector_renal_stress",
+                    "fbc_vector_hypoperfusion",
+                    "fbc_shock_x_low_renal_reserve",
+                    "fbc_hypoperfusion_x_creatinine_slope",
+                    "fbc_afterload_x_current_creatinine",
+                    "fbc_afterload_x_oliguria",
+                    "fbc_recovery_x_low_reserve"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.364297,
+                    "focused_coupled_ridge": 0.349445,
+                    "placebo_ridge": 0.364401
+                  },
+                  "rows": 16374,
+                  "subjects": 5843
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.007869,
+                      -0.003782
+                    ],
+                    "point_delta": -0.005969,
+                    "significant": true,
+                    "subjects": 7820
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.007986,
+                      -0.004228
+                    ],
+                    "point_delta": -0.006128,
+                    "significant": true,
+                    "subjects": 7820
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 83,
+                    "focused_coupling": 27,
+                    "placebo": 27
+                  },
+                  "focused_coupling_features": [
+                    "fbc_cardio_shock_burden_mean",
+                    "fbc_cardio_shock_burden_sd",
+                    "fbc_cardio_shock_burden_observation",
+                    "fbc_cardio_shock_burden_innovation",
+                    "fbc_cardio_shock_burden_delta_since_prior",
+                    "fbc_cardio_shock_burden_observation_confidence",
+                    "fbc_cardio_renal_afterload_mean",
+                    "fbc_cardio_renal_afterload_sd",
+                    "fbc_cardio_renal_afterload_observation",
+                    "fbc_cardio_renal_afterload_innovation",
+                    "fbc_cardio_renal_afterload_delta_since_prior",
+                    "fbc_cardio_renal_afterload_observation_confidence",
+                    "fbc_cardio_renal_recovery_drive_mean",
+                    "fbc_cardio_renal_recovery_drive_sd",
+                    "fbc_cardio_renal_recovery_drive_observation",
+                    "fbc_cardio_renal_recovery_drive_innovation",
+                    "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                    "fbc_cardio_renal_recovery_drive_observation_confidence",
+                    "fbc_vector_renal_reserve",
+                    "fbc_vector_creatinine_slope",
+                    "fbc_vector_renal_stress",
+                    "fbc_vector_hypoperfusion",
+                    "fbc_shock_x_low_renal_reserve",
+                    "fbc_hypoperfusion_x_creatinine_slope",
+                    "fbc_afterload_x_current_creatinine",
+                    "fbc_afterload_x_oliguria",
+                    "fbc_recovery_x_low_reserve"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.282937,
+                    "focused_coupled_ridge": 0.275526,
+                    "placebo_ridge": 0.28316
+                  },
+                  "rows": 23747,
+                  "subjects": 7820
+                }
+              },
+              "urine_output": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.004116,
+                      -0.000582
+                    ],
+                    "point_delta": -0.002525,
+                    "significant": true,
+                    "subjects": 4047
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.004539,
+                      -0.000942
+                    ],
+                    "point_delta": -0.00268,
+                    "significant": true,
+                    "subjects": 4047
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 83,
+                    "focused_coupling": 27,
+                    "placebo": 27
+                  },
+                  "focused_coupling_features": [
+                    "fbc_cardio_shock_burden_mean",
+                    "fbc_cardio_shock_burden_sd",
+                    "fbc_cardio_shock_burden_observation",
+                    "fbc_cardio_shock_burden_innovation",
+                    "fbc_cardio_shock_burden_delta_since_prior",
+                    "fbc_cardio_shock_burden_observation_confidence",
+                    "fbc_cardio_renal_afterload_mean",
+                    "fbc_cardio_renal_afterload_sd",
+                    "fbc_cardio_renal_afterload_observation",
+                    "fbc_cardio_renal_afterload_innovation",
+                    "fbc_cardio_renal_afterload_delta_since_prior",
+                    "fbc_cardio_renal_afterload_observation_confidence",
+                    "fbc_cardio_renal_recovery_drive_mean",
+                    "fbc_cardio_renal_recovery_drive_sd",
+                    "fbc_cardio_renal_recovery_drive_observation",
+                    "fbc_cardio_renal_recovery_drive_innovation",
+                    "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                    "fbc_cardio_renal_recovery_drive_observation_confidence",
+                    "fbc_vector_renal_reserve",
+                    "fbc_vector_creatinine_slope",
+                    "fbc_vector_renal_stress",
+                    "fbc_vector_hypoperfusion",
+                    "fbc_shock_x_low_renal_reserve",
+                    "fbc_hypoperfusion_x_creatinine_slope",
+                    "fbc_afterload_x_current_creatinine",
+                    "fbc_afterload_x_oliguria",
+                    "fbc_recovery_x_low_reserve"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.40769,
+                    "focused_coupled_ridge": 0.400999,
+                    "placebo_ridge": 0.407731
+                  },
+                  "rows": 24137,
+                  "subjects": 4047
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.005993,
+                      -0.003012
+                    ],
+                    "point_delta": -0.004329,
+                    "significant": true,
+                    "subjects": 5399
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.006052,
+                      -0.002896
+                    ],
+                    "point_delta": -0.004427,
+                    "significant": true,
+                    "subjects": 5399
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 83,
+                    "focused_coupling": 27,
+                    "placebo": 27
+                  },
+                  "focused_coupling_features": [
+                    "fbc_cardio_shock_burden_mean",
+                    "fbc_cardio_shock_burden_sd",
+                    "fbc_cardio_shock_burden_observation",
+                    "fbc_cardio_shock_burden_innovation",
+                    "fbc_cardio_shock_burden_delta_since_prior",
+                    "fbc_cardio_shock_burden_observation_confidence",
+                    "fbc_cardio_renal_afterload_mean",
+                    "fbc_cardio_renal_afterload_sd",
+                    "fbc_cardio_renal_afterload_observation",
+                    "fbc_cardio_renal_afterload_innovation",
+                    "fbc_cardio_renal_afterload_delta_since_prior",
+                    "fbc_cardio_renal_afterload_observation_confidence",
+                    "fbc_cardio_renal_recovery_drive_mean",
+                    "fbc_cardio_renal_recovery_drive_sd",
+                    "fbc_cardio_renal_recovery_drive_observation",
+                    "fbc_cardio_renal_recovery_drive_innovation",
+                    "fbc_cardio_renal_recovery_drive_delta_since_prior",
+                    "fbc_cardio_renal_recovery_drive_observation_confidence",
+                    "fbc_vector_renal_reserve",
+                    "fbc_vector_creatinine_slope",
+                    "fbc_vector_renal_stress",
+                    "fbc_vector_hypoperfusion",
+                    "fbc_shock_x_low_renal_reserve",
+                    "fbc_hypoperfusion_x_creatinine_slope",
+                    "fbc_afterload_x_current_creatinine",
+                    "fbc_afterload_x_oliguria",
+                    "fbc_recovery_x_low_reserve"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.492729,
+                    "focused_coupled_ridge": 0.488818,
+                    "placebo_ridge": 0.492747
+                  },
+                  "rows": 65458,
+                  "subjects": 5399
+                }
+              }
+            }
+          }
+        ],
+        "seeds": [
+          7,
+          11,
+          19,
+          23,
+          37,
+          53,
+          71
+        ],
+        "summary": {
+          "bun": {
+            "active_only": {
+              "candidate_beats_baseline_significant_count": 7,
+              "candidate_beats_placebo_significant_count": 7,
+              "candidate_passes_both_count": 7,
+              "median_delta_vs_baseline": -0.012082,
+              "median_delta_vs_placebo": -0.012057
+            },
+            "all_windows": {
+              "candidate_beats_baseline_significant_count": 7,
+              "candidate_beats_placebo_significant_count": 7,
+              "candidate_passes_both_count": 7,
+              "median_delta_vs_baseline": -0.007056,
+              "median_delta_vs_placebo": -0.007006
+            }
+          },
+          "creatinine": {
+            "active_only": {
+              "candidate_beats_baseline_significant_count": 7,
+              "candidate_beats_placebo_significant_count": 7,
+              "candidate_passes_both_count": 7,
+              "median_delta_vs_baseline": -0.019332,
+              "median_delta_vs_placebo": -0.019409
+            },
+            "all_windows": {
+              "candidate_beats_baseline_significant_count": 7,
+              "candidate_beats_placebo_significant_count": 7,
+              "candidate_passes_both_count": 7,
+              "median_delta_vs_baseline": -0.00683,
+              "median_delta_vs_placebo": -0.006996
+            }
+          },
+          "urine_output": {
+            "active_only": {
+              "candidate_beats_baseline_significant_count": 5,
+              "candidate_beats_placebo_significant_count": 5,
+              "candidate_passes_both_count": 5,
+              "median_delta_vs_baseline": -0.002525,
+              "median_delta_vs_placebo": -0.00268
+            },
+            "all_windows": {
+              "candidate_beats_baseline_significant_count": 7,
+              "candidate_beats_placebo_significant_count": 7,
+              "candidate_passes_both_count": 7,
+              "median_delta_vs_baseline": -0.00419,
+              "median_delta_vs_placebo": -0.00425
+            }
+          }
+        }
+      },
+      "rationale": "perfusion shock burden coupled to renal reserve and creatinine kinetics at 24h",
+      "rows": 530265,
+      "source_system": "cardiovascular_perfusion",
+      "stays": 33975,
+      "subjects": 29508,
+      "target_system": "renal",
+      "targets": [
+        "creatinine",
+        "bun",
+        "urine_output"
+      ]
+    }
+  ],
+  "gate": {
+    "baseline": "ridge_without_focused_coupling_features",
+    "candidate": "focused_deep_coupling_features",
+    "pass_rule": "candidate must significantly beat both baseline and placebo on held-out patients",
+    "placebo": "ridge_plus_capacity_matched_random_features"
+  },
+  "safety_boundary": {
+    "active_rule_promotion_allowed": false,
+    "causal_claim_allowed": false,
+    "checkpoint_promotion_allowed": false,
+    "clinical_claim_allowed": false,
+    "counterfactual_claim_allowed": false,
+    "factual_predictive_signal_only": true,
+    "patient_ids_included_in_report": false,
+    "raw_rows_included": false,
+    "runtime_decision_authority": false
+  }
+}

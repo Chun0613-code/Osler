@@ -1,0 +1,81 @@
+{
+  "artifact": "MIMIC-IV radiology-note structured observation extraction",
+  "causal_claim_allowed": false,
+  "chest_radiology_admissions": 56063,
+  "chest_radiology_notes": 317371,
+  "clinical_claim_allowed": false,
+  "current_chest_report_rows": 406588,
+  "current_support": {
+    "rad_atelectasis": 178375,
+    "rad_cardiomegaly": 83770,
+    "rad_consolidation": 181482,
+    "rad_pleural_effusion": 295061,
+    "rad_pneumothorax": 242869,
+    "rad_pulmonary_edema": 155626
+  },
+  "future_chest_report_rows": 57976,
+  "future_support": {
+    "rad_atelectasis": 25485,
+    "rad_cardiomegaly": 11352,
+    "rad_consolidation": 22957,
+    "rad_pleural_effusion": 39480,
+    "rad_pneumothorax": 31218,
+    "rad_pulmonary_edema": 21666
+  },
+  "admissions_in_source_cohort": 82174,
+  "leakage_guard": {
+    "current_note_time_rule": "note_time <= anchor t, with 72h lookback",
+    "future_note_time_rule": "note_time > anchor t and nearest to t+6h within +/-2h",
+    "note_time_definition": "storetime when available, otherwise charttime"
+  },
+  "output": "local-only row-level radiology transition parquet",
+  "pair_counts": {
+    "rad_atelectasis": 12041,
+    "rad_cardiomegaly": 3348,
+    "rad_consolidation": 10051,
+    "rad_pleural_effusion": 25483,
+    "rad_pneumothorax": 17904,
+    "rad_pulmonary_edema": 9216
+  },
+  "patient_ids_included_in_report": false,
+  "prevalence": {
+    "rad_atelectasis": {
+      "current_positive_rate": 0.9365494043447793,
+      "future_positive_rate": 0.9853247008043947
+    },
+    "rad_cardiomegaly": {
+      "current_positive_rate": 0.8566551271338188,
+      "future_positive_rate": 0.96723044397463
+    },
+    "rad_consolidation": {
+      "current_positive_rate": 0.7351527975226193,
+      "future_positive_rate": 0.8193143703445572
+    },
+    "rad_pleural_effusion": {
+      "current_positive_rate": 0.7270937196037429,
+      "future_positive_rate": 0.813500506585613
+    },
+    "rad_pneumothorax": {
+      "current_positive_rate": 0.37634691953275223,
+      "future_positive_rate": 0.3976872317252867
+    },
+    "rad_pulmonary_edema": {
+      "current_positive_rate": 0.7561846992147842,
+      "future_positive_rate": 0.8123788424259208
+    }
+  },
+  "radiology_note_dir": "local MIMIC-IV Note v2.2 note directory",
+  "row_level_outputs_committed": false,
+  "rows": 640164,
+  "source_cohort": "local-only MIMIC-IV all-ICU 6h observation transition cohort",
+  "stays": 90190,
+  "subjects": 63307,
+  "targets": [
+    "rad_pulmonary_edema",
+    "rad_pleural_effusion",
+    "rad_consolidation",
+    "rad_atelectasis",
+    "rad_pneumothorax",
+    "rad_cardiomegaly"
+  ]
+}

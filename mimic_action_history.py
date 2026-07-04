@@ -14,8 +14,13 @@ import numpy as np
 import pandas as pd
 
 from dka_action_contract import ACTION_KEYS, INSULIN_KEYS
+from osler_jepa.actions import TREATMENT_EVENT_DIM
 
 ACTION_NAMES = ACTION_KEYS
+MAINTENANCE_NAMES = (
+    "free_water", "oral_intake", "enteral_nutrition",
+    "parenteral_nutrition", "carbohydrate",
+)
 ACTION_UNITS = {
     **{name: "unit" for name in INSULIN_KEYS},
     "fluids": "ml",
@@ -30,6 +35,11 @@ def _number(value):
         return None
     match = re.search(r"[-+]?(?:\d+(?:\.\d*)?|\.\d+)", str(value).replace(",", ""))
     return float(match.group()) if match else None
+
+
+def _integer(value):
+    number = _number(value)
+    return int(number) if number is not None else 0
 
 
 def _text(*values):
@@ -109,8 +119,24 @@ def dextrose_fraction(label):
     return None
 
 
+def fluid_sodium_concentration(label):
+    """Approximate sodium concentration for common crystalloid carriers."""
+    text = _text(label).replace(" ", "")
+    if any(token in text for token in ("d5w", "d10w", "d20w", "sterilewater")):
+        return 0.0
+    if any(token in text for token in ("1/2ns", "0.45%", "halfnormal")):
+        return 77.0
+    if any(token in text for token in ("lactatedringer", "ringer's", "ringer")) or text == "lr":
+        return 130.0
+    if any(token in text for token in ("plasma-lyte", "plasmalyte")):
+        return 140.0
+    if any(token in text for token in ("normalsaline", "0.9%", "sodiumchloride", "nacl")) or text == "ns":
+        return 154.0
+    return 140.0
+
+
 def canonical_amount(action, amount, uom, label, duration_hours=None,
-                     rate=None, rate_uom=None):
+                     rate=None, rate_uom=None, itemid=None):
     """Return total canonical amount for one event, or None if unsafe to infer."""
     amount = _number(amount)
     rate = _number(rate)
@@ -135,6 +161,10 @@ def canonical_amount(action, amount, uom, label, duration_hours=None,
     elif action in ("kcl", "bicarbonate"):
         if "mmol" in unit or "meq" in unit or unit == "":
             return amount
+        # MIMIC 8.4% sodium bicarbonate items are approximately 1 mEq/mL.
+        # KCl bolus carrier volume is deliberately not converted to mEq.
+        if action == "bicarbonate" and _integer(itemid) in (220995, 227533) and "ml" in unit:
+            return amount
     elif action == "dextrose":
         if unit in ("g", "gram", "grams") or "gm" in unit:
             return amount
@@ -157,6 +187,7 @@ def normalize_events(frame):
         if pd.isna(end) or end < start:
             end = start
         duration = max((end - start).total_seconds() / 3600.0, 0.0)
+        duration_is_exact = bool(duration > 0.0)
         label = _text(event.get("label"), event.get("product_description"))
         for action in classify_actions(label):
             if action == "insulin":
@@ -183,6 +214,7 @@ def normalize_events(frame):
                 effective_duration,
                 event.get("rate"),
                 event.get("rate_uom"),
+                event.get("itemid"),
             )
             if total is None or not np.isfinite(total) or total <= 0:
                 continue
@@ -202,12 +234,88 @@ def normalize_events(frame):
                 "source": event.get("source", "unknown"),
                 "route": event.get("route"),
                 "original_label": label,
+                "itemid": event.get("itemid"),
+                "orderid": event.get("orderid"),
+                "timing_source": "recorded_interval" if duration_is_exact else "default_duration",
+                "timing_confidence": 1.0 if duration_is_exact else 0.5,
+                "dose_source": "recorded_amount" if _number(event.get("amount")) is not None else "rate_x_duration",
+                "dose_confidence": 1.0 if _number(event.get("amount")) is not None else 0.75,
+                "fluid_sodium_meq_l": (
+                    fluid_sodium_concentration(label) if action == "fluids" else np.nan
+                ),
             })
     columns = [
         "subject_id", "stay_id", "starttime", "endtime", "action",
-        "amount", "uom", "source", "route", "original_label",
+        "amount", "uom", "source", "route", "original_label", "itemid",
+        "orderid", "timing_source", "timing_confidence", "dose_source",
+        "dose_confidence", "fluid_sodium_meq_l",
     ]
     return pd.DataFrame(rows, columns=columns)
+
+
+def normalize_maintenance_events(frame):
+    """Normalize observed nutrition/free-water ingredients without guessing dose.
+
+    Volumes remain contextual maintenance inputs. Only explicitly charted
+    glucose/carbohydrate mass is converted to grams; calories are never reverse
+    engineered into carbohydrate.
+    """
+    rows = []
+    for event in frame.to_dict("records"):
+        start = pd.to_datetime(event.get("starttime"), errors="coerce")
+        end = pd.to_datetime(event.get("endtime"), errors="coerce")
+        if pd.isna(start):
+            continue
+        if pd.isna(end) or end <= start:
+            end = start + pd.Timedelta(hours=0.5)
+        itemid = _integer(event.get("ingredient_itemid") or event.get("itemid"))
+        input_label = _text(event.get("input_label"))
+        amount = _number(event.get("amount"))
+        unit = _text(event.get("uom") or event.get("amountuom")).replace(" ", "")
+        if amount is None or amount <= 0:
+            continue
+        name = None
+        canonical_amount = amount
+        canonical_unit = "ml"
+        if itemid == 226221:
+            name = "enteral_nutrition"
+        elif itemid == 227079:
+            name = "parenteral_nutrition"
+        elif itemid == 227075:
+            if "free water" in input_label or "flush" in input_label:
+                name = "free_water"
+            elif "po intake" in input_label:
+                name = "oral_intake"
+        elif itemid in (220395, 220364):
+            if not any(token in input_label for token in ("tpn", "parenteral", "nutrition")):
+                continue
+            name = "carbohydrate"
+            canonical_unit = "g"
+            if unit in ("mg", "milligram", "milligrams"):
+                canonical_amount = amount / 1000.0
+            elif unit not in ("g", "gram", "grams", "gm"):
+                continue
+        if name is None:
+            continue
+        rows.append({
+            "subject_id": event.get("subject_id"),
+            "stay_id": event.get("stay_id"),
+            "starttime": start,
+            "endtime": end,
+            "maintenance": name,
+            "amount": float(canonical_amount),
+            "uom": canonical_unit,
+            "source": "ingredientevents",
+            "orderid": event.get("orderid"),
+            "input_label": input_label,
+            "dose_confidence": 1.0,
+            "timing_confidence": 1.0,
+        })
+    return pd.DataFrame(rows, columns=[
+        "subject_id", "stay_id", "starttime", "endtime", "maintenance",
+        "amount", "uom", "source", "orderid", "input_label",
+        "dose_confidence", "timing_confidence",
+    ])
 
 
 def deduplicate_events(frame, tolerance_minutes=20):
@@ -260,6 +368,153 @@ def action_rate_grid(events, start, hours, dt=0.5):
     return grid
 
 
+def maintenance_rate_grid(events, start, hours, dt=0.5):
+    cells = int(round(hours / dt))
+    grid = np.zeros((cells, len(MAINTENANCE_NAMES)), dtype=np.float32)
+    end = start + pd.Timedelta(hours=hours)
+    for event in events.to_dict("records"):
+        event_start = max(pd.Timestamp(event["starttime"]), start)
+        event_end = min(pd.Timestamp(event["endtime"]), end)
+        if event_end <= event_start:
+            continue
+        full_duration = max(
+            (pd.Timestamp(event["endtime"]) - pd.Timestamp(event["starttime"])).total_seconds()
+            / 3600.0,
+            dt,
+        )
+        index = MAINTENANCE_NAMES.index(event["maintenance"])
+        for cell in range(cells):
+            lo = start + pd.Timedelta(hours=cell * dt)
+            hi = lo + pd.Timedelta(hours=dt)
+            overlap = max(0.0, (min(event_end, hi) - max(event_start, lo)).total_seconds() / 3600.0)
+            if overlap:
+                grid[cell, index] += float(event["amount"]) * overlap / full_duration / dt
+    return grid
+
+
+def maintenance_window_summary(events, anchor, history_hours=6.0,
+                               future_hours=6.0, dt=0.5):
+    history_start = anchor - pd.Timedelta(hours=history_hours)
+    future_end = anchor + pd.Timedelta(hours=future_hours)
+    history = events[
+        (events["endtime"] >= history_start) & (events["starttime"] < anchor)
+    ]
+    future = events[
+        (events["endtime"] >= anchor) & (events["starttime"] < future_end)
+    ]
+    history_grid = maintenance_rate_grid(history, history_start, history_hours, dt)
+    future_grid = maintenance_rate_grid(future, anchor, future_hours, dt)
+    output = {
+        "history_maintenance_grid": history_grid.tolist(),
+        "future_maintenance_grid": future_grid.tolist(),
+        "maintenance_sources": sorted(events["source"].dropna().unique().tolist())
+        if not events.empty else [],
+    }
+    for index, name in enumerate(MAINTENANCE_NAMES):
+        output[f"hist_{name}_total"] = float(history_grid[:, index].sum() * dt)
+        output[f"act_{name}_total"] = float(future_grid[:, index].sum() * dt)
+    return output
+
+
+def fluid_sodium_grid(events, start, hours, dt=0.5):
+    """Volume-weighted fluid sodium concentration for each action cell."""
+    cells = int(round(hours / dt))
+    sodium_mass = np.zeros(cells, dtype=np.float32)
+    fluid_volume = np.zeros(cells, dtype=np.float32)
+    end = start + pd.Timedelta(hours=hours)
+    for event in events[events["action"] == "fluids"].to_dict("records"):
+        event_start = max(pd.Timestamp(event["starttime"]), start)
+        event_end = min(pd.Timestamp(event["endtime"]), end)
+        if event_end <= event_start:
+            event_end = min(event_start + pd.Timedelta(hours=dt), end)
+        full_duration = max(
+            (pd.Timestamp(event["endtime"]) - pd.Timestamp(event["starttime"])).total_seconds()
+            / 3600.0,
+            dt,
+        )
+        concentration = float(event.get("fluid_sodium_meq_l", 140.0))
+        for cell in range(cells):
+            lo = start + pd.Timedelta(hours=cell * dt)
+            hi = lo + pd.Timedelta(hours=dt)
+            overlap = max(0.0, (min(event_end, hi) - max(event_start, lo)).total_seconds() / 3600.0)
+            if overlap:
+                volume = float(event["amount"]) * overlap / full_duration
+                fluid_volume[cell] += volume
+                sodium_mass[cell] += volume * concentration
+    return np.divide(
+        sodium_mass,
+        fluid_volume,
+        out=np.full(cells, 140.0, dtype=np.float32),
+        where=fluid_volume > 0,
+    )
+
+
+def action_quality_summary(events):
+    if events.empty:
+        return {
+            "event_count": 0,
+            "exact_timing_fraction": 0.0,
+            "high_confidence_dose_fraction": 0.0,
+            "sources": [],
+        }
+    return {
+        "event_count": int(len(events)),
+        "exact_timing_fraction": float((events["timing_source"] == "recorded_interval").mean()),
+        "high_confidence_dose_fraction": float((events["dose_confidence"] >= 0.75).mean()),
+        "sources": sorted(events["source"].dropna().astype(str).unique().tolist()),
+    }
+
+
+def treatment_event_records(events, start, hours):
+    """Return aggregate start/stop lifecycle events within a time window."""
+    start = pd.Timestamp(start)
+    end = start + pd.Timedelta(hours=hours)
+    records = []
+    for action in ACTION_NAMES:
+        selected = events[events["action"] == action]
+        active = int(((selected["starttime"] < start) & (selected["endtime"] > start)).sum())
+        if active:
+            records.append({
+                "hour": 0.0, "event_type": "start", "action": action,
+                "carried_in": True,
+            })
+        boundaries = {}
+        for event in selected.to_dict("records"):
+            event_start = pd.Timestamp(event["starttime"])
+            event_end = pd.Timestamp(event["endtime"])
+            if start <= event_start < end:
+                boundaries[event_start] = boundaries.get(event_start, 0) + 1
+            if start < event_end < end:
+                boundaries[event_end] = boundaries.get(event_end, 0) - 1
+        for timestamp, delta in sorted(boundaries.items()):
+            before = active
+            active = max(0, active + delta)
+            if before == 0 and active > 0:
+                event_type = "start"
+            elif before > 0 and active == 0:
+                event_type = "stop"
+            else:
+                continue
+            records.append({
+                "hour": round((timestamp - start).total_seconds() / 3600.0, 6),
+                "event_type": event_type,
+                "action": action,
+                "carried_in": False,
+            })
+    return sorted(records, key=lambda item: (item["hour"], item["action"], item["event_type"]))
+
+
+def treatment_event_grid(events, start, hours, dt=0.5):
+    """Map exact lifecycle records to start/stop event channels."""
+    cells = int(round(hours / dt))
+    grid = np.zeros((cells, TREATMENT_EVENT_DIM), dtype=np.float32)
+    for event in treatment_event_records(events, start, hours):
+        cell = min(cells - 1, max(0, int(float(event["hour"]) // dt)))
+        offset = 0 if event["event_type"] == "start" else len(ACTION_NAMES)
+        grid[cell, offset + ACTION_NAMES.index(event["action"])] = 1.0
+    return grid
+
+
 def action_window_summary(events, anchor, history_hours=6.0, future_hours=6.0, dt=0.5):
     history_start = anchor - pd.Timedelta(hours=history_hours)
     future_end = anchor + pd.Timedelta(hours=future_hours)
@@ -271,9 +526,31 @@ def action_window_summary(events, anchor, history_hours=6.0, future_hours=6.0, d
     ]
     history_grid = action_rate_grid(history_events, history_start, history_hours, dt)
     future_grid = action_rate_grid(future_events, anchor, future_hours, dt)
+    history_event_grid = treatment_event_grid(
+        history_events, history_start, history_hours, dt
+    )
+    future_event_grid = treatment_event_grid(
+        future_events, anchor, future_hours, dt
+    )
     output = {
         "history_action_grid": history_grid.tolist(),
         "future_action_grid": future_grid.tolist(),
+        "history_treatment_event_grid": history_event_grid.tolist(),
+        "future_treatment_event_grid": future_event_grid.tolist(),
+        "history_treatment_events": treatment_event_records(
+            history_events, history_start, history_hours
+        ),
+        "future_treatment_events": treatment_event_records(
+            future_events, anchor, future_hours
+        ),
+        "history_fluid_sodium_grid": fluid_sodium_grid(
+            history_events, history_start, history_hours, dt
+        ).tolist(),
+        "future_fluid_sodium_grid": fluid_sodium_grid(
+            future_events, anchor, future_hours, dt
+        ).tolist(),
+        "history_action_quality": action_quality_summary(history_events),
+        "future_action_quality": action_quality_summary(future_events),
     }
     for index, action in enumerate(ACTION_NAMES):
         output[f"hist_{action}_total"] = float(history_grid[:, index].sum() * dt)

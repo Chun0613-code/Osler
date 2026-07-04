@@ -1,0 +1,144 @@
+{
+  "artifact": "Osler-JEPA whole-body observation and prediction contract",
+  "date": "2026-06-30",
+  "goal": "Maximize non-causal observation and factual physiology prediction while ignoring treatment planning and refusing unsupported targets.",
+  "validated_capabilities": [
+    {
+      "name": "body_system_surface_factual_routers",
+      "scope": "12 adult-ICU body-system routers",
+      "targets": [
+        "dense_fast_physiologic_targets",
+        "persistence_fallback_for_sparse_or_slow_targets"
+      ],
+      "horizon_hours": [6]
+    },
+    {
+      "name": "dka_factual_router",
+      "scope": "disease router",
+      "targets": ["glucose", "anion_gap", "potassium", "bicarbonate", "map"],
+      "horizon_hours": [6]
+    },
+    {
+      "name": "sepsis_factual_router",
+      "scope": "disease router",
+      "targets": ["map", "heart_rate", "lactate", "creatinine", "bun", "o2sat"],
+      "horizon_hours": [6]
+    },
+    {
+      "name": "aki_long_horizon_factual_router",
+      "scope": "disease router",
+      "targets": ["creatinine", "bun", "urine_output"],
+      "horizon_hours": [24, 48]
+    },
+    {
+      "name": "respiratory_factual_router",
+      "scope": "disease router",
+      "targets": ["o2sat", "respiratory_rate", "map", "heart_rate", "ph", "bicarbonate"],
+      "horizon_hours": [6]
+    },
+    {
+      "name": "whole_body_same_time_nowcasting",
+      "scope": "same-time observation completion",
+      "targets": [
+        "map",
+        "creatinine",
+        "heart_rate",
+        "ph",
+        "platelets",
+        "respiratory_rate",
+        "vasopressor_requirement",
+        "potassium",
+        "bicarbonate",
+        "bun",
+        "sodium",
+        "temperature",
+        "wbc",
+        "hemoglobin",
+        "hematocrit",
+        "albumin",
+        "anion_gap",
+        "chloride",
+        "calcium",
+        "phosphate",
+        "total_protein",
+        "bilirubin_direct"
+      ],
+      "horizon_hours": [0]
+    },
+    {
+      "name": "eicu_full_variable_6h_forecast_coverage",
+      "scope": "full numeric-variable forecast sweep",
+      "targets": ["59 module-target forecast cells", "51 calibrated interval cells"],
+      "horizon_hours": [6]
+    },
+    {
+      "name": "cardio_renal_long_horizon_coupling",
+      "scope": "single-hop body coupling",
+      "targets": ["creatinine", "bun"],
+      "horizon_hours": [24, 48]
+    },
+    {
+      "name": "sepsis_map_short_horizon_coupling",
+      "scope": "single-hop body coupling",
+      "targets": ["map"],
+      "horizon_hours": [6]
+    },
+    {
+      "name": "sepsis_map6_renal24_multihop",
+      "scope": "multi-hop body coupling",
+      "targets": ["creatinine", "bun"],
+      "horizon_hours": [24]
+    },
+    {
+      "name": "renal_belief_state_v2",
+      "scope": "predict-update hidden renal state",
+      "targets": ["creatinine", "bun", "renal_reserve"],
+      "horizon_hours": [24, 48]
+    }
+  ],
+  "candidate_or_closed_frontiers": [
+    "respiratory_acid_base_observed_coupling",
+    "hepato_renal_coupling",
+    "renal_electrolyte_store_coupling",
+    "sepsis_map6_renal48_multihop",
+    "heme_coag_hidden_state_belief"
+  ],
+  "prediction_policy": {
+    "fast_horizon_hours": 6,
+    "slow_renal_horizon_hours": [24, 48],
+    "trajectory_horizons_hours": [1, 3, 6, 12, 24, 48],
+    "validated_multihop": "sepsis/immune -> MAP at 6h -> renal creatinine/BUN at 24h",
+    "fallback": "persistence for unsupported, sparse, slow-at-wrong-horizon, or candidate-only targets",
+    "selection_rule": "validated target and horizon only; otherwise abstain or fall back",
+    "uncertainty_rule": "numeric intervals require target-horizon-source conformal calibration; otherwise interval_status is needs_calibration_audit",
+    "nowcasting_rule": "same-time state completion is allowed only for validated module-target pairs; a validated nowcast does not imply validated future movement"
+  },
+  "safety_boundary": {
+    "shadow_observation_allowed": true,
+    "factual_prediction_allowed": true,
+    "causal_claim_allowed": false,
+    "counterfactual_treatment_effect_allowed": false,
+    "clinical_claim_allowed": false,
+    "runtime_treatment_authority": false,
+    "checkpoint_promotion_allowed": false,
+    "active_rule_promotion_allowed": false,
+    "complete_human_simulation_claim_allowed": false
+  },
+  "source_files": [
+    "osler_jepa/observation_layer.py",
+    "WHOLE_BODY_OBSERVATION_PREDICTION_LAYER.md",
+    "WHOLE_BODY_TRAJECTORY_UNCERTAINTY_LAYER.md",
+    "whole_body_rollout_uncertainty_contract.json",
+    "BODY_SYSTEM_COVERAGE_COMPLETE.md",
+    "ICU_FACTUAL_ROUTER_CANONICAL_FINDINGS.md",
+    "BODY_SYSTEM_FOCUSED_COUPLING_FINDINGS.md",
+    "BODY_SYSTEM_MULTIHOP_COUPLING_FINDINGS.md",
+    "AKI_RENAL_BELIEF_STATE_V2_FINDINGS.md",
+    "EICU_FULL_VARIABLE_COVERAGE_FINDINGS.md",
+    "eicu_full_variable_coverage_audit.json",
+    "WHOLE_BODY_NOWCASTING_FINDINGS.md",
+    "whole_body_nowcasting_audit.json",
+    "WHOLE_BODY_STATE_FORECAST_OBJECT.md",
+    "whole_body_state_forecast_contract.json"
+  ]
+}

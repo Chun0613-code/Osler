@@ -1,0 +1,331 @@
+{
+  "evaluation": "patient-stay grouped target-trial diagnostics",
+  "trials": {
+    "insulin_to_glucose": {
+      "available": true,
+      "target_trial": {
+        "name": "insulin_to_glucose",
+        "treatment_column": "act_insulin",
+        "outcome_column": "glucose_tp6",
+        "baseline_outcome_column": "glucose_t",
+        "horizon_hours": 6.0,
+        "treatment_grace_hours": 6.0,
+        "time_zero": "anchor state at t",
+        "eligibility": "observed baseline and six-hour outcome",
+        "treatment_strategy": "action recorded during treatment grace window",
+        "outcome": "six-hour change from baseline",
+        "assignment_is_time_aligned": true
+      },
+      "support": {
+        "rows": 4950,
+        "stays": 933,
+        "treated_rows": 4160,
+        "control_rows": 790,
+        "overlap_rows": 3341,
+        "overlap_fraction": 0.674949,
+        "propensity_range": [
+          0.05,
+          0.95
+        ],
+        "concomitant_treatment_rate_among_treated": 1.0,
+        "max_abs_smd_before": 1.248936
+      },
+      "aipw_ate": {
+        "estimate": 1.548042,
+        "cluster_bootstrap_95_ci": [
+          -7.475891,
+          11.227768
+        ]
+      },
+      "propensity_matched_att": {
+        "estimate": 0.864663,
+        "cluster_bootstrap_95_ci": [
+          -6.003057,
+          7.32158
+        ],
+        "matched_pairs": 4160,
+        "unique_treated_stays": 907,
+        "same_stay_matches": 0,
+        "caliper_logit": 0.328288,
+        "max_abs_smd_after": 0.315968
+      },
+      "promotion_readiness": {
+        "passes": false,
+        "failures": [
+          "insufficient_propensity_overlap",
+          "high_concomitant_treatment_rate",
+          "matched_covariate_balance_inadequate"
+        ]
+      },
+      "causal_claim_allowed": false,
+      "limitations": [
+        "Treatment is observational and may have unmeasured confounding.",
+        "Concurrent treatments make action-specific effects difficult to identify.",
+        "A treatment grace window longer than zero can introduce time-alignment bias.",
+        "Confidence intervals reflect sampling variability, not structural bias."
+      ]
+    },
+    "insulin_to_bicarbonate": {
+      "available": true,
+      "target_trial": {
+        "name": "insulin_to_bicarbonate",
+        "treatment_column": "act_insulin",
+        "outcome_column": "bicarbonate_tp6",
+        "baseline_outcome_column": "bicarbonate_t",
+        "horizon_hours": 6.0,
+        "treatment_grace_hours": 6.0,
+        "time_zero": "anchor state at t",
+        "eligibility": "observed baseline and six-hour outcome",
+        "treatment_strategy": "action recorded during treatment grace window",
+        "outcome": "six-hour change from baseline",
+        "assignment_is_time_aligned": true
+      },
+      "support": {
+        "rows": 4749,
+        "stays": 929,
+        "treated_rows": 3990,
+        "control_rows": 759,
+        "overlap_rows": 3212,
+        "overlap_fraction": 0.676353,
+        "propensity_range": [
+          0.05,
+          0.95
+        ],
+        "concomitant_treatment_rate_among_treated": 1.0,
+        "max_abs_smd_before": 1.242374
+      },
+      "aipw_ate": {
+        "estimate": -0.011219,
+        "cluster_bootstrap_95_ci": [
+          -0.289154,
+          0.289161
+        ]
+      },
+      "propensity_matched_att": {
+        "estimate": 0.213008,
+        "cluster_bootstrap_95_ci": [
+          0.063279,
+          0.365374
+        ],
+        "matched_pairs": 3990,
+        "unique_treated_stays": 902,
+        "same_stay_matches": 0,
+        "caliper_logit": 0.324571,
+        "max_abs_smd_after": 0.255177
+      },
+      "promotion_readiness": {
+        "passes": false,
+        "failures": [
+          "insufficient_propensity_overlap",
+          "high_concomitant_treatment_rate",
+          "matched_covariate_balance_inadequate"
+        ]
+      },
+      "causal_claim_allowed": false,
+      "limitations": [
+        "Treatment is observational and may have unmeasured confounding.",
+        "Concurrent treatments make action-specific effects difficult to identify.",
+        "A treatment grace window longer than zero can introduce time-alignment bias.",
+        "Confidence intervals reflect sampling variability, not structural bias."
+      ]
+    },
+    "insulin_to_anion_gap": {
+      "available": true,
+      "target_trial": {
+        "name": "insulin_to_anion_gap",
+        "treatment_column": "act_insulin",
+        "outcome_column": "anion_gap_tp6",
+        "baseline_outcome_column": "anion_gap_t",
+        "horizon_hours": 6.0,
+        "treatment_grace_hours": 6.0,
+        "time_zero": "anchor state at t",
+        "eligibility": "observed baseline and six-hour outcome",
+        "treatment_strategy": "action recorded during treatment grace window",
+        "outcome": "six-hour change from baseline",
+        "assignment_is_time_aligned": true
+      },
+      "support": {
+        "rows": 4696,
+        "stays": 929,
+        "treated_rows": 3948,
+        "control_rows": 748,
+        "overlap_rows": 3169,
+        "overlap_fraction": 0.67483,
+        "propensity_range": [
+          0.05,
+          0.95
+        ],
+        "concomitant_treatment_rate_among_treated": 1.0,
+        "max_abs_smd_before": 1.246691
+      },
+      "aipw_ate": {
+        "estimate": -0.227512,
+        "cluster_bootstrap_95_ci": [
+          -0.613289,
+          0.143999
+        ]
+      },
+      "propensity_matched_att": {
+        "estimate": -0.132979,
+        "cluster_bootstrap_95_ci": [
+          -0.337785,
+          0.068003
+        ],
+        "matched_pairs": 3948,
+        "unique_treated_stays": 901,
+        "same_stay_matches": 0,
+        "caliper_logit": 0.325732,
+        "max_abs_smd_after": 0.218003
+      },
+      "promotion_readiness": {
+        "passes": false,
+        "failures": [
+          "insufficient_propensity_overlap",
+          "high_concomitant_treatment_rate",
+          "matched_covariate_balance_inadequate"
+        ]
+      },
+      "causal_claim_allowed": false,
+      "limitations": [
+        "Treatment is observational and may have unmeasured confounding.",
+        "Concurrent treatments make action-specific effects difficult to identify.",
+        "A treatment grace window longer than zero can introduce time-alignment bias.",
+        "Confidence intervals reflect sampling variability, not structural bias."
+      ]
+    },
+    "fluids_to_map": {
+      "available": true,
+      "target_trial": {
+        "name": "fluids_to_map",
+        "treatment_column": "act_fluids",
+        "outcome_column": "map_tp6",
+        "baseline_outcome_column": "map_t",
+        "horizon_hours": 6.0,
+        "treatment_grace_hours": 6.0,
+        "time_zero": "anchor state at t",
+        "eligibility": "observed baseline and six-hour outcome",
+        "treatment_strategy": "action recorded during treatment grace window",
+        "outcome": "six-hour change from baseline",
+        "assignment_is_time_aligned": true
+      },
+      "support": {
+        "rows": 10311,
+        "stays": 1003,
+        "treated_rows": 7900,
+        "control_rows": 2411,
+        "overlap_rows": 1972,
+        "overlap_fraction": 0.191252,
+        "propensity_range": [
+          0.05,
+          0.95
+        ],
+        "concomitant_treatment_rate_among_treated": 0.96443,
+        "max_abs_smd_before": 3.505777
+      },
+      "aipw_ate": {
+        "estimate": -1.014469,
+        "cluster_bootstrap_95_ci": [
+          -2.44952,
+          0.67909
+        ]
+      },
+      "propensity_matched_att": {
+        "estimate": 0.541266,
+        "cluster_bootstrap_95_ci": [
+          0.13526,
+          0.915447
+        ],
+        "matched_pairs": 7900,
+        "unique_treated_stays": 872,
+        "same_stay_matches": 0,
+        "caliper_logit": 0.476204,
+        "max_abs_smd_after": 1.589079
+      },
+      "promotion_readiness": {
+        "passes": false,
+        "failures": [
+          "insufficient_propensity_overlap",
+          "high_concomitant_treatment_rate",
+          "matched_covariate_balance_inadequate"
+        ]
+      },
+      "causal_claim_allowed": false,
+      "limitations": [
+        "Treatment is observational and may have unmeasured confounding.",
+        "Concurrent treatments make action-specific effects difficult to identify.",
+        "A treatment grace window longer than zero can introduce time-alignment bias.",
+        "Confidence intervals reflect sampling variability, not structural bias."
+      ]
+    },
+    "potassium_to_serum_potassium": {
+      "available": true,
+      "target_trial": {
+        "name": "potassium_to_serum_potassium",
+        "treatment_column": "act_kcl",
+        "outcome_column": "potassium_tp6",
+        "baseline_outcome_column": "potassium_t",
+        "horizon_hours": 6.0,
+        "treatment_grace_hours": 6.0,
+        "time_zero": "anchor state at t",
+        "eligibility": "observed baseline and six-hour outcome",
+        "treatment_strategy": "action recorded during treatment grace window",
+        "outcome": "six-hour change from baseline",
+        "assignment_is_time_aligned": true
+      },
+      "support": {
+        "rows": 5094,
+        "stays": 938,
+        "treated_rows": 2064,
+        "control_rows": 3030,
+        "overlap_rows": 3676,
+        "overlap_fraction": 0.721633,
+        "propensity_range": [
+          0.05,
+          0.95
+        ],
+        "concomitant_treatment_rate_among_treated": 0.956395,
+        "max_abs_smd_before": 1.758291
+      },
+      "aipw_ate": {
+        "estimate": -0.053801,
+        "cluster_bootstrap_95_ci": [
+          -0.10816,
+          -0.009285
+        ]
+      },
+      "propensity_matched_att": {
+        "estimate": 0.054893,
+        "cluster_bootstrap_95_ci": [
+          0.010685,
+          0.098468
+        ],
+        "matched_pairs": 2064,
+        "unique_treated_stays": 672,
+        "same_stay_matches": 0,
+        "caliper_logit": 0.368147,
+        "max_abs_smd_after": 0.638997
+      },
+      "promotion_readiness": {
+        "passes": false,
+        "failures": [
+          "insufficient_propensity_overlap",
+          "high_concomitant_treatment_rate",
+          "matched_covariate_balance_inadequate"
+        ]
+      },
+      "causal_claim_allowed": false,
+      "limitations": [
+        "Treatment is observational and may have unmeasured confounding.",
+        "Concurrent treatments make action-specific effects difficult to identify.",
+        "A treatment grace window longer than zero can introduce time-alignment bias.",
+        "Confidence intervals reflect sampling variability, not structural bias."
+      ]
+    }
+  },
+  "causal_claim_allowed": false,
+  "cohort": {
+    "path": "dka_transitions_6h_mimiciv_full_v31_icd.parquet",
+    "rows": 10785,
+    "stays": 1010
+  }
+}

@@ -22,19 +22,18 @@ from dka_action_contract import (
     expand_action,
 )
 from osler_jepa.actions import TemporalActionEncoder
+from osler_jepa.actions import TREATMENT_EVENT_DIM, TREATMENT_EVENT_KEYS
 from osler_jepa.ontology import OSLER_STATE_ONTOLOGY
+from osler_jepa.state_compiler import DkaStateCompiler
 from osler_jepa.symbolic import RULE_IDS, schema as symbolic_schema
+from dka_world_model_contract import STATE_KEYS as CONTRACT_STATE_KEYS
 
 
 SEED = 0
 np.random.seed(SEED)
 torch.manual_seed(SEED)
 
-STATE_KEYS = [
-    "G", "pH", "HCO3", "anion_gap", "Ke", "MAP", "V", "I",
-    "Na", "osmolality", "creatinine", "urine_output", "BHB",
-    "K_store", "osmotic_injury",
-]
+STATE_KEYS = list(CONTRACT_STATE_KEYS)
 S_MEAN = np.array(
     [250, 7.2, 15, 18, 4.2, 80, 13, 15.0, 138, 295, 1.2, 100, 4.0, 110, 2.0],
     dtype=np.float32,
@@ -44,6 +43,9 @@ S_STD = np.array(
     dtype=np.float32,
 )
 S_DIM = len(STATE_KEYS)
+DKA_STATE_COMPILER = DkaStateCompiler(
+    STATE_KEYS, S_MEAN, S_STD, OSLER_STATE_ONTOLOGY
+)
 
 ACTION_KEYS = list(ROUTE_ACTION_KEYS)
 A_SCALE = ACTION_SCALE.copy()
@@ -67,6 +69,7 @@ ACT_GRID = [
 ACTION_EMBED_DIM = 32
 HISTORY_HOURS = 6.0
 H_DIM = A_DIM * 2
+MAX_OBSERVATION_AGE_HOURS = 24.0
 
 Z_DIM = 48
 DT = 0.5
@@ -91,6 +94,26 @@ def s2vec(observation):
     return (values - S_MEAN) / S_STD
 
 
+def observation_context(observation, ages=None):
+    """Return normalized state, observed-value mask, and observation ages.
+
+    Missing values are imputed by ``s2vec`` but remain explicitly marked as
+    unobserved. Ages are hours since measurement and are clipped by the encoder.
+    """
+    ages = ages or {}
+    vector = s2vec(observation)
+    mask = np.array(
+        [1.0 if key in observation and observation[key] is not None else 0.0
+         for key in STATE_KEYS],
+        dtype=np.float32,
+    )
+    age = np.array([
+        float(ages.get(key, 0.0 if mask[index] else MAX_OBSERVATION_AGE_HOURS))
+        for index, key in enumerate(STATE_KEYS)
+    ], dtype=np.float32)
+    return vector, mask, np.clip(age, 0.0, MAX_OBSERVATION_AGE_HOURS)
+
+
 def vec2state(vector):
     values = np.asarray(vector, dtype=np.float32) * S_STD + S_MEAN
     return dict(zip(STATE_KEYS, values.tolist()))
@@ -104,8 +127,8 @@ def vec2action(vector):
     return (np.asarray(vector, dtype=np.float32) * A_SCALE).tolist()
 
 
-def treatment_history_features(actions, dt=DT,
-                               history_hours=HISTORY_HOURS):
+def treatment_history_features(actions, dt=DT, history_hours=HISTORY_HOURS,
+                               durations=None):
     """Encode prior physical action rates as exposure and recency features."""
     values = np.asarray(actions, dtype=np.float32)
     if values.size == 0:
@@ -117,15 +140,23 @@ def treatment_history_features(actions, dt=DT,
     padded = np.zeros((len(values), A_DIM), dtype=np.float32)
     padded[:, :min(values.shape[1], A_DIM)] = values[:, :A_DIM]
     normalized = padded / A_SCALE
-    max_steps = max(1, int(round(history_hours / dt)))
-    normalized = normalized[-max_steps:]
-    exposure = normalized.sum(axis=0) * dt / history_hours
+    if durations is None:
+        durations = np.full(len(normalized), float(dt), dtype=np.float32)
+    else:
+        durations = np.asarray(durations, dtype=np.float32).reshape(-1)
+        if len(durations) != len(normalized):
+            raise ValueError("Action history and duration history must align")
+    cumulative = np.cumsum(durations[::-1])
+    keep = max(1, int(np.searchsorted(cumulative, history_hours, side="left") + 1))
+    normalized = normalized[-keep:]
+    durations = durations[-keep:]
+    exposure = (normalized * durations[:, None]).sum(axis=0) / history_hours
     recency = np.ones(A_DIM, dtype=np.float32)
     for index in range(A_DIM):
         active = np.flatnonzero(normalized[:, index] > 1e-6)
         if len(active):
-            elapsed_steps = len(normalized) - 1 - int(active[-1])
-            recency[index] = min(1.0, elapsed_steps * dt / history_hours)
+            elapsed = durations[int(active[-1]) + 1:].sum()
+            recency[index] = min(1.0, elapsed / history_hours)
     return np.concatenate([exposure, recency]).astype(np.float32)
 
 
@@ -150,6 +181,10 @@ def randomized_dka(body, rng=None, randomize_profile=True):
         body.profile.baseline_creatinine / body.profile.renal_reserve
         * rng.uniform(0.9, 2.0), 0.4, 5.0,
     ))
+    body.counterregulatory_stress = float(
+        body.profile.counterregulatory_drive * rng.uniform(0.9, 1.35)
+    )
+    body.renal_perfusion_state = body._instantaneous_renal_perfusion()
     body.urine_output_ml_hr = float(rng.uniform(10.0, 250.0))
     body.osmotic_injury = float(rng.uniform(0.0, 4.0))
     body.t = 0.0
@@ -201,23 +236,75 @@ class LatentPredictor(nn.Module):
         self.delta = mlp(latent_dim + action_dim, latent_dim)
         self.residual_scale = nn.Parameter(torch.tensor(0.1))
 
-    def forward(self, latent_and_action):
+    def forward(self, latent_and_action, delta_hours=None):
         latent = latent_and_action[..., :self.latent_dim]
         delta = self.delta(latent_and_action)
         return latent + torch.tanh(self.residual_scale) * delta
 
 
-class WorldModel(nn.Module):
-    def __init__(self):
+class LiquidTimeConstantPredictor(nn.Module):
+    """Continuous-time candidate latent dynamics with learned time constants.
+
+    This is a research-only alternative to the residual MLP predictor. It is
+    designed for irregular intervals: the same latent/action drive is integrated
+    with a bounded ``1 - exp(-dt / tau)`` update, so short and long intervals can
+    produce different-sized residual moves without changing the rest of the JEPA
+    contract.
+    """
+
+    continuous_time = True
+
+    def __init__(self, latent_dim=Z_DIM, action_dim=ACTION_EMBED_DIM):
         super().__init__()
+        self.latent_dim = latent_dim
+        self.delta = mlp(latent_dim + action_dim, latent_dim)
+        self.tau = nn.Sequential(
+            nn.Linear(latent_dim + action_dim, 128),
+            nn.SiLU(),
+            nn.Linear(128, latent_dim),
+        )
+        self.residual_scale = nn.Parameter(torch.tensor(0.1))
+
+    def forward(self, latent_and_action, delta_hours=None):
+        latent = latent_and_action[..., :self.latent_dim]
+        drive = self.delta(latent_and_action)
+        tau = torch.nn.functional.softplus(self.tau(latent_and_action)) + 0.05
+        if delta_hours is None:
+            dt = latent.new_full(latent.shape[:-1], DT)
+        else:
+            dt = torch.as_tensor(
+                delta_hours, dtype=latent.dtype, device=latent.device
+            )
+            if dt.ndim == 0:
+                dt = dt.expand(latent.shape[:-1])
+        while dt.ndim < latent.ndim:
+            dt = dt.unsqueeze(-1)
+        alpha = 1.0 - torch.exp(-dt.clamp_min(0.0) / tau)
+        return latent + alpha * torch.tanh(self.residual_scale) * drive
+
+
+class WorldModel(nn.Module):
+    def __init__(self, dynamics_cell="residual_mlp"):
+        super().__init__()
+        if dynamics_cell not in {"residual_mlp", "ltc"}:
+            raise ValueError(f"Unsupported dynamics cell: {dynamics_cell}")
+        self.dynamics_cell = dynamics_cell
+        self.uncertainty_trained = False
         self.AEnc = TemporalActionEncoder(A_DIM, ACTION_EMBED_DIM)
+        self.EventEnc = nn.Linear(TREATMENT_EVENT_DIM, ACTION_EMBED_DIM, bias=False)
+        nn.init.zeros_(self.EventEnc.weight)
         self.E = mlp(S_DIM, Z_DIM)
         self.HEnc = nn.Sequential(
             nn.Linear(H_DIM, 96, bias=False),
             nn.SiLU(),
             nn.Linear(96, Z_DIM, bias=False),
         )
-        self.P = LatentPredictor()
+        self.ObsEnc = nn.Linear(S_DIM * 2, Z_DIM, bias=False)
+        nn.init.zeros_(self.ObsEnc.weight)
+        self.P = (
+            LiquidTimeConstantPredictor()
+            if dynamics_cell == "ltc" else LatentPredictor()
+        )
         self.D = mlp(Z_DIM, S_DIM)
         self.R = mlp(Z_DIM, 1, hidden=96)
         symbolic_dim = Z_DIM + ACTION_EMBED_DIM
@@ -229,32 +316,87 @@ class WorldModel(nn.Module):
         self.Ebar.load_state_dict(self.E.state_dict())
         for parameter in self.Ebar.parameters():
             parameter.requires_grad_(False)
+        # New modules are initialized after the full legacy v5 module sequence.
+        # This preserves the random initialization of every numerical dynamics
+        # layer for controlled ablations.
+        self.StateCompilerEnc = nn.Linear(
+            DKA_STATE_COMPILER.context_dim, Z_DIM, bias=False
+        )
+        nn.init.zeros_(self.StateCompilerEnc.weight)
+        self.U = mlp(Z_DIM, S_DIM, hidden=96)
+        nn.init.zeros_(self.U[-1].weight)
+        nn.init.zeros_(self.U[-1].bias)
 
     @torch.no_grad()
     def ema(self, tau=0.995):
         for target, online in zip(self.Ebar.parameters(), self.E.parameters()):
             target.data.mul_(tau).add_(online.data, alpha=1.0 - tau)
 
-    def predict_latent(self, latent, action, delta_hours=DT, elapsed_hours=0.0):
+    def predict_latent(self, latent, action, delta_hours=DT, elapsed_hours=0.0,
+                       treatment_events=None):
         action_embedding = self.AEnc(action, delta_hours, elapsed_hours)
-        return self.P(torch.cat([latent, action_embedding], dim=-1))
+        if treatment_events is not None:
+            action_embedding = action_embedding + self.EventEnc(
+                treatment_events.to(dtype=action.dtype)
+            )
+        return self.P(
+            torch.cat([latent, action_embedding], dim=-1),
+            delta_hours=delta_hours,
+        )
 
-    def encode_state(self, state, history=None):
+    def encode_state(self, state, history=None, observation_mask=None,
+                     observation_age=None, compiled_context=None):
+        if observation_mask is None:
+            observation_mask = torch.ones_like(state)
+        if observation_age is None:
+            observation_age = torch.zeros_like(state)
+        observation_mask = observation_mask.to(dtype=state.dtype)
+        observation_age = observation_age.to(dtype=state.dtype)
+        # ``state`` contains explicit imputations or belief estimates. Reliability
+        # is carried separately by mask and age; training code zeroes synthetically
+        # hidden ground truth before calling this method to prevent leakage.
         latent = self.E(state)
+        observation_features = torch.cat([
+            observation_mask - 1.0,
+            observation_age.clamp(0.0, MAX_OBSERVATION_AGE_HOURS)
+            / MAX_OBSERVATION_AGE_HOURS,
+        ], dim=-1)
+        latent = latent + self.ObsEnc(observation_features)
         if history is not None:
             latent = latent + self.HEnc(history)
         return latent
 
+    def encode_target_state(self, state):
+        return self.Ebar(state)
+
+    def uncertainty_logits(self, latent):
+        """Per-state log variance used only for calibrated self-critique."""
+        return self.U(latent)
+
     def predict_step(self, state, action, delta_hours=DT, elapsed_hours=0.0,
-                     history=None):
-        latent = self.encode_state(state, history)
-        next_latent = self.predict_latent(latent, action, delta_hours, elapsed_hours)
+                     history=None, observation_mask=None, observation_age=None,
+                     treatment_events=None):
+        latent = self.encode_state(
+            state, history, observation_mask, observation_age
+        )
+        next_latent = self.predict_latent(
+            latent, action, delta_hours, elapsed_hours, treatment_events
+        )
         return self.D(next_latent), self.R(next_latent).squeeze(-1), next_latent
 
     def symbolic_outputs(self, context_latent, action, delta_hours=DT,
-                         elapsed_hours=0.0):
+                         elapsed_hours=0.0, treatment_events=None,
+                         compiled_context=None):
         """Decode a transition into Osler-readable symbolic predictions."""
+        if compiled_context is not None:
+            context_latent = context_latent + self.StateCompilerEnc(
+                compiled_context.to(dtype=context_latent.dtype)
+            )
         action_embedding = self.AEnc(action, delta_hours, elapsed_hours)
+        if treatment_events is not None:
+            action_embedding = action_embedding + self.EventEnc(
+                treatment_events.to(dtype=action.dtype)
+            )
         features = torch.cat([context_latent, action_embedding], dim=-1)
         return {
             "direction_logits": self.DirectionHead(features).reshape(
@@ -267,17 +409,29 @@ class WorldModel(nn.Module):
             ),
         }
 
-    def rollout(self, initial_state, action_sequence, initial_history=None):
+    def rollout(self, initial_state, action_sequence, initial_history=None,
+                observation_mask=None, observation_age=None, delta_hours=None,
+                treatment_events=None):
         """Open-loop rollout. action_sequence shape: [batch, time, A_DIM]."""
-        latent = self.encode_state(initial_state, initial_history)
+        latent = self.encode_state(
+            initial_state, initial_history, observation_mask, observation_age
+        )
         states, risk_logits, latents = [], [], []
+        elapsed = initial_state.new_zeros(initial_state.shape[:-1])
         for step in range(action_sequence.shape[1]):
+            step_delta = self._rollout_delta(
+                delta_hours, step, action_sequence.shape[0], initial_state
+            )
             latent = self.predict_latent(
                 latent,
                 action_sequence[:, step],
-                delta_hours=DT,
-                elapsed_hours=step * DT,
+                delta_hours=step_delta,
+                elapsed_hours=elapsed,
+                treatment_events=self._rollout_event(
+                    treatment_events, step, action_sequence.shape[0], initial_state
+                ),
             )
+            elapsed = elapsed + step_delta
             states.append(self.D(latent))
             risk_logits.append(self.R(latent).squeeze(-1))
             latents.append(latent)
@@ -286,6 +440,32 @@ class WorldModel(nn.Module):
             torch.stack(risk_logits, dim=1),
             torch.stack(latents, dim=1),
         )
+
+    @staticmethod
+    def _rollout_delta(delta_hours, step, batch_size, reference):
+        if delta_hours is None:
+            return reference.new_full((batch_size,), DT)
+        values = torch.as_tensor(
+            delta_hours, dtype=reference.dtype, device=reference.device
+        )
+        if values.ndim == 0:
+            return values.expand(batch_size)
+        if values.ndim == 1:
+            return values[step].expand(batch_size)
+        return values[:, step]
+
+    @staticmethod
+    def _rollout_event(treatment_events, step, batch_size, reference):
+        if treatment_events is None:
+            return None
+        values = torch.as_tensor(
+            treatment_events, dtype=reference.dtype, device=reference.device
+        )
+        if values.ndim == 1:
+            return values.expand(batch_size, -1)
+        if values.ndim == 2:
+            return values[step].expand(batch_size, -1)
+        return values[:, step]
 
 
 def vicreg(latent, gamma=1.0):
@@ -316,10 +496,10 @@ def train(model, states, actions, next_states, epochs=14, bs=256, device=None):
         for start in range(0, count, bs):
             index = permutation[start:start + bs]
             state, action, target_state = states[index], actions[index], next_states[index]
-            latent = model.E(state)
+            latent = model.encode_state(state)
             predicted_latent = model.predict_latent(latent, action)
             with torch.no_grad():
-                target_latent = model.Ebar(target_state)
+                target_latent = model.encode_target_state(target_state)
             loss = (
                 nn.functional.mse_loss(predicted_latent, target_latent)
                 + nn.functional.mse_loss(model.D(latent), state)
@@ -335,7 +515,9 @@ def train(model, states, actions, next_states, epochs=14, bs=256, device=None):
             batches += 1
         if (epoch + 1) % 2 == 0:
             with torch.no_grad():
-                latent_std = model.E(states[: min(2000, count)]).std(dim=0).mean()
+                latent_std = model.encode_state(
+                    states[: min(2000, count)]
+                ).std(dim=0).mean()
             print(
                 f"  ep {epoch + 1:2d} loss={total / max(batches, 1):.4f} "
                 f"z_std={float(latent_std):.3f}"
@@ -358,10 +540,27 @@ def save_checkpoint(model, path, metadata=None):
                 *[f"recency_{name}" for name in ACTION_KEYS],
             ],
         },
+        "observation_contract": {
+            "features": ["value", "observed_mask", "age_hours"],
+            "max_age_hours": MAX_OBSERVATION_AGE_HOURS,
+            "missing_value_imputation": "normalized_population_mean",
+        },
+        "state_compiler": DKA_STATE_COMPILER.schema(),
+        "uncertainty": {
+            "type": "heteroscedastic_log_variance",
+            "scope": "world_model_self_critique_only",
+            "clinical_authority": False,
+        },
         "action_encoder": {
-            "type": "route_formulation_channels_plus_delta_and_elapsed_time",
+            "type": "route_formulation_channels_plus_time_and_lifecycle_events",
             "embedding_dim": ACTION_EMBED_DIM,
             "insulin_channels": list(ACTION_KEYS[:4]),
+            "treatment_event_features": list(TREATMENT_EVENT_KEYS),
+        },
+        "dynamics": {
+            "cell": getattr(model, "dynamics_cell", "residual_mlp"),
+            "ltc_candidate_only": getattr(model, "dynamics_cell", "residual_mlp") == "ltc",
+            "runtime_promotion_implied": False,
         },
         "symbolic_interface": symbolic_schema(
             STATE_KEYS, ACTION_KEYS, OSLER_STATE_ONTOLOGY
@@ -373,13 +572,47 @@ def save_checkpoint(model, path, metadata=None):
 
 def load_checkpoint(path, device="cpu"):
     payload = torch.load(Path(path), map_location=device, weights_only=False)
-    model = WorldModel().to(device)
+    dynamics_cell = (
+        payload.get("dynamics", {}).get("cell")
+        or payload.get("metadata", {}).get("model_architecture", {}).get(
+            "dynamics_cell"
+        )
+        or "residual_mlp"
+    )
+    model = WorldModel(dynamics_cell=dynamics_cell).to(device)
     incompatible = model.load_state_dict(payload["model_state"], strict=False)
+    model.uncertainty_trained = (
+        not any(key.startswith("U.") for key in incompatible.missing_keys)
+        and bool(payload.get("metadata", {}).get("world_model_objective"))
+    )
     if incompatible.missing_keys or incompatible.unexpected_keys:
+        notes = []
+        if "ObsEnc.weight" in incompatible.missing_keys:
+            notes.append(
+                "The observation-context encoder is zero-initialized, so complete "
+                "fresh observations preserve legacy checkpoint behavior."
+            )
+        if "EventEnc.weight" in incompatible.missing_keys:
+            notes.append(
+                "The treatment-event encoder is zero-initialized, preserving "
+                "legacy rate-only checkpoint behavior."
+            )
+        if "StateCompilerEnc.weight" in incompatible.missing_keys:
+            notes.append(
+                "The Prolog-state encoder is zero-initialized and conditions "
+                "symbolic heads only, preserving legacy numerical dynamics."
+            )
+        if any(key.startswith("U.") for key in incompatible.missing_keys):
+            notes.append(
+                "The uncertainty head is independent from state prediction and "
+                "must be calibrated before its output is interpreted."
+            )
+        if any("Head" in key for key in incompatible.missing_keys):
+            notes.append("Legacy symbolic heads use their initialized weights.")
         payload["compatibility"] = {
             "missing_keys": list(incompatible.missing_keys),
             "unexpected_keys": list(incompatible.unexpected_keys),
-            "note": "Legacy checkpoints initialize new symbolic heads randomly.",
+            "notes": notes,
         }
     model.eval()
     return model, payload

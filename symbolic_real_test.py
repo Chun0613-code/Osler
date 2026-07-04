@@ -1,7 +1,8 @@
 """Patient-held-out real-data test for symbolic-grounded DKA JEPA proposals.
 
-MIMIC observations can validate reproducibility, not causality. Candidate rules
-therefore stay in the sandbox even when they pass the retrospective gate.
+Real observational cohorts can validate reproducibility, not causality.
+Candidate rules therefore stay in the sandbox even when they pass the
+retrospective gate.
 """
 
 from __future__ import annotations
@@ -41,6 +42,31 @@ TARGET_COLUMNS = {
     11: ("urine_output_t", "urine_output_tp6"),
     12: ("BHB_t", "BHB_tp6"),
 }
+
+
+def _cohort_info(path):
+    name = Path(path).name.lower()
+    if "eicu" in name:
+        label = "eICU demo"
+        population = "eICU demo ICU DKA-like anchors"
+    elif "mimiciii" in name or "mimic-iii" in name:
+        label = "MIMIC-III demo"
+        population = "MIMIC-III demo ICU lab-defined DKA-like anchors"
+    elif "mimiciv_full" in name or "full_v31" in name:
+        label = "MIMIC-IV full v3.1"
+        population = "MIMIC-IV full v3.1 ICU DKA-like anchors"
+    elif "mimic" in name or "dka_transitions_6h_demo" in name:
+        label = "MIMIC-IV demo"
+        population = "MIMIC-IV ICU DKA-like anchors"
+    else:
+        label = "real-data cohort"
+        population = "real-data ICU DKA-like anchors"
+    return {
+        "label": label,
+        "population": population,
+        "test_type": f"patient-held-out {label} symbolic rule test",
+        "provenance_source": f"JEPA symbolic RuleProposalHead + {label}",
+    }
 
 
 def _value(row, name, default=np.nan):
@@ -222,6 +248,7 @@ def main():
         for key in compatibility.get("missing_keys", [])
     )
     frame = pd.read_parquet(args.mimic)
+    cohort_info = _cohort_info(args.mimic)
     stays = np.asarray(sorted(frame["stay_id"].dropna().unique()), dtype=np.int64)
     rng = np.random.default_rng(args.seed)
     rng.shuffle(stays)
@@ -236,7 +263,9 @@ def main():
 
     canonical = [OSLER_STATE_ONTOLOGY.require(name) for name in STATE_KEYS]
     candidates = induce_candidates(
-        discovery_records, ACTION_KEYS, STATE_KEYS, canonical
+        discovery_records, ACTION_KEYS, STATE_KEYS, canonical,
+        population=cohort_info["population"],
+        provenance_source=cohort_info["provenance_source"],
     )
     candidates = validate_candidates(
         candidates, heldout_records, ACTION_KEYS, STATE_KEYS
@@ -279,10 +308,11 @@ def main():
         issues.append("Changed-only external direction accuracy is below chance.")
 
     report = {
-        "test_type": "patient-held-out MIMIC-IV demo symbolic rule test",
+        "test_type": cohort_info["test_type"],
         "checkpoint": str(Path(args.checkpoint).resolve()),
         "symbolic_heads_trained": symbolic_trained,
         "cohort": str(Path(args.mimic).resolve()),
+        "cohort_label": cohort_info["label"],
         "patient_split": {
             "discovery_stays": len(discovery_stays),
             "heldout_stays": len(heldout_stays),

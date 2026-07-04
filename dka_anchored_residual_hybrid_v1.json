@@ -1,0 +1,815 @@
+{
+  "experiment": "persistence-anchored residual shrinkage with Prolog gate",
+  "prediction_rows": "dka_real_world_oof_predictions_v3.csv",
+  "prediction_source": "rebuilt_patient_oof",
+  "cohort": "dka_transitions_maintenance.parquet",
+  "stay_count": 15,
+  "horizon_hours": 6.0,
+  "contract": {
+    "anchor": "persistence/current observed value",
+    "residual_source": "candidate forecast minus persistence",
+    "numeric_rule": "selected = persistence + shrink * clipped_residual",
+    "prolog_role": "allow/deny and expected direction only",
+    "default": "persistence",
+    "clinical_or_causal_claim_allowed": false
+  },
+  "gate_config": {
+    "min_direction_agreement": 0.9,
+    "max_shrink": 0.35,
+    "max_residual_scale": 0.25,
+    "supported_horizon_hours": 6.0,
+    "horizon_tolerance_hours": 0.25,
+    "require_prolog_direction": true,
+    "require_direction_agreement": true
+  },
+  "candidate_reports": {
+    "base_jepa": {
+      "candidate_source": "base_jepa",
+      "anchored_column": "anchored_base_jepa",
+      "movement": {
+        "total_predictions": 889,
+        "allowed_to_leave_persistence": 0,
+        "allowed_fraction": 0.0,
+        "abstain_reasons": {
+          "no_active_prolog_direction": 864,
+          "missing_direction_agreement": 889,
+          "candidate_direction_contradicts_prolog": 12,
+          "candidate_residual_below_stable_threshold": 36
+        },
+        "prolog_status": {
+          "no_active_prolog_direction": 864,
+          "matched": 25
+        },
+        "allowed_by_state": {
+          "G": {
+            "allowed": 0,
+            "total": 72
+          },
+          "HCO3": {
+            "allowed": 0,
+            "total": 71
+          },
+          "Ke": {
+            "allowed": 0,
+            "total": 75
+          },
+          "MAP": {
+            "allowed": 0,
+            "total": 152
+          },
+          "Na": {
+            "allowed": 0,
+            "total": 74
+          },
+          "anion_gap": {
+            "allowed": 0,
+            "total": 71
+          },
+          "creatinine": {
+            "allowed": 0,
+            "total": 68
+          },
+          "osmolality": {
+            "allowed": 0,
+            "total": 73
+          },
+          "pH": {
+            "allowed": 0,
+            "total": 98
+          },
+          "urine_output": {
+            "allowed": 0,
+            "total": 135
+          }
+        }
+      },
+      "normalized_mae": {
+        "all_windows": {
+          "persistence": {
+            "n": 889,
+            "normalized_mae": 0.266976
+          },
+          "base_jepa": {
+            "n": 889,
+            "normalized_mae": 0.563875
+          },
+          "anchored_base_jepa": {
+            "n": 889,
+            "normalized_mae": 0.266976
+          }
+        },
+        "active_dka_only": {
+          "persistence": {
+            "n": 279,
+            "normalized_mae": 0.347436
+          },
+          "base_jepa": {
+            "n": 279,
+            "normalized_mae": 0.552925
+          },
+          "anchored_base_jepa": {
+            "n": 279,
+            "normalized_mae": 0.347436
+          }
+        },
+        "dense_core_all_windows": {
+          "persistence": {
+            "n": 214,
+            "normalized_mae": 0.220685
+          },
+          "base_jepa": {
+            "n": 214,
+            "normalized_mae": 0.668569
+          },
+          "anchored_base_jepa": {
+            "n": 214,
+            "normalized_mae": 0.220685
+          }
+        }
+      },
+      "stay_level_delta_vs_persistence": {
+        "all_windows": {
+          "stay_count": 15,
+          "mean_method_minus_persistence": 0.0,
+          "sd_stay_delta": 0.0,
+          "bootstrap_95_ci": [
+            -0.0,
+            0.0
+          ],
+          "required_stays_for_95ci_80power": null,
+          "additional_stays_needed_from_current_demo": null,
+          "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+        },
+        "active_dka_only": {
+          "stay_count": 13,
+          "mean_method_minus_persistence": 0.0,
+          "sd_stay_delta": 0.0,
+          "bootstrap_95_ci": [
+            -0.0,
+            0.0
+          ],
+          "required_stays_for_95ci_80power": null,
+          "additional_stays_needed_from_current_demo": null,
+          "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+        }
+      },
+      "per_state": {
+        "G": {
+          "persistence": {
+            "n": 72,
+            "normalized_mae": 0.2175
+          },
+          "base_jepa": {
+            "n": 72,
+            "normalized_mae": 0.963628
+          },
+          "anchored_base_jepa": {
+            "n": 72,
+            "normalized_mae": 0.2175
+          },
+          "anchored_delta_vs_persistence": {
+            "stay_count": 14,
+            "mean_method_minus_persistence": 0.0,
+            "sd_stay_delta": 0.0,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          }
+        },
+        "HCO3": {
+          "persistence": {
+            "n": 71,
+            "normalized_mae": 0.240845
+          },
+          "base_jepa": {
+            "n": 71,
+            "normalized_mae": 0.657608
+          },
+          "anchored_base_jepa": {
+            "n": 71,
+            "normalized_mae": 0.240845
+          },
+          "anchored_delta_vs_persistence": {
+            "stay_count": 14,
+            "mean_method_minus_persistence": 0.0,
+            "sd_stay_delta": 0.0,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          }
+        },
+        "Ke": {
+          "persistence": {
+            "n": 75,
+            "normalized_mae": 0.256889
+          },
+          "base_jepa": {
+            "n": 75,
+            "normalized_mae": 0.523635
+          },
+          "anchored_base_jepa": {
+            "n": 75,
+            "normalized_mae": 0.256889
+          },
+          "anchored_delta_vs_persistence": {
+            "stay_count": 15,
+            "mean_method_minus_persistence": 0.0,
+            "sd_stay_delta": 0.0,
+            "bootstrap_95_ci": [
+              -0.0,
+              0.0
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          }
+        },
+        "MAP": {
+          "persistence": {
+            "n": 152,
+            "normalized_mae": 0.351096
+          },
+          "base_jepa": {
+            "n": 152,
+            "normalized_mae": 0.32077
+          },
+          "anchored_base_jepa": {
+            "n": 152,
+            "normalized_mae": 0.351096
+          },
+          "anchored_delta_vs_persistence": {
+            "stay_count": 15,
+            "mean_method_minus_persistence": 0.0,
+            "sd_stay_delta": 0.0,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          }
+        },
+        "Na": {
+          "persistence": {
+            "n": 74,
+            "normalized_mae": 0.201351
+          },
+          "base_jepa": {
+            "n": 74,
+            "normalized_mae": 0.703102
+          },
+          "anchored_base_jepa": {
+            "n": 74,
+            "normalized_mae": 0.201351
+          },
+          "anchored_delta_vs_persistence": {
+            "stay_count": 15,
+            "mean_method_minus_persistence": 0.0,
+            "sd_stay_delta": 0.0,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          }
+        },
+        "anion_gap": {
+          "persistence": {
+            "n": 71,
+            "normalized_mae": 0.346479
+          },
+          "base_jepa": {
+            "n": 71,
+            "normalized_mae": 0.488662
+          },
+          "anchored_base_jepa": {
+            "n": 71,
+            "normalized_mae": 0.346479
+          },
+          "anchored_delta_vs_persistence": {
+            "stay_count": 14,
+            "mean_method_minus_persistence": 0.0,
+            "sd_stay_delta": 0.0,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          }
+        },
+        "creatinine": {
+          "persistence": {
+            "n": 68,
+            "normalized_mae": 0.245098
+          },
+          "base_jepa": {
+            "n": 68,
+            "normalized_mae": 0.318574
+          },
+          "anchored_base_jepa": {
+            "n": 68,
+            "normalized_mae": 0.245098
+          },
+          "anchored_delta_vs_persistence": {
+            "stay_count": 14,
+            "mean_method_minus_persistence": 0.0,
+            "sd_stay_delta": 0.0,
+            "bootstrap_95_ci": [
+              -0.0,
+              0.0
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          }
+        },
+        "osmolality": {
+          "persistence": {
+            "n": 73,
+            "normalized_mae": 0.165601
+          },
+          "base_jepa": {
+            "n": 73,
+            "normalized_mae": 0.711528
+          },
+          "anchored_base_jepa": {
+            "n": 73,
+            "normalized_mae": 0.165601
+          },
+          "anchored_delta_vs_persistence": {
+            "stay_count": 14,
+            "mean_method_minus_persistence": 0.0,
+            "sd_stay_delta": 0.0,
+            "bootstrap_95_ci": [
+              -0.0,
+              0.0
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          }
+        },
+        "pH": {
+          "persistence": {
+            "n": 98,
+            "normalized_mae": 0.213805
+          },
+          "base_jepa": {
+            "n": 98,
+            "normalized_mae": 0.319738
+          },
+          "anchored_base_jepa": {
+            "n": 98,
+            "normalized_mae": 0.213805
+          },
+          "anchored_delta_vs_persistence": {
+            "stay_count": 15,
+            "mean_method_minus_persistence": 0.0,
+            "sd_stay_delta": 0.0,
+            "bootstrap_95_ci": [
+              -0.0,
+              0.0
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          }
+        },
+        "urine_output": {
+          "persistence": {
+            "n": 135,
+            "normalized_mae": 0.316595
+          },
+          "base_jepa": {
+            "n": 135,
+            "normalized_mae": 0.781629
+          },
+          "anchored_base_jepa": {
+            "n": 135,
+            "normalized_mae": 0.316595
+          },
+          "anchored_delta_vs_persistence": {
+            "stay_count": 15,
+            "mean_method_minus_persistence": 0.0,
+            "sd_stay_delta": 0.0,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          }
+        }
+      }
+    },
+    "ensemble_adapter": {
+      "candidate_source": "ensemble_adapter",
+      "anchored_column": "anchored_ensemble_adapter",
+      "movement": {
+        "total_predictions": 889,
+        "allowed_to_leave_persistence": 15,
+        "allowed_fraction": 0.016873,
+        "abstain_reasons": {
+          "no_active_prolog_direction": 864,
+          "low_direction_agreement": 416,
+          "candidate_residual_below_stable_threshold": 64,
+          "candidate_direction_contradicts_prolog": 9,
+          "allowed": 15
+        },
+        "prolog_status": {
+          "no_active_prolog_direction": 864,
+          "matched": 25
+        },
+        "allowed_by_state": {
+          "G": {
+            "allowed": 1,
+            "total": 72
+          },
+          "HCO3": {
+            "allowed": 0,
+            "total": 71
+          },
+          "Ke": {
+            "allowed": 14,
+            "total": 75
+          },
+          "MAP": {
+            "allowed": 0,
+            "total": 152
+          },
+          "Na": {
+            "allowed": 0,
+            "total": 74
+          },
+          "anion_gap": {
+            "allowed": 0,
+            "total": 71
+          },
+          "creatinine": {
+            "allowed": 0,
+            "total": 68
+          },
+          "osmolality": {
+            "allowed": 0,
+            "total": 73
+          },
+          "pH": {
+            "allowed": 0,
+            "total": 98
+          },
+          "urine_output": {
+            "allowed": 0,
+            "total": 135
+          }
+        }
+      },
+      "normalized_mae": {
+        "all_windows": {
+          "persistence": {
+            "n": 889,
+            "normalized_mae": 0.266976
+          },
+          "ensemble_adapter": {
+            "n": 889,
+            "normalized_mae": 0.395932
+          },
+          "anchored_ensemble_adapter": {
+            "n": 889,
+            "normalized_mae": 0.26736
+          }
+        },
+        "active_dka_only": {
+          "persistence": {
+            "n": 279,
+            "normalized_mae": 0.347436
+          },
+          "ensemble_adapter": {
+            "n": 279,
+            "normalized_mae": 0.56142
+          },
+          "anchored_ensemble_adapter": {
+            "n": 279,
+            "normalized_mae": 0.347906
+          }
+        },
+        "dense_core_all_windows": {
+          "persistence": {
+            "n": 214,
+            "normalized_mae": 0.220685
+          },
+          "ensemble_adapter": {
+            "n": 214,
+            "normalized_mae": 0.386638
+          },
+          "anchored_ensemble_adapter": {
+            "n": 214,
+            "normalized_mae": 0.220317
+          }
+        }
+      },
+      "stay_level_delta_vs_persistence": {
+        "all_windows": {
+          "stay_count": 15,
+          "mean_method_minus_persistence": 0.000329,
+          "sd_stay_delta": 0.001386,
+          "bootstrap_95_ci": [
+            -0.000277,
+            0.001072
+          ],
+          "required_stays_for_95ci_80power": null,
+          "additional_stays_needed_from_current_demo": null,
+          "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+        },
+        "active_dka_only": {
+          "stay_count": 13,
+          "mean_method_minus_persistence": 0.000327,
+          "sd_stay_delta": 0.001333,
+          "bootstrap_95_ci": [
+            -0.000404,
+            0.001034
+          ],
+          "required_stays_for_95ci_80power": null,
+          "additional_stays_needed_from_current_demo": null,
+          "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+        }
+      },
+      "per_state": {
+        "G": {
+          "persistence": {
+            "n": 72,
+            "normalized_mae": 0.2175
+          },
+          "ensemble_adapter": {
+            "n": 72,
+            "normalized_mae": 0.471157
+          },
+          "anchored_ensemble_adapter": {
+            "n": 72,
+            "normalized_mae": 0.216406
+          },
+          "anchored_delta_vs_persistence": {
+            "stay_count": 14,
+            "mean_method_minus_persistence": -0.000469,
+            "sd_stay_delta": 0.001754,
+            "bootstrap_95_ci": [
+              -0.001406,
+              0.0
+            ],
+            "required_stays_for_95ci_80power": 110,
+            "additional_stays_needed_from_current_demo": 96,
+            "interpretation": "underpowered_for_current_observed_effect"
+          }
+        },
+        "HCO3": {
+          "persistence": {
+            "n": 71,
+            "normalized_mae": 0.240845
+          },
+          "ensemble_adapter": {
+            "n": 71,
+            "normalized_mae": 0.450599
+          },
+          "anchored_ensemble_adapter": {
+            "n": 71,
+            "normalized_mae": 0.240845
+          },
+          "anchored_delta_vs_persistence": {
+            "stay_count": 14,
+            "mean_method_minus_persistence": 0.0,
+            "sd_stay_delta": 0.0,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          }
+        },
+        "Ke": {
+          "persistence": {
+            "n": 75,
+            "normalized_mae": 0.256889
+          },
+          "ensemble_adapter": {
+            "n": 75,
+            "normalized_mae": 0.548861
+          },
+          "anchored_ensemble_adapter": {
+            "n": 75,
+            "normalized_mae": 0.262489
+          },
+          "anchored_delta_vs_persistence": {
+            "stay_count": 15,
+            "mean_method_minus_persistence": 0.003967,
+            "sd_stay_delta": 0.016836,
+            "bootstrap_95_ci": [
+              -0.003967,
+              0.012289
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          }
+        },
+        "MAP": {
+          "persistence": {
+            "n": 152,
+            "normalized_mae": 0.351096
+          },
+          "ensemble_adapter": {
+            "n": 152,
+            "normalized_mae": 0.338604
+          },
+          "anchored_ensemble_adapter": {
+            "n": 152,
+            "normalized_mae": 0.351096
+          },
+          "anchored_delta_vs_persistence": {
+            "stay_count": 15,
+            "mean_method_minus_persistence": 0.0,
+            "sd_stay_delta": 0.0,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          }
+        },
+        "Na": {
+          "persistence": {
+            "n": 74,
+            "normalized_mae": 0.201351
+          },
+          "ensemble_adapter": {
+            "n": 74,
+            "normalized_mae": 0.38689
+          },
+          "anchored_ensemble_adapter": {
+            "n": 74,
+            "normalized_mae": 0.201351
+          },
+          "anchored_delta_vs_persistence": {
+            "stay_count": 15,
+            "mean_method_minus_persistence": 0.0,
+            "sd_stay_delta": 0.0,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          }
+        },
+        "anion_gap": {
+          "persistence": {
+            "n": 71,
+            "normalized_mae": 0.346479
+          },
+          "ensemble_adapter": {
+            "n": 71,
+            "normalized_mae": 0.442458
+          },
+          "anchored_ensemble_adapter": {
+            "n": 71,
+            "normalized_mae": 0.346479
+          },
+          "anchored_delta_vs_persistence": {
+            "stay_count": 14,
+            "mean_method_minus_persistence": 0.0,
+            "sd_stay_delta": 0.0,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          }
+        },
+        "creatinine": {
+          "persistence": {
+            "n": 68,
+            "normalized_mae": 0.245098
+          },
+          "ensemble_adapter": {
+            "n": 68,
+            "normalized_mae": 0.296873
+          },
+          "anchored_ensemble_adapter": {
+            "n": 68,
+            "normalized_mae": 0.245098
+          },
+          "anchored_delta_vs_persistence": {
+            "stay_count": 14,
+            "mean_method_minus_persistence": 0.0,
+            "sd_stay_delta": 0.0,
+            "bootstrap_95_ci": [
+              -0.0,
+              0.0
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          }
+        },
+        "osmolality": {
+          "persistence": {
+            "n": 73,
+            "normalized_mae": 0.165601
+          },
+          "ensemble_adapter": {
+            "n": 73,
+            "normalized_mae": 0.304087
+          },
+          "anchored_ensemble_adapter": {
+            "n": 73,
+            "normalized_mae": 0.165601
+          },
+          "anchored_delta_vs_persistence": {
+            "stay_count": 14,
+            "mean_method_minus_persistence": 0.0,
+            "sd_stay_delta": 0.0,
+            "bootstrap_95_ci": [
+              -0.0,
+              0.0
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          }
+        },
+        "pH": {
+          "persistence": {
+            "n": 98,
+            "normalized_mae": 0.213805
+          },
+          "ensemble_adapter": {
+            "n": 98,
+            "normalized_mae": 0.331371
+          },
+          "anchored_ensemble_adapter": {
+            "n": 98,
+            "normalized_mae": 0.213805
+          },
+          "anchored_delta_vs_persistence": {
+            "stay_count": 15,
+            "mean_method_minus_persistence": 0.0,
+            "sd_stay_delta": 0.0,
+            "bootstrap_95_ci": [
+              -0.0,
+              0.0
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          }
+        },
+        "urine_output": {
+          "persistence": {
+            "n": 135,
+            "normalized_mae": 0.316595
+          },
+          "ensemble_adapter": {
+            "n": 135,
+            "normalized_mae": 0.433563
+          },
+          "anchored_ensemble_adapter": {
+            "n": 135,
+            "normalized_mae": 0.316595
+          },
+          "anchored_delta_vs_persistence": {
+            "stay_count": 15,
+            "mean_method_minus_persistence": 0.0,
+            "sd_stay_delta": 0.0,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          }
+        }
+      }
+    }
+  },
+  "conclusion": "Anchoring converts unsafe model outputs into abstention or small, rule-consistent residuals. It reduces self-confident departures from persistence, but remains a research guard and does not create a causal or clinical promotion claim."
+}

@@ -1,0 +1,1544 @@
+{
+  "experiment": "MIMIC-IV full v3.1 DKA real-data grey-box residual crossfit",
+  "cohort": "/Users/chunyouchang/Desktop/llm_project/medical_jepa/dka_transitions_6h_mimiciv_full_v31_icd.parquet",
+  "cohort_summary": {
+    "rows": 10785,
+    "examples_with_mechanism_rollout": 5899,
+    "subjects": 755,
+    "stays": 1010,
+    "active_dka_rows": 3739,
+    "all_icd_supported": true,
+    "glucose_pairs": 4950,
+    "ketone_proxy_from_anion_gap_pairs": 4696,
+    "bicarbonate_pairs": 4749,
+    "serum_potassium_pairs": 5094,
+    "sodium_pairs": 4939,
+    "creatinine_pairs": 4616
+  },
+  "model": {
+    "type": "constrained grey-box residual ODE",
+    "training_target": "residual derivative between DKABody mechanism rollout and observed 6h factual outcome",
+    "residual_keys": [
+      "G",
+      "Ket",
+      "HCO3",
+      "Ke",
+      "Na",
+      "Cr"
+    ],
+    "mechanism_owned_hard_states": [
+      "total_body_potassium",
+      "fluid_volume",
+      "insulin_pk_depots",
+      "dose_mass_balance",
+      "osmotic_injury",
+      "critical_burdens"
+    ],
+    "bottleneck": 8,
+    "epochs": 160,
+    "folds": 4
+  },
+  "evaluation": {
+    "unit_of_evidence": "ICU stay; transition rows are averaged within stay",
+    "split": "GroupKFold by ICU stay; no stay appears in both train and heldout fold",
+    "baseline": "persistence/current observed value",
+    "delta_definition": "normalized MAE(method) - normalized MAE(persistence); negative is better",
+    "row_level_predictions_written": false,
+    "patient_identifiers_written": false,
+    "timestamp_cutoffs_written": false
+  },
+  "random_patient_crossfit": {
+    "seeds": [
+      7,
+      19,
+      37
+    ],
+    "summary": {
+      "mechanism": {
+        "all_windows": {
+          "seeds": 3,
+          "beats_persistence_count": 0,
+          "significant_count": 0,
+          "delta_min": 0.158396,
+          "delta_median": 0.158396,
+          "delta_max": 0.158396
+        },
+        "active_dka_only": {
+          "seeds": 3,
+          "beats_persistence_count": 0,
+          "significant_count": 0,
+          "delta_min": 0.122078,
+          "delta_median": 0.122078,
+          "delta_max": 0.122078
+        }
+      },
+      "greybox": {
+        "all_windows": {
+          "seeds": 3,
+          "beats_persistence_count": 0,
+          "significant_count": 0,
+          "delta_min": 0.037071,
+          "delta_median": 0.038122,
+          "delta_max": 0.039449
+        },
+        "active_dka_only": {
+          "seeds": 3,
+          "beats_persistence_count": 3,
+          "significant_count": 0,
+          "delta_min": -0.009606,
+          "delta_median": -0.00881,
+          "delta_max": -0.007471
+        }
+      }
+    },
+    "runs": [
+      {
+        "seed": 7,
+        "prediction_rows": 29044,
+        "active_prediction_rows": 14424,
+        "folds": 4,
+        "validation_loss_mean": 0.116452,
+        "methods": {
+          "mechanism": {
+            "all_residual_states": {
+              "all_windows": {
+                "rows": 29044,
+                "stays": 940,
+                "persistence_normalized_mae": 0.324698,
+                "mechanism_normalized_mae": 0.485686,
+                "delta_vs_persistence": {
+                  "point_delta": 0.158396,
+                  "bootstrap_95_ci": [
+                    0.146757,
+                    0.171037
+                  ],
+                  "beats_persistence": false,
+                  "significant": false
+                }
+              },
+              "active_dka_only": {
+                "rows": 14424,
+                "stays": 814,
+                "persistence_normalized_mae": 0.409267,
+                "mechanism_normalized_mae": 0.546883,
+                "delta_vs_persistence": {
+                  "point_delta": 0.122078,
+                  "bootstrap_95_ci": [
+                    0.103814,
+                    0.139371
+                  ],
+                  "beats_persistence": false,
+                  "significant": false
+                }
+              }
+            },
+            "per_state": {
+              "G": {
+                "label": "glucose",
+                "all_windows": {
+                  "rows": 4950,
+                  "stays": 933,
+                  "persistence_normalized_mae": 0.524352,
+                  "mechanism_normalized_mae": 0.575538,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.035596,
+                    "bootstrap_95_ci": [
+                      0.012636,
+                      0.059466
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                },
+                "active_dka_only": {
+                  "rows": 2446,
+                  "stays": 811,
+                  "persistence_normalized_mae": 0.729556,
+                  "mechanism_normalized_mae": 0.703283,
+                  "delta_vs_persistence": {
+                    "point_delta": -0.058837,
+                    "bootstrap_95_ci": [
+                      -0.092312,
+                      -0.025649
+                    ],
+                    "beats_persistence": true,
+                    "significant": true
+                  }
+                }
+              },
+              "Ket": {
+                "label": "ketone_proxy_from_anion_gap",
+                "all_windows": {
+                  "rows": 4696,
+                  "stays": 929,
+                  "persistence_normalized_mae": 0.343633,
+                  "mechanism_normalized_mae": 0.366906,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.018043,
+                    "bootstrap_95_ci": [
+                      -0.000513,
+                      0.036656
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                },
+                "active_dka_only": {
+                  "rows": 2357,
+                  "stays": 803,
+                  "persistence_normalized_mae": 0.481841,
+                  "mechanism_normalized_mae": 0.456868,
+                  "delta_vs_persistence": {
+                    "point_delta": -0.050625,
+                    "bootstrap_95_ci": [
+                      -0.077228,
+                      -0.025192
+                    ],
+                    "beats_persistence": true,
+                    "significant": true
+                  }
+                }
+              },
+              "HCO3": {
+                "label": "bicarbonate",
+                "all_windows": {
+                  "rows": 4749,
+                  "stays": 929,
+                  "persistence_normalized_mae": 0.285723,
+                  "mechanism_normalized_mae": 0.379832,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.097005,
+                    "bootstrap_95_ci": [
+                      0.081792,
+                      0.113326
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                },
+                "active_dka_only": {
+                  "rows": 2377,
+                  "stays": 804,
+                  "persistence_normalized_mae": 0.360711,
+                  "mechanism_normalized_mae": 0.464089,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.091432,
+                    "bootstrap_95_ci": [
+                      0.068618,
+                      0.115613
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                }
+              },
+              "Ke": {
+                "label": "serum_potassium",
+                "all_windows": {
+                  "rows": 5094,
+                  "stays": 938,
+                  "persistence_normalized_mae": 0.34964,
+                  "mechanism_normalized_mae": 0.437994,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.07912,
+                    "bootstrap_95_ci": [
+                      0.062361,
+                      0.097384
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                },
+                "active_dka_only": {
+                  "rows": 2486,
+                  "stays": 812,
+                  "persistence_normalized_mae": 0.400188,
+                  "mechanism_normalized_mae": 0.472586,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.055985,
+                    "bootstrap_95_ci": [
+                      0.031706,
+                      0.078022
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                }
+              },
+              "Na": {
+                "label": "sodium",
+                "all_windows": {
+                  "rows": 4939,
+                  "stays": 935,
+                  "persistence_normalized_mae": 0.275096,
+                  "mechanism_normalized_mae": 0.595966,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.310429,
+                    "bootstrap_95_ci": [
+                      0.295563,
+                      0.326251
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                },
+                "active_dka_only": {
+                  "rows": 2427,
+                  "stays": 810,
+                  "persistence_normalized_mae": 0.295756,
+                  "mechanism_normalized_mae": 0.600973,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.280476,
+                    "bootstrap_95_ci": [
+                      0.25965,
+                      0.302916
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                }
+              },
+              "Cr": {
+                "label": "creatinine",
+                "all_windows": {
+                  "rows": 4616,
+                  "stays": 926,
+                  "persistence_normalized_mae": 0.15698,
+                  "mechanism_normalized_mae": 0.55371,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.418268,
+                    "bootstrap_95_ci": [
+                      0.374246,
+                      0.466178
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                },
+                "active_dka_only": {
+                  "rows": 2331,
+                  "stays": 802,
+                  "persistence_normalized_mae": 0.177174,
+                  "mechanism_normalized_mae": 0.581136,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.423309,
+                    "bootstrap_95_ci": [
+                      0.368825,
+                      0.476844
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                }
+              }
+            }
+          },
+          "greybox": {
+            "all_residual_states": {
+              "all_windows": {
+                "rows": 29044,
+                "stays": 940,
+                "persistence_normalized_mae": 0.324698,
+                "greybox_normalized_mae": 0.36419,
+                "delta_vs_persistence": {
+                  "point_delta": 0.039449,
+                  "bootstrap_95_ci": [
+                    0.028537,
+                    0.05161
+                  ],
+                  "beats_persistence": false,
+                  "significant": false
+                }
+              },
+              "active_dka_only": {
+                "rows": 14424,
+                "stays": 814,
+                "persistence_normalized_mae": 0.409267,
+                "greybox_normalized_mae": 0.412292,
+                "delta_vs_persistence": {
+                  "point_delta": -0.007471,
+                  "bootstrap_95_ci": [
+                    -0.022268,
+                    0.007777
+                  ],
+                  "beats_persistence": true,
+                  "significant": false
+                }
+              }
+            },
+            "per_state": {
+              "G": {
+                "label": "glucose",
+                "all_windows": {
+                  "rows": 4950,
+                  "stays": 933,
+                  "persistence_normalized_mae": 0.524352,
+                  "greybox_normalized_mae": 0.419099,
+                  "delta_vs_persistence": {
+                    "point_delta": -0.112886,
+                    "bootstrap_95_ci": [
+                      -0.133323,
+                      -0.091097
+                    ],
+                    "beats_persistence": true,
+                    "significant": true
+                  }
+                },
+                "active_dka_only": {
+                  "rows": 2446,
+                  "stays": 811,
+                  "persistence_normalized_mae": 0.729556,
+                  "greybox_normalized_mae": 0.510856,
+                  "delta_vs_persistence": {
+                    "point_delta": -0.235791,
+                    "bootstrap_95_ci": [
+                      -0.268041,
+                      -0.207394
+                    ],
+                    "beats_persistence": true,
+                    "significant": true
+                  }
+                }
+              },
+              "Ket": {
+                "label": "ketone_proxy_from_anion_gap",
+                "all_windows": {
+                  "rows": 4696,
+                  "stays": 929,
+                  "persistence_normalized_mae": 0.343633,
+                  "greybox_normalized_mae": 0.302826,
+                  "delta_vs_persistence": {
+                    "point_delta": -0.04315,
+                    "bootstrap_95_ci": [
+                      -0.05946,
+                      -0.026578
+                    ],
+                    "beats_persistence": true,
+                    "significant": true
+                  }
+                },
+                "active_dka_only": {
+                  "rows": 2357,
+                  "stays": 803,
+                  "persistence_normalized_mae": 0.481841,
+                  "greybox_normalized_mae": 0.373771,
+                  "delta_vs_persistence": {
+                    "point_delta": -0.130318,
+                    "bootstrap_95_ci": [
+                      -0.155305,
+                      -0.106387
+                    ],
+                    "beats_persistence": true,
+                    "significant": true
+                  }
+                }
+              },
+              "HCO3": {
+                "label": "bicarbonate",
+                "all_windows": {
+                  "rows": 4749,
+                  "stays": 929,
+                  "persistence_normalized_mae": 0.285723,
+                  "greybox_normalized_mae": 0.311211,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.024653,
+                    "bootstrap_95_ci": [
+                      0.01212,
+                      0.038098
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                },
+                "active_dka_only": {
+                  "rows": 2377,
+                  "stays": 804,
+                  "persistence_normalized_mae": 0.360711,
+                  "greybox_normalized_mae": 0.368656,
+                  "delta_vs_persistence": {
+                    "point_delta": -0.003791,
+                    "bootstrap_95_ci": [
+                      -0.022858,
+                      0.017088
+                    ],
+                    "beats_persistence": true,
+                    "significant": false
+                  }
+                }
+              },
+              "Ke": {
+                "label": "serum_potassium",
+                "all_windows": {
+                  "rows": 5094,
+                  "stays": 938,
+                  "persistence_normalized_mae": 0.34964,
+                  "greybox_normalized_mae": 0.374857,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.016016,
+                    "bootstrap_95_ci": [
+                      0.001759,
+                      0.030906
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                },
+                "active_dka_only": {
+                  "rows": 2486,
+                  "stays": 812,
+                  "persistence_normalized_mae": 0.400188,
+                  "greybox_normalized_mae": 0.404314,
+                  "delta_vs_persistence": {
+                    "point_delta": -0.009742,
+                    "bootstrap_95_ci": [
+                      -0.031068,
+                      0.009983
+                    ],
+                    "beats_persistence": true,
+                    "significant": false
+                  }
+                }
+              },
+              "Na": {
+                "label": "sodium",
+                "all_windows": {
+                  "rows": 4939,
+                  "stays": 935,
+                  "persistence_normalized_mae": 0.275096,
+                  "greybox_normalized_mae": 0.314213,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.035886,
+                    "bootstrap_95_ci": [
+                      0.02633,
+                      0.045239
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                },
+                "active_dka_only": {
+                  "rows": 2427,
+                  "stays": 810,
+                  "persistence_normalized_mae": 0.295756,
+                  "greybox_normalized_mae": 0.326268,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.015746,
+                    "bootstrap_95_ci": [
+                      0.002057,
+                      0.028097
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                }
+              },
+              "Cr": {
+                "label": "creatinine",
+                "all_windows": {
+                  "rows": 4616,
+                  "stays": 926,
+                  "persistence_normalized_mae": 0.15698,
+                  "greybox_normalized_mae": 0.463941,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.326148,
+                    "bootstrap_95_ci": [
+                      0.28869,
+                      0.368244
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                },
+                "active_dka_only": {
+                  "rows": 2331,
+                  "stays": 802,
+                  "persistence_normalized_mae": 0.177174,
+                  "greybox_normalized_mae": 0.490391,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.330942,
+                    "bootstrap_95_ci": [
+                      0.280282,
+                      0.386198
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      {
+        "seed": 19,
+        "prediction_rows": 29044,
+        "active_prediction_rows": 14424,
+        "folds": 4,
+        "validation_loss_mean": 0.114717,
+        "methods": {
+          "mechanism": {
+            "all_residual_states": {
+              "all_windows": {
+                "rows": 29044,
+                "stays": 940,
+                "persistence_normalized_mae": 0.324698,
+                "mechanism_normalized_mae": 0.485686,
+                "delta_vs_persistence": {
+                  "point_delta": 0.158396,
+                  "bootstrap_95_ci": [
+                    0.14718,
+                    0.171284
+                  ],
+                  "beats_persistence": false,
+                  "significant": false
+                }
+              },
+              "active_dka_only": {
+                "rows": 14424,
+                "stays": 814,
+                "persistence_normalized_mae": 0.409267,
+                "mechanism_normalized_mae": 0.546883,
+                "delta_vs_persistence": {
+                  "point_delta": 0.122078,
+                  "bootstrap_95_ci": [
+                    0.105439,
+                    0.140115
+                  ],
+                  "beats_persistence": false,
+                  "significant": false
+                }
+              }
+            },
+            "per_state": {
+              "G": {
+                "label": "glucose",
+                "all_windows": {
+                  "rows": 4950,
+                  "stays": 933,
+                  "persistence_normalized_mae": 0.524352,
+                  "mechanism_normalized_mae": 0.575538,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.035596,
+                    "bootstrap_95_ci": [
+                      0.012154,
+                      0.059798
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                },
+                "active_dka_only": {
+                  "rows": 2446,
+                  "stays": 811,
+                  "persistence_normalized_mae": 0.729556,
+                  "mechanism_normalized_mae": 0.703283,
+                  "delta_vs_persistence": {
+                    "point_delta": -0.058837,
+                    "bootstrap_95_ci": [
+                      -0.093279,
+                      -0.02499
+                    ],
+                    "beats_persistence": true,
+                    "significant": true
+                  }
+                }
+              },
+              "Ket": {
+                "label": "ketone_proxy_from_anion_gap",
+                "all_windows": {
+                  "rows": 4696,
+                  "stays": 929,
+                  "persistence_normalized_mae": 0.343633,
+                  "mechanism_normalized_mae": 0.366906,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.018043,
+                    "bootstrap_95_ci": [
+                      0.001164,
+                      0.035592
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                },
+                "active_dka_only": {
+                  "rows": 2357,
+                  "stays": 803,
+                  "persistence_normalized_mae": 0.481841,
+                  "mechanism_normalized_mae": 0.456868,
+                  "delta_vs_persistence": {
+                    "point_delta": -0.050625,
+                    "bootstrap_95_ci": [
+                      -0.078761,
+                      -0.023624
+                    ],
+                    "beats_persistence": true,
+                    "significant": true
+                  }
+                }
+              },
+              "HCO3": {
+                "label": "bicarbonate",
+                "all_windows": {
+                  "rows": 4749,
+                  "stays": 929,
+                  "persistence_normalized_mae": 0.285723,
+                  "mechanism_normalized_mae": 0.379832,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.097005,
+                    "bootstrap_95_ci": [
+                      0.081314,
+                      0.112584
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                },
+                "active_dka_only": {
+                  "rows": 2377,
+                  "stays": 804,
+                  "persistence_normalized_mae": 0.360711,
+                  "mechanism_normalized_mae": 0.464089,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.091432,
+                    "bootstrap_95_ci": [
+                      0.067782,
+                      0.115869
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                }
+              },
+              "Ke": {
+                "label": "serum_potassium",
+                "all_windows": {
+                  "rows": 5094,
+                  "stays": 938,
+                  "persistence_normalized_mae": 0.34964,
+                  "mechanism_normalized_mae": 0.437994,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.07912,
+                    "bootstrap_95_ci": [
+                      0.061957,
+                      0.096981
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                },
+                "active_dka_only": {
+                  "rows": 2486,
+                  "stays": 812,
+                  "persistence_normalized_mae": 0.400188,
+                  "mechanism_normalized_mae": 0.472586,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.055985,
+                    "bootstrap_95_ci": [
+                      0.03365,
+                      0.077751
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                }
+              },
+              "Na": {
+                "label": "sodium",
+                "all_windows": {
+                  "rows": 4939,
+                  "stays": 935,
+                  "persistence_normalized_mae": 0.275096,
+                  "mechanism_normalized_mae": 0.595966,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.310429,
+                    "bootstrap_95_ci": [
+                      0.296981,
+                      0.325978
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                },
+                "active_dka_only": {
+                  "rows": 2427,
+                  "stays": 810,
+                  "persistence_normalized_mae": 0.295756,
+                  "mechanism_normalized_mae": 0.600973,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.280476,
+                    "bootstrap_95_ci": [
+                      0.258593,
+                      0.301064
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                }
+              },
+              "Cr": {
+                "label": "creatinine",
+                "all_windows": {
+                  "rows": 4616,
+                  "stays": 926,
+                  "persistence_normalized_mae": 0.15698,
+                  "mechanism_normalized_mae": 0.55371,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.418268,
+                    "bootstrap_95_ci": [
+                      0.371412,
+                      0.462519
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                },
+                "active_dka_only": {
+                  "rows": 2331,
+                  "stays": 802,
+                  "persistence_normalized_mae": 0.177174,
+                  "mechanism_normalized_mae": 0.581136,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.423309,
+                    "bootstrap_95_ci": [
+                      0.367655,
+                      0.480898
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                }
+              }
+            }
+          },
+          "greybox": {
+            "all_residual_states": {
+              "all_windows": {
+                "rows": 29044,
+                "stays": 940,
+                "persistence_normalized_mae": 0.324698,
+                "greybox_normalized_mae": 0.361408,
+                "delta_vs_persistence": {
+                  "point_delta": 0.037071,
+                  "bootstrap_95_ci": [
+                    0.0261,
+                    0.04753
+                  ],
+                  "beats_persistence": false,
+                  "significant": false
+                }
+              },
+              "active_dka_only": {
+                "rows": 14424,
+                "stays": 814,
+                "persistence_normalized_mae": 0.409267,
+                "greybox_normalized_mae": 0.409568,
+                "delta_vs_persistence": {
+                  "point_delta": -0.009606,
+                  "bootstrap_95_ci": [
+                    -0.024139,
+                    0.004582
+                  ],
+                  "beats_persistence": true,
+                  "significant": false
+                }
+              }
+            },
+            "per_state": {
+              "G": {
+                "label": "glucose",
+                "all_windows": {
+                  "rows": 4950,
+                  "stays": 933,
+                  "persistence_normalized_mae": 0.524352,
+                  "greybox_normalized_mae": 0.416067,
+                  "delta_vs_persistence": {
+                    "point_delta": -0.116329,
+                    "bootstrap_95_ci": [
+                      -0.135567,
+                      -0.096221
+                    ],
+                    "beats_persistence": true,
+                    "significant": true
+                  }
+                },
+                "active_dka_only": {
+                  "rows": 2446,
+                  "stays": 811,
+                  "persistence_normalized_mae": 0.729556,
+                  "greybox_normalized_mae": 0.507689,
+                  "delta_vs_persistence": {
+                    "point_delta": -0.239,
+                    "bootstrap_95_ci": [
+                      -0.268676,
+                      -0.207845
+                    ],
+                    "beats_persistence": true,
+                    "significant": true
+                  }
+                }
+              },
+              "Ket": {
+                "label": "ketone_proxy_from_anion_gap",
+                "all_windows": {
+                  "rows": 4696,
+                  "stays": 929,
+                  "persistence_normalized_mae": 0.343633,
+                  "greybox_normalized_mae": 0.301154,
+                  "delta_vs_persistence": {
+                    "point_delta": -0.044574,
+                    "bootstrap_95_ci": [
+                      -0.060468,
+                      -0.028644
+                    ],
+                    "beats_persistence": true,
+                    "significant": true
+                  }
+                },
+                "active_dka_only": {
+                  "rows": 2357,
+                  "stays": 803,
+                  "persistence_normalized_mae": 0.481841,
+                  "greybox_normalized_mae": 0.371234,
+                  "delta_vs_persistence": {
+                    "point_delta": -0.13223,
+                    "bootstrap_95_ci": [
+                      -0.158126,
+                      -0.10778
+                    ],
+                    "beats_persistence": true,
+                    "significant": true
+                  }
+                }
+              },
+              "HCO3": {
+                "label": "bicarbonate",
+                "all_windows": {
+                  "rows": 4749,
+                  "stays": 929,
+                  "persistence_normalized_mae": 0.285723,
+                  "greybox_normalized_mae": 0.312985,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.026866,
+                    "bootstrap_95_ci": [
+                      0.013074,
+                      0.040546
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                },
+                "active_dka_only": {
+                  "rows": 2377,
+                  "stays": 804,
+                  "persistence_normalized_mae": 0.360711,
+                  "greybox_normalized_mae": 0.370908,
+                  "delta_vs_persistence": {
+                    "point_delta": -0.001443,
+                    "bootstrap_95_ci": [
+                      -0.022453,
+                      0.018359
+                    ],
+                    "beats_persistence": true,
+                    "significant": false
+                  }
+                }
+              },
+              "Ke": {
+                "label": "serum_potassium",
+                "all_windows": {
+                  "rows": 5094,
+                  "stays": 938,
+                  "persistence_normalized_mae": 0.34964,
+                  "greybox_normalized_mae": 0.375523,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.017291,
+                    "bootstrap_95_ci": [
+                      0.002904,
+                      0.031497
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                },
+                "active_dka_only": {
+                  "rows": 2486,
+                  "stays": 812,
+                  "persistence_normalized_mae": 0.400188,
+                  "greybox_normalized_mae": 0.405284,
+                  "delta_vs_persistence": {
+                    "point_delta": -0.00727,
+                    "bootstrap_95_ci": [
+                      -0.027395,
+                      0.011207
+                    ],
+                    "beats_persistence": true,
+                    "significant": false
+                  }
+                }
+              },
+              "Na": {
+                "label": "sodium",
+                "all_windows": {
+                  "rows": 4939,
+                  "stays": 935,
+                  "persistence_normalized_mae": 0.275096,
+                  "greybox_normalized_mae": 0.305679,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.029744,
+                    "bootstrap_95_ci": [
+                      0.021533,
+                      0.038988
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                },
+                "active_dka_only": {
+                  "rows": 2427,
+                  "stays": 810,
+                  "persistence_normalized_mae": 0.295756,
+                  "greybox_normalized_mae": 0.3178,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.00823,
+                    "bootstrap_95_ci": [
+                      -0.002934,
+                      0.02043
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                }
+              },
+              "Cr": {
+                "label": "creatinine",
+                "all_windows": {
+                  "rows": 4616,
+                  "stays": 926,
+                  "persistence_normalized_mae": 0.15698,
+                  "greybox_normalized_mae": 0.457961,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.319983,
+                    "bootstrap_95_ci": [
+                      0.276319,
+                      0.360389
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                },
+                "active_dka_only": {
+                  "rows": 2331,
+                  "stays": 802,
+                  "persistence_normalized_mae": 0.177174,
+                  "greybox_normalized_mae": 0.484904,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.325525,
+                    "bootstrap_95_ci": [
+                      0.277311,
+                      0.374758
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      {
+        "seed": 37,
+        "prediction_rows": 29044,
+        "active_prediction_rows": 14424,
+        "folds": 4,
+        "validation_loss_mean": 0.114559,
+        "methods": {
+          "mechanism": {
+            "all_residual_states": {
+              "all_windows": {
+                "rows": 29044,
+                "stays": 940,
+                "persistence_normalized_mae": 0.324698,
+                "mechanism_normalized_mae": 0.485686,
+                "delta_vs_persistence": {
+                  "point_delta": 0.158396,
+                  "bootstrap_95_ci": [
+                    0.145139,
+                    0.169803
+                  ],
+                  "beats_persistence": false,
+                  "significant": false
+                }
+              },
+              "active_dka_only": {
+                "rows": 14424,
+                "stays": 814,
+                "persistence_normalized_mae": 0.409267,
+                "mechanism_normalized_mae": 0.546883,
+                "delta_vs_persistence": {
+                  "point_delta": 0.122078,
+                  "bootstrap_95_ci": [
+                    0.105778,
+                    0.138026
+                  ],
+                  "beats_persistence": false,
+                  "significant": false
+                }
+              }
+            },
+            "per_state": {
+              "G": {
+                "label": "glucose",
+                "all_windows": {
+                  "rows": 4950,
+                  "stays": 933,
+                  "persistence_normalized_mae": 0.524352,
+                  "mechanism_normalized_mae": 0.575538,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.035596,
+                    "bootstrap_95_ci": [
+                      0.010925,
+                      0.05872
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                },
+                "active_dka_only": {
+                  "rows": 2446,
+                  "stays": 811,
+                  "persistence_normalized_mae": 0.729556,
+                  "mechanism_normalized_mae": 0.703283,
+                  "delta_vs_persistence": {
+                    "point_delta": -0.058837,
+                    "bootstrap_95_ci": [
+                      -0.094956,
+                      -0.024235
+                    ],
+                    "beats_persistence": true,
+                    "significant": true
+                  }
+                }
+              },
+              "Ket": {
+                "label": "ketone_proxy_from_anion_gap",
+                "all_windows": {
+                  "rows": 4696,
+                  "stays": 929,
+                  "persistence_normalized_mae": 0.343633,
+                  "mechanism_normalized_mae": 0.366906,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.018043,
+                    "bootstrap_95_ci": [
+                      0.001346,
+                      0.035532
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                },
+                "active_dka_only": {
+                  "rows": 2357,
+                  "stays": 803,
+                  "persistence_normalized_mae": 0.481841,
+                  "mechanism_normalized_mae": 0.456868,
+                  "delta_vs_persistence": {
+                    "point_delta": -0.050625,
+                    "bootstrap_95_ci": [
+                      -0.078636,
+                      -0.02486
+                    ],
+                    "beats_persistence": true,
+                    "significant": true
+                  }
+                }
+              },
+              "HCO3": {
+                "label": "bicarbonate",
+                "all_windows": {
+                  "rows": 4749,
+                  "stays": 929,
+                  "persistence_normalized_mae": 0.285723,
+                  "mechanism_normalized_mae": 0.379832,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.097005,
+                    "bootstrap_95_ci": [
+                      0.081999,
+                      0.113757
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                },
+                "active_dka_only": {
+                  "rows": 2377,
+                  "stays": 804,
+                  "persistence_normalized_mae": 0.360711,
+                  "mechanism_normalized_mae": 0.464089,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.091432,
+                    "bootstrap_95_ci": [
+                      0.068676,
+                      0.113413
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                }
+              },
+              "Ke": {
+                "label": "serum_potassium",
+                "all_windows": {
+                  "rows": 5094,
+                  "stays": 938,
+                  "persistence_normalized_mae": 0.34964,
+                  "mechanism_normalized_mae": 0.437994,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.07912,
+                    "bootstrap_95_ci": [
+                      0.061624,
+                      0.096335
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                },
+                "active_dka_only": {
+                  "rows": 2486,
+                  "stays": 812,
+                  "persistence_normalized_mae": 0.400188,
+                  "mechanism_normalized_mae": 0.472586,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.055985,
+                    "bootstrap_95_ci": [
+                      0.032829,
+                      0.078173
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                }
+              },
+              "Na": {
+                "label": "sodium",
+                "all_windows": {
+                  "rows": 4939,
+                  "stays": 935,
+                  "persistence_normalized_mae": 0.275096,
+                  "mechanism_normalized_mae": 0.595966,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.310429,
+                    "bootstrap_95_ci": [
+                      0.295738,
+                      0.324998
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                },
+                "active_dka_only": {
+                  "rows": 2427,
+                  "stays": 810,
+                  "persistence_normalized_mae": 0.295756,
+                  "mechanism_normalized_mae": 0.600973,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.280476,
+                    "bootstrap_95_ci": [
+                      0.260691,
+                      0.302748
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                }
+              },
+              "Cr": {
+                "label": "creatinine",
+                "all_windows": {
+                  "rows": 4616,
+                  "stays": 926,
+                  "persistence_normalized_mae": 0.15698,
+                  "mechanism_normalized_mae": 0.55371,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.418268,
+                    "bootstrap_95_ci": [
+                      0.37584,
+                      0.466521
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                },
+                "active_dka_only": {
+                  "rows": 2331,
+                  "stays": 802,
+                  "persistence_normalized_mae": 0.177174,
+                  "mechanism_normalized_mae": 0.581136,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.423309,
+                    "bootstrap_95_ci": [
+                      0.371938,
+                      0.481428
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                }
+              }
+            }
+          },
+          "greybox": {
+            "all_residual_states": {
+              "all_windows": {
+                "rows": 29044,
+                "stays": 940,
+                "persistence_normalized_mae": 0.324698,
+                "greybox_normalized_mae": 0.363194,
+                "delta_vs_persistence": {
+                  "point_delta": 0.038122,
+                  "bootstrap_95_ci": [
+                    0.026615,
+                    0.048947
+                  ],
+                  "beats_persistence": false,
+                  "significant": false
+                }
+              },
+              "active_dka_only": {
+                "rows": 14424,
+                "stays": 814,
+                "persistence_normalized_mae": 0.409267,
+                "greybox_normalized_mae": 0.411046,
+                "delta_vs_persistence": {
+                  "point_delta": -0.00881,
+                  "bootstrap_95_ci": [
+                    -0.024616,
+                    0.006334
+                  ],
+                  "beats_persistence": true,
+                  "significant": false
+                }
+              }
+            },
+            "per_state": {
+              "G": {
+                "label": "glucose",
+                "all_windows": {
+                  "rows": 4950,
+                  "stays": 933,
+                  "persistence_normalized_mae": 0.524352,
+                  "greybox_normalized_mae": 0.417918,
+                  "delta_vs_persistence": {
+                    "point_delta": -0.114543,
+                    "bootstrap_95_ci": [
+                      -0.13513,
+                      -0.09465
+                    ],
+                    "beats_persistence": true,
+                    "significant": true
+                  }
+                },
+                "active_dka_only": {
+                  "rows": 2446,
+                  "stays": 811,
+                  "persistence_normalized_mae": 0.729556,
+                  "greybox_normalized_mae": 0.509543,
+                  "delta_vs_persistence": {
+                    "point_delta": -0.237347,
+                    "bootstrap_95_ci": [
+                      -0.265266,
+                      -0.208537
+                    ],
+                    "beats_persistence": true,
+                    "significant": true
+                  }
+                }
+              },
+              "Ket": {
+                "label": "ketone_proxy_from_anion_gap",
+                "all_windows": {
+                  "rows": 4696,
+                  "stays": 929,
+                  "persistence_normalized_mae": 0.343633,
+                  "greybox_normalized_mae": 0.301772,
+                  "delta_vs_persistence": {
+                    "point_delta": -0.044633,
+                    "bootstrap_95_ci": [
+                      -0.060305,
+                      -0.028594
+                    ],
+                    "beats_persistence": true,
+                    "significant": true
+                  }
+                },
+                "active_dka_only": {
+                  "rows": 2357,
+                  "stays": 803,
+                  "persistence_normalized_mae": 0.481841,
+                  "greybox_normalized_mae": 0.371393,
+                  "delta_vs_persistence": {
+                    "point_delta": -0.133318,
+                    "bootstrap_95_ci": [
+                      -0.160087,
+                      -0.107924
+                    ],
+                    "beats_persistence": true,
+                    "significant": true
+                  }
+                }
+              },
+              "HCO3": {
+                "label": "bicarbonate",
+                "all_windows": {
+                  "rows": 4749,
+                  "stays": 929,
+                  "persistence_normalized_mae": 0.285723,
+                  "greybox_normalized_mae": 0.311218,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.024373,
+                    "bootstrap_95_ci": [
+                      0.01138,
+                      0.038448
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                },
+                "active_dka_only": {
+                  "rows": 2377,
+                  "stays": 804,
+                  "persistence_normalized_mae": 0.360711,
+                  "greybox_normalized_mae": 0.36889,
+                  "delta_vs_persistence": {
+                    "point_delta": -0.003843,
+                    "bootstrap_95_ci": [
+                      -0.025088,
+                      0.017405
+                    ],
+                    "beats_persistence": true,
+                    "significant": false
+                  }
+                }
+              },
+              "Ke": {
+                "label": "serum_potassium",
+                "all_windows": {
+                  "rows": 5094,
+                  "stays": 938,
+                  "persistence_normalized_mae": 0.34964,
+                  "greybox_normalized_mae": 0.374093,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.016021,
+                    "bootstrap_95_ci": [
+                      0.002169,
+                      0.030576
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                },
+                "active_dka_only": {
+                  "rows": 2486,
+                  "stays": 812,
+                  "persistence_normalized_mae": 0.400188,
+                  "greybox_normalized_mae": 0.403711,
+                  "delta_vs_persistence": {
+                    "point_delta": -0.008871,
+                    "bootstrap_95_ci": [
+                      -0.029822,
+                      0.010405
+                    ],
+                    "beats_persistence": true,
+                    "significant": false
+                  }
+                }
+              },
+              "Na": {
+                "label": "sodium",
+                "all_windows": {
+                  "rows": 4939,
+                  "stays": 935,
+                  "persistence_normalized_mae": 0.275096,
+                  "greybox_normalized_mae": 0.313089,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.03463,
+                    "bootstrap_95_ci": [
+                      0.025562,
+                      0.04396
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                },
+                "active_dka_only": {
+                  "rows": 2427,
+                  "stays": 810,
+                  "persistence_normalized_mae": 0.295756,
+                  "greybox_normalized_mae": 0.324132,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.013861,
+                    "bootstrap_95_ci": [
+                      0.000119,
+                      0.025936
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                }
+              },
+              "Cr": {
+                "label": "creatinine",
+                "all_windows": {
+                  "rows": 4616,
+                  "stays": 926,
+                  "persistence_normalized_mae": 0.15698,
+                  "greybox_normalized_mae": 0.462055,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.32386,
+                    "bootstrap_95_ci": [
+                      0.284436,
+                      0.365494
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                },
+                "active_dka_only": {
+                  "rows": 2331,
+                  "stays": 802,
+                  "persistence_normalized_mae": 0.177174,
+                  "greybox_normalized_mae": 0.48909,
+                  "delta_vs_persistence": {
+                    "point_delta": 0.32958,
+                    "bootstrap_95_ci": [
+                      0.280856,
+                      0.38537
+                    ],
+                    "beats_persistence": false,
+                    "significant": false
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "reference_baselines": {
+    "validated_per_target_ensemble": "mimiciv_full_v31_icd_per_target_ensemble.json is the factual advisory baseline. This grey-box audit uses only residual states, so scores are not target-identical to the ensemble report."
+  },
+  "safety_boundary": {
+    "factual_observed_treatment_only": true,
+    "causal_claim_allowed": false,
+    "counterfactual_claim_allowed": false,
+    "clinical_claim_allowed": false,
+    "checkpoint_promotion_allowed": false,
+    "candidate_artifact_written": false
+  },
+  "interpretation": [
+    "This tests whether a small residual learned from real DKA transitions adds useful factual signal over persistence.",
+    "A pass would justify a candidate-only downstream JEPA experiment, not causal or clinical promotion.",
+    "A fail keeps the validated per-target ensemble as the current factual advisory artifact."
+  ]
+}

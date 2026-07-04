@@ -16,6 +16,7 @@ from dka_osler import shield_route_aware
 from dka_action_contract import ACTION_INDEX, ACTION_KEYS, expand_action
 from dka_world_model import (
     A_DIM,
+    DKA_STATE_COMPILER,
     DT,
     S_MEAN,
     S_STD,
@@ -24,9 +25,16 @@ from dka_world_model import (
     HISTORY_HOURS,
     a2vec,
     load_checkpoint,
+    observation_context,
     s2vec,
 )
+from osler_jepa.belief import PotassiumStoreBelief
+from osler_jepa.actions import (
+    TREATMENT_EVENT_KEYS,
+    treatment_event_features,
+)
 from osler_jepa.validator import OSLER_DKA_VALIDATOR
+from osler_jepa.embodied_logic import OSLER_DKA_PROLOG
 from osler_jepa.ontology import OSLER_STATE_ONTOLOGY
 from osler_jepa.symbolic import DIRECTION_NAMES, RULE_IDS, STATUS_NAMES
 
@@ -51,65 +59,150 @@ def physical_state(normalized):
 
 
 @torch.no_grad()
-def predict(model, state, action, hours, device, apply_osler=False, history=None):
-    steps = max(1, int(round(hours / DT)))
+def predict(model, state, action, hours, device, apply_osler=False, history=None,
+            observation_age=None, time_deltas=None):
+    if time_deltas is None:
+        time_deltas = [DT] * max(1, int(round(hours / DT)))
+    else:
+        time_deltas = [float(value) for value in time_deltas]
+        if not time_deltas or any(value <= 0 for value in time_deltas):
+            raise ValueError("time_deltas must contain positive intervals")
+    steps = len(time_deltas)
     history_tensor = None if history is None else torch.as_tensor(
         history, dtype=torch.float32, device=device
     ).unsqueeze(0)
-    latent = model.encode_state(
-        torch.as_tensor(s2vec(state), dtype=torch.float32, device=device).unsqueeze(0),
-        history_tensor,
+    belief = PotassiumStoreBelief.from_state(state)
+    model_state = dict(state)
+    model_state.setdefault("K_store", belief.mean)
+    initial_vector, observed_mask, observed_age = observation_context(
+        state, observation_age
     )
-    current_state = dict(state)
-    predicted, death_probability, action_schedule, applied_actions = [], [], [], []
+    initial_vector = s2vec(model_state)
+    latent = model.encode_state(
+        torch.as_tensor(
+            initial_vector, dtype=torch.float32, device=device
+        ).unsqueeze(0),
+        history_tensor,
+        torch.as_tensor(
+            observed_mask, dtype=torch.float32, device=device
+        ).unsqueeze(0),
+        torch.as_tensor(
+            observed_age, dtype=torch.float32, device=device
+        ).unsqueeze(0),
+    )
+    current_state = physical_state(initial_vector)
+    current_state["K_store"] = round(belief.mean, 4)
+    predicted, death_probability, belief_history = [], [], []
+    state_uncertainty = []
+    action_schedule, applied_actions = [], []
     previous_action = None
+    elapsed_hours = 0.0
     for step in range(steps):
+        step_hours = time_deltas[step]
         step_action = list(action)
         trace = []
         if apply_osler:
             step_action, trace = shield_route_aware(current_state, step_action)
+            step_action, prolog_trace = OSLER_DKA_PROLOG.gate(
+                current_state, step_action
+            )
+            trace = [
+                {"type": "symbolic_policy", "explanation": item}
+                for item in trace
+            ] + prolog_trace
+        event_vector = treatment_event_features(
+            [step_action], initial_action=previous_action
+        )[0]
+        physical_step_action = expand_action(step_action)
         latent = model.predict_latent(
             latent,
             torch.as_tensor(
                 a2vec(step_action), dtype=torch.float32, device=device
             ).unsqueeze(0),
-            delta_hours=DT,
-            elapsed_hours=step * DT,
+            delta_hours=step_hours,
+            elapsed_hours=elapsed_hours,
+            treatment_events=torch.as_tensor(
+                event_vector, dtype=torch.float32, device=device
+            ).unsqueeze(0),
         )
         applied_actions.append(step_action)
         normalized = model.D(latent)[0].cpu().numpy()
         current_state = physical_state(normalized)
+        belief = belief.step(
+            step_action,
+            current_state,
+            step_hours,
+            model_estimate=current_state.get("K_store"),
+        )
+        current_state["K_store"] = round(belief.mean, 4)
         predicted.append(current_state)
+        if model.uncertainty_trained:
+            normalized_std = torch.exp(
+                0.5 * model.uncertainty_logits(latent).clamp(-6.0, 4.0)
+            )[0].cpu().numpy()
+            state_uncertainty.append({
+                name: round(float(value), 4)
+                for name, value in zip(STATE_KEYS, normalized_std * S_STD)
+            })
+        else:
+            state_uncertainty.append(None)
+        belief_history.append(belief.to_dict())
         death_probability.append(float(torch.sigmoid(model.R(latent))[0, 0]))
-        if trace or previous_action != step_action:
+        action_changed = previous_action is None or not np.allclose(
+            previous_action, physical_step_action
+        )
+        if trace or action_changed or event_vector.any():
             action_schedule.append({
-                "hours": round(step * DT, 2),
+                "hours": round(elapsed_hours, 2),
                 "action": {
                     key: round(float(value), 4)
                     for key, value in zip(ACTION_KEYS, expand_action(step_action))
                 },
+                "treatment_events": [
+                    name for name, active in zip(TREATMENT_EVENT_KEYS, event_vector)
+                    if active > 0
+                ],
                 "trace": trace,
             })
-        previous_action = step_action
+        previous_action = physical_step_action
+        elapsed_hours += step_hours
 
     sample_steps = sorted({0, min(5, steps - 1), steps - 1})
+    elapsed_at_step = np.cumsum(time_deltas)
     trajectory = [{
-        "hours": round((step + 1) * DT, 2),
+        "hours": round(float(elapsed_at_step[step]), 2),
         "state": predicted[step],
         "death_probability": round(death_probability[step], 6),
+        "belief_states": {
+            "total_body_potassium_store": belief_history[step],
+        },
+        "uncertainty": {
+            "status": (
+                "trained_research_only"
+                if model.uncertainty_trained
+                else "unavailable_for_legacy_or_uncalibrated_checkpoint"
+            ),
+            "one_standard_deviation": state_uncertainty[step],
+            "clinical_calibration": False,
+        },
     } for step in sample_steps]
     return trajectory, action_schedule, applied_actions
 
 
 def compare(model, state, proposed_action, hours, device, input_warnings=None,
-            history=None):
+            history=None, observation_age=None, time_deltas=None):
+    effective_hours = (
+        float(sum(time_deltas)) if time_deltas is not None else float(hours)
+    )
     intervention, action_schedule, applied_actions = predict(
         model, state, proposed_action, hours, device, apply_osler=True,
-        history=history,
+        history=history, observation_age=observation_age,
+        time_deltas=time_deltas,
     )
     untreated, _, _ = predict(
         model, state, np.zeros(A_DIM, dtype=np.float32), hours, device,
-        apply_osler=False, history=history,
+        apply_osler=False, history=history, observation_age=observation_age,
+        time_deltas=time_deltas,
     )
     treated_final = intervention[-1]["state"]
     untreated_final = untreated[-1]["state"]
@@ -117,26 +210,73 @@ def compare(model, state, proposed_action, hours, device, input_warnings=None,
         key: round(treated_final[key] - untreated_final[key], 4)
         for key in STATE_KEYS
     }
-    mean_action = np.mean([a2vec(action) for action in applied_actions], axis=0)
+    applied_durations = np.asarray(
+        time_deltas if time_deltas is not None else [DT] * len(applied_actions),
+        dtype=np.float32,
+    )
+    mean_physical_action = np.average(
+        np.asarray([expand_action(action) for action in applied_actions]),
+        axis=0,
+        weights=applied_durations,
+    )
+    mean_action = mean_physical_action / A_SCALE
+    lifecycle_summary = treatment_event_features(applied_actions).max(axis=0)
     osler_validation = OSLER_DKA_VALIDATOR.validate(
-        mean_action, treated_final, untreated_final
+        mean_action, treated_final, untreated_final,
+        horizon_hours=effective_hours,
+    )
+    prolog_reasoning = OSLER_DKA_PROLOG.evaluate(
+        state=state,
+        proposed_action=proposed_action,
+        applied_action=mean_physical_action,
+        future=treated_final,
+        baseline_future=untreated_final,
+        elapsed_hours=effective_hours,
     )
     history_tensor = None if history is None else torch.as_tensor(
         history, dtype=torch.float32, device=device
     ).unsqueeze(0)
+    initial_belief = PotassiumStoreBelief.from_state(state)
+    symbolic_state = dict(state)
+    symbolic_state.setdefault("K_store", initial_belief.mean)
+    symbolic_vector, symbolic_mask, symbolic_age = observation_context(
+        state, observation_age
+    )
+    symbolic_vector = s2vec(symbolic_state)
+    compiled_state = DKA_STATE_COMPILER.compile_mapping(
+        symbolic_state,
+        observed=[
+            name for name, is_observed in zip(STATE_KEYS, symbolic_mask)
+            if is_observed
+        ],
+    )
     with torch.no_grad():
         context_latent = model.encode_state(
             torch.as_tensor(
-                s2vec(state), dtype=torch.float32, device=device
+                symbolic_vector, dtype=torch.float32, device=device
             ).unsqueeze(0),
             history_tensor,
+            torch.as_tensor(
+                symbolic_mask, dtype=torch.float32, device=device
+            ).unsqueeze(0),
+            torch.as_tensor(
+                symbolic_age, dtype=torch.float32, device=device
+            ).unsqueeze(0),
         )
         symbolic = model.symbolic_outputs(
             context_latent,
             torch.as_tensor(
                 mean_action, dtype=torch.float32, device=device
             ).unsqueeze(0),
-            delta_hours=hours,
+            delta_hours=effective_hours,
+            treatment_events=torch.as_tensor(
+                lifecycle_summary, dtype=torch.float32, device=device
+            ).unsqueeze(0),
+            compiled_context=torch.as_tensor(
+                compiled_state.feature_vector,
+                dtype=torch.float32,
+                device=device,
+            ).unsqueeze(0),
         )
     direction_probability = symbolic["direction_logits"].softmax(dim=-1)[0]
     proposal_probability = symbolic["proposal_logits"].softmax(dim=-1)[0]
@@ -169,7 +309,7 @@ def compare(model, state, proposed_action, hours, device, input_warnings=None,
             "intervention_effect_confidence": round(
                 float(proposal_probability[index, proposal_index]), 4
             ),
-            "time_window_hours": hours,
+            "time_window_hours": effective_hours,
         })
     return {
         "research_only": True,
@@ -182,12 +322,32 @@ def compare(model, state, proposed_action, hours, device, input_warnings=None,
         "prior_treatment_history_features": (
             history.tolist() if isinstance(history, np.ndarray) else history
         ),
+        "observation_contract": {
+            "observed_mask": dict(zip(STATE_KEYS, symbolic_mask.astype(int).tolist())),
+            "age_hours": dict(zip(STATE_KEYS, symbolic_age.tolist())),
+            "potassium_store_prior": initial_belief.to_dict(),
+            "compiled_state": {
+                "facts": list(compiled_state.facts),
+                "numeric_reference_residuals": {
+                    name: round(float(value), 6)
+                    for name, value in zip(
+                        STATE_KEYS, compiled_state.residual_vector
+                    )
+                },
+                "rule_authority": "human_owned_active_prolog",
+            },
+        },
         "osler_dynamic_action_schedule": action_schedule,
+        "effective_action_summary": {
+            key: round(float(value), 6)
+            for key, value in zip(ACTION_KEYS, mean_physical_action)
+        },
         "predicted_intervention_trajectory": intervention,
         "predicted_no_treatment_trajectory": untreated,
         "predicted_effect_at_final_horizon": effect,
         "jepa_symbolic_transition": symbolic_transition,
         "osler_transition_validation": osler_validation,
+        "osler_prolog_reasoning": prolog_reasoning,
     }
 
 

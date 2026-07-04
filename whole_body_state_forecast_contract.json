@@ -1,0 +1,364 @@
+{
+  "artifact": "Osler-JEPA whole_body_state_forecast contract",
+  "date": "2026-07-02",
+  "goal": "Unify validated current-state nowcasting, future factual forecasting, and calibrated uncertainty into one fail-closed whole-body observation object.",
+  "object_name": "whole_body_state_forecast",
+  "runtime_values_included": false,
+  "axes": {
+    "current_state_nowcast": {
+      "horizon_hours": [0],
+      "validated_module_target_cells": 71,
+      "source_artifacts": [
+        "EICU_FULL_VARIABLE_COVERAGE_FINDINGS.md",
+        "eicu_full_variable_coverage_audit.json",
+        "MIMICIV_CROSS_DATABASE_COVERAGE_FINDINGS.md",
+        "mimiciv_cross_database_coverage_audit.json",
+        "WHOLE_BODY_NOWCASTING_FINDINGS.md",
+        "whole_body_nowcasting_audit.json"
+      ],
+      "policy": {
+        "observed_values_preferred": true,
+        "nowcast_only_when_target_missing": true,
+        "validated_module_target_required": true,
+        "future_claim_from_nowcast_allowed": false
+      }
+    },
+    "future_trajectory_forecast": {
+      "horizons_hours": [1, 3, 6, 12, 24, 48],
+      "validated_full_variable_6h_forecast_cells": 59,
+      "validated_all_module_intermediate_move_cells": 79,
+      "validated_core_fast_and_slow_cells_in_template": "core 6h fast physiology plus 24-48h renal accumulation",
+      "source_artifacts": [
+        "EICU_FULL_VARIABLE_COVERAGE_FINDINGS.md",
+        "eicu_full_variable_coverage_audit.json",
+        "MIMICIV_CROSS_DATABASE_COVERAGE_FINDINGS.md",
+        "mimiciv_cross_database_coverage_audit.json",
+        "WHOLE_BODY_TRAJECTORY_UNCERTAINTY_LAYER.md",
+        "whole_body_rollout_uncertainty_contract.json",
+        "whole_body_all_modules_intermediate_horizon_move_audit.json"
+      ],
+      "policy": {
+        "move_rule": "only validated future cells may move away from persistence",
+        "fallback_rule": "unsupported target-horizon pairs stay at persistence or missing",
+        "no_recursive_unvalidated_rollout": true
+      }
+    },
+    "uncertainty_interval": {
+      "method": "split_conformal_residual_interval_per_target_horizon_source",
+      "primary_coverage_target": 0.9,
+      "accepted_90pct_coverage_range": [0.87, 0.93],
+      "validated_cells": {
+        "full_variable_6h": "51",
+        "active_window": "135/378",
+        "all_windows": "151/378",
+        "mimiciv_external_target_level_6h": "14"
+      },
+      "source_artifacts": [
+        "EICU_FULL_VARIABLE_COVERAGE_FINDINGS.md",
+        "eicu_full_variable_coverage_audit.json",
+        "MIMICIV_CROSS_DATABASE_COVERAGE_FINDINGS.md",
+        "mimiciv_cross_database_coverage_audit.json",
+        "whole_body_all_modules_conformal_coverage_audit.json",
+        "whole_body_conformal_coverage_audit.json"
+      ],
+      "policy": {
+        "numeric_interval_requires_calibration_gate": true,
+        "missing_calibration_status": "needs_calibration_audit",
+        "lower_upper_empty_until_calibrated": true
+      }
+    },
+    "external_database_validation": {
+      "database": "MIMIC-IV v3.1",
+      "scope": "target-level all-ICU observation validation",
+      "subjects": 63307,
+      "transition_rows": 640164,
+      "eligible_numeric_targets": 55,
+      "validated_nowcast_targets": 23,
+      "validated_6h_forecast_targets": 18,
+      "validated_6h_interval_targets": 14,
+      "holdout_gates": [
+        "7 random patient splits",
+        "first-careunit heldout",
+        "chronological heldout"
+      ],
+      "source_artifacts": [
+        "MIMICIV_CROSS_DATABASE_COVERAGE_FINDINGS.md",
+        "mimiciv_observation_transition_report.json",
+        "mimiciv_cross_database_coverage_audit.json"
+      ],
+      "policy": {
+        "external_validity_evidence": true,
+        "new_module_runtime_authority": false,
+        "causal_claim_allowed": false
+      }
+    },
+    "ed_scene_validation": {
+      "database": "MIMIC-IV-ED v2.2",
+      "scope": "pre-ICU ED-scene table-based observation validation",
+      "horizons_hours": [
+        1,
+        3,
+        6
+      ],
+      "subjects_by_horizon": {
+        "1h": 107445,
+        "3h": 137831,
+        "6h": 93811
+      },
+      "validated_nowcast_targets": {
+        "1h_cohort": [
+          "dbp",
+          "map",
+          "sbp"
+        ],
+        "3h_cohort": [
+          "acuity",
+          "dbp",
+          "map",
+          "pain",
+          "sbp"
+        ],
+        "6h_cohort": [
+          "acuity",
+          "dbp",
+          "map",
+          "sbp"
+        ]
+      },
+      "validated_forecast_targets": {
+        "1h": [
+          "map",
+          "sbp"
+        ],
+        "3h": [
+          "dbp",
+          "map",
+          "respiratory_rate",
+          "sbp",
+          "temperature"
+        ],
+        "6h": [
+          "dbp",
+          "heart_rate",
+          "map",
+          "respiratory_rate",
+          "sbp",
+          "temperature"
+        ]
+      },
+      "validated_interval_targets": {
+        "1h": [
+          "map",
+          "sbp"
+        ],
+        "3h": [
+          "dbp",
+          "map",
+          "respiratory_rate",
+          "sbp",
+          "temperature"
+        ],
+        "6h": [
+          "dbp",
+          "heart_rate",
+          "map",
+          "respiratory_rate",
+          "sbp",
+          "temperature"
+        ]
+      },
+      "holdout_gates": [
+        "7 random patient splits",
+        "arrival-transport heldout",
+        "chronological heldout"
+      ],
+      "source_artifacts": [
+        "MIMICIV_ED_OBSERVATION_FINDINGS.md",
+        "mimiciv_ed_observation_transition_report_1h.json",
+        "mimiciv_ed_observation_transition_report_3h.json",
+        "mimiciv_ed_observation_transition_report_6h.json",
+        "mimiciv_ed_observation_coverage_audit_1h.json",
+        "mimiciv_ed_observation_coverage_audit_3h.json",
+        "mimiciv_ed_observation_coverage_audit_6h.json"
+      ],
+      "policy": {
+        "scene_extension_evidence": true,
+        "new_runtime_authority": false,
+        "causal_claim_allowed": false,
+        "counterfactual_treatment_effect_allowed": false,
+        "clinical_claim_allowed": false
+      }
+    },
+    "ed_to_early_icu_baseline": {
+      "status": "candidate_only",
+      "database_pair": "MIMIC-IV-ED v2.2 to MIMIC-IV v3.1 ICU",
+      "scope": "prior ED trajectory as early-ICU baseline",
+      "horizons_hours": [
+        1,
+        3,
+        6
+      ],
+      "subjects_by_horizon": {
+        "1h": 18285,
+        "3h": 18463,
+        "6h": 18574
+      },
+      "targets_evaluated": [
+        "heart_rate",
+        "map",
+        "o2sat",
+        "respiratory_rate",
+        "temperature"
+      ],
+      "validated_ed_increment_targets": {
+        "1h": [],
+        "3h": [],
+        "6h": []
+      },
+      "near_miss_targets": {
+        "3h": [
+          "heart_rate",
+          "map"
+        ],
+        "6h": [
+          "heart_rate",
+          "map"
+        ]
+      },
+      "gate": {
+        "candidate": "ICU current state + prior ED trajectory ridge",
+        "must_beat": [
+          "persistence",
+          "ICU-only ridge",
+          "capacity-matched ED-feature placebo ridge"
+        ],
+        "holdouts": [
+          "7 random patient splits",
+          "first-careunit heldout",
+          "chronological heldout"
+        ]
+      },
+      "source_artifacts": [
+        "MIMICIV_ED_TO_ICU_BASELINE_FINDINGS.md",
+        "mimiciv_ed_to_icu_baseline_transition_report_1h.json",
+        "mimiciv_ed_to_icu_baseline_transition_report_3h.json",
+        "mimiciv_ed_to_icu_baseline_transition_report_6h.json",
+        "mimiciv_ed_to_icu_baseline_audit_1h.json",
+        "mimiciv_ed_to_icu_baseline_audit_3h.json",
+        "mimiciv_ed_to_icu_baseline_audit_6h.json"
+      ],
+      "policy": {
+        "runtime_forecast_allowed": false,
+        "uncertainty_interval_allowed": false,
+        "causal_claim_allowed": false,
+        "counterfactual_treatment_effect_allowed": false,
+        "clinical_claim_allowed": false
+      }
+    },
+    "note_backed_measurement_depth": {
+      "status": "candidate_only",
+      "modules": {
+        "mimiciv_radiology": {
+          "database": "MIMIC-IV Note v2.2 radiology reports",
+          "reports_or_events_parsed": 317371,
+          "targets": [
+            "rad_pulmonary_edema",
+            "rad_pleural_effusion",
+            "rad_consolidation",
+            "rad_atelectasis",
+            "rad_pneumothorax",
+            "rad_cardiomegaly"
+          ],
+          "validated_nowcast_targets": 0,
+          "validated_6h_forecast_targets": 0,
+          "validated_6h_interval_targets": 0
+        },
+        "eicu_neuro_notes": {
+          "database": "eICU nurseCharting, nurseAssessment, physicalExam",
+          "reports_or_events_parsed": 108418,
+          "targets": [
+            "neuro_gcs",
+            "neuro_sedation_score",
+            "neuro_delirium_present",
+            "neuro_mental_abnormal",
+            "neuro_pupils_abnormal",
+            "neuro_motor_abnormal"
+          ],
+          "validated_nowcast_targets": 0,
+          "validated_6h_forecast_targets": 0,
+          "validated_6h_interval_targets": 0
+        },
+        "eicu_neuro_notes_all_icu": {
+          "database": "eICU all-ICU nurseCharting and physicalExam",
+          "reports_or_events_parsed": 3749014,
+          "subjects": 100862,
+          "targets": [
+            "neuro_gcs",
+            "neuro_delirium_present"
+          ],
+          "validated_nowcast_targets": 0,
+          "validated_6h_forecast_targets": 0,
+          "validated_6h_interval_targets": 0
+        }
+      },
+      "scope": "timestamp-valid structured text observation",
+      "source_artifacts": [
+        "MIMICIV_RADIOLOGY_NOTE_OBSERVATION_FINDINGS.md",
+        "mimiciv_radiology_note_observation_report.json",
+        "mimiciv_radiology_note_coverage_audit.json",
+        "EICU_NEURO_NOTE_OBSERVATION_FINDINGS.md",
+        "eicu_neuro_note_observation_report.json",
+        "eicu_neuro_note_coverage_audit.json",
+        "EICU_NEURO_NOTE_ALL_ICU_FINDINGS.md",
+        "eicu_neuro_note_all_icu_observation_report.json",
+        "eicu_neuro_note_all_icu_coverage_audit.json"
+      ],
+      "policy": {
+        "timestamp_valid_observed_note_findings_allowed": true,
+        "same_time_imputation_allowed": false,
+        "future_forecast_allowed": false,
+        "uncertainty_interval_allowed": false,
+        "causal_claim_allowed": false
+      }
+    }
+  },
+  "cell_schema": {
+    "target": "physiology variable name",
+    "module": "validated module or context",
+    "horizon_hours": "0 for current nowcast, otherwise forecast horizon",
+    "time_axis": "current or future",
+    "status": "observed, validated_nowcast_available, validated, fallback, candidate_only, unsupported, or missing",
+    "source": "observed, same_time_nowcast_ridge, validated router, belief state, multihop path, persistence, or missing",
+    "point_estimate": "runtime numeric value or null in aggregate templates",
+    "lower": "runtime numeric lower interval bound or null",
+    "upper": "runtime numeric upper interval bound or null",
+    "interval_level": "coverage level or null",
+    "interval_status": "not_a_future_interval, calibrated, or needs_calibration_audit",
+    "can_estimate": "true only for directly observed, validated nowcast, or validated forecast cells",
+    "can_move": "true only for validated future forecast cells"
+  },
+  "allowed_uses": [
+    "shadow observation",
+    "validated same-time state completion",
+    "validated factual physiology prediction",
+    "validated uncertainty display",
+    "timestamp-valid structured note observation",
+    "capability reporting"
+  ],
+  "safety_boundary": {
+    "row_level_outputs_committed": false,
+    "patient_identifiers_included": false,
+    "causal_claim_allowed": false,
+    "counterfactual_treatment_effect_allowed": false,
+    "clinical_claim_allowed": false,
+    "runtime_treatment_authority": false,
+    "checkpoint_promotion_allowed": false,
+    "active_rule_promotion_allowed": false,
+    "complete_human_simulation_claim_allowed": false
+  },
+  "implementation_files": [
+    "osler_jepa/observation_layer.py",
+    "WHOLE_BODY_STATE_FORECAST_OBJECT.md",
+    "test_observation_layer.py"
+  ]
+}

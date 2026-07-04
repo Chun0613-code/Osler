@@ -58,6 +58,11 @@ The current DKA implementation now contains:
 8. `mimic_action_history.py`: a shared dose/unit normalizer that combines ICU
    `inputevents` with hospital `emar`/`emar_detail`, separates dextrose grams from
    carrier-fluid volume, and builds future and prior-treatment action grids.
+9. A partial-observation encoder supplies per-state masks and measurement ages.
+   Its zero initialization preserves old checkpoints for complete observations.
+10. Rollouts and counterfactual action exposure support irregular event intervals.
+11. `osler_jepa/belief.py` implements a transparent predict-update belief for the
+    latent total-body potassium reserve and reports posterior uncertainty.
 
 The current June 2026 v4 checkpoint was trained on 1,000 simulated patient
 profiles, each cloned into 11 intervention branches for 55 epochs. It predicts 15
@@ -124,11 +129,19 @@ still produces 12/12 simulated deaths. The structural gap is smaller, not closed
 
 ### Phase 1: Complete the DKA Contract
 
-- Add observation masks and calibrated uncertainty to the 15-state contract.
-- Replace grid-implied action continuity with explicit start/stop event encoding.
-- Replace the anchor-only K-store prior with a learned predict-update belief filter.
-- Calibrate potassium depletion and cumulative hyperosmolar injury on a larger
-  patient-held-out cohort.
+- Implemented: observation masks and measurement ages in the 15-state contract.
+- Implemented: irregular action intervals plus explicit EHR start/stop lifecycle
+  events in extraction, training, rollout, and research inference.
+- Implemented: K-store predict-update belief with uncertainty. It is currently
+  mechanistic plus JEPA-updated; patient-cohort calibration remains outstanding.
+- Implemented: differentiable direction constraints compile from active Prolog
+  `expected/4` and `training_constraint/3` declarations.
+- Implemented: temporal windows and confidence compile from active Prolog
+  `temporal_constraint/4` declarations.
+- Implemented: reversible severity-duration burdens replace instant terminal
+  events, and protocol mortality/response audits run with every training job.
+- Outstanding: calibrate potassium depletion, acute burdens, and cumulative
+  hyperosmolar injury on a larger patient-held-out cohort.
 - Obtain a larger MIMIC cohort; the 12-stay demo cannot identify causal treatment
   effects or support JEPA fine-tuning.
 
@@ -138,13 +151,38 @@ Build separate state adapters, simulators/data loaders, and validator rule packs
 for sepsis, asthma, and acute kidney injury. Keep the shared ontology and action
 schema; do not mix diseases into one unvalidated latent space at the start.
 
+Implemented next-chapter contract: `osler_jepa/disease_router.py` defines the
+reusable per-disease, per-target router gate. `next_chapter_ab_contract.json`
+instantiates starter templates for sepsis, acute kidney injury, and asthma
+exacerbation. Each disease must begin with its own cohort definition, target
+contract, action channels, discovery-only source selection, and held-out
+evaluation before any shared latent space is attempted.
+
 ### Phase 3: Learn From Real EHR Trajectories
 
 - Preserve actual dose, route, formulation, start, stop, and administration timing.
 - Model missingness and irregular observation intervals explicitly.
 - Correct treatment-selection bias with propensity or doubly robust estimation.
 - Evaluate against matched controls and patient/hospital-held-out baselines.
+- Implemented as a research audit: patient-stay cross-fitted AIPW, propensity
+  matching, overlap, balance, and clustered bootstrap uncertainty. Current demo
+  data fail time alignment and balance requirements, so causal claims stay off.
+- Implemented: fail-closed live Osler shadow mode. It observes only completed
+  symbolic-approved DKA candidates, verifies recommendation fingerprints before
+  and after JEPA inference, and has no ranking, dosing, or veto authority.
+- Implemented: shadow outcome reconciliation against persistence. It requires
+  action/horizon alignment, scores only measured future states, and quarantines
+  every record for human review before any offline training use.
+- Implemented: checkpoint-specific, patient-grouped shadow cohort audits with
+  local HMAC pseudonyms, subject-cluster bootstrap intervals, state coverage, and
+  minimum-sample promotion gates. Passing remains retrospective evidence only.
 - Keep simulator and EHR provenance separate in training and reports.
+
+Implemented next-chapter causal boundary: `osler_jepa/causal_readiness.py`
+defines the external-evidence gate for randomized, instrumental-variable, or
+front-door data. Current observational EHR remains valid for factual forecasting
+and confounding diagnostics, but causal what-if planning stays closed until an
+external identification dataset passes that gate.
 
 ### Phase 4: Connect to the Live Symbolic Engine
 
@@ -152,3 +190,20 @@ The live drug ranker may call a promoted JEPA only to simulate and compare candi
 actions already allowed by Osler. JEPA cannot introduce a drug, bypass a safety
 veto, or supply an unvalidated dose. Osler remains the final explanation and veto
 layer.
+
+Active Prolog effect rules now include temporal windows and confidence metadata.
+Runtime checks defer conclusions outside the declared window. Full probabilistic
+inference over uncertain patient facts remains future work.
+
+## Research Method Integration
+
+The current research reading list has been narrowed to methods that attach
+directly to existing Osler-JEPA modules. The build order now prioritizes methods
+that touch the real bottleneck first: Liquid Time-Constant Networks for
+irregular continuous-time dynamics, generalized predict-update belief filters
+for hidden-state inference, and Active Inference as the planning frame. ILP/FOIL,
+Logical Neural Networks, NDRE, and DreamCoder-style library growth remain
+important rule-discovery infrastructure, but they run in parallel with
+credentialed data access and do not replace the need for dose/time-resolved real
+cohorts. See `RESEARCH_INTEGRATION_ROADMAP.md` for the exact module mapping,
+build order, and safety boundaries.

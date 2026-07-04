@@ -1,0 +1,2214 @@
+{
+  "experiment": "eICU focused body-system deep coupling audit",
+  "focused_specs": [
+    {
+      "candidate": "focused_deep_coupling_features",
+      "cohort": "eicu_hepatic_failure_transitions_6h.parquet",
+      "future_suffix": "tp6",
+      "hospital_holdout": {
+        "discovery_groups": 59,
+        "focused_coupling_feature_count": 25,
+        "group_column": "hospitalid",
+        "heldout_groups": 29,
+        "overlap": 0,
+        "seed": 2029,
+        "targets": {
+          "bun": {
+            "active_only": {
+              "active_only": true,
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.036495,
+                  0.004524
+                ],
+                "point_delta": -0.01886,
+                "significant": false,
+                "subjects": 124
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.04181,
+                  0.000619
+                ],
+                "point_delta": -0.022712,
+                "significant": false,
+                "subjects": 124
+              },
+              "feature_counts": {
+                "baseline": 56,
+                "candidate": 81,
+                "focused_coupling": 25,
+                "placebo": 25
+              },
+              "focused_coupling_features": [
+                "fbc_hepatic_burden_mean",
+                "fbc_hepatic_burden_sd",
+                "fbc_hepatic_burden_observation",
+                "fbc_hepatic_burden_innovation",
+                "fbc_hepatic_burden_delta_since_prior",
+                "fbc_hepatic_burden_observation_confidence",
+                "fbc_hepato_renal_pressure_mean",
+                "fbc_hepato_renal_pressure_sd",
+                "fbc_hepato_renal_pressure_observation",
+                "fbc_hepato_renal_pressure_innovation",
+                "fbc_hepato_renal_pressure_delta_since_prior",
+                "fbc_hepato_renal_pressure_observation_confidence",
+                "fbc_hepato_renal_acid_perfusion_stress_mean",
+                "fbc_hepato_renal_acid_perfusion_stress_sd",
+                "fbc_hepato_renal_acid_perfusion_stress_observation",
+                "fbc_hepato_renal_acid_perfusion_stress_innovation",
+                "fbc_hepato_renal_acid_perfusion_stress_delta_since_prior",
+                "fbc_hepato_renal_acid_perfusion_stress_observation_confidence",
+                "fbc_hepatic_x_creatinine",
+                "fbc_hepatic_x_bun",
+                "fbc_hepatic_x_low_map",
+                "fbc_hepatic_x_hyponatremia",
+                "fbc_renal_pressure_x_lactate",
+                "fbc_acid_stress_x_hepatic",
+                "fbc_hepato_renal_treatment_context"
+              ],
+              "mae": {
+                "baseline_ridge": 0.271477,
+                "focused_coupled_ridge": 0.242245,
+                "placebo_ridge": 0.278101
+              },
+              "rows": 378,
+              "subjects": 124
+            },
+            "all_windows": {
+              "active_only": false,
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.032381,
+                  0.006068
+                ],
+                "point_delta": -0.014211,
+                "significant": false,
+                "subjects": 137
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.038261,
+                  -0.000991
+                ],
+                "point_delta": -0.020391,
+                "significant": true,
+                "subjects": 137
+              },
+              "feature_counts": {
+                "baseline": 56,
+                "candidate": 81,
+                "focused_coupling": 25,
+                "placebo": 25
+              },
+              "focused_coupling_features": [
+                "fbc_hepatic_burden_mean",
+                "fbc_hepatic_burden_sd",
+                "fbc_hepatic_burden_observation",
+                "fbc_hepatic_burden_innovation",
+                "fbc_hepatic_burden_delta_since_prior",
+                "fbc_hepatic_burden_observation_confidence",
+                "fbc_hepato_renal_pressure_mean",
+                "fbc_hepato_renal_pressure_sd",
+                "fbc_hepato_renal_pressure_observation",
+                "fbc_hepato_renal_pressure_innovation",
+                "fbc_hepato_renal_pressure_delta_since_prior",
+                "fbc_hepato_renal_pressure_observation_confidence",
+                "fbc_hepato_renal_acid_perfusion_stress_mean",
+                "fbc_hepato_renal_acid_perfusion_stress_sd",
+                "fbc_hepato_renal_acid_perfusion_stress_observation",
+                "fbc_hepato_renal_acid_perfusion_stress_innovation",
+                "fbc_hepato_renal_acid_perfusion_stress_delta_since_prior",
+                "fbc_hepato_renal_acid_perfusion_stress_observation_confidence",
+                "fbc_hepatic_x_creatinine",
+                "fbc_hepatic_x_bun",
+                "fbc_hepatic_x_low_map",
+                "fbc_hepatic_x_hyponatremia",
+                "fbc_renal_pressure_x_lactate",
+                "fbc_acid_stress_x_hepatic",
+                "fbc_hepato_renal_treatment_context"
+              ],
+              "mae": {
+                "baseline_ridge": 0.251362,
+                "focused_coupled_ridge": 0.228034,
+                "placebo_ridge": 0.258813
+              },
+              "rows": 431,
+              "subjects": 137
+            }
+          },
+          "creatinine": {
+            "active_only": {
+              "active_only": true,
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.074408,
+                  -0.020068
+                ],
+                "point_delta": -0.048261,
+                "significant": true,
+                "subjects": 126
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.088439,
+                  -0.031763
+                ],
+                "point_delta": -0.059165,
+                "significant": true,
+                "subjects": 126
+              },
+              "feature_counts": {
+                "baseline": 56,
+                "candidate": 81,
+                "focused_coupling": 25,
+                "placebo": 25
+              },
+              "focused_coupling_features": [
+                "fbc_hepatic_burden_mean",
+                "fbc_hepatic_burden_sd",
+                "fbc_hepatic_burden_observation",
+                "fbc_hepatic_burden_innovation",
+                "fbc_hepatic_burden_delta_since_prior",
+                "fbc_hepatic_burden_observation_confidence",
+                "fbc_hepato_renal_pressure_mean",
+                "fbc_hepato_renal_pressure_sd",
+                "fbc_hepato_renal_pressure_observation",
+                "fbc_hepato_renal_pressure_innovation",
+                "fbc_hepato_renal_pressure_delta_since_prior",
+                "fbc_hepato_renal_pressure_observation_confidence",
+                "fbc_hepato_renal_acid_perfusion_stress_mean",
+                "fbc_hepato_renal_acid_perfusion_stress_sd",
+                "fbc_hepato_renal_acid_perfusion_stress_observation",
+                "fbc_hepato_renal_acid_perfusion_stress_innovation",
+                "fbc_hepato_renal_acid_perfusion_stress_delta_since_prior",
+                "fbc_hepato_renal_acid_perfusion_stress_observation_confidence",
+                "fbc_hepatic_x_creatinine",
+                "fbc_hepatic_x_bun",
+                "fbc_hepatic_x_low_map",
+                "fbc_hepatic_x_hyponatremia",
+                "fbc_renal_pressure_x_lactate",
+                "fbc_acid_stress_x_hepatic",
+                "fbc_hepato_renal_treatment_context"
+              ],
+              "mae": {
+                "baseline_ridge": 0.308728,
+                "focused_coupled_ridge": 0.246612,
+                "placebo_ridge": 0.316358
+              },
+              "rows": 380,
+              "subjects": 126
+            },
+            "all_windows": {
+              "active_only": false,
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.070376,
+                  -0.017917
+                ],
+                "point_delta": -0.044429,
+                "significant": true,
+                "subjects": 139
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.085615,
+                  -0.030467
+                ],
+                "point_delta": -0.056698,
+                "significant": true,
+                "subjects": 139
+              },
+              "feature_counts": {
+                "baseline": 56,
+                "candidate": 81,
+                "focused_coupling": 25,
+                "placebo": 25
+              },
+              "focused_coupling_features": [
+                "fbc_hepatic_burden_mean",
+                "fbc_hepatic_burden_sd",
+                "fbc_hepatic_burden_observation",
+                "fbc_hepatic_burden_innovation",
+                "fbc_hepatic_burden_delta_since_prior",
+                "fbc_hepatic_burden_observation_confidence",
+                "fbc_hepato_renal_pressure_mean",
+                "fbc_hepato_renal_pressure_sd",
+                "fbc_hepato_renal_pressure_observation",
+                "fbc_hepato_renal_pressure_innovation",
+                "fbc_hepato_renal_pressure_delta_since_prior",
+                "fbc_hepato_renal_pressure_observation_confidence",
+                "fbc_hepato_renal_acid_perfusion_stress_mean",
+                "fbc_hepato_renal_acid_perfusion_stress_sd",
+                "fbc_hepato_renal_acid_perfusion_stress_observation",
+                "fbc_hepato_renal_acid_perfusion_stress_innovation",
+                "fbc_hepato_renal_acid_perfusion_stress_delta_since_prior",
+                "fbc_hepato_renal_acid_perfusion_stress_observation_confidence",
+                "fbc_hepatic_x_creatinine",
+                "fbc_hepatic_x_bun",
+                "fbc_hepatic_x_low_map",
+                "fbc_hepatic_x_hyponatremia",
+                "fbc_renal_pressure_x_lactate",
+                "fbc_acid_stress_x_hepatic",
+                "fbc_hepato_renal_treatment_context"
+              ],
+              "mae": {
+                "baseline_ridge": 0.283967,
+                "focused_coupled_ridge": 0.231789,
+                "placebo_ridge": 0.293737
+              },
+              "rows": 434,
+              "subjects": 139
+            }
+          }
+        }
+      },
+      "hospitals": 88,
+      "name": "hepato_renal_6h",
+      "random_patient_splits": {
+        "runs": [
+          {
+            "discovery_groups": 734,
+            "focused_coupling_feature_count": 25,
+            "group_column": "subject_id",
+            "heldout_groups": 362,
+            "overlap": 0,
+            "seed": 7,
+            "targets": {
+              "bun": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.0461,
+                      -0.01123
+                    ],
+                    "point_delta": -0.028796,
+                    "significant": true,
+                    "subjects": 153
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.05236,
+                      -0.013205
+                    ],
+                    "point_delta": -0.033032,
+                    "significant": true,
+                    "subjects": 153
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 81,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_hepatic_burden_mean",
+                    "fbc_hepatic_burden_sd",
+                    "fbc_hepatic_burden_observation",
+                    "fbc_hepatic_burden_innovation",
+                    "fbc_hepatic_burden_delta_since_prior",
+                    "fbc_hepatic_burden_observation_confidence",
+                    "fbc_hepato_renal_pressure_mean",
+                    "fbc_hepato_renal_pressure_sd",
+                    "fbc_hepato_renal_pressure_observation",
+                    "fbc_hepato_renal_pressure_innovation",
+                    "fbc_hepato_renal_pressure_delta_since_prior",
+                    "fbc_hepato_renal_pressure_observation_confidence",
+                    "fbc_hepato_renal_acid_perfusion_stress_mean",
+                    "fbc_hepato_renal_acid_perfusion_stress_sd",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation",
+                    "fbc_hepato_renal_acid_perfusion_stress_innovation",
+                    "fbc_hepato_renal_acid_perfusion_stress_delta_since_prior",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation_confidence",
+                    "fbc_hepatic_x_creatinine",
+                    "fbc_hepatic_x_bun",
+                    "fbc_hepatic_x_low_map",
+                    "fbc_hepatic_x_hyponatremia",
+                    "fbc_renal_pressure_x_lactate",
+                    "fbc_acid_stress_x_hepatic",
+                    "fbc_hepato_renal_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.235721,
+                    "focused_coupled_ridge": 0.220915,
+                    "placebo_ridge": 0.24169
+                  },
+                  "rows": 544,
+                  "subjects": 153
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.039558,
+                      -0.009315
+                    ],
+                    "point_delta": -0.024508,
+                    "significant": true,
+                    "subjects": 173
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.048488,
+                      -0.015497
+                    ],
+                    "point_delta": -0.032854,
+                    "significant": true,
+                    "subjects": 173
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 81,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_hepatic_burden_mean",
+                    "fbc_hepatic_burden_sd",
+                    "fbc_hepatic_burden_observation",
+                    "fbc_hepatic_burden_innovation",
+                    "fbc_hepatic_burden_delta_since_prior",
+                    "fbc_hepatic_burden_observation_confidence",
+                    "fbc_hepato_renal_pressure_mean",
+                    "fbc_hepato_renal_pressure_sd",
+                    "fbc_hepato_renal_pressure_observation",
+                    "fbc_hepato_renal_pressure_innovation",
+                    "fbc_hepato_renal_pressure_delta_since_prior",
+                    "fbc_hepato_renal_pressure_observation_confidence",
+                    "fbc_hepato_renal_acid_perfusion_stress_mean",
+                    "fbc_hepato_renal_acid_perfusion_stress_sd",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation",
+                    "fbc_hepato_renal_acid_perfusion_stress_innovation",
+                    "fbc_hepato_renal_acid_perfusion_stress_delta_since_prior",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation_confidence",
+                    "fbc_hepatic_x_creatinine",
+                    "fbc_hepatic_x_bun",
+                    "fbc_hepatic_x_low_map",
+                    "fbc_hepatic_x_hyponatremia",
+                    "fbc_renal_pressure_x_lactate",
+                    "fbc_acid_stress_x_hepatic",
+                    "fbc_hepato_renal_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.229564,
+                    "focused_coupled_ridge": 0.217509,
+                    "placebo_ridge": 0.237546
+                  },
+                  "rows": 588,
+                  "subjects": 173
+                }
+              },
+              "creatinine": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.072438,
+                      -0.014768
+                    ],
+                    "point_delta": -0.044333,
+                    "significant": true,
+                    "subjects": 149
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.089105,
+                      -0.023098
+                    ],
+                    "point_delta": -0.052855,
+                    "significant": true,
+                    "subjects": 149
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 81,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_hepatic_burden_mean",
+                    "fbc_hepatic_burden_sd",
+                    "fbc_hepatic_burden_observation",
+                    "fbc_hepatic_burden_innovation",
+                    "fbc_hepatic_burden_delta_since_prior",
+                    "fbc_hepatic_burden_observation_confidence",
+                    "fbc_hepato_renal_pressure_mean",
+                    "fbc_hepato_renal_pressure_sd",
+                    "fbc_hepato_renal_pressure_observation",
+                    "fbc_hepato_renal_pressure_innovation",
+                    "fbc_hepato_renal_pressure_delta_since_prior",
+                    "fbc_hepato_renal_pressure_observation_confidence",
+                    "fbc_hepato_renal_acid_perfusion_stress_mean",
+                    "fbc_hepato_renal_acid_perfusion_stress_sd",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation",
+                    "fbc_hepato_renal_acid_perfusion_stress_innovation",
+                    "fbc_hepato_renal_acid_perfusion_stress_delta_since_prior",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation_confidence",
+                    "fbc_hepatic_x_creatinine",
+                    "fbc_hepatic_x_bun",
+                    "fbc_hepatic_x_low_map",
+                    "fbc_hepatic_x_hyponatremia",
+                    "fbc_renal_pressure_x_lactate",
+                    "fbc_acid_stress_x_hepatic",
+                    "fbc_hepato_renal_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.304253,
+                    "focused_coupled_ridge": 0.27154,
+                    "placebo_ridge": 0.315081
+                  },
+                  "rows": 524,
+                  "subjects": 149
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.068284,
+                      -0.018996
+                    ],
+                    "point_delta": -0.042433,
+                    "significant": true,
+                    "subjects": 168
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.074647,
+                      -0.023572
+                    ],
+                    "point_delta": -0.048295,
+                    "significant": true,
+                    "subjects": 168
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 81,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_hepatic_burden_mean",
+                    "fbc_hepatic_burden_sd",
+                    "fbc_hepatic_burden_observation",
+                    "fbc_hepatic_burden_innovation",
+                    "fbc_hepatic_burden_delta_since_prior",
+                    "fbc_hepatic_burden_observation_confidence",
+                    "fbc_hepato_renal_pressure_mean",
+                    "fbc_hepato_renal_pressure_sd",
+                    "fbc_hepato_renal_pressure_observation",
+                    "fbc_hepato_renal_pressure_innovation",
+                    "fbc_hepato_renal_pressure_delta_since_prior",
+                    "fbc_hepato_renal_pressure_observation_confidence",
+                    "fbc_hepato_renal_acid_perfusion_stress_mean",
+                    "fbc_hepato_renal_acid_perfusion_stress_sd",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation",
+                    "fbc_hepato_renal_acid_perfusion_stress_innovation",
+                    "fbc_hepato_renal_acid_perfusion_stress_delta_since_prior",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation_confidence",
+                    "fbc_hepatic_x_creatinine",
+                    "fbc_hepatic_x_bun",
+                    "fbc_hepatic_x_low_map",
+                    "fbc_hepatic_x_hyponatremia",
+                    "fbc_renal_pressure_x_lactate",
+                    "fbc_acid_stress_x_hepatic",
+                    "fbc_hepato_renal_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.294157,
+                    "focused_coupled_ridge": 0.262986,
+                    "placebo_ridge": 0.30455
+                  },
+                  "rows": 564,
+                  "subjects": 168
+                }
+              }
+            }
+          },
+          {
+            "discovery_groups": 734,
+            "focused_coupling_feature_count": 25,
+            "group_column": "subject_id",
+            "heldout_groups": 362,
+            "overlap": 0,
+            "seed": 11,
+            "targets": {
+              "bun": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.05038,
+                      -0.007835
+                    ],
+                    "point_delta": -0.028385,
+                    "significant": true,
+                    "subjects": 148
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.058758,
+                      -0.006817
+                    ],
+                    "point_delta": -0.032301,
+                    "significant": true,
+                    "subjects": 148
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 81,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_hepatic_burden_mean",
+                    "fbc_hepatic_burden_sd",
+                    "fbc_hepatic_burden_observation",
+                    "fbc_hepatic_burden_innovation",
+                    "fbc_hepatic_burden_delta_since_prior",
+                    "fbc_hepatic_burden_observation_confidence",
+                    "fbc_hepato_renal_pressure_mean",
+                    "fbc_hepato_renal_pressure_sd",
+                    "fbc_hepato_renal_pressure_observation",
+                    "fbc_hepato_renal_pressure_innovation",
+                    "fbc_hepato_renal_pressure_delta_since_prior",
+                    "fbc_hepato_renal_pressure_observation_confidence",
+                    "fbc_hepato_renal_acid_perfusion_stress_mean",
+                    "fbc_hepato_renal_acid_perfusion_stress_sd",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation",
+                    "fbc_hepato_renal_acid_perfusion_stress_innovation",
+                    "fbc_hepato_renal_acid_perfusion_stress_delta_since_prior",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation_confidence",
+                    "fbc_hepatic_x_creatinine",
+                    "fbc_hepatic_x_bun",
+                    "fbc_hepatic_x_low_map",
+                    "fbc_hepatic_x_hyponatremia",
+                    "fbc_renal_pressure_x_lactate",
+                    "fbc_acid_stress_x_hepatic",
+                    "fbc_hepato_renal_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.269975,
+                    "focused_coupled_ridge": 0.262294,
+                    "placebo_ridge": 0.273921
+                  },
+                  "rows": 491,
+                  "subjects": 148
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.041499,
+                      -0.000602
+                    ],
+                    "point_delta": -0.020326,
+                    "significant": true,
+                    "subjects": 170
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.043644,
+                      0.001245
+                    ],
+                    "point_delta": -0.022436,
+                    "significant": false,
+                    "subjects": 170
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 81,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_hepatic_burden_mean",
+                    "fbc_hepatic_burden_sd",
+                    "fbc_hepatic_burden_observation",
+                    "fbc_hepatic_burden_innovation",
+                    "fbc_hepatic_burden_delta_since_prior",
+                    "fbc_hepatic_burden_observation_confidence",
+                    "fbc_hepato_renal_pressure_mean",
+                    "fbc_hepato_renal_pressure_sd",
+                    "fbc_hepato_renal_pressure_observation",
+                    "fbc_hepato_renal_pressure_innovation",
+                    "fbc_hepato_renal_pressure_delta_since_prior",
+                    "fbc_hepato_renal_pressure_observation_confidence",
+                    "fbc_hepato_renal_acid_perfusion_stress_mean",
+                    "fbc_hepato_renal_acid_perfusion_stress_sd",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation",
+                    "fbc_hepato_renal_acid_perfusion_stress_innovation",
+                    "fbc_hepato_renal_acid_perfusion_stress_delta_since_prior",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation_confidence",
+                    "fbc_hepatic_x_creatinine",
+                    "fbc_hepatic_x_bun",
+                    "fbc_hepatic_x_low_map",
+                    "fbc_hepatic_x_hyponatremia",
+                    "fbc_renal_pressure_x_lactate",
+                    "fbc_acid_stress_x_hepatic",
+                    "fbc_hepato_renal_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.251372,
+                    "focused_coupled_ridge": 0.249163,
+                    "placebo_ridge": 0.255435
+                  },
+                  "rows": 563,
+                  "subjects": 170
+                }
+              },
+              "creatinine": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.096266,
+                      -0.039386
+                    ],
+                    "point_delta": -0.070082,
+                    "significant": true,
+                    "subjects": 147
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.104214,
+                      -0.046545
+                    ],
+                    "point_delta": -0.075044,
+                    "significant": true,
+                    "subjects": 147
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 81,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_hepatic_burden_mean",
+                    "fbc_hepatic_burden_sd",
+                    "fbc_hepatic_burden_observation",
+                    "fbc_hepatic_burden_innovation",
+                    "fbc_hepatic_burden_delta_since_prior",
+                    "fbc_hepatic_burden_observation_confidence",
+                    "fbc_hepato_renal_pressure_mean",
+                    "fbc_hepato_renal_pressure_sd",
+                    "fbc_hepato_renal_pressure_observation",
+                    "fbc_hepato_renal_pressure_innovation",
+                    "fbc_hepato_renal_pressure_delta_since_prior",
+                    "fbc_hepato_renal_pressure_observation_confidence",
+                    "fbc_hepato_renal_acid_perfusion_stress_mean",
+                    "fbc_hepato_renal_acid_perfusion_stress_sd",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation",
+                    "fbc_hepato_renal_acid_perfusion_stress_innovation",
+                    "fbc_hepato_renal_acid_perfusion_stress_delta_since_prior",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation_confidence",
+                    "fbc_hepatic_x_creatinine",
+                    "fbc_hepatic_x_bun",
+                    "fbc_hepatic_x_low_map",
+                    "fbc_hepatic_x_hyponatremia",
+                    "fbc_renal_pressure_x_lactate",
+                    "fbc_acid_stress_x_hepatic",
+                    "fbc_hepato_renal_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.335458,
+                    "focused_coupled_ridge": 0.287162,
+                    "placebo_ridge": 0.339471
+                  },
+                  "rows": 483,
+                  "subjects": 147
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.085417,
+                      -0.034181
+                    ],
+                    "point_delta": -0.060495,
+                    "significant": true,
+                    "subjects": 169
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.096503,
+                      -0.039166
+                    ],
+                    "point_delta": -0.066067,
+                    "significant": true,
+                    "subjects": 169
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 81,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_hepatic_burden_mean",
+                    "fbc_hepatic_burden_sd",
+                    "fbc_hepatic_burden_observation",
+                    "fbc_hepatic_burden_innovation",
+                    "fbc_hepatic_burden_delta_since_prior",
+                    "fbc_hepatic_burden_observation_confidence",
+                    "fbc_hepato_renal_pressure_mean",
+                    "fbc_hepato_renal_pressure_sd",
+                    "fbc_hepato_renal_pressure_observation",
+                    "fbc_hepato_renal_pressure_innovation",
+                    "fbc_hepato_renal_pressure_delta_since_prior",
+                    "fbc_hepato_renal_pressure_observation_confidence",
+                    "fbc_hepato_renal_acid_perfusion_stress_mean",
+                    "fbc_hepato_renal_acid_perfusion_stress_sd",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation",
+                    "fbc_hepato_renal_acid_perfusion_stress_innovation",
+                    "fbc_hepato_renal_acid_perfusion_stress_delta_since_prior",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation_confidence",
+                    "fbc_hepatic_x_creatinine",
+                    "fbc_hepatic_x_bun",
+                    "fbc_hepatic_x_low_map",
+                    "fbc_hepatic_x_hyponatremia",
+                    "fbc_renal_pressure_x_lactate",
+                    "fbc_acid_stress_x_hepatic",
+                    "fbc_hepato_renal_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.309584,
+                    "focused_coupled_ridge": 0.27307,
+                    "placebo_ridge": 0.315708
+                  },
+                  "rows": 553,
+                  "subjects": 169
+                }
+              }
+            }
+          },
+          {
+            "discovery_groups": 734,
+            "focused_coupling_feature_count": 25,
+            "group_column": "subject_id",
+            "heldout_groups": 362,
+            "overlap": 0,
+            "seed": 19,
+            "targets": {
+              "bun": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.035416,
+                      0.005657
+                    ],
+                    "point_delta": -0.016291,
+                    "significant": false,
+                    "subjects": 136
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.039992,
+                      0.00428
+                    ],
+                    "point_delta": -0.01834,
+                    "significant": false,
+                    "subjects": 136
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 81,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_hepatic_burden_mean",
+                    "fbc_hepatic_burden_sd",
+                    "fbc_hepatic_burden_observation",
+                    "fbc_hepatic_burden_innovation",
+                    "fbc_hepatic_burden_delta_since_prior",
+                    "fbc_hepatic_burden_observation_confidence",
+                    "fbc_hepato_renal_pressure_mean",
+                    "fbc_hepato_renal_pressure_sd",
+                    "fbc_hepato_renal_pressure_observation",
+                    "fbc_hepato_renal_pressure_innovation",
+                    "fbc_hepato_renal_pressure_delta_since_prior",
+                    "fbc_hepato_renal_pressure_observation_confidence",
+                    "fbc_hepato_renal_acid_perfusion_stress_mean",
+                    "fbc_hepato_renal_acid_perfusion_stress_sd",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation",
+                    "fbc_hepato_renal_acid_perfusion_stress_innovation",
+                    "fbc_hepato_renal_acid_perfusion_stress_delta_since_prior",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation_confidence",
+                    "fbc_hepatic_x_creatinine",
+                    "fbc_hepatic_x_bun",
+                    "fbc_hepatic_x_low_map",
+                    "fbc_hepatic_x_hyponatremia",
+                    "fbc_renal_pressure_x_lactate",
+                    "fbc_acid_stress_x_hepatic",
+                    "fbc_hepato_renal_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.228037,
+                    "focused_coupled_ridge": 0.206717,
+                    "placebo_ridge": 0.229072
+                  },
+                  "rows": 457,
+                  "subjects": 136
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.031796,
+                      0.002994
+                    ],
+                    "point_delta": -0.014474,
+                    "significant": false,
+                    "subjects": 158
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.032473,
+                      0.00072
+                    ],
+                    "point_delta": -0.015481,
+                    "significant": false,
+                    "subjects": 158
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 81,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_hepatic_burden_mean",
+                    "fbc_hepatic_burden_sd",
+                    "fbc_hepatic_burden_observation",
+                    "fbc_hepatic_burden_innovation",
+                    "fbc_hepatic_burden_delta_since_prior",
+                    "fbc_hepatic_burden_observation_confidence",
+                    "fbc_hepato_renal_pressure_mean",
+                    "fbc_hepato_renal_pressure_sd",
+                    "fbc_hepato_renal_pressure_observation",
+                    "fbc_hepato_renal_pressure_innovation",
+                    "fbc_hepato_renal_pressure_delta_since_prior",
+                    "fbc_hepato_renal_pressure_observation_confidence",
+                    "fbc_hepato_renal_acid_perfusion_stress_mean",
+                    "fbc_hepato_renal_acid_perfusion_stress_sd",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation",
+                    "fbc_hepato_renal_acid_perfusion_stress_innovation",
+                    "fbc_hepato_renal_acid_perfusion_stress_delta_since_prior",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation_confidence",
+                    "fbc_hepatic_x_creatinine",
+                    "fbc_hepatic_x_bun",
+                    "fbc_hepatic_x_low_map",
+                    "fbc_hepatic_x_hyponatremia",
+                    "fbc_renal_pressure_x_lactate",
+                    "fbc_acid_stress_x_hepatic",
+                    "fbc_hepato_renal_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.220129,
+                    "focused_coupled_ridge": 0.201214,
+                    "placebo_ridge": 0.220859
+                  },
+                  "rows": 519,
+                  "subjects": 158
+                }
+              },
+              "creatinine": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.062342,
+                      0.001411
+                    ],
+                    "point_delta": -0.034476,
+                    "significant": false,
+                    "subjects": 134
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.077404,
+                      -0.006205
+                    ],
+                    "point_delta": -0.044751,
+                    "significant": true,
+                    "subjects": 134
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 81,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_hepatic_burden_mean",
+                    "fbc_hepatic_burden_sd",
+                    "fbc_hepatic_burden_observation",
+                    "fbc_hepatic_burden_innovation",
+                    "fbc_hepatic_burden_delta_since_prior",
+                    "fbc_hepatic_burden_observation_confidence",
+                    "fbc_hepato_renal_pressure_mean",
+                    "fbc_hepato_renal_pressure_sd",
+                    "fbc_hepato_renal_pressure_observation",
+                    "fbc_hepato_renal_pressure_innovation",
+                    "fbc_hepato_renal_pressure_delta_since_prior",
+                    "fbc_hepato_renal_pressure_observation_confidence",
+                    "fbc_hepato_renal_acid_perfusion_stress_mean",
+                    "fbc_hepato_renal_acid_perfusion_stress_sd",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation",
+                    "fbc_hepato_renal_acid_perfusion_stress_innovation",
+                    "fbc_hepato_renal_acid_perfusion_stress_delta_since_prior",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation_confidence",
+                    "fbc_hepatic_x_creatinine",
+                    "fbc_hepatic_x_bun",
+                    "fbc_hepatic_x_low_map",
+                    "fbc_hepatic_x_hyponatremia",
+                    "fbc_renal_pressure_x_lactate",
+                    "fbc_acid_stress_x_hepatic",
+                    "fbc_hepato_renal_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.301984,
+                    "focused_coupled_ridge": 0.247366,
+                    "placebo_ridge": 0.311985
+                  },
+                  "rows": 449,
+                  "subjects": 134
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.058393,
+                      0.001399
+                    ],
+                    "point_delta": -0.029711,
+                    "significant": false,
+                    "subjects": 156
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.070377,
+                      -0.012888
+                    ],
+                    "point_delta": -0.042098,
+                    "significant": true,
+                    "subjects": 156
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 81,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_hepatic_burden_mean",
+                    "fbc_hepatic_burden_sd",
+                    "fbc_hepatic_burden_observation",
+                    "fbc_hepatic_burden_innovation",
+                    "fbc_hepatic_burden_delta_since_prior",
+                    "fbc_hepatic_burden_observation_confidence",
+                    "fbc_hepato_renal_pressure_mean",
+                    "fbc_hepato_renal_pressure_sd",
+                    "fbc_hepato_renal_pressure_observation",
+                    "fbc_hepato_renal_pressure_innovation",
+                    "fbc_hepato_renal_pressure_delta_since_prior",
+                    "fbc_hepato_renal_pressure_observation_confidence",
+                    "fbc_hepato_renal_acid_perfusion_stress_mean",
+                    "fbc_hepato_renal_acid_perfusion_stress_sd",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation",
+                    "fbc_hepato_renal_acid_perfusion_stress_innovation",
+                    "fbc_hepato_renal_acid_perfusion_stress_delta_since_prior",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation_confidence",
+                    "fbc_hepatic_x_creatinine",
+                    "fbc_hepatic_x_bun",
+                    "fbc_hepatic_x_low_map",
+                    "fbc_hepatic_x_hyponatremia",
+                    "fbc_renal_pressure_x_lactate",
+                    "fbc_acid_stress_x_hepatic",
+                    "fbc_hepato_renal_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.284187,
+                    "focused_coupled_ridge": 0.237394,
+                    "placebo_ridge": 0.295762
+                  },
+                  "rows": 509,
+                  "subjects": 156
+                }
+              }
+            }
+          },
+          {
+            "discovery_groups": 734,
+            "focused_coupling_feature_count": 25,
+            "group_column": "subject_id",
+            "heldout_groups": 362,
+            "overlap": 0,
+            "seed": 23,
+            "targets": {
+              "bun": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.03276,
+                      0.015246
+                    ],
+                    "point_delta": -0.0084,
+                    "significant": false,
+                    "subjects": 135
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.038254,
+                      0.010722
+                    ],
+                    "point_delta": -0.014323,
+                    "significant": false,
+                    "subjects": 135
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 81,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_hepatic_burden_mean",
+                    "fbc_hepatic_burden_sd",
+                    "fbc_hepatic_burden_observation",
+                    "fbc_hepatic_burden_innovation",
+                    "fbc_hepatic_burden_delta_since_prior",
+                    "fbc_hepatic_burden_observation_confidence",
+                    "fbc_hepato_renal_pressure_mean",
+                    "fbc_hepato_renal_pressure_sd",
+                    "fbc_hepato_renal_pressure_observation",
+                    "fbc_hepato_renal_pressure_innovation",
+                    "fbc_hepato_renal_pressure_delta_since_prior",
+                    "fbc_hepato_renal_pressure_observation_confidence",
+                    "fbc_hepato_renal_acid_perfusion_stress_mean",
+                    "fbc_hepato_renal_acid_perfusion_stress_sd",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation",
+                    "fbc_hepato_renal_acid_perfusion_stress_innovation",
+                    "fbc_hepato_renal_acid_perfusion_stress_delta_since_prior",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation_confidence",
+                    "fbc_hepatic_x_creatinine",
+                    "fbc_hepatic_x_bun",
+                    "fbc_hepatic_x_low_map",
+                    "fbc_hepatic_x_hyponatremia",
+                    "fbc_renal_pressure_x_lactate",
+                    "fbc_acid_stress_x_hepatic",
+                    "fbc_hepato_renal_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.260696,
+                    "focused_coupled_ridge": 0.242445,
+                    "placebo_ridge": 0.264936
+                  },
+                  "rows": 493,
+                  "subjects": 135
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.024849,
+                      0.011425
+                    ],
+                    "point_delta": -0.006737,
+                    "significant": false,
+                    "subjects": 163
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.034391,
+                      0.012826
+                    ],
+                    "point_delta": -0.011645,
+                    "significant": false,
+                    "subjects": 163
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 81,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_hepatic_burden_mean",
+                    "fbc_hepatic_burden_sd",
+                    "fbc_hepatic_burden_observation",
+                    "fbc_hepatic_burden_innovation",
+                    "fbc_hepatic_burden_delta_since_prior",
+                    "fbc_hepatic_burden_observation_confidence",
+                    "fbc_hepato_renal_pressure_mean",
+                    "fbc_hepato_renal_pressure_sd",
+                    "fbc_hepato_renal_pressure_observation",
+                    "fbc_hepato_renal_pressure_innovation",
+                    "fbc_hepato_renal_pressure_delta_since_prior",
+                    "fbc_hepato_renal_pressure_observation_confidence",
+                    "fbc_hepato_renal_acid_perfusion_stress_mean",
+                    "fbc_hepato_renal_acid_perfusion_stress_sd",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation",
+                    "fbc_hepato_renal_acid_perfusion_stress_innovation",
+                    "fbc_hepato_renal_acid_perfusion_stress_delta_since_prior",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation_confidence",
+                    "fbc_hepatic_x_creatinine",
+                    "fbc_hepatic_x_bun",
+                    "fbc_hepatic_x_low_map",
+                    "fbc_hepatic_x_hyponatremia",
+                    "fbc_renal_pressure_x_lactate",
+                    "fbc_acid_stress_x_hepatic",
+                    "fbc_hepato_renal_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.246029,
+                    "focused_coupled_ridge": 0.231052,
+                    "placebo_ridge": 0.249562
+                  },
+                  "rows": 559,
+                  "subjects": 163
+                }
+              },
+              "creatinine": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.039554,
+                      0.032093
+                    ],
+                    "point_delta": -0.007047,
+                    "significant": false,
+                    "subjects": 137
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.050019,
+                      0.019525
+                    ],
+                    "point_delta": -0.018073,
+                    "significant": false,
+                    "subjects": 137
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 81,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_hepatic_burden_mean",
+                    "fbc_hepatic_burden_sd",
+                    "fbc_hepatic_burden_observation",
+                    "fbc_hepatic_burden_innovation",
+                    "fbc_hepatic_burden_delta_since_prior",
+                    "fbc_hepatic_burden_observation_confidence",
+                    "fbc_hepato_renal_pressure_mean",
+                    "fbc_hepato_renal_pressure_sd",
+                    "fbc_hepato_renal_pressure_observation",
+                    "fbc_hepato_renal_pressure_innovation",
+                    "fbc_hepato_renal_pressure_delta_since_prior",
+                    "fbc_hepato_renal_pressure_observation_confidence",
+                    "fbc_hepato_renal_acid_perfusion_stress_mean",
+                    "fbc_hepato_renal_acid_perfusion_stress_sd",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation",
+                    "fbc_hepato_renal_acid_perfusion_stress_innovation",
+                    "fbc_hepato_renal_acid_perfusion_stress_delta_since_prior",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation_confidence",
+                    "fbc_hepatic_x_creatinine",
+                    "fbc_hepatic_x_bun",
+                    "fbc_hepatic_x_low_map",
+                    "fbc_hepatic_x_hyponatremia",
+                    "fbc_renal_pressure_x_lactate",
+                    "fbc_acid_stress_x_hepatic",
+                    "fbc_hepato_renal_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.287977,
+                    "focused_coupled_ridge": 0.269736,
+                    "placebo_ridge": 0.298884
+                  },
+                  "rows": 498,
+                  "subjects": 137
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.031483,
+                      0.0238
+                    ],
+                    "point_delta": -0.003992,
+                    "significant": false,
+                    "subjects": 164
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.048785,
+                      0.013159
+                    ],
+                    "point_delta": -0.015564,
+                    "significant": false,
+                    "subjects": 164
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 81,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_hepatic_burden_mean",
+                    "fbc_hepatic_burden_sd",
+                    "fbc_hepatic_burden_observation",
+                    "fbc_hepatic_burden_innovation",
+                    "fbc_hepatic_burden_delta_since_prior",
+                    "fbc_hepatic_burden_observation_confidence",
+                    "fbc_hepato_renal_pressure_mean",
+                    "fbc_hepato_renal_pressure_sd",
+                    "fbc_hepato_renal_pressure_observation",
+                    "fbc_hepato_renal_pressure_innovation",
+                    "fbc_hepato_renal_pressure_delta_since_prior",
+                    "fbc_hepato_renal_pressure_observation_confidence",
+                    "fbc_hepato_renal_acid_perfusion_stress_mean",
+                    "fbc_hepato_renal_acid_perfusion_stress_sd",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation",
+                    "fbc_hepato_renal_acid_perfusion_stress_innovation",
+                    "fbc_hepato_renal_acid_perfusion_stress_delta_since_prior",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation_confidence",
+                    "fbc_hepatic_x_creatinine",
+                    "fbc_hepatic_x_bun",
+                    "fbc_hepatic_x_low_map",
+                    "fbc_hepatic_x_hyponatremia",
+                    "fbc_renal_pressure_x_lactate",
+                    "fbc_acid_stress_x_hepatic",
+                    "fbc_hepato_renal_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.270171,
+                    "focused_coupled_ridge": 0.257819,
+                    "placebo_ridge": 0.280998
+                  },
+                  "rows": 564,
+                  "subjects": 164
+                }
+              }
+            }
+          },
+          {
+            "discovery_groups": 734,
+            "focused_coupling_feature_count": 25,
+            "group_column": "subject_id",
+            "heldout_groups": 362,
+            "overlap": 0,
+            "seed": 37,
+            "targets": {
+              "bun": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.027781,
+                      0.004573
+                    ],
+                    "point_delta": -0.011381,
+                    "significant": false,
+                    "subjects": 135
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.03704,
+                      -0.002586
+                    ],
+                    "point_delta": -0.019774,
+                    "significant": true,
+                    "subjects": 135
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 81,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_hepatic_burden_mean",
+                    "fbc_hepatic_burden_sd",
+                    "fbc_hepatic_burden_observation",
+                    "fbc_hepatic_burden_innovation",
+                    "fbc_hepatic_burden_delta_since_prior",
+                    "fbc_hepatic_burden_observation_confidence",
+                    "fbc_hepato_renal_pressure_mean",
+                    "fbc_hepato_renal_pressure_sd",
+                    "fbc_hepato_renal_pressure_observation",
+                    "fbc_hepato_renal_pressure_innovation",
+                    "fbc_hepato_renal_pressure_delta_since_prior",
+                    "fbc_hepato_renal_pressure_observation_confidence",
+                    "fbc_hepato_renal_acid_perfusion_stress_mean",
+                    "fbc_hepato_renal_acid_perfusion_stress_sd",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation",
+                    "fbc_hepato_renal_acid_perfusion_stress_innovation",
+                    "fbc_hepato_renal_acid_perfusion_stress_delta_since_prior",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation_confidence",
+                    "fbc_hepatic_x_creatinine",
+                    "fbc_hepatic_x_bun",
+                    "fbc_hepatic_x_low_map",
+                    "fbc_hepatic_x_hyponatremia",
+                    "fbc_renal_pressure_x_lactate",
+                    "fbc_acid_stress_x_hepatic",
+                    "fbc_hepato_renal_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.219251,
+                    "focused_coupled_ridge": 0.209223,
+                    "placebo_ridge": 0.224496
+                  },
+                  "rows": 456,
+                  "subjects": 135
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.019222,
+                      0.009782
+                    ],
+                    "point_delta": -0.005013,
+                    "significant": false,
+                    "subjects": 154
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.024615,
+                      0.005606
+                    ],
+                    "point_delta": -0.010974,
+                    "significant": false,
+                    "subjects": 154
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 81,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_hepatic_burden_mean",
+                    "fbc_hepatic_burden_sd",
+                    "fbc_hepatic_burden_observation",
+                    "fbc_hepatic_burden_innovation",
+                    "fbc_hepatic_burden_delta_since_prior",
+                    "fbc_hepatic_burden_observation_confidence",
+                    "fbc_hepato_renal_pressure_mean",
+                    "fbc_hepato_renal_pressure_sd",
+                    "fbc_hepato_renal_pressure_observation",
+                    "fbc_hepato_renal_pressure_innovation",
+                    "fbc_hepato_renal_pressure_delta_since_prior",
+                    "fbc_hepato_renal_pressure_observation_confidence",
+                    "fbc_hepato_renal_acid_perfusion_stress_mean",
+                    "fbc_hepato_renal_acid_perfusion_stress_sd",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation",
+                    "fbc_hepato_renal_acid_perfusion_stress_innovation",
+                    "fbc_hepato_renal_acid_perfusion_stress_delta_since_prior",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation_confidence",
+                    "fbc_hepatic_x_creatinine",
+                    "fbc_hepatic_x_bun",
+                    "fbc_hepatic_x_low_map",
+                    "fbc_hepatic_x_hyponatremia",
+                    "fbc_renal_pressure_x_lactate",
+                    "fbc_acid_stress_x_hepatic",
+                    "fbc_hepato_renal_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.209554,
+                    "focused_coupled_ridge": 0.204674,
+                    "placebo_ridge": 0.213779
+                  },
+                  "rows": 520,
+                  "subjects": 154
+                }
+              },
+              "creatinine": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.059309,
+                      -3.3e-05
+                    ],
+                    "point_delta": -0.025094,
+                    "significant": true,
+                    "subjects": 135
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.058033,
+                      0.002014
+                    ],
+                    "point_delta": -0.028896,
+                    "significant": false,
+                    "subjects": 135
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 81,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_hepatic_burden_mean",
+                    "fbc_hepatic_burden_sd",
+                    "fbc_hepatic_burden_observation",
+                    "fbc_hepatic_burden_innovation",
+                    "fbc_hepatic_burden_delta_since_prior",
+                    "fbc_hepatic_burden_observation_confidence",
+                    "fbc_hepato_renal_pressure_mean",
+                    "fbc_hepato_renal_pressure_sd",
+                    "fbc_hepato_renal_pressure_observation",
+                    "fbc_hepato_renal_pressure_innovation",
+                    "fbc_hepato_renal_pressure_delta_since_prior",
+                    "fbc_hepato_renal_pressure_observation_confidence",
+                    "fbc_hepato_renal_acid_perfusion_stress_mean",
+                    "fbc_hepato_renal_acid_perfusion_stress_sd",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation",
+                    "fbc_hepato_renal_acid_perfusion_stress_innovation",
+                    "fbc_hepato_renal_acid_perfusion_stress_delta_since_prior",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation_confidence",
+                    "fbc_hepatic_x_creatinine",
+                    "fbc_hepatic_x_bun",
+                    "fbc_hepatic_x_low_map",
+                    "fbc_hepatic_x_hyponatremia",
+                    "fbc_renal_pressure_x_lactate",
+                    "fbc_acid_stress_x_hepatic",
+                    "fbc_hepato_renal_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.266927,
+                    "focused_coupled_ridge": 0.239693,
+                    "placebo_ridge": 0.272531
+                  },
+                  "rows": 452,
+                  "subjects": 135
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.046376,
+                      0.001673
+                    ],
+                    "point_delta": -0.021237,
+                    "significant": false,
+                    "subjects": 153
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.051861,
+                      -0.00114
+                    ],
+                    "point_delta": -0.025726,
+                    "significant": true,
+                    "subjects": 153
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 81,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_hepatic_burden_mean",
+                    "fbc_hepatic_burden_sd",
+                    "fbc_hepatic_burden_observation",
+                    "fbc_hepatic_burden_innovation",
+                    "fbc_hepatic_burden_delta_since_prior",
+                    "fbc_hepatic_burden_observation_confidence",
+                    "fbc_hepato_renal_pressure_mean",
+                    "fbc_hepato_renal_pressure_sd",
+                    "fbc_hepato_renal_pressure_observation",
+                    "fbc_hepato_renal_pressure_innovation",
+                    "fbc_hepato_renal_pressure_delta_since_prior",
+                    "fbc_hepato_renal_pressure_observation_confidence",
+                    "fbc_hepato_renal_acid_perfusion_stress_mean",
+                    "fbc_hepato_renal_acid_perfusion_stress_sd",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation",
+                    "fbc_hepato_renal_acid_perfusion_stress_innovation",
+                    "fbc_hepato_renal_acid_perfusion_stress_delta_since_prior",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation_confidence",
+                    "fbc_hepatic_x_creatinine",
+                    "fbc_hepatic_x_bun",
+                    "fbc_hepatic_x_low_map",
+                    "fbc_hepatic_x_hyponatremia",
+                    "fbc_renal_pressure_x_lactate",
+                    "fbc_acid_stress_x_hepatic",
+                    "fbc_hepato_renal_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.251959,
+                    "focused_coupled_ridge": 0.232941,
+                    "placebo_ridge": 0.257869
+                  },
+                  "rows": 514,
+                  "subjects": 153
+                }
+              }
+            }
+          },
+          {
+            "discovery_groups": 734,
+            "focused_coupling_feature_count": 25,
+            "group_column": "subject_id",
+            "heldout_groups": 362,
+            "overlap": 0,
+            "seed": 53,
+            "targets": {
+              "bun": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.0422,
+                      -0.004505
+                    ],
+                    "point_delta": -0.023606,
+                    "significant": true,
+                    "subjects": 146
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.040589,
+                      -0.00252
+                    ],
+                    "point_delta": -0.022618,
+                    "significant": true,
+                    "subjects": 146
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 81,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_hepatic_burden_mean",
+                    "fbc_hepatic_burden_sd",
+                    "fbc_hepatic_burden_observation",
+                    "fbc_hepatic_burden_innovation",
+                    "fbc_hepatic_burden_delta_since_prior",
+                    "fbc_hepatic_burden_observation_confidence",
+                    "fbc_hepato_renal_pressure_mean",
+                    "fbc_hepato_renal_pressure_sd",
+                    "fbc_hepato_renal_pressure_observation",
+                    "fbc_hepato_renal_pressure_innovation",
+                    "fbc_hepato_renal_pressure_delta_since_prior",
+                    "fbc_hepato_renal_pressure_observation_confidence",
+                    "fbc_hepato_renal_acid_perfusion_stress_mean",
+                    "fbc_hepato_renal_acid_perfusion_stress_sd",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation",
+                    "fbc_hepato_renal_acid_perfusion_stress_innovation",
+                    "fbc_hepato_renal_acid_perfusion_stress_delta_since_prior",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation_confidence",
+                    "fbc_hepatic_x_creatinine",
+                    "fbc_hepatic_x_bun",
+                    "fbc_hepatic_x_low_map",
+                    "fbc_hepatic_x_hyponatremia",
+                    "fbc_renal_pressure_x_lactate",
+                    "fbc_acid_stress_x_hepatic",
+                    "fbc_hepato_renal_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.305412,
+                    "focused_coupled_ridge": 0.272769,
+                    "placebo_ridge": 0.306896
+                  },
+                  "rows": 497,
+                  "subjects": 146
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.035309,
+                      -0.002793
+                    ],
+                    "point_delta": -0.019422,
+                    "significant": true,
+                    "subjects": 165
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.035475,
+                      -0.002171
+                    ],
+                    "point_delta": -0.0188,
+                    "significant": true,
+                    "subjects": 165
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 81,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_hepatic_burden_mean",
+                    "fbc_hepatic_burden_sd",
+                    "fbc_hepatic_burden_observation",
+                    "fbc_hepatic_burden_innovation",
+                    "fbc_hepatic_burden_delta_since_prior",
+                    "fbc_hepatic_burden_observation_confidence",
+                    "fbc_hepato_renal_pressure_mean",
+                    "fbc_hepato_renal_pressure_sd",
+                    "fbc_hepato_renal_pressure_observation",
+                    "fbc_hepato_renal_pressure_innovation",
+                    "fbc_hepato_renal_pressure_delta_since_prior",
+                    "fbc_hepato_renal_pressure_observation_confidence",
+                    "fbc_hepato_renal_acid_perfusion_stress_mean",
+                    "fbc_hepato_renal_acid_perfusion_stress_sd",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation",
+                    "fbc_hepato_renal_acid_perfusion_stress_innovation",
+                    "fbc_hepato_renal_acid_perfusion_stress_delta_since_prior",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation_confidence",
+                    "fbc_hepatic_x_creatinine",
+                    "fbc_hepatic_x_bun",
+                    "fbc_hepatic_x_low_map",
+                    "fbc_hepatic_x_hyponatremia",
+                    "fbc_renal_pressure_x_lactate",
+                    "fbc_acid_stress_x_hepatic",
+                    "fbc_hepato_renal_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.287787,
+                    "focused_coupled_ridge": 0.261657,
+                    "placebo_ridge": 0.289445
+                  },
+                  "rows": 557,
+                  "subjects": 165
+                }
+              },
+              "creatinine": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.068701,
+                      -0.01773
+                    ],
+                    "point_delta": -0.043308,
+                    "significant": true,
+                    "subjects": 145
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.078175,
+                      -0.026163
+                    ],
+                    "point_delta": -0.049815,
+                    "significant": true,
+                    "subjects": 145
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 81,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_hepatic_burden_mean",
+                    "fbc_hepatic_burden_sd",
+                    "fbc_hepatic_burden_observation",
+                    "fbc_hepatic_burden_innovation",
+                    "fbc_hepatic_burden_delta_since_prior",
+                    "fbc_hepatic_burden_observation_confidence",
+                    "fbc_hepato_renal_pressure_mean",
+                    "fbc_hepato_renal_pressure_sd",
+                    "fbc_hepato_renal_pressure_observation",
+                    "fbc_hepato_renal_pressure_innovation",
+                    "fbc_hepato_renal_pressure_delta_since_prior",
+                    "fbc_hepato_renal_pressure_observation_confidence",
+                    "fbc_hepato_renal_acid_perfusion_stress_mean",
+                    "fbc_hepato_renal_acid_perfusion_stress_sd",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation",
+                    "fbc_hepato_renal_acid_perfusion_stress_innovation",
+                    "fbc_hepato_renal_acid_perfusion_stress_delta_since_prior",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation_confidence",
+                    "fbc_hepatic_x_creatinine",
+                    "fbc_hepatic_x_bun",
+                    "fbc_hepatic_x_low_map",
+                    "fbc_hepatic_x_hyponatremia",
+                    "fbc_renal_pressure_x_lactate",
+                    "fbc_acid_stress_x_hepatic",
+                    "fbc_hepato_renal_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.334987,
+                    "focused_coupled_ridge": 0.282819,
+                    "placebo_ridge": 0.33848
+                  },
+                  "rows": 487,
+                  "subjects": 145
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.063266,
+                      -0.015057
+                    ],
+                    "point_delta": -0.038475,
+                    "significant": true,
+                    "subjects": 164
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.069009,
+                      -0.019206
+                    ],
+                    "point_delta": -0.044187,
+                    "significant": true,
+                    "subjects": 164
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 81,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_hepatic_burden_mean",
+                    "fbc_hepatic_burden_sd",
+                    "fbc_hepatic_burden_observation",
+                    "fbc_hepatic_burden_innovation",
+                    "fbc_hepatic_burden_delta_since_prior",
+                    "fbc_hepatic_burden_observation_confidence",
+                    "fbc_hepato_renal_pressure_mean",
+                    "fbc_hepato_renal_pressure_sd",
+                    "fbc_hepato_renal_pressure_observation",
+                    "fbc_hepato_renal_pressure_innovation",
+                    "fbc_hepato_renal_pressure_delta_since_prior",
+                    "fbc_hepato_renal_pressure_observation_confidence",
+                    "fbc_hepato_renal_acid_perfusion_stress_mean",
+                    "fbc_hepato_renal_acid_perfusion_stress_sd",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation",
+                    "fbc_hepato_renal_acid_perfusion_stress_innovation",
+                    "fbc_hepato_renal_acid_perfusion_stress_delta_since_prior",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation_confidence",
+                    "fbc_hepatic_x_creatinine",
+                    "fbc_hepatic_x_bun",
+                    "fbc_hepatic_x_low_map",
+                    "fbc_hepatic_x_hyponatremia",
+                    "fbc_renal_pressure_x_lactate",
+                    "fbc_acid_stress_x_hepatic",
+                    "fbc_hepato_renal_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.314742,
+                    "focused_coupled_ridge": 0.271972,
+                    "placebo_ridge": 0.318472
+                  },
+                  "rows": 548,
+                  "subjects": 164
+                }
+              }
+            }
+          },
+          {
+            "discovery_groups": 734,
+            "focused_coupling_feature_count": 25,
+            "group_column": "subject_id",
+            "heldout_groups": 362,
+            "overlap": 0,
+            "seed": 71,
+            "targets": {
+              "bun": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": false,
+                    "bootstrap_95_ci": [
+                      0.00062,
+                      0.010852
+                    ],
+                    "point_delta": 0.005267,
+                    "significant": false,
+                    "subjects": 149
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": false,
+                    "bootstrap_95_ci": [
+                      -0.006219,
+                      0.008951
+                    ],
+                    "point_delta": 0.001249,
+                    "significant": false,
+                    "subjects": 149
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 81,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_hepatic_burden_mean",
+                    "fbc_hepatic_burden_sd",
+                    "fbc_hepatic_burden_observation",
+                    "fbc_hepatic_burden_innovation",
+                    "fbc_hepatic_burden_delta_since_prior",
+                    "fbc_hepatic_burden_observation_confidence",
+                    "fbc_hepato_renal_pressure_mean",
+                    "fbc_hepato_renal_pressure_sd",
+                    "fbc_hepato_renal_pressure_observation",
+                    "fbc_hepato_renal_pressure_innovation",
+                    "fbc_hepato_renal_pressure_delta_since_prior",
+                    "fbc_hepato_renal_pressure_observation_confidence",
+                    "fbc_hepato_renal_acid_perfusion_stress_mean",
+                    "fbc_hepato_renal_acid_perfusion_stress_sd",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation",
+                    "fbc_hepato_renal_acid_perfusion_stress_innovation",
+                    "fbc_hepato_renal_acid_perfusion_stress_delta_since_prior",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation_confidence",
+                    "fbc_hepatic_x_creatinine",
+                    "fbc_hepatic_x_bun",
+                    "fbc_hepatic_x_low_map",
+                    "fbc_hepatic_x_hyponatremia",
+                    "fbc_renal_pressure_x_lactate",
+                    "fbc_acid_stress_x_hepatic",
+                    "fbc_hepato_renal_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.245452,
+                    "focused_coupled_ridge": 0.245368,
+                    "placebo_ridge": 0.24782
+                  },
+                  "rows": 527,
+                  "subjects": 149
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": false,
+                    "bootstrap_95_ci": [
+                      0.001627,
+                      0.011331
+                    ],
+                    "point_delta": 0.006115,
+                    "significant": false,
+                    "subjects": 170
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": false,
+                    "bootstrap_95_ci": [
+                      -0.00666,
+                      0.010236
+                    ],
+                    "point_delta": 0.001312,
+                    "significant": false,
+                    "subjects": 170
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 81,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_hepatic_burden_mean",
+                    "fbc_hepatic_burden_sd",
+                    "fbc_hepatic_burden_observation",
+                    "fbc_hepatic_burden_innovation",
+                    "fbc_hepatic_burden_delta_since_prior",
+                    "fbc_hepatic_burden_observation_confidence",
+                    "fbc_hepato_renal_pressure_mean",
+                    "fbc_hepato_renal_pressure_sd",
+                    "fbc_hepato_renal_pressure_observation",
+                    "fbc_hepato_renal_pressure_innovation",
+                    "fbc_hepato_renal_pressure_delta_since_prior",
+                    "fbc_hepato_renal_pressure_observation_confidence",
+                    "fbc_hepato_renal_acid_perfusion_stress_mean",
+                    "fbc_hepato_renal_acid_perfusion_stress_sd",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation",
+                    "fbc_hepato_renal_acid_perfusion_stress_innovation",
+                    "fbc_hepato_renal_acid_perfusion_stress_delta_since_prior",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation_confidence",
+                    "fbc_hepatic_x_creatinine",
+                    "fbc_hepatic_x_bun",
+                    "fbc_hepatic_x_low_map",
+                    "fbc_hepatic_x_hyponatremia",
+                    "fbc_renal_pressure_x_lactate",
+                    "fbc_acid_stress_x_hepatic",
+                    "fbc_hepato_renal_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.230238,
+                    "focused_coupled_ridge": 0.230759,
+                    "placebo_ridge": 0.233316
+                  },
+                  "rows": 585,
+                  "subjects": 170
+                }
+              },
+              "creatinine": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": false,
+                    "bootstrap_95_ci": [
+                      -0.004173,
+                      0.012251
+                    ],
+                    "point_delta": 0.003839,
+                    "significant": false,
+                    "subjects": 150
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.014672,
+                      0.006804
+                    ],
+                    "point_delta": -0.003488,
+                    "significant": false,
+                    "subjects": 150
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 81,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_hepatic_burden_mean",
+                    "fbc_hepatic_burden_sd",
+                    "fbc_hepatic_burden_observation",
+                    "fbc_hepatic_burden_innovation",
+                    "fbc_hepatic_burden_delta_since_prior",
+                    "fbc_hepatic_burden_observation_confidence",
+                    "fbc_hepato_renal_pressure_mean",
+                    "fbc_hepato_renal_pressure_sd",
+                    "fbc_hepato_renal_pressure_observation",
+                    "fbc_hepato_renal_pressure_innovation",
+                    "fbc_hepato_renal_pressure_delta_since_prior",
+                    "fbc_hepato_renal_pressure_observation_confidence",
+                    "fbc_hepato_renal_acid_perfusion_stress_mean",
+                    "fbc_hepato_renal_acid_perfusion_stress_sd",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation",
+                    "fbc_hepato_renal_acid_perfusion_stress_innovation",
+                    "fbc_hepato_renal_acid_perfusion_stress_delta_since_prior",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation_confidence",
+                    "fbc_hepatic_x_creatinine",
+                    "fbc_hepatic_x_bun",
+                    "fbc_hepatic_x_low_map",
+                    "fbc_hepatic_x_hyponatremia",
+                    "fbc_renal_pressure_x_lactate",
+                    "fbc_acid_stress_x_hepatic",
+                    "fbc_hepato_renal_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.314202,
+                    "focused_coupled_ridge": 0.310033,
+                    "placebo_ridge": 0.318022
+                  },
+                  "rows": 528,
+                  "subjects": 150
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": false,
+                    "bootstrap_95_ci": [
+                      -0.003538,
+                      0.01005
+                    ],
+                    "point_delta": 0.002855,
+                    "significant": false,
+                    "subjects": 170
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.011884,
+                      0.006307
+                    ],
+                    "point_delta": -0.00321,
+                    "significant": false,
+                    "subjects": 170
+                  },
+                  "feature_counts": {
+                    "baseline": 56,
+                    "candidate": 81,
+                    "focused_coupling": 25,
+                    "placebo": 25
+                  },
+                  "focused_coupling_features": [
+                    "fbc_hepatic_burden_mean",
+                    "fbc_hepatic_burden_sd",
+                    "fbc_hepatic_burden_observation",
+                    "fbc_hepatic_burden_innovation",
+                    "fbc_hepatic_burden_delta_since_prior",
+                    "fbc_hepatic_burden_observation_confidence",
+                    "fbc_hepato_renal_pressure_mean",
+                    "fbc_hepato_renal_pressure_sd",
+                    "fbc_hepato_renal_pressure_observation",
+                    "fbc_hepato_renal_pressure_innovation",
+                    "fbc_hepato_renal_pressure_delta_since_prior",
+                    "fbc_hepato_renal_pressure_observation_confidence",
+                    "fbc_hepato_renal_acid_perfusion_stress_mean",
+                    "fbc_hepato_renal_acid_perfusion_stress_sd",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation",
+                    "fbc_hepato_renal_acid_perfusion_stress_innovation",
+                    "fbc_hepato_renal_acid_perfusion_stress_delta_since_prior",
+                    "fbc_hepato_renal_acid_perfusion_stress_observation_confidence",
+                    "fbc_hepatic_x_creatinine",
+                    "fbc_hepatic_x_bun",
+                    "fbc_hepatic_x_low_map",
+                    "fbc_hepatic_x_hyponatremia",
+                    "fbc_renal_pressure_x_lactate",
+                    "fbc_acid_stress_x_hepatic",
+                    "fbc_hepato_renal_treatment_context"
+                  ],
+                  "mae": {
+                    "baseline_ridge": 0.294752,
+                    "focused_coupled_ridge": 0.291483,
+                    "placebo_ridge": 0.299047
+                  },
+                  "rows": 585,
+                  "subjects": 170
+                }
+              }
+            }
+          }
+        ],
+        "seeds": [
+          7,
+          11,
+          19,
+          23,
+          37,
+          53,
+          71
+        ],
+        "summary": {
+          "bun": {
+            "active_only": {
+              "candidate_beats_baseline_significant_count": 3,
+              "candidate_beats_placebo_significant_count": 4,
+              "candidate_passes_both_count": 3,
+              "median_delta_vs_baseline": -0.016291,
+              "median_delta_vs_placebo": -0.019774
+            },
+            "all_windows": {
+              "candidate_beats_baseline_significant_count": 3,
+              "candidate_beats_placebo_significant_count": 2,
+              "candidate_passes_both_count": 2,
+              "median_delta_vs_baseline": -0.014474,
+              "median_delta_vs_placebo": -0.015481
+            }
+          },
+          "creatinine": {
+            "active_only": {
+              "candidate_beats_baseline_significant_count": 4,
+              "candidate_beats_placebo_significant_count": 4,
+              "candidate_passes_both_count": 3,
+              "median_delta_vs_baseline": -0.034476,
+              "median_delta_vs_placebo": -0.044751
+            },
+            "all_windows": {
+              "candidate_beats_baseline_significant_count": 3,
+              "candidate_beats_placebo_significant_count": 5,
+              "candidate_passes_both_count": 3,
+              "median_delta_vs_baseline": -0.029711,
+              "median_delta_vs_placebo": -0.042098
+            }
+          }
+        }
+      },
+      "rationale": "hepatic burden, low effective arterial volume, and acid-perfusion stress coupled to renal targets at 6h",
+      "rows": 17730,
+      "source_system": "hepatic_gastrointestinal",
+      "stays": 1396,
+      "subjects": 1096,
+      "target_system": "renal",
+      "targets": [
+        "creatinine",
+        "bun"
+      ]
+    }
+  ],
+  "gate": {
+    "baseline": "ridge_without_focused_coupling_features",
+    "candidate": "focused_deep_coupling_features",
+    "pass_rule": "candidate must significantly beat both baseline and placebo on held-out patients",
+    "placebo": "ridge_plus_capacity_matched_random_features"
+  },
+  "safety_boundary": {
+    "active_rule_promotion_allowed": false,
+    "causal_claim_allowed": false,
+    "checkpoint_promotion_allowed": false,
+    "clinical_claim_allowed": false,
+    "counterfactual_claim_allowed": false,
+    "factual_predictive_signal_only": true,
+    "patient_ids_included_in_report": false,
+    "raw_rows_included": false,
+    "runtime_decision_authority": false
+  }
+}

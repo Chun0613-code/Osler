@@ -1,0 +1,106 @@
+{
+  "action_quality": {
+    "exact_timing_fraction": 1.0,
+    "high_confidence_dose_fraction": 1.0,
+    "normalized_event_rows": 1713,
+    "sources": {
+      "eicu_infusiondrug": 1713
+    }
+  },
+  "action_target_support": {
+    "bicarbonate_to_hco3": {
+      "active_dka_stays": 0,
+      "active_dka_transitions": 0,
+      "stays": 0,
+      "transitions": 0
+    },
+    "dextrose_to_glucose": {
+      "active_dka_stays": 1,
+      "active_dka_transitions": 1,
+      "stays": 2,
+      "transitions": 11
+    },
+    "fluids_to_map": {
+      "active_dka_stays": 3,
+      "active_dka_transitions": 3,
+      "stays": 8,
+      "transitions": 32
+    },
+    "insulin_any_to_glucose": {
+      "active_dka_stays": 21,
+      "active_dka_transitions": 34,
+      "stays": 27,
+      "transitions": 177
+    },
+    "insulin_iv_to_glucose": {
+      "active_dka_stays": 21,
+      "active_dka_transitions": 34,
+      "stays": 27,
+      "transitions": 177
+    },
+    "kcl_to_potassium": {
+      "active_dka_stays": 0,
+      "active_dka_transitions": 0,
+      "stays": 0,
+      "transitions": 0
+    },
+    "rapid_sc_insulin_to_glucose": {
+      "active_dka_stays": 0,
+      "active_dka_transitions": 0,
+      "stays": 0,
+      "transitions": 0
+    }
+  },
+  "active_dka_transitions": 367,
+  "core_pair_counts": {
+    "bicarbonate": 677,
+    "glucose": 1951,
+    "map": 2468,
+    "ph": 164,
+    "potassium": 637
+  },
+  "data_root": "physionet.org/files/eicu-crd-demo/2.0.1",
+  "dataset": "PhysioNet eICU Collaborative Research Database Demo 2.0.1",
+  "dka_like_stay_count_before_evaluable_filter": 304,
+  "output": "eicu_dka_transitions_6h_demo.parquet",
+  "power_proxy": {
+    "glucose_gate_reference_stays": 77,
+    "map_gate_reference_stays": 42,
+    "note": "Reference thresholds come from prior MIMIC-demo power analysis; eICU effect sizes may differ.",
+    "support_passes_reference": {
+      "fluids_to_map": false,
+      "insulin_any_to_glucose": false,
+      "kcl_to_potassium": false
+    }
+  },
+  "safety_boundary": {
+    "causal_claim_allowed": false,
+    "clinical_claim_allowed": false,
+    "counterfactual_claim_allowed": false,
+    "factual_observed_treatment_only": true,
+    "medication_orders_used_as_numeric_administrations": false,
+    "patient_ids_included_in_report": false,
+    "raw_rows_included": false,
+    "unknown_dose_evidence_used_in_action_grid": false
+  },
+  "schema": {
+    "compatible_with_evaluate_mimic_proxy": true,
+    "has_exact_action_grids": true,
+    "has_separate_treatment_presence_evidence": true,
+    "has_treatment_history": true,
+    "has_treatment_lifecycle": true
+  },
+  "stays": 259,
+  "transitions": 2762,
+  "treatment_presence_evidence": {
+    "active_dka_windows_with_evidence_but_no_numeric_dose": 181,
+    "active_dka_windows_with_insulin_evidence": 216,
+    "note": "Medication orders, coarse treatment rows, and unknown-unit infusions are presence evidence only and never enter dose grids.",
+    "rows": 21782,
+    "sources": {
+      "eicu_infusiondrug": 2844,
+      "eicu_medication": 13035,
+      "eicu_treatment": 5903
+    }
+  }
+}

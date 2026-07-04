@@ -1,0 +1,3997 @@
+{
+  "accepted_coverage_range": [
+    0.87,
+    0.93
+  ],
+  "artifact": "whole-body split-conformal coverage audit",
+  "interval_method": "split_conformal_residual_interval_per_target_horizon_source",
+  "primary_coverage_target": 0.9,
+  "safety_boundary": {
+    "causal_claim_allowed": false,
+    "clinical_claim_allowed": false,
+    "factual_prediction_only": true,
+    "patient_ids_included_in_report": false,
+    "row_level_outputs_committed": false,
+    "runtime_decision_authority": false
+  },
+  "tasks": [
+    {
+      "cohort": "eicu_sepsis_transitions_6h.parquet",
+      "future_suffix": "tp6",
+      "hospital_holdout": {
+        "active_only": {
+          "creatinine": {
+            "calibration_rows": 13024,
+            "coverage": 0.90503,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "mean_interval_width": 1.5,
+            "method": "persistence",
+            "radius": 0.75,
+            "test_rows": 10993
+          },
+          "heart_rate": {
+            "calibration_rows": 144673,
+            "coverage": 0.90186,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "mean_interval_width": 36.578894,
+            "method": "ridge_realfit",
+            "radius": 18.289447,
+            "test_rows": 102445
+          },
+          "lactate": {
+            "calibration_rows": 8648,
+            "coverage": 0.886501,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "mean_interval_width": 5.706715,
+            "method": "ridge_realfit",
+            "radius": 2.853357,
+            "test_rows": 6282
+          },
+          "map": {
+            "calibration_rows": 143652,
+            "coverage": 0.90256,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "mean_interval_width": 41.244141,
+            "method": "ridge_realfit",
+            "radius": 20.62207,
+            "test_rows": 101775
+          },
+          "o2sat": {
+            "calibration_rows": 140254,
+            "coverage": 0.904211,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "mean_interval_width": 9.321276,
+            "method": "ridge_realfit",
+            "radius": 4.660638,
+            "test_rows": 99677
+          },
+          "respiratory_rate": {
+            "calibration_rows": 134750,
+            "coverage": 0.888995,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "mean_interval_width": 16.225343,
+            "method": "ridge_realfit",
+            "radius": 8.112672,
+            "test_rows": 89654
+          },
+          "urine_output": {
+            "calibration_rows": 52078,
+            "coverage": 0.918911,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "mean_interval_width": 544.595046,
+            "method": "ridge_realfit",
+            "radius": 272.297523,
+            "test_rows": 47072
+          },
+          "vasopressor_requirement": {
+            "calibration_rows": 147352,
+            "coverage": 0.904756,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "mean_interval_width": 0.0,
+            "method": "persistence",
+            "radius": 0.0,
+            "test_rows": 104825
+          }
+        },
+        "all_windows": {
+          "creatinine": {
+            "calibration_rows": 15604,
+            "coverage": 0.903537,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "mean_interval_width": 1.34,
+            "method": "persistence",
+            "radius": 0.67,
+            "test_rows": 12948
+          },
+          "heart_rate": {
+            "calibration_rows": 240125,
+            "coverage": 0.901807,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "mean_interval_width": 36.355099,
+            "method": "ridge_realfit",
+            "radius": 18.177549,
+            "test_rows": 172039
+          },
+          "lactate": {
+            "calibration_rows": 9554,
+            "coverage": 0.884409,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "mean_interval_width": 5.435207,
+            "method": "ridge_realfit",
+            "radius": 2.717603,
+            "test_rows": 6696
+          },
+          "map": {
+            "calibration_rows": 237990,
+            "coverage": 0.905175,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "mean_interval_width": 42.688584,
+            "method": "ridge_realfit",
+            "radius": 21.344292,
+            "test_rows": 170398
+          },
+          "o2sat": {
+            "calibration_rows": 232502,
+            "coverage": 0.905304,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "mean_interval_width": 8.561099,
+            "method": "ridge_realfit",
+            "radius": 4.28055,
+            "test_rows": 167134
+          },
+          "respiratory_rate": {
+            "calibration_rows": 222429,
+            "coverage": 0.887665,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "mean_interval_width": 16.287969,
+            "method": "ridge_realfit",
+            "radius": 8.143985,
+            "test_rows": 150051
+          },
+          "urine_output": {
+            "calibration_rows": 79910,
+            "coverage": 0.920242,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "mean_interval_width": 615.898644,
+            "method": "ridge_realfit",
+            "radius": 307.949322,
+            "test_rows": 73234
+          },
+          "vasopressor_requirement": {
+            "calibration_rows": 246030,
+            "coverage": 0.930301,
+            "coverage_gate_passed": false,
+            "level": 0.9,
+            "mean_interval_width": 0.0,
+            "method": "persistence",
+            "radius": 0.0,
+            "test_rows": 176214
+          }
+        },
+        "available": true,
+        "selected_methods": {
+          "creatinine": "persistence",
+          "heart_rate": "ridge_realfit",
+          "lactate": "ridge_realfit",
+          "map": "ridge_realfit",
+          "o2sat": "ridge_realfit",
+          "respiratory_rate": "ridge_realfit",
+          "urine_output": "ridge_realfit",
+          "vasopressor_requirement": "persistence"
+        }
+      },
+      "hospitals": 204,
+      "level": 0.9,
+      "module": "sepsis",
+      "random_patient_splits": {
+        "runs": [
+          {
+            "active_only": {
+              "creatinine": {
+                "calibration_rows": 16210,
+                "coverage": 0.894582,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 1.44,
+                "method": "persistence",
+                "radius": 0.72,
+                "test_rows": 7807
+              },
+              "heart_rate": {
+                "calibration_rows": 164794,
+                "coverage": 0.896652,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 36.268322,
+                "method": "ridge_realfit",
+                "radius": 18.134161,
+                "test_rows": 82324
+              },
+              "lactate": {
+                "calibration_rows": 10014,
+                "coverage": 0.89585,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 5.807361,
+                "method": "ridge_realfit",
+                "radius": 2.90368,
+                "test_rows": 4916
+              },
+              "map": {
+                "calibration_rows": 163655,
+                "coverage": 0.898131,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 40.862187,
+                "method": "ridge_realfit",
+                "radius": 20.431093,
+                "test_rows": 81772
+              },
+              "o2sat": {
+                "calibration_rows": 159920,
+                "coverage": 0.902026,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 9.243989,
+                "method": "ridge_realfit",
+                "radius": 4.621995,
+                "test_rows": 80011
+              },
+              "respiratory_rate": {
+                "calibration_rows": 149414,
+                "coverage": 0.901814,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 16.557897,
+                "method": "ridge_realfit",
+                "radius": 8.278948,
+                "test_rows": 74990
+              },
+              "urine_output": {
+                "calibration_rows": 65801,
+                "coverage": 0.899277,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 508.275007,
+                "method": "ridge_realfit",
+                "radius": 254.137504,
+                "test_rows": 33349
+              },
+              "vasopressor_requirement": {
+                "calibration_rows": 168088,
+                "coverage": 0.90736,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 0.0,
+                "method": "persistence",
+                "radius": 0.0,
+                "test_rows": 84089
+              }
+            },
+            "all_windows": {
+              "creatinine": {
+                "calibration_rows": 19179,
+                "coverage": 0.897578,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 1.32,
+                "method": "persistence",
+                "radius": 0.66,
+                "test_rows": 9373
+              },
+              "heart_rate": {
+                "calibration_rows": 275305,
+                "coverage": 0.896938,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 36.067012,
+                "method": "ridge_realfit",
+                "radius": 18.033506,
+                "test_rows": 136859
+              },
+              "lactate": {
+                "calibration_rows": 10925,
+                "coverage": 0.896526,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 5.555495,
+                "method": "ridge_realfit",
+                "radius": 2.777748,
+                "test_rows": 5325
+              },
+              "map": {
+                "calibration_rows": 272785,
+                "coverage": 0.8988,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 42.152462,
+                "method": "ridge_realfit",
+                "radius": 21.076231,
+                "test_rows": 135603
+              },
+              "o2sat": {
+                "calibration_rows": 266960,
+                "coverage": 0.900743,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 8.461708,
+                "method": "ridge_realfit",
+                "radius": 4.230854,
+                "test_rows": 132676
+              },
+              "respiratory_rate": {
+                "calibration_rows": 248460,
+                "coverage": 0.899339,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 16.604129,
+                "method": "ridge_realfit",
+                "radius": 8.302065,
+                "test_rows": 124020
+              },
+              "urine_output": {
+                "calibration_rows": 101944,
+                "coverage": 0.898105,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 568.075122,
+                "method": "ridge_realfit",
+                "radius": 284.037561,
+                "test_rows": 51200
+              },
+              "vasopressor_requirement": {
+                "calibration_rows": 282013,
+                "coverage": 0.932661,
+                "coverage_gate_passed": false,
+                "level": 0.9,
+                "mean_interval_width": 0.0,
+                "method": "persistence",
+                "radius": 0.0,
+                "test_rows": 140231
+              }
+            },
+            "seed": 7,
+            "selected_methods": {
+              "creatinine": "persistence",
+              "heart_rate": "ridge_realfit",
+              "lactate": "ridge_realfit",
+              "map": "ridge_realfit",
+              "o2sat": "ridge_realfit",
+              "respiratory_rate": "ridge_realfit",
+              "urine_output": "ridge_realfit",
+              "vasopressor_requirement": "persistence"
+            }
+          },
+          {
+            "active_only": {
+              "creatinine": {
+                "calibration_rows": 15910,
+                "coverage": 0.910941,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 1.52,
+                "method": "persistence",
+                "radius": 0.76,
+                "test_rows": 8107
+              },
+              "heart_rate": {
+                "calibration_rows": 165869,
+                "coverage": 0.899137,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 36.424081,
+                "method": "ridge_realfit",
+                "radius": 18.212041,
+                "test_rows": 81249
+              },
+              "lactate": {
+                "calibration_rows": 9833,
+                "coverage": 0.900334,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 5.899245,
+                "method": "ridge_realfit",
+                "radius": 2.949622,
+                "test_rows": 5097
+              },
+              "map": {
+                "calibration_rows": 164804,
+                "coverage": 0.900512,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 40.975359,
+                "method": "ridge_realfit",
+                "radius": 20.487679,
+                "test_rows": 80623
+              },
+              "o2sat": {
+                "calibration_rows": 161029,
+                "coverage": 0.902182,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 9.268199,
+                "method": "ridge_realfit",
+                "radius": 4.6341,
+                "test_rows": 78902
+              },
+              "respiratory_rate": {
+                "calibration_rows": 150805,
+                "coverage": 0.902567,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 16.581556,
+                "method": "ridge_realfit",
+                "radius": 8.290778,
+                "test_rows": 73599
+              },
+              "urine_output": {
+                "calibration_rows": 66458,
+                "coverage": 0.898079,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 506.431625,
+                "method": "ridge_realfit",
+                "radius": 253.215813,
+                "test_rows": 32692
+              },
+              "vasopressor_requirement": {
+                "calibration_rows": 169290,
+                "coverage": 0.905051,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 0.0,
+                "method": "persistence",
+                "radius": 0.0,
+                "test_rows": 82887
+              }
+            },
+            "all_windows": {
+              "creatinine": {
+                "calibration_rows": 18982,
+                "coverage": 0.909613,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 1.36,
+                "method": "persistence",
+                "radius": 0.68,
+                "test_rows": 9570
+              },
+              "heart_rate": {
+                "calibration_rows": 277382,
+                "coverage": 0.900172,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 36.2467,
+                "method": "ridge_realfit",
+                "radius": 18.12335,
+                "test_rows": 134782
+              },
+              "lactate": {
+                "calibration_rows": 10719,
+                "coverage": 0.89821,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 5.5795,
+                "method": "ridge_realfit",
+                "radius": 2.78975,
+                "test_rows": 5531
+              },
+              "map": {
+                "calibration_rows": 274953,
+                "coverage": 0.901817,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 42.317212,
+                "method": "ridge_realfit",
+                "radius": 21.158606,
+                "test_rows": 133435
+              },
+              "o2sat": {
+                "calibration_rows": 268993,
+                "coverage": 0.901855,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 8.484422,
+                "method": "ridge_realfit",
+                "radius": 4.242211,
+                "test_rows": 130643
+              },
+              "respiratory_rate": {
+                "calibration_rows": 250724,
+                "coverage": 0.903364,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 16.702497,
+                "method": "ridge_realfit",
+                "radius": 8.351248,
+                "test_rows": 121756
+              },
+              "urine_output": {
+                "calibration_rows": 102706,
+                "coverage": 0.901642,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 572.755207,
+                "method": "ridge_realfit",
+                "radius": 286.377603,
+                "test_rows": 50438
+              },
+              "vasopressor_requirement": {
+                "calibration_rows": 284092,
+                "coverage": 0.930584,
+                "coverage_gate_passed": false,
+                "level": 0.9,
+                "mean_interval_width": 0.0,
+                "method": "persistence",
+                "radius": 0.0,
+                "test_rows": 138152
+              }
+            },
+            "seed": 11,
+            "selected_methods": {
+              "creatinine": "persistence",
+              "heart_rate": "ridge_realfit",
+              "lactate": "ridge_realfit",
+              "map": "ridge_realfit",
+              "o2sat": "ridge_realfit",
+              "respiratory_rate": "ridge_realfit",
+              "urine_output": "ridge_realfit",
+              "vasopressor_requirement": "persistence"
+            }
+          },
+          {
+            "active_only": {
+              "creatinine": {
+                "calibration_rows": 16002,
+                "coverage": 0.894822,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 1.44,
+                "method": "persistence",
+                "radius": 0.72,
+                "test_rows": 8015
+              },
+              "heart_rate": {
+                "calibration_rows": 165954,
+                "coverage": 0.900966,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 36.489336,
+                "method": "ridge_realfit",
+                "radius": 18.244668,
+                "test_rows": 81164
+              },
+              "lactate": {
+                "calibration_rows": 9956,
+                "coverage": 0.893848,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 5.859121,
+                "method": "ridge_realfit",
+                "radius": 2.929561,
+                "test_rows": 4974
+              },
+              "map": {
+                "calibration_rows": 164866,
+                "coverage": 0.902285,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 41.088527,
+                "method": "ridge_realfit",
+                "radius": 20.544263,
+                "test_rows": 80561
+              },
+              "o2sat": {
+                "calibration_rows": 161005,
+                "coverage": 0.902466,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 9.235076,
+                "method": "ridge_realfit",
+                "radius": 4.617538,
+                "test_rows": 78926
+              },
+              "respiratory_rate": {
+                "calibration_rows": 150887,
+                "coverage": 0.896405,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 16.430148,
+                "method": "ridge_realfit",
+                "radius": 8.215074,
+                "test_rows": 73517
+              },
+              "urine_output": {
+                "calibration_rows": 66259,
+                "coverage": 0.902709,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 511.821464,
+                "method": "ridge_realfit",
+                "radius": 255.910732,
+                "test_rows": 32891
+              },
+              "vasopressor_requirement": {
+                "calibration_rows": 169361,
+                "coverage": 0.907385,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 0.0,
+                "method": "persistence",
+                "radius": 0.0,
+                "test_rows": 82816
+              }
+            },
+            "all_windows": {
+              "creatinine": {
+                "calibration_rows": 19070,
+                "coverage": 0.893588,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 1.3,
+                "method": "persistence",
+                "radius": 0.65,
+                "test_rows": 9482
+              },
+              "heart_rate": {
+                "calibration_rows": 276298,
+                "coverage": 0.900549,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 36.239854,
+                "method": "ridge_realfit",
+                "radius": 18.119927,
+                "test_rows": 135866
+              },
+              "lactate": {
+                "calibration_rows": 10840,
+                "coverage": 0.896303,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 5.614308,
+                "method": "ridge_realfit",
+                "radius": 2.807154,
+                "test_rows": 5410
+              },
+              "map": {
+                "calibration_rows": 273804,
+                "coverage": 0.90195,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 42.323572,
+                "method": "ridge_realfit",
+                "radius": 21.161786,
+                "test_rows": 134584
+              },
+              "o2sat": {
+                "calibration_rows": 267597,
+                "coverage": 0.900355,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 8.443573,
+                "method": "ridge_realfit",
+                "radius": 4.221787,
+                "test_rows": 132039
+              },
+              "respiratory_rate": {
+                "calibration_rows": 249904,
+                "coverage": 0.898602,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 16.597975,
+                "method": "ridge_realfit",
+                "radius": 8.298987,
+                "test_rows": 122576
+              },
+              "urine_output": {
+                "calibration_rows": 101812,
+                "coverage": 0.903121,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 575.869576,
+                "method": "ridge_realfit",
+                "radius": 287.934788,
+                "test_rows": 51332
+              },
+              "vasopressor_requirement": {
+                "calibration_rows": 283139,
+                "coverage": 0.932475,
+                "coverage_gate_passed": false,
+                "level": 0.9,
+                "mean_interval_width": 0.0,
+                "method": "persistence",
+                "radius": 0.0,
+                "test_rows": 139105
+              }
+            },
+            "seed": 19,
+            "selected_methods": {
+              "creatinine": "persistence",
+              "heart_rate": "ridge_realfit",
+              "lactate": "ridge_realfit",
+              "map": "ridge_realfit",
+              "o2sat": "ridge_realfit",
+              "respiratory_rate": "ridge_realfit",
+              "urine_output": "ridge_realfit",
+              "vasopressor_requirement": "persistence"
+            }
+          },
+          {
+            "active_only": {
+              "creatinine": {
+                "calibration_rows": 16319,
+                "coverage": 0.904131,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 1.48,
+                "method": "persistence",
+                "radius": 0.74,
+                "test_rows": 7698
+              },
+              "heart_rate": {
+                "calibration_rows": 165724,
+                "coverage": 0.900005,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 36.43596,
+                "method": "ridge_realfit",
+                "radius": 18.21798,
+                "test_rows": 81394
+              },
+              "lactate": {
+                "calibration_rows": 10100,
+                "coverage": 0.910766,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 6.037422,
+                "method": "ridge_realfit",
+                "radius": 3.018711,
+                "test_rows": 4830
+              },
+              "map": {
+                "calibration_rows": 164636,
+                "coverage": 0.900645,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 40.974916,
+                "method": "ridge_realfit",
+                "radius": 20.487458,
+                "test_rows": 80791
+              },
+              "o2sat": {
+                "calibration_rows": 160883,
+                "coverage": 0.903514,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 9.282472,
+                "method": "ridge_realfit",
+                "radius": 4.641236,
+                "test_rows": 79048
+              },
+              "respiratory_rate": {
+                "calibration_rows": 150683,
+                "coverage": 0.89718,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 16.443089,
+                "method": "ridge_realfit",
+                "radius": 8.221545,
+                "test_rows": 73721
+              },
+              "urine_output": {
+                "calibration_rows": 65720,
+                "coverage": 0.89994,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 509.565141,
+                "method": "ridge_realfit",
+                "radius": 254.78257,
+                "test_rows": 33430
+              },
+              "vasopressor_requirement": {
+                "calibration_rows": 169200,
+                "coverage": 0.907324,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 0.0,
+                "method": "persistence",
+                "radius": 0.0,
+                "test_rows": 82977
+              }
+            },
+            "all_windows": {
+              "creatinine": {
+                "calibration_rows": 19290,
+                "coverage": 0.909199,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 1.36,
+                "method": "persistence",
+                "radius": 0.68,
+                "test_rows": 9262
+              },
+              "heart_rate": {
+                "calibration_rows": 275960,
+                "coverage": 0.901236,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 36.275933,
+                "method": "ridge_realfit",
+                "radius": 18.137967,
+                "test_rows": 136204
+              },
+              "lactate": {
+                "calibration_rows": 10988,
+                "coverage": 0.91087,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 5.744266,
+                "method": "ridge_realfit",
+                "radius": 2.872133,
+                "test_rows": 5262
+              },
+              "map": {
+                "calibration_rows": 273500,
+                "coverage": 0.900399,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 42.250577,
+                "method": "ridge_realfit",
+                "radius": 21.125289,
+                "test_rows": 134888
+              },
+              "o2sat": {
+                "calibration_rows": 267669,
+                "coverage": 0.902756,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 8.492056,
+                "method": "ridge_realfit",
+                "radius": 4.246028,
+                "test_rows": 131967
+              },
+              "respiratory_rate": {
+                "calibration_rows": 249534,
+                "coverage": 0.898882,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 16.593985,
+                "method": "ridge_realfit",
+                "radius": 8.296993,
+                "test_rows": 122946
+              },
+              "urine_output": {
+                "calibration_rows": 101761,
+                "coverage": 0.900823,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 571.103026,
+                "method": "ridge_realfit",
+                "radius": 285.551513,
+                "test_rows": 51383
+              },
+              "vasopressor_requirement": {
+                "calibration_rows": 282957,
+                "coverage": 0.932729,
+                "coverage_gate_passed": false,
+                "level": 0.9,
+                "mean_interval_width": 0.0,
+                "method": "persistence",
+                "radius": 0.0,
+                "test_rows": 139287
+              }
+            },
+            "seed": 23,
+            "selected_methods": {
+              "creatinine": "persistence",
+              "heart_rate": "ridge_realfit",
+              "lactate": "ridge_realfit",
+              "map": "ridge_realfit",
+              "o2sat": "ridge_realfit",
+              "respiratory_rate": "ridge_realfit",
+              "urine_output": "ridge_realfit",
+              "vasopressor_requirement": "persistence"
+            }
+          },
+          {
+            "active_only": {
+              "creatinine": {
+                "calibration_rows": 16269,
+                "coverage": 0.903588,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 1.48,
+                "method": "persistence",
+                "radius": 0.74,
+                "test_rows": 7748
+              },
+              "heart_rate": {
+                "calibration_rows": 165993,
+                "coverage": 0.899328,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 36.409939,
+                "method": "ridge_realfit",
+                "radius": 18.20497,
+                "test_rows": 81125
+              },
+              "lactate": {
+                "calibration_rows": 10097,
+                "coverage": 0.896958,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 5.851171,
+                "method": "ridge_realfit",
+                "radius": 2.925586,
+                "test_rows": 4833
+              },
+              "map": {
+                "calibration_rows": 164866,
+                "coverage": 0.900808,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 41.009645,
+                "method": "ridge_realfit",
+                "radius": 20.504822,
+                "test_rows": 80561
+              },
+              "o2sat": {
+                "calibration_rows": 161140,
+                "coverage": 0.900547,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 9.229289,
+                "method": "ridge_realfit",
+                "radius": 4.614644,
+                "test_rows": 78791
+              },
+              "respiratory_rate": {
+                "calibration_rows": 151099,
+                "coverage": 0.899488,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 16.504348,
+                "method": "ridge_realfit",
+                "radius": 8.252174,
+                "test_rows": 73305
+              },
+              "urine_output": {
+                "calibration_rows": 67179,
+                "coverage": 0.896406,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 504.636497,
+                "method": "ridge_realfit",
+                "radius": 252.318249,
+                "test_rows": 31971
+              },
+              "vasopressor_requirement": {
+                "calibration_rows": 169339,
+                "coverage": 0.902955,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 0.0,
+                "method": "persistence",
+                "radius": 0.0,
+                "test_rows": 82838
+              }
+            },
+            "all_windows": {
+              "creatinine": {
+                "calibration_rows": 19349,
+                "coverage": 0.901771,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 1.320001,
+                "method": "persistence",
+                "radius": 0.66,
+                "test_rows": 9203
+              },
+              "heart_rate": {
+                "calibration_rows": 275271,
+                "coverage": 0.898446,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 36.133132,
+                "method": "ridge_realfit",
+                "radius": 18.066566,
+                "test_rows": 136893
+              },
+              "lactate": {
+                "calibration_rows": 10942,
+                "coverage": 0.900151,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 5.643388,
+                "method": "ridge_realfit",
+                "radius": 2.821694,
+                "test_rows": 5308
+              },
+              "map": {
+                "calibration_rows": 272768,
+                "coverage": 0.902271,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 42.322438,
+                "method": "ridge_realfit",
+                "radius": 21.161219,
+                "test_rows": 135620
+              },
+              "o2sat": {
+                "calibration_rows": 266874,
+                "coverage": 0.90196,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 8.484573,
+                "method": "ridge_realfit",
+                "radius": 4.242287,
+                "test_rows": 132762
+              },
+              "respiratory_rate": {
+                "calibration_rows": 249565,
+                "coverage": 0.901468,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 16.660345,
+                "method": "ridge_realfit",
+                "radius": 8.330173,
+                "test_rows": 122915
+              },
+              "urine_output": {
+                "calibration_rows": 103612,
+                "coverage": 0.900105,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 570.341905,
+                "method": "ridge_realfit",
+                "radius": 285.170952,
+                "test_rows": 49532
+              },
+              "vasopressor_requirement": {
+                "calibration_rows": 281958,
+                "coverage": 0.929587,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 0.0,
+                "method": "persistence",
+                "radius": 0.0,
+                "test_rows": 140286
+              }
+            },
+            "seed": 37,
+            "selected_methods": {
+              "creatinine": "persistence",
+              "heart_rate": "ridge_realfit",
+              "lactate": "ridge_realfit",
+              "map": "ridge_realfit",
+              "o2sat": "ridge_realfit",
+              "respiratory_rate": "ridge_realfit",
+              "urine_output": "ridge_realfit",
+              "vasopressor_requirement": "persistence"
+            }
+          },
+          {
+            "active_only": {
+              "creatinine": {
+                "calibration_rows": 16131,
+                "coverage": 0.895257,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 1.459999,
+                "method": "persistence",
+                "radius": 0.73,
+                "test_rows": 7886
+              },
+              "heart_rate": {
+                "calibration_rows": 165877,
+                "coverage": 0.899829,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 36.436291,
+                "method": "ridge_realfit",
+                "radius": 18.218145,
+                "test_rows": 81241
+              },
+              "lactate": {
+                "calibration_rows": 9850,
+                "coverage": 0.910433,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 6.01376,
+                "method": "ridge_realfit",
+                "radius": 3.00688,
+                "test_rows": 5080
+              },
+              "map": {
+                "calibration_rows": 164781,
+                "coverage": 0.896684,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 40.775659,
+                "method": "ridge_realfit",
+                "radius": 20.38783,
+                "test_rows": 80646
+              },
+              "o2sat": {
+                "calibration_rows": 161102,
+                "coverage": 0.901965,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 9.258525,
+                "method": "ridge_realfit",
+                "radius": 4.629262,
+                "test_rows": 78829
+              },
+              "respiratory_rate": {
+                "calibration_rows": 150898,
+                "coverage": 0.901954,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 16.555507,
+                "method": "ridge_realfit",
+                "radius": 8.277754,
+                "test_rows": 73506
+              },
+              "urine_output": {
+                "calibration_rows": 66261,
+                "coverage": 0.902885,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 512.668142,
+                "method": "ridge_realfit",
+                "radius": 256.334071,
+                "test_rows": 32889
+              },
+              "vasopressor_requirement": {
+                "calibration_rows": 169259,
+                "coverage": 0.9078,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 0.0,
+                "method": "persistence",
+                "radius": 0.0,
+                "test_rows": 82918
+              }
+            },
+            "all_windows": {
+              "creatinine": {
+                "calibration_rows": 19147,
+                "coverage": 0.897289,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 1.32,
+                "method": "persistence",
+                "radius": 0.66,
+                "test_rows": 9405
+              },
+              "heart_rate": {
+                "calibration_rows": 277833,
+                "coverage": 0.900112,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 36.220226,
+                "method": "ridge_realfit",
+                "radius": 18.110113,
+                "test_rows": 134331
+              },
+              "lactate": {
+                "calibration_rows": 10723,
+                "coverage": 0.909354,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 5.719186,
+                "method": "ridge_realfit",
+                "radius": 2.859593,
+                "test_rows": 5527
+              },
+              "map": {
+                "calibration_rows": 275412,
+                "coverage": 0.897553,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 42.075008,
+                "method": "ridge_realfit",
+                "radius": 21.037504,
+                "test_rows": 132976
+              },
+              "o2sat": {
+                "calibration_rows": 269356,
+                "coverage": 0.900514,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 8.467606,
+                "method": "ridge_realfit",
+                "radius": 4.233803,
+                "test_rows": 130280
+              },
+              "respiratory_rate": {
+                "calibration_rows": 251779,
+                "coverage": 0.899968,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 16.627141,
+                "method": "ridge_realfit",
+                "radius": 8.313571,
+                "test_rows": 120701
+              },
+              "urine_output": {
+                "calibration_rows": 103135,
+                "coverage": 0.902338,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 574.009501,
+                "method": "ridge_realfit",
+                "radius": 287.004751,
+                "test_rows": 50009
+              },
+              "vasopressor_requirement": {
+                "calibration_rows": 284637,
+                "coverage": 0.931421,
+                "coverage_gate_passed": false,
+                "level": 0.9,
+                "mean_interval_width": 0.0,
+                "method": "persistence",
+                "radius": 0.0,
+                "test_rows": 137607
+              }
+            },
+            "seed": 53,
+            "selected_methods": {
+              "creatinine": "persistence",
+              "heart_rate": "ridge_realfit",
+              "lactate": "ridge_realfit",
+              "map": "ridge_realfit",
+              "o2sat": "ridge_realfit",
+              "respiratory_rate": "ridge_realfit",
+              "urine_output": "ridge_realfit",
+              "vasopressor_requirement": "persistence"
+            }
+          },
+          {
+            "active_only": {
+              "creatinine": {
+                "calibration_rows": 16111,
+                "coverage": 0.898052,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 1.46,
+                "method": "persistence",
+                "radius": 0.73,
+                "test_rows": 7906
+              },
+              "heart_rate": {
+                "calibration_rows": 165825,
+                "coverage": 0.902119,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 36.550924,
+                "method": "ridge_realfit",
+                "radius": 18.275462,
+                "test_rows": 81293
+              },
+              "lactate": {
+                "calibration_rows": 10032,
+                "coverage": 0.903838,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 5.930281,
+                "method": "ridge_realfit",
+                "radius": 2.965141,
+                "test_rows": 4898
+              },
+              "map": {
+                "calibration_rows": 164665,
+                "coverage": 0.901303,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 41.02482,
+                "method": "ridge_realfit",
+                "radius": 20.51241,
+                "test_rows": 80762
+              },
+              "o2sat": {
+                "calibration_rows": 160930,
+                "coverage": 0.900697,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 9.227609,
+                "method": "ridge_realfit",
+                "radius": 4.613804,
+                "test_rows": 79001
+              },
+              "respiratory_rate": {
+                "calibration_rows": 150542,
+                "coverage": 0.898405,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 16.468947,
+                "method": "ridge_realfit",
+                "radius": 8.234474,
+                "test_rows": 73862
+              },
+              "urine_output": {
+                "calibration_rows": 66443,
+                "coverage": 0.899899,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 509.854327,
+                "method": "ridge_realfit",
+                "radius": 254.927163,
+                "test_rows": 32707
+              },
+              "vasopressor_requirement": {
+                "calibration_rows": 169178,
+                "coverage": 0.905951,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 0.0,
+                "method": "persistence",
+                "radius": 0.0,
+                "test_rows": 82999
+              }
+            },
+            "all_windows": {
+              "creatinine": {
+                "calibration_rows": 19012,
+                "coverage": 0.899371,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 1.32,
+                "method": "persistence",
+                "radius": 0.66,
+                "test_rows": 9540
+              },
+              "heart_rate": {
+                "calibration_rows": 275978,
+                "coverage": 0.900621,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 36.25111,
+                "method": "ridge_realfit",
+                "radius": 18.125555,
+                "test_rows": 136186
+              },
+              "lactate": {
+                "calibration_rows": 10873,
+                "coverage": 0.907011,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 5.728568,
+                "method": "ridge_realfit",
+                "radius": 2.864284,
+                "test_rows": 5377
+              },
+              "map": {
+                "calibration_rows": 273370,
+                "coverage": 0.900739,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 42.245585,
+                "method": "ridge_realfit",
+                "radius": 21.122792,
+                "test_rows": 135018
+              },
+              "o2sat": {
+                "calibration_rows": 267435,
+                "coverage": 0.90081,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 8.459983,
+                "method": "ridge_realfit",
+                "radius": 4.229991,
+                "test_rows": 132201
+              },
+              "respiratory_rate": {
+                "calibration_rows": 249128,
+                "coverage": 0.896978,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 16.54801,
+                "method": "ridge_realfit",
+                "radius": 8.274005,
+                "test_rows": 123352
+              },
+              "urine_output": {
+                "calibration_rows": 102691,
+                "coverage": 0.902959,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 575.027131,
+                "method": "ridge_realfit",
+                "radius": 287.513565,
+                "test_rows": 50453
+              },
+              "vasopressor_requirement": {
+                "calibration_rows": 282757,
+                "coverage": 0.93165,
+                "coverage_gate_passed": false,
+                "level": 0.9,
+                "mean_interval_width": 0.0,
+                "method": "persistence",
+                "radius": 0.0,
+                "test_rows": 139487
+              }
+            },
+            "seed": 71,
+            "selected_methods": {
+              "creatinine": "persistence",
+              "heart_rate": "ridge_realfit",
+              "lactate": "ridge_realfit",
+              "map": "ridge_realfit",
+              "o2sat": "ridge_realfit",
+              "respiratory_rate": "ridge_realfit",
+              "urine_output": "ridge_realfit",
+              "vasopressor_requirement": "persistence"
+            }
+          }
+        ],
+        "seeds": [
+          7,
+          11,
+          19,
+          23,
+          37,
+          53,
+          71
+        ]
+      },
+      "rows": 422244,
+      "subjects": 25175
+    },
+    {
+      "cohort": "eicu_aki_transitions_24h.parquet",
+      "future_suffix": "tp24",
+      "hospital_holdout": {
+        "active_only": {
+          "bicarbonate": {
+            "calibration_rows": 34716,
+            "coverage": 0.894361,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "mean_interval_width": 11.051007,
+            "method": "ridge_realfit",
+            "radius": 5.525504,
+            "test_rows": 23533
+          },
+          "bun": {
+            "calibration_rows": 30656,
+            "coverage": 0.891882,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "mean_interval_width": 43.727513,
+            "method": "ridge_realfit",
+            "radius": 21.863756,
+            "test_rows": 19821
+          },
+          "creatinine": {
+            "calibration_rows": 30722,
+            "coverage": 0.897826,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "mean_interval_width": 3.053758,
+            "method": "ridge_realfit",
+            "radius": 1.526879,
+            "test_rows": 19868
+          },
+          "map": {
+            "calibration_rows": 106507,
+            "coverage": 0.895032,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "mean_interval_width": 45.782244,
+            "method": "ridge_realfit",
+            "radius": 22.891122,
+            "test_rows": 68192
+          },
+          "potassium": {
+            "calibration_rows": 33491,
+            "coverage": 0.898678,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "mean_interval_width": 1.722529,
+            "method": "ridge_realfit",
+            "radius": 0.861264,
+            "test_rows": 21476
+          },
+          "sodium": {
+            "calibration_rows": 32703,
+            "coverage": 0.90287,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "mean_interval_width": 10.877124,
+            "method": "ridge_realfit",
+            "radius": 5.438562,
+            "test_rows": 20385
+          },
+          "urine_output": {
+            "calibration_rows": 49137,
+            "coverage": 0.88016,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "mean_interval_width": 520.442103,
+            "method": "population_delta",
+            "radius": 260.221052,
+            "test_rows": 25776
+          }
+        },
+        "all_windows": {
+          "bicarbonate": {
+            "calibration_rows": 53962,
+            "coverage": 0.895956,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "mean_interval_width": 10.68071,
+            "method": "ridge_realfit",
+            "radius": 5.340355,
+            "test_rows": 37609
+          },
+          "bun": {
+            "calibration_rows": 44479,
+            "coverage": 0.893162,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "mean_interval_width": 38.305508,
+            "method": "ridge_realfit",
+            "radius": 19.152754,
+            "test_rows": 28370
+          },
+          "creatinine": {
+            "calibration_rows": 44572,
+            "coverage": 0.897308,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "mean_interval_width": 2.522217,
+            "method": "ridge_realfit",
+            "radius": 1.261108,
+            "test_rows": 28454
+          },
+          "map": {
+            "calibration_rows": 312812,
+            "coverage": 0.895304,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "mean_interval_width": 45.96982,
+            "method": "ridge_realfit",
+            "radius": 22.98491,
+            "test_rows": 209913
+          },
+          "potassium": {
+            "calibration_rows": 52731,
+            "coverage": 0.902237,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "mean_interval_width": 1.642802,
+            "method": "ridge_realfit",
+            "radius": 0.821401,
+            "test_rows": 33837
+          },
+          "sodium": {
+            "calibration_rows": 49835,
+            "coverage": 0.902575,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "mean_interval_width": 10.942384,
+            "method": "ridge_realfit",
+            "radius": 5.471192,
+            "test_rows": 30023
+          },
+          "urine_output": {
+            "calibration_rows": 126063,
+            "coverage": 0.886456,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "mean_interval_width": 659.557897,
+            "method": "population_delta",
+            "radius": 329.778948,
+            "test_rows": 73540
+          }
+        },
+        "available": true,
+        "selected_methods": {
+          "bicarbonate": "ridge_realfit",
+          "bun": "ridge_realfit",
+          "creatinine": "ridge_realfit",
+          "map": "ridge_realfit",
+          "potassium": "ridge_realfit",
+          "sodium": "ridge_realfit",
+          "urine_output": "population_delta"
+        }
+      },
+      "hospitals": 203,
+      "level": 0.9,
+      "module": "aki",
+      "random_patient_splits": {
+        "runs": [
+          {
+            "active_only": {
+              "bicarbonate": {
+                "calibration_rows": 38629,
+                "coverage": 0.900765,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 11.141845,
+                "method": "ridge_realfit",
+                "radius": 5.570923,
+                "test_rows": 19620
+              },
+              "bun": {
+                "calibration_rows": 33475,
+                "coverage": 0.900541,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 44.165241,
+                "method": "ridge_realfit",
+                "radius": 22.08262,
+                "test_rows": 17002
+              },
+              "creatinine": {
+                "calibration_rows": 33537,
+                "coverage": 0.902539,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 3.071897,
+                "method": "ridge_realfit",
+                "radius": 1.535949,
+                "test_rows": 17053
+              },
+              "map": {
+                "calibration_rows": 116751,
+                "coverage": 0.899237,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 45.962787,
+                "method": "ridge_realfit",
+                "radius": 22.981393,
+                "test_rows": 57948
+              },
+              "potassium": {
+                "calibration_rows": 36555,
+                "coverage": 0.903487,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 1.728238,
+                "method": "ridge_realfit",
+                "radius": 0.864119,
+                "test_rows": 18412
+              },
+              "sodium": {
+                "calibration_rows": 35206,
+                "coverage": 0.901353,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 10.788405,
+                "method": "ridge_realfit",
+                "radius": 5.394203,
+                "test_rows": 17882
+              },
+              "urine_output": {
+                "calibration_rows": 50104,
+                "coverage": 0.897618,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 530.28204,
+                "method": "population_delta",
+                "radius": 265.14102,
+                "test_rows": 24809
+              }
+            },
+            "all_windows": {
+              "bicarbonate": {
+                "calibration_rows": 61037,
+                "coverage": 0.896181,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 10.667753,
+                "method": "ridge_realfit",
+                "radius": 5.333876,
+                "test_rows": 30534
+              },
+              "bun": {
+                "calibration_rows": 48328,
+                "coverage": 0.8998,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 38.619396,
+                "method": "ridge_realfit",
+                "radius": 19.309698,
+                "test_rows": 24521
+              },
+              "creatinine": {
+                "calibration_rows": 48434,
+                "coverage": 0.903587,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 2.558362,
+                "method": "ridge_realfit",
+                "radius": 1.279181,
+                "test_rows": 24592
+              },
+              "map": {
+                "calibration_rows": 351014,
+                "coverage": 0.900472,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 46.268389,
+                "method": "ridge_realfit",
+                "radius": 23.134194,
+                "test_rows": 171711
+              },
+              "potassium": {
+                "calibration_rows": 57745,
+                "coverage": 0.902092,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 1.636382,
+                "method": "ridge_realfit",
+                "radius": 0.818191,
+                "test_rows": 28823
+              },
+              "sodium": {
+                "calibration_rows": 52972,
+                "coverage": 0.897568,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 10.808411,
+                "method": "ridge_realfit",
+                "radius": 5.404206,
+                "test_rows": 26886
+              },
+              "urine_output": {
+                "calibration_rows": 134725,
+                "coverage": 0.903881,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 679.71796,
+                "method": "population_delta",
+                "radius": 339.85898,
+                "test_rows": 64878
+              }
+            },
+            "seed": 7,
+            "selected_methods": {
+              "bicarbonate": "ridge_realfit",
+              "bun": "ridge_realfit",
+              "creatinine": "ridge_realfit",
+              "map": "ridge_realfit",
+              "potassium": "ridge_realfit",
+              "sodium": "ridge_realfit",
+              "urine_output": "population_delta"
+            }
+          },
+          {
+            "active_only": {
+              "bicarbonate": {
+                "calibration_rows": 39058,
+                "coverage": 0.904174,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 11.193762,
+                "method": "ridge_realfit",
+                "radius": 5.596881,
+                "test_rows": 19191
+              },
+              "bun": {
+                "calibration_rows": 33916,
+                "coverage": 0.903146,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 44.217242,
+                "method": "ridge_realfit",
+                "radius": 22.108621,
+                "test_rows": 16561
+              },
+              "creatinine": {
+                "calibration_rows": 34001,
+                "coverage": 0.89921,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 3.046815,
+                "method": "ridge_realfit",
+                "radius": 1.523407,
+                "test_rows": 16589
+              },
+              "map": {
+                "calibration_rows": 116827,
+                "coverage": 0.900211,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 46.013473,
+                "method": "ridge_realfit",
+                "radius": 23.006737,
+                "test_rows": 57872
+              },
+              "potassium": {
+                "calibration_rows": 36994,
+                "coverage": 0.897735,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 1.71739,
+                "method": "ridge_realfit",
+                "radius": 0.858695,
+                "test_rows": 17973
+              },
+              "sodium": {
+                "calibration_rows": 35733,
+                "coverage": 0.896744,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 10.716967,
+                "method": "ridge_realfit",
+                "radius": 5.358484,
+                "test_rows": 17355
+              },
+              "urine_output": {
+                "calibration_rows": 49818,
+                "coverage": 0.900936,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 531.818682,
+                "method": "population_delta",
+                "radius": 265.909341,
+                "test_rows": 25095
+              }
+            },
+            "all_windows": {
+              "bicarbonate": {
+                "calibration_rows": 61387,
+                "coverage": 0.903161,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 10.776102,
+                "method": "ridge_realfit",
+                "radius": 5.388051,
+                "test_rows": 30184
+              },
+              "bun": {
+                "calibration_rows": 48897,
+                "coverage": 0.901929,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 38.765406,
+                "method": "ridge_realfit",
+                "radius": 19.382703,
+                "test_rows": 23952
+              },
+              "creatinine": {
+                "calibration_rows": 49031,
+                "coverage": 0.900521,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 2.531028,
+                "method": "ridge_realfit",
+                "radius": 1.265514,
+                "test_rows": 23995
+              },
+              "map": {
+                "calibration_rows": 349996,
+                "coverage": 0.900497,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 46.26072,
+                "method": "ridge_realfit",
+                "radius": 23.13036,
+                "test_rows": 172729
+              },
+              "potassium": {
+                "calibration_rows": 58189,
+                "coverage": 0.899116,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 1.631993,
+                "method": "ridge_realfit",
+                "radius": 0.815997,
+                "test_rows": 28379
+              },
+              "sodium": {
+                "calibration_rows": 53745,
+                "coverage": 0.898441,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 10.829679,
+                "method": "ridge_realfit",
+                "radius": 5.41484,
+                "test_rows": 26113
+              },
+              "urine_output": {
+                "calibration_rows": 133225,
+                "coverage": 0.900826,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 670.487129,
+                "method": "population_delta",
+                "radius": 335.243564,
+                "test_rows": 66378
+              }
+            },
+            "seed": 11,
+            "selected_methods": {
+              "bicarbonate": "ridge_realfit",
+              "bun": "ridge_realfit",
+              "creatinine": "ridge_realfit",
+              "map": "ridge_realfit",
+              "potassium": "ridge_realfit",
+              "sodium": "ridge_realfit",
+              "urine_output": "population_delta"
+            }
+          },
+          {
+            "active_only": {
+              "bicarbonate": {
+                "calibration_rows": 38678,
+                "coverage": 0.903224,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 11.171287,
+                "method": "ridge_realfit",
+                "radius": 5.585644,
+                "test_rows": 19571
+              },
+              "bun": {
+                "calibration_rows": 33472,
+                "coverage": 0.895384,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 43.83891,
+                "method": "ridge_realfit",
+                "radius": 21.919455,
+                "test_rows": 17005
+              },
+              "creatinine": {
+                "calibration_rows": 33538,
+                "coverage": 0.904234,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 3.071793,
+                "method": "ridge_realfit",
+                "radius": 1.535896,
+                "test_rows": 17052
+              },
+              "map": {
+                "calibration_rows": 116213,
+                "coverage": 0.900215,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 46.015829,
+                "method": "ridge_realfit",
+                "radius": 23.007915,
+                "test_rows": 58486
+              },
+              "potassium": {
+                "calibration_rows": 36407,
+                "coverage": 0.898599,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 1.723304,
+                "method": "ridge_realfit",
+                "radius": 0.861652,
+                "test_rows": 18560
+              },
+              "sodium": {
+                "calibration_rows": 35183,
+                "coverage": 0.902876,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 10.810561,
+                "method": "ridge_realfit",
+                "radius": 5.405281,
+                "test_rows": 17905
+              },
+              "urine_output": {
+                "calibration_rows": 50290,
+                "coverage": 0.912155,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 552.843809,
+                "method": "population_delta",
+                "radius": 276.421904,
+                "test_rows": 24623
+              }
+            },
+            "all_windows": {
+              "bicarbonate": {
+                "calibration_rows": 61027,
+                "coverage": 0.903222,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 10.797036,
+                "method": "ridge_realfit",
+                "radius": 5.398518,
+                "test_rows": 30544
+              },
+              "bun": {
+                "calibration_rows": 48370,
+                "coverage": 0.896033,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 38.397447,
+                "method": "ridge_realfit",
+                "radius": 19.198723,
+                "test_rows": 24479
+              },
+              "creatinine": {
+                "calibration_rows": 48465,
+                "coverage": 0.902243,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 2.546749,
+                "method": "ridge_realfit",
+                "radius": 1.273374,
+                "test_rows": 24561
+              },
+              "map": {
+                "calibration_rows": 348863,
+                "coverage": 0.899334,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 46.207155,
+                "method": "ridge_realfit",
+                "radius": 23.103577,
+                "test_rows": 173862
+              },
+              "potassium": {
+                "calibration_rows": 57630,
+                "coverage": 0.900373,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 1.635812,
+                "method": "ridge_realfit",
+                "radius": 0.817906,
+                "test_rows": 28938
+              },
+              "sodium": {
+                "calibration_rows": 53126,
+                "coverage": 0.902215,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 10.884903,
+                "method": "ridge_realfit",
+                "radius": 5.442451,
+                "test_rows": 26732
+              },
+              "urine_output": {
+                "calibration_rows": 134895,
+                "coverage": 0.904123,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 682.77061,
+                "method": "population_delta",
+                "radius": 341.385305,
+                "test_rows": 64708
+              }
+            },
+            "seed": 19,
+            "selected_methods": {
+              "bicarbonate": "ridge_realfit",
+              "bun": "ridge_realfit",
+              "creatinine": "ridge_realfit",
+              "map": "ridge_realfit",
+              "potassium": "ridge_realfit",
+              "sodium": "ridge_realfit",
+              "urine_output": "population_delta"
+            }
+          },
+          {
+            "active_only": {
+              "bicarbonate": {
+                "calibration_rows": 39074,
+                "coverage": 0.903207,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 11.152413,
+                "method": "ridge_realfit",
+                "radius": 5.576207,
+                "test_rows": 19175
+              },
+              "bun": {
+                "calibration_rows": 33971,
+                "coverage": 0.906277,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 44.576272,
+                "method": "ridge_realfit",
+                "radius": 22.288136,
+                "test_rows": 16506
+              },
+              "creatinine": {
+                "calibration_rows": 34051,
+                "coverage": 0.903743,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 3.064746,
+                "method": "ridge_realfit",
+                "radius": 1.532373,
+                "test_rows": 16539
+              },
+              "map": {
+                "calibration_rows": 116782,
+                "coverage": 0.900755,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 46.070239,
+                "method": "ridge_realfit",
+                "radius": 23.03512,
+                "test_rows": 57917
+              },
+              "potassium": {
+                "calibration_rows": 36954,
+                "coverage": 0.900072,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 1.723403,
+                "method": "ridge_realfit",
+                "radius": 0.861701,
+                "test_rows": 18013
+              },
+              "sodium": {
+                "calibration_rows": 35701,
+                "coverage": 0.899178,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 10.757518,
+                "method": "ridge_realfit",
+                "radius": 5.378759,
+                "test_rows": 17387
+              },
+              "urine_output": {
+                "calibration_rows": 49905,
+                "coverage": 0.902311,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 532.034578,
+                "method": "population_delta",
+                "radius": 266.017289,
+                "test_rows": 25008
+              }
+            },
+            "all_windows": {
+              "bicarbonate": {
+                "calibration_rows": 61609,
+                "coverage": 0.904746,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 10.810327,
+                "method": "ridge_realfit",
+                "radius": 5.405164,
+                "test_rows": 29962
+              },
+              "bun": {
+                "calibration_rows": 49038,
+                "coverage": 0.905842,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 38.971834,
+                "method": "ridge_realfit",
+                "radius": 19.485917,
+                "test_rows": 23811
+              },
+              "creatinine": {
+                "calibration_rows": 49169,
+                "coverage": 0.902796,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 2.544635,
+                "method": "ridge_realfit",
+                "radius": 1.272317,
+                "test_rows": 23857
+              },
+              "map": {
+                "calibration_rows": 349431,
+                "coverage": 0.897908,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 46.132648,
+                "method": "ridge_realfit",
+                "radius": 23.066324,
+                "test_rows": 173294
+              },
+              "potassium": {
+                "calibration_rows": 58150,
+                "coverage": 0.899571,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 1.632419,
+                "method": "ridge_realfit",
+                "radius": 0.81621,
+                "test_rows": 28418
+              },
+              "sodium": {
+                "calibration_rows": 53744,
+                "coverage": 0.900666,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 10.865456,
+                "method": "ridge_realfit",
+                "radius": 5.432728,
+                "test_rows": 26114
+              },
+              "urine_output": {
+                "calibration_rows": 132829,
+                "coverage": 0.903286,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 680.034578,
+                "method": "population_delta",
+                "radius": 340.017289,
+                "test_rows": 66774
+              }
+            },
+            "seed": 23,
+            "selected_methods": {
+              "bicarbonate": "ridge_realfit",
+              "bun": "ridge_realfit",
+              "creatinine": "ridge_realfit",
+              "map": "ridge_realfit",
+              "potassium": "ridge_realfit",
+              "sodium": "ridge_realfit",
+              "urine_output": "population_delta"
+            }
+          },
+          {
+            "active_only": {
+              "bicarbonate": {
+                "calibration_rows": 39097,
+                "coverage": 0.898496,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 11.101871,
+                "method": "ridge_realfit",
+                "radius": 5.550936,
+                "test_rows": 19152
+              },
+              "bun": {
+                "calibration_rows": 33947,
+                "coverage": 0.900484,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 44.218249,
+                "method": "ridge_realfit",
+                "radius": 22.109124,
+                "test_rows": 16530
+              },
+              "creatinine": {
+                "calibration_rows": 34007,
+                "coverage": 0.901948,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 3.060554,
+                "method": "ridge_realfit",
+                "radius": 1.530277,
+                "test_rows": 16583
+              },
+              "map": {
+                "calibration_rows": 117479,
+                "coverage": 0.900821,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 46.034989,
+                "method": "ridge_realfit",
+                "radius": 23.017494,
+                "test_rows": 57220
+              },
+              "potassium": {
+                "calibration_rows": 36940,
+                "coverage": 0.900205,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 1.723139,
+                "method": "ridge_realfit",
+                "radius": 0.861569,
+                "test_rows": 18027
+              },
+              "sodium": {
+                "calibration_rows": 35622,
+                "coverage": 0.900378,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 10.733253,
+                "method": "ridge_realfit",
+                "radius": 5.366627,
+                "test_rows": 17466
+              },
+              "urine_output": {
+                "calibration_rows": 50036,
+                "coverage": 0.907023,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 539.688284,
+                "method": "population_delta",
+                "radius": 269.844142,
+                "test_rows": 24877
+              }
+            },
+            "all_windows": {
+              "bicarbonate": {
+                "calibration_rows": 61025,
+                "coverage": 0.898874,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 10.728707,
+                "method": "ridge_realfit",
+                "radius": 5.364354,
+                "test_rows": 30546
+              },
+              "bun": {
+                "calibration_rows": 48590,
+                "coverage": 0.904324,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 38.88369,
+                "method": "ridge_realfit",
+                "radius": 19.441845,
+                "test_rows": 24259
+              },
+              "creatinine": {
+                "calibration_rows": 48694,
+                "coverage": 0.903707,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 2.552374,
+                "method": "ridge_realfit",
+                "radius": 1.276187,
+                "test_rows": 24332
+              },
+              "map": {
+                "calibration_rows": 350056,
+                "coverage": 0.901378,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 46.317423,
+                "method": "ridge_realfit",
+                "radius": 23.158712,
+                "test_rows": 172669
+              },
+              "potassium": {
+                "calibration_rows": 57634,
+                "coverage": 0.89915,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 1.631918,
+                "method": "ridge_realfit",
+                "radius": 0.815959,
+                "test_rows": 28934
+              },
+              "sodium": {
+                "calibration_rows": 53077,
+                "coverage": 0.895822,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 10.777445,
+                "method": "ridge_realfit",
+                "radius": 5.388723,
+                "test_rows": 26781
+              },
+              "urine_output": {
+                "calibration_rows": 132688,
+                "coverage": 0.906284,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 681.868754,
+                "method": "population_delta",
+                "radius": 340.934377,
+                "test_rows": 66915
+              }
+            },
+            "seed": 37,
+            "selected_methods": {
+              "bicarbonate": "ridge_realfit",
+              "bun": "ridge_realfit",
+              "creatinine": "ridge_realfit",
+              "map": "ridge_realfit",
+              "potassium": "ridge_realfit",
+              "sodium": "ridge_realfit",
+              "urine_output": "population_delta"
+            }
+          },
+          {
+            "active_only": {
+              "bicarbonate": {
+                "calibration_rows": 39505,
+                "coverage": 0.897407,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 11.096523,
+                "method": "ridge_realfit",
+                "radius": 5.548261,
+                "test_rows": 18744
+              },
+              "bun": {
+                "calibration_rows": 34092,
+                "coverage": 0.897833,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 44.061927,
+                "method": "ridge_realfit",
+                "radius": 22.030964,
+                "test_rows": 16385
+              },
+              "creatinine": {
+                "calibration_rows": 34156,
+                "coverage": 0.89972,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 3.045288,
+                "method": "ridge_realfit",
+                "radius": 1.522644,
+                "test_rows": 16434
+              },
+              "map": {
+                "calibration_rows": 117703,
+                "coverage": 0.900098,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 46.015642,
+                "method": "ridge_realfit",
+                "radius": 23.007821,
+                "test_rows": 56996
+              },
+              "potassium": {
+                "calibration_rows": 37105,
+                "coverage": 0.901915,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 1.726359,
+                "method": "ridge_realfit",
+                "radius": 0.863179,
+                "test_rows": 17862
+              },
+              "sodium": {
+                "calibration_rows": 35870,
+                "coverage": 0.897839,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 10.734713,
+                "method": "ridge_realfit",
+                "radius": 5.367357,
+                "test_rows": 17218
+              },
+              "urine_output": {
+                "calibration_rows": 50340,
+                "coverage": 0.904122,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 531.975888,
+                "method": "population_delta",
+                "radius": 265.987944,
+                "test_rows": 24573
+              }
+            },
+            "all_windows": {
+              "bicarbonate": {
+                "calibration_rows": 62003,
+                "coverage": 0.898201,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 10.716446,
+                "method": "ridge_realfit",
+                "radius": 5.358223,
+                "test_rows": 29568
+              },
+              "bun": {
+                "calibration_rows": 49116,
+                "coverage": 0.900223,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 38.67322,
+                "method": "ridge_realfit",
+                "radius": 19.33661,
+                "test_rows": 23733
+              },
+              "creatinine": {
+                "calibration_rows": 49223,
+                "coverage": 0.901189,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 2.542151,
+                "method": "ridge_realfit",
+                "radius": 1.271076,
+                "test_rows": 23803
+              },
+              "map": {
+                "calibration_rows": 352046,
+                "coverage": 0.899695,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 46.23452,
+                "method": "ridge_realfit",
+                "radius": 23.11726,
+                "test_rows": 170679
+              },
+              "potassium": {
+                "calibration_rows": 58367,
+                "coverage": 0.90284,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 1.63721,
+                "method": "ridge_realfit",
+                "radius": 0.818605,
+                "test_rows": 28201
+              },
+              "sodium": {
+                "calibration_rows": 53855,
+                "coverage": 0.900473,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 10.850916,
+                "method": "ridge_realfit",
+                "radius": 5.425458,
+                "test_rows": 26003
+              },
+              "urine_output": {
+                "calibration_rows": 134742,
+                "coverage": 0.90085,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 670.178928,
+                "method": "population_delta",
+                "radius": 335.089464,
+                "test_rows": 64861
+              }
+            },
+            "seed": 53,
+            "selected_methods": {
+              "bicarbonate": "ridge_realfit",
+              "bun": "ridge_realfit",
+              "creatinine": "ridge_realfit",
+              "map": "ridge_realfit",
+              "potassium": "ridge_realfit",
+              "sodium": "ridge_realfit",
+              "urine_output": "population_delta"
+            }
+          },
+          {
+            "active_only": {
+              "bicarbonate": {
+                "calibration_rows": 39590,
+                "coverage": 0.899941,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 11.104949,
+                "method": "ridge_realfit",
+                "radius": 5.552475,
+                "test_rows": 18659
+              },
+              "bun": {
+                "calibration_rows": 34143,
+                "coverage": 0.899535,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 44.120227,
+                "method": "ridge_realfit",
+                "radius": 22.060114,
+                "test_rows": 16334
+              },
+              "creatinine": {
+                "calibration_rows": 34216,
+                "coverage": 0.900452,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 3.057492,
+                "method": "ridge_realfit",
+                "radius": 1.528746,
+                "test_rows": 16374
+              },
+              "map": {
+                "calibration_rows": 117807,
+                "coverage": 0.899142,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 45.948628,
+                "method": "ridge_realfit",
+                "radius": 22.974314,
+                "test_rows": 56892
+              },
+              "potassium": {
+                "calibration_rows": 37157,
+                "coverage": 0.89534,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 1.713711,
+                "method": "ridge_realfit",
+                "radius": 0.856856,
+                "test_rows": 17810
+              },
+              "sodium": {
+                "calibration_rows": 35852,
+                "coverage": 0.899107,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 10.740432,
+                "method": "ridge_realfit",
+                "radius": 5.370216,
+                "test_rows": 17236
+              },
+              "urine_output": {
+                "calibration_rows": 50776,
+                "coverage": 0.906989,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 538.166989,
+                "method": "population_delta",
+                "radius": 269.083494,
+                "test_rows": 24137
+              }
+            },
+            "all_windows": {
+              "bicarbonate": {
+                "calibration_rows": 62023,
+                "coverage": 0.899655,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 10.725024,
+                "method": "ridge_realfit",
+                "radius": 5.362512,
+                "test_rows": 29548
+              },
+              "bun": {
+                "calibration_rows": 49164,
+                "coverage": 0.902554,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 38.836911,
+                "method": "ridge_realfit",
+                "radius": 19.418455,
+                "test_rows": 23685
+              },
+              "creatinine": {
+                "calibration_rows": 49279,
+                "coverage": 0.899861,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 2.539259,
+                "method": "ridge_realfit",
+                "radius": 1.26963,
+                "test_rows": 23747
+              },
+              "map": {
+                "calibration_rows": 351196,
+                "coverage": 0.899451,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 46.20516,
+                "method": "ridge_realfit",
+                "radius": 23.10258,
+                "test_rows": 171529
+              },
+              "potassium": {
+                "calibration_rows": 58397,
+                "coverage": 0.89688,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 1.626136,
+                "method": "ridge_realfit",
+                "radius": 0.813068,
+                "test_rows": 28171
+              },
+              "sodium": {
+                "calibration_rows": 53821,
+                "coverage": 0.897146,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 10.800026,
+                "method": "ridge_realfit",
+                "radius": 5.400013,
+                "test_rows": 26037
+              },
+              "urine_output": {
+                "calibration_rows": 134145,
+                "coverage": 0.903602,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 681.633425,
+                "method": "population_delta",
+                "radius": 340.816713,
+                "test_rows": 65458
+              }
+            },
+            "seed": 71,
+            "selected_methods": {
+              "bicarbonate": "ridge_realfit",
+              "bun": "ridge_realfit",
+              "creatinine": "ridge_realfit",
+              "map": "ridge_realfit",
+              "potassium": "ridge_realfit",
+              "sodium": "ridge_realfit",
+              "urine_output": "population_delta"
+            }
+          }
+        ],
+        "seeds": [
+          7,
+          11,
+          19,
+          23,
+          37,
+          53,
+          71
+        ]
+      },
+      "rows": 530265,
+      "subjects": 29508
+    },
+    {
+      "cohort": "eicu_aki_transitions_48h.parquet",
+      "future_suffix": "tp48",
+      "hospital_holdout": {
+        "active_only": {
+          "bicarbonate": {
+            "calibration_rows": 27344,
+            "coverage": 0.897128,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "mean_interval_width": 12.930939,
+            "method": "ridge_realfit",
+            "radius": 6.465469,
+            "test_rows": 14552
+          },
+          "bun": {
+            "calibration_rows": 23741,
+            "coverage": 0.899648,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "mean_interval_width": 61.183687,
+            "method": "ridge_realfit",
+            "radius": 30.591843,
+            "test_rows": 12516
+          },
+          "creatinine": {
+            "calibration_rows": 23791,
+            "coverage": 0.901107,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "mean_interval_width": 3.542134,
+            "method": "ridge_realfit",
+            "radius": 1.771067,
+            "test_rows": 12559
+          },
+          "map": {
+            "calibration_rows": 88102,
+            "coverage": 0.898227,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "mean_interval_width": 48.790888,
+            "method": "ridge_realfit",
+            "radius": 24.395444,
+            "test_rows": 45061
+          },
+          "potassium": {
+            "calibration_rows": 25991,
+            "coverage": 0.896372,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "mean_interval_width": 1.817564,
+            "method": "ridge_realfit",
+            "radius": 0.908782,
+            "test_rows": 13780
+          },
+          "sodium": {
+            "calibration_rows": 25033,
+            "coverage": 0.901558,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "mean_interval_width": 13.72428,
+            "method": "ridge_realfit",
+            "radius": 6.86214,
+            "test_rows": 13155
+          },
+          "urine_output": {
+            "calibration_rows": 38964,
+            "coverage": 0.904248,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "mean_interval_width": 601.029726,
+            "method": "population_delta",
+            "radius": 300.514863,
+            "test_rows": 16595
+          }
+        },
+        "all_windows": {
+          "bicarbonate": {
+            "calibration_rows": 42901,
+            "coverage": 0.900128,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "mean_interval_width": 12.741203,
+            "method": "ridge_realfit",
+            "radius": 6.370602,
+            "test_rows": 23470
+          },
+          "bun": {
+            "calibration_rows": 34081,
+            "coverage": 0.900484,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "mean_interval_width": 53.701232,
+            "method": "ridge_realfit",
+            "radius": 26.850616,
+            "test_rows": 18188
+          },
+          "creatinine": {
+            "calibration_rows": 34121,
+            "coverage": 0.903492,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "mean_interval_width": 3.001408,
+            "method": "ridge_realfit",
+            "radius": 1.500704,
+            "test_rows": 18268
+          },
+          "map": {
+            "calibration_rows": 256678,
+            "coverage": 0.896929,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "mean_interval_width": 48.633001,
+            "method": "ridge_realfit",
+            "radius": 24.3165,
+            "test_rows": 135645
+          },
+          "potassium": {
+            "calibration_rows": 40634,
+            "coverage": 0.898858,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "mean_interval_width": 1.724295,
+            "method": "ridge_realfit",
+            "radius": 0.862147,
+            "test_rows": 22068
+          },
+          "sodium": {
+            "calibration_rows": 37727,
+            "coverage": 0.901938,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "mean_interval_width": 13.866064,
+            "method": "ridge_realfit",
+            "radius": 6.933032,
+            "test_rows": 19763
+          },
+          "urine_output": {
+            "calibration_rows": 102573,
+            "coverage": 0.902128,
+            "coverage_gate_passed": true,
+            "level": 0.9,
+            "mean_interval_width": 751.029726,
+            "method": "population_delta",
+            "radius": 375.514863,
+            "test_rows": 45294
+          }
+        },
+        "available": true,
+        "selected_methods": {
+          "bicarbonate": "ridge_realfit",
+          "bun": "ridge_realfit",
+          "creatinine": "ridge_realfit",
+          "map": "ridge_realfit",
+          "potassium": "ridge_realfit",
+          "sodium": "ridge_realfit",
+          "urine_output": "population_delta"
+        }
+      },
+      "hospitals": 198,
+      "level": 0.9,
+      "module": "aki",
+      "random_patient_splits": {
+        "runs": [
+          {
+            "active_only": {
+              "bicarbonate": {
+                "calibration_rows": 27970,
+                "coverage": 0.906649,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 13.02119,
+                "method": "ridge_realfit",
+                "radius": 6.510595,
+                "test_rows": 13926
+              },
+              "bun": {
+                "calibration_rows": 24291,
+                "coverage": 0.899214,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 60.943262,
+                "method": "ridge_realfit",
+                "radius": 30.471631,
+                "test_rows": 11966
+              },
+              "creatinine": {
+                "calibration_rows": 24349,
+                "coverage": 0.902008,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 3.537221,
+                "method": "ridge_realfit",
+                "radius": 1.76861,
+                "test_rows": 12001
+              },
+              "map": {
+                "calibration_rows": 89073,
+                "coverage": 0.902812,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 48.779069,
+                "method": "ridge_realfit",
+                "radius": 24.389534,
+                "test_rows": 44090
+              },
+              "potassium": {
+                "calibration_rows": 26662,
+                "coverage": 0.896636,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 1.820446,
+                "method": "ridge_realfit",
+                "radius": 0.910223,
+                "test_rows": 13109
+              },
+              "sodium": {
+                "calibration_rows": 25579,
+                "coverage": 0.904989,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 13.739426,
+                "method": "ridge_realfit",
+                "radius": 6.869713,
+                "test_rows": 12609
+              },
+              "urine_output": {
+                "calibration_rows": 37048,
+                "coverage": 0.902652,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 600.228196,
+                "method": "population_delta",
+                "radius": 300.114098,
+                "test_rows": 18511
+              }
+            },
+            "all_windows": {
+              "bicarbonate": {
+                "calibration_rows": 44299,
+                "coverage": 0.904449,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 12.734054,
+                "method": "ridge_realfit",
+                "radius": 6.367027,
+                "test_rows": 22072
+              },
+              "bun": {
+                "calibration_rows": 35036,
+                "coverage": 0.898277,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 53.450303,
+                "method": "ridge_realfit",
+                "radius": 26.725152,
+                "test_rows": 17233
+              },
+              "creatinine": {
+                "calibration_rows": 35108,
+                "coverage": 0.902263,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 2.972938,
+                "method": "ridge_realfit",
+                "radius": 1.486469,
+                "test_rows": 17281
+              },
+              "map": {
+                "calibration_rows": 262476,
+                "coverage": 0.900514,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 48.589488,
+                "method": "ridge_realfit",
+                "radius": 24.294744,
+                "test_rows": 129847
+              },
+              "potassium": {
+                "calibration_rows": 42088,
+                "coverage": 0.897012,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 1.721099,
+                "method": "ridge_realfit",
+                "radius": 0.860549,
+                "test_rows": 20614
+              },
+              "sodium": {
+                "calibration_rows": 38541,
+                "coverage": 0.907172,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 13.891831,
+                "method": "ridge_realfit",
+                "radius": 6.945915,
+                "test_rows": 18949
+              },
+              "urine_output": {
+                "calibration_rows": 99118,
+                "coverage": 0.906849,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 752.150243,
+                "method": "population_delta",
+                "radius": 376.075121,
+                "test_rows": 48749
+              }
+            },
+            "seed": 7,
+            "selected_methods": {
+              "bicarbonate": "ridge_realfit",
+              "bun": "ridge_realfit",
+              "creatinine": "ridge_realfit",
+              "map": "ridge_realfit",
+              "potassium": "ridge_realfit",
+              "sodium": "ridge_realfit",
+              "urine_output": "population_delta"
+            }
+          },
+          {
+            "active_only": {
+              "bicarbonate": {
+                "calibration_rows": 28667,
+                "coverage": 0.901504,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 12.954149,
+                "method": "ridge_realfit",
+                "radius": 6.477075,
+                "test_rows": 13229
+              },
+              "bun": {
+                "calibration_rows": 24760,
+                "coverage": 0.903366,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 61.289006,
+                "method": "ridge_realfit",
+                "radius": 30.644503,
+                "test_rows": 11497
+              },
+              "creatinine": {
+                "calibration_rows": 24823,
+                "coverage": 0.906047,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 3.553153,
+                "method": "ridge_realfit",
+                "radius": 1.776577,
+                "test_rows": 11527
+              },
+              "map": {
+                "calibration_rows": 90245,
+                "coverage": 0.895312,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 48.351301,
+                "method": "ridge_realfit",
+                "radius": 24.17565,
+                "test_rows": 42918
+              },
+              "potassium": {
+                "calibration_rows": 27140,
+                "coverage": 0.901987,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 1.831302,
+                "method": "ridge_realfit",
+                "radius": 0.915651,
+                "test_rows": 12631
+              },
+              "sodium": {
+                "calibration_rows": 26046,
+                "coverage": 0.896557,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 13.579,
+                "method": "ridge_realfit",
+                "radius": 6.7895,
+                "test_rows": 12142
+              },
+              "urine_output": {
+                "calibration_rows": 37497,
+                "coverage": 0.897963,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 596.683649,
+                "method": "population_delta",
+                "radius": 298.341824,
+                "test_rows": 18062
+              }
+            },
+            "all_windows": {
+              "bicarbonate": {
+                "calibration_rows": 45032,
+                "coverage": 0.898683,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 12.667366,
+                "method": "ridge_realfit",
+                "radius": 6.333683,
+                "test_rows": 21339
+              },
+              "bun": {
+                "calibration_rows": 35392,
+                "coverage": 0.904663,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 53.877438,
+                "method": "ridge_realfit",
+                "radius": 26.938719,
+                "test_rows": 16877
+              },
+              "creatinine": {
+                "calibration_rows": 35481,
+                "coverage": 0.905784,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 3.002301,
+                "method": "ridge_realfit",
+                "radius": 1.50115,
+                "test_rows": 16908
+              },
+              "map": {
+                "calibration_rows": 263820,
+                "coverage": 0.894508,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 48.257026,
+                "method": "ridge_realfit",
+                "radius": 24.128513,
+                "test_rows": 128503
+              },
+              "potassium": {
+                "calibration_rows": 42348,
+                "coverage": 0.905326,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 1.736703,
+                "method": "ridge_realfit",
+                "radius": 0.868351,
+                "test_rows": 20354
+              },
+              "sodium": {
+                "calibration_rows": 38832,
+                "coverage": 0.896988,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 13.723828,
+                "method": "ridge_realfit",
+                "radius": 6.861914,
+                "test_rows": 18658
+              },
+              "urine_output": {
+                "calibration_rows": 99462,
+                "coverage": 0.895279,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 746.951306,
+                "method": "population_delta",
+                "radius": 373.475653,
+                "test_rows": 48405
+              }
+            },
+            "seed": 11,
+            "selected_methods": {
+              "bicarbonate": "ridge_realfit",
+              "bun": "ridge_realfit",
+              "creatinine": "ridge_realfit",
+              "map": "ridge_realfit",
+              "potassium": "ridge_realfit",
+              "sodium": "ridge_realfit",
+              "urine_output": "population_delta"
+            }
+          },
+          {
+            "active_only": {
+              "bicarbonate": {
+                "calibration_rows": 27538,
+                "coverage": 0.903329,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 12.963352,
+                "method": "ridge_realfit",
+                "radius": 6.481676,
+                "test_rows": 14358
+              },
+              "bun": {
+                "calibration_rows": 23811,
+                "coverage": 0.90045,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 61.163428,
+                "method": "ridge_realfit",
+                "radius": 30.581714,
+                "test_rows": 12446
+              },
+              "creatinine": {
+                "calibration_rows": 23864,
+                "coverage": 0.894121,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 3.500936,
+                "method": "ridge_realfit",
+                "radius": 1.750468,
+                "test_rows": 12486
+              },
+              "map": {
+                "calibration_rows": 88126,
+                "coverage": 0.900349,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 48.60861,
+                "method": "ridge_realfit",
+                "radius": 24.304305,
+                "test_rows": 45037
+              },
+              "potassium": {
+                "calibration_rows": 26142,
+                "coverage": 0.900066,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 1.825492,
+                "method": "ridge_realfit",
+                "radius": 0.912746,
+                "test_rows": 13629
+              },
+              "sodium": {
+                "calibration_rows": 25108,
+                "coverage": 0.900612,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 13.667681,
+                "method": "ridge_realfit",
+                "radius": 6.83384,
+                "test_rows": 13080
+              },
+              "urine_output": {
+                "calibration_rows": 36686,
+                "coverage": 0.913898,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 610.746083,
+                "method": "population_delta",
+                "radius": 305.373041,
+                "test_rows": 18873
+              }
+            },
+            "all_windows": {
+              "bicarbonate": {
+                "calibration_rows": 44034,
+                "coverage": 0.899897,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 12.664799,
+                "method": "ridge_realfit",
+                "radius": 6.3324,
+                "test_rows": 22337
+              },
+              "bun": {
+                "calibration_rows": 34569,
+                "coverage": 0.897571,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 53.37532,
+                "method": "ridge_realfit",
+                "radius": 26.68766,
+                "test_rows": 17700
+              },
+              "creatinine": {
+                "calibration_rows": 34648,
+                "coverage": 0.89668,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 2.953002,
+                "method": "ridge_realfit",
+                "radius": 1.476501,
+                "test_rows": 17741
+              },
+              "map": {
+                "calibration_rows": 262100,
+                "coverage": 0.899918,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 48.542303,
+                "method": "ridge_realfit",
+                "radius": 24.271152,
+                "test_rows": 130223
+              },
+              "potassium": {
+                "calibration_rows": 41752,
+                "coverage": 0.899905,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 1.730294,
+                "method": "ridge_realfit",
+                "radius": 0.865147,
+                "test_rows": 20950
+              },
+              "sodium": {
+                "calibration_rows": 38255,
+                "coverage": 0.902054,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 13.831759,
+                "method": "ridge_realfit",
+                "radius": 6.915879,
+                "test_rows": 19235
+              },
+              "urine_output": {
+                "calibration_rows": 99130,
+                "coverage": 0.906724,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 750.746083,
+                "method": "population_delta",
+                "radius": 375.373041,
+                "test_rows": 48737
+              }
+            },
+            "seed": 19,
+            "selected_methods": {
+              "bicarbonate": "ridge_realfit",
+              "bun": "ridge_realfit",
+              "creatinine": "ridge_realfit",
+              "map": "ridge_realfit",
+              "potassium": "ridge_realfit",
+              "sodium": "ridge_realfit",
+              "urine_output": "population_delta"
+            }
+          },
+          {
+            "active_only": {
+              "bicarbonate": {
+                "calibration_rows": 28029,
+                "coverage": 0.910074,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 13.091313,
+                "method": "ridge_realfit",
+                "radius": 6.545656,
+                "test_rows": 13867
+              },
+              "bun": {
+                "calibration_rows": 24221,
+                "coverage": 0.900798,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 61.185955,
+                "method": "ridge_realfit",
+                "radius": 30.592978,
+                "test_rows": 12036
+              },
+              "creatinine": {
+                "calibration_rows": 24278,
+                "coverage": 0.903579,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 3.542986,
+                "method": "ridge_realfit",
+                "radius": 1.771493,
+                "test_rows": 12072
+              },
+              "map": {
+                "calibration_rows": 89093,
+                "coverage": 0.899297,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 48.592074,
+                "method": "ridge_realfit",
+                "radius": 24.296037,
+                "test_rows": 44070
+              },
+              "potassium": {
+                "calibration_rows": 26543,
+                "coverage": 0.90573,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 1.835719,
+                "method": "ridge_realfit",
+                "radius": 0.91786,
+                "test_rows": 13228
+              },
+              "sodium": {
+                "calibration_rows": 25504,
+                "coverage": 0.904604,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 13.755615,
+                "method": "ridge_realfit",
+                "radius": 6.877807,
+                "test_rows": 12684
+              },
+              "urine_output": {
+                "calibration_rows": 37101,
+                "coverage": 0.892459,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 588.436193,
+                "method": "population_delta",
+                "radius": 294.218097,
+                "test_rows": 18458
+              }
+            },
+            "all_windows": {
+              "bicarbonate": {
+                "calibration_rows": 44514,
+                "coverage": 0.907078,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 12.804083,
+                "method": "ridge_realfit",
+                "radius": 6.402041,
+                "test_rows": 21857
+              },
+              "bun": {
+                "calibration_rows": 34920,
+                "coverage": 0.898438,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 53.445042,
+                "method": "ridge_realfit",
+                "radius": 26.722521,
+                "test_rows": 17349
+              },
+              "creatinine": {
+                "calibration_rows": 34995,
+                "coverage": 0.90514,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 3.003082,
+                "method": "ridge_realfit",
+                "radius": 1.501541,
+                "test_rows": 17394
+              },
+              "map": {
+                "calibration_rows": 262604,
+                "coverage": 0.899375,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 48.50655,
+                "method": "ridge_realfit",
+                "radius": 24.253275,
+                "test_rows": 129719
+              },
+              "potassium": {
+                "calibration_rows": 41993,
+                "coverage": 0.901299,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 1.726302,
+                "method": "ridge_realfit",
+                "radius": 0.863151,
+                "test_rows": 20709
+              },
+              "sodium": {
+                "calibration_rows": 38463,
+                "coverage": 0.901613,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 13.818142,
+                "method": "ridge_realfit",
+                "radius": 6.909071,
+                "test_rows": 19027
+              },
+              "urine_output": {
+                "calibration_rows": 98954,
+                "coverage": 0.897328,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 748.436193,
+                "method": "population_delta",
+                "radius": 374.218097,
+                "test_rows": 48913
+              }
+            },
+            "seed": 23,
+            "selected_methods": {
+              "bicarbonate": "ridge_realfit",
+              "bun": "ridge_realfit",
+              "creatinine": "ridge_realfit",
+              "map": "ridge_realfit",
+              "potassium": "ridge_realfit",
+              "sodium": "ridge_realfit",
+              "urine_output": "population_delta"
+            }
+          },
+          {
+            "active_only": {
+              "bicarbonate": {
+                "calibration_rows": 28254,
+                "coverage": 0.900015,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 12.924522,
+                "method": "ridge_realfit",
+                "radius": 6.462261,
+                "test_rows": 13642
+              },
+              "bun": {
+                "calibration_rows": 24399,
+                "coverage": 0.896441,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 60.723406,
+                "method": "ridge_realfit",
+                "radius": 30.361703,
+                "test_rows": 11858
+              },
+              "creatinine": {
+                "calibration_rows": 24460,
+                "coverage": 0.897813,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 3.511664,
+                "method": "ridge_realfit",
+                "radius": 1.755832,
+                "test_rows": 11890
+              },
+              "map": {
+                "calibration_rows": 90029,
+                "coverage": 0.897019,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 48.431118,
+                "method": "ridge_realfit",
+                "radius": 24.215559,
+                "test_rows": 43134
+              },
+              "potassium": {
+                "calibration_rows": 26812,
+                "coverage": 0.904545,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 1.829349,
+                "method": "ridge_realfit",
+                "radius": 0.914674,
+                "test_rows": 12959
+              },
+              "sodium": {
+                "calibration_rows": 25708,
+                "coverage": 0.910096,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 13.811514,
+                "method": "ridge_realfit",
+                "radius": 6.905757,
+                "test_rows": 12480
+              },
+              "urine_output": {
+                "calibration_rows": 37467,
+                "coverage": 0.904157,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 599.515487,
+                "method": "population_delta",
+                "radius": 299.757744,
+                "test_rows": 18092
+              }
+            },
+            "all_windows": {
+              "bicarbonate": {
+                "calibration_rows": 44400,
+                "coverage": 0.899959,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 12.678166,
+                "method": "ridge_realfit",
+                "radius": 6.339083,
+                "test_rows": 21971
+              },
+              "bun": {
+                "calibration_rows": 34885,
+                "coverage": 0.89962,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 53.518562,
+                "method": "ridge_realfit",
+                "radius": 26.759281,
+                "test_rows": 17384
+              },
+              "creatinine": {
+                "calibration_rows": 34959,
+                "coverage": 0.898336,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 2.960497,
+                "method": "ridge_realfit",
+                "radius": 1.480248,
+                "test_rows": 17430
+              },
+              "map": {
+                "calibration_rows": 262862,
+                "coverage": 0.898479,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 48.473665,
+                "method": "ridge_realfit",
+                "radius": 24.236833,
+                "test_rows": 129461
+              },
+              "potassium": {
+                "calibration_rows": 41923,
+                "coverage": 0.904423,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 1.737216,
+                "method": "ridge_realfit",
+                "radius": 0.868608,
+                "test_rows": 20779
+              },
+              "sodium": {
+                "calibration_rows": 38361,
+                "coverage": 0.909823,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 13.928372,
+                "method": "ridge_realfit",
+                "radius": 6.964186,
+                "test_rows": 19129
+              },
+              "urine_output": {
+                "calibration_rows": 98789,
+                "coverage": 0.901565,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 749.515487,
+                "method": "population_delta",
+                "radius": 374.757744,
+                "test_rows": 49078
+              }
+            },
+            "seed": 37,
+            "selected_methods": {
+              "bicarbonate": "ridge_realfit",
+              "bun": "ridge_realfit",
+              "creatinine": "ridge_realfit",
+              "map": "ridge_realfit",
+              "potassium": "ridge_realfit",
+              "sodium": "ridge_realfit",
+              "urine_output": "population_delta"
+            }
+          },
+          {
+            "active_only": {
+              "bicarbonate": {
+                "calibration_rows": 28063,
+                "coverage": 0.898359,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 12.896694,
+                "method": "ridge_realfit",
+                "radius": 6.448347,
+                "test_rows": 13833
+              },
+              "bun": {
+                "calibration_rows": 24141,
+                "coverage": 0.896005,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 60.679513,
+                "method": "ridge_realfit",
+                "radius": 30.339756,
+                "test_rows": 12116
+              },
+              "creatinine": {
+                "calibration_rows": 24211,
+                "coverage": 0.899909,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 3.532236,
+                "method": "ridge_realfit",
+                "radius": 1.766118,
+                "test_rows": 12139
+              },
+              "map": {
+                "calibration_rows": 88685,
+                "coverage": 0.898242,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 48.508949,
+                "method": "ridge_realfit",
+                "radius": 24.254474,
+                "test_rows": 44478
+              },
+              "potassium": {
+                "calibration_rows": 26526,
+                "coverage": 0.905776,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 1.839428,
+                "method": "ridge_realfit",
+                "radius": 0.919714,
+                "test_rows": 13245
+              },
+              "sodium": {
+                "calibration_rows": 25453,
+                "coverage": 0.895878,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 13.589687,
+                "method": "ridge_realfit",
+                "radius": 6.794844,
+                "test_rows": 12735
+              },
+              "urine_output": {
+                "calibration_rows": 36641,
+                "coverage": 0.905645,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 600.745433,
+                "method": "population_delta",
+                "radius": 300.372716,
+                "test_rows": 18918
+              }
+            },
+            "all_windows": {
+              "bicarbonate": {
+                "calibration_rows": 44328,
+                "coverage": 0.894025,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 12.593755,
+                "method": "ridge_realfit",
+                "radius": 6.296877,
+                "test_rows": 22043
+              },
+              "bun": {
+                "calibration_rows": 34838,
+                "coverage": 0.89163,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 52.8354,
+                "method": "ridge_realfit",
+                "radius": 26.4177,
+                "test_rows": 17431
+              },
+              "creatinine": {
+                "calibration_rows": 34957,
+                "coverage": 0.895135,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 2.946323,
+                "method": "ridge_realfit",
+                "radius": 1.473161,
+                "test_rows": 17432
+              },
+              "map": {
+                "calibration_rows": 261524,
+                "coverage": 0.899739,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 48.558779,
+                "method": "ridge_realfit",
+                "radius": 24.279389,
+                "test_rows": 130799
+              },
+              "potassium": {
+                "calibration_rows": 41873,
+                "coverage": 0.9059,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 1.738947,
+                "method": "ridge_realfit",
+                "radius": 0.869474,
+                "test_rows": 20829
+              },
+              "sodium": {
+                "calibration_rows": 38394,
+                "coverage": 0.894638,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 13.696577,
+                "method": "ridge_realfit",
+                "radius": 6.848288,
+                "test_rows": 19096
+              },
+              "urine_output": {
+                "calibration_rows": 97335,
+                "coverage": 0.904417,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 750.745433,
+                "method": "population_delta",
+                "radius": 375.372716,
+                "test_rows": 50532
+              }
+            },
+            "seed": 53,
+            "selected_methods": {
+              "bicarbonate": "ridge_realfit",
+              "bun": "ridge_realfit",
+              "creatinine": "ridge_realfit",
+              "map": "ridge_realfit",
+              "potassium": "ridge_realfit",
+              "sodium": "ridge_realfit",
+              "urine_output": "population_delta"
+            }
+          },
+          {
+            "active_only": {
+              "bicarbonate": {
+                "calibration_rows": 28463,
+                "coverage": 0.904563,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 12.958112,
+                "method": "ridge_realfit",
+                "radius": 6.479056,
+                "test_rows": 13433
+              },
+              "bun": {
+                "calibration_rows": 24592,
+                "coverage": 0.909559,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 61.60653,
+                "method": "ridge_realfit",
+                "radius": 30.803265,
+                "test_rows": 11665
+              },
+              "creatinine": {
+                "calibration_rows": 24655,
+                "coverage": 0.905259,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 3.550992,
+                "method": "ridge_realfit",
+                "radius": 1.775496,
+                "test_rows": 11695
+              },
+              "map": {
+                "calibration_rows": 89872,
+                "coverage": 0.902058,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 48.693549,
+                "method": "ridge_realfit",
+                "radius": 24.346775,
+                "test_rows": 43291
+              },
+              "potassium": {
+                "calibration_rows": 27016,
+                "coverage": 0.891729,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 1.809178,
+                "method": "ridge_realfit",
+                "radius": 0.904589,
+                "test_rows": 12755
+              },
+              "sodium": {
+                "calibration_rows": 25878,
+                "coverage": 0.900812,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 13.641498,
+                "method": "ridge_realfit",
+                "radius": 6.820749,
+                "test_rows": 12310
+              },
+              "urine_output": {
+                "calibration_rows": 36997,
+                "coverage": 0.896563,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 595.508416,
+                "method": "population_delta",
+                "radius": 297.754208,
+                "test_rows": 18562
+              }
+            },
+            "all_windows": {
+              "bicarbonate": {
+                "calibration_rows": 44789,
+                "coverage": 0.907562,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 12.768523,
+                "method": "ridge_realfit",
+                "radius": 6.384262,
+                "test_rows": 21582
+              },
+              "bun": {
+                "calibration_rows": 35272,
+                "coverage": 0.906219,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 53.983808,
+                "method": "ridge_realfit",
+                "radius": 26.991904,
+                "test_rows": 16997
+              },
+              "creatinine": {
+                "calibration_rows": 35352,
+                "coverage": 0.905558,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 3.000646,
+                "method": "ridge_realfit",
+                "radius": 1.500323,
+                "test_rows": 17037
+              },
+              "map": {
+                "calibration_rows": 263345,
+                "coverage": 0.901611,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 48.651061,
+                "method": "ridge_realfit",
+                "radius": 24.32553,
+                "test_rows": 128978
+              },
+              "potassium": {
+                "calibration_rows": 42256,
+                "coverage": 0.893671,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 1.712398,
+                "method": "ridge_realfit",
+                "radius": 0.856199,
+                "test_rows": 20446
+              },
+              "sodium": {
+                "calibration_rows": 38699,
+                "coverage": 0.902985,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 13.807638,
+                "method": "ridge_realfit",
+                "radius": 6.903819,
+                "test_rows": 18791
+              },
+              "urine_output": {
+                "calibration_rows": 98660,
+                "coverage": 0.893531,
+                "coverage_gate_passed": true,
+                "level": 0.9,
+                "mean_interval_width": 747.508416,
+                "method": "population_delta",
+                "radius": 373.754208,
+                "test_rows": 49207
+              }
+            },
+            "seed": 71,
+            "selected_methods": {
+              "bicarbonate": "ridge_realfit",
+              "bun": "ridge_realfit",
+              "creatinine": "ridge_realfit",
+              "map": "ridge_realfit",
+              "potassium": "ridge_realfit",
+              "sodium": "ridge_realfit",
+              "urine_output": "population_delta"
+            }
+          }
+        ],
+        "seeds": [
+          7,
+          11,
+          19,
+          23,
+          37,
+          53,
+          71
+        ]
+      },
+      "rows": 397897,
+      "subjects": 21427
+    }
+  ]
+}

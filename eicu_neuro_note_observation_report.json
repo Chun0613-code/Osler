@@ -1,0 +1,52 @@
+{
+  "artifact": "eICU neuro-note structured observation extraction",
+  "causal_claim_allowed": false,
+  "clinical_claim_allowed": false,
+  "current_support": {
+    "neuro_delirium_present": 13965,
+    "neuro_gcs": 12756,
+    "neuro_mental_abnormal": 0,
+    "neuro_motor_abnormal": 0,
+    "neuro_pupils_abnormal": 0,
+    "neuro_sedation_score": 0
+  },
+  "event_stays": 1359,
+  "events": 108418,
+  "future_support": {
+    "neuro_delirium_present": 12073,
+    "neuro_gcs": 11591,
+    "neuro_mental_abnormal": 0,
+    "neuro_motor_abnormal": 0,
+    "neuro_pupils_abnormal": 0,
+    "neuro_sedation_score": 0
+  },
+  "hospitals": 12,
+  "leakage_guard": {
+    "current_note_time_rule": "note_time <= anchor t, with 24h lookback",
+    "future_note_time_rule": "note_time > anchor t and nearest to t+6h within +/-2h",
+    "same_source_nowcast_rule": "all neuro_* features must be excluded from same-time nowcast features"
+  },
+  "output": "local-only row-level neuro-note transition parquet",
+  "pair_counts": {
+    "neuro_delirium_present": 11714,
+    "neuro_gcs": 11385,
+    "neuro_mental_abnormal": 0,
+    "neuro_motor_abnormal": 0,
+    "neuro_pupils_abnormal": 0,
+    "neuro_sedation_score": 0
+  },
+  "patient_ids_included_in_report": false,
+  "row_level_outputs_committed": false,
+  "rows": 16238,
+  "source_cohort": "eicu_acute_neuro_transitions_6h.parquet",
+  "stays": 1390,
+  "subjects": 1183,
+  "targets": [
+    "neuro_gcs",
+    "neuro_sedation_score",
+    "neuro_delirium_present",
+    "neuro_mental_abnormal",
+    "neuro_pupils_abnormal",
+    "neuro_motor_abnormal"
+  ]
+}

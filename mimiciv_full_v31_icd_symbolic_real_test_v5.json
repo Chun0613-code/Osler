@@ -1,0 +1,2379 @@
+{
+  "test_type": "patient-held-out MIMIC-IV full v3.1 symbolic rule test",
+  "checkpoint": "/Users/chunyouchang/Desktop/llm_project/medical_jepa/dka_symbolic_jepa_v5.pt",
+  "symbolic_heads_trained": true,
+  "cohort": "/Users/chunyouchang/Desktop/llm_project/medical_jepa/dka_transitions_6h_mimiciv_full_v31_icd.parquet",
+  "cohort_label": "MIMIC-IV full v3.1",
+  "patient_split": {
+    "discovery_stays": 677,
+    "heldout_stays": 333,
+    "overlap": 0,
+    "discovery_records": 1814,
+    "heldout_records": 916
+  },
+  "external_symbolic_metrics": {
+    "factual_direction_accuracy_all": 0.564,
+    "factual_direction_accuracy_changed_only": 0.6053,
+    "direction_comparisons": 6399,
+    "changed_direction_comparisons": 5848,
+    "mean_proposal_confidence": 0.9401,
+    "interpretation": "Observational factual-direction check; it is not a causal effect test."
+  },
+  "factual_numerical_benchmark": {
+    "available": true,
+    "rows_with_any_comparison": 8050,
+    "rows_with_active_dka_comparison": 3576,
+    "stays": 1010,
+    "warning": "Factual check only: 1010 stays; dose/time grids and prior history are present, but targets remain sparse and treatment selection is unadjusted.",
+    "data_adequacy": {
+      "rows": 10785,
+      "complete_core_input_rows": 8050,
+      "fully_observed_clinical_state_rows": 10,
+      "median_measurement_age_hours": {
+        "glucose": 2.033,
+        "ph": 2.317,
+        "bicarbonate": 2.133,
+        "anion_gap": 2.15,
+        "potassium": 2.017,
+        "map": 0.5,
+        "sodium": 2.067,
+        "osmolality": 2.517,
+        "creatinine": 2.15,
+        "urine_output": 0.967,
+        "BHB": 2.933
+      },
+      "mean_anchor_state": {
+        "glucose": 225.295,
+        "ph": 7.33,
+        "bicarbonate": 17.616,
+        "anion_gap": 16.686,
+        "potassium": 4.14,
+        "map": 82.582,
+        "sodium": 138.007,
+        "osmolality": 316.935,
+        "creatinine": 1.932,
+        "urine_output": 155.295,
+        "BHB": 2.987
+      },
+      "positive_action_rows": {
+        "insulin": 9049,
+        "fluids": 8249,
+        "kcl": 4246,
+        "bicarbonate": 346,
+        "dextrose": 4589
+      },
+      "has_exact_dose_and_timing": true,
+      "has_explicit_start_stop_events": true,
+      "has_pre_anchor_treatment_history": true,
+      "sufficient_for_causal_validation": false
+    },
+    "action_rate_support": {
+      "insulin_iv": {
+        "n_active_cells": 38086,
+        "median": 4.0,
+        "p95": 18.0646,
+        "max": 374.1279,
+        "training_max": 20.0,
+        "fraction_above_training_max": 0.0385
+      },
+      "insulin_rapid_sc": {
+        "n_active_cells": 12797,
+        "median": 4.4,
+        "p95": 32.0,
+        "max": 401.2,
+        "training_max": 40.0,
+        "fraction_above_training_max": 0.0327
+      },
+      "insulin_intermediate_sc": {
+        "n_active_cells": 223,
+        "median": 11.3333,
+        "p95": 47.7,
+        "max": 80.0,
+        "training_max": 40.0,
+        "fraction_above_training_max": 0.0807
+      },
+      "insulin_basal_sc": {
+        "n_active_cells": 2265,
+        "median": 16.0,
+        "p95": 60.0,
+        "max": 133.3333,
+        "training_max": 80.0,
+        "fraction_above_training_max": 0.0172
+      },
+      "fluids": {
+        "n_active_cells": 66357,
+        "median": 91.002,
+        "p95": 336.7757,
+        "max": 4000.0,
+        "training_max": 500.0,
+        "fraction_above_training_max": 0.0233
+      },
+      "kcl": {
+        "n_active_cells": 25607,
+        "median": 5.0002,
+        "p95": 20.0,
+        "max": 199.9936,
+        "training_max": 20.0,
+        "fraction_above_training_max": 0.0379
+      },
+      "bicarbonate": {
+        "n_active_cells": 1667,
+        "median": 18.75,
+        "p95": 75.0,
+        "max": 272.7273,
+        "training_max": 50.0,
+        "fraction_above_training_max": 0.0972
+      },
+      "dextrose": {
+        "n_active_cells": 25764,
+        "median": 1.8316,
+        "p95": 12.9214,
+        "max": 90.9091,
+        "training_max": 20.0,
+        "fraction_above_training_max": 0.0191
+      }
+    },
+    "mae": {
+      "glucose": {
+        "n": 4643,
+        "jepa": 134.3316,
+        "persistence": 103.742
+      },
+      "ph": {
+        "n": 2449,
+        "jepa": 0.0691,
+        "persistence": 0.0555
+      },
+      "bicarbonate": {
+        "n": 4523,
+        "jepa": 3.6909,
+        "persistence": 2.8362
+      },
+      "anion_gap": {
+        "n": 4477,
+        "jepa": 4.5037,
+        "persistence": 3.7952
+      },
+      "potassium": {
+        "n": 4739,
+        "jepa": 0.8431,
+        "persistence": 0.5241
+      },
+      "map": {
+        "n": 7941,
+        "jepa": 11.2427,
+        "persistence": 11.3215
+      },
+      "sodium": {
+        "n": 4631,
+        "jepa": 6.9183,
+        "persistence": 2.735
+      },
+      "osmolality": {
+        "n": 4566,
+        "jepa": 20.0592,
+        "persistence": 6.9133
+      },
+      "creatinine": {
+        "n": 4401,
+        "jepa": 0.5279,
+        "persistence": 0.2327
+      },
+      "urine_output": {
+        "n": 5411,
+        "jepa": 115.2173,
+        "persistence": 74.9909
+      },
+      "BHB": {
+        "n": 7,
+        "jepa": 4.0223,
+        "persistence": 1.2286
+      }
+    },
+    "mae_active_dka": {
+      "glucose": {
+        "n": 2305,
+        "jepa": 175.731,
+        "persistence": 143.3735
+      },
+      "ph": {
+        "n": 1193,
+        "jepa": 0.0768,
+        "persistence": 0.0675
+      },
+      "bicarbonate": {
+        "n": 2240,
+        "jepa": 4.1216,
+        "persistence": 3.5697
+      },
+      "anion_gap": {
+        "n": 2224,
+        "jepa": 5.4516,
+        "persistence": 5.0238
+      },
+      "potassium": {
+        "n": 2345,
+        "jepa": 0.8397,
+        "persistence": 0.5951
+      },
+      "map": {
+        "n": 3530,
+        "jepa": 11.5419,
+        "persistence": 11.5229
+      },
+      "sodium": {
+        "n": 2289,
+        "jepa": 6.5702,
+        "persistence": 2.9201
+      },
+      "osmolality": {
+        "n": 2263,
+        "jepa": 21.143,
+        "persistence": 8.4046
+      },
+      "creatinine": {
+        "n": 2198,
+        "jepa": 0.6786,
+        "persistence": 0.2651
+      },
+      "urine_output": {
+        "n": 2312,
+        "jepa": 140.5844,
+        "persistence": 81.3003
+      },
+      "BHB": {
+        "n": 5,
+        "jepa": 4.156,
+        "persistence": 1.6
+      }
+    }
+  },
+  "candidate_rule_gate": {
+    "proposed": 42,
+    "retrospectively_validated": 23,
+    "active_rule_conflicts": 0,
+    "automatically_promoted_to_active": 0,
+    "candidate_file": "/Users/chunyouchang/Desktop/llm_project/medical_jepa/rules/candidate/symbolic_real_test_1782454971.json"
+  },
+  "safety_boundary": {
+    "active_sandbox_unchanged": true,
+    "validator_source_unchanged": true,
+    "causal_claims_allowed": false,
+    "human_review_required": true
+  },
+  "issues": [],
+  "rules": [
+    {
+      "rule_id": "jepa_observational_01363ad089",
+      "level": "retrospective_validated",
+      "context": {
+        "disease": "DKA",
+        "population": "MIMIC-IV full v3.1 ICU DKA-like anchors",
+        "cointerventions_observed": {
+          "bicarbonate": 38,
+          "dextrose": 297,
+          "insulin_basal_sc": 49,
+          "insulin_intermediate_sc": 5,
+          "insulin_iv": 561,
+          "insulin_rapid_sc": 124,
+          "kcl": 409
+        }
+      },
+      "action": {
+        "type": "intervention",
+        "name": "fluids"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.ph",
+        "model_variable": "pH",
+        "direction": "increase",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.9517,
+      "evidence": {
+        "support_count": 769,
+        "patient_stay_count": 346,
+        "discovery_factual_direction_accuracy": 0.7334,
+        "proposal_direction_consistency": 0.9424,
+        "isolated_action_support_count": 50
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + MIMIC-IV full v3.1",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "awaiting_human_review",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 470,
+        "patient_stay_count": 191,
+        "direction_accuracy": 0.6915,
+        "persistence_direction_accuracy": 0.0851,
+        "isolated_action_support_count": 59,
+        "action_specificity_identifiable": true,
+        "passes_automated_retrospective_gate": true
+      }
+    },
+    {
+      "rule_id": "jepa_observational_0695fc6e81",
+      "level": "observational_association",
+      "context": {
+        "disease": "DKA",
+        "population": "MIMIC-IV full v3.1 ICU DKA-like anchors",
+        "cointerventions_observed": {
+          "bicarbonate": 36,
+          "fluids": 297,
+          "insulin_basal_sc": 10,
+          "insulin_intermediate_sc": 1,
+          "insulin_iv": 198,
+          "insulin_rapid_sc": 29,
+          "kcl": 140
+        }
+      },
+      "action": {
+        "type": "intervention",
+        "name": "dextrose"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.ph",
+        "model_variable": "pH",
+        "direction": "increase",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.9762,
+      "evidence": {
+        "support_count": 319,
+        "patient_stay_count": 145,
+        "discovery_factual_direction_accuracy": 0.7429,
+        "proposal_direction_consistency": 0.9938,
+        "isolated_action_support_count": 15
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + MIMIC-IV full v3.1",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "insufficient_or_failed_heldout_evidence",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 157,
+        "patient_stay_count": 75,
+        "direction_accuracy": 0.6688,
+        "persistence_direction_accuracy": 0.1019,
+        "isolated_action_support_count": 7,
+        "action_specificity_identifiable": true,
+        "passes_automated_retrospective_gate": false
+      }
+    },
+    {
+      "rule_id": "jepa_observational_0eeb76af45",
+      "level": "observational_association",
+      "context": {
+        "disease": "DKA",
+        "population": "MIMIC-IV full v3.1 ICU DKA-like anchors",
+        "cointerventions_observed": {
+          "dextrose": 1,
+          "fluids": 5,
+          "insulin_iv": 5,
+          "insulin_rapid_sc": 5,
+          "kcl": 5
+        }
+      },
+      "action": {
+        "type": "intervention",
+        "name": "insulin_intermediate_sc"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.bicarbonate",
+        "model_variable": "HCO3",
+        "direction": "increase",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.9964,
+      "evidence": {
+        "support_count": 10,
+        "patient_stay_count": 10,
+        "discovery_factual_direction_accuracy": 0.7,
+        "proposal_direction_consistency": 1.0,
+        "isolated_action_support_count": 0
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + MIMIC-IV full v3.1",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "insufficient_or_failed_heldout_evidence",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 7,
+        "patient_stay_count": 6,
+        "direction_accuracy": 1.0,
+        "persistence_direction_accuracy": 0.0,
+        "isolated_action_support_count": 0,
+        "action_specificity_identifiable": false,
+        "passes_automated_retrospective_gate": false
+      }
+    },
+    {
+      "rule_id": "jepa_observational_147ef7ae35",
+      "level": "retrospective_validated",
+      "context": {
+        "disease": "DKA",
+        "population": "MIMIC-IV full v3.1 ICU DKA-like anchors",
+        "cointerventions_observed": {
+          "bicarbonate": 15,
+          "dextrose": 129,
+          "fluids": 375,
+          "insulin_basal_sc": 31,
+          "insulin_intermediate_sc": 5,
+          "insulin_iv": 347,
+          "insulin_rapid_sc": 76
+        }
+      },
+      "action": {
+        "type": "intervention",
+        "name": "kcl"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.bicarbonate",
+        "model_variable": "HCO3",
+        "direction": "increase",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.957,
+      "evidence": {
+        "support_count": 454,
+        "patient_stay_count": 261,
+        "discovery_factual_direction_accuracy": 0.7841,
+        "proposal_direction_consistency": 0.94,
+        "isolated_action_support_count": 34
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + MIMIC-IV full v3.1",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "awaiting_human_review",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 259,
+        "patient_stay_count": 139,
+        "direction_accuracy": 0.7452,
+        "persistence_direction_accuracy": 0.1313,
+        "isolated_action_support_count": 29,
+        "action_specificity_identifiable": true,
+        "passes_automated_retrospective_gate": true
+      }
+    },
+    {
+      "rule_id": "jepa_observational_1997659fcd",
+      "level": "retrospective_validated",
+      "context": {
+        "disease": "DKA",
+        "population": "MIMIC-IV full v3.1 ICU DKA-like anchors",
+        "cointerventions_observed": {
+          "bicarbonate": 26,
+          "dextrose": 176,
+          "fluids": 510,
+          "insulin_basal_sc": 41,
+          "insulin_intermediate_sc": 5,
+          "insulin_rapid_sc": 87,
+          "kcl": 347
+        }
+      },
+      "action": {
+        "type": "intervention",
+        "name": "insulin_iv"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.bicarbonate",
+        "model_variable": "HCO3",
+        "direction": "increase",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.9782,
+      "evidence": {
+        "support_count": 604,
+        "patient_stay_count": 308,
+        "discovery_factual_direction_accuracy": 0.7864,
+        "proposal_direction_consistency": 0.9853,
+        "isolated_action_support_count": 49
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + MIMIC-IV full v3.1",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "awaiting_human_review",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 318,
+        "patient_stay_count": 157,
+        "direction_accuracy": 0.7327,
+        "persistence_direction_accuracy": 0.1226,
+        "isolated_action_support_count": 27,
+        "action_specificity_identifiable": true,
+        "passes_automated_retrospective_gate": true
+      }
+    },
+    {
+      "rule_id": "jepa_observational_1ae745cd87",
+      "level": "retrospective_validated",
+      "context": {
+        "disease": "DKA",
+        "population": "MIMIC-IV full v3.1 ICU DKA-like anchors",
+        "cointerventions_observed": {
+          "bicarbonate": 4,
+          "dextrose": 10,
+          "fluids": 49,
+          "insulin_iv": 43,
+          "insulin_rapid_sc": 54,
+          "kcl": 34
+        }
+      },
+      "action": {
+        "type": "intervention",
+        "name": "insulin_basal_sc"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.ph",
+        "model_variable": "pH",
+        "direction": "increase",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.9837,
+      "evidence": {
+        "support_count": 80,
+        "patient_stay_count": 65,
+        "discovery_factual_direction_accuracy": 0.7375,
+        "proposal_direction_consistency": 1.0,
+        "isolated_action_support_count": 6
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + MIMIC-IV full v3.1",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "awaiting_human_review",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 43,
+        "patient_stay_count": 32,
+        "direction_accuracy": 0.7907,
+        "persistence_direction_accuracy": 0.0465,
+        "isolated_action_support_count": 10,
+        "action_specificity_identifiable": true,
+        "passes_automated_retrospective_gate": true
+      }
+    },
+    {
+      "rule_id": "jepa_observational_1d534df374",
+      "level": "retrospective_validated",
+      "context": {
+        "disease": "DKA",
+        "population": "MIMIC-IV full v3.1 ICU DKA-like anchors",
+        "cointerventions_observed": {
+          "bicarbonate": 9,
+          "dextrose": 26,
+          "fluids": 113,
+          "insulin_basal_sc": 49,
+          "insulin_intermediate_sc": 5,
+          "insulin_iv": 85,
+          "kcl": 75
+        }
+      },
+      "action": {
+        "type": "intervention",
+        "name": "insulin_rapid_sc"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.anion_gap",
+        "model_variable": "anion_gap",
+        "direction": "decrease",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.9967,
+      "evidence": {
+        "support_count": 268,
+        "patient_stay_count": 167,
+        "discovery_factual_direction_accuracy": 0.7948,
+        "proposal_direction_consistency": 1.0,
+        "isolated_action_support_count": 107
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + MIMIC-IV full v3.1",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "awaiting_human_review",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 133,
+        "patient_stay_count": 96,
+        "direction_accuracy": 0.7068,
+        "persistence_direction_accuracy": 0.0977,
+        "isolated_action_support_count": 41,
+        "action_specificity_identifiable": true,
+        "passes_automated_retrospective_gate": true
+      }
+    },
+    {
+      "rule_id": "jepa_observational_1f46da266f",
+      "level": "retrospective_validated",
+      "context": {
+        "disease": "DKA",
+        "population": "MIMIC-IV full v3.1 ICU DKA-like anchors",
+        "cointerventions_observed": {
+          "bicarbonate": 19,
+          "dextrose": 146,
+          "insulin_basal_sc": 47,
+          "insulin_intermediate_sc": 5,
+          "insulin_iv": 475,
+          "insulin_rapid_sc": 110,
+          "kcl": 366
+        }
+      },
+      "action": {
+        "type": "intervention",
+        "name": "fluids"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.effective_osmolality",
+        "model_variable": "osmolality",
+        "direction": "decrease",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.9753,
+      "evidence": {
+        "support_count": 675,
+        "patient_stay_count": 328,
+        "discovery_factual_direction_accuracy": 0.68,
+        "proposal_direction_consistency": 0.871,
+        "isolated_action_support_count": 86
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + MIMIC-IV full v3.1",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "awaiting_human_review",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 431,
+        "patient_stay_count": 185,
+        "direction_accuracy": 0.6729,
+        "persistence_direction_accuracy": 0.1021,
+        "isolated_action_support_count": 56,
+        "action_specificity_identifiable": true,
+        "passes_automated_retrospective_gate": true
+      }
+    },
+    {
+      "rule_id": "jepa_observational_27ff78ccfa",
+      "level": "observational_association",
+      "context": {
+        "disease": "DKA",
+        "population": "MIMIC-IV full v3.1 ICU DKA-like anchors",
+        "cointerventions_observed": {
+          "dextrose": 31,
+          "fluids": 33,
+          "insulin_basal_sc": 4,
+          "insulin_iv": 26,
+          "insulin_rapid_sc": 9,
+          "kcl": 15
+        }
+      },
+      "action": {
+        "type": "intervention",
+        "name": "bicarbonate"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.bicarbonate",
+        "model_variable": "HCO3",
+        "direction": "increase",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.9997,
+      "evidence": {
+        "support_count": 36,
+        "patient_stay_count": 24,
+        "discovery_factual_direction_accuracy": 0.8889,
+        "proposal_direction_consistency": 1.0,
+        "isolated_action_support_count": 3
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + MIMIC-IV full v3.1",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "insufficient_or_failed_heldout_evidence",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 18,
+        "patient_stay_count": 15,
+        "direction_accuracy": 0.6667,
+        "persistence_direction_accuracy": 0.0556,
+        "isolated_action_support_count": 1,
+        "action_specificity_identifiable": false,
+        "passes_automated_retrospective_gate": false
+      }
+    },
+    {
+      "rule_id": "jepa_observational_289b2bcf9b",
+      "level": "observational_association",
+      "context": {
+        "disease": "DKA",
+        "population": "MIMIC-IV full v3.1 ICU DKA-like anchors",
+        "cointerventions_observed": {
+          "dextrose": 1,
+          "fluids": 5,
+          "insulin_iv": 5,
+          "insulin_rapid_sc": 5,
+          "kcl": 5
+        }
+      },
+      "action": {
+        "type": "intervention",
+        "name": "insulin_intermediate_sc"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.anion_gap",
+        "model_variable": "anion_gap",
+        "direction": "decrease",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.9999,
+      "evidence": {
+        "support_count": 10,
+        "patient_stay_count": 10,
+        "discovery_factual_direction_accuracy": 0.9,
+        "proposal_direction_consistency": 1.0,
+        "isolated_action_support_count": 0
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + MIMIC-IV full v3.1",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "insufficient_or_failed_heldout_evidence",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 6,
+        "patient_stay_count": 5,
+        "direction_accuracy": 0.8333,
+        "persistence_direction_accuracy": 0.1667,
+        "isolated_action_support_count": 0,
+        "action_specificity_identifiable": false,
+        "passes_automated_retrospective_gate": false
+      }
+    },
+    {
+      "rule_id": "jepa_observational_383633e10a",
+      "level": "observational_association",
+      "context": {
+        "disease": "DKA",
+        "population": "MIMIC-IV full v3.1 ICU DKA-like anchors",
+        "cointerventions_observed": {
+          "bicarbonate": 10,
+          "dextrose": 69,
+          "fluids": 366,
+          "insulin_basal_sc": 32,
+          "insulin_intermediate_sc": 5,
+          "insulin_iv": 337,
+          "insulin_rapid_sc": 76
+        }
+      },
+      "action": {
+        "type": "intervention",
+        "name": "kcl"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.effective_osmolality",
+        "model_variable": "osmolality",
+        "direction": "decrease",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.9705,
+      "evidence": {
+        "support_count": 460,
+        "patient_stay_count": 263,
+        "discovery_factual_direction_accuracy": 0.6804,
+        "proposal_direction_consistency": 0.9002,
+        "isolated_action_support_count": 49
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + MIMIC-IV full v3.1",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "insufficient_or_failed_heldout_evidence",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 257,
+        "patient_stay_count": 138,
+        "direction_accuracy": 0.6498,
+        "persistence_direction_accuracy": 0.0973,
+        "isolated_action_support_count": 28,
+        "action_specificity_identifiable": true,
+        "passes_automated_retrospective_gate": false
+      }
+    },
+    {
+      "rule_id": "jepa_observational_384a5ee15e",
+      "level": "retrospective_validated",
+      "context": {
+        "disease": "DKA",
+        "population": "MIMIC-IV full v3.1 ICU DKA-like anchors",
+        "cointerventions_observed": {
+          "bicarbonate": 9,
+          "dextrose": 26,
+          "fluids": 113,
+          "insulin_basal_sc": 50,
+          "insulin_intermediate_sc": 5,
+          "insulin_iv": 87,
+          "kcl": 76
+        }
+      },
+      "action": {
+        "type": "intervention",
+        "name": "insulin_rapid_sc"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.bicarbonate",
+        "model_variable": "HCO3",
+        "direction": "increase",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.974,
+      "evidence": {
+        "support_count": 268,
+        "patient_stay_count": 167,
+        "discovery_factual_direction_accuracy": 0.7537,
+        "proposal_direction_consistency": 0.9926,
+        "isolated_action_support_count": 107
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + MIMIC-IV full v3.1",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "awaiting_human_review",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 134,
+        "patient_stay_count": 96,
+        "direction_accuracy": 0.7463,
+        "persistence_direction_accuracy": 0.1343,
+        "isolated_action_support_count": 42,
+        "action_specificity_identifiable": true,
+        "passes_automated_retrospective_gate": true
+      }
+    },
+    {
+      "rule_id": "jepa_observational_3aca1d9db7",
+      "level": "retrospective_validated",
+      "context": {
+        "disease": "DKA",
+        "population": "MIMIC-IV full v3.1 ICU DKA-like anchors",
+        "cointerventions_observed": {
+          "bicarbonate": 4,
+          "dextrose": 9,
+          "fluids": 46,
+          "insulin_iv": 41,
+          "insulin_rapid_sc": 50,
+          "kcl": 31
+        }
+      },
+      "action": {
+        "type": "intervention",
+        "name": "insulin_basal_sc"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.bicarbonate",
+        "model_variable": "HCO3",
+        "direction": "increase",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.9918,
+      "evidence": {
+        "support_count": 73,
+        "patient_stay_count": 59,
+        "discovery_factual_direction_accuracy": 0.8219,
+        "proposal_direction_consistency": 1.0,
+        "isolated_action_support_count": 5
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + MIMIC-IV full v3.1",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "awaiting_human_review",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 41,
+        "patient_stay_count": 32,
+        "direction_accuracy": 0.7073,
+        "persistence_direction_accuracy": 0.0976,
+        "isolated_action_support_count": 10,
+        "action_specificity_identifiable": true,
+        "passes_automated_retrospective_gate": true
+      }
+    },
+    {
+      "rule_id": "jepa_observational_3dbdc48d5c",
+      "level": "retrospective_validated",
+      "context": {
+        "disease": "DKA",
+        "population": "MIMIC-IV full v3.1 ICU DKA-like anchors",
+        "cointerventions_observed": {
+          "bicarbonate": 9,
+          "dextrose": 29,
+          "fluids": 124,
+          "insulin_basal_sc": 54,
+          "insulin_intermediate_sc": 5,
+          "insulin_iv": 96,
+          "kcl": 84
+        }
+      },
+      "action": {
+        "type": "intervention",
+        "name": "insulin_rapid_sc"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.ph",
+        "model_variable": "pH",
+        "direction": "increase",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.9511,
+      "evidence": {
+        "support_count": 279,
+        "patient_stay_count": 176,
+        "discovery_factual_direction_accuracy": 0.7276,
+        "proposal_direction_consistency": 0.9964,
+        "isolated_action_support_count": 103
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + MIMIC-IV full v3.1",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "awaiting_human_review",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 153,
+        "patient_stay_count": 103,
+        "direction_accuracy": 0.6928,
+        "persistence_direction_accuracy": 0.085,
+        "isolated_action_support_count": 51,
+        "action_specificity_identifiable": true,
+        "passes_automated_retrospective_gate": true
+      }
+    },
+    {
+      "rule_id": "jepa_observational_3f4a9a1528",
+      "level": "retrospective_validated",
+      "context": {
+        "disease": "DKA",
+        "population": "MIMIC-IV full v3.1 ICU DKA-like anchors",
+        "cointerventions_observed": {
+          "bicarbonate": 28,
+          "dextrose": 198,
+          "fluids": 561,
+          "insulin_basal_sc": 43,
+          "insulin_intermediate_sc": 5,
+          "insulin_rapid_sc": 96,
+          "kcl": 379
+        }
+      },
+      "action": {
+        "type": "intervention",
+        "name": "insulin_iv"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.ph",
+        "model_variable": "pH",
+        "direction": "increase",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.9673,
+      "evidence": {
+        "support_count": 667,
+        "patient_stay_count": 319,
+        "discovery_factual_direction_accuracy": 0.7196,
+        "proposal_direction_consistency": 0.9911,
+        "isolated_action_support_count": 55
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + MIMIC-IV full v3.1",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "awaiting_human_review",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 350,
+        "patient_stay_count": 162,
+        "direction_accuracy": 0.6943,
+        "persistence_direction_accuracy": 0.0886,
+        "isolated_action_support_count": 28,
+        "action_specificity_identifiable": true,
+        "passes_automated_retrospective_gate": true
+      }
+    },
+    {
+      "rule_id": "jepa_observational_4dbb3816ef",
+      "level": "observational_association",
+      "context": {
+        "disease": "DKA",
+        "population": "MIMIC-IV full v3.1 ICU DKA-like anchors",
+        "cointerventions_observed": {
+          "dextrose": 1,
+          "fluids": 5,
+          "insulin_iv": 5,
+          "insulin_rapid_sc": 5,
+          "kcl": 5
+        }
+      },
+      "action": {
+        "type": "intervention",
+        "name": "insulin_intermediate_sc"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.glucose",
+        "model_variable": "G",
+        "direction": "decrease",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.9996,
+      "evidence": {
+        "support_count": 10,
+        "patient_stay_count": 10,
+        "discovery_factual_direction_accuracy": 0.7,
+        "proposal_direction_consistency": 1.0,
+        "isolated_action_support_count": 0
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + MIMIC-IV full v3.1",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "insufficient_or_failed_heldout_evidence",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 7,
+        "patient_stay_count": 6,
+        "direction_accuracy": 0.5714,
+        "persistence_direction_accuracy": 0.1429,
+        "isolated_action_support_count": 0,
+        "action_specificity_identifiable": false,
+        "passes_automated_retrospective_gate": false
+      }
+    },
+    {
+      "rule_id": "jepa_observational_5eca5a0613",
+      "level": "observational_association",
+      "context": {
+        "disease": "DKA",
+        "population": "MIMIC-IV full v3.1 ICU DKA-like anchors",
+        "cointerventions_observed": {
+          "bicarbonate": 1,
+          "dextrose": 1,
+          "fluids": 4,
+          "insulin_iv": 2,
+          "insulin_rapid_sc": 1
+        }
+      },
+      "action": {
+        "type": "intervention",
+        "name": "kcl"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.beta_hydroxybutyrate",
+        "model_variable": "BHB",
+        "direction": "decrease",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.9806,
+      "evidence": {
+        "support_count": 5,
+        "patient_stay_count": 4,
+        "discovery_factual_direction_accuracy": 1.0,
+        "proposal_direction_consistency": 1.0,
+        "isolated_action_support_count": 1
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + MIMIC-IV full v3.1",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "insufficient_or_failed_heldout_evidence",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 6,
+        "patient_stay_count": 6,
+        "direction_accuracy": 1.0,
+        "persistence_direction_accuracy": 0.0,
+        "isolated_action_support_count": 1,
+        "action_specificity_identifiable": false,
+        "passes_automated_retrospective_gate": false
+      }
+    },
+    {
+      "rule_id": "jepa_observational_60fd4228a2",
+      "level": "retrospective_validated",
+      "context": {
+        "disease": "DKA",
+        "population": "MIMIC-IV full v3.1 ICU DKA-like anchors",
+        "cointerventions_observed": {
+          "bicarbonate": 31,
+          "fluids": 266,
+          "insulin_basal_sc": 9,
+          "insulin_intermediate_sc": 1,
+          "insulin_iv": 175,
+          "insulin_rapid_sc": 26,
+          "kcl": 131
+        }
+      },
+      "action": {
+        "type": "intervention",
+        "name": "dextrose"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.anion_gap",
+        "model_variable": "anion_gap",
+        "direction": "decrease",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.9975,
+      "evidence": {
+        "support_count": 287,
+        "patient_stay_count": 139,
+        "discovery_factual_direction_accuracy": 0.7666,
+        "proposal_direction_consistency": 1.0,
+        "isolated_action_support_count": 15
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + MIMIC-IV full v3.1",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "awaiting_human_review",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 139,
+        "patient_stay_count": 70,
+        "direction_accuracy": 0.741,
+        "persistence_direction_accuracy": 0.0791,
+        "isolated_action_support_count": 7,
+        "action_specificity_identifiable": true,
+        "passes_automated_retrospective_gate": true
+      }
+    },
+    {
+      "rule_id": "jepa_observational_6243e54d3b",
+      "level": "retrospective_validated",
+      "context": {
+        "disease": "DKA",
+        "population": "MIMIC-IV full v3.1 ICU DKA-like anchors",
+        "cointerventions_observed": {
+          "bicarbonate": 10,
+          "dextrose": 75,
+          "fluids": 378,
+          "insulin_basal_sc": 33,
+          "insulin_intermediate_sc": 5,
+          "insulin_iv": 345,
+          "insulin_rapid_sc": 79
+        }
+      },
+      "action": {
+        "type": "intervention",
+        "name": "kcl"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.glucose",
+        "model_variable": "G",
+        "direction": "decrease",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.9831,
+      "evidence": {
+        "support_count": 478,
+        "patient_stay_count": 269,
+        "discovery_factual_direction_accuracy": 0.8264,
+        "proposal_direction_consistency": 0.8968,
+        "isolated_action_support_count": 52
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + MIMIC-IV full v3.1",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "awaiting_human_review",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 261,
+        "patient_stay_count": 139,
+        "direction_accuracy": 0.7893,
+        "persistence_direction_accuracy": 0.0153,
+        "isolated_action_support_count": 29,
+        "action_specificity_identifiable": true,
+        "passes_automated_retrospective_gate": true
+      }
+    },
+    {
+      "rule_id": "jepa_observational_66f590453e",
+      "level": "observational_association",
+      "context": {
+        "disease": "DKA",
+        "population": "MIMIC-IV full v3.1 ICU DKA-like anchors",
+        "cointerventions_observed": {
+          "dextrose": 18,
+          "fluids": 19,
+          "insulin_basal_sc": 4,
+          "insulin_iv": 16,
+          "insulin_rapid_sc": 6,
+          "kcl": 10
+        }
+      },
+      "action": {
+        "type": "intervention",
+        "name": "bicarbonate"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.effective_osmolality",
+        "model_variable": "osmolality",
+        "direction": "decrease",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.88,
+      "evidence": {
+        "support_count": 22,
+        "patient_stay_count": 14,
+        "discovery_factual_direction_accuracy": 0.7727,
+        "proposal_direction_consistency": 0.7097,
+        "isolated_action_support_count": 3
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + MIMIC-IV full v3.1",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "insufficient_or_failed_heldout_evidence",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 19,
+        "patient_stay_count": 16,
+        "direction_accuracy": 0.6316,
+        "persistence_direction_accuracy": 0.1053,
+        "isolated_action_support_count": 1,
+        "action_specificity_identifiable": false,
+        "passes_automated_retrospective_gate": false
+      }
+    },
+    {
+      "rule_id": "jepa_observational_7e9991d8cc",
+      "level": "observational_association",
+      "context": {
+        "disease": "DKA",
+        "population": "MIMIC-IV full v3.1 ICU DKA-like anchors",
+        "cointerventions_observed": {
+          "bicarbonate": 6,
+          "dextrose": 18,
+          "fluids": 110,
+          "insulin_basal_sc": 52,
+          "insulin_intermediate_sc": 5,
+          "insulin_iv": 83,
+          "kcl": 76
+        }
+      },
+      "action": {
+        "type": "intervention",
+        "name": "insulin_rapid_sc"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.effective_osmolality",
+        "model_variable": "osmolality",
+        "direction": "decrease",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.9852,
+      "evidence": {
+        "support_count": 265,
+        "patient_stay_count": 166,
+        "discovery_factual_direction_accuracy": 0.6226,
+        "proposal_direction_consistency": 0.9815,
+        "isolated_action_support_count": 107
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + MIMIC-IV full v3.1",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "insufficient_or_failed_heldout_evidence",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 135,
+        "patient_stay_count": 96,
+        "direction_accuracy": 0.5704,
+        "persistence_direction_accuracy": 0.1037,
+        "isolated_action_support_count": 42,
+        "action_specificity_identifiable": true,
+        "passes_automated_retrospective_gate": false
+      }
+    },
+    {
+      "rule_id": "jepa_observational_88864ab239",
+      "level": "observational_association",
+      "context": {
+        "disease": "DKA",
+        "population": "MIMIC-IV full v3.1 ICU DKA-like anchors",
+        "cointerventions_observed": {
+          "dextrose": 31,
+          "fluids": 33,
+          "insulin_basal_sc": 4,
+          "insulin_iv": 26,
+          "insulin_rapid_sc": 9,
+          "kcl": 15
+        }
+      },
+      "action": {
+        "type": "intervention",
+        "name": "bicarbonate"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.anion_gap",
+        "model_variable": "anion_gap",
+        "direction": "decrease",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.9999,
+      "evidence": {
+        "support_count": 36,
+        "patient_stay_count": 24,
+        "discovery_factual_direction_accuracy": 0.75,
+        "proposal_direction_consistency": 1.0,
+        "isolated_action_support_count": 3
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + MIMIC-IV full v3.1",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "insufficient_or_failed_heldout_evidence",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 18,
+        "patient_stay_count": 15,
+        "direction_accuracy": 0.7222,
+        "persistence_direction_accuracy": 0.1111,
+        "isolated_action_support_count": 1,
+        "action_specificity_identifiable": false,
+        "passes_automated_retrospective_gate": false
+      }
+    },
+    {
+      "rule_id": "jepa_observational_8cced9a7ef",
+      "level": "retrospective_validated",
+      "context": {
+        "disease": "DKA",
+        "population": "MIMIC-IV full v3.1 ICU DKA-like anchors",
+        "cointerventions_observed": {
+          "bicarbonate": 22,
+          "dextrose": 161,
+          "insulin_basal_sc": 47,
+          "insulin_intermediate_sc": 5,
+          "insulin_iv": 488,
+          "insulin_rapid_sc": 114,
+          "kcl": 378
+        }
+      },
+      "action": {
+        "type": "intervention",
+        "name": "fluids"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.glucose",
+        "model_variable": "G",
+        "direction": "decrease",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.9826,
+      "evidence": {
+        "support_count": 704,
+        "patient_stay_count": 334,
+        "discovery_factual_direction_accuracy": 0.8168,
+        "proposal_direction_consistency": 0.8649,
+        "isolated_action_support_count": 93
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + MIMIC-IV full v3.1",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "awaiting_human_review",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 436,
+        "patient_stay_count": 185,
+        "direction_accuracy": 0.8211,
+        "persistence_direction_accuracy": 0.0229,
+        "isolated_action_support_count": 57,
+        "action_specificity_identifiable": true,
+        "passes_automated_retrospective_gate": true
+      }
+    },
+    {
+      "rule_id": "jepa_observational_915cbec304",
+      "level": "retrospective_validated",
+      "context": {
+        "disease": "DKA",
+        "population": "MIMIC-IV full v3.1 ICU DKA-like anchors",
+        "cointerventions_observed": {
+          "bicarbonate": 19,
+          "dextrose": 120,
+          "fluids": 488,
+          "insulin_basal_sc": 42,
+          "insulin_intermediate_sc": 5,
+          "insulin_rapid_sc": 85,
+          "kcl": 345
+        }
+      },
+      "action": {
+        "type": "intervention",
+        "name": "insulin_iv"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.glucose",
+        "model_variable": "G",
+        "direction": "decrease",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.9876,
+      "evidence": {
+        "support_count": 584,
+        "patient_stay_count": 299,
+        "discovery_factual_direction_accuracy": 0.8151,
+        "proposal_direction_consistency": 0.9082,
+        "isolated_action_support_count": 51
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + MIMIC-IV full v3.1",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "awaiting_human_review",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 322,
+        "patient_stay_count": 157,
+        "direction_accuracy": 0.7826,
+        "persistence_direction_accuracy": 0.0311,
+        "isolated_action_support_count": 26,
+        "action_specificity_identifiable": true,
+        "passes_automated_retrospective_gate": true
+      }
+    },
+    {
+      "rule_id": "jepa_observational_a20825d15a",
+      "level": "observational_association",
+      "context": {
+        "disease": "DKA",
+        "population": "MIMIC-IV full v3.1 ICU DKA-like anchors",
+        "cointerventions_observed": {
+          "dextrose": 21,
+          "fluids": 22,
+          "insulin_basal_sc": 4,
+          "insulin_iv": 19,
+          "insulin_rapid_sc": 7,
+          "kcl": 10
+        }
+      },
+      "action": {
+        "type": "intervention",
+        "name": "bicarbonate"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.glucose",
+        "model_variable": "G",
+        "direction": "decrease",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.9165,
+      "evidence": {
+        "support_count": 25,
+        "patient_stay_count": 16,
+        "discovery_factual_direction_accuracy": 0.72,
+        "proposal_direction_consistency": 0.7143,
+        "isolated_action_support_count": 3
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + MIMIC-IV full v3.1",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "insufficient_or_failed_heldout_evidence",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 18,
+        "patient_stay_count": 15,
+        "direction_accuracy": 0.8889,
+        "persistence_direction_accuracy": 0.0,
+        "isolated_action_support_count": 1,
+        "action_specificity_identifiable": false,
+        "passes_automated_retrospective_gate": false
+      }
+    },
+    {
+      "rule_id": "jepa_observational_a5b169190e",
+      "level": "retrospective_validated",
+      "context": {
+        "disease": "DKA",
+        "population": "MIMIC-IV full v3.1 ICU DKA-like anchors",
+        "cointerventions_observed": {
+          "bicarbonate": 15,
+          "dextrose": 131,
+          "fluids": 421,
+          "insulin_basal_sc": 30,
+          "insulin_intermediate_sc": 5,
+          "insulin_iv": 365,
+          "insulin_rapid_sc": 75
+        }
+      },
+      "action": {
+        "type": "intervention",
+        "name": "kcl"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.anion_gap",
+        "model_variable": "anion_gap",
+        "direction": "decrease",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.9897,
+      "evidence": {
+        "support_count": 515,
+        "patient_stay_count": 281,
+        "discovery_factual_direction_accuracy": 0.7573,
+        "proposal_direction_consistency": 1.0,
+        "isolated_action_support_count": 51
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + MIMIC-IV full v3.1",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "awaiting_human_review",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 255,
+        "patient_stay_count": 139,
+        "direction_accuracy": 0.7765,
+        "persistence_direction_accuracy": 0.0588,
+        "isolated_action_support_count": 28,
+        "action_specificity_identifiable": true,
+        "passes_automated_retrospective_gate": true
+      }
+    },
+    {
+      "rule_id": "jepa_observational_b3f28d9a35",
+      "level": "retrospective_validated",
+      "context": {
+        "disease": "DKA",
+        "population": "MIMIC-IV full v3.1 ICU DKA-like anchors",
+        "cointerventions_observed": {
+          "bicarbonate": 4,
+          "dextrose": 10,
+          "fluids": 47,
+          "insulin_iv": 42,
+          "insulin_rapid_sc": 52,
+          "kcl": 33
+        }
+      },
+      "action": {
+        "type": "intervention",
+        "name": "insulin_basal_sc"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.glucose",
+        "model_variable": "G",
+        "direction": "decrease",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.9942,
+      "evidence": {
+        "support_count": 77,
+        "patient_stay_count": 62,
+        "discovery_factual_direction_accuracy": 0.8182,
+        "proposal_direction_consistency": 1.0,
+        "isolated_action_support_count": 6
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + MIMIC-IV full v3.1",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "awaiting_human_review",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 41,
+        "patient_stay_count": 32,
+        "direction_accuracy": 0.7561,
+        "persistence_direction_accuracy": 0.0488,
+        "isolated_action_support_count": 10,
+        "action_specificity_identifiable": true,
+        "passes_automated_retrospective_gate": true
+      }
+    },
+    {
+      "rule_id": "jepa_observational_b998de2946",
+      "level": "observational_association",
+      "context": {
+        "disease": "DKA",
+        "population": "MIMIC-IV full v3.1 ICU DKA-like anchors",
+        "cointerventions_observed": {
+          "dextrose": 1,
+          "fluids": 5,
+          "insulin_iv": 5,
+          "insulin_rapid_sc": 3,
+          "kcl": 5
+        }
+      },
+      "action": {
+        "type": "intervention",
+        "name": "insulin_intermediate_sc"
+      },
+      "predicted_transition": {
+        "variable": "renal.creatinine",
+        "model_variable": "creatinine",
+        "direction": "decrease",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.9176,
+      "evidence": {
+        "support_count": 8,
+        "patient_stay_count": 8,
+        "discovery_factual_direction_accuracy": 0.75,
+        "proposal_direction_consistency": 1.0,
+        "isolated_action_support_count": 0
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + MIMIC-IV full v3.1",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "insufficient_or_failed_heldout_evidence",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 6,
+        "patient_stay_count": 5,
+        "direction_accuracy": 0.5,
+        "persistence_direction_accuracy": 0.0,
+        "isolated_action_support_count": 0,
+        "action_specificity_identifiable": false,
+        "passes_automated_retrospective_gate": false
+      }
+    },
+    {
+      "rule_id": "jepa_observational_c035cfd8f7",
+      "level": "observational_association",
+      "context": {
+        "disease": "DKA",
+        "population": "MIMIC-IV full v3.1 ICU DKA-like anchors",
+        "cointerventions_observed": {
+          "bicarbonate": 1,
+          "dextrose": 5,
+          "insulin_iv": 5,
+          "insulin_rapid_sc": 1,
+          "kcl": 4
+        }
+      },
+      "action": {
+        "type": "intervention",
+        "name": "fluids"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.beta_hydroxybutyrate",
+        "model_variable": "BHB",
+        "direction": "decrease",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.9878,
+      "evidence": {
+        "support_count": 14,
+        "patient_stay_count": 13,
+        "discovery_factual_direction_accuracy": 1.0,
+        "proposal_direction_consistency": 1.0,
+        "isolated_action_support_count": 5
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + MIMIC-IV full v3.1",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "insufficient_or_failed_heldout_evidence",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 4,
+        "patient_stay_count": 4,
+        "direction_accuracy": 1.0,
+        "persistence_direction_accuracy": 0.0,
+        "isolated_action_support_count": 0,
+        "action_specificity_identifiable": false,
+        "passes_automated_retrospective_gate": false
+      }
+    },
+    {
+      "rule_id": "jepa_observational_c34ec1899a",
+      "level": "observational_association",
+      "context": {
+        "disease": "DKA",
+        "population": "MIMIC-IV full v3.1 ICU DKA-like anchors",
+        "cointerventions_observed": {
+          "dextrose": 36,
+          "fluids": 38,
+          "insulin_basal_sc": 4,
+          "insulin_iv": 28,
+          "insulin_rapid_sc": 9,
+          "kcl": 16
+        }
+      },
+      "action": {
+        "type": "intervention",
+        "name": "bicarbonate"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.ph",
+        "model_variable": "pH",
+        "direction": "increase",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.9985,
+      "evidence": {
+        "support_count": 41,
+        "patient_stay_count": 26,
+        "discovery_factual_direction_accuracy": 0.7805,
+        "proposal_direction_consistency": 1.0,
+        "isolated_action_support_count": 3
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + MIMIC-IV full v3.1",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "insufficient_or_failed_heldout_evidence",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 18,
+        "patient_stay_count": 15,
+        "direction_accuracy": 0.7222,
+        "persistence_direction_accuracy": 0.0556,
+        "isolated_action_support_count": 1,
+        "action_specificity_identifiable": false,
+        "passes_automated_retrospective_gate": false
+      }
+    },
+    {
+      "rule_id": "jepa_observational_c38192a9ca",
+      "level": "observational_association",
+      "context": {
+        "disease": "DKA",
+        "population": "MIMIC-IV full v3.1 ICU DKA-like anchors",
+        "cointerventions_observed": {
+          "bicarbonate": 16,
+          "dextrose": 111,
+          "fluids": 475,
+          "insulin_basal_sc": 42,
+          "insulin_intermediate_sc": 5,
+          "insulin_rapid_sc": 83,
+          "kcl": 337
+        }
+      },
+      "action": {
+        "type": "intervention",
+        "name": "insulin_iv"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.effective_osmolality",
+        "model_variable": "osmolality",
+        "direction": "decrease",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.9878,
+      "evidence": {
+        "support_count": 569,
+        "patient_stay_count": 297,
+        "discovery_factual_direction_accuracy": 0.6749,
+        "proposal_direction_consistency": 0.9104,
+        "isolated_action_support_count": 50
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + MIMIC-IV full v3.1",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "insufficient_or_failed_heldout_evidence",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 319,
+        "patient_stay_count": 159,
+        "direction_accuracy": 0.6301,
+        "persistence_direction_accuracy": 0.1034,
+        "isolated_action_support_count": 26,
+        "action_specificity_identifiable": true,
+        "passes_automated_retrospective_gate": false
+      }
+    },
+    {
+      "rule_id": "jepa_observational_c7cd367f0e",
+      "level": "observational_association",
+      "context": {
+        "disease": "DKA",
+        "population": "MIMIC-IV full v3.1 ICU DKA-like anchors",
+        "cointerventions_observed": {
+          "bicarbonate": 4,
+          "dextrose": 9,
+          "fluids": 45,
+          "insulin_iv": 40,
+          "insulin_rapid_sc": 49,
+          "kcl": 30
+        }
+      },
+      "action": {
+        "type": "intervention",
+        "name": "insulin_basal_sc"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.anion_gap",
+        "model_variable": "anion_gap",
+        "direction": "decrease",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.9999,
+      "evidence": {
+        "support_count": 72,
+        "patient_stay_count": 58,
+        "discovery_factual_direction_accuracy": 0.8472,
+        "proposal_direction_consistency": 1.0,
+        "isolated_action_support_count": 5
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + MIMIC-IV full v3.1",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "insufficient_or_failed_heldout_evidence",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 41,
+        "patient_stay_count": 32,
+        "direction_accuracy": 0.6585,
+        "persistence_direction_accuracy": 0.0732,
+        "isolated_action_support_count": 10,
+        "action_specificity_identifiable": true,
+        "passes_automated_retrospective_gate": false
+      }
+    },
+    {
+      "rule_id": "jepa_observational_c91ac2b272",
+      "level": "retrospective_validated",
+      "context": {
+        "disease": "DKA",
+        "population": "MIMIC-IV full v3.1 ICU DKA-like anchors",
+        "cointerventions_observed": {
+          "bicarbonate": 16,
+          "dextrose": 140,
+          "fluids": 409,
+          "insulin_basal_sc": 34,
+          "insulin_intermediate_sc": 5,
+          "insulin_iv": 379,
+          "insulin_rapid_sc": 84
+        }
+      },
+      "action": {
+        "type": "intervention",
+        "name": "kcl"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.ph",
+        "model_variable": "pH",
+        "direction": "increase",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.9421,
+      "evidence": {
+        "support_count": 491,
+        "patient_stay_count": 267,
+        "discovery_factual_direction_accuracy": 0.723,
+        "proposal_direction_consistency": 0.9534,
+        "isolated_action_support_count": 31
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + MIMIC-IV full v3.1",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "awaiting_human_review",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 290,
+        "patient_stay_count": 147,
+        "direction_accuracy": 0.6931,
+        "persistence_direction_accuracy": 0.1,
+        "isolated_action_support_count": 32,
+        "action_specificity_identifiable": true,
+        "passes_automated_retrospective_gate": true
+      }
+    },
+    {
+      "rule_id": "jepa_observational_cc2741b915",
+      "level": "retrospective_validated",
+      "context": {
+        "disease": "DKA",
+        "population": "MIMIC-IV full v3.1 ICU DKA-like anchors",
+        "cointerventions_observed": {
+          "bicarbonate": 4,
+          "dextrose": 10,
+          "fluids": 47,
+          "insulin_iv": 42,
+          "insulin_rapid_sc": 52,
+          "kcl": 32
+        }
+      },
+      "action": {
+        "type": "intervention",
+        "name": "insulin_basal_sc"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.effective_osmolality",
+        "model_variable": "osmolality",
+        "direction": "decrease",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.9859,
+      "evidence": {
+        "support_count": 76,
+        "patient_stay_count": 61,
+        "discovery_factual_direction_accuracy": 0.6711,
+        "proposal_direction_consistency": 1.0,
+        "isolated_action_support_count": 6
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + MIMIC-IV full v3.1",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "awaiting_human_review",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 41,
+        "patient_stay_count": 32,
+        "direction_accuracy": 0.7317,
+        "persistence_direction_accuracy": 0.0244,
+        "isolated_action_support_count": 10,
+        "action_specificity_identifiable": true,
+        "passes_automated_retrospective_gate": true
+      }
+    },
+    {
+      "rule_id": "jepa_observational_ce839ab87a",
+      "level": "observational_association",
+      "context": {
+        "disease": "DKA",
+        "population": "MIMIC-IV full v3.1 ICU DKA-like anchors",
+        "cointerventions_observed": {
+          "dextrose": 2,
+          "fluids": 5,
+          "insulin_rapid_sc": 1,
+          "kcl": 2
+        }
+      },
+      "action": {
+        "type": "intervention",
+        "name": "insulin_iv"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.beta_hydroxybutyrate",
+        "model_variable": "BHB",
+        "direction": "decrease",
+        "time_window": "0-6h"
+      },
+      "confidence": 1.0,
+      "evidence": {
+        "support_count": 5,
+        "patient_stay_count": 5,
+        "discovery_factual_direction_accuracy": 1.0,
+        "proposal_direction_consistency": 1.0,
+        "isolated_action_support_count": 0
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + MIMIC-IV full v3.1",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "insufficient_or_failed_heldout_evidence",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 3,
+        "patient_stay_count": 3,
+        "direction_accuracy": 1.0,
+        "persistence_direction_accuracy": 0.0,
+        "isolated_action_support_count": 0,
+        "action_specificity_identifiable": false,
+        "passes_automated_retrospective_gate": false
+      }
+    },
+    {
+      "rule_id": "jepa_observational_d3afe90186",
+      "level": "retrospective_validated",
+      "context": {
+        "disease": "DKA",
+        "population": "MIMIC-IV full v3.1 ICU DKA-like anchors",
+        "cointerventions_observed": {
+          "bicarbonate": 7,
+          "dextrose": 21,
+          "fluids": 114,
+          "insulin_basal_sc": 52,
+          "insulin_intermediate_sc": 5,
+          "insulin_iv": 85,
+          "kcl": 79
+        }
+      },
+      "action": {
+        "type": "intervention",
+        "name": "insulin_rapid_sc"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.glucose",
+        "model_variable": "G",
+        "direction": "decrease",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.9942,
+      "evidence": {
+        "support_count": 274,
+        "patient_stay_count": 170,
+        "discovery_factual_direction_accuracy": 0.8212,
+        "proposal_direction_consistency": 0.9786,
+        "isolated_action_support_count": 111
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + MIMIC-IV full v3.1",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "awaiting_human_review",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 135,
+        "patient_stay_count": 97,
+        "direction_accuracy": 0.7926,
+        "persistence_direction_accuracy": 0.0148,
+        "isolated_action_support_count": 43,
+        "action_specificity_identifiable": true,
+        "passes_automated_retrospective_gate": true
+      }
+    },
+    {
+      "rule_id": "jepa_observational_da5f89933d",
+      "level": "retrospective_validated",
+      "context": {
+        "disease": "DKA",
+        "population": "MIMIC-IV full v3.1 ICU DKA-like anchors",
+        "cointerventions_observed": {
+          "bicarbonate": 31,
+          "fluids": 265,
+          "insulin_basal_sc": 9,
+          "insulin_intermediate_sc": 1,
+          "insulin_iv": 176,
+          "insulin_rapid_sc": 26,
+          "kcl": 129
+        }
+      },
+      "action": {
+        "type": "intervention",
+        "name": "dextrose"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.bicarbonate",
+        "model_variable": "HCO3",
+        "direction": "increase",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.9825,
+      "evidence": {
+        "support_count": 286,
+        "patient_stay_count": 137,
+        "discovery_factual_direction_accuracy": 0.7727,
+        "proposal_direction_consistency": 0.9931,
+        "isolated_action_support_count": 15
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + MIMIC-IV full v3.1",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "awaiting_human_review",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 140,
+        "patient_stay_count": 70,
+        "direction_accuracy": 0.7286,
+        "persistence_direction_accuracy": 0.1357,
+        "isolated_action_support_count": 7,
+        "action_specificity_identifiable": true,
+        "passes_automated_retrospective_gate": true
+      }
+    },
+    {
+      "rule_id": "jepa_observational_dc7690aa90",
+      "level": "retrospective_validated",
+      "context": {
+        "disease": "DKA",
+        "population": "MIMIC-IV full v3.1 ICU DKA-like anchors",
+        "cointerventions_observed": {
+          "bicarbonate": 33,
+          "dextrose": 266,
+          "insulin_basal_sc": 45,
+          "insulin_intermediate_sc": 5,
+          "insulin_iv": 531,
+          "insulin_rapid_sc": 113,
+          "kcl": 421
+        }
+      },
+      "action": {
+        "type": "intervention",
+        "name": "fluids"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.anion_gap",
+        "model_variable": "anion_gap",
+        "direction": "decrease",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.9918,
+      "evidence": {
+        "support_count": 783,
+        "patient_stay_count": 351,
+        "discovery_factual_direction_accuracy": 0.7573,
+        "proposal_direction_consistency": 1.0,
+        "isolated_action_support_count": 84
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + MIMIC-IV full v3.1",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "awaiting_human_review",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 427,
+        "patient_stay_count": 184,
+        "direction_accuracy": 0.7728,
+        "persistence_direction_accuracy": 0.0726,
+        "isolated_action_support_count": 57,
+        "action_specificity_identifiable": true,
+        "passes_automated_retrospective_gate": true
+      }
+    },
+    {
+      "rule_id": "jepa_observational_e66d0f4207",
+      "level": "observational_association",
+      "context": {
+        "disease": "DKA",
+        "population": "MIMIC-IV full v3.1 ICU DKA-like anchors",
+        "cointerventions_observed": {
+          "dextrose": 1,
+          "fluids": 5,
+          "insulin_iv": 5,
+          "insulin_rapid_sc": 5,
+          "kcl": 5
+        }
+      },
+      "action": {
+        "type": "intervention",
+        "name": "insulin_intermediate_sc"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.ph",
+        "model_variable": "pH",
+        "direction": "increase",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.9812,
+      "evidence": {
+        "support_count": 11,
+        "patient_stay_count": 11,
+        "discovery_factual_direction_accuracy": 0.9091,
+        "proposal_direction_consistency": 1.0,
+        "isolated_action_support_count": 1
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + MIMIC-IV full v3.1",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "insufficient_or_failed_heldout_evidence",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 8,
+        "patient_stay_count": 7,
+        "direction_accuracy": 0.875,
+        "persistence_direction_accuracy": 0.125,
+        "isolated_action_support_count": 0,
+        "action_specificity_identifiable": false,
+        "passes_automated_retrospective_gate": false
+      }
+    },
+    {
+      "rule_id": "jepa_observational_ee5dcdc627",
+      "level": "observational_association",
+      "context": {
+        "disease": "DKA",
+        "population": "MIMIC-IV full v3.1 ICU DKA-like anchors",
+        "cointerventions_observed": {
+          "bicarbonate": 1,
+          "fluids": 5,
+          "insulin_iv": 2,
+          "kcl": 1
+        }
+      },
+      "action": {
+        "type": "intervention",
+        "name": "dextrose"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.beta_hydroxybutyrate",
+        "model_variable": "BHB",
+        "direction": "decrease",
+        "time_window": "0-6h"
+      },
+      "confidence": 1.0,
+      "evidence": {
+        "support_count": 5,
+        "patient_stay_count": 5,
+        "discovery_factual_direction_accuracy": 1.0,
+        "proposal_direction_consistency": 1.0,
+        "isolated_action_support_count": 0
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + MIMIC-IV full v3.1",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "insufficient_or_failed_heldout_evidence",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 1,
+        "patient_stay_count": 1,
+        "direction_accuracy": 1.0,
+        "persistence_direction_accuracy": 0.0,
+        "isolated_action_support_count": 0,
+        "action_specificity_identifiable": false,
+        "passes_automated_retrospective_gate": false
+      }
+    },
+    {
+      "rule_id": "jepa_observational_f8f84e4ee7",
+      "level": "retrospective_validated",
+      "context": {
+        "disease": "DKA",
+        "population": "MIMIC-IV full v3.1 ICU DKA-like anchors",
+        "cointerventions_observed": {
+          "bicarbonate": 33,
+          "dextrose": 265,
+          "insulin_basal_sc": 46,
+          "insulin_intermediate_sc": 5,
+          "insulin_iv": 510,
+          "insulin_rapid_sc": 113,
+          "kcl": 375
+        }
+      },
+      "action": {
+        "type": "intervention",
+        "name": "fluids"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.bicarbonate",
+        "model_variable": "HCO3",
+        "direction": "increase",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.9653,
+      "evidence": {
+        "support_count": 697,
+        "patient_stay_count": 327,
+        "discovery_factual_direction_accuracy": 0.7891,
+        "proposal_direction_consistency": 0.922,
+        "isolated_action_support_count": 46
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + MIMIC-IV full v3.1",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "awaiting_human_review",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 431,
+        "patient_stay_count": 185,
+        "direction_accuracy": 0.7355,
+        "persistence_direction_accuracy": 0.1206,
+        "isolated_action_support_count": 57,
+        "action_specificity_identifiable": true,
+        "passes_automated_retrospective_gate": true
+      }
+    },
+    {
+      "rule_id": "jepa_observational_fc584adae9",
+      "level": "retrospective_validated",
+      "context": {
+        "disease": "DKA",
+        "population": "MIMIC-IV full v3.1 ICU DKA-like anchors",
+        "cointerventions_observed": {
+          "bicarbonate": 26,
+          "dextrose": 175,
+          "fluids": 531,
+          "insulin_basal_sc": 40,
+          "insulin_intermediate_sc": 5,
+          "insulin_rapid_sc": 85,
+          "kcl": 365
+        }
+      },
+      "action": {
+        "type": "intervention",
+        "name": "insulin_iv"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.anion_gap",
+        "model_variable": "anion_gap",
+        "direction": "decrease",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.9988,
+      "evidence": {
+        "support_count": 623,
+        "patient_stay_count": 315,
+        "discovery_factual_direction_accuracy": 0.7657,
+        "proposal_direction_consistency": 1.0,
+        "isolated_action_support_count": 49
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + MIMIC-IV full v3.1",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "awaiting_human_review",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 315,
+        "patient_stay_count": 156,
+        "direction_accuracy": 0.746,
+        "persistence_direction_accuracy": 0.0667,
+        "isolated_action_support_count": 26,
+        "action_specificity_identifiable": true,
+        "passes_automated_retrospective_gate": true
+      }
+    }
+  ]
+}

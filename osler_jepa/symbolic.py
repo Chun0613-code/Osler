@@ -1,7 +1,8 @@
 """Symbolic supervision shared by the DKA JEPA and Osler validator.
 
 The neural model may predict transitions and propose observational rules. The
-active rule set remains owned by :mod:`osler_jepa.validator`.
+active rule set remains human-owned under ``rules/active``. Differentiable
+constraints, temporal windows, and confidence compile from that Prolog source.
 """
 
 from __future__ import annotations
@@ -32,7 +33,30 @@ def direction_targets(delta, state_scale):
     return targets
 
 
-def rule_supervision(effect, action_exposure, valid_mask=None):
+def _active_rule_mask(rule, action_exposure, valid_mask=None,
+                      horizon_hours=None):
+    active = action_exposure[..., rule.action_index] > rule.min_action
+    if rule.blocker_action_index is not None:
+        active = active & (
+            action_exposure[..., rule.blocker_action_index] <= rule.blocker_max
+        )
+    for blocker_index in rule.blocker_action_indices:
+        active = active & (
+            action_exposure[..., blocker_index] <= rule.blocker_max
+        )
+    if horizon_hours is not None:
+        hours = torch.as_tensor(
+            horizon_hours, dtype=action_exposure.dtype,
+            device=action_exposure.device,
+        )
+        active = active & (hours >= rule.min_hours) & (hours <= rule.max_hours)
+    if valid_mask is not None:
+        active = active & valid_mask.bool()
+    return active
+
+
+def rule_supervision(effect, action_exposure, valid_mask=None,
+                     horizon_hours=None):
     """Create Osler status and proof-path labels for matched action effects."""
     shape = effect.shape[:-1]
     proof = effect.new_zeros((*shape, len(RULE_IDS)))
@@ -40,17 +64,9 @@ def rule_supervision(effect, action_exposure, valid_mask=None):
     explained = torch.zeros(shape, dtype=torch.bool, device=effect.device)
 
     for index, rule in enumerate(OSLER_DKA_VALIDATOR.rules):
-        active = action_exposure[..., rule.action_index] > rule.min_action
-        if rule.blocker_action_index is not None:
-            active = active & (
-                action_exposure[..., rule.blocker_action_index] <= rule.blocker_max
-            )
-        for blocker_index in rule.blocker_action_indices:
-            active = active & (
-                action_exposure[..., blocker_index] <= rule.blocker_max
-            )
-        if valid_mask is not None:
-            active = active & valid_mask.bool()
+        active = _active_rule_mask(
+            rule, action_exposure, valid_mask, horizon_hours
+        )
         signed = effect[..., rule.state_index] * float(rule.expected_sign)
         verified = signed >= rule.min_effect
         proof[..., index] = active.to(effect.dtype)
@@ -81,34 +97,30 @@ def masked_binary_cross_entropy(logits, targets, mask):
     return (losses * mask).sum() / mask.sum().clamp_min(1.0)
 
 
-def contradiction_penalty(proposal_logits, action_exposure, valid_mask=None):
+def contradiction_penalty(proposal_logits, action_exposure, valid_mask=None,
+                          horizon_hours=None):
     """Penalize proposal probabilities that oppose active Osler rules."""
     probabilities = proposal_logits.softmax(dim=-1)
     penalties = []
     for rule in OSLER_DKA_VALIDATOR.rules:
-        active = action_exposure[..., rule.action_index] > rule.min_action
-        if rule.blocker_action_index is not None:
-            active = active & (
-                action_exposure[..., rule.blocker_action_index] <= rule.blocker_max
-            )
-        for blocker_index in rule.blocker_action_indices:
-            active = active & (
-                action_exposure[..., blocker_index] <= rule.blocker_max
-            )
-        if valid_mask is not None:
-            active = active & valid_mask.bool()
+        active = _active_rule_mask(
+            rule, action_exposure, valid_mask, horizon_hours
+        )
         if active.any():
             expected_class = 2 if rule.expected_sign > 0 else 0
             expected = probabilities[..., rule.state_index, expected_class]
-            penalties.append((1.0 - expected)[active].mean())
+            penalties.append(
+                (1.0 - expected)[active].mean() * rule.confidence
+            )
     return torch.stack(penalties).mean() if penalties else proposal_logits.new_tensor(0.0)
 
 
 def schema(state_keys, action_keys, ontology):
     return {
-        "version": "1.0.0",
+        "version": "1.1.0",
         "ownership": {
-            "active_rules": "Osler validator and human review",
+            "active_rules": "rules/active/dka_embodied.pl and human review",
+            "training_compiler": "osler_jepa.validator",
             "candidate_rules": "JEPA observational proposals only",
         },
         "state_variables": [
@@ -119,5 +131,12 @@ def schema(state_keys, action_keys, ontology):
         "directions": list(DIRECTION_NAMES),
         "transition_status": list(STATUS_NAMES),
         "proof_paths": list(RULE_IDS),
+        "temporal_constraints": {
+            rule.rule_id: {
+                "window_hours": [rule.min_hours, rule.max_hours],
+                "confidence": rule.confidence,
+            }
+            for rule in OSLER_DKA_VALIDATOR.rules
+        },
         "candidate_rule_level": "observational_association",
     }
