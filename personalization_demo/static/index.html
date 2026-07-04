@@ -59,6 +59,72 @@
       font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
       resize: vertical;
     }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+    .field label {
+      color: #bfdbfe;
+      font-size: 0.86rem;
+      font-weight: 700;
+    }
+    .field span {
+      color: #94a3b8;
+      font-size: 0.76rem;
+    }
+    input, select {
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid rgba(148, 163, 184, 0.26);
+      border-radius: 14px;
+      padding: 11px 12px;
+      color: #f8fafc;
+      background: rgba(2, 6, 23, 0.72);
+      font: 15px/1.25 inherit;
+    }
+    .simple-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .check-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .pill-check {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid rgba(148, 163, 184, 0.24);
+      border-radius: 999px;
+      padding: 9px 12px;
+      color: #dbeafe;
+      background: rgba(2, 6, 23, 0.38);
+      cursor: pointer;
+    }
+    .pill-check input {
+      width: auto;
+      margin: 0;
+    }
+    details {
+      margin-top: 18px;
+      border-top: 1px solid rgba(148, 163, 184, 0.18);
+      padding-top: 14px;
+    }
+    summary {
+      color: #93c5fd;
+      cursor: pointer;
+      font-weight: 700;
+    }
     button {
       border: 0;
       border-radius: 999px;
@@ -165,11 +231,45 @@
   </section>
 
   <section class="panel" style="margin-top: 24px;">
-    <textarea id="payload" spellcheck="false"></textarea>
-    <div>
-      <button id="run">Run Real Belief Forecast</button>
-      <button id="sample" class="secondary">Reload Sample</button>
+    <h2 style="margin: 0;">1. Enter Current Patient State</h2>
+    <p style="margin-bottom: 0;">
+      Fill the current values, choose the recent trend, then run. Osler will
+      build a short patient trajectory and use the real belief modules.
+    </p>
+    <div class="simple-row">
+      <div class="field">
+        <label for="trend">Recent trend</label>
+        <select id="trend">
+          <option value="improving">Improving over last 8h</option>
+          <option value="stable">Mostly stable</option>
+          <option value="worsening">Worsening over last 8h</option>
+        </select>
+        <span>This creates the patient's own mini-trajectory.</span>
+      </div>
+      <div class="field">
+        <label for="patient_id">Patient label</label>
+        <input id="patient_id" value="demo-patient" autocomplete="off">
+        <span>Local demo only; not persisted.</span>
+      </div>
     </div>
+    <div id="simple-fields" class="form-grid"></div>
+    <div style="margin-top: 18px;">
+      <strong>Recent observed treatments</strong>
+      <div class="check-row">
+        <label class="pill-check"><input id="act_insulin" type="checkbox" checked> insulin</label>
+        <label class="pill-check"><input id="act_fluids" type="checkbox" checked> fluids</label>
+        <label class="pill-check"><input id="act_ventilation" type="checkbox"> oxygen / ventilation</label>
+      </div>
+    </div>
+    <div>
+      <button id="run">2. Run Personalized Forecast</button>
+      <button id="sample" class="secondary">Load Example Patient</button>
+    </div>
+    <details>
+      <summary>Advanced: generated JSON payload</summary>
+      <p>This is what the simple form sends to the backend.</p>
+      <textarea id="payload" spellcheck="false"></textarea>
+    </details>
     <p id="message"></p>
   </section>
 
@@ -178,9 +278,27 @@
 
 <script>
 const payloadBox = document.getElementById("payload");
+const fieldsEl = document.getElementById("simple-fields");
 const results = document.getElementById("results");
 const message = document.getElementById("message");
 const capabilitiesEl = document.getElementById("capabilities");
+
+const FIELD_CONFIG = [
+  ["glucose", "Glucose", "mg/dL", 210, 90],
+  ["anion_gap", "Anion gap", "mEq/L", 17, 5],
+  ["bicarbonate", "Bicarbonate", "mEq/L", 18, -4],
+  ["potassium", "Potassium", "mEq/L", 4.1, 0.6],
+  ["sodium", "Sodium", "mEq/L", 137, -3],
+  ["creatinine", "Creatinine", "mg/dL", 1.55, 0.25],
+  ["bun", "BUN", "mg/dL", 31, 6],
+  ["map", "MAP", "mmHg", 75, -8],
+  ["heart_rate", "Heart rate", "bpm", 100, 18],
+  ["o2sat", "O2 sat", "%", 95, -5],
+  ["respiratory_rate", "Resp. rate", "/min", 21, 8],
+  ["paco2", "PaCO2", "mmHg", 37, -4],
+  ["ph", "pH", "", 7.36, -0.08],
+  ["temperature", "Temp", "C", 37.2, 1.0],
+];
 
 function fmt(value) {
   if (value === null || value === undefined || Number.isNaN(value)) return "missing";
@@ -189,7 +307,9 @@ function fmt(value) {
 
 async function loadSample() {
   const response = await fetch("/api/sample");
-  payloadBox.value = JSON.stringify(await response.json(), null, 2);
+  const payload = await response.json();
+  applyPayloadToForm(payload);
+  updatePayloadPreview();
 }
 
 async function loadCapabilities() {
@@ -237,11 +357,83 @@ function render(data) {
   message.textContent = `Returned ${data.forecasts.length} forecasts from ${data.input_rows} trajectory rows.`;
 }
 
+function renderSimpleFields() {
+  fieldsEl.innerHTML = "";
+  for (const [id, label, unit, value] of FIELD_CONFIG) {
+    const wrapper = document.createElement("div");
+    wrapper.className = "field";
+    wrapper.innerHTML = `
+      <label for="${id}">${label}</label>
+      <input id="${id}" type="number" step="any" value="${value}">
+      <span>${unit || "unitless"}</span>
+    `;
+    fieldsEl.appendChild(wrapper);
+  }
+}
+
+function currentValue(id) {
+  const value = Number(document.getElementById(id).value);
+  return Number.isFinite(value) ? value : null;
+}
+
+function buildPayloadFromForm() {
+  const trend = document.getElementById("trend").value;
+  const direction = trend === "improving" ? 1 : trend === "worsening" ? -1 : 0;
+  const treatment = {
+    act_insulin: document.getElementById("act_insulin").checked ? 1 : 0,
+    act_fluids: document.getElementById("act_fluids").checked ? 1 : 0,
+    act_ventilation: document.getElementById("act_ventilation").checked ? 1 : 0,
+  };
+  function rowAt(hour, fraction) {
+    const row = {hours_since_onset: hour};
+    for (const [id, , , , worseDelta] of FIELD_CONFIG) {
+      const latest = currentValue(id);
+      if (latest === null) continue;
+      row[id] = latest + direction * worseDelta * fraction;
+    }
+    if (hour === 8) {
+      Object.assign(row, treatment);
+      row.hist_insulin = treatment.act_insulin;
+      row.hist_fluids = treatment.act_fluids;
+      row.hist_ventilation = treatment.act_ventilation;
+    }
+    return row;
+  }
+  return {
+    patient_id: document.getElementById("patient_id").value || "demo-patient",
+    trajectory: [
+      rowAt(0, 1.0),
+      rowAt(4, 0.5),
+      rowAt(8, 0.0),
+    ],
+  };
+}
+
+function updatePayloadPreview() {
+  payloadBox.value = JSON.stringify(buildPayloadFromForm(), null, 2);
+}
+
+function applyPayloadToForm(payload) {
+  const rows = payload.trajectory || [];
+  const latest = rows[rows.length - 1] || {};
+  document.getElementById("patient_id").value = payload.patient_id || "demo-patient";
+  document.getElementById("trend").value = "improving";
+  for (const [id] of FIELD_CONFIG) {
+    if (latest[id] !== undefined) {
+      document.getElementById(id).value = latest[id];
+    }
+  }
+  document.getElementById("act_insulin").checked = Boolean(latest.act_insulin ?? latest.hist_insulin);
+  document.getElementById("act_fluids").checked = Boolean(latest.act_fluids ?? latest.hist_fluids);
+  document.getElementById("act_ventilation").checked = Boolean(latest.act_ventilation ?? latest.hist_ventilation);
+}
+
 async function runForecast() {
   results.innerHTML = "";
   message.className = "";
   message.textContent = "Running...";
   try {
+    updatePayloadPreview();
     const payload = JSON.parse(payloadBox.value);
     const response = await fetch("/api/forecast", {
       method: "POST",
@@ -259,6 +451,11 @@ async function runForecast() {
   }
 }
 
+renderSimpleFields();
+document.querySelectorAll("input, select").forEach(element => {
+  element.addEventListener("input", updatePayloadPreview);
+  element.addEventListener("change", updatePayloadPreview);
+});
 document.getElementById("sample").addEventListener("click", loadSample);
 document.getElementById("run").addEventListener("click", runForecast);
 loadCapabilities();
@@ -266,4 +463,3 @@ loadSample();
 </script>
 </body>
 </html>
-
