@@ -94,6 +94,38 @@
       gap: 12px;
       margin-top: 16px;
     }
+    .trajectory-wrap {
+      margin-top: 16px;
+      overflow-x: auto;
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      border-radius: 18px;
+    }
+    table {
+      width: 100%;
+      min-width: 760px;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+      text-align: left;
+      vertical-align: middle;
+    }
+    th {
+      color: #bfdbfe;
+      font-size: 0.82rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(15, 23, 42, 0.55);
+    }
+    td small {
+      display: block;
+      color: #94a3b8;
+      margin-top: 2px;
+    }
+    td input {
+      min-width: 112px;
+    }
     .check-row {
       display: flex;
       flex-wrap: wrap;
@@ -231,28 +263,38 @@
   </section>
 
   <section class="panel" style="margin-top: 24px;">
-    <h2 style="margin: 0;">1. Enter Current Patient State</h2>
+    <h2 style="margin: 0;">1. Enter What You Know</h2>
     <p style="margin-bottom: 0;">
-      Fill the current values, choose the recent trend, then run. Osler will
-      build a short patient trajectory and use the real belief modules.
+      Fill any values you know. Leave unknown cells blank. Blank means missing,
+      never zero. Osler infers trend from the time columns itself.
     </p>
     <div class="simple-row">
-      <div class="field">
-        <label for="trend">Recent trend</label>
-        <select id="trend">
-          <option value="improving">Improving over last 8h</option>
-          <option value="stable">Mostly stable</option>
-          <option value="worsening">Worsening over last 8h</option>
-        </select>
-        <span>This creates the patient's own mini-trajectory.</span>
-      </div>
       <div class="field">
         <label for="patient_id">Patient label</label>
         <input id="patient_id" value="demo-patient" autocomplete="off">
         <span>Local demo only; not persisted.</span>
       </div>
+      <div class="field">
+        <label>Trend policy</label>
+        <p style="margin: 0; color: #94a3b8;">
+          No manual better/worse switch. The belief layer reads the patient's
+          own 8h / 4h / now values and computes slopes internally.
+        </p>
+      </div>
     </div>
-    <div id="simple-fields" class="form-grid"></div>
+    <div class="trajectory-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Variable</th>
+            <th>8h ago</th>
+            <th>4h ago</th>
+            <th>Now</th>
+          </tr>
+        </thead>
+        <tbody id="simple-fields"></tbody>
+      </table>
+    </div>
     <div style="margin-top: 18px;">
       <strong>Recent observed treatments</strong>
       <div class="check-row">
@@ -284,20 +326,28 @@ const message = document.getElementById("message");
 const capabilitiesEl = document.getElementById("capabilities");
 
 const FIELD_CONFIG = [
-  ["glucose", "Glucose", "mg/dL", 210, 90],
-  ["anion_gap", "Anion gap", "mEq/L", 17, 5],
-  ["bicarbonate", "Bicarbonate", "mEq/L", 18, -4],
-  ["potassium", "Potassium", "mEq/L", 4.1, 0.6],
-  ["sodium", "Sodium", "mEq/L", 137, -3],
-  ["creatinine", "Creatinine", "mg/dL", 1.55, 0.25],
-  ["bun", "BUN", "mg/dL", 31, 6],
-  ["map", "MAP", "mmHg", 75, -8],
-  ["heart_rate", "Heart rate", "bpm", 100, 18],
-  ["o2sat", "O2 sat", "%", 95, -5],
-  ["respiratory_rate", "Resp. rate", "/min", 21, 8],
-  ["paco2", "PaCO2", "mmHg", 37, -4],
-  ["ph", "pH", "", 7.36, -0.08],
-  ["temperature", "Temp", "C", 37.2, 1.0],
+  ["glucose", "Glucose", "mg/dL"],
+  ["anion_gap", "Anion gap", "mEq/L"],
+  ["bicarbonate", "Bicarbonate", "mEq/L"],
+  ["chloride", "Chloride", "mEq/L"],
+  ["potassium", "Potassium", "mEq/L"],
+  ["sodium", "Sodium", "mEq/L"],
+  ["creatinine", "Creatinine", "mg/dL"],
+  ["bun", "BUN", "mg/dL"],
+  ["map", "MAP", "mmHg"],
+  ["sbp", "SBP", "mmHg"],
+  ["dbp", "DBP", "mmHg"],
+  ["heart_rate", "Heart rate", "bpm"],
+  ["o2sat", "O2 sat", "%"],
+  ["respiratory_rate", "Resp. rate", "/min"],
+  ["paco2", "PaCO2", "mmHg"],
+  ["ph", "pH", ""],
+  ["temperature", "Temp", "C"],
+];
+const TIMEPOINTS = [
+  ["past8", 0, "8h ago"],
+  ["past4", 4, "4h ago"],
+  ["now", 8, "Now"],
 ];
 
 function fmt(value) {
@@ -359,39 +409,38 @@ function render(data) {
 
 function renderSimpleFields() {
   fieldsEl.innerHTML = "";
-  for (const [id, label, unit, value] of FIELD_CONFIG) {
-    const wrapper = document.createElement("div");
-    wrapper.className = "field";
-    wrapper.innerHTML = `
-      <label for="${id}">${label}</label>
-      <input id="${id}" type="number" step="any" value="${value}">
-      <span>${unit || "unitless"}</span>
+  for (const [id, label, unit] of FIELD_CONFIG) {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td><strong>${label}</strong><small>${unit || "unitless"}</small></td>
+      ${TIMEPOINTS.map(([key]) => `
+        <td><input id="${id}_${key}" type="number" step="any" placeholder="blank = missing"></td>
+      `).join("")}
     `;
-    fieldsEl.appendChild(wrapper);
+    fieldsEl.appendChild(row);
   }
 }
 
-function currentValue(id) {
-  const value = Number(document.getElementById(id).value);
+function fieldValue(id, key) {
+  const raw = document.getElementById(`${id}_${key}`).value.trim();
+  if (raw === "") return null;
+  const value = Number(raw);
   return Number.isFinite(value) ? value : null;
 }
 
 function buildPayloadFromForm() {
-  const trend = document.getElementById("trend").value;
-  const direction = trend === "improving" ? 1 : trend === "worsening" ? -1 : 0;
   const treatment = {
     act_insulin: document.getElementById("act_insulin").checked ? 1 : 0,
     act_fluids: document.getElementById("act_fluids").checked ? 1 : 0,
     act_ventilation: document.getElementById("act_ventilation").checked ? 1 : 0,
   };
-  function rowAt(hour, fraction) {
+  function rowAt(key, hour) {
     const row = {hours_since_onset: hour};
-    for (const [id, , , , worseDelta] of FIELD_CONFIG) {
-      const latest = currentValue(id);
-      if (latest === null) continue;
-      row[id] = latest + direction * worseDelta * fraction;
+    for (const [id] of FIELD_CONFIG) {
+      const value = fieldValue(id, key);
+      if (value !== null) row[id] = value;
     }
-    if (hour === 8) {
+    if (key === "now") {
       Object.assign(row, treatment);
       row.hist_insulin = treatment.act_insulin;
       row.hist_fluids = treatment.act_fluids;
@@ -401,11 +450,7 @@ function buildPayloadFromForm() {
   }
   return {
     patient_id: document.getElementById("patient_id").value || "demo-patient",
-    trajectory: [
-      rowAt(0, 1.0),
-      rowAt(4, 0.5),
-      rowAt(8, 0.0),
-    ],
+    trajectory: TIMEPOINTS.map(([key, hour]) => rowAt(key, hour)),
   };
 }
 
@@ -415,12 +460,14 @@ function updatePayloadPreview() {
 
 function applyPayloadToForm(payload) {
   const rows = payload.trajectory || [];
-  const latest = rows[rows.length - 1] || {};
+  const byHour = new Map(rows.map(row => [Number(row.hours_since_onset), row]));
+  const latest = byHour.get(8) || rows[rows.length - 1] || {};
   document.getElementById("patient_id").value = payload.patient_id || "demo-patient";
-  document.getElementById("trend").value = "improving";
   for (const [id] of FIELD_CONFIG) {
-    if (latest[id] !== undefined) {
-      document.getElementById(id).value = latest[id];
+    for (const [key, hour] of TIMEPOINTS) {
+      const input = document.getElementById(`${id}_${key}`);
+      const row = byHour.get(hour) || {};
+      input.value = row[id] ?? "";
     }
   }
   document.getElementById("act_insulin").checked = Boolean(latest.act_insulin ?? latest.hist_insulin);

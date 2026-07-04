@@ -42,6 +42,24 @@ class PersonalizationDemoTests(unittest.TestCase):
         })
         self.assertAlmostEqual(frame.loc[0, "map_t"], 70.0)
 
+    def test_make_frame_keeps_missing_values_missing(self):
+        frame = make_frame({
+            "trajectory": [
+                {"hours_since_onset": 0, "glucose": "", "potassium": None},
+            ],
+        })
+        self.assertTrue(frame["glucose_t"].isna().all())
+        self.assertTrue(frame["potassium_t"].isna().all())
+        self.assertFalse((frame[["glucose_t", "potassium_t"]] == 0).any().any())
+
+    def test_make_frame_derives_anion_gap_from_basic_chemistry(self):
+        frame = make_frame({
+            "trajectory": [
+                {"hours_since_onset": 0, "sodium": 140, "chloride": 104, "bicarbonate": 20},
+            ],
+        })
+        self.assertAlmostEqual(frame.loc[0, "anion_gap_t"], 16.0)
+
 
 if __name__ == "__main__":
     unittest.main()

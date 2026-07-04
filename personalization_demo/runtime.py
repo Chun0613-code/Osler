@@ -287,6 +287,13 @@ def make_frame(payload: dict[str, Any]) -> pd.DataFrame:
                 row[f"{canonical}_t"] = _as_float(value)
         if "map_t" not in row and "sbp_t" in row and "dbp_t" in row:
             row["map_t"] = (row["sbp_t"] + 2.0 * row["dbp_t"]) / 3.0
+        if (
+            "anion_gap_t" not in row
+            and "sodium_t" in row
+            and "chloride_t" in row
+            and "bicarbonate_t" in row
+        ):
+            row["anion_gap_t"] = row["sodium_t"] - row["chloride_t"] - row["bicarbonate_t"]
         normalized.append(row)
     frame = pd.DataFrame(normalized)
     frame["stay_id"] = "demo"
