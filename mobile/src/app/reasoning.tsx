@@ -1,11 +1,13 @@
 /**
- * Reasoning screen — segmented Drugs | Graph | Disease views over the
- * current patient's analysis bundle (mirrors the web demo's right column).
+ * Reasoning screen — answer-first: a Drugs | Rx segmented control over the
+ * current patient's analysis bundle, with the low-frequency reference views
+ * (reasoning graph, disease model) demoted to secondary links below it.
  *
  * Tapping a drug node in the Graph posts back through GraphWebView →
  * setHighlightDrug(context) → this screen auto-switches to Drugs, scrolls to
  * the card and pulses a highlight for ~2.5s.
  */
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -27,11 +29,20 @@ import { colors, fonts, radius, shadow, spacing } from '@/theme/tokens';
 
 type Segment = 'drugs' | 'graph' | 'disease' | 'rx';
 
-const SEGMENTS: { key: Segment; label: string }[] = [
+// Answer-first: the segmented control carries the two views clinicians act on;
+// the reference views live in a quieter tinted-chip row (toggle back to Drugs).
+const PRIMARY_SEGMENTS: { key: Segment; label: string }[] = [
   { key: 'drugs', label: 'Drugs' },
-  { key: 'graph', label: 'Graph' },
-  { key: 'disease', label: 'Disease' },
   { key: 'rx', label: 'Rx' },
+];
+
+const REFERENCE_VIEWS: {
+  key: Segment;
+  label: string;
+  icon: React.ComponentProps<typeof Ionicons>['name'];
+}[] = [
+  { key: 'graph', label: 'Reasoning graph', icon: 'git-network-outline' },
+  { key: 'disease', label: 'Disease model', icon: 'pulse-outline' },
 ];
 
 export default function ReasoningScreen() {
@@ -111,9 +122,9 @@ export default function ReasoningScreen() {
 
   return (
     <View style={styles.screen}>
-      {/* Patient summary strip */}
+      {/* Patient summary strip — one line (title truncates, age/sex always show) */}
       <View style={styles.summary}>
-        <View style={styles.summaryText}>
+        <View style={styles.summaryTextRow}>
           <Text style={styles.summaryTitle} numberOfLines={1}>
             {bundle.result?.indication_label ?? bundle.indication}
           </Text>
@@ -130,9 +141,9 @@ export default function ReasoningScreen() {
         )}
       </View>
 
-      {/* Segmented control */}
+      {/* Segmented control — the views clinicians act on */}
       <View style={styles.segmentBar}>
-        {SEGMENTS.map((s) => {
+        {PRIMARY_SEGMENTS.map((s) => {
           const active = segment === s.key;
           return (
             <Pressable
@@ -145,6 +156,35 @@ export default function ReasoningScreen() {
                 style={[
                   styles.segmentLabel,
                   active && styles.segmentLabelActive,
+                ]}>
+                {s.label}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+
+      {/* Reference views, demoted — tinted chips; tap toggles in, tap again returns to Drugs */}
+      <View style={styles.referenceRow}>
+        {REFERENCE_VIEWS.map((s) => {
+          const active = segment === s.key;
+          return (
+            <Pressable
+              key={s.key}
+              onPress={() => setSegment(active ? 'drugs' : s.key)}
+              hitSlop={6}
+              accessibilityRole="button"
+              accessibilityState={{ selected: active }}
+              style={({ pressed }) => [
+                styles.referenceChip,
+                active && styles.referenceChipActive,
+                pressed && { opacity: 0.82 },
+              ]}>
+              <Ionicons name={s.icon} size={14} color={active ? '#FFFFFF' : colors.accent} />
+              <Text
+                style={[
+                  styles.referenceChipText,
+                  active && styles.referenceChipTextActive,
                 ]}>
                 {s.label}
               </Text>
@@ -259,10 +299,10 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: colors.borderSolid,
     paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    gap: spacing.sm,
+    paddingVertical: spacing.sm,
+    gap: 6,
   },
-  summaryText: {
+  summaryTextRow: {
     flexDirection: 'row',
     alignItems: 'baseline',
     gap: spacing.sm,
@@ -270,30 +310,30 @@ const styles = StyleSheet.create({
   summaryTitle: {
     flexShrink: 1,
     fontFamily: fonts.heading,
-    fontSize: 15,
+    fontSize: 14.5,
     color: colors.text,
   },
   summaryDemo: {
     fontFamily: fonts.body,
-    fontSize: 12.5,
+    fontSize: 12,
     color: colors.textMuted,
   },
   flagWrap: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 6,
+    gap: 4,
   },
   flagPill: {
     backgroundColor: 'rgba(220,38,38,0.08)',
     borderWidth: 1,
     borderColor: 'rgba(220,38,38,0.25)',
     borderRadius: radius.pill,
-    paddingHorizontal: 10,
-    paddingVertical: 3,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
   },
   flagText: {
     fontFamily: fonts.bodyMedium,
-    fontSize: 11.5,
+    fontSize: 11,
     color: colors.red,
   },
   // Segmented control (mirrors web .reasoning-tabs)
@@ -301,9 +341,40 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: colors.bgWarm,
     borderRadius: radius.sm + 2,
-    margin: spacing.md,
+    marginHorizontal: spacing.md,
+    marginTop: spacing.md,
     padding: 3,
     gap: 3,
+  },
+  // Demoted reference views — tinted chips (CasePresetChips language, one tier
+  // below the segmented control: smaller type, no shadow, tinted fill)
+  referenceRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+  },
+  referenceChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    minHeight: 34,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 7,
+    backgroundColor: colors.accentLight,
+    borderRadius: radius.pill,
+  },
+  referenceChipActive: {
+    backgroundColor: colors.accent,
+  },
+  referenceChipText: {
+    fontFamily: fonts.bodySemiBold,
+    fontSize: 12.5,
+    color: colors.accent,
+  },
+  referenceChipTextActive: {
+    color: '#FFFFFF',
   },
   segmentBtn: {
     flex: 1,

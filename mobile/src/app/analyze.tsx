@@ -458,6 +458,7 @@ export default function AnalyzeScreen() {
   const [parsing, setParsing] = useState(false);
   const [confirmed, setConfirmed] = useState<Set<CapturedKey>>(new Set());
   const textRef = useRef(text);
+  const lastParsedNoteRef = useRef('');
   useEffect(() => {
     textRef.current = text;
   }, [text]);
@@ -468,6 +469,7 @@ export default function AnalyzeScreen() {
     async (note: string) => {
       const trimmed = note.trim();
       if (!trimmed) return;
+      lastParsedNoteRef.current = trimmed;
       setParsing(true);
       setError(null);
       try {
@@ -496,6 +498,16 @@ export default function AnalyzeScreen() {
     },
     [runParse],
   );
+
+  // Typed/edited notes structure themselves: after a typing pause the note is
+  // parsed automatically (voice already parses in handleTranscript, so the
+  // lastParsedNoteRef guard keeps this from double-firing).
+  useEffect(() => {
+    const trimmed = text.trim();
+    if (!trimmed || trimmed === lastParsedNoteRef.current) return;
+    const t = setTimeout(() => void runParse(trimmed), 900);
+    return () => clearTimeout(t);
+  }, [text, runParse]);
 
   // Confirm one captured value into the Case-details form (voice is never silently adopted).
   const confirmField = useCallback(
@@ -715,22 +727,13 @@ export default function AnalyzeScreen() {
           placeholder="64yo man, crushing chest pain, BP 88/54, HR 112…"
         />
 
-        {/* Structure a typed or edited note into confirmable fields (voice auto-structures). */}
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Structure note into fields"
-          onPress={() => void runParse(text)}
-          disabled={parsing || !text.trim()}
-          style={({ pressed }) => [
-            styles.structureBtn,
-            (pressed || parsing || !text.trim()) && { opacity: 0.6 },
-          ]}>
-          {parsing ? (
-            <ActivityIndicator size="small" color={colors.accent} />
-          ) : (
-            <Text style={styles.structureBtnText}>Structure note</Text>
-          )}
-        </Pressable>
+        {/* Notes structure themselves after a typing pause — just quiet progress here. */}
+        {parsing && (
+          <View style={styles.parsingRow}>
+            <ActivityIndicator size="small" color={colors.textMuted} />
+            <Text style={styles.parsingText}>Structuring note…</Text>
+          </View>
+        )}
 
         {parsed && (
           <CapturedFields
@@ -1110,22 +1113,19 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     color: colors.text,
   },
-  structureBtn: {
+  parsingRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 40,
+    gap: spacing.sm,
+    minHeight: 28,
     marginTop: spacing.sm,
     marginBottom: spacing.sm,
-    borderRadius: radius.pill,
-    borderWidth: 1,
-    borderColor: colors.borderSolid,
-    backgroundColor: colors.bgCard,
   },
-  structureBtnText: {
-    fontFamily: fonts.bodySemiBold,
-    fontSize: 13,
-    color: colors.accent,
+  parsingText: {
+    fontFamily: fonts.bodyMedium,
+    fontSize: 12.5,
+    color: colors.textMuted,
   },
   errorText: {
     fontFamily: fonts.bodyMedium,
