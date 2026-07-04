@@ -2,6 +2,8 @@ import unittest
 
 from osler_jepa.observation_layer import (
     DENIED_AUTHORITIES,
+    DERIVED_COMPLETION_RULES,
+    SAME_GROUP_CALIBRATED_COMPLETION_GROUPS,
     observation_readiness,
     rollout_readiness,
     nowcast_state_grid,
@@ -208,6 +210,21 @@ class ObservationLayerTests(unittest.TestCase):
         template = whole_body_state_forecast_template()
         self.assertEqual(template["object_name"], "whole_body_state_forecast")
         self.assertFalse(template["runtime_values_included"])
+        self.assertEqual(
+            template["current_state"]["completion_source_hierarchy"],
+            [
+                "observed",
+                "derived_formula_completion",
+                "same_group_calibrated_completion",
+                "same_time_nowcast_ridge",
+                "missing",
+            ],
+        )
+        self.assertIn("map", DERIVED_COMPLETION_RULES)
+        self.assertIn("red_cell_indices", SAME_GROUP_CALIBRATED_COMPLETION_GROUPS)
+        self.assertTrue(
+            template["current_state"]["policy"]["same_group_calibration_not_counted_as_cross_system_nowcast"]
+        )
         self.assertEqual(
             template["current_state"]["validated_nowcast_module_target_cells"],
             71,

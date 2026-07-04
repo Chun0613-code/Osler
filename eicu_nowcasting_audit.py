@@ -40,6 +40,14 @@ DEFAULT_TASKS = (
     ),
 )
 
+LEAKAGE_GROUPS = (
+    frozenset(("sbp", "dbp", "map")),
+    frozenset(("hemoglobin", "hematocrit", "rbc")),
+    frozenset(("bmi", "weight", "waist")),
+    frozenset(("anion_gap", "sodium", "chloride", "bicarbonate")),
+    frozenset(("serum_osmolality", "sodium", "glucose", "bun")),
+)
+
 
 def _round(value, digits: int = 6):
     if value is None:
@@ -80,6 +88,25 @@ def target_age_column(target: str) -> str:
     return f"{target}_age_hr"
 
 
+def leakage_sibling_targets(target: str) -> set[str]:
+    siblings: set[str] = set()
+    for group in LEAKAGE_GROUPS:
+        if target in group:
+            siblings.update(group)
+    siblings.discard(target)
+    return siblings
+
+
+def is_leakage_sibling_column(column: str, target: str) -> bool:
+    siblings = leakage_sibling_targets(target)
+    if not siblings:
+        return False
+    for sibling in siblings:
+        if column == target_column(sibling) or column == target_age_column(sibling):
+            return True
+    return False
+
+
 def is_future_column(column: str) -> bool:
     if "_tp" not in column:
         return False
@@ -105,6 +132,8 @@ def nowcast_feature_columns(frame: pd.DataFrame, target: str) -> list[str]:
     columns: list[str] = []
     for column in frame.columns:
         if column in excluded_exact:
+            continue
+        if is_leakage_sibling_column(column, target):
             continue
         if is_future_column(column):
             continue
@@ -586,6 +615,13 @@ def main() -> None:
             "must_beat": ["discovery_median_baseline", "capacity_matched_placebo_ridge"],
             "selection_scope": "discovery all-windows out-of-fold",
             "validation_scope": "heldout all-windows plus hospital-heldout all-windows",
+            "leakage_sibling_groups": [sorted(group) for group in LEAKAGE_GROUPS],
+            "leakage_policy": (
+                "When target is in a deterministic or near-deterministic sibling group, "
+                "same-group target_t and age features are excluded from ridge nowcast. "
+                "Those completions belong in derived_formula or same_group_calibrated "
+                "layers, not cross-system nowcast."
+            ),
         },
         "safety_boundary": {
             "row_level_outputs_committed": False,

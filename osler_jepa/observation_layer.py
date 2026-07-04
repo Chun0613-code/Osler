@@ -15,6 +15,40 @@ from dataclasses import asdict, dataclass
 
 PREDICTION_HORIZONS_HOURS = (1, 3, 6, 12, 24, 48)
 
+DERIVED_COMPLETION_RULES: dict[str, dict[str, object]] = {
+    "map": {
+        "source": "derived_formula_completion",
+        "inputs": ("sbp", "dbp"),
+        "formula": "dbp + (sbp - dbp) / 3",
+        "confidence": "high_when_inputs_observed",
+    },
+    "anion_gap": {
+        "source": "derived_formula_completion",
+        "inputs": ("sodium", "chloride", "bicarbonate"),
+        "formula": "sodium - chloride - bicarbonate",
+        "confidence": "high_when_inputs_observed",
+    },
+    "serum_osmolality": {
+        "source": "derived_formula_completion",
+        "inputs": ("sodium", "glucose", "bun"),
+        "formula": "2*sodium + glucose/18 + bun/2.8",
+        "confidence": "moderate_formula_estimate",
+    },
+}
+
+SAME_GROUP_CALIBRATED_COMPLETION_GROUPS: dict[str, dict[str, object]] = {
+    "red_cell_indices": {
+        "source": "same_group_calibrated_completion",
+        "targets": ("hemoglobin", "hematocrit", "rbc"),
+        "rationale": "near-linear red-cell measurement family; not cross-system inference",
+    },
+    "body_size": {
+        "source": "same_group_calibrated_completion",
+        "targets": ("bmi", "weight", "waist"),
+        "rationale": "body-size measurement family with deterministic or near-deterministic relationships",
+    },
+}
+
 VALIDATED_NOWCAST_MODULE_TARGETS: dict[str, tuple[str, ...]] = {
     "sepsis": (
         "bicarbonate",
@@ -859,6 +893,10 @@ def observation_readiness() -> dict[str, object]:
             "fallback": "persistence for unsupported, sparse, or slow targets at the wrong horizon",
             "selection_rule": "use only capabilities validated by held-out aggregate gates; otherwise abstain or fall back",
             "nowcasting_rule": "same-time state completion is allowed only for validated module-target pairs and does not authorize future movement",
+            "completion_source_hierarchy": (
+                "observed > derived_formula_completion > same_group_calibrated_completion "
+                "> same_time_nowcast_ridge > missing"
+            ),
             "external_population_nowcast_rule": (
                 "cross-sectional healthy-population audits may validate "
                 "same-time state completion, but they do not validate future "
@@ -1148,8 +1186,14 @@ def whole_body_state_forecast_schema() -> dict[str, object]:
             "upper": None,
             "interval_level": None,
             "interval_status": "not_a_future_interval",
-            "source": "observed, same_time_nowcast_ridge, or missing",
-            "status": "observed, validated_nowcast_available, unsupported, or missing",
+            "source": (
+                "observed, derived_formula_completion, "
+                "same_group_calibrated_completion, same_time_nowcast_ridge, or missing"
+            ),
+            "status": (
+                "observed, derived_formula_available, same_group_calibrated_available, "
+                "validated_nowcast_available, unsupported, or missing"
+            ),
             "can_estimate": "true only for observed or validated nowcast cells",
             "can_move": False,
         },
@@ -1195,12 +1239,23 @@ def whole_body_state_forecast_template() -> dict[str, object]:
         },
         "current_state": {
             "role": "present-tense body-state completion",
+            "completion_source_hierarchy": [
+                "observed",
+                "derived_formula_completion",
+                "same_group_calibrated_completion",
+                "same_time_nowcast_ridge",
+                "missing",
+            ],
+            "derived_formula_rules": DERIVED_COMPLETION_RULES,
+            "same_group_calibrated_completion_groups": SAME_GROUP_CALIBRATED_COMPLETION_GROUPS,
             "validated_nowcast_module_target_cells": sum(
                 len(targets) for targets in VALIDATED_NOWCAST_MODULE_TARGETS.values()
             ),
             "cells": [cell.to_dict() for cell in nowcast_cells],
             "policy": {
                 "observed_values_preferred": True,
+                "derived_formula_before_ridge_nowcast": True,
+                "same_group_calibration_not_counted_as_cross_system_nowcast": True,
                 "nowcast_only_when_target_missing": True,
                 "validated_module_target_required": True,
                 "future_claim_from_nowcast_allowed": False,

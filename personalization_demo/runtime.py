@@ -26,6 +26,7 @@ from cardiovascular_belief import cardiovascular_belief_state_features
 from electrolyte_belief import electrolyte_belief_state_features
 from endocrine_belief import endocrine_belief_state_features
 from respiratory_belief import respiratory_belief_state_features
+from osler_jepa.state_completion import complete_current_state
 
 
 @dataclass(frozen=True)
@@ -294,6 +295,13 @@ def make_frame(payload: dict[str, Any]) -> pd.DataFrame:
             and "bicarbonate_t" in row
         ):
             row["anion_gap_t"] = row["sodium_t"] - row["chloride_t"] - row["bicarbonate_t"]
+        completions = complete_current_state({
+            key[:-2]: value
+            for key, value in row.items()
+            if key.endswith("_t")
+        })
+        for target, payload in completions.items():
+            row.setdefault(f"{target}_t", payload["point_estimate"])
         normalized.append(row)
     frame = pd.DataFrame(normalized)
     frame["stay_id"] = "demo"

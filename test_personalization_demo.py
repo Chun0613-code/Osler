@@ -1,6 +1,7 @@
 import unittest
 
 from personalization_demo.runtime import capabilities, forecast, make_frame, sample_payload
+from osler_jepa.state_completion import complete_current_state
 
 
 class PersonalizationDemoTests(unittest.TestCase):
@@ -59,6 +60,15 @@ class PersonalizationDemoTests(unittest.TestCase):
             ],
         })
         self.assertAlmostEqual(frame.loc[0, "anion_gap_t"], 16.0)
+
+    def test_completion_layer_reports_source_for_red_cell_family(self):
+        completions = complete_current_state({"hemoglobin": 10.0})
+        self.assertAlmostEqual(completions["hematocrit"]["point_estimate"], 30.0)
+        self.assertEqual(
+            completions["hematocrit"]["source"],
+            "same_group_calibrated_completion",
+        )
+        self.assertFalse(completions["hematocrit"]["clinical_claim_allowed"])
 
 
 if __name__ == "__main__":
