@@ -91,9 +91,9 @@ validated or deployed to influence care.
 ## Remaining Frontiers
 
 - **Factual accuracy frontier:** high-frequency waveforms. A candidate MIMIC-IV
-  Waveform manifest/contract now exists for ECG, arterial pressure, plethysmography,
-  respiration, and related signals, but it has no prediction authority until a new
-  signal-processing pipeline and held-out accuracy audit pass.
+  Waveform manifest and bounded raw-feature smoke now exist for ECG, arterial pressure,
+  plethysmography, respiration, and related signals, but waveform features have no
+  prediction authority until a held-out accuracy audit passes.
 - **Causal frontier:** what-if treatment planning. Observational data cannot unlock this
   by itself; it requires external randomized-trial evidence (e.g. BioLINCC critical-care
   trials). That door is built, fail-closed, and waiting.

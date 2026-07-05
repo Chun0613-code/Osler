@@ -36,6 +36,7 @@ class WaveformContractTests(unittest.TestCase):
         )
 
         self.assertEqual(header.signal_count, 4)
+        self.assertEqual(header.header_kind, "signal_segment")
         self.assertEqual(header.sampling_frequency_hz, 125.0)
         self.assertEqual(header.sample_count, 1250)
         self.assertEqual(header.duration_seconds, 10.0)
@@ -44,6 +45,39 @@ class WaveformContractTests(unittest.TestCase):
             header.signal_groups,
             ("arterial_pressure", "ecg", "pleth", "respiration"),
         )
+
+    def test_multi_segment_master_header_does_not_emit_fake_signals(self):
+        header = parse_wfdb_header_text(
+            "\n".join(
+                [
+                    "#wfdb 10.7",
+                    "82439920/14 8 62.4725/999.56 5263040 13:28:47.781 1/12/2167",
+                    "82439920_0000 0",
+                    "82439920_0001 320",
+                    "# subject_id 10952189",
+                ]
+            )
+        )
+
+        self.assertEqual(header.record_name, "82439920")
+        self.assertEqual(header.header_kind, "multi_segment_layout")
+        self.assertEqual(header.signals, ())
+        self.assertEqual(header.signal_groups, ())
+
+    def test_ecg_subchannel_description_is_canonicalized(self):
+        header = parse_wfdb_header_text(
+            "\n".join(
+                [
+                    "80493349_0000 3 62.4725/999.56 0",
+                    "~ 0x4 2(-1)/mV 1 0 0 0 0 ECG #0",
+                    "~ 0x4 2(-1)/mV 1 0 0 0 0 ECG #0+",
+                    "~ 0x4 200/mV 14 0 0 0 0 II",
+                ]
+            )
+        )
+
+        self.assertEqual(header.signals, ("ECG", "ECG", "II"))
+        self.assertEqual(header.signal_groups, ("ecg",))
 
     def test_manifest_summary_and_readiness_are_candidate_only(self):
         header = parse_wfdb_header_text(

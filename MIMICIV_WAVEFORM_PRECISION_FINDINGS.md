@@ -1,7 +1,7 @@
 # MIMIC-IV Waveform Precision Candidate
 
-Status: candidate-only scaffold. No waveform-derived feature is validated for
-factual forecasting yet.
+Status: candidate-only manifest validated. No waveform-derived feature is
+validated for factual forecasting yet.
 
 ## Why This Exists
 
@@ -54,19 +54,96 @@ pass the same discipline as the rest of Osler-JEPA:
 
 ## Current Result
 
-No local waveform manifest has been found in the current workspace, and no
-accuracy audit has been run. This means waveform is opened as an engineering
-track, not as a validated capability.
+The MIMIC-IV Waveform Database local mirror is present at:
 
-The correct next step is to place the MIMIC-IV Waveform headers under a local
-root and run:
+```text
+physionet.org/files/mimic4wdb/0.1.0
+```
+
+Aggregate WFDB header manifest, run 2026-07-05:
+
+| Metric | Count |
+|---|---:|
+| headers scanned | 4,059 |
+| parse errors | 0 |
+| ECG coverage | 3,597 |
+| respiration coverage | 3,689 |
+| pleth coverage | 3,369 |
+| arterial pressure coverage | 1,072 |
+| central venous pressure coverage | 429 |
+| capnography coverage | 4 |
+
+The header parser was also corrected for two WFDB details:
+
+- multi-segment master headers list segment names, not signal labels;
+- ECG subchannels such as `ECG #0` are canonicalized to `ECG`.
+
+This means the data source is real and has enough ECG/pleth/respiration coverage
+to justify the next engineering step. It still has **no factual prediction
+authority** because no raw waveform features or held-out accuracy audit have
+been run.
+
+The manifest command is:
 
 ```bash
 python3 mimiciv_waveform_manifest.py \
-  --waveform-root /path/to/mimic-iv-waveform \
+  --waveform-root physionet.org/files/mimic4wdb/0.1.0 \
   --output /tmp/mimiciv_waveform_manifest.json
 ```
 
-If the manifest shows useful ECG/arterial/pleth/respiration coverage, the next
-engineering step is high-frequency feature extraction followed by the promotion
-gate above.
+## Next Engineering Step
+
+Raw feature extraction has been opened as a bounded candidate pipeline:
+
+- `osler_jepa/waveform_features.py`
+  - computes robust channel summaries from bounded waveform windows;
+  - emits ECG, arterial pressure, pleth, and respiration candidate features;
+  - keeps prediction authority closed.
+- `mimiciv_waveform_feature_extract.py`
+  - reads local WFDB records through the optional `wfdb` dependency;
+  - writes row-level feature candidates only to caller-provided output paths;
+  - should use `/tmp` or another non-repository path for smoke outputs.
+
+Bounded feature smoke, run 2026-07-05:
+
+| Metric | Value |
+|---|---:|
+| records read | 100 |
+| read failures | 8 |
+| requested window | 60 seconds |
+| median seconds read | 20.49 |
+| candidate features emitted | 38 |
+| ECG feature coverage | 87 / 100 |
+| pleth feature coverage | 92 / 100 |
+| respiration feature coverage | 97 / 100 |
+| arterial pressure feature coverage | 19 / 100 |
+
+The smoke command was:
+
+```bash
+.venv/bin/python mimiciv_waveform_feature_extract.py \
+  --waveform-root physionet.org/files/mimic4wdb/0.1.0 \
+  --seconds 60 \
+  --max-records 100 \
+  --features-output /tmp/mimiciv_waveform_features_smoke.csv \
+  --summary-output /tmp/mimiciv_waveform_features_smoke_summary.json
+```
+
+This proves the raw reader and bounded feature path work. It still does **not**
+prove that waveform features improve forecasts.
+
+## Accuracy Gate Still Required
+
+Next, run the actual precision audit:
+
+1. ECG/pleth/respiration features first because coverage is highest.
+2. Arterial pressure features second because coverage is smaller but clinically
+   high value.
+3. Compare `table-only forecast` versus `table + waveform features` versus
+   capacity-matched placebo.
+4. Promote nothing unless patient-heldout plus careunit/time or hospital-heldout
+   gates pass.
+
+The current environment does not have the optional `wfdb` Python package
+installed by default. It was installed into the local project `.venv` for this
+smoke test and is now listed in `requirements.txt`.

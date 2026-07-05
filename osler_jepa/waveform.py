@@ -133,6 +133,7 @@ class WaveformHeader:
     """Aggregate-safe metadata parsed from a WFDB header."""
 
     record_name: str
+    header_kind: str
     signal_count: int | None
     sampling_frequency_hz: float | None
     sample_count: int | None
@@ -178,6 +179,8 @@ def _signal_label_from_line(line: str) -> str | None:
     tokens = line.split()
     if not tokens:
         return None
+    if len(tokens) >= 10 and tokens[-1].startswith("#"):
+        return tokens[-2]
     label = tokens[-1]
     if re.fullmatch(r"[-+]?\d+(\.\d+)?", label):
         return None
@@ -201,7 +204,9 @@ def parse_wfdb_header_text(text: str) -> WaveformHeader:
         raise ValueError("empty WFDB header")
 
     header = lines[0].split()
-    record_name = header[0]
+    record_token = header[0]
+    is_multi_segment = "/" in record_token
+    record_name = record_token.split("/", 1)[0]
     signal_count = _parse_int(header[1]) if len(header) > 1 else None
     sampling_frequency_hz = _parse_float(header[2]) if len(header) > 2 else None
     sample_count = _parse_int(header[3]) if len(header) > 3 else None
@@ -209,7 +214,7 @@ def parse_wfdb_header_text(text: str) -> WaveformHeader:
     if sampling_frequency_hz and sample_count is not None:
         duration_seconds = sample_count / sampling_frequency_hz
 
-    expected_signals = signal_count or max(len(lines) - 1, 0)
+    expected_signals = 0 if is_multi_segment else signal_count or max(len(lines) - 1, 0)
     signal_lines = lines[1 : 1 + expected_signals]
     signals = tuple(
         label
@@ -228,6 +233,7 @@ def parse_wfdb_header_text(text: str) -> WaveformHeader:
 
     return WaveformHeader(
         record_name=record_name,
+        header_kind="multi_segment_layout" if is_multi_segment else "signal_segment",
         signal_count=signal_count,
         sampling_frequency_hz=sampling_frequency_hz,
         sample_count=sample_count,
