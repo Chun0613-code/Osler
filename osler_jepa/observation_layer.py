@@ -16,6 +16,7 @@ from osler_jepa.state_completion import (
     DERIVED_COMPLETION_RULES,
     SAME_GROUP_CALIBRATED_COMPLETION_GROUPS,
 )
+from osler_jepa.waveform import WAVEFORM_CANDIDATE_TARGETS
 
 PREDICTION_HORIZONS_HOURS = (1, 3, 6, 12, 24, 48)
 
@@ -511,6 +512,52 @@ def whole_body_observation_capabilities() -> tuple[ObservationCapability, ...]:
             ),
         ),
         ObservationCapability(
+            name="mimiciv_observed_treatment_context_forecast_features",
+            status="validated",
+            scope="factual_observed_treatment_context",
+            systems=("intensive_care_unit", "medication_administration", "whole_body"),
+            targets=("glucose", "potassium", "bicarbonate"),
+            horizon_hours=(6,),
+            evidence=(
+                "MIMICIV_TREATMENT_CONTEXT_ACCURACY_FINDINGS.md; observed "
+                "inputevents/emar/procedureevents hist_*/act_* features "
+                "improve 6h factual forecasts for glucose, potassium, and "
+                "bicarbonate across 7 patient splits plus careunit/time "
+                "held-out gates. MAP remains candidate-only. This is observed "
+                "factual treatment context, not a treatment-effect claim."
+            ),
+        ),
+        ObservationCapability(
+            name="mimiciv_waveform_precision_candidate",
+            status="candidate_only",
+            scope="high_frequency_waveform_precision",
+            systems=(
+                "icu_waveform",
+                "cardiovascular",
+                "respiratory",
+                "oxygenation",
+            ),
+            targets=(
+                "ecg_rr_variability",
+                "arterial_pressure_beat_to_beat",
+                "pleth_perfusion_variability",
+                "respiratory_waveform_variability",
+                *WAVEFORM_CANDIDATE_TARGETS,
+            ),
+            horizon_hours=(0, 1, 3, 6),
+            evidence=(
+                "MIMICIV_WAVEFORM_PRECISION_FINDINGS.md; waveform work is "
+                "opened as a candidate-only high-frequency signal pipeline. "
+                "No local waveform manifest or held-out accuracy audit is "
+                "available yet, so no factual prediction authority is granted."
+            ),
+            allowed_uses=(
+                "waveform_manifest_inspection",
+                "feature_engineering_candidate",
+                "capability_reporting",
+            ),
+        ),
+        ObservationCapability(
             name="mimiciv_ed_scene_observation_validation",
             status="validated",
             scope="ed_scene_observation_validation",
@@ -875,6 +922,17 @@ def observation_readiness() -> dict[str, object]:
             "note_observation_rule": (
                 "timestamp-valid note findings may be displayed as observed evidence, "
                 "but candidate-only note targets may not be imputed or forecast"
+            ),
+            "observed_treatment_context_rule": (
+                "observed hist_*/act_* treatment context may be used as factual "
+                "input only for targets that passed held-out accuracy gates; it "
+                "does not authorize causal or counterfactual treatment claims"
+            ),
+            "waveform_rule": (
+                "MIMIC-IV Waveform can be scanned as a candidate high-frequency "
+                "signal source, but waveform-derived features require a separate "
+                "held-out accuracy audit against table-only and placebo baselines "
+                "before any forecast use"
             ),
         },
         "safety_boundary": {
@@ -1263,6 +1321,8 @@ def whole_body_state_forecast_template() -> dict[str, object]:
             "mimiciv_ed_to_icu_baseline_audit_6h.json",
             "NHANES_NOWCAST_FINDINGS.md",
             "nhanes_2017_2018_nowcast_audit.json",
+            "MIMICIV_TREATMENT_CONTEXT_ACCURACY_FINDINGS.md",
+            "MIMICIV_WAVEFORM_PRECISION_FINDINGS.md",
             "MIMICIV_RADIOLOGY_NOTE_OBSERVATION_FINDINGS.md",
             "mimiciv_radiology_note_coverage_audit.json",
             "EICU_NEURO_NOTE_OBSERVATION_FINDINGS.md",

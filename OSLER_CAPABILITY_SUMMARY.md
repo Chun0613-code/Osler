@@ -1,6 +1,6 @@
 # Osler-JEPA — What This System Can Do
 
-*A one-page, plain-language summary. Last updated 2026-07-03.*
+*A one-page, plain-language summary. Last updated 2026-07-04.*
 
 ## In one sentence
 
@@ -51,6 +51,10 @@ and the whole system was built without ever faking a small-sample win.
 - **Healthy-population nowcasting:** in NHANES, the same nowcast recipe validates
   **29 / 32** targets after sibling-variable leakage guards, including electrolytes,
   kidney, liver, CBC, blood pressure, body composition, lipids, and HbA1c.
+- **Observed treatment context as factual input:** MIMIC-IV `inputevents`, `emar`,
+  and `procedureevents` features improve 6h forecasts for glucose, potassium, and
+  bicarbonate. This means the model can use treatment that was actually observed;
+  it still does **not** claim what a different treatment would have done.
 - An observed-evidence layer drawn from clinical notes (imaging findings, GCS, delirium
   status).
 
@@ -84,12 +88,15 @@ These boundaries are enforced in code and never crossed:
 Everything above is **research-grade and observational.** Nothing has been clinically
 validated or deployed to influence care.
 
-## The one remaining frontier
+## Remaining Frontiers
 
-The single capability the system cannot reach with observational data — no matter how much
-more is collected — is **causal, what-if treatment planning.** That requires external
-randomized-trial evidence (e.g. BioLINCC critical-care trials), which is a data-acquisition
-step, not an engineering one. That door is built, fail-closed, and waiting.
+- **Factual accuracy frontier:** high-frequency waveforms. A candidate MIMIC-IV
+  Waveform manifest/contract now exists for ECG, arterial pressure, plethysmography,
+  respiration, and related signals, but it has no prediction authority until a new
+  signal-processing pipeline and held-out accuracy audit pass.
+- **Causal frontier:** what-if treatment planning. Observational data cannot unlock this
+  by itself; it requires external randomized-trial evidence (e.g. BioLINCC critical-care
+  trials). That door is built, fail-closed, and waiting.
 
 ---
 

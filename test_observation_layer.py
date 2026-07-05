@@ -48,6 +48,24 @@ class ObservationLayerTests(unittest.TestCase):
         self.assertEqual(mimiciv.horizon_hours, (0, 6))
         self.assertIn("14_target_calibrated_interval_cells", mimiciv.targets)
 
+        treatment_context = capabilities["mimiciv_observed_treatment_context_forecast_features"]
+        self.assertTrue(treatment_context.is_validated)
+        self.assertEqual(treatment_context.scope, "factual_observed_treatment_context")
+        self.assertEqual(treatment_context.horizon_hours, (6,))
+        self.assertIn("glucose", treatment_context.targets)
+        self.assertIn("potassium", treatment_context.targets)
+        self.assertIn("bicarbonate", treatment_context.targets)
+        self.assertIn("not a treatment-effect claim", treatment_context.evidence)
+
+        waveform = capabilities["mimiciv_waveform_precision_candidate"]
+        self.assertFalse(waveform.is_validated)
+        self.assertEqual(waveform.scope, "high_frequency_waveform_precision")
+        self.assertIn("arterial_pressure_beat_to_beat", waveform.targets)
+        self.assertIn("heart_rate", waveform.targets)
+        self.assertIn("waveform_manifest_inspection", waveform.allowed_uses)
+        self.assertNotIn("factual_prediction", waveform.allowed_uses)
+        self.assertIn("No local waveform manifest", waveform.evidence)
+
         ed = capabilities["mimiciv_ed_scene_observation_validation"]
         self.assertTrue(ed.is_validated)
         self.assertEqual(ed.scope, "ed_scene_observation_validation")
@@ -275,6 +293,14 @@ class ObservationLayerTests(unittest.TestCase):
         )
         self.assertIn(
             "nhanes_2017_2018_nowcast_audit.json",
+            template["source_artifacts"],
+        )
+        self.assertIn(
+            "MIMICIV_TREATMENT_CONTEXT_ACCURACY_FINDINGS.md",
+            template["source_artifacts"],
+        )
+        self.assertIn(
+            "MIMICIV_WAVEFORM_PRECISION_FINDINGS.md",
             template["source_artifacts"],
         )
         self.assertIn(
