@@ -36,7 +36,7 @@ and the whole system was built without ever faking a small-sample win.
   - *interval* — show a calibrated 90% confidence band, only where coverage was verified.
 - **Cross-organ coupling:** e.g. cardiovascular perfusion → kidney (24–48h), sepsis burden
   → blood pressure (6h), and a validated three-organ chain **sepsis → blood pressure →
-  kidney**. Cached all-model belief reruns now connect five personalized physiology
+  kidney**. Cached all-model belief reruns connect personalized physiology
   states at scale; they validate heart-rate/MAP/oxygenation/respiratory-rate signal in
   full cardiovascular cohorts, broad sepsis physiology, AKI 24–48h kidney/electrolyte
   targets, and many dense MIMIC-IV observation targets. A stricter explicit
@@ -45,12 +45,14 @@ and the whole system was built without ever faking a small-sample win.
   A still stricter graph-propagated coupling layer adds only a small validated
   renal/systemic increment for MIMIC-IV 6h creatinine; broader graph gains remain
   candidate-only, which keeps the coupling claims bounded.
-- **Individualization:** online hidden-state estimates now validate in five places:
+- **Individualization:** online hidden-state estimates now validate in six places:
   kidney reserve for creatinine/BUN, cardiovascular perfusion/shock state for
   heart-rate prediction, and electrolyte/acid-base state for potassium, bicarbonate,
   anion gap, and creatinine, plus respiratory/gas-exchange state for O2 saturation,
   respiratory rate, heart rate, and bicarbonate, and endocrine/glycemic-stress state
-  for glucose, anion gap, bicarbonate, sodium, potassium, and MAP. Each improves
+  for glucose, anion gap, bicarbonate, sodium, potassium, and MAP, plus
+  immune/inflammatory host-response state for sepsis MAP, creatinine, O2 saturation,
+  heart rate, respiratory rate, and vasopressor requirement. Each improves
   downstream observable prediction beyond a strong baseline and a capacity-matched
   placebo. In the cached full rerun, the cardiovascular heart-rate near-miss becomes
   a full validation at scale, and the connected belief layer generalizes to MIMIC-IV.

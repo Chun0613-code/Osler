@@ -914,6 +914,44 @@ def whole_body_observation_capabilities() -> tuple[ObservationCapability, ...]:
             allowed_uses=("capability_reporting",),
         ),
         ObservationCapability(
+            name="immune_inflammatory_belief_state",
+            status="validated",
+            scope="predict_update_belief_state",
+            systems=("immune_inflammatory", "host_response", "cardiopulmonary", "renal_urinary"),
+            targets=(
+                "map",
+                "creatinine",
+                "o2sat",
+                "heart_rate",
+                "respiratory_rate",
+                "vasopressor_requirement",
+                "patient_specific_immune_inflammatory_state",
+            ),
+            horizon_hours=(6,),
+            evidence=(
+                "IMMUNE_INFLAMMATORY_BELIEF_FINDINGS.md; full eICU sepsis "
+                "cohort validates immune/inflammatory predict-update belief "
+                "for MAP, creatinine, O2 saturation, heart rate, respiratory "
+                "rate, and vasopressor requirement across 7/7 patient splits "
+                "and hospital-heldout, beating baseline and capacity-matched "
+                "placebo; no direct hidden-state accuracy claim"
+            ),
+        ),
+        ObservationCapability(
+            name="immune_belief_remaining_targets_candidate",
+            status="candidate_only",
+            scope="predict_update_belief_state",
+            systems=("immune_inflammatory", "host_response"),
+            targets=("urine_output", "wbc", "temperature", "lactate"),
+            horizon_hours=(6,),
+            evidence=(
+                "IMMUNE_INFLAMMATORY_BELIEF_FINDINGS.md; urine_output, WBC, "
+                "temperature, and lactate show partial signal but fail the "
+                "full robust immune belief gate"
+            ),
+            allowed_uses=("capability_reporting",),
+        ),
+        ObservationCapability(
             name="respiratory_acid_base_observed_coupling",
             status="candidate_only",
             scope="single_hop_body_coupling",

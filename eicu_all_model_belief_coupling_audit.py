@@ -3,7 +3,7 @@
 This aggregate-only audit compares:
 
 * baseline: ordinary table/action ridge features;
-* candidate: baseline plus all five current predict-update belief feature sets;
+* candidate: baseline plus all current predict-update belief feature sets;
 * placebo: baseline plus capacity-matched random features.
 
 It is factual and observational only.  It grants no causal, clinical,
@@ -30,6 +30,7 @@ from aki_renal_belief import renal_belief_state_v2_features
 from cardiovascular_belief import cardiovascular_belief_state_features
 from electrolyte_belief import electrolyte_belief_state_features
 from endocrine_belief import endocrine_belief_state_features
+from immune_inflammatory_belief import immune_inflammatory_belief_state_features
 from respiratory_belief import respiratory_belief_state_features
 from eicu_body_system_target_router import _fit_ridge
 from eicu_sepsis_target_router import _bootstrap_ci, _feature_columns, _round, _subject_column, split_subjects
@@ -115,6 +116,7 @@ BELIEF_BUILDERS = (
     ("electrolyte", electrolyte_belief_state_features),
     ("respiratory", respiratory_belief_state_features),
     ("endocrine", endocrine_belief_state_features),
+    ("immune", immune_inflammatory_belief_state_features),
 )
 
 
@@ -187,7 +189,9 @@ def attach_all_beliefs_cached(
     cache_info["path"] = str(cache_path)
     if cache_path.exists() and manifest_path.exists() and not rebuild_cache:
         manifest = json.loads(manifest_path.read_text())
-        if int(manifest.get("rows", -1)) == len(frame):
+        manifest_builders = [item.get("name") for item in manifest.get("builders", [])]
+        current_builders = [name for name, _builder in BELIEF_BUILDERS]
+        if int(manifest.get("rows", -1)) == len(frame) and manifest_builders == current_builders:
             belief = pd.read_parquet(cache_path).reset_index(drop=True)
             columns = [column for column in manifest.get("columns", []) if column in belief]
             if len(columns) == len(manifest.get("columns", [])):
