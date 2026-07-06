@@ -86,6 +86,14 @@ def _clip01(values: np.ndarray | float) -> np.ndarray | float:
     return np.clip(values, 0.0, 1.0)
 
 
+def _coerce_scalar(value) -> float:
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return float("nan")
+    return number if np.isfinite(number) else float("nan")
+
+
 def _action_any(frame: pd.DataFrame, stem: str) -> np.ndarray:
     return (
         (_num(frame, f"hist_{stem}", default=0.0) > 0.0)
@@ -212,10 +220,9 @@ def _tracked_kinetics(frame: pd.DataFrame) -> pd.DataFrame:
                 column = f"{var}_t"
                 if column not in frame:
                     continue
-                value = pd.to_numeric(pd.Series([frame.at[index, column]]), errors="coerce").iloc[0]
+                value = _coerce_scalar(frame.at[index, column])
                 if not np.isfinite(value):
                     continue
-                value = float(value)
                 previous_value = previous_values.get(var)
                 previous_slope = previous_slopes.get(var, 0.0)
                 if previous_value is None:
@@ -358,4 +365,3 @@ def placebo_endocrine_belief_features(
         columns=[f"placebo_{column}" for column in columns],
         dtype=np.float64,
     )
-

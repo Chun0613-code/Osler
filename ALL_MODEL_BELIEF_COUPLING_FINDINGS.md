@@ -42,6 +42,64 @@ computing five online belief states over 400k-500k row tables is too slow in
 the current non-cached implementation. That is an engineering limit of the
 audit runner, not a biological conclusion.
 
+## Cached Full Rerun
+
+The engineering limit has now been removed by caching all five belief feature
+families once per cohort and reusing the cached features across every split.
+The row-level caches remain local-only and are not committed.
+
+Cached full cohorts:
+
+| Cohort | Rows | Holdout support | Belief features |
+|---|---:|---|---:|
+| full cardiovascular instability | 682,172 | 206 hospitals | 156 |
+| full sepsis | 422,244 | hospital-heldout | 156 |
+| AKI 24h | 530,265 | hospital-heldout | 156 |
+| AKI 48h | 397,897 | hospital-heldout | 156 |
+| MIMIC-IV observation 6h | 640,164 | careunit-heldout | 156 |
+
+The rerun validates the following cells across 7 patient splits and the
+available hospital/careunit holdout, always against both baseline and
+capacity-matched placebo.
+
+| Cohort | Validated targets |
+|---|---|
+| cardiovascular_full_6h | heart_rate, MAP, O2 saturation, respiratory_rate |
+| sepsis_6h_full | MAP, creatinine, urine_output, O2 saturation, heart_rate, respiratory_rate, vasopressor_requirement |
+| aki_24h_full | creatinine, potassium, bicarbonate, MAP, BUN, sodium |
+| aki_48h_full | creatinine, potassium, bicarbonate, MAP, BUN, sodium |
+| mimiciv_observation_6h | anion_gap, bicarbonate, BUN, calcium, chloride, creatinine, FiO2, glucose, heart_rate, hematocrit, hemoglobin, lactate, magnesium, MAP, minute_volume, O2 saturation, PaCO2, PaO2, pH, phosphate, potassium, respiratory_rate, sodium, temperature, urine_output |
+
+Key deltas from the cached full rerun:
+
+| Cohort | Target | Median delta vs baseline | Median delta vs placebo |
+|---|---|---:|---:|
+| cardiovascular_full_6h | heart_rate | -0.247222 | -0.249876 |
+| cardiovascular_full_6h | MAP | -0.369981 | -0.371737 |
+| sepsis_6h_full | MAP | -0.306954 | -0.311221 |
+| sepsis_6h_full | urine_output | -2.197772 | -2.370074 |
+| AKI 24h | creatinine | -0.053483 | -0.054585 |
+| AKI 24h | BUN | -0.648400 | -0.679650 |
+| AKI 48h | creatinine | -0.053978 | -0.056186 |
+| AKI 48h | BUN | -0.794947 | -0.816441 |
+| MIMIC-IV 6h | glucose | -0.564341 | -0.607153 |
+| MIMIC-IV 6h | MAP | -0.273235 | -0.276151 |
+| MIMIC-IV 6h | PaO2 | -0.382534 | -0.452251 |
+| MIMIC-IV 6h | urine_output | -1.042320 | -1.077995 |
+
+This firms up two previously incomplete findings:
+
+1. the cardiovascular heart-rate near-miss becomes a full validation at scale;
+2. the shared belief layer generalizes beyond eICU into MIMIC-IV, where it
+   improves many dense physiology targets while still rejecting sparse deep
+   markers such as troponin, thyroid tests, bilirubin, INR/PTT, and inflammatory
+   specialty markers.
+
+The result is not that the connected model predicts everything. It is more
+precise: cached all-model belief features add stable signal for dense,
+mechanistically coupled physiology across cardiovascular, sepsis, AKI, and
+MIMIC-IV observation cohorts; sparse specialty targets still fall back.
+
 ## Result
 
 All-model coupling validated six target/cohort cells:
@@ -140,14 +198,9 @@ Not allowed:
 - active rule promotion;
 - claiming direct hidden-state truth.
 
-## Next Engineering Step
+## Engineering Status
 
-Cache belief features per cohort before running the full all-model scan. The
-current online builders are correct but too slow for 400k-500k row sepsis/AKI
-tables when recomputed inside a single probe.
-
-Once cached, rerun the same gate on:
-
-- full sepsis 6h;
-- AKI 24h/48h;
-- MIMIC-IV cross-database cohorts where matching belief features exist.
+The cache layer is now implemented in `eicu_all_model_belief_coupling_audit.py`.
+It writes local row-level belief parquet caches and small manifests, then reuses
+those features for the full scan. `.belief_cache/` is ignored by Git, and the
+committed output is aggregate-only.

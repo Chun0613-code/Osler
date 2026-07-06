@@ -16,6 +16,7 @@ import json
 import sys
 import warnings
 import argparse
+import re
 from pathlib import Path
 
 import numpy as np
@@ -74,24 +75,164 @@ COHORTS = (
     },
 )
 
+FULL_COHORTS = (
+    {
+        "name": "sepsis_6h_full",
+        "path": "eicu_sepsis_transitions_6h.parquet",
+        "future_suffix": "tp6",
+        "targets": ("map", "lactate", "creatinine", "urine_output", "o2sat", "heart_rate", "respiratory_rate", "vasopressor_requirement"),
+    },
+    {
+        "name": "aki_24h_full",
+        "path": "eicu_aki_transitions_24h.parquet",
+        "future_suffix": "tp24",
+        "targets": ("creatinine", "urine_output", "potassium", "bicarbonate", "map", "bun", "sodium"),
+    },
+    {
+        "name": "aki_48h_full",
+        "path": "eicu_aki_transitions_48h.parquet",
+        "future_suffix": "tp48",
+        "targets": ("creatinine", "urine_output", "potassium", "bicarbonate", "map", "bun", "sodium"),
+    },
+    {
+        "name": "mimiciv_observation_6h",
+        "path": "/private/tmp/mimiciv_observation_transitions_6h_treatment_context.parquet",
+        "future_suffix": "tp6",
+        "targets": "auto",
+        "holdout_group_column": "first_careunit",
+    },
+    {
+        "name": "cardiovascular_full_6h",
+        "path": "/private/tmp/eicu_cardiovascular_instability_full_transitions_6h.parquet",
+        "future_suffix": "tp6",
+        "targets": ("heart_rate", "map", "lactate", "o2sat", "respiratory_rate"),
+    },
+)
+
+BELIEF_BUILDERS = (
+    ("renal", renal_belief_state_v2_features),
+    ("cardiovascular", cardiovascular_belief_state_features),
+    ("electrolyte", electrolyte_belief_state_features),
+    ("respiratory", respiratory_belief_state_features),
+    ("endocrine", endocrine_belief_state_features),
+)
+
 
 def attach_all_beliefs(frame: pd.DataFrame) -> tuple[pd.DataFrame, list[str]]:
-    builders = (
-        ("renal", renal_belief_state_v2_features),
-        ("cardiovascular", cardiovascular_belief_state_features),
-        ("electrolyte", electrolyte_belief_state_features),
-        ("respiratory", respiratory_belief_state_features),
-        ("endocrine", endocrine_belief_state_features),
-    )
     parts = [frame.reset_index(drop=True)]
     columns: list[str] = []
-    for _name, builder in builders:
+    for _name, builder in BELIEF_BUILDERS:
         extra = builder(frame).reset_index(drop=True)
         parts.append(extra)
         columns.extend(list(extra.columns))
     combined = pd.concat(parts, axis=1)
     columns = sorted(set(column for column in columns if column in combined))
     return combined, columns
+
+
+def _resolve_path(path: str | Path) -> Path:
+    resolved = Path(path)
+    return resolved if resolved.is_absolute() else PROJECT / resolved
+
+
+def _cache_stem(name: str) -> str:
+    return re.sub(r"[^A-Za-z0-9_.-]+", "_", name).strip("_")
+
+
+def _belief_cache_files(cache_dir: Path, name: str) -> tuple[Path, Path]:
+    stem = _cache_stem(name)
+    return cache_dir / f"{stem}_belief_features.parquet", cache_dir / f"{stem}_belief_features.manifest.json"
+
+
+def _build_belief_frame(frame: pd.DataFrame, *, label: str) -> tuple[pd.DataFrame, list[str], list[dict[str, object]]]:
+    parts = []
+    columns: list[str] = []
+    builders = []
+    for name, builder in BELIEF_BUILDERS:
+        print(f"  computing {label}:{name} belief features", flush=True)
+        extra = builder(frame).reset_index(drop=True)
+        parts.append(extra)
+        columns.extend(list(extra.columns))
+        builders.append({"name": name, "columns": int(extra.shape[1])})
+    belief = pd.concat(parts, axis=1) if parts else pd.DataFrame(index=frame.index)
+    columns = sorted(set(column for column in columns if column in belief))
+    return belief[columns], columns, builders
+
+
+def attach_all_beliefs_cached(
+    frame: pd.DataFrame,
+    *,
+    spec: dict[str, object],
+    cache_dir: Path | None,
+    rebuild_cache: bool = False,
+) -> tuple[pd.DataFrame, list[str], dict[str, object]]:
+    label = str(spec["name"])
+    cache_info: dict[str, object] = {
+        "enabled": bool(cache_dir),
+        "label": label,
+        "used": False,
+        "rebuilt": False,
+        "path": None,
+        "rows": int(len(frame)),
+    }
+    if cache_dir is None:
+        belief, columns, builders = _build_belief_frame(frame, label=label)
+        combined = pd.concat([frame.reset_index(drop=True), belief.reset_index(drop=True)], axis=1)
+        cache_info["builders"] = builders
+        cache_info["columns"] = int(len(columns))
+        return combined, columns, cache_info
+
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    cache_path, manifest_path = _belief_cache_files(cache_dir, label)
+    cache_info["path"] = str(cache_path)
+    if cache_path.exists() and manifest_path.exists() and not rebuild_cache:
+        manifest = json.loads(manifest_path.read_text())
+        if int(manifest.get("rows", -1)) == len(frame):
+            belief = pd.read_parquet(cache_path).reset_index(drop=True)
+            columns = [column for column in manifest.get("columns", []) if column in belief]
+            if len(columns) == len(manifest.get("columns", [])):
+                combined = pd.concat([frame.reset_index(drop=True), belief[columns]], axis=1)
+                cache_info.update({
+                    "used": True,
+                    "rebuilt": False,
+                    "columns": int(len(columns)),
+                    "builders": manifest.get("builders", []),
+                })
+                return combined, columns, cache_info
+        print(f"  cache mismatch for {label}; rebuilding", flush=True)
+
+    belief, columns, builders = _build_belief_frame(frame, label=label)
+    belief.to_parquet(cache_path, index=False)
+    manifest = {
+        "label": label,
+        "cohort": str(spec["path"]),
+        "rows": int(len(frame)),
+        "columns": columns,
+        "builders": builders,
+        "row_level_cache": True,
+        "commit_policy": "local cache only; never commit patient-level belief features",
+    }
+    manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
+    combined = pd.concat([frame.reset_index(drop=True), belief.reset_index(drop=True)], axis=1)
+    cache_info.update({
+        "used": True,
+        "rebuilt": True,
+        "columns": int(len(columns)),
+        "builders": builders,
+    })
+    return combined, columns, cache_info
+
+
+def auto_targets(frame: pd.DataFrame, suffix: str) -> tuple[str, ...]:
+    marker = f"_{suffix}"
+    targets = []
+    for column in frame.columns:
+        if not column.endswith(marker):
+            continue
+        target = column[: -len(marker)]
+        if f"{target}_t" in frame:
+            targets.append(target)
+    return tuple(sorted(set(targets)))
 
 
 def target_rows(frame: pd.DataFrame, target: str, suffix: str) -> pd.DataFrame:
@@ -225,13 +366,33 @@ def summarize(target_reports: list[dict[str, object]]) -> dict[str, object]:
     }
 
 
-def audit_cohort(spec: dict[str, object]) -> dict[str, object]:
+def audit_cohort(spec: dict[str, object], *, cache_dir: Path | None, rebuild_cache: bool = False) -> dict[str, object]:
     print(f"Loading {spec['name']}", flush=True)
-    frame = pd.read_parquet(PROJECT / str(spec["path"])).reset_index(drop=True)
-    frame, belief_columns = attach_all_beliefs(frame)
-    print(f"Attached {len(belief_columns)} belief features to {spec['name']} rows={len(frame)}", flush=True)
+    cohort_path = _resolve_path(str(spec["path"]))
+    if not cohort_path.exists():
+        return {
+            "name": spec["name"],
+            "cohort": str(spec["path"]),
+            "status": "missing_cohort",
+            "rows": 0,
+            "targets": {},
+        }
+    frame = pd.read_parquet(cohort_path).reset_index(drop=True)
+    frame, belief_columns, cache_info = attach_all_beliefs_cached(
+        frame,
+        spec=spec,
+        cache_dir=cache_dir,
+        rebuild_cache=rebuild_cache,
+    )
+    print(
+        f"Attached {len(belief_columns)} belief features to {spec['name']} "
+        f"rows={len(frame)} cache_rebuilt={cache_info.get('rebuilt')}",
+        flush=True,
+    )
+    requested_targets = spec["targets"]
+    cohort_targets = auto_targets(frame, str(spec["future_suffix"])) if requested_targets == "auto" else tuple(requested_targets)
     targets = {}
-    for target in spec["targets"]:
+    for target in cohort_targets:
         split_reports = [
             split_target_report(frame, str(target), str(spec["future_suffix"]), belief_columns, seed)
             for seed in SEEDS
@@ -246,6 +407,15 @@ def audit_cohort(spec: dict[str, object]) -> dict[str, object]:
                 9901,
                 group_column="hospitalid",
             )
+        elif spec.get("holdout_group_column") in frame and frame[str(spec["holdout_group_column"])].nunique(dropna=True) >= 2:
+            hospital_report = split_target_report(
+                frame,
+                str(target),
+                str(spec["future_suffix"]),
+                belief_columns,
+                9901,
+                group_column=str(spec["holdout_group_column"]),
+            )
         targets[str(target)] = {
             "patient_splits": summarize(split_reports),
             "hospital_holdout": hospital_report,
@@ -258,7 +428,9 @@ def audit_cohort(spec: dict[str, object]) -> dict[str, object]:
         "rows": int(len(frame)),
         "subjects": int(frame[_subject_column(frame)].nunique()) if len(frame) else 0,
         "hospitals": int(frame["hospitalid"].nunique()) if "hospitalid" in frame else None,
+        "holdout_group_column": "hospitalid" if "hospitalid" in frame else spec.get("holdout_group_column"),
         "belief_feature_count": int(len(belief_columns)),
+        "cache": cache_info,
         "targets": targets,
     }
 
@@ -266,10 +438,22 @@ def audit_cohort(spec: dict[str, object]) -> dict[str, object]:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", default="eicu_all_model_belief_coupling_audit.json")
+    parser.add_argument("--profile", choices=("bounded", "full"), default="bounded")
+    parser.add_argument("--cohorts", default="", help="Optional comma-separated cohort names within the selected profile.")
+    parser.add_argument("--cache-dir", type=Path, default=Path(".belief_cache"))
+    parser.add_argument("--no-cache", action="store_true")
+    parser.add_argument("--rebuild-cache", action="store_true")
     args = parser.parse_args()
-    cohorts = [audit_cohort(spec) for spec in COHORTS]
+    specs = list(FULL_COHORTS if args.profile == "full" else COHORTS)
+    if args.cohorts.strip():
+        wanted = {item.strip() for item in args.cohorts.split(",") if item.strip()}
+        specs = [spec for spec in specs if str(spec["name"]) in wanted]
+    cache_dir = None if args.no_cache else args.cache_dir
+    cohorts = [audit_cohort(spec, cache_dir=cache_dir, rebuild_cache=args.rebuild_cache) for spec in specs]
     validated = []
     for cohort in cohorts:
+        if cohort.get("status") == "missing_cohort":
+            continue
         for target, report in cohort["targets"].items():
             patient = report["patient_splits"]
             hospital = report["hospital_holdout"] or {}
@@ -281,8 +465,14 @@ def main() -> None:
             ):
                 validated.append({"cohort": cohort["name"], "target": target, "patient": patient})
     output = {
-        "artifact": "temporary all-model belief coupling probe",
+        "artifact": "eICU/MIMIC all-model belief coupling audit",
         "definition": "table/action ridge baseline vs baseline plus all current belief model outputs vs capacity-matched placebo",
+        "profile": args.profile,
+        "cache": {
+            "enabled": not args.no_cache,
+            "directory": str(args.cache_dir) if not args.no_cache else None,
+            "row_level_cache_committed": False,
+        },
         "boundary": {
             "factual_observed_inputs_only": True,
             "causal_claim_allowed": False,

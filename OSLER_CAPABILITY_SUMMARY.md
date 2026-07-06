@@ -36,9 +36,10 @@ and the whole system was built without ever faking a small-sample win.
   - *interval* — show a calibrated 90% confidence band, only where coverage was verified.
 - **Cross-organ coupling:** e.g. cardiovascular perfusion → kidney (24–48h), sepsis burden
   → blood pressure (6h), and a validated three-organ chain **sepsis → blood pressure →
-  kidney**. A first all-model coupling scan also found a shared-state link:
-  endocrine/adrenal-hemodynamic stress improves MAP prediction inside respiratory and
-  electrolyte contexts.
+  kidney**. Cached all-model belief reruns now connect five personalized physiology
+  states at scale; they validate heart-rate/MAP/oxygenation/respiratory-rate signal in
+  full cardiovascular cohorts, broad sepsis physiology, AKI 24–48h kidney/electrolyte
+  targets, and many dense MIMIC-IV observation targets.
 - **Individualization:** online hidden-state estimates now validate in five places:
   kidney reserve for creatinine/BUN, cardiovascular perfusion/shock state for
   heart-rate prediction, and electrolyte/acid-base state for potassium, bicarbonate,
@@ -46,7 +47,8 @@ and the whole system was built without ever faking a small-sample win.
   respiratory rate, heart rate, and bicarbonate, and endocrine/glycemic-stress state
   for glucose, anion gap, bicarbonate, sodium, potassium, and MAP. Each improves
   downstream observable prediction beyond a strong baseline and a capacity-matched
-  placebo.
+  placebo. In the cached full rerun, the cardiovascular heart-rate near-miss becomes
+  a full validation at scale, and the connected belief layer generalizes to MIMIC-IV.
 - **Two care settings:** ICU **and** the pre-ICU emergency department.
 - **Three population/data axes:** multi-hospital ICU data (eICU), independent ICU data
   (MIMIC-IV), and healthy/general-population cross-sectional data (NHANES).
