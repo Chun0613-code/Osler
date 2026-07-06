@@ -952,6 +952,44 @@ def whole_body_observation_capabilities() -> tuple[ObservationCapability, ...]:
             allowed_uses=("capability_reporting",),
         ),
         ObservationCapability(
+            name="gi_nutrition_belief_state",
+            status="validated",
+            scope="predict_update_belief_state",
+            systems=("gastrointestinal_pancreatic_nutrition", "gut_perfusion", "cardiovascular_perfusion"),
+            targets=("map", "patient_specific_gi_nutrition_state"),
+            horizon_hours=(6,),
+            evidence=(
+                "GI_NUTRITION_BELIEF_FINDINGS.md; eICU GI/nutrition cohort "
+                "validates GI/pancreatic/nutrition predict-update belief for "
+                "MAP across 7/7 patient splits and hospital-heldout, beating "
+                "baseline and capacity-matched placebo; no direct hidden-state "
+                "accuracy claim"
+            ),
+        ),
+        ObservationCapability(
+            name="gi_nutrition_belief_remaining_targets_candidate",
+            status="candidate_only",
+            scope="predict_update_belief_state",
+            systems=("gastrointestinal_pancreatic_nutrition",),
+            targets=(
+                "albumin",
+                "total_protein",
+                "calcium",
+                "glucose",
+                "lactate",
+                "bilirubin",
+                "lipase_sparse",
+                "amylase_sparse",
+                "triglycerides_sparse",
+            ),
+            horizon_hours=(6,),
+            evidence=(
+                "GI_NUTRITION_BELIEF_FINDINGS.md; non-MAP GI/nutrition targets "
+                "do not pass the robust downstream observable gate"
+            ),
+            allowed_uses=("capability_reporting",),
+        ),
+        ObservationCapability(
             name="respiratory_acid_base_observed_coupling",
             status="candidate_only",
             scope="single_hop_body_coupling",

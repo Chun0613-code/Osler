@@ -45,14 +45,15 @@ and the whole system was built without ever faking a small-sample win.
   A still stricter graph-propagated coupling layer adds only a small validated
   renal/systemic increment for MIMIC-IV 6h creatinine; broader graph gains remain
   candidate-only, which keeps the coupling claims bounded.
-- **Individualization:** online hidden-state estimates now validate in six places:
+- **Individualization:** online hidden-state estimates now validate in seven places:
   kidney reserve for creatinine/BUN, cardiovascular perfusion/shock state for
   heart-rate prediction, and electrolyte/acid-base state for potassium, bicarbonate,
   anion gap, and creatinine, plus respiratory/gas-exchange state for O2 saturation,
   respiratory rate, heart rate, and bicarbonate, and endocrine/glycemic-stress state
   for glucose, anion gap, bicarbonate, sodium, potassium, and MAP, plus
   immune/inflammatory host-response state for sepsis MAP, creatinine, O2 saturation,
-  heart rate, respiratory rate, and vasopressor requirement. Each improves
+  heart rate, respiratory rate, and vasopressor requirement, plus a bounded
+  GI/nutrition/gut-perfusion belief for MAP. Each improves
   downstream observable prediction beyond a strong baseline and a capacity-matched
   placebo. In the cached full rerun, the cardiovascular heart-rate near-miss becomes
   a full validation at scale, and the connected belief layer generalizes to MIMIC-IV.

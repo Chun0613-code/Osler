@@ -204,3 +204,16 @@ The cache layer is now implemented in `eicu_all_model_belief_coupling_audit.py`.
 It writes local row-level belief parquet caches and small manifests, then reuses
 those features for the full scan. `.belief_cache/` is ignored by Git, and the
 committed output is aggregate-only.
+
+### 2026-07-06 Builder Update
+
+After this five-belief full rerun, two more belief families were validated and
+added to the all-model builder:
+
+- immune / inflammatory host-response belief;
+- GI / pancreatic / nutrition belief.
+
+The cache manifest now checks the builder list.  Old five-belief caches will be
+treated as mismatches and rebuilt before any future all-model or coupling audit.
+The historical results above should therefore be read as the validated
+five-belief rerun, while future reruns use the expanded seven-belief builder.
