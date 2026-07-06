@@ -36,7 +36,9 @@ and the whole system was built without ever faking a small-sample win.
   - *interval* — show a calibrated 90% confidence band, only where coverage was verified.
 - **Cross-organ coupling:** e.g. cardiovascular perfusion → kidney (24–48h), sepsis burden
   → blood pressure (6h), and a validated three-organ chain **sepsis → blood pressure →
-  kidney**.
+  kidney**. A first all-model coupling scan also found a shared-state link:
+  endocrine/adrenal-hemodynamic stress improves MAP prediction inside respiratory and
+  electrolyte contexts.
 - **Individualization:** online hidden-state estimates now validate in five places:
   kidney reserve for creatinine/BUN, cardiovascular perfusion/shock state for
   heart-rate prediction, and electrolyte/acid-base state for potassium, bicarbonate,
