@@ -1,0 +1,3766 @@
+{
+  "artifact": "explicit whole-body latent coupling audit",
+  "boundary": {
+    "causal_claim_allowed": false,
+    "clinical_claim_allowed": false,
+    "counterfactual_claim_allowed": false,
+    "factual_observed_inputs_only": true,
+    "row_level_outputs_written": false,
+    "runtime_authority": false
+  },
+  "cohorts": [
+    {
+      "belief_feature_count": 156,
+      "cache": {
+        "builders": [
+          {
+            "columns": 10,
+            "name": "renal"
+          },
+          {
+            "columns": 12,
+            "name": "cardiovascular"
+          },
+          {
+            "columns": 52,
+            "name": "electrolyte"
+          },
+          {
+            "columns": 37,
+            "name": "respiratory"
+          },
+          {
+            "columns": 45,
+            "name": "endocrine"
+          }
+        ],
+        "columns": 156,
+        "enabled": true,
+        "label": "sepsis_6h_full",
+        "path": "/private/tmp/osler_belief_cache_full/sepsis_6h_full_belief_features.parquet",
+        "rebuilt": false,
+        "rows": 422244,
+        "used": true
+      },
+      "cohort": "eicu_sepsis_transitions_6h.parquet",
+      "coupling_feature_count": 31,
+      "future_suffix": "tp6",
+      "holdout_group_column": "hospitalid",
+      "hospitals": 204,
+      "name": "sepsis_6h_full",
+      "rows": 422244,
+      "subjects": 25175,
+      "targets": {
+        "creatinine": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                -0.000686,
+                0.000615
+              ],
+              "point_delta": 1.9e-05,
+              "significant": false,
+              "subjects": 2289
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.001516,
+                9.4e-05
+              ],
+              "point_delta": -0.000713,
+              "significant": false,
+              "subjects": 2289
+            },
+            "feature_counts": {
+              "baseline": 221,
+              "belief": 156,
+              "candidate": 252,
+              "coupling": 31,
+              "ordinary": 65,
+              "placebo": 31
+            },
+            "group_column": "hospitalid",
+            "rows": 5254,
+            "status": "evaluated",
+            "subjects": 2289
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": 9.4e-05,
+            "median_delta_vs_placebo": -0.000537,
+            "pass_both_count": 0
+          }
+        },
+        "heart_rate": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                -0.003002,
+                0.003831
+              ],
+              "point_delta": 0.00053,
+              "significant": false,
+              "subjects": 5639
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                -0.003446,
+                0.00388
+              ],
+              "point_delta": 0.000251,
+              "significant": false,
+              "subjects": 5639
+            },
+            "feature_counts": {
+              "baseline": 221,
+              "belief": 156,
+              "candidate": 252,
+              "coupling": 31,
+              "ordinary": 65,
+              "placebo": 31
+            },
+            "group_column": "hospitalid",
+            "rows": 55815,
+            "status": "evaluated",
+            "subjects": 5639
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -0.001209,
+            "median_delta_vs_placebo": -0.001959,
+            "pass_both_count": 1
+          }
+        },
+        "lactate": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.050128,
+                -0.02827
+              ],
+              "point_delta": -0.038993,
+              "significant": true,
+              "subjects": 1590
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.057508,
+                -0.032787
+              ],
+              "point_delta": -0.046325,
+              "significant": true,
+              "subjects": 1590
+            },
+            "feature_counts": {
+              "baseline": 221,
+              "belief": 156,
+              "candidate": 252,
+              "coupling": 31,
+              "ordinary": 65,
+              "placebo": 31
+            },
+            "group_column": "hospitalid",
+            "rows": 3840,
+            "status": "evaluated",
+            "subjects": 1590
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -0.039607,
+            "median_delta_vs_placebo": -0.042979,
+            "pass_both_count": 7
+          }
+        },
+        "map": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.010944,
+                0.008833
+              ],
+              "point_delta": -0.001206,
+              "significant": false,
+              "subjects": 5608
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.009837,
+                0.011438
+              ],
+              "point_delta": -0.000198,
+              "significant": false,
+              "subjects": 5608
+            },
+            "feature_counts": {
+              "baseline": 221,
+              "belief": 156,
+              "candidate": 252,
+              "coupling": 31,
+              "ordinary": 65,
+              "placebo": 31
+            },
+            "group_column": "hospitalid",
+            "rows": 55367,
+            "status": "evaluated",
+            "subjects": 5608
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -0.002015,
+            "median_delta_vs_placebo": -0.003246,
+            "pass_both_count": 1
+          }
+        },
+        "o2sat": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.014478,
+                -0.002877
+              ],
+              "point_delta": -0.007933,
+              "significant": true,
+              "subjects": 5549
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.014571,
+                -0.002724
+              ],
+              "point_delta": -0.008606,
+              "significant": true,
+              "subjects": 5549
+            },
+            "feature_counts": {
+              "baseline": 221,
+              "belief": 156,
+              "candidate": 252,
+              "coupling": 31,
+              "ordinary": 65,
+              "placebo": 31
+            },
+            "group_column": "hospitalid",
+            "rows": 54009,
+            "status": "evaluated",
+            "subjects": 5549
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -0.010591,
+            "median_delta_vs_placebo": -0.010871,
+            "pass_both_count": 7
+          }
+        },
+        "respiratory_rate": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                -0.001281,
+                0.006775
+              ],
+              "point_delta": 0.002591,
+              "significant": false,
+              "subjects": 5281
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                -0.002445,
+                0.006519
+              ],
+              "point_delta": 0.001889,
+              "significant": false,
+              "subjects": 5281
+            },
+            "feature_counts": {
+              "baseline": 221,
+              "belief": 156,
+              "candidate": 252,
+              "coupling": 31,
+              "ordinary": 65,
+              "placebo": 31
+            },
+            "group_column": "hospitalid",
+            "rows": 50590,
+            "status": "evaluated",
+            "subjects": 5281
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": 0.000188,
+            "median_delta_vs_placebo": -0.000471,
+            "pass_both_count": 1
+          }
+        },
+        "urine_output": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                -0.302494,
+                0.401621
+              ],
+              "point_delta": 0.076388,
+              "significant": false,
+              "subjects": 2846
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.549502,
+                0.309576
+              ],
+              "point_delta": -0.08944,
+              "significant": false,
+              "subjects": 2846
+            },
+            "feature_counts": {
+              "baseline": 221,
+              "belief": 156,
+              "candidate": 252,
+              "coupling": 31,
+              "ordinary": 65,
+              "placebo": 31
+            },
+            "group_column": "hospitalid",
+            "rows": 21342,
+            "status": "evaluated",
+            "subjects": 2846
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -0.074371,
+            "median_delta_vs_placebo": -0.124248,
+            "pass_both_count": 1
+          }
+        },
+        "vasopressor_requirement": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.000178,
+                -6.3e-05
+              ],
+              "point_delta": -0.000113,
+              "significant": true,
+              "subjects": 5764
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.000215,
+                -9.2e-05
+              ],
+              "point_delta": -0.000158,
+              "significant": true,
+              "subjects": 5764
+            },
+            "feature_counts": {
+              "baseline": 206,
+              "belief": 156,
+              "candidate": 237,
+              "coupling": 31,
+              "ordinary": 50,
+              "placebo": 31
+            },
+            "group_column": "hospitalid",
+            "rows": 57762,
+            "status": "evaluated",
+            "subjects": 5764
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -4.4e-05,
+            "median_delta_vs_placebo": -8.5e-05,
+            "pass_both_count": 3
+          }
+        }
+      }
+    },
+    {
+      "belief_feature_count": 156,
+      "cache": {
+        "builders": [
+          {
+            "columns": 10,
+            "name": "renal"
+          },
+          {
+            "columns": 12,
+            "name": "cardiovascular"
+          },
+          {
+            "columns": 52,
+            "name": "electrolyte"
+          },
+          {
+            "columns": 37,
+            "name": "respiratory"
+          },
+          {
+            "columns": 45,
+            "name": "endocrine"
+          }
+        ],
+        "columns": 156,
+        "enabled": true,
+        "label": "aki_24h_full",
+        "path": "/private/tmp/osler_belief_cache_full/aki_24h_full_belief_features.parquet",
+        "rebuilt": false,
+        "rows": 530265,
+        "used": true
+      },
+      "cohort": "eicu_aki_transitions_24h.parquet",
+      "coupling_feature_count": 31,
+      "future_suffix": "tp24",
+      "holdout_group_column": "hospitalid",
+      "hospitals": 203,
+      "name": "aki_24h_full",
+      "rows": 530265,
+      "subjects": 29508,
+      "targets": {
+        "bicarbonate": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                -0.000617,
+                0.0037
+              ],
+              "point_delta": 0.001644,
+              "significant": false,
+              "subjects": 6931
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                -0.000792,
+                0.003815
+              ],
+              "point_delta": 0.001789,
+              "significant": false,
+              "subjects": 6931
+            },
+            "feature_counts": {
+              "baseline": 212,
+              "belief": 156,
+              "candidate": 243,
+              "coupling": 31,
+              "ordinary": 56,
+              "placebo": 31
+            },
+            "group_column": "hospitalid",
+            "rows": 23300,
+            "status": "evaluated",
+            "subjects": 6931
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -0.001426,
+            "median_delta_vs_placebo": -0.002861,
+            "pass_both_count": 1
+          }
+        },
+        "bun": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.043974,
+                -0.013189
+              ],
+              "point_delta": -0.02786,
+              "significant": true,
+              "subjects": 6783
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.041618,
+                -0.016602
+              ],
+              "point_delta": -0.029737,
+              "significant": true,
+              "subjects": 6783
+            },
+            "feature_counts": {
+              "baseline": 212,
+              "belief": 156,
+              "candidate": 243,
+              "coupling": 31,
+              "ordinary": 56,
+              "placebo": 31
+            },
+            "group_column": "hospitalid",
+            "rows": 19268,
+            "status": "evaluated",
+            "subjects": 6783
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -0.021879,
+            "median_delta_vs_placebo": -0.026502,
+            "pass_both_count": 7
+          }
+        },
+        "creatinine": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                0.00045,
+                0.001479
+              ],
+              "point_delta": 0.000948,
+              "significant": false,
+              "subjects": 6794
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                -0.000309,
+                0.001044
+              ],
+              "point_delta": 0.000382,
+              "significant": false,
+              "subjects": 6794
+            },
+            "feature_counts": {
+              "baseline": 212,
+              "belief": 156,
+              "candidate": 243,
+              "coupling": 31,
+              "ordinary": 56,
+              "placebo": 31
+            },
+            "group_column": "hospitalid",
+            "rows": 19322,
+            "status": "evaluated",
+            "subjects": 6794
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": 0.00063,
+            "median_delta_vs_placebo": 0.000508,
+            "pass_both_count": 0
+          }
+        },
+        "map": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.016519,
+                0.00275
+              ],
+              "point_delta": -0.007385,
+              "significant": false,
+              "subjects": 8655
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.017902,
+                0.00208
+              ],
+              "point_delta": -0.008333,
+              "significant": false,
+              "subjects": 8655
+            },
+            "feature_counts": {
+              "baseline": 212,
+              "belief": 156,
+              "candidate": 243,
+              "coupling": 31,
+              "ordinary": 56,
+              "placebo": 31
+            },
+            "group_column": "hospitalid",
+            "rows": 67677,
+            "status": "evaluated",
+            "subjects": 8655
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -0.008377,
+            "median_delta_vs_placebo": -0.009987,
+            "pass_both_count": 2
+          }
+        },
+        "potassium": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.000702,
+                6e-05
+              ],
+              "point_delta": -0.000322,
+              "significant": false,
+              "subjects": 6915
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.000812,
+                -6.8e-05
+              ],
+              "point_delta": -0.000439,
+              "significant": true,
+              "subjects": 6915
+            },
+            "feature_counts": {
+              "baseline": 212,
+              "belief": 156,
+              "candidate": 243,
+              "coupling": 31,
+              "ordinary": 56,
+              "placebo": 31
+            },
+            "group_column": "hospitalid",
+            "rows": 21253,
+            "status": "evaluated",
+            "subjects": 6915
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -0.000118,
+            "median_delta_vs_placebo": -0.000385,
+            "pass_both_count": 1
+          }
+        },
+        "sodium": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                -0.001504,
+                0.001713
+              ],
+              "point_delta": 0.000155,
+              "significant": false,
+              "subjects": 6848
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.002256,
+                0.002075
+              ],
+              "point_delta": -0.000186,
+              "significant": false,
+              "subjects": 6848
+            },
+            "feature_counts": {
+              "baseline": 212,
+              "belief": 156,
+              "candidate": 243,
+              "coupling": 31,
+              "ordinary": 56,
+              "placebo": 31
+            },
+            "group_column": "hospitalid",
+            "rows": 20592,
+            "status": "evaluated",
+            "subjects": 6848
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": 0.000671,
+            "median_delta_vs_placebo": -0.000128,
+            "pass_both_count": 0
+          }
+        },
+        "urine_output": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.389553,
+                0.161803
+              ],
+              "point_delta": -0.103926,
+              "significant": false,
+              "subjects": 4677
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.377052,
+                0.158004
+              ],
+              "point_delta": -0.117777,
+              "significant": false,
+              "subjects": 4677
+            },
+            "feature_counts": {
+              "baseline": 212,
+              "belief": 156,
+              "candidate": 243,
+              "coupling": 31,
+              "ordinary": 56,
+              "placebo": 31
+            },
+            "group_column": "hospitalid",
+            "rows": 29211,
+            "status": "evaluated",
+            "subjects": 4677
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": 0.009491,
+            "median_delta_vs_placebo": -0.028891,
+            "pass_both_count": 0
+          }
+        }
+      }
+    },
+    {
+      "belief_feature_count": 156,
+      "cache": {
+        "builders": [
+          {
+            "columns": 10,
+            "name": "renal"
+          },
+          {
+            "columns": 12,
+            "name": "cardiovascular"
+          },
+          {
+            "columns": 52,
+            "name": "electrolyte"
+          },
+          {
+            "columns": 37,
+            "name": "respiratory"
+          },
+          {
+            "columns": 45,
+            "name": "endocrine"
+          }
+        ],
+        "columns": 156,
+        "enabled": true,
+        "label": "aki_48h_full",
+        "path": "/private/tmp/osler_belief_cache_full/aki_48h_full_belief_features.parquet",
+        "rebuilt": false,
+        "rows": 397897,
+        "used": true
+      },
+      "cohort": "eicu_aki_transitions_48h.parquet",
+      "coupling_feature_count": 31,
+      "future_suffix": "tp48",
+      "holdout_group_column": "hospitalid",
+      "hospitals": 198,
+      "name": "aki_48h_full",
+      "rows": 397897,
+      "subjects": 21427,
+      "targets": {
+        "bicarbonate": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.002582,
+                0.002139
+              ],
+              "point_delta": -0.00023,
+              "significant": false,
+              "subjects": 5581
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                -0.003625,
+                0.003972
+              ],
+              "point_delta": 0.000235,
+              "significant": false,
+              "subjects": 5581
+            },
+            "feature_counts": {
+              "baseline": 212,
+              "belief": 156,
+              "candidate": 243,
+              "coupling": 31,
+              "ordinary": 56,
+              "placebo": 31
+            },
+            "group_column": "hospitalid",
+            "rows": 18530,
+            "status": "evaluated",
+            "subjects": 5581
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": 0.00161,
+            "median_delta_vs_placebo": -0.000477,
+            "pass_both_count": 0
+          }
+        },
+        "bun": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.046843,
+                -0.002169
+              ],
+              "point_delta": -0.025183,
+              "significant": true,
+              "subjects": 5604
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.047796,
+                0.003131
+              ],
+              "point_delta": -0.023593,
+              "significant": false,
+              "subjects": 5604
+            },
+            "feature_counts": {
+              "baseline": 212,
+              "belief": 156,
+              "candidate": 243,
+              "coupling": 31,
+              "ordinary": 56,
+              "placebo": 31
+            },
+            "group_column": "hospitalid",
+            "rows": 15834,
+            "status": "evaluated",
+            "subjects": 5604
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -0.002289,
+            "median_delta_vs_placebo": -0.015289,
+            "pass_both_count": 1
+          }
+        },
+        "creatinine": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                -0.00029,
+                0.00234
+              ],
+              "point_delta": 0.001066,
+              "significant": false,
+              "subjects": 5611
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                -0.000231,
+                0.002305
+              ],
+              "point_delta": 0.001083,
+              "significant": false,
+              "subjects": 5611
+            },
+            "feature_counts": {
+              "baseline": 212,
+              "belief": 156,
+              "candidate": 243,
+              "coupling": 31,
+              "ordinary": 56,
+              "placebo": 31
+            },
+            "group_column": "hospitalid",
+            "rows": 15883,
+            "status": "evaluated",
+            "subjects": 5611
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": 0.001553,
+            "median_delta_vs_placebo": 0.001143,
+            "pass_both_count": 0
+          }
+        },
+        "map": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.028193,
+                -0.00714
+              ],
+              "point_delta": -0.018464,
+              "significant": true,
+              "subjects": 6878
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.028115,
+                -0.008764
+              ],
+              "point_delta": -0.018195,
+              "significant": true,
+              "subjects": 6878
+            },
+            "feature_counts": {
+              "baseline": 212,
+              "belief": 156,
+              "candidate": 243,
+              "coupling": 31,
+              "ordinary": 56,
+              "placebo": 31
+            },
+            "group_column": "hospitalid",
+            "rows": 53418,
+            "status": "evaluated",
+            "subjects": 6878
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -0.016741,
+            "median_delta_vs_placebo": -0.017043,
+            "pass_both_count": 5
+          }
+        },
+        "potassium": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                -0.000349,
+                0.000677
+              ],
+              "point_delta": 0.00016,
+              "significant": false,
+              "subjects": 5722
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                -0.000596,
+                0.000611
+              ],
+              "point_delta": 8.9e-05,
+              "significant": false,
+              "subjects": 5722
+            },
+            "feature_counts": {
+              "baseline": 212,
+              "belief": 156,
+              "candidate": 243,
+              "coupling": 31,
+              "ordinary": 56,
+              "placebo": 31
+            },
+            "group_column": "hospitalid",
+            "rows": 17557,
+            "status": "evaluated",
+            "subjects": 5722
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -0.000395,
+            "median_delta_vs_placebo": -0.000631,
+            "pass_both_count": 2
+          }
+        },
+        "sodium": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.004706,
+                0.002328
+              ],
+              "point_delta": -0.0012,
+              "significant": false,
+              "subjects": 5631
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.005796,
+                0.002859
+              ],
+              "point_delta": -0.001017,
+              "significant": false,
+              "subjects": 5631
+            },
+            "feature_counts": {
+              "baseline": 212,
+              "belief": 156,
+              "candidate": 243,
+              "coupling": 31,
+              "ordinary": 56,
+              "placebo": 31
+            },
+            "group_column": "hospitalid",
+            "rows": 16759,
+            "status": "evaluated",
+            "subjects": 5631
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": 0.00201,
+            "median_delta_vs_placebo": 0.000928,
+            "pass_both_count": 0
+          }
+        },
+        "urine_output": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.469001,
+                0.158556
+              ],
+              "point_delta": -0.13839,
+              "significant": false,
+              "subjects": 2993
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.419451,
+                0.190047
+              ],
+              "point_delta": -0.132405,
+              "significant": false,
+              "subjects": 2993
+            },
+            "feature_counts": {
+              "baseline": 212,
+              "belief": 156,
+              "candidate": 243,
+              "coupling": 31,
+              "ordinary": 56,
+              "placebo": 31
+            },
+            "group_column": "hospitalid",
+            "rows": 18768,
+            "status": "evaluated",
+            "subjects": 2993
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": 0.051847,
+            "median_delta_vs_placebo": 0.039598,
+            "pass_both_count": 0
+          }
+        }
+      }
+    },
+    {
+      "belief_feature_count": 156,
+      "cache": {
+        "builders": [
+          {
+            "columns": 10,
+            "name": "renal"
+          },
+          {
+            "columns": 12,
+            "name": "cardiovascular"
+          },
+          {
+            "columns": 52,
+            "name": "electrolyte"
+          },
+          {
+            "columns": 37,
+            "name": "respiratory"
+          },
+          {
+            "columns": 45,
+            "name": "endocrine"
+          }
+        ],
+        "columns": 156,
+        "enabled": true,
+        "label": "mimiciv_observation_6h",
+        "path": "/private/tmp/osler_belief_cache_full/mimiciv_observation_6h_belief_features.parquet",
+        "rebuilt": false,
+        "rows": 640164,
+        "used": true
+      },
+      "cohort": "/private/tmp/mimiciv_observation_transitions_6h_treatment_context.parquet",
+      "coupling_feature_count": 31,
+      "future_suffix": "tp6",
+      "holdout_group_column": "first_careunit",
+      "hospitals": null,
+      "name": "mimiciv_observation_6h",
+      "rows": 640164,
+      "subjects": 63307,
+      "targets": {
+        "albumin": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.005189,
+                -0.000169
+              ],
+              "point_delta": -0.002512,
+              "significant": true,
+              "subjects": 555
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.007602,
+                -0.000677
+              ],
+              "point_delta": -0.00415,
+              "significant": true,
+              "subjects": 555
+            },
+            "feature_counts": {
+              "baseline": 586,
+              "belief": 156,
+              "candidate": 617,
+              "coupling": 31,
+              "ordinary": 430,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 678,
+            "status": "evaluated",
+            "subjects": 555
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": 0.000593,
+            "median_delta_vs_placebo": -0.001708,
+            "pass_both_count": 0
+          }
+        },
+        "alkaline_phos": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                -0.099457,
+                0.161325
+              ],
+              "point_delta": 0.034231,
+              "significant": false,
+              "subjects": 1916
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.281122,
+                0.034341
+              ],
+              "point_delta": -0.147894,
+              "significant": false,
+              "subjects": 1916
+            },
+            "feature_counts": {
+              "baseline": 586,
+              "belief": 156,
+              "candidate": 617,
+              "coupling": 31,
+              "ordinary": 430,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 2626,
+            "status": "evaluated",
+            "subjects": 1916
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": 0.030235,
+            "median_delta_vs_placebo": -0.113985,
+            "pass_both_count": 0
+          }
+        },
+        "alt": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                1.082873,
+                6.19267
+              ],
+              "point_delta": 3.706391,
+              "significant": false,
+              "subjects": 1947
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                -1.580589,
+                4.163073
+              ],
+              "point_delta": 1.028651,
+              "significant": false,
+              "subjects": 1947
+            },
+            "feature_counts": {
+              "baseline": 586,
+              "belief": 156,
+              "candidate": 617,
+              "coupling": 31,
+              "ordinary": 430,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 2691,
+            "status": "evaluated",
+            "subjects": 1947
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": 0.566477,
+            "median_delta_vs_placebo": -1.8646,
+            "pass_both_count": 0
+          }
+        },
+        "amylase": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": null,
+              "bootstrap_95_ci": [
+                null,
+                null
+              ],
+              "point_delta": null,
+              "significant": false,
+              "subjects": 0
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": null,
+              "bootstrap_95_ci": [
+                null,
+                null
+              ],
+              "point_delta": null,
+              "significant": false,
+              "subjects": 0
+            },
+            "feature_counts": {
+              "baseline": 584,
+              "belief": 156,
+              "candidate": 615,
+              "coupling": 31,
+              "ordinary": 428,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 43,
+            "status": "evaluated",
+            "subjects": 35
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": null,
+            "median_delta_vs_placebo": null,
+            "pass_both_count": 0
+          }
+        },
+        "anion_gap": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.012629,
+                -0.005876
+              ],
+              "point_delta": -0.009134,
+              "significant": true,
+              "subjects": 9814
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.012724,
+                -0.005008
+              ],
+              "point_delta": -0.009349,
+              "significant": true,
+              "subjects": 9814
+            },
+            "feature_counts": {
+              "baseline": 586,
+              "belief": 156,
+              "candidate": 617,
+              "coupling": 31,
+              "ordinary": 430,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 24064,
+            "status": "evaluated",
+            "subjects": 9814
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -0.007704,
+            "median_delta_vs_placebo": -0.008581,
+            "pass_both_count": 7
+          }
+        },
+        "ast": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -6.956222,
+                4.915464
+              ],
+              "point_delta": -1.27104,
+              "significant": false,
+              "subjects": 1967
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -11.024778,
+                0.272366
+              ],
+              "point_delta": -5.91049,
+              "significant": false,
+              "subjects": 1967
+            },
+            "feature_counts": {
+              "baseline": 586,
+              "belief": 156,
+              "candidate": 617,
+              "coupling": 31,
+              "ordinary": 430,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 2713,
+            "status": "evaluated",
+            "subjects": 1967
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -4.603808,
+            "median_delta_vs_placebo": -9.389638,
+            "pass_both_count": 3
+          }
+        },
+        "bicarbonate": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.003227,
+                0.001044
+              ],
+              "point_delta": -0.00077,
+              "significant": false,
+              "subjects": 9848
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.003306,
+                0.001407
+              ],
+              "point_delta": -0.001209,
+              "significant": false,
+              "subjects": 9848
+            },
+            "feature_counts": {
+              "baseline": 586,
+              "belief": 156,
+              "candidate": 617,
+              "coupling": 31,
+              "ordinary": 430,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 24266,
+            "status": "evaluated",
+            "subjects": 9848
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -0.002386,
+            "median_delta_vs_placebo": -0.003297,
+            "pass_both_count": 4
+          }
+        },
+        "bilirubin": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                0.001753,
+                0.006172
+              ],
+              "point_delta": 0.004184,
+              "significant": false,
+              "subjects": 2076
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.005031,
+                0.003739
+              ],
+              "point_delta": -0.000456,
+              "significant": false,
+              "subjects": 2076
+            },
+            "feature_counts": {
+              "baseline": 586,
+              "belief": 156,
+              "candidate": 617,
+              "coupling": 31,
+              "ordinary": 430,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 2954,
+            "status": "evaluated",
+            "subjects": 2076
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": 0.002741,
+            "median_delta_vs_placebo": -0.001066,
+            "pass_both_count": 0
+          }
+        },
+        "bilirubin_direct": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                0.10081,
+                0.771557
+              ],
+              "point_delta": 0.388309,
+              "significant": false,
+              "subjects": 79
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -2.466196,
+                1.18691
+              ],
+              "point_delta": -0.575187,
+              "significant": false,
+              "subjects": 79
+            },
+            "feature_counts": {
+              "baseline": 582,
+              "belief": 156,
+              "candidate": 613,
+              "coupling": 31,
+              "ordinary": 426,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 96,
+            "status": "evaluated",
+            "subjects": 79
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -0.019367,
+            "median_delta_vs_placebo": -0.098862,
+            "pass_both_count": 1
+          }
+        },
+        "bnp": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": null,
+              "bootstrap_95_ci": [
+                null,
+                null
+              ],
+              "point_delta": null,
+              "significant": false,
+              "subjects": 0
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": null,
+              "bootstrap_95_ci": [
+                null,
+                null
+              ],
+              "point_delta": null,
+              "significant": false,
+              "subjects": 0
+            },
+            "feature_counts": {
+              "baseline": 576,
+              "belief": 156,
+              "candidate": 607,
+              "coupling": 31,
+              "ordinary": 420,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 13,
+            "status": "evaluated",
+            "subjects": 13
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": null,
+            "median_delta_vs_placebo": null,
+            "pass_both_count": 0
+          }
+        },
+        "bun": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.015788,
+                -0.006112
+              ],
+              "point_delta": -0.010889,
+              "significant": true,
+              "subjects": 9854
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.019374,
+                -0.008818
+              ],
+              "point_delta": -0.014131,
+              "significant": true,
+              "subjects": 9854
+            },
+            "feature_counts": {
+              "baseline": 586,
+              "belief": 156,
+              "candidate": 617,
+              "coupling": 31,
+              "ordinary": 430,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 23785,
+            "status": "evaluated",
+            "subjects": 9854
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -0.007167,
+            "median_delta_vs_placebo": -0.010018,
+            "pass_both_count": 7
+          }
+        },
+        "calcium": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.000555,
+                0.000161
+              ],
+              "point_delta": -0.000177,
+              "significant": false,
+              "subjects": 9176
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.000584,
+                0.000142
+              ],
+              "point_delta": -0.000194,
+              "significant": false,
+              "subjects": 9176
+            },
+            "feature_counts": {
+              "baseline": 586,
+              "belief": 156,
+              "candidate": 617,
+              "coupling": 31,
+              "ordinary": 430,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 21368,
+            "status": "evaluated",
+            "subjects": 9176
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -5.3e-05,
+            "median_delta_vs_placebo": -0.000467,
+            "pass_both_count": 1
+          }
+        },
+        "chloride": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.005003,
+                -0.000448
+              ],
+              "point_delta": -0.002706,
+              "significant": true,
+              "subjects": 10236
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.004266,
+                0.00062
+              ],
+              "point_delta": -0.00192,
+              "significant": false,
+              "subjects": 10236
+            },
+            "feature_counts": {
+              "baseline": 586,
+              "belief": 156,
+              "candidate": 617,
+              "coupling": 31,
+              "ordinary": 430,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 25939,
+            "status": "evaluated",
+            "subjects": 10236
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -0.002141,
+            "median_delta_vs_placebo": -0.003059,
+            "pass_both_count": 5
+          }
+        },
+        "ck_mb": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.116618,
+                0.046683
+              ],
+              "point_delta": -0.021726,
+              "significant": false,
+              "subjects": 2513
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.207067,
+                -0.049197
+              ],
+              "point_delta": -0.135952,
+              "significant": true,
+              "subjects": 2513
+            },
+            "feature_counts": {
+              "baseline": 586,
+              "belief": 156,
+              "candidate": 617,
+              "coupling": 31,
+              "ordinary": 430,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 3561,
+            "status": "evaluated",
+            "subjects": 2513
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": 0.034025,
+            "median_delta_vs_placebo": -0.076941,
+            "pass_both_count": 0
+          }
+        },
+        "cortisol": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": null,
+              "bootstrap_95_ci": [
+                null,
+                null
+              ],
+              "point_delta": null,
+              "significant": false,
+              "subjects": 0
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": null,
+              "bootstrap_95_ci": [
+                null,
+                null
+              ],
+              "point_delta": null,
+              "significant": false,
+              "subjects": 0
+            },
+            "feature_counts": {
+              "baseline": 576,
+              "belief": 156,
+              "candidate": 607,
+              "coupling": 31,
+              "ordinary": 420,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 36,
+            "status": "evaluated",
+            "subjects": 36
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": null,
+            "median_delta_vs_placebo": null,
+            "pass_both_count": 0
+          }
+        },
+        "cpk": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                12.255108,
+                62.558972
+              ],
+              "point_delta": 35.265977,
+              "significant": false,
+              "subjects": 1791
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -29.106343,
+                27.269904
+              ],
+              "point_delta": -0.457771,
+              "significant": false,
+              "subjects": 1791
+            },
+            "feature_counts": {
+              "baseline": 586,
+              "belief": 156,
+              "candidate": 617,
+              "coupling": 31,
+              "ordinary": 430,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 2443,
+            "status": "evaluated",
+            "subjects": 1791
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": 19.666312,
+            "median_delta_vs_placebo": -5.397572,
+            "pass_both_count": 0
+          }
+        },
+        "creatinine": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.000906,
+                -7.4e-05
+              ],
+              "point_delta": -0.000524,
+              "significant": true,
+              "subjects": 9916
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.001164,
+                -0.000147
+              ],
+              "point_delta": -0.000658,
+              "significant": true,
+              "subjects": 9916
+            },
+            "feature_counts": {
+              "baseline": 586,
+              "belief": 156,
+              "candidate": 617,
+              "coupling": 31,
+              "ordinary": 430,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 24134,
+            "status": "evaluated",
+            "subjects": 9916
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -0.000861,
+            "median_delta_vs_placebo": -0.001093,
+            "pass_both_count": 7
+          }
+        },
+        "crp": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": null,
+              "bootstrap_95_ci": [
+                null,
+                null
+              ],
+              "point_delta": null,
+              "significant": false,
+              "subjects": 0
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": null,
+              "bootstrap_95_ci": [
+                null,
+                null
+              ],
+              "point_delta": null,
+              "significant": false,
+              "subjects": 0
+            },
+            "feature_counts": {
+              "baseline": 584,
+              "belief": 156,
+              "candidate": 615,
+              "coupling": 31,
+              "ordinary": 428,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 52,
+            "status": "evaluated",
+            "subjects": 26
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": null,
+            "median_delta_vs_placebo": null,
+            "pass_both_count": 0
+          }
+        },
+        "esr": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": null,
+              "bootstrap_95_ci": [
+                null,
+                null
+              ],
+              "point_delta": null,
+              "significant": false,
+              "subjects": 0
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": null,
+              "bootstrap_95_ci": [
+                null,
+                null
+              ],
+              "point_delta": null,
+              "significant": false,
+              "subjects": 0
+            },
+            "feature_counts": {
+              "baseline": 538,
+              "belief": 156,
+              "candidate": 569,
+              "coupling": 31,
+              "ordinary": 382,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 2,
+            "status": "evaluated",
+            "subjects": 2
+          },
+          "patient_splits": {
+            "evaluated_splits": 5,
+            "median_delta_vs_all_belief_baseline": null,
+            "median_delta_vs_placebo": null,
+            "pass_both_count": 0
+          }
+        },
+        "ferritin": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": null,
+              "bootstrap_95_ci": [
+                null,
+                null
+              ],
+              "point_delta": null,
+              "significant": false,
+              "subjects": 0
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": null,
+              "bootstrap_95_ci": [
+                null,
+                null
+              ],
+              "point_delta": null,
+              "significant": false,
+              "subjects": 0
+            },
+            "feature_counts": {
+              "baseline": 580,
+              "belief": 156,
+              "candidate": 611,
+              "coupling": 31,
+              "ordinary": 424,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 68,
+            "status": "evaluated",
+            "subjects": 42
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": null,
+            "median_delta_vs_placebo": null,
+            "pass_both_count": 0
+          }
+        },
+        "fibrinogen": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.360233,
+                0.230862
+              ],
+              "point_delta": -0.018862,
+              "significant": false,
+              "subjects": 744
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -1.172785,
+                0.169865
+              ],
+              "point_delta": -0.384202,
+              "significant": false,
+              "subjects": 744
+            },
+            "feature_counts": {
+              "baseline": 586,
+              "belief": 156,
+              "candidate": 617,
+              "coupling": 31,
+              "ordinary": 430,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 1711,
+            "status": "evaluated",
+            "subjects": 744
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": 0.005729,
+            "median_delta_vs_placebo": -0.089791,
+            "pass_both_count": 0
+          }
+        },
+        "fio2": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                -0.003211,
+                0.008142
+              ],
+              "point_delta": 0.001591,
+              "significant": false,
+              "subjects": 6420
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                -0.006375,
+                0.00797
+              ],
+              "point_delta": 0.000769,
+              "significant": false,
+              "subjects": 6420
+            },
+            "feature_counts": {
+              "baseline": 586,
+              "belief": 156,
+              "candidate": 617,
+              "coupling": 31,
+              "ordinary": 430,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 43656,
+            "status": "evaluated",
+            "subjects": 6420
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -0.000674,
+            "median_delta_vs_placebo": -0.003381,
+            "pass_both_count": 1
+          }
+        },
+        "glucose": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.064861,
+                0.040573
+              ],
+              "point_delta": -0.011126,
+              "significant": false,
+              "subjects": 9879
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.084565,
+                0.040002
+              ],
+              "point_delta": -0.021858,
+              "significant": false,
+              "subjects": 9879
+            },
+            "feature_counts": {
+              "baseline": 586,
+              "belief": 156,
+              "candidate": 617,
+              "coupling": 31,
+              "ordinary": 430,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 24780,
+            "status": "evaluated",
+            "subjects": 9879
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -0.002994,
+            "median_delta_vs_placebo": -0.016546,
+            "pass_both_count": 0
+          }
+        },
+        "heart_rate": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                -0.001961,
+                0.002625
+              ],
+              "point_delta": 0.00038,
+              "significant": false,
+              "subjects": 19812
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                -0.001919,
+                0.002134
+              ],
+              "point_delta": 2e-05,
+              "significant": false,
+              "subjects": 19812
+            },
+            "feature_counts": {
+              "baseline": 586,
+              "belief": 156,
+              "candidate": 617,
+              "coupling": 31,
+              "ordinary": 430,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 171871,
+            "status": "evaluated",
+            "subjects": 19812
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": 0.000348,
+            "median_delta_vs_placebo": 0.000306,
+            "pass_both_count": 0
+          }
+        },
+        "hematocrit": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                -0.001437,
+                0.002088
+              ],
+              "point_delta": 0.000282,
+              "significant": false,
+              "subjects": 8844
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                -0.0016,
+                0.002175
+              ],
+              "point_delta": 0.000214,
+              "significant": false,
+              "subjects": 8844
+            },
+            "feature_counts": {
+              "baseline": 586,
+              "belief": 156,
+              "candidate": 617,
+              "coupling": 31,
+              "ordinary": 430,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 22087,
+            "status": "evaluated",
+            "subjects": 8844
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -0.000668,
+            "median_delta_vs_placebo": -0.001292,
+            "pass_both_count": 1
+          }
+        },
+        "hemoglobin": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                -0.000431,
+                0.000886
+              ],
+              "point_delta": 0.0003,
+              "significant": false,
+              "subjects": 7942
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                -0.000581,
+                0.000895
+              ],
+              "point_delta": 0.000264,
+              "significant": false,
+              "subjects": 7942
+            },
+            "feature_counts": {
+              "baseline": 586,
+              "belief": 156,
+              "candidate": 617,
+              "coupling": 31,
+              "ordinary": 430,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 18853,
+            "status": "evaluated",
+            "subjects": 7942
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -5e-05,
+            "median_delta_vs_placebo": -0.000283,
+            "pass_both_count": 0
+          }
+        },
+        "inr": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                0.000557,
+                0.001859
+              ],
+              "point_delta": 0.001163,
+              "significant": false,
+              "subjects": 4486
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                -0.000395,
+                0.001185
+              ],
+              "point_delta": 0.000493,
+              "significant": false,
+              "subjects": 4486
+            },
+            "feature_counts": {
+              "baseline": 586,
+              "belief": 156,
+              "candidate": 617,
+              "coupling": 31,
+              "ordinary": 430,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 7762,
+            "status": "evaluated",
+            "subjects": 4486
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": 0.000347,
+            "median_delta_vs_placebo": -0.000696,
+            "pass_both_count": 0
+          }
+        },
+        "ionized_calcium": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.000374,
+                0.000133
+              ],
+              "point_delta": -0.000154,
+              "significant": false,
+              "subjects": 1571
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.000434,
+                9.4e-05
+              ],
+              "point_delta": -0.000202,
+              "significant": false,
+              "subjects": 1571
+            },
+            "feature_counts": {
+              "baseline": 586,
+              "belief": 156,
+              "candidate": 617,
+              "coupling": 31,
+              "ordinary": 430,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 4430,
+            "status": "evaluated",
+            "subjects": 1571
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -0.000116,
+            "median_delta_vs_placebo": -0.00016,
+            "pass_both_count": 3
+          }
+        },
+        "lactate": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.025347,
+                -0.016058
+              ],
+              "point_delta": -0.020627,
+              "significant": true,
+              "subjects": 4603
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.026084,
+                -0.016375
+              ],
+              "point_delta": -0.021531,
+              "significant": true,
+              "subjects": 4603
+            },
+            "feature_counts": {
+              "baseline": 586,
+              "belief": 156,
+              "candidate": 617,
+              "coupling": 31,
+              "ordinary": 430,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 12460,
+            "status": "evaluated",
+            "subjects": 4603
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -0.017113,
+            "median_delta_vs_placebo": -0.01808,
+            "pass_both_count": 7
+          }
+        },
+        "ldh": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                -14.98585,
+                24.358451
+              ],
+              "point_delta": 3.134793,
+              "significant": false,
+              "subjects": 1336
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -34.609324,
+                5.635025
+              ],
+              "point_delta": -13.70763,
+              "significant": false,
+              "subjects": 1336
+            },
+            "feature_counts": {
+              "baseline": 586,
+              "belief": 156,
+              "candidate": 617,
+              "coupling": 31,
+              "ordinary": 430,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 2338,
+            "status": "evaluated",
+            "subjects": 1336
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": 1.298067,
+            "median_delta_vs_placebo": -12.407374,
+            "pass_both_count": 1
+          }
+        },
+        "lipase": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": null,
+              "bootstrap_95_ci": [
+                null,
+                null
+              ],
+              "point_delta": null,
+              "significant": false,
+              "subjects": 0
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": null,
+              "bootstrap_95_ci": [
+                null,
+                null
+              ],
+              "point_delta": null,
+              "significant": false,
+              "subjects": 0
+            },
+            "feature_counts": {
+              "baseline": 584,
+              "belief": 156,
+              "candidate": 615,
+              "coupling": 31,
+              "ordinary": 428,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 94,
+            "status": "evaluated",
+            "subjects": 79
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": null,
+            "median_delta_vs_placebo": null,
+            "pass_both_count": 0
+          }
+        },
+        "magnesium": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.000246,
+                0.000129
+              ],
+              "point_delta": -6.2e-05,
+              "significant": false,
+              "subjects": 9669
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.000406,
+                7e-05
+              ],
+              "point_delta": -0.000153,
+              "significant": false,
+              "subjects": 9669
+            },
+            "feature_counts": {
+              "baseline": 586,
+              "belief": 156,
+              "candidate": 617,
+              "coupling": 31,
+              "ordinary": 430,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 23102,
+            "status": "evaluated",
+            "subjects": 9669
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -0.00012,
+            "median_delta_vs_placebo": -0.000236,
+            "pass_both_count": 0
+          }
+        },
+        "map": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.010511,
+                -0.003167
+              ],
+              "point_delta": -0.006746,
+              "significant": true,
+              "subjects": 19579
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.009887,
+                -0.002951
+              ],
+              "point_delta": -0.006488,
+              "significant": true,
+              "subjects": 19579
+            },
+            "feature_counts": {
+              "baseline": 586,
+              "belief": 156,
+              "candidate": 617,
+              "coupling": 31,
+              "ordinary": 430,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 164953,
+            "status": "evaluated",
+            "subjects": 19579
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -0.003916,
+            "median_delta_vs_placebo": -0.004083,
+            "pass_both_count": 3
+          }
+        },
+        "minute_volume": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.001719,
+                0.000923
+              ],
+              "point_delta": -0.000397,
+              "significant": false,
+              "subjects": 4871
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.001941,
+                0.0007
+              ],
+              "point_delta": -0.000646,
+              "significant": false,
+              "subjects": 4871
+            },
+            "feature_counts": {
+              "baseline": 586,
+              "belief": 156,
+              "candidate": 617,
+              "coupling": 31,
+              "ordinary": 430,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 31970,
+            "status": "evaluated",
+            "subjects": 4871
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -9.5e-05,
+            "median_delta_vs_placebo": -0.000475,
+            "pass_both_count": 0
+          }
+        },
+        "myoglobin": {
+          "holdout": {
+            "rows": 0,
+            "status": "insufficient_pairs",
+            "subjects": 0
+          },
+          "patient_splits": {
+            "evaluated_splits": 0,
+            "median_delta_vs_all_belief_baseline": null,
+            "median_delta_vs_placebo": null,
+            "pass_both_count": 0
+          }
+        },
+        "o2sat": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                -0.000825,
+                0.001831
+              ],
+              "point_delta": 0.000269,
+              "significant": false,
+              "subjects": 19725
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                -0.00105,
+                0.001917
+              ],
+              "point_delta": 0.000277,
+              "significant": false,
+              "subjects": 19725
+            },
+            "feature_counts": {
+              "baseline": 586,
+              "belief": 156,
+              "candidate": 617,
+              "coupling": 31,
+              "ordinary": 430,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 169275,
+            "status": "evaluated",
+            "subjects": 19725
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": 0.000128,
+            "median_delta_vs_placebo": -8e-05,
+            "pass_both_count": 0
+          }
+        },
+        "paco2": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.072046,
+                -0.038954
+              ],
+              "point_delta": -0.057234,
+              "significant": true,
+              "subjects": 5136
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.079886,
+                -0.042869
+              ],
+              "point_delta": -0.060833,
+              "significant": true,
+              "subjects": 5136
+            },
+            "feature_counts": {
+              "baseline": 586,
+              "belief": 156,
+              "candidate": 617,
+              "coupling": 31,
+              "ordinary": 430,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 16371,
+            "status": "evaluated",
+            "subjects": 5136
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -0.038039,
+            "median_delta_vs_placebo": -0.040195,
+            "pass_both_count": 7
+          }
+        },
+        "pao2": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.034785,
+                0.018456
+              ],
+              "point_delta": -0.00703,
+              "significant": false,
+              "subjects": 5140
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.046695,
+                0.027304
+              ],
+              "point_delta": -0.008541,
+              "significant": false,
+              "subjects": 5140
+            },
+            "feature_counts": {
+              "baseline": 586,
+              "belief": 156,
+              "candidate": 617,
+              "coupling": 31,
+              "ordinary": 430,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 16404,
+            "status": "evaluated",
+            "subjects": 5140
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -0.002216,
+            "median_delta_vs_placebo": -0.014981,
+            "pass_both_count": 0
+          }
+        },
+        "peep": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.000961,
+                0.000768
+              ],
+              "point_delta": -0.000129,
+              "significant": false,
+              "subjects": 4918
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.001976,
+                -4.4e-05
+              ],
+              "point_delta": -0.000938,
+              "significant": true,
+              "subjects": 4918
+            },
+            "feature_counts": {
+              "baseline": 586,
+              "belief": 156,
+              "candidate": 617,
+              "coupling": 31,
+              "ordinary": 430,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 32554,
+            "status": "evaluated",
+            "subjects": 4918
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": 0.000541,
+            "median_delta_vs_placebo": -0.000408,
+            "pass_both_count": 0
+          }
+        },
+        "ph": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.0002,
+                -2.5e-05
+              ],
+              "point_delta": -0.000107,
+              "significant": true,
+              "subjects": 5443
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.000207,
+                -2.8e-05
+              ],
+              "point_delta": -0.000116,
+              "significant": true,
+              "subjects": 5443
+            },
+            "feature_counts": {
+              "baseline": 586,
+              "belief": 156,
+              "candidate": 617,
+              "coupling": 31,
+              "ordinary": 430,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 17562,
+            "status": "evaluated",
+            "subjects": 5443
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -0.000135,
+            "median_delta_vs_placebo": -0.000147,
+            "pass_both_count": 6
+          }
+        },
+        "phosphate": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.004343,
+                -0.002053
+              ],
+              "point_delta": -0.003278,
+              "significant": true,
+              "subjects": 9197
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.005347,
+                -0.002543
+              ],
+              "point_delta": -0.003876,
+              "significant": true,
+              "subjects": 9197
+            },
+            "feature_counts": {
+              "baseline": 586,
+              "belief": 156,
+              "candidate": 617,
+              "coupling": 31,
+              "ordinary": 430,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 21513,
+            "status": "evaluated",
+            "subjects": 9197
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -0.001761,
+            "median_delta_vs_placebo": -0.002305,
+            "pass_both_count": 7
+          }
+        },
+        "platelets": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.045099,
+                0.011457
+              ],
+              "point_delta": -0.014033,
+              "significant": false,
+              "subjects": 7704
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.064464,
+                -0.004092
+              ],
+              "point_delta": -0.031032,
+              "significant": true,
+              "subjects": 7704
+            },
+            "feature_counts": {
+              "baseline": 586,
+              "belief": 156,
+              "candidate": 617,
+              "coupling": 31,
+              "ordinary": 430,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 16119,
+            "status": "evaluated",
+            "subjects": 7704
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -0.026685,
+            "median_delta_vs_placebo": -0.03901,
+            "pass_both_count": 4
+          }
+        },
+        "potassium": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.000602,
+                0.00015
+              ],
+              "point_delta": -0.000187,
+              "significant": false,
+              "subjects": 10655
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.000668,
+                0.000174
+              ],
+              "point_delta": -0.000281,
+              "significant": false,
+              "subjects": 10655
+            },
+            "feature_counts": {
+              "baseline": 586,
+              "belief": 156,
+              "candidate": 617,
+              "coupling": 31,
+              "ordinary": 430,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 28380,
+            "status": "evaluated",
+            "subjects": 10655
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -0.00028,
+            "median_delta_vs_placebo": -0.000402,
+            "pass_both_count": 2
+          }
+        },
+        "ptt": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                0.014941,
+                0.040378
+              ],
+              "point_delta": 0.026521,
+              "significant": false,
+              "subjects": 5696
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                0.000843,
+                0.038
+              ],
+              "point_delta": 0.016083,
+              "significant": false,
+              "subjects": 5696
+            },
+            "feature_counts": {
+              "baseline": 586,
+              "belief": 156,
+              "candidate": 617,
+              "coupling": 31,
+              "ordinary": 430,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 12892,
+            "status": "evaluated",
+            "subjects": 5696
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": 0.01079,
+            "median_delta_vs_placebo": -0.010326,
+            "pass_both_count": 0
+          }
+        },
+        "respiratory_rate": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.001142,
+                0.000456
+              ],
+              "point_delta": -0.00035,
+              "significant": false,
+              "subjects": 19785
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.001261,
+                0.000492
+              ],
+              "point_delta": -0.000348,
+              "significant": false,
+              "subjects": 19785
+            },
+            "feature_counts": {
+              "baseline": 586,
+              "belief": 156,
+              "candidate": 617,
+              "coupling": 31,
+              "ordinary": 430,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 171233,
+            "status": "evaluated",
+            "subjects": 19785
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -0.000492,
+            "median_delta_vs_placebo": -0.000634,
+            "pass_both_count": 2
+          }
+        },
+        "serum_ketones": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": null,
+              "bootstrap_95_ci": [
+                null,
+                null
+              ],
+              "point_delta": null,
+              "significant": false,
+              "subjects": 0
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": null,
+              "bootstrap_95_ci": [
+                null,
+                null
+              ],
+              "point_delta": null,
+              "significant": false,
+              "subjects": 0
+            },
+            "feature_counts": {
+              "baseline": 574,
+              "belief": 156,
+              "candidate": 605,
+              "coupling": 31,
+              "ordinary": 418,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 3,
+            "status": "evaluated",
+            "subjects": 2
+          },
+          "patient_splits": {
+            "evaluated_splits": 6,
+            "median_delta_vs_all_belief_baseline": null,
+            "median_delta_vs_placebo": null,
+            "pass_both_count": 0
+          }
+        },
+        "serum_osmolality": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                -0.205343,
+                0.433114
+              ],
+              "point_delta": 0.110421,
+              "significant": false,
+              "subjects": 69
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                -0.297975,
+                0.449788
+              ],
+              "point_delta": 0.090265,
+              "significant": false,
+              "subjects": 69
+            },
+            "feature_counts": {
+              "baseline": 586,
+              "belief": 156,
+              "candidate": 617,
+              "coupling": 31,
+              "ordinary": 430,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 140,
+            "status": "evaluated",
+            "subjects": 69
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": 0.000175,
+            "median_delta_vs_placebo": -0.029471,
+            "pass_both_count": 0
+          }
+        },
+        "sodium": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.003622,
+                0.000631
+              ],
+              "point_delta": -0.001352,
+              "significant": false,
+              "subjects": 10432
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.004893,
+                0.000136
+              ],
+              "point_delta": -0.002366,
+              "significant": false,
+              "subjects": 10432
+            },
+            "feature_counts": {
+              "baseline": 586,
+              "belief": 156,
+              "candidate": 617,
+              "coupling": 31,
+              "ordinary": 430,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 27864,
+            "status": "evaluated",
+            "subjects": 10432
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -0.001003,
+            "median_delta_vs_placebo": -0.001994,
+            "pass_both_count": 1
+          }
+        },
+        "temperature": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.000144,
+                8.3e-05
+              ],
+              "point_delta": -3.6e-05,
+              "significant": false,
+              "subjects": 19074
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.000193,
+                5.9e-05
+              ],
+              "point_delta": -6.9e-05,
+              "significant": false,
+              "subjects": 19074
+            },
+            "feature_counts": {
+              "baseline": 586,
+              "belief": 156,
+              "candidate": 617,
+              "coupling": 31,
+              "ordinary": 430,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 142991,
+            "status": "evaluated",
+            "subjects": 19074
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -5.6e-05,
+            "median_delta_vs_placebo": -6.7e-05,
+            "pass_both_count": 1
+          }
+        },
+        "total_protein": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": null,
+              "bootstrap_95_ci": [
+                null,
+                null
+              ],
+              "point_delta": null,
+              "significant": false,
+              "subjects": 0
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": null,
+              "bootstrap_95_ci": [
+                null,
+                null
+              ],
+              "point_delta": null,
+              "significant": false,
+              "subjects": 0
+            },
+            "feature_counts": {
+              "baseline": 572,
+              "belief": 156,
+              "candidate": 603,
+              "coupling": 31,
+              "ordinary": 416,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 8,
+            "status": "evaluated",
+            "subjects": 8
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": null,
+            "median_delta_vs_placebo": null,
+            "pass_both_count": 0
+          }
+        },
+        "triglycerides": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": null,
+              "bootstrap_95_ci": [
+                null,
+                null
+              ],
+              "point_delta": null,
+              "significant": false,
+              "subjects": 0
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": null,
+              "bootstrap_95_ci": [
+                null,
+                null
+              ],
+              "point_delta": null,
+              "significant": false,
+              "subjects": 0
+            },
+            "feature_counts": {
+              "baseline": 584,
+              "belief": 156,
+              "candidate": 615,
+              "coupling": 31,
+              "ordinary": 428,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 146,
+            "status": "evaluated",
+            "subjects": 86
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": null,
+            "median_delta_vs_placebo": null,
+            "pass_both_count": 0
+          }
+        },
+        "troponin_i": {
+          "holdout": {
+            "rows": 0,
+            "status": "insufficient_pairs",
+            "subjects": 0
+          },
+          "patient_splits": {
+            "evaluated_splits": 0,
+            "median_delta_vs_all_belief_baseline": null,
+            "median_delta_vs_placebo": null,
+            "pass_both_count": 0
+          }
+        },
+        "troponin_t": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                -0.001128,
+                0.001348
+              ],
+              "point_delta": 7.4e-05,
+              "significant": false,
+              "subjects": 2491
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.004938,
+                -0.001094
+              ],
+              "point_delta": -0.002981,
+              "significant": true,
+              "subjects": 2491
+            },
+            "feature_counts": {
+              "baseline": 586,
+              "belief": 156,
+              "candidate": 617,
+              "coupling": 31,
+              "ordinary": 430,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 3591,
+            "status": "evaluated",
+            "subjects": 2491
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": 0.001208,
+            "median_delta_vs_placebo": -0.003044,
+            "pass_both_count": 0
+          }
+        },
+        "tsh": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": null,
+              "bootstrap_95_ci": [
+                null,
+                null
+              ],
+              "point_delta": null,
+              "significant": false,
+              "subjects": 0
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": null,
+              "bootstrap_95_ci": [
+                null,
+                null
+              ],
+              "point_delta": null,
+              "significant": false,
+              "subjects": 0
+            },
+            "feature_counts": {
+              "baseline": 582,
+              "belief": 156,
+              "candidate": 613,
+              "coupling": 31,
+              "ordinary": 426,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 8,
+            "status": "evaluated",
+            "subjects": 8
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": null,
+            "median_delta_vs_placebo": null,
+            "pass_both_count": 0
+          }
+        },
+        "uric_acid": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": null,
+              "bootstrap_95_ci": [
+                null,
+                null
+              ],
+              "point_delta": null,
+              "significant": false,
+              "subjects": 0
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": null,
+              "bootstrap_95_ci": [
+                null,
+                null
+              ],
+              "point_delta": null,
+              "significant": false,
+              "subjects": 0
+            },
+            "feature_counts": {
+              "baseline": 582,
+              "belief": 156,
+              "candidate": 613,
+              "coupling": 31,
+              "ordinary": 426,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 970,
+            "status": "evaluated",
+            "subjects": 303
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": 0.007572,
+            "median_delta_vs_placebo": -0.034699,
+            "pass_both_count": 0
+          }
+        },
+        "urine_output": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.123632,
+                0.003689
+              ],
+              "point_delta": -0.064737,
+              "significant": false,
+              "subjects": 17787
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.126735,
+                0.00017
+              ],
+              "point_delta": -0.064621,
+              "significant": false,
+              "subjects": 17787
+            },
+            "feature_counts": {
+              "baseline": 586,
+              "belief": 156,
+              "candidate": 617,
+              "coupling": 31,
+              "ordinary": 430,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 128409,
+            "status": "evaluated",
+            "subjects": 17787
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -0.151703,
+            "median_delta_vs_placebo": -0.151351,
+            "pass_both_count": 7
+          }
+        },
+        "wbc": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.005709,
+                0.001164
+              ],
+              "point_delta": -0.002352,
+              "significant": false,
+              "subjects": 7462
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.008716,
+                0.000252
+              ],
+              "point_delta": -0.003969,
+              "significant": false,
+              "subjects": 7462
+            },
+            "feature_counts": {
+              "baseline": 586,
+              "belief": 156,
+              "candidate": 617,
+              "coupling": 31,
+              "ordinary": 430,
+              "placebo": 31
+            },
+            "group_column": "first_careunit",
+            "rows": 15330,
+            "status": "evaluated",
+            "subjects": 7462
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -0.002099,
+            "median_delta_vs_placebo": -0.004877,
+            "pass_both_count": 1
+          }
+        }
+      }
+    },
+    {
+      "belief_feature_count": 156,
+      "cache": {
+        "builders": [
+          {
+            "columns": 10,
+            "name": "renal"
+          },
+          {
+            "columns": 12,
+            "name": "cardiovascular"
+          },
+          {
+            "columns": 52,
+            "name": "electrolyte"
+          },
+          {
+            "columns": 37,
+            "name": "respiratory"
+          },
+          {
+            "columns": 45,
+            "name": "endocrine"
+          }
+        ],
+        "columns": 156,
+        "enabled": true,
+        "label": "cardiovascular_full_6h",
+        "path": "/private/tmp/osler_belief_cache_full/cardiovascular_full_6h_belief_features.parquet",
+        "rebuilt": false,
+        "rows": 682172,
+        "used": true
+      },
+      "cohort": "/private/tmp/eicu_cardiovascular_instability_full_transitions_6h.parquet",
+      "coupling_feature_count": 31,
+      "future_suffix": "tp6",
+      "holdout_group_column": "hospitalid",
+      "hospitals": 206,
+      "name": "cardiovascular_full_6h",
+      "rows": 682172,
+      "subjects": 45486,
+      "targets": {
+        "heart_rate": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                -0.000773,
+                0.003932
+              ],
+              "point_delta": 0.001376,
+              "significant": false,
+              "subjects": 10752
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                -0.001849,
+                0.003055
+              ],
+              "point_delta": 0.000735,
+              "significant": false,
+              "subjects": 10752
+            },
+            "feature_counts": {
+              "baseline": 215,
+              "belief": 156,
+              "candidate": 246,
+              "coupling": 31,
+              "ordinary": 59,
+              "placebo": 31
+            },
+            "group_column": "hospitalid",
+            "rows": 85192,
+            "status": "evaluated",
+            "subjects": 10752
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -7e-06,
+            "median_delta_vs_placebo": -0.000123,
+            "pass_both_count": 0
+          }
+        },
+        "lactate": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.056959,
+                -0.026205
+              ],
+              "point_delta": -0.04175,
+              "significant": true,
+              "subjects": 1454
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.061432,
+                -0.028192
+              ],
+              "point_delta": -0.04353,
+              "significant": true,
+              "subjects": 1454
+            },
+            "feature_counts": {
+              "baseline": 215,
+              "belief": 156,
+              "candidate": 246,
+              "coupling": 31,
+              "ordinary": 59,
+              "placebo": 31
+            },
+            "group_column": "hospitalid",
+            "rows": 3905,
+            "status": "evaluated",
+            "subjects": 1454
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -0.041106,
+            "median_delta_vs_placebo": -0.049929,
+            "pass_both_count": 7
+          }
+        },
+        "map": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.007865,
+                0.007448
+              ],
+              "point_delta": -0.000154,
+              "significant": false,
+              "subjects": 10702
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.007921,
+                0.007621
+              ],
+              "point_delta": -8.6e-05,
+              "significant": false,
+              "subjects": 10702
+            },
+            "feature_counts": {
+              "baseline": 215,
+              "belief": 156,
+              "candidate": 246,
+              "coupling": 31,
+              "ordinary": 59,
+              "placebo": 31
+            },
+            "group_column": "hospitalid",
+            "rows": 84440,
+            "status": "evaluated",
+            "subjects": 10702
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -0.003673,
+            "median_delta_vs_placebo": -0.003368,
+            "pass_both_count": 2
+          }
+        },
+        "o2sat": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.007716,
+                -0.001801
+              ],
+              "point_delta": -0.004955,
+              "significant": true,
+              "subjects": 10595
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.008599,
+                -0.002156
+              ],
+              "point_delta": -0.005078,
+              "significant": true,
+              "subjects": 10595
+            },
+            "feature_counts": {
+              "baseline": 215,
+              "belief": 156,
+              "candidate": 246,
+              "coupling": 31,
+              "ordinary": 59,
+              "placebo": 31
+            },
+            "group_column": "hospitalid",
+            "rows": 82830,
+            "status": "evaluated",
+            "subjects": 10595
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -0.004138,
+            "median_delta_vs_placebo": -0.004392,
+            "pass_both_count": 5
+          }
+        },
+        "respiratory_rate": {
+          "holdout": {
+            "candidate_vs_all_belief_baseline": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                -0.002074,
+                0.003288
+              ],
+              "point_delta": 0.000705,
+              "significant": false,
+              "subjects": 9951
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": false,
+              "bootstrap_95_ci": [
+                -0.00206,
+                0.003414
+              ],
+              "point_delta": 0.000812,
+              "significant": false,
+              "subjects": 9951
+            },
+            "feature_counts": {
+              "baseline": 215,
+              "belief": 156,
+              "candidate": 246,
+              "coupling": 31,
+              "ordinary": 59,
+              "placebo": 31
+            },
+            "group_column": "hospitalid",
+            "rows": 77332,
+            "status": "evaluated",
+            "subjects": 9951
+          },
+          "patient_splits": {
+            "evaluated_splits": 7,
+            "median_delta_vs_all_belief_baseline": -0.001024,
+            "median_delta_vs_placebo": -0.001356,
+            "pass_both_count": 0
+          }
+        }
+      }
+    }
+  ],
+  "definition": "all-belief baseline vs all-belief plus explicit cross-system latent coupling features vs capacity-matched placebo",
+  "validated": [
+    {
+      "cohort": "sepsis_6h_full",
+      "median_delta_vs_all_belief_baseline": -0.039607,
+      "median_delta_vs_placebo": -0.042979,
+      "target": "lactate"
+    },
+    {
+      "cohort": "sepsis_6h_full",
+      "median_delta_vs_all_belief_baseline": -0.010591,
+      "median_delta_vs_placebo": -0.010871,
+      "target": "o2sat"
+    },
+    {
+      "cohort": "aki_24h_full",
+      "median_delta_vs_all_belief_baseline": -0.021879,
+      "median_delta_vs_placebo": -0.026502,
+      "target": "bun"
+    },
+    {
+      "cohort": "mimiciv_observation_6h",
+      "median_delta_vs_all_belief_baseline": -0.007704,
+      "median_delta_vs_placebo": -0.008581,
+      "target": "anion_gap"
+    },
+    {
+      "cohort": "mimiciv_observation_6h",
+      "median_delta_vs_all_belief_baseline": -0.007167,
+      "median_delta_vs_placebo": -0.010018,
+      "target": "bun"
+    },
+    {
+      "cohort": "mimiciv_observation_6h",
+      "median_delta_vs_all_belief_baseline": -0.000861,
+      "median_delta_vs_placebo": -0.001093,
+      "target": "creatinine"
+    },
+    {
+      "cohort": "mimiciv_observation_6h",
+      "median_delta_vs_all_belief_baseline": -0.017113,
+      "median_delta_vs_placebo": -0.01808,
+      "target": "lactate"
+    },
+    {
+      "cohort": "mimiciv_observation_6h",
+      "median_delta_vs_all_belief_baseline": -0.038039,
+      "median_delta_vs_placebo": -0.040195,
+      "target": "paco2"
+    },
+    {
+      "cohort": "mimiciv_observation_6h",
+      "median_delta_vs_all_belief_baseline": -0.001761,
+      "median_delta_vs_placebo": -0.002305,
+      "target": "phosphate"
+    },
+    {
+      "cohort": "cardiovascular_full_6h",
+      "median_delta_vs_all_belief_baseline": -0.041106,
+      "median_delta_vs_placebo": -0.049929,
+      "target": "lactate"
+    }
+  ]
+}

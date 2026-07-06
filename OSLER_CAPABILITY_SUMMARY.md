@@ -39,7 +39,9 @@ and the whole system was built without ever faking a small-sample win.
   kidney**. Cached all-model belief reruns now connect five personalized physiology
   states at scale; they validate heart-rate/MAP/oxygenation/respiratory-rate signal in
   full cardiovascular cohorts, broad sepsis physiology, AKI 24–48h kidney/electrolyte
-  targets, and many dense MIMIC-IV observation targets.
+  targets, and many dense MIMIC-IV observation targets. A stricter explicit
+  whole-body latent layer adds incremental signal beyond the all-belief baseline for
+  cross-system targets such as lactate, BUN, anion gap, PaCO2, and phosphate.
 - **Individualization:** online hidden-state estimates now validate in five places:
   kidney reserve for creatinine/BUN, cardiovascular perfusion/shock state for
   heart-rate prediction, and electrolyte/acid-base state for potassium, bicarbonate,
