@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Mapping
 
 import numpy as np
+from scipy.signal import find_peaks
 
 from osler_jepa.waveform import classify_signal_name
 
@@ -64,6 +65,71 @@ def robust_univariate_features(values: np.ndarray, prefix: str) -> dict[str, flo
     }
 
 
+def peak_interval_features(
+    values: np.ndarray,
+    sampling_frequency_hz: float | None,
+    prefix: str,
+    min_interval_seconds: float,
+    max_interval_seconds: float,
+) -> dict[str, float]:
+    """Return simple peak/cycle features for a bounded waveform channel."""
+
+    clean = _clean_values(values)
+    if clean.size < 3 or not sampling_frequency_hz:
+        return {
+            f"{prefix}_peak_count": 0.0,
+            f"{prefix}_peak_rate_per_min": math.nan,
+            f"{prefix}_peak_interval_median_s": math.nan,
+            f"{prefix}_peak_interval_iqr_s": math.nan,
+        }
+    centered = np.asarray(values, dtype=float)
+    finite = np.isfinite(centered)
+    if not finite.any():
+        return {
+            f"{prefix}_peak_count": 0.0,
+            f"{prefix}_peak_rate_per_min": math.nan,
+            f"{prefix}_peak_interval_median_s": math.nan,
+            f"{prefix}_peak_interval_iqr_s": math.nan,
+        }
+    fill_value = float(np.nanmedian(centered[finite]))
+    centered = np.where(finite, centered, fill_value)
+    centered = centered - float(np.median(centered))
+    scale = float(np.std(centered))
+    if scale <= 1e-9:
+        return {
+            f"{prefix}_peak_count": 0.0,
+            f"{prefix}_peak_rate_per_min": math.nan,
+            f"{prefix}_peak_interval_median_s": math.nan,
+            f"{prefix}_peak_interval_iqr_s": math.nan,
+        }
+    normalized = centered / scale
+    min_distance = max(1, int(round(min_interval_seconds * sampling_frequency_hz)))
+    peaks, _ = find_peaks(normalized, distance=min_distance, prominence=0.5)
+    if len(peaks) < 2:
+        peaks, _ = find_peaks(-normalized, distance=min_distance, prominence=0.5)
+    duration_minutes = len(values) / sampling_frequency_hz / 60.0
+    intervals = np.diff(peaks) / sampling_frequency_hz if len(peaks) >= 2 else np.array([])
+    intervals = intervals[
+        (intervals >= min_interval_seconds)
+        & (intervals <= max_interval_seconds)
+    ]
+    if intervals.size:
+        q25, q75 = np.percentile(intervals, [25, 75])
+        rate = 60.0 / float(np.median(intervals))
+        interval_median = float(np.median(intervals))
+        interval_iqr = float(q75 - q25)
+    else:
+        rate = float(len(peaks) / duration_minutes) if duration_minutes > 0 else math.nan
+        interval_median = math.nan
+        interval_iqr = math.nan
+    return {
+        f"{prefix}_peak_count": float(len(peaks)),
+        f"{prefix}_peak_rate_per_min": float(rate),
+        f"{prefix}_peak_interval_median_s": interval_median,
+        f"{prefix}_peak_interval_iqr_s": interval_iqr,
+    }
+
+
 def arterial_pressure_features(values: np.ndarray, prefix: str) -> dict[str, float]:
     """Return candidate arterial-pressure burden features."""
 
@@ -89,6 +155,7 @@ def arterial_pressure_features(values: np.ndarray, prefix: str) -> dict[str, flo
 def waveform_array_features(
     signal_values: np.ndarray,
     signal_names: list[str] | tuple[str, ...],
+    sampling_frequency_hz: float | None = None,
 ) -> dict[str, float]:
     """Summarize waveform channels into candidate feature columns."""
 
@@ -108,13 +175,52 @@ def waveform_array_features(
         column = signal_values[:, column_index]
         if group == "arterial_pressure":
             features.update(arterial_pressure_features(column, prefix))
+            features.update(
+                peak_interval_features(
+                    column,
+                    sampling_frequency_hz,
+                    prefix,
+                    min_interval_seconds=0.3,
+                    max_interval_seconds=2.0,
+                )
+            )
         else:
             features.update(robust_univariate_features(column, prefix))
+            if group in {"ecg", "pleth"}:
+                features.update(
+                    peak_interval_features(
+                        column,
+                        sampling_frequency_hz,
+                        prefix,
+                        min_interval_seconds=0.3,
+                        max_interval_seconds=2.0,
+                    )
+                )
+            elif group == "respiration":
+                features.update(
+                    peak_interval_features(
+                        column,
+                        sampling_frequency_hz,
+                        prefix,
+                        min_interval_seconds=1.0,
+                        max_interval_seconds=10.0,
+                    )
+                )
     return features
 
 
 def read_waveform_feature_record(record_path: str | Path, seconds: float = 60.0) -> WaveformFeatureRecord:
     """Read a bounded waveform segment and return candidate features."""
+
+    return read_waveform_feature_window(record_path, sampfrom=0, seconds=seconds)
+
+
+def read_waveform_feature_window(
+    record_path: str | Path,
+    sampfrom: int = 0,
+    seconds: float = 60.0,
+) -> WaveformFeatureRecord:
+    """Read a bounded waveform window and return candidate features."""
 
     import wfdb  # Optional dependency; installed only for waveform work.
 
@@ -122,17 +228,19 @@ def read_waveform_feature_record(record_path: str | Path, seconds: float = 60.0)
     header = wfdb.rdheader(str(record_path))
     fs = float(header.fs) if header.fs is not None else None
     sample_count = int(round(seconds * fs)) if fs else None
+    sampfrom = max(0, int(sampfrom))
     if header.sig_len is not None and sample_count is not None:
-        sample_count = min(sample_count, int(header.sig_len))
+        sample_count = min(sample_count, max(int(header.sig_len) - sampfrom, 0))
     if sample_count is None or sample_count <= 0:
-        sample_count = int(header.sig_len or 0)
+        sample_count = max(int(header.sig_len or 0) - sampfrom, 0)
     if sample_count <= 0:
         raise ValueError(f"record has no readable samples: {record_path}")
+    sampto = sampfrom + sample_count
 
     record = wfdb.rdrecord(
         str(record_path),
-        sampfrom=0,
-        sampto=sample_count,
+        sampfrom=sampfrom,
+        sampto=sampto,
         physical=True,
     )
     signal_values = np.asarray(record.p_signal, dtype=float)
@@ -146,7 +254,7 @@ def read_waveform_feature_record(record_path: str | Path, seconds: float = 60.0)
         seconds_read=seconds_read,
         signals=signal_names,
         signal_groups=groups,
-        features=waveform_array_features(signal_values, signal_names),
+        features=waveform_array_features(signal_values, signal_names, sampling_frequency_hz=fs),
     )
 
 

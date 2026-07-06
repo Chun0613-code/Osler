@@ -5,6 +5,7 @@ import numpy as np
 
 from osler_jepa.waveform_features import (
     aggregate_feature_summary,
+    peak_interval_features,
     robust_univariate_features,
     waveform_array_features,
     WaveformFeatureRecord,
@@ -40,6 +41,35 @@ class WaveformFeatureTests(unittest.TestCase):
         self.assertIn("wave_arterial_pressure_1_hypotension_fraction_lt65", features)
         self.assertIn("wave_pleth_1_iqr", features)
         self.assertIn("wave_respiration_1_std", features)
+
+    def test_peak_interval_features_estimate_rate(self):
+        fs = 50.0
+        t = np.arange(0, 10, 1 / fs)
+        signal = np.sin(2 * np.pi * 1.0 * t)
+
+        features = peak_interval_features(
+            signal,
+            fs,
+            "ecg",
+            min_interval_seconds=0.3,
+            max_interval_seconds=2.0,
+        )
+
+        self.assertGreater(features["ecg_peak_count"], 5)
+        self.assertAlmostEqual(features["ecg_peak_rate_per_min"], 60.0, delta=5.0)
+
+    def test_waveform_array_features_include_peak_rates_when_fs_available(self):
+        fs = 50.0
+        t = np.arange(0, 10, 1 / fs)
+        values = np.column_stack([
+            np.sin(2 * np.pi * 1.2 * t),
+            np.sin(2 * np.pi * 0.25 * t),
+        ])
+
+        features = waveform_array_features(values, ["II", "Resp"], sampling_frequency_hz=fs)
+
+        self.assertIn("wave_ecg_1_peak_rate_per_min", features)
+        self.assertIn("wave_respiration_1_peak_rate_per_min", features)
 
     def test_aggregate_summary_has_no_prediction_authority(self):
         record = WaveformFeatureRecord(

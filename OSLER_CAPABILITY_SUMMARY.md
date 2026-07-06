@@ -1,6 +1,6 @@
 # Osler-JEPA — What This System Can Do
 
-*A one-page, plain-language summary. Last updated 2026-07-04.*
+*A one-page, plain-language summary. Last updated 2026-07-05.*
 
 ## In one sentence
 
@@ -91,9 +91,11 @@ validated or deployed to influence care.
 ## Remaining Frontiers
 
 - **Factual accuracy frontier:** high-frequency waveforms. A candidate MIMIC-IV
-  Waveform manifest and bounded raw-feature smoke now exist for ECG, arterial pressure,
-  plethysmography, respiration, and related signals, but waveform features have no
-  prediction authority until a held-out accuracy audit passes.
+  Waveform manifest, raw feature reader, and first held-out 6h precision audit now
+  exist for ECG, arterial pressure, plethysmography, respiration, and related
+  signals. The first audit validated **0 targets**, so waveform remains
+  candidate-only; this specific 60-second feature layer did not improve the
+  table-plus-treatment baseline.
 - **Causal frontier:** what-if treatment planning. Observational data cannot unlock this
   by itself; it requires external randomized-trial evidence (e.g. BioLINCC critical-care
   trials). That door is built, fail-closed, and waiting.
