@@ -42,6 +42,9 @@ and the whole system was built without ever faking a small-sample win.
   targets, and many dense MIMIC-IV observation targets. A stricter explicit
   whole-body latent layer adds incremental signal beyond the all-belief baseline for
   cross-system targets such as lactate, BUN, anion gap, PaCO2, and phosphate.
+  A still stricter graph-propagated coupling layer adds only a small validated
+  renal/systemic increment for MIMIC-IV 6h creatinine; broader graph gains remain
+  candidate-only, which keeps the coupling claims bounded.
 - **Individualization:** online hidden-state estimates now validate in five places:
   kidney reserve for creatinine/BUN, cardiovascular perfusion/shock state for
   heart-rate prediction, and electrolyte/acid-base state for potassium, bicarbonate,

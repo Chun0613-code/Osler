@@ -685,6 +685,65 @@ def whole_body_observation_capabilities() -> tuple[ObservationCapability, ...]:
             evidence="BODY_SYSTEM_MULTIHOP_COUPLING_FINDINGS.md; sepsis->MAP at 6h -> renal at 24h passes 7/7 and hospital-heldout",
         ),
         ObservationCapability(
+            name="explicit_whole_body_latent_coupling",
+            status="validated",
+            scope="whole_body_latent_coupling",
+            systems=(
+                "cardiovascular_perfusion",
+                "respiratory",
+                "endocrine_metabolic",
+                "electrolyte_acid_base",
+                "renal_urinary",
+            ),
+            targets=("lactate", "bun", "anion_gap", "paco2", "phosphate", "creatinine"),
+            horizon_hours=(6, 24),
+            evidence=(
+                "WHOLE_BODY_COUPLING_LATENT_FINDINGS.md; explicit cross-system "
+                "latent axes add incremental factual signal beyond the all-belief "
+                "baseline for selected cross-system targets"
+            ),
+        ),
+        ObservationCapability(
+            name="graph_propagated_whole_body_coupling",
+            status="validated",
+            scope="whole_body_graph_coupling",
+            systems=(
+                "cardiovascular_perfusion",
+                "respiratory",
+                "endocrine_metabolic",
+                "electrolyte_acid_base",
+                "renal_urinary",
+            ),
+            targets=("creatinine",),
+            horizon_hours=(6,),
+            evidence=(
+                "WHOLE_BODY_GRAPH_COUPLING_FINDINGS.md; graph propagation over "
+                "the explicit whole-body latent axes adds a small validated "
+                "increment for MIMIC-IV 6h creatinine beyond explicit latent "
+                "baseline and capacity-matched placebo"
+            ),
+        ),
+        ObservationCapability(
+            name="graph_coupling_near_misses_candidate",
+            status="candidate_only",
+            scope="whole_body_graph_coupling",
+            systems=(
+                "cardiovascular_perfusion",
+                "respiratory",
+                "endocrine_metabolic",
+                "electrolyte_acid_base",
+                "renal_urinary",
+            ),
+            targets=("bun", "respiratory_rate", "anion_gap", "map", "lactate"),
+            horizon_hours=(6, 24),
+            evidence=(
+                "WHOLE_BODY_GRAPH_COUPLING_FINDINGS.md; BUN, respiratory_rate, "
+                "anion_gap, MAP, and lactate show directional signal but fail "
+                "the full 7-split plus held-out graph gate"
+            ),
+            allowed_uses=("shadow_research", "capability_reporting"),
+        ),
+        ObservationCapability(
             name="renal_belief_state_v2",
             status="validated",
             scope="predict_update_belief_state",
