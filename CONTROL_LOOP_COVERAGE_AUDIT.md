@@ -20,7 +20,8 @@ The current promoted predict-update belief families are:
 4. respiratory / gas-exchange state;
 5. endocrine / glycemic-adrenal stress;
 6. immune / inflammatory host-response state;
-7. GI / pancreatic / nutrition / gut-perfusion state.
+7. GI / pancreatic / nutrition / gut-perfusion state;
+8. musculoskeletal / rhabdomyolysis perfusion-stress state.
 
 These are the loops where patient-specific hidden-state features have already
 shown held-out improvement over both a strong baseline and a capacity-matched
@@ -55,29 +56,35 @@ placebo for at least one downstream observable.
 | Consciousness / arousal | observation-only | GCS/delirium notes can be timestamped and observed; prediction remains unstable |
 | Intracranial pressure regulation | data ceiling | no reliable first-class ICP/exam/procedure trajectory in current eICU contract |
 | Autonomic balance | indirect only | cardiovascular and endocrine beliefs touch HR/BP/stress; no explicit sympathetic/parasympathetic belief has validated |
-| Musculoskeletal / rhabdomyolysis | tested, candidate-only | new muscle belief audit validates 0 targets; MAP is near-miss 6/7 but not promoted |
+| Musculoskeletal / rhabdomyolysis | bounded validated | muscle belief validates MAP at 3h and 12h; 1h/6h MAP remain candidate-only; muscle-to-kidney and muscle-to-electrolyte targets remain rejected |
 
 ## What Changed In This Pass
 
 The new action taken in this pass was to test a distinct
-musculoskeletal/rhabdomyolysis belief family.  It did **not** meet promotion:
+musculoskeletal/rhabdomyolysis belief family and then rerun it across nearby
+horizons after a 6h MAP near-miss.  The result is horizon-specific:
 
 - rows: `16,837`;
 - subjects: `1,205`;
 - hospitals: `22`;
 - features: `59`;
-- validated targets: `0`;
-- strongest candidate: MAP at `6 / 7` patient splits, median delta
-  `-0.2802` versus baseline and `-0.3312` versus placebo.
+- 1h: no promoted target; MAP reaches `5 / 7`;
+- 3h: MAP promotes at `7 / 7`, median delta `-0.4197` versus baseline and
+  `-0.4244` versus placebo;
+- 6h: no promoted target; MAP reaches `6 / 7`;
+- 12h: MAP promotes at `7 / 7`, median delta `-0.3003` versus baseline and
+  `-0.3060` versus placebo.
 
-Because it failed the full held-out gate, it is not added to the promoted
-all-belief builder.
+Because the validated signal is MAP-only, this expands the whole-body belief
+layer narrowly: it adds a muscle/perfusion-stress loop, not a validated
+muscle-to-kidney or muscle-to-electrolyte loop.
 
 ## Practical Reading
 
 The model is getting closer to a whole-body observer, but not a complete human
 simulator.  It has robust acute ICU loops for perfusion, kidney, respiratory,
-acid-base, potassium, glucose, inflammation, and GI/nutrition stress.  The
+acid-base, potassium, glucose, inflammation, GI/nutrition stress, and bounded
+muscle/perfusion stress.  The
 remaining gaps are mostly one of three kinds:
 
 1. **Sparse specialty hormones or deep labs**: thyroid, cortisol, ACTH, IGF,

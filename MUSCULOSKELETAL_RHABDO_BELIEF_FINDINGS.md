@@ -36,9 +36,9 @@ checkpoint-promotion, or active-rule authority.
 - Belief feature count: `59`
 - Audit report: `eicu_musculoskeletal_belief_audit.json`
 
-## Result
+## Initial 6h Result
 
-No target passed the full promotion gate.
+No target passed the full 6h promotion gate.
 
 | Target | Patient Splits Passing Both | Median Delta vs Baseline | Median Delta vs Placebo | Status |
 |---|---:|---:|---:|---|
@@ -52,42 +52,74 @@ No target passed the full promotion gate.
 | pH | 0 / 7 | +0.0053 | +0.0017 | rejected |
 | CPK / myoglobin / LDH / phosphate / ionized calcium / lactate | 0 / 7 | insufficient or unstable | insufficient or unstable | rejected |
 
-Hospital-heldout did not rescue the candidate. MAP showed useful direction but
-the confidence interval crossed zero versus baseline, so it remains
-candidate-only. Several targets improved versus placebo but worsened versus the
-baseline, which is exactly why the capacity-matched placebo gate is necessary
-but not sufficient.
+At 6h, hospital-heldout did not rescue the candidate. MAP showed useful
+direction but the confidence interval crossed zero versus baseline, so it
+remained candidate-only at that horizon. Several targets improved versus
+placebo but worsened versus the baseline, which is exactly why the
+capacity-matched placebo gate is necessary but not sufficient.
+
+## Horizon Follow-Up
+
+Because MAP was a 6/7 near-miss at 6h, the same audit was rerun at 1h, 3h, and
+12h using the already-built musculoskeletal transition contracts.
+
+| Horizon | Validated Targets | MAP Patient Splits | MAP Median Delta vs Baseline | MAP Median Delta vs Placebo | MAP Hospital-Heldout |
+|---|---|---:|---:|---:|---|
+| 1h | none | 5 / 7 | -0.2418 | -0.2643 | candidate-only; baseline CI crosses zero |
+| 3h | MAP | 7 / 7 | -0.4197 | -0.4244 | pass |
+| 6h | none | 6 / 7 | -0.2802 | -0.3312 | candidate-only; baseline CI crosses zero |
+| 12h | MAP | 7 / 7 | -0.3003 | -0.3060 | pass |
+
+Hospital-heldout details for the promoted horizons:
+
+| Horizon | Baseline MAE | Belief MAE | Placebo MAE | Delta vs Baseline 95% CI | Delta vs Placebo 95% CI |
+|---|---:|---:|---:|---:|---:|
+| 3h MAP | 9.4424 | 8.9379 | 9.4771 | [-0.5661, -0.2551] | [-0.5625, -0.2715] |
+| 12h MAP | 10.5045 | 10.0022 | 10.5485 | [-0.5784, -0.2075] | [-0.5868, -0.1783] |
 
 ## Interpretation
 
-This is a clean negative result for a new organ-specific belief family.
+The horizon follow-up changes the conclusion.
 
-The musculoskeletal surface is covered by the body-system router, but the
-predict-update muscle-injury state does not yet add robust held-out information
-beyond the ordinary table/action model.  In the current eICU contract, muscle
-injury is mostly a bounded proxy: CPK, myoglobin, LDH, and downstream renal /
-electrolyte changes are too sparse or too treatment/measurement dependent to
-support a promoted 6h personalization layer.
+Musculoskeletal / rhabdomyolysis belief validates as a bounded personalization
+component for **MAP at 3h and 12h**, but not for muscle biomarkers or downstream
+renal/electrolyte injury.  The useful signal is therefore:
 
-The strongest signal is MAP, not CPK or renal/electrolyte targets.  That
-suggests the candidate is mostly detecting nonspecific perfusion/critical-illness
-stress, which is already partly covered by the validated cardiovascular,
-immune, endocrine, renal, respiratory, and GI belief families.
+```text
+muscle injury / rhabdomyolysis / perfusion-clearance stress -> MAP
+```
+
+It is **not** yet:
+
+```text
+muscle injury -> kidney injury
+muscle injury -> potassium/phosphate/calcium dynamics
+```
+
+The distinction matters.  The belief state appears to capture a short-to-middle
+horizon perfusion / critical-illness stress component in rhabdomyolysis-like
+patients.  It does not robustly recover CPK, myoglobin, LDH, creatinine, BUN,
+potassium, phosphate, calcium, bicarbonate, pH, urine output, or lactate beyond
+the baseline/placebo gate.
+
+The most likely explanation is observability.  CPK, myoglobin, LDH, phosphate,
+and ionized calcium are sparse, while renal/electrolyte consequences are
+strongly treatment- and measurement-dependent.  MAP is dense enough for the
+belief state to add signal.
 
 ## Boundary
 
 Allowed:
 
-- report musculoskeletal / rhabdomyolysis belief as a tested candidate-only
-  loop;
-- keep the feature module for future richer-observability or alternate-horizon
-  experiments;
-- use this audit as evidence that musculoskeletal coupling has not yet met the
-  same validation bar as renal, cardiovascular, electrolyte, respiratory,
-  endocrine, immune, or GI/nutrition beliefs.
+- report musculoskeletal / rhabdomyolysis belief as a bounded validated factual
+  MAP personalization source at 3h and 12h;
+- add the musculoskeletal belief builder to future all-model coupling reruns,
+  with cache-manifest mismatch protection;
+- keep 1h and 6h MAP as candidate-only horizon cells.
 
 Not allowed:
 
-- adding musculoskeletal belief to the all-model promoted builder;
 - claiming muscle-to-kidney or muscle-to-electrolyte coupling is validated;
+- promoting CPK, myoglobin, LDH, creatinine, BUN, potassium, phosphate, calcium,
+  bicarbonate, pH, urine output, or lactate from this audit;
 - causal, counterfactual, clinical, or runtime claims.

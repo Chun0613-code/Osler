@@ -217,3 +217,17 @@ The cache manifest now checks the builder list.  Old five-belief caches will be
 treated as mismatches and rebuilt before any future all-model or coupling audit.
 The historical results above should therefore be read as the validated
 five-belief rerun, while future reruns use the expanded seven-belief builder.
+
+### 2026-07-10 Builder Update
+
+A musculoskeletal / rhabdomyolysis belief family was added after
+horizon-specific validation:
+
+- 3h MAP: 7 / 7 patient splits, hospital-heldout pass;
+- 12h MAP: 7 / 7 patient splits, hospital-heldout pass.
+
+The validated claim is deliberately narrow: muscle/perfusion-stress belief
+improves MAP prediction in the rhabdomyolysis module.  Muscle-to-kidney and
+muscle-to-electrolyte targets remain unvalidated.  Future all-model reruns will
+therefore use an expanded eight-belief builder, and the manifest check will
+force old seven-belief caches to rebuild before use.

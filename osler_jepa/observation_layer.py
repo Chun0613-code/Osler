@@ -299,6 +299,8 @@ VALIDATED_INTERMEDIATE_MOVE_CELLS: dict[str, dict[int, tuple[str, ...]]] = {
     },
     "musculoskeletal_rhabdo": {
         1: ("map",),
+        3: ("map",),
+        12: ("map",),
     },
     "respiratory": {
         1: ("map", "o2sat", "respiratory_rate"),
@@ -990,6 +992,50 @@ def whole_body_observation_capabilities() -> tuple[ObservationCapability, ...]:
             allowed_uses=("capability_reporting",),
         ),
         ObservationCapability(
+            name="musculoskeletal_rhabdo_belief_state",
+            status="validated",
+            scope="predict_update_belief_state",
+            systems=("musculoskeletal", "rhabdomyolysis", "cardiovascular_perfusion"),
+            targets=("map", "patient_specific_musculoskeletal_rhabdo_state"),
+            horizon_hours=(3, 12),
+            evidence=(
+                "MUSCULOSKELETAL_RHABDO_BELIEF_FINDINGS.md; "
+                "musculoskeletal/rhabdomyolysis predict-update belief validates "
+                "MAP at 3h and 12h across 7/7 patient splits and "
+                "hospital-heldout, beating baseline and capacity-matched "
+                "placebo; no muscle-to-kidney or muscle-to-electrolyte "
+                "promotion"
+            ),
+        ),
+        ObservationCapability(
+            name="musculoskeletal_belief_remaining_targets_candidate",
+            status="candidate_only",
+            scope="predict_update_belief_state",
+            systems=("musculoskeletal", "rhabdomyolysis"),
+            targets=(
+                "cpk",
+                "myoglobin",
+                "ldh",
+                "potassium",
+                "creatinine",
+                "bun",
+                "phosphate",
+                "calcium",
+                "ionized_calcium",
+                "bicarbonate",
+                "ph",
+                "urine_output",
+                "lactate",
+            ),
+            horizon_hours=(1, 3, 6, 12),
+            evidence=(
+                "MUSCULOSKELETAL_RHABDO_BELIEF_FINDINGS.md; non-MAP "
+                "musculoskeletal/rhabdomyolysis targets do not pass the robust "
+                "downstream observable gate"
+            ),
+            allowed_uses=("capability_reporting",),
+        ),
+        ObservationCapability(
             name="respiratory_acid_base_observed_coupling",
             status="candidate_only",
             scope="single_hop_body_coupling",
@@ -1477,6 +1523,13 @@ def whole_body_state_forecast_template() -> dict[str, object]:
             "ENDOCRINE_BELIEF_FINDINGS.md",
             "eicu_endocrine_belief_full_audit.json",
             "eicu_endocrine_stress_full_transition_report.json",
+            "IMMUNE_INFLAMMATORY_BELIEF_FINDINGS.md",
+            "eicu_immune_belief_sepsis_full_audit.json",
+            "GI_NUTRITION_BELIEF_FINDINGS.md",
+            "eicu_gi_nutrition_belief_audit.json",
+            "MUSCULOSKELETAL_RHABDO_BELIEF_FINDINGS.md",
+            "eicu_musculoskeletal_belief_audit_3h.json",
+            "eicu_musculoskeletal_belief_audit_12h.json",
         ],
         "safety_boundary": {
             **observation_readiness()["safety_boundary"],

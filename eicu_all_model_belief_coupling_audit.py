@@ -32,6 +32,7 @@ from electrolyte_belief import electrolyte_belief_state_features
 from endocrine_belief import endocrine_belief_state_features
 from gi_nutrition_belief import gi_nutrition_belief_state_features
 from immune_inflammatory_belief import immune_inflammatory_belief_state_features
+from musculoskeletal_rhabdo_belief import musculoskeletal_rhabdo_belief_state_features
 from respiratory_belief import respiratory_belief_state_features
 from eicu_body_system_target_router import _fit_ridge
 from eicu_sepsis_target_router import _bootstrap_ci, _feature_columns, _round, _subject_column, split_subjects
@@ -119,6 +120,7 @@ BELIEF_BUILDERS = (
     ("endocrine", endocrine_belief_state_features),
     ("immune", immune_inflammatory_belief_state_features),
     ("gi_nutrition", gi_nutrition_belief_state_features),
+    ("musculoskeletal", musculoskeletal_rhabdo_belief_state_features),
 )
 
 

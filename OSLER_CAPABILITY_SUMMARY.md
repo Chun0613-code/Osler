@@ -53,13 +53,12 @@ and the whole system was built without ever faking a small-sample win.
   for glucose, anion gap, bicarbonate, sodium, potassium, and MAP, plus
   immune/inflammatory host-response state for sepsis MAP, creatinine, O2 saturation,
   heart rate, respiratory rate, and vasopressor requirement, plus a bounded
-  GI/nutrition/gut-perfusion belief for MAP. Each improves
+  GI/nutrition/gut-perfusion belief for MAP, and a bounded musculoskeletal /
+  rhabdomyolysis perfusion-stress belief for MAP at 3h and 12h. Each improves
   downstream observable prediction beyond a strong baseline and a capacity-matched
   placebo. In the cached full rerun, the cardiovascular heart-rate near-miss becomes
   a full validation at scale, and the connected belief layer generalizes to MIMIC-IV.
-  A musculoskeletal/rhabdomyolysis belief has also been tested; it remains
-  candidate-only, with MAP as a 6/7 near-miss and no promoted muscle-to-kidney or
-  muscle-to-electrolyte coupling.
+  Muscle-to-kidney and muscle-to-electrolyte coupling remain candidate-only.
 - **Two care settings:** ICU **and** the pre-ICU emergency department.
 - **Three population/data axes:** multi-hospital ICU data (eICU), independent ICU data
   (MIMIC-IV), and healthy/general-population cross-sectional data (NHANES).
