@@ -45,7 +45,7 @@ and the whole system was built without ever faking a small-sample win.
   A still stricter graph-propagated coupling layer adds only a small validated
   renal/systemic increment for MIMIC-IV 6h creatinine; broader graph gains remain
   candidate-only, which keeps the coupling claims bounded.
-- **Individualization:** online hidden-state estimates now validate in seven places:
+- **Individualization:** online hidden-state estimates now validate in seven belief families:
   kidney reserve for creatinine/BUN, cardiovascular perfusion/shock state for
   heart-rate prediction, and electrolyte/acid-base state for potassium, bicarbonate,
   anion gap, and creatinine, plus respiratory/gas-exchange state for O2 saturation,
@@ -57,6 +57,9 @@ and the whole system was built without ever faking a small-sample win.
   downstream observable prediction beyond a strong baseline and a capacity-matched
   placebo. In the cached full rerun, the cardiovascular heart-rate near-miss becomes
   a full validation at scale, and the connected belief layer generalizes to MIMIC-IV.
+  A musculoskeletal/rhabdomyolysis belief has also been tested; it remains
+  candidate-only, with MAP as a 6/7 near-miss and no promoted muscle-to-kidney or
+  muscle-to-electrolyte coupling.
 - **Two care settings:** ICU **and** the pre-ICU emergency department.
 - **Three population/data axes:** multi-hospital ICU data (eICU), independent ICU data
   (MIMIC-IV), and healthy/general-population cross-sectional data (NHANES).
@@ -108,6 +111,11 @@ validated or deployed to influence care.
   signals. The first audit validated **0 targets**, so waveform remains
   candidate-only; this specific 60-second feature layer did not improve the
   table-plus-treatment baseline.
+- **Control-loop frontier:** sparse specialty loops. A new control-loop audit maps
+  validated versus missing physiologic feedback loops. Mineral-bone, coagulation,
+  liver detoxification, thermoregulation, neuro-arousal, autonomic balance, and
+  muscle-injury loops are partly observed but not yet validated as promoted
+  predict-update belief families.
 - **Causal frontier:** what-if treatment planning. Observational data cannot unlock this
   by itself; it requires external randomized-trial evidence (e.g. BioLINCC critical-care
   trials). That door is built, fail-closed, and waiting.
