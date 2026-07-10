@@ -746,6 +746,21 @@ def whole_body_observation_capabilities() -> tuple[ObservationCapability, ...]:
             allowed_uses=("shadow_research", "capability_reporting"),
         ),
         ObservationCapability(
+            name="cardiac_injury_connected_belief_candidate",
+            status="candidate_only",
+            scope="connected_belief_coupling",
+            systems=("cardiac_myocardial", "cardiovascular_perfusion", "whole_body_belief_layer"),
+            targets=("heart_rate_near_miss", "map", "troponin_i", "bnp", "ck_mb", "cpk"),
+            horizon_hours=(3, 12),
+            evidence=(
+                "CARDIAC_INJURY_CONNECTED_BELIEF_FINDINGS.md; eight-belief "
+                "connected audit validates 0 cardiac injury targets; 12h "
+                "heart_rate reaches 6/7 but remains candidate-only, while "
+                "troponin/BNP/CK-MB/CPK remain sparse fallback markers"
+            ),
+            allowed_uses=("shadow_research", "capability_reporting"),
+        ),
+        ObservationCapability(
             name="renal_belief_state_v2",
             status="validated",
             scope="predict_update_belief_state",
@@ -1000,11 +1015,10 @@ def whole_body_observation_capabilities() -> tuple[ObservationCapability, ...]:
             horizon_hours=(3, 12),
             evidence=(
                 "MUSCULOSKELETAL_RHABDO_BELIEF_FINDINGS.md; "
-                "musculoskeletal/rhabdomyolysis predict-update belief validates "
-                "MAP at 3h and 12h across 7/7 patient splits and "
-                "hospital-heldout, beating baseline and capacity-matched "
-                "placebo; no muscle-to-kidney or muscle-to-electrolyte "
-                "promotion"
+                "isolated musculoskeletal/rhabdomyolysis predict-update belief "
+                "validates MAP at 3h and 12h; connected 8-belief rerun "
+                "preserves 3h MAP only; no muscle-to-kidney or "
+                "muscle-to-electrolyte promotion"
             ),
         ),
         ObservationCapability(
@@ -1530,6 +1544,9 @@ def whole_body_state_forecast_template() -> dict[str, object]:
             "MUSCULOSKELETAL_RHABDO_BELIEF_FINDINGS.md",
             "eicu_musculoskeletal_belief_audit_3h.json",
             "eicu_musculoskeletal_belief_audit_12h.json",
+            "eicu_all_model_belief_coupling_musculoskeletal_audit.json",
+            "CARDIAC_INJURY_CONNECTED_BELIEF_FINDINGS.md",
+            "eicu_all_model_belief_coupling_cardiac_injury_audit.json",
         ],
         "safety_boundary": {
             **observation_readiness()["safety_boundary"],

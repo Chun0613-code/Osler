@@ -54,11 +54,15 @@ and the whole system was built without ever faking a small-sample win.
   immune/inflammatory host-response state for sepsis MAP, creatinine, O2 saturation,
   heart rate, respiratory rate, and vasopressor requirement, plus a bounded
   GI/nutrition/gut-perfusion belief for MAP, and a bounded musculoskeletal /
-  rhabdomyolysis perfusion-stress belief for MAP at 3h and 12h. Each improves
+  rhabdomyolysis perfusion-stress belief for MAP. Each improves
   downstream observable prediction beyond a strong baseline and a capacity-matched
   placebo. In the cached full rerun, the cardiovascular heart-rate near-miss becomes
   a full validation at scale, and the connected belief layer generalizes to MIMIC-IV.
+  The connected 8-belief audit preserves musculoskeletal MAP at 3h; its 12h
+  isolated signal is candidate-only after whole-body connection.
   Muscle-to-kidney and muscle-to-electrolyte coupling remain candidate-only.
+  A connected cardiac-injury scan was also run; it validates no target, with
+  12h heart rate as a 6/7 near-miss and myocardial biomarkers still fallback.
 - **Two care settings:** ICU **and** the pre-ICU emergency department.
 - **Three population/data axes:** multi-hospital ICU data (eICU), independent ICU data
   (MIMIC-IV), and healthy/general-population cross-sectional data (NHANES).
@@ -113,7 +117,7 @@ validated or deployed to influence care.
 - **Control-loop frontier:** sparse specialty loops. A new control-loop audit maps
   validated versus missing physiologic feedback loops. Mineral-bone, coagulation,
   liver detoxification, thermoregulation, neuro-arousal, autonomic balance, and
-  muscle-injury loops are partly observed but not yet validated as promoted
+  cardiac-biomarker loops are partly observed but not yet validated as promoted
   predict-update belief families.
 - **Causal frontier:** what-if treatment planning. Observational data cannot unlock this
   by itself; it requires external randomized-trial evidence (e.g. BioLINCC critical-care

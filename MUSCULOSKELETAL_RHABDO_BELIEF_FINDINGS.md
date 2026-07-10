@@ -82,8 +82,9 @@ Hospital-heldout details for the promoted horizons:
 The horizon follow-up changes the conclusion.
 
 Musculoskeletal / rhabdomyolysis belief validates as a bounded personalization
-component for **MAP at 3h and 12h**, but not for muscle biomarkers or downstream
-renal/electrolyte injury.  The useful signal is therefore:
+component for **MAP at 3h and 12h** when tested as an isolated belief family,
+but not for muscle biomarkers or downstream renal/electrolyte injury.  The
+useful signal is therefore:
 
 ```text
 muscle injury / rhabdomyolysis / perfusion-clearance stress -> MAP
@@ -107,12 +108,41 @@ and ionized calcium are sparse, while renal/electrolyte consequences are
 strongly treatment- and measurement-dependent.  MAP is dense enough for the
 belief state to add signal.
 
+## Connected 8-Belief Coupling Check
+
+After the musculoskeletal belief was added to the all-model builder, it was
+rerun together with the previous seven belief families:
+
+- renal;
+- cardiovascular;
+- electrolyte / acid-base;
+- respiratory;
+- endocrine;
+- immune;
+- GI / nutrition;
+- musculoskeletal / rhabdomyolysis.
+
+Audit report: `eicu_all_model_belief_coupling_musculoskeletal_audit.json`
+
+| Cohort | Target | Patient Splits Passing Both | Median Delta vs Baseline | Median Delta vs Placebo | Status |
+|---|---|---:|---:|---:|---|
+| musculoskeletal_3h | MAP | 7 / 7 | -0.4051 | -0.4874 | connected validated |
+| musculoskeletal_12h | MAP | 6 / 7 | -0.2913 | -0.4486 | connected candidate-only |
+
+This connected audit tightens the claim: the whole-body connected belief layer
+supports **musculoskeletal/rhabdomyolysis -> MAP at 3h**.  The 12h MAP signal is
+valid for the isolated muscle belief but does not retain the full 7/7 bar when
+all belief families are connected, so it remains candidate-only in the connected
+whole-body setting.
+
 ## Boundary
 
 Allowed:
 
-- report musculoskeletal / rhabdomyolysis belief as a bounded validated factual
+- report musculoskeletal / rhabdomyolysis belief as a bounded isolated factual
   MAP personalization source at 3h and 12h;
+- report musculoskeletal / rhabdomyolysis belief as a connected whole-body MAP
+  source at 3h only;
 - add the musculoskeletal belief builder to future all-model coupling reruns,
   with cache-manifest mismatch protection;
 - keep 1h and 6h MAP as candidate-only horizon cells.

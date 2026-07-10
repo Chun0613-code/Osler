@@ -76,6 +76,30 @@ COHORTS = (
         "future_suffix": "tp6",
         "targets": ("heart_rate", "map", "lactate", "o2sat", "respiratory_rate", "creatinine"),
     },
+    {
+        "name": "cardiac_injury_3h",
+        "path": "eicu_cardiac_injury_transitions_3h.parquet",
+        "future_suffix": "tp3",
+        "targets": ("map", "heart_rate", "potassium", "creatinine", "lactate", "troponin_i", "bnp", "ck_mb", "cpk"),
+    },
+    {
+        "name": "cardiac_injury_12h",
+        "path": "eicu_cardiac_injury_transitions_12h.parquet",
+        "future_suffix": "tp12",
+        "targets": ("map", "heart_rate", "potassium", "creatinine", "lactate", "troponin_i", "bnp", "ck_mb", "cpk"),
+    },
+    {
+        "name": "musculoskeletal_3h",
+        "path": "eicu_musculoskeletal_rhabdo_transitions_3h.parquet",
+        "future_suffix": "tp3",
+        "targets": ("map", "urine_output", "potassium", "creatinine", "bun", "phosphate", "calcium", "bicarbonate"),
+    },
+    {
+        "name": "musculoskeletal_12h",
+        "path": "eicu_musculoskeletal_rhabdo_transitions_12h.parquet",
+        "future_suffix": "tp12",
+        "targets": ("map", "urine_output", "potassium", "creatinine", "bun", "phosphate", "calcium", "bicarbonate"),
+    },
 )
 
 FULL_COHORTS = (

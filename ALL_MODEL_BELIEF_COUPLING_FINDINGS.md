@@ -220,14 +220,35 @@ five-belief rerun, while future reruns use the expanded seven-belief builder.
 
 ### 2026-07-10 Builder Update
 
-A musculoskeletal / rhabdomyolysis belief family was added after
+A musculoskeletal / rhabdomyolysis belief family was added after isolated
 horizon-specific validation:
 
 - 3h MAP: 7 / 7 patient splits, hospital-heldout pass;
 - 12h MAP: 7 / 7 patient splits, hospital-heldout pass.
 
-The validated claim is deliberately narrow: muscle/perfusion-stress belief
-improves MAP prediction in the rhabdomyolysis module.  Muscle-to-kidney and
-muscle-to-electrolyte targets remain unvalidated.  Future all-model reruns will
-therefore use an expanded eight-belief builder, and the manifest check will
-force old seven-belief caches to rebuild before use.
+The first connected rerun with all eight belief families validates:
+
+- musculoskeletal_3h -> MAP: 7 / 7 patient splits, median delta `-0.405114`
+  versus baseline and `-0.487372` versus placebo.
+
+The 12h MAP isolated signal drops to 6 / 7 when connected to all belief
+families, so it remains connected candidate-only.  The validated claim is
+therefore deliberately narrow: muscle/perfusion-stress belief improves 3h MAP
+prediction in the rhabdomyolysis module.  Muscle-to-kidney and
+muscle-to-electrolyte targets remain unvalidated.  Future all-model reruns use
+the expanded eight-belief builder, and the manifest check forces old seven-
+belief caches to rebuild before use.
+
+### 2026-07-10 Cardiac Injury Connected Scan
+
+The same eight-belief connected layer was then tested on cardiac injury /
+myocardial stress cohorts at 3h and 12h.  No target promoted:
+
+- 3h MAP reaches 3 / 7;
+- 12h heart rate reaches 6 / 7 but remains candidate-only;
+- troponin I, BNP, CK-MB, CPK, potassium, creatinine, and lactate do not pass.
+
+This argues against adding a separate cardiac injury belief family under the
+current table-data contract.  The hemodynamic signal overlaps with existing
+cardiovascular/endocrine belief states, while the myocardial biomarkers are too
+sparse for a promoted connected belief layer.

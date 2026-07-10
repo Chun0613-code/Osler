@@ -56,7 +56,8 @@ placebo for at least one downstream observable.
 | Consciousness / arousal | observation-only | GCS/delirium notes can be timestamped and observed; prediction remains unstable |
 | Intracranial pressure regulation | data ceiling | no reliable first-class ICP/exam/procedure trajectory in current eICU contract |
 | Autonomic balance | indirect only | cardiovascular and endocrine beliefs touch HR/BP/stress; no explicit sympathetic/parasympathetic belief has validated |
-| Musculoskeletal / rhabdomyolysis | bounded validated | muscle belief validates MAP at 3h and 12h; 1h/6h MAP remain candidate-only; muscle-to-kidney and muscle-to-electrolyte targets remain rejected |
+| Musculoskeletal / rhabdomyolysis | bounded validated | isolated muscle belief validates MAP at 3h and 12h; connected all-belief layer preserves 3h MAP only; muscle-to-kidney and muscle-to-electrolyte targets remain rejected |
+| Cardiac injury / myocardial biomarkers | connected candidate-only | eight-belief connected audit validates 0 targets; 12h heart rate reaches 6/7 but does not promote; troponin/BNP/CK-MB remain sparse specialty markers |
 
 ## What Changed In This Pass
 
@@ -78,6 +79,17 @@ horizons after a 6h MAP near-miss.  The result is horizon-specific:
 Because the validated signal is MAP-only, this expands the whole-body belief
 layer narrowly: it adds a muscle/perfusion-stress loop, not a validated
 muscle-to-kidney or muscle-to-electrolyte loop.
+
+The connected 8-belief follow-up preserves the 3h MAP signal at `7 / 7`
+(`-0.4051` versus baseline, `-0.4874` versus placebo).  The 12h MAP signal
+drops to `6 / 7` when connected to all previous belief families, so it remains
+candidate-only in the connected whole-body layer.
+
+The same connected 8-belief approach was tested on cardiac injury / myocardial
+stress cohorts.  It validates no target: 12h heart rate reaches `6 / 7`, but
+troponin I, BNP, CK-MB, CPK, potassium, creatinine, MAP, and lactate fail the
+full gate.  This keeps cardiac injury as a candidate-only control loop under
+the current table-data contract.
 
 ## Practical Reading
 
