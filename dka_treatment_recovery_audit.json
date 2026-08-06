@@ -1,0 +1,1839 @@
+{
+  "experiment": "sourced DKABody treatment-recovery falsification",
+  "cohort": "/Users/chunyouchang/Desktop/llm_project/medical_jepa/eicu_dka_transitions_6h_demo.parquet",
+  "data_boundary": {
+    "dataset_role": "observational external falsification only",
+    "patient_rows_in_output": false,
+    "patient_identifiers_in_output": false,
+    "treatment_effect_identified": false,
+    "parameters_fitted_to_eicu": false
+  },
+  "source_priors": {
+    "initial_insulin_glucose_decline_mg_dl_hr": {
+      "lower": 50.0,
+      "upper": 75.0,
+      "applies_when": "active DKA, glucose >=250 mg/dL, insulin delivered, no dextrose, and glucose remains above the dextrose-transition threshold",
+      "source": "Umpierrez GE et al. Hyperglycemic Crises in Adults With Diabetes: A Consensus Report. Diabetes Care. 2024;47(8):1257-1275.",
+      "source_url": "https://doi.org/10.2337/dci24-0032",
+      "role": "broad protocol-response boundary, not patient-specific target"
+    },
+    "dka_resolution": {
+      "beta_hydroxybutyrate_max_mmol_l": 0.6,
+      "venous_ph_min": 7.3,
+      "bicarbonate_min_mmol_l": 18.0,
+      "source": "Umpierrez GE et al. Hyperglycemic Crises in Adults With Diabetes: A Consensus Report. Diabetes Care. 2024;47(8):1257-1275.",
+      "source_url": "https://doi.org/10.2337/dci24-0032",
+      "role": "resolution boundary, not a fixed hourly acid-base slope"
+    },
+    "potassium_safety": {
+      "hold_insulin_below_mmol_l": 3.5,
+      "source": "Umpierrez GE et al. Hyperglycemic Crises in Adults With Diabetes: A Consensus Report. Diabetes Care. 2024;47(8):1257-1275.",
+      "source_url": "https://doi.org/10.2337/dci24-0032",
+      "role": "safety boundary, not a fitted potassium trajectory"
+    }
+  },
+  "evaluated_rows": 2762,
+  "active_dka_rows": 367,
+  "active_dka_stays": 182,
+  "simulated_deaths": {
+    "total": 26,
+    "by_cause": {
+      "acidosis (pH<6.8)": 22,
+      "circulatory collapse (MAP<40)": 3,
+      "hyperkalemia (K>7.0)": 1
+    },
+    "by_insulin_coverage": {
+      "presence_evidence_only": 17,
+      "no_insulin_evidence": 7,
+      "numeric_dose_captured": 2
+    },
+    "cause_by_insulin_coverage": {
+      "acidosis (pH<6.8)": {
+        "presence_evidence_only": 16,
+        "no_insulin_evidence": 5,
+        "numeric_dose_captured": 1
+      },
+      "circulatory collapse (MAP<40)": {
+        "no_insulin_evidence": 2,
+        "numeric_dose_captured": 1
+      },
+      "hyperkalemia (K>7.0)": {
+        "presence_evidence_only": 1
+      }
+    },
+    "interpretation": "Deaths with presence evidence but no numeric dose are explicitly coverage-limited. No-evidence deaths may still reflect missing capture, but the demo cannot prove treatment occurred."
+  },
+  "target_summaries": {
+    "glucose": {
+      "n": 310,
+      "stays": 157,
+      "real_delta_per_hour": {
+        "mean": -18.963441,
+        "quantiles": {
+          "p10": -47.75,
+          "p25": -26.583333,
+          "p50": -14.75,
+          "p75": -5.541667,
+          "p90": 2.016667
+        }
+      },
+      "sim_delta_per_hour": {
+        "mean": 13.458866,
+        "quantiles": {
+          "p10": -2.287227,
+          "p25": 5.98324,
+          "p50": 14.742822,
+          "p75": 23.427368,
+          "p90": 30.911956
+        }
+      },
+      "simulator_mae": 202.395098,
+      "persistence_mae": 128.464516,
+      "direction_agreement": 0.23871,
+      "median_absolute_rate_gap": 28.49939
+    },
+    "bicarbonate": {
+      "n": 207,
+      "stays": 124,
+      "real_delta_per_hour": {
+        "mean": 0.675201,
+        "quantiles": {
+          "p10": -0.166667,
+          "p25": 0.166667,
+          "p50": 0.666667,
+          "p75": 1.166667,
+          "p90": 1.666667
+        }
+      },
+      "sim_delta_per_hour": {
+        "mean": -0.245684,
+        "quantiles": {
+          "p10": -0.826034,
+          "p25": -0.649948,
+          "p50": -0.310961,
+          "p75": -0.113669,
+          "p90": 0.125075
+        }
+      },
+      "simulator_mae": 6.849714,
+      "persistence_mae": 4.963285,
+      "direction_agreement": 0.270531,
+      "median_absolute_rate_gap": 0.907513
+    },
+    "ph": {
+      "n": 41,
+      "stays": 30,
+      "real_delta_per_hour": {
+        "mean": 0.011817,
+        "quantiles": {
+          "p10": -0.008333,
+          "p25": 0.001667,
+          "p50": 0.008,
+          "p75": 0.021667,
+          "p90": 0.036667
+        }
+      },
+      "sim_delta_per_hour": {
+        "mean": -0.001449,
+        "quantiles": {
+          "p10": -0.028218,
+          "p25": -0.006106,
+          "p50": 0.004022,
+          "p75": 0.020611,
+          "p90": 0.034737
+        }
+      },
+      "simulator_mae": 0.160137,
+      "persistence_mae": 0.094219,
+      "direction_agreement": 0.536585,
+      "median_absolute_rate_gap": 0.01307
+    },
+    "anion_gap": {
+      "n": 152,
+      "stays": 89,
+      "real_delta_per_hour": {
+        "mean": -1.151316,
+        "quantiles": {
+          "p10": -2.5,
+          "p25": -2.054167,
+          "p50": -0.866667,
+          "p75": -0.4,
+          "p90": 0.166667
+        }
+      },
+      "sim_delta_per_hour": {
+        "mean": 0.992496,
+        "quantiles": {
+          "p10": 0.354585,
+          "p25": 0.583687,
+          "p50": 1.011613,
+          "p75": 1.514043,
+          "p90": 1.966193
+        }
+      },
+      "simulator_mae": 13.252224,
+      "persistence_mae": 7.642105,
+      "direction_agreement": 0.164474,
+      "median_absolute_rate_gap": 1.811827
+    },
+    "potassium": {
+      "n": 189,
+      "stays": 112,
+      "real_delta_per_hour": {
+        "mean": -0.074259,
+        "quantiles": {
+          "p10": -0.236667,
+          "p25": -0.15,
+          "p50": -0.066667,
+          "p75": 0.0,
+          "p90": 0.066667
+        }
+      },
+      "sim_delta_per_hour": {
+        "mean": 0.051555,
+        "quantiles": {
+          "p10": -0.088059,
+          "p25": -0.007745,
+          "p50": 0.058769,
+          "p75": 0.115009,
+          "p90": 0.182642
+        }
+      },
+      "simulator_mae": 0.895498,
+      "persistence_mae": 0.694127,
+      "direction_agreement": 0.428571,
+      "median_absolute_rate_gap": 0.134126
+    },
+    "map": {
+      "n": 252,
+      "stays": 133,
+      "real_delta_per_hour": {
+        "mean": -0.550926,
+        "quantiles": {
+          "p10": -4.0,
+          "p25": -2.333333,
+          "p50": -0.333333,
+          "p75": 1.375,
+          "p90": 2.983333
+        }
+      },
+      "sim_delta_per_hour": {
+        "mean": -1.558645,
+        "quantiles": {
+          "p10": -3.069843,
+          "p25": -1.651623,
+          "p50": -1.060149,
+          "p75": -0.834455,
+          "p90": -0.644509
+        }
+      },
+      "simulator_mae": 13.794887,
+      "persistence_mae": 14.130952,
+      "direction_agreement": 0.551587,
+      "median_absolute_rate_gap": 1.863775
+    }
+  },
+  "treatment_strata": {
+    "all_active_dka": {
+      "rows": 367,
+      "stays": 182,
+      "targets": {
+        "glucose": {
+          "n": 310,
+          "stays": 157,
+          "real_delta_per_hour": {
+            "mean": -18.963441,
+            "quantiles": {
+              "p10": -47.75,
+              "p25": -26.583333,
+              "p50": -14.75,
+              "p75": -5.541667,
+              "p90": 2.016667
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": 13.458866,
+            "quantiles": {
+              "p10": -2.287227,
+              "p25": 5.98324,
+              "p50": 14.742822,
+              "p75": 23.427368,
+              "p90": 30.911956
+            }
+          },
+          "simulator_mae": 202.395098,
+          "persistence_mae": 128.464516,
+          "direction_agreement": 0.23871,
+          "median_absolute_rate_gap": 28.49939
+        },
+        "bicarbonate": {
+          "n": 207,
+          "stays": 124,
+          "real_delta_per_hour": {
+            "mean": 0.675201,
+            "quantiles": {
+              "p10": -0.166667,
+              "p25": 0.166667,
+              "p50": 0.666667,
+              "p75": 1.166667,
+              "p90": 1.666667
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": -0.245684,
+            "quantiles": {
+              "p10": -0.826034,
+              "p25": -0.649948,
+              "p50": -0.310961,
+              "p75": -0.113669,
+              "p90": 0.125075
+            }
+          },
+          "simulator_mae": 6.849714,
+          "persistence_mae": 4.963285,
+          "direction_agreement": 0.270531,
+          "median_absolute_rate_gap": 0.907513
+        },
+        "ph": {
+          "n": 41,
+          "stays": 30,
+          "real_delta_per_hour": {
+            "mean": 0.011817,
+            "quantiles": {
+              "p10": -0.008333,
+              "p25": 0.001667,
+              "p50": 0.008,
+              "p75": 0.021667,
+              "p90": 0.036667
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": -0.001449,
+            "quantiles": {
+              "p10": -0.028218,
+              "p25": -0.006106,
+              "p50": 0.004022,
+              "p75": 0.020611,
+              "p90": 0.034737
+            }
+          },
+          "simulator_mae": 0.160137,
+          "persistence_mae": 0.094219,
+          "direction_agreement": 0.536585,
+          "median_absolute_rate_gap": 0.01307
+        },
+        "anion_gap": {
+          "n": 152,
+          "stays": 89,
+          "real_delta_per_hour": {
+            "mean": -1.151316,
+            "quantiles": {
+              "p10": -2.5,
+              "p25": -2.054167,
+              "p50": -0.866667,
+              "p75": -0.4,
+              "p90": 0.166667
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": 0.992496,
+            "quantiles": {
+              "p10": 0.354585,
+              "p25": 0.583687,
+              "p50": 1.011613,
+              "p75": 1.514043,
+              "p90": 1.966193
+            }
+          },
+          "simulator_mae": 13.252224,
+          "persistence_mae": 7.642105,
+          "direction_agreement": 0.164474,
+          "median_absolute_rate_gap": 1.811827
+        },
+        "potassium": {
+          "n": 189,
+          "stays": 112,
+          "real_delta_per_hour": {
+            "mean": -0.074259,
+            "quantiles": {
+              "p10": -0.236667,
+              "p25": -0.15,
+              "p50": -0.066667,
+              "p75": 0.0,
+              "p90": 0.066667
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": 0.051555,
+            "quantiles": {
+              "p10": -0.088059,
+              "p25": -0.007745,
+              "p50": 0.058769,
+              "p75": 0.115009,
+              "p90": 0.182642
+            }
+          },
+          "simulator_mae": 0.895498,
+          "persistence_mae": 0.694127,
+          "direction_agreement": 0.428571,
+          "median_absolute_rate_gap": 0.134126
+        },
+        "map": {
+          "n": 252,
+          "stays": 133,
+          "real_delta_per_hour": {
+            "mean": -0.550926,
+            "quantiles": {
+              "p10": -4.0,
+              "p25": -2.333333,
+              "p50": -0.333333,
+              "p75": 1.375,
+              "p90": 2.983333
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": -1.558645,
+            "quantiles": {
+              "p10": -3.069843,
+              "p25": -1.651623,
+              "p50": -1.060149,
+              "p75": -0.834455,
+              "p90": -0.644509
+            }
+          },
+          "simulator_mae": 13.794887,
+          "persistence_mae": 14.130952,
+          "direction_agreement": 0.551587,
+          "median_absolute_rate_gap": 1.863775
+        }
+      }
+    },
+    "numeric_dose_captured": {
+      "rows": 35,
+      "stays": 22,
+      "targets": {
+        "glucose": {
+          "n": 34,
+          "stays": 21,
+          "real_delta_per_hour": {
+            "mean": -24.504902,
+            "quantiles": {
+              "p10": -45.05,
+              "p25": -32.375,
+              "p50": -22.833333,
+              "p75": -13.25,
+              "p90": -4.333333
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": -13.382056,
+            "quantiles": {
+              "p10": -35.807227,
+              "p25": -21.915513,
+              "p50": -13.939224,
+              "p75": -4.205059,
+              "p90": 8.288174
+            }
+          },
+          "simulator_mae": 94.755302,
+          "persistence_mae": 150.029412,
+          "direction_agreement": 0.794118,
+          "median_absolute_rate_gap": 12.199197
+        },
+        "bicarbonate": {
+          "n": 19,
+          "stays": 14,
+          "real_delta_per_hour": {
+            "mean": 0.975439,
+            "quantiles": {
+              "p10": 0.333333,
+              "p25": 0.466667,
+              "p50": 0.85,
+              "p75": 1.583333,
+              "p90": 1.733333
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": 1.324642,
+            "quantiles": {
+              "p10": 0.056644,
+              "p25": 0.657877,
+              "p50": 1.257513,
+              "p75": 1.737234,
+              "p90": 2.477043
+            }
+          },
+          "simulator_mae": 5.559897,
+          "persistence_mae": 5.957895,
+          "direction_agreement": 0.894737,
+          "median_absolute_rate_gap": 0.714983
+        },
+        "ph": {
+          "n": 5,
+          "stays": 5,
+          "real_delta_per_hour": {
+            "mean": 0.006033,
+            "quantiles": {
+              "p10": -0.003667,
+              "p25": 0.003333,
+              "p50": 0.006667,
+              "p75": 0.01,
+              "p90": 0.0151
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": 0.003805,
+            "quantiles": {
+              "p10": -0.004486,
+              "p25": -0.002569,
+              "p50": 0.004629,
+              "p75": 0.007749,
+              "p90": 0.012087
+            }
+          },
+          "simulator_mae": 0.075028,
+          "persistence_mae": 0.0562,
+          "direction_agreement": 0.4,
+          "median_absolute_rate_gap": 0.012569
+        },
+        "anion_gap": {
+          "n": 16,
+          "stays": 11,
+          "real_delta_per_hour": {
+            "mean": -1.3125,
+            "quantiles": {
+              "p10": -2.333333,
+              "p25": -2.166667,
+              "p50": -1.583333,
+              "p75": -0.5,
+              "p90": 0.0
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": -0.780097,
+            "quantiles": {
+              "p10": -1.837527,
+              "p25": -1.344988,
+              "p50": -0.695946,
+              "p75": -0.044747,
+              "p90": 0.245168
+            }
+          },
+          "simulator_mae": 5.346823,
+          "persistence_mae": 8.375,
+          "direction_agreement": 0.625,
+          "median_absolute_rate_gap": 0.801843
+        },
+        "potassium": {
+          "n": 18,
+          "stays": 13,
+          "real_delta_per_hour": {
+            "mean": -0.060185,
+            "quantiles": {
+              "p10": -0.181667,
+              "p25": -0.141667,
+              "p50": -0.108333,
+              "p75": -0.0375,
+              "p90": 0.126667
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": -0.016891,
+            "quantiles": {
+              "p10": -0.143849,
+              "p25": -0.060618,
+              "p50": -0.012185,
+              "p75": 0.043681,
+              "p90": 0.092017
+            }
+          },
+          "simulator_mae": 0.711131,
+          "persistence_mae": 0.805556,
+          "direction_agreement": 0.666667,
+          "median_absolute_rate_gap": 0.088441
+        },
+        "map": {
+          "n": 24,
+          "stays": 16,
+          "real_delta_per_hour": {
+            "mean": -0.527778,
+            "quantiles": {
+              "p10": -3.5,
+              "p25": -1.916667,
+              "p50": 0.0,
+              "p75": 1.166667,
+              "p90": 1.783333
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": -0.868172,
+            "quantiles": {
+              "p10": -1.773217,
+              "p25": -0.995552,
+              "p50": -0.765168,
+              "p75": -0.545113,
+              "p90": -0.448528
+            }
+          },
+          "simulator_mae": 12.987049,
+          "persistence_mae": 11.583333,
+          "direction_agreement": 0.5,
+          "median_absolute_rate_gap": 1.743234
+        }
+      }
+    },
+    "insulin_without_dextrose": {
+      "rows": 34,
+      "stays": 21,
+      "targets": {
+        "glucose": {
+          "n": 33,
+          "stays": 20,
+          "real_delta_per_hour": {
+            "mean": -24.247475,
+            "quantiles": {
+              "p10": -45.2,
+              "p25": -30.5,
+              "p50": -22.666667,
+              "p75": -13.0,
+              "p90": -4.166667
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": -14.780941,
+            "quantiles": {
+              "p10": -36.329614,
+              "p25": -22.080614,
+              "p50": -14.175465,
+              "p75": -5.4835,
+              "p90": 2.872619
+            }
+          },
+          "simulator_mae": 85.66646,
+          "persistence_mae": 148.575758,
+          "direction_agreement": 0.818182,
+          "median_absolute_rate_gap": 11.335805
+        },
+        "bicarbonate": {
+          "n": 18,
+          "stays": 13,
+          "real_delta_per_hour": {
+            "mean": 0.974074,
+            "quantiles": {
+              "p10": 0.333333,
+              "p25": 0.45,
+              "p50": 0.841667,
+              "p75": 1.625,
+              "p90": 1.733333
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": 1.274633,
+            "quantiles": {
+              "p10": 0.050554,
+              "p25": 0.577826,
+              "p50": 1.246821,
+              "p75": 1.701944,
+              "p90": 2.491407
+            }
+          },
+          "simulator_mae": 5.460515,
+          "persistence_mae": 5.955556,
+          "direction_agreement": 0.888889,
+          "median_absolute_rate_gap": 0.686862
+        },
+        "ph": {
+          "n": 5,
+          "stays": 5,
+          "real_delta_per_hour": {
+            "mean": 0.006033,
+            "quantiles": {
+              "p10": -0.003667,
+              "p25": 0.003333,
+              "p50": 0.006667,
+              "p75": 0.01,
+              "p90": 0.0151
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": 0.003805,
+            "quantiles": {
+              "p10": -0.004486,
+              "p25": -0.002569,
+              "p50": 0.004629,
+              "p75": 0.007749,
+              "p90": 0.012087
+            }
+          },
+          "simulator_mae": 0.075028,
+          "persistence_mae": 0.0562,
+          "direction_agreement": 0.4,
+          "median_absolute_rate_gap": 0.012569
+        },
+        "anion_gap": {
+          "n": 15,
+          "stays": 10,
+          "real_delta_per_hour": {
+            "mean": -1.244444,
+            "quantiles": {
+              "p10": -2.266667,
+              "p25": -2.083333,
+              "p50": -1.5,
+              "p75": -0.5,
+              "p90": 0.066667
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": -0.771151,
+            "quantiles": {
+              "p10": -1.838394,
+              "p25": -1.395994,
+              "p50": -0.626788,
+              "p75": -0.026173,
+              "p90": 0.282223
+            }
+          },
+          "simulator_mae": 5.135659,
+          "persistence_mae": 8.0,
+          "direction_agreement": 0.6,
+          "median_absolute_rate_gap": 0.794112
+        },
+        "potassium": {
+          "n": 17,
+          "stays": 12,
+          "real_delta_per_hour": {
+            "mean": -0.053922,
+            "quantiles": {
+              "p10": -0.186667,
+              "p25": -0.116667,
+              "p50": -0.1,
+              "p75": -0.033333,
+              "p90": 0.146667
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": -0.012895,
+            "quantiles": {
+              "p10": -0.146652,
+              "p25": -0.046341,
+              "p50": -0.011367,
+              "p75": 0.054469,
+              "p90": 0.095658
+            }
+          },
+          "simulator_mae": 0.724076,
+          "persistence_mae": 0.794118,
+          "direction_agreement": 0.647059,
+          "median_absolute_rate_gap": 0.094056
+        },
+        "map": {
+          "n": 24,
+          "stays": 16,
+          "real_delta_per_hour": {
+            "mean": -0.527778,
+            "quantiles": {
+              "p10": -3.5,
+              "p25": -1.916667,
+              "p50": 0.0,
+              "p75": 1.166667,
+              "p90": 1.783333
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": -0.868172,
+            "quantiles": {
+              "p10": -1.773217,
+              "p25": -0.995552,
+              "p50": -0.765168,
+              "p75": -0.545113,
+              "p90": -0.448528
+            }
+          },
+          "simulator_mae": 12.987049,
+          "persistence_mae": 11.583333,
+          "direction_agreement": 0.5,
+          "median_absolute_rate_gap": 1.743234
+        }
+      }
+    },
+    "insulin_with_dextrose": {
+      "rows": 1,
+      "stays": 1,
+      "targets": {
+        "glucose": {
+          "n": 1,
+          "stays": 1,
+          "real_delta_per_hour": {
+            "mean": -33.0,
+            "quantiles": {
+              "p10": -33.0,
+              "p25": -33.0,
+              "p50": -33.0,
+              "p75": -33.0,
+              "p90": -33.0
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": 32.781179,
+            "quantiles": {
+              "p10": 32.781179,
+              "p25": 32.781179,
+              "p50": 32.781179,
+              "p75": 32.781179,
+              "p90": 32.781179
+            }
+          },
+          "simulator_mae": 394.687073,
+          "persistence_mae": 198.0,
+          "direction_agreement": 0.0,
+          "median_absolute_rate_gap": 65.781179
+        },
+        "bicarbonate": {
+          "n": 1,
+          "stays": 1,
+          "real_delta_per_hour": {
+            "mean": 1.0,
+            "quantiles": {
+              "p10": 1.0,
+              "p25": 1.0,
+              "p50": 1.0,
+              "p75": 1.0,
+              "p90": 1.0
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": 2.224795,
+            "quantiles": {
+              "p10": 2.224795,
+              "p25": 2.224795,
+              "p50": 2.224795,
+              "p75": 2.224795,
+              "p90": 2.224795
+            }
+          },
+          "simulator_mae": 7.348772,
+          "persistence_mae": 6.0,
+          "direction_agreement": 1.0,
+          "median_absolute_rate_gap": 1.224795
+        },
+        "ph": {
+          "n": 0
+        },
+        "anion_gap": {
+          "n": 1,
+          "stays": 1,
+          "real_delta_per_hour": {
+            "mean": -2.333333,
+            "quantiles": {
+              "p10": -2.333333,
+              "p25": -2.333333,
+              "p50": -2.333333,
+              "p75": -2.333333,
+              "p90": -2.333333
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": -0.914288,
+            "quantiles": {
+              "p10": -0.914288,
+              "p25": -0.914288,
+              "p50": -0.914288,
+              "p75": -0.914288,
+              "p90": -0.914288
+            }
+          },
+          "simulator_mae": 8.514271,
+          "persistence_mae": 14.0,
+          "direction_agreement": 1.0,
+          "median_absolute_rate_gap": 1.419045
+        },
+        "potassium": {
+          "n": 1,
+          "stays": 1,
+          "real_delta_per_hour": {
+            "mean": -0.166667,
+            "quantiles": {
+              "p10": -0.166667,
+              "p25": -0.166667,
+              "p50": -0.166667,
+              "p75": -0.166667,
+              "p90": -0.166667
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": -0.084824,
+            "quantiles": {
+              "p10": -0.084824,
+              "p25": -0.084824,
+              "p50": -0.084824,
+              "p75": -0.084824,
+              "p90": -0.084824
+            }
+          },
+          "simulator_mae": 0.491058,
+          "persistence_mae": 1.0,
+          "direction_agreement": 1.0,
+          "median_absolute_rate_gap": 0.081843
+        },
+        "map": {
+          "n": 0
+        }
+      }
+    },
+    "no_captured_insulin": {
+      "rows": 332,
+      "stays": 168,
+      "targets": {
+        "glucose": {
+          "n": 276,
+          "stays": 144,
+          "real_delta_per_hour": {
+            "mean": -18.280797,
+            "quantiles": {
+              "p10": -48.083333,
+              "p25": -25.708333,
+              "p50": -14.25,
+              "p75": -4.958333,
+              "p90": 2.916667
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": 16.765356,
+            "quantiles": {
+              "p10": 2.471233,
+              "p25": 8.675607,
+              "p50": 16.077627,
+              "p75": 24.703471,
+              "p90": 31.623485
+            }
+          },
+          "simulator_mae": 215.655073,
+          "persistence_mae": 125.807971,
+          "direction_agreement": 0.17029,
+          "median_absolute_rate_gap": 30.782789
+        },
+        "bicarbonate": {
+          "n": 188,
+          "stays": 112,
+          "real_delta_per_hour": {
+            "mean": 0.644858,
+            "quantiles": {
+              "p10": -0.193333,
+              "p25": 0.166667,
+              "p50": 0.516667,
+              "p75": 1.166667,
+              "p90": 1.666667
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": -0.404388,
+            "quantiles": {
+              "p10": -0.836328,
+              "p25": -0.677267,
+              "p50": -0.370115,
+              "p75": -0.169429,
+              "p90": -0.034636
+            }
+          },
+          "simulator_mae": 6.980068,
+          "persistence_mae": 4.862766,
+          "direction_agreement": 0.207447,
+          "median_absolute_rate_gap": 0.951885
+        },
+        "ph": {
+          "n": 36,
+          "stays": 27,
+          "real_delta_per_hour": {
+            "mean": 0.01262,
+            "quantiles": {
+              "p10": -0.007333,
+              "p25": 0.001667,
+              "p50": 0.008167,
+              "p75": 0.02625,
+              "p90": 0.036667
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": -0.002179,
+            "quantiles": {
+              "p10": -0.046587,
+              "p25": -0.008784,
+              "p50": 0.003626,
+              "p75": 0.023011,
+              "p90": 0.036029
+            }
+          },
+          "simulator_mae": 0.171957,
+          "persistence_mae": 0.0995,
+          "direction_agreement": 0.555556,
+          "median_absolute_rate_gap": 0.013122
+        },
+        "anion_gap": {
+          "n": 136,
+          "stays": 80,
+          "real_delta_per_hour": {
+            "mean": -1.132353,
+            "quantiles": {
+              "p10": -2.5,
+              "p25": -2.004167,
+              "p50": -0.833333,
+              "p75": -0.383333,
+              "p90": 0.166667
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": 1.201037,
+            "quantiles": {
+              "p10": 0.520696,
+              "p25": 0.740513,
+              "p50": 1.068324,
+              "p75": 1.560559,
+              "p90": 2.017846
+            }
+          },
+          "simulator_mae": 14.182272,
+          "persistence_mae": 7.555882,
+          "direction_agreement": 0.110294,
+          "median_absolute_rate_gap": 1.971821
+        },
+        "potassium": {
+          "n": 171,
+          "stays": 101,
+          "real_delta_per_hour": {
+            "mean": -0.075741,
+            "quantiles": {
+              "p10": -0.25,
+              "p25": -0.15,
+              "p50": -0.066667,
+              "p75": 0.008333,
+              "p90": 0.066667
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": 0.05876,
+            "quantiles": {
+              "p10": -0.082608,
+              "p25": 0.010148,
+              "p50": 0.063674,
+              "p75": 0.11921,
+              "p90": 0.18371
+            }
+          },
+          "simulator_mae": 0.914905,
+          "persistence_mae": 0.682398,
+          "direction_agreement": 0.403509,
+          "median_absolute_rate_gap": 0.135303
+        },
+        "map": {
+          "n": 228,
+          "stays": 123,
+          "real_delta_per_hour": {
+            "mean": -0.553363,
+            "quantiles": {
+              "p10": -4.05,
+              "p25": -2.333333,
+              "p50": -0.333333,
+              "p75": 1.5,
+              "p90": 3.0
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": -1.631327,
+            "quantiles": {
+              "p10": -3.199495,
+              "p25": -1.684294,
+              "p50": -1.08917,
+              "p75": -0.854,
+              "p90": -0.718858
+            }
+          },
+          "simulator_mae": 13.879923,
+          "persistence_mae": 14.399123,
+          "direction_agreement": 0.557018,
+          "median_absolute_rate_gap": 1.87667
+        }
+      }
+    },
+    "insulin_evidence_only": {
+      "rows": 181,
+      "stays": 104,
+      "targets": {
+        "glucose": {
+          "n": 157,
+          "stays": 93,
+          "real_delta_per_hour": {
+            "mean": -22.657113,
+            "quantiles": {
+              "p10": -54.3,
+              "p25": -32.166667,
+              "p50": -17.833333,
+              "p75": -6.833333,
+              "p90": 1.8
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": 17.94663,
+            "quantiles": {
+              "p10": 2.474156,
+              "p25": 10.039675,
+              "p50": 17.840505,
+              "p75": 25.160085,
+              "p90": 32.560887
+            }
+          },
+          "simulator_mae": 249.008096,
+          "persistence_mae": 152.643312,
+          "direction_agreement": 0.171975,
+          "median_absolute_rate_gap": 37.098775
+        },
+        "bicarbonate": {
+          "n": 114,
+          "stays": 72,
+          "real_delta_per_hour": {
+            "mean": 0.742251,
+            "quantiles": {
+              "p10": -0.166667,
+              "p25": 0.166667,
+              "p50": 0.766667,
+              "p75": 1.3125,
+              "p90": 1.666667
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": -0.484094,
+            "quantiles": {
+              "p10": -0.875062,
+              "p25": -0.724864,
+              "p50": -0.495887,
+              "p75": -0.243032,
+              "p90": -0.077101
+            }
+          },
+          "simulator_mae": 7.991996,
+          "persistence_mae": 5.435965,
+          "direction_agreement": 0.201754,
+          "median_absolute_rate_gap": 1.237307
+        },
+        "ph": {
+          "n": 18,
+          "stays": 12,
+          "real_delta_per_hour": {
+            "mean": 0.018343,
+            "quantiles": {
+              "p10": 0.000667,
+              "p25": 0.006,
+              "p50": 0.01675,
+              "p75": 0.032917,
+              "p90": 0.037667
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": -0.014228,
+            "quantiles": {
+              "p10": -0.112892,
+              "p25": -0.02348,
+              "p50": 0.002057,
+              "p75": 0.022333,
+              "p90": 0.035512
+            }
+          },
+          "simulator_mae": 0.281667,
+          "persistence_mae": 0.122278,
+          "direction_agreement": 0.444444,
+          "median_absolute_rate_gap": 0.023245
+        },
+        "anion_gap": {
+          "n": 85,
+          "stays": 53,
+          "real_delta_per_hour": {
+            "mean": -1.259608,
+            "quantiles": {
+              "p10": -2.55,
+              "p25": -2.016667,
+              "p50": -1.166667,
+              "p75": -0.5,
+              "p90": -0.023333
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": 1.312554,
+            "quantiles": {
+              "p10": 0.586735,
+              "p25": 0.930006,
+              "p50": 1.172579,
+              "p75": 1.705681,
+              "p90": 2.185415
+            }
+          },
+          "simulator_mae": 15.66903,
+          "persistence_mae": 8.411765,
+          "direction_agreement": 0.094118,
+          "median_absolute_rate_gap": 2.228793
+        },
+        "potassium": {
+          "n": 111,
+          "stays": 70,
+          "real_delta_per_hour": {
+            "mean": -0.076892,
+            "quantiles": {
+              "p10": -0.25,
+              "p25": -0.15,
+              "p50": -0.066667,
+              "p75": 0.0,
+              "p90": 0.066667
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": 0.071542,
+            "quantiles": {
+              "p10": -0.042546,
+              "p25": 0.01983,
+              "p50": 0.078742,
+              "p75": 0.132246,
+              "p90": 0.1907
+            }
+          },
+          "simulator_mae": 0.984568,
+          "persistence_mae": 0.682793,
+          "direction_agreement": 0.369369,
+          "median_absolute_rate_gap": 0.148233
+        },
+        "map": {
+          "n": 113,
+          "stays": 68,
+          "real_delta_per_hour": {
+            "mean": -0.19764,
+            "quantiles": {
+              "p10": -3.966667,
+              "p25": -2.0,
+              "p50": -0.166667,
+              "p75": 1.833333,
+              "p90": 2.966667
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": -1.471721,
+            "quantiles": {
+              "p10": -2.414892,
+              "p25": -1.654996,
+              "p50": -1.094294,
+              "p75": -0.854018,
+              "p90": -0.690232
+            }
+          },
+          "simulator_mae": 15.096556,
+          "persistence_mae": 13.522124,
+          "direction_agreement": 0.513274,
+          "median_absolute_rate_gap": 2.30505
+        }
+      }
+    },
+    "no_insulin_evidence": {
+      "rows": 151,
+      "stays": 83,
+      "targets": {
+        "glucose": {
+          "n": 119,
+          "stays": 67,
+          "real_delta_per_hour": {
+            "mean": -12.507003,
+            "quantiles": {
+              "p10": -27.4,
+              "p25": -17.916667,
+              "p50": -9.666667,
+              "p75": -3.25,
+              "p90": 3.033333
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": 15.20687,
+            "quantiles": {
+              "p10": 2.948054,
+              "p25": 6.915676,
+              "p50": 13.855485,
+              "p75": 22.298854,
+              "p90": 30.474977
+            }
+          },
+          "simulator_mae": 171.651506,
+          "persistence_mae": 90.403361,
+          "direction_agreement": 0.168067,
+          "median_absolute_rate_gap": 25.05298
+        },
+        "bicarbonate": {
+          "n": 74,
+          "stays": 50,
+          "real_delta_per_hour": {
+            "mean": 0.49482,
+            "quantiles": {
+              "p10": -0.298333,
+              "p25": 0.041667,
+              "p50": 0.458333,
+              "p75": 0.8125,
+              "p90": 1.495
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": -0.281596,
+            "quantiles": {
+              "p10": -0.784769,
+              "p25": -0.394427,
+              "p50": -0.243741,
+              "p75": -0.109618,
+              "p90": 0.044842
+            }
+          },
+          "simulator_mae": 5.421154,
+          "persistence_mae": 3.97973,
+          "direction_agreement": 0.216216,
+          "median_absolute_rate_gap": 0.637434
+        },
+        "ph": {
+          "n": 18,
+          "stays": 16,
+          "real_delta_per_hour": {
+            "mean": 0.006898,
+            "quantiles": {
+              "p10": -0.011267,
+              "p25": -0.001042,
+              "p50": 0.00425,
+              "p75": 0.009583,
+              "p90": 0.032
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": 0.009871,
+            "quantiles": {
+              "p10": -0.009798,
+              "p25": -0.004238,
+              "p50": 0.007802,
+              "p75": 0.022428,
+              "p90": 0.033519
+            }
+          },
+          "simulator_mae": 0.062248,
+          "persistence_mae": 0.076722,
+          "direction_agreement": 0.666667,
+          "median_absolute_rate_gap": 0.010625
+        },
+        "anion_gap": {
+          "n": 51,
+          "stays": 34,
+          "real_delta_per_hour": {
+            "mean": -0.920261,
+            "quantiles": {
+              "p10": -2.5,
+              "p25": -1.625,
+              "p50": -0.533333,
+              "p75": -0.166667,
+              "p90": 0.166667
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": 1.015174,
+            "quantiles": {
+              "p10": 0.504229,
+              "p25": 0.56962,
+              "p50": 0.822753,
+              "p75": 1.472329,
+              "p90": 1.648145
+            }
+          },
+          "simulator_mae": 11.704341,
+          "persistence_mae": 6.129412,
+          "direction_agreement": 0.137255,
+          "median_absolute_rate_gap": 1.445724
+        },
+        "potassium": {
+          "n": 60,
+          "stays": 41,
+          "real_delta_per_hour": {
+            "mean": -0.073611,
+            "quantiles": {
+              "p10": -0.233333,
+              "p25": -0.120833,
+              "p50": -0.066667,
+              "p75": 0.016667,
+              "p90": 0.068333
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": 0.035115,
+            "quantiles": {
+              "p10": -0.098072,
+              "p25": -0.025857,
+              "p50": 0.044251,
+              "p75": 0.084578,
+              "p90": 0.15628
+            }
+          },
+          "simulator_mae": 0.786028,
+          "persistence_mae": 0.681667,
+          "direction_agreement": 0.466667,
+          "median_absolute_rate_gap": 0.108511
+        },
+        "map": {
+          "n": 115,
+          "stays": 67,
+          "real_delta_per_hour": {
+            "mean": -0.902899,
+            "quantiles": {
+              "p10": -4.2,
+              "p25": -2.5,
+              "p50": -0.666667,
+              "p75": 0.916667,
+              "p90": 2.8
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": -1.788156,
+            "quantiles": {
+              "p10": -3.91804,
+              "p25": -1.693679,
+              "p50": -1.084046,
+              "p75": -0.85465,
+              "p90": -0.727891
+            }
+          },
+          "simulator_mae": 12.684448,
+          "persistence_mae": 15.26087,
+          "direction_agreement": 0.6,
+          "median_absolute_rate_gap": 1.645418
+        }
+      }
+    },
+    "fluids_without_insulin": {
+      "rows": 4,
+      "stays": 4,
+      "targets": {
+        "glucose": {
+          "n": 4,
+          "stays": 4,
+          "real_delta_per_hour": {
+            "mean": -27.833333,
+            "quantiles": {
+              "p10": -52.366667,
+              "p25": -45.166667,
+              "p50": -27.666667,
+              "p75": -10.333333,
+              "p90": -3.433333
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": 22.28404,
+            "quantiles": {
+              "p10": 16.961229,
+              "p25": 18.963941,
+              "p50": 21.316876,
+              "p75": 24.636975,
+              "p90": 28.380581
+            }
+          },
+          "simulator_mae": 300.70424,
+          "persistence_mae": 170.5,
+          "direction_agreement": 0.25,
+          "median_absolute_rate_gap": 48.983543
+        },
+        "bicarbonate": {
+          "n": 4,
+          "stays": 4,
+          "real_delta_per_hour": {
+            "mean": -0.9125,
+            "quantiles": {
+              "p10": -2.563333,
+              "p25": -1.408333,
+              "p50": -0.408333,
+              "p75": 0.0875,
+              "p90": 0.335
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": -0.437612,
+            "quantiles": {
+              "p10": -0.838803,
+              "p25": -0.828555,
+              "p50": -0.432306,
+              "p75": -0.041362,
+              "p90": -0.040664
+            }
+          },
+          "simulator_mae": 9.204823,
+          "persistence_mae": 6.975,
+          "direction_agreement": 0.75,
+          "median_absolute_rate_gap": 1.059249
+        },
+        "ph": {
+          "n": 1,
+          "stays": 1,
+          "real_delta_per_hour": {
+            "mean": 0.021667,
+            "quantiles": {
+              "p10": 0.021667,
+              "p25": 0.021667,
+              "p50": 0.021667,
+              "p75": 0.021667,
+              "p90": 0.021667
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": 0.034737,
+            "quantiles": {
+              "p10": 0.034737,
+              "p25": 0.034737,
+              "p50": 0.034737,
+              "p75": 0.034737,
+              "p90": 0.034737
+            }
+          },
+          "simulator_mae": 0.07842,
+          "persistence_mae": 0.13,
+          "direction_agreement": 1.0,
+          "median_absolute_rate_gap": 0.01307
+        },
+        "anion_gap": {
+          "n": 0
+        },
+        "potassium": {
+          "n": 3,
+          "stays": 3,
+          "real_delta_per_hour": {
+            "mean": 0.055556,
+            "quantiles": {
+              "p10": -0.08,
+              "p25": -0.025,
+              "p50": 0.066667,
+              "p75": 0.141667,
+              "p90": 0.186667
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": 0.060436,
+            "quantiles": {
+              "p10": -0.018731,
+              "p25": 0.012131,
+              "p50": 0.063567,
+              "p75": 0.110306,
+              "p90": 0.13835
+            }
+          },
+          "simulator_mae": 1.053169,
+          "persistence_mae": 0.8,
+          "direction_agreement": 0.333333,
+          "median_absolute_rate_gap": 0.180234
+        },
+        "map": {
+          "n": 2,
+          "stays": 2,
+          "real_delta_per_hour": {
+            "mean": 0.0,
+            "quantiles": {
+              "p10": -0.133333,
+              "p25": -0.083333,
+              "p50": 0.0,
+              "p75": 0.083333,
+              "p90": 0.133333
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": -0.909059,
+            "quantiles": {
+              "p10": -1.170783,
+              "p25": -1.072637,
+              "p50": -0.909059,
+              "p75": -0.745482,
+              "p90": -0.647335
+            }
+          },
+          "simulator_mae": 5.454355,
+          "persistence_mae": 1.0,
+          "direction_agreement": 0.5,
+          "median_absolute_rate_gap": 0.909059
+        }
+      }
+    },
+    "protocol_iv_first_hour": {
+      "rows": 15,
+      "stays": 12,
+      "targets": {
+        "glucose": {
+          "n": 15,
+          "stays": 12,
+          "real_delta_per_hour": {
+            "mean": -26.422222,
+            "quantiles": {
+              "p10": -40.9,
+              "p25": -28.833333,
+              "p50": -25.833333,
+              "p75": -18.25,
+              "p90": -8.9
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": -17.567984,
+            "quantiles": {
+              "p10": -37.800412,
+              "p25": -23.797853,
+              "p50": -16.895922,
+              "p75": -7.23972,
+              "p90": -1.407443
+            }
+          },
+          "simulator_mae": 79.350284,
+          "persistence_mae": 158.533333,
+          "direction_agreement": 0.933333,
+          "median_absolute_rate_gap": 10.355762
+        },
+        "bicarbonate": {
+          "n": 6,
+          "stays": 6,
+          "real_delta_per_hour": {
+            "mean": 1.122222,
+            "quantiles": {
+              "p10": 0.5,
+              "p25": 0.708333,
+              "p50": 1.166667,
+              "p75": 1.625,
+              "p90": 1.7
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": 1.284644,
+            "quantiles": {
+              "p10": 0.383667,
+              "p25": 0.639773,
+              "p50": 1.365847,
+              "p75": 1.736874,
+              "p90": 2.104418
+            }
+          },
+          "simulator_mae": 4.106531,
+          "persistence_mae": 6.733333,
+          "direction_agreement": 1.0,
+          "median_absolute_rate_gap": 0.556046
+        },
+        "ph": {
+          "n": 3,
+          "stays": 3,
+          "real_delta_per_hour": {
+            "mean": 0.000556,
+            "quantiles": {
+              "p10": -0.006,
+              "p25": -0.0025,
+              "p50": 0.003333,
+              "p75": 0.005,
+              "p90": 0.006
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": 0.009119,
+            "quantiles": {
+              "p10": 0.005253,
+              "p25": 0.006189,
+              "p50": 0.007749,
+              "p75": 0.011364,
+              "p90": 0.013533
+            }
+          },
+          "simulator_mae": 0.051382,
+          "persistence_mae": 0.036667,
+          "direction_agreement": 0.666667,
+          "median_absolute_rate_gap": 0.011646
+        },
+        "anion_gap": {
+          "n": 5,
+          "stays": 5,
+          "real_delta_per_hour": {
+            "mean": -1.533333,
+            "quantiles": {
+              "p10": -2.366667,
+              "p25": -2.166667,
+              "p50": -1.666667,
+              "p75": -0.833333,
+              "p90": -0.633333
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": -0.878495,
+            "quantiles": {
+              "p10": -1.704319,
+              "p25": -1.498006,
+              "p50": -1.049181,
+              "p75": -0.063322,
+              "p90": 0.010607
+            }
+          },
+          "simulator_mae": 5.524242,
+          "persistence_mae": 9.2,
+          "direction_agreement": 0.8,
+          "median_absolute_rate_gap": 0.664672
+        },
+        "potassium": {
+          "n": 6,
+          "stays": 6,
+          "real_delta_per_hour": {
+            "mean": 0.047222,
+            "quantiles": {
+              "p10": -0.141667,
+              "p25": -0.095833,
+              "p50": -0.016667,
+              "p75": 0.2,
+              "p90": 0.3
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": -0.021248,
+            "quantiles": {
+              "p10": -0.100409,
+              "p25": -0.057705,
+              "p50": -0.028649,
+              "p75": 0.002835,
+              "p90": 0.065313
+            }
+          },
+          "simulator_mae": 0.68402,
+          "persistence_mae": 0.916667,
+          "direction_agreement": 0.666667,
+          "median_absolute_rate_gap": 0.06305
+        },
+        "map": {
+          "n": 12,
+          "stays": 10,
+          "real_delta_per_hour": {
+            "mean": -0.652778,
+            "quantiles": {
+              "p10": -3.45,
+              "p25": -2.375,
+              "p50": -0.333333,
+              "p75": 1.166667,
+              "p90": 1.766667
+            }
+          },
+          "sim_delta_per_hour": {
+            "mean": -0.536816,
+            "quantiles": {
+              "p10": -1.058794,
+              "p25": -0.943225,
+              "p50": -0.65315,
+              "p75": -0.471332,
+              "p90": -0.326531
+            }
+          },
+          "simulator_mae": 11.191791,
+          "persistence_mae": 12.416667,
+          "direction_agreement": 0.583333,
+          "median_absolute_rate_gap": 1.637747
+        }
+      }
+    }
+  },
+  "patient_bootstrap": {
+    "glucose": {
+      "n_stays": 157,
+      "delta_mae_sim_minus_persistence": 80.427966,
+      "ci95": [
+        67.762699,
+        92.605522
+      ],
+      "interpretation": "negative favors DKABody; crossing zero is inconclusive"
+    },
+    "bicarbonate": {
+      "n_stays": 124,
+      "delta_mae_sim_minus_persistence": 1.942239,
+      "ci95": [
+        1.473418,
+        2.363017
+      ],
+      "interpretation": "negative favors DKABody; crossing zero is inconclusive"
+    },
+    "ph": {
+      "n_stays": 30,
+      "delta_mae_sim_minus_persistence": 0.040081,
+      "ci95": [
+        -0.016955,
+        0.109084
+      ],
+      "interpretation": "negative favors DKABody; crossing zero is inconclusive"
+    },
+    "anion_gap": {
+      "n_stays": 89,
+      "delta_mae_sim_minus_persistence": 5.929056,
+      "ci95": [
+        4.978331,
+        6.876106
+      ],
+      "interpretation": "negative favors DKABody; crossing zero is inconclusive"
+    },
+    "potassium": {
+      "n_stays": 112,
+      "delta_mae_sim_minus_persistence": 0.150291,
+      "ci95": [
+        0.065156,
+        0.236655
+      ],
+      "interpretation": "negative favors DKABody; crossing zero is inconclusive"
+    },
+    "map": {
+      "n_stays": 133,
+      "delta_mae_sim_minus_persistence": -0.712781,
+      "ci95": [
+        -2.869099,
+        1.300588
+      ],
+      "interpretation": "negative favors DKABody; crossing zero is inconclusive"
+    }
+  },
+  "sourced_boundary_checks": {
+    "reference_protocol": {
+      "scenario": {
+        "initial_glucose_mg_dl": 480.0,
+        "insulin_iv_u_hr": 6.0,
+        "isotonic_fluid_ml_hr": 500.0,
+        "kcl_meq_hr": 10.0,
+        "dextrose_g_hr": 0.0,
+        "duration_hours": 1.0
+      },
+      "glucose_decline_mg_dl_hr": 66.074432,
+      "boundary": [
+        50.0,
+        75.0
+      ],
+      "passes_sourced_boundary": true,
+      "alive": true,
+      "death_cause": null,
+      "end_state": {
+        "G": 413.925568,
+        "HCO3": 10.947018,
+        "pH": 7.27442,
+        "Ke": 5.520268,
+        "anion_gap": 20.154842,
+        "MAP": 77.97937
+      },
+      "parameters_fitted_to_eicu": false
+    },
+    "eicu_protocol_dose_response": {
+      "n": 10,
+      "stays": 9,
+      "sim_decline_mg_dl_hr": {
+        "median": 34.032002,
+        "quantiles": {
+          "p10": 27.906494,
+          "p25": 29.286972,
+          "p50": 34.032002,
+          "p75": 40.706047,
+          "p90": 65.440236
+        }
+      },
+      "dose_proxy": "first-hour IV insulin mean 4-15 U/hr",
+      "warning": "Descriptive only. Heterogeneous patient state, prior insulin, and unobserved co-treatment make this unsuitable as a hard source gate."
+    }
+  },
+  "decision": {
+    "falsifications": [],
+    "runtime_change_allowed": false,
+    "automatic_parameter_fit_allowed": false,
+    "checkpoint_promotion_allowed": false,
+    "causal_claim_allowed": false,
+    "clinical_claim_allowed": false,
+    "stop_rule": "Change a mechanism only when a sourced boundary and external falsification agree. Do not tune constants to minimize this cohort."
+  }
+}

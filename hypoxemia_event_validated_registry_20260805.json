@@ -1,0 +1,53 @@
+{
+  "schema": "whole_body_promotion_registry.v2",
+  "candidate_id": "calibrated_hypoxemia_event_factual_model_20260805",
+  "input_contract_id": "joint_asof_whole_body_state_aligned_treatment_interval_urine.v1",
+  "input_contract": "anchor-time measurements, causal lag/slope history, and strictly pre-anchor treatment context; hospital/care-unit/database provenance excluded from model inputs",
+  "variable_units": {
+    "hypoxemia_event": "probability"
+  },
+  "output_contract": {
+    "hypoxemia_event": {
+      "task_type": "binary_event_probability",
+      "event_definition": "future_o2sat <= 92",
+      "not_equivalent_to": "continuous oxygen-saturation value forecast"
+    }
+  },
+  "source_audit_schema": "target_specific_event_hurdle_audit.v1",
+  "factual_only": true,
+  "causal_claim_allowed": false,
+  "clinical_promotion_allowed": false,
+  "promotion_status": "validated_target_gated_joint_research_only",
+  "validated_target_horizon_cells": [
+    "hypoxemia_event@1h",
+    "hypoxemia_event@3h"
+  ],
+  "target_horizon_registry": {
+    "hypoxemia_event@1h": {
+      "validated_for_joint_runtime": true,
+      "can_move": true,
+      "task_type": "binary_event_probability",
+      "source_audit_cell": "o2sat@1h",
+      "requirements": {
+        "patient_7seed": true,
+        "hospital_heldout": true,
+        "careunit_heldout": true,
+        "forward_time_heldout": true,
+        "causal_claim_allowed": false
+      }
+    },
+    "hypoxemia_event@3h": {
+      "validated_for_joint_runtime": true,
+      "can_move": true,
+      "task_type": "binary_event_probability",
+      "source_audit_cell": "o2sat@3h",
+      "requirements": {
+        "patient_7seed": true,
+        "hospital_heldout": true,
+        "careunit_heldout": true,
+        "forward_time_heldout": true,
+        "causal_claim_allowed": false
+      }
+    }
+  }
+}

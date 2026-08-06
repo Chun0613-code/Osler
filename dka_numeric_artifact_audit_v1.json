@@ -1,0 +1,3427 @@
+{
+  "audit": "DKABody numeric artifact audit",
+  "trajectory_source": "dka_maintenance_trajectories.jsonl",
+  "bound_registry": {
+    "G": {
+      "floor": 0.0,
+      "ceiling": null,
+      "uses": [
+        "glucose kinetics",
+        "effective osmolality",
+        "critical burden"
+      ],
+      "denominator_role": "none",
+      "terminal_role": "non-terminal burden only",
+      "guard": "extreme hyperglycemia excluded from terminal causes"
+    },
+    "I": {
+      "floor": 0.0,
+      "ceiling": null,
+      "uses": [
+        "insulin effect"
+      ],
+      "denominator_role": "none",
+      "terminal_role": "none",
+      "guard": "saturating insulin_effect I/(I+I50)"
+    },
+    "Ket": {
+      "floor": 0.0,
+      "ceiling": null,
+      "uses": [
+        "anion gap",
+        "BHB",
+        "acid-base"
+      ],
+      "denominator_role": "none",
+      "terminal_role": "through acidosis burden only",
+      "guard": "no direct terminal ketone switch"
+    },
+    "HCO3": {
+      "floor": 0.1,
+      "ceiling": null,
+      "uses": [
+        "pH via Henderson-Hasselbalch",
+        "acidosis burden"
+      ],
+      "denominator_role": "pH calculation floor",
+      "terminal_role": "terminal if sustained pH<6.8",
+      "guard": "pH uses hco3 floor and burden requires duration"
+    },
+    "Ke": {
+      "floor": 0.0,
+      "ceiling": null,
+      "uses": [
+        "potassium critical burden",
+        "reward"
+      ],
+      "denominator_role": "none",
+      "terminal_role": "terminal if sustained hypo/hyperkalemia",
+      "guard": "insulin shift floor and pH-corrected equilibrium"
+    },
+    "Ki": {
+      "floor": 0.0,
+      "ceiling": null,
+      "uses": [
+        "potassium store ratio",
+        "serum K equilibrium"
+      ],
+      "denominator_role": "ratio numerator only",
+      "terminal_role": "none",
+      "guard": "store_ratio clipped before use"
+    },
+    "V": {
+      "floor": 1.0,
+      "ceiling": null,
+      "uses": [
+        "MAP",
+        "renal perfusion",
+        "concentrations",
+        "sodium balance"
+      ],
+      "denominator_role": "partly protected by effective distribution volumes",
+      "terminal_role": "terminal through sustained MAP<40",
+      "guard": "glucose/HCO3/K use effective volumes; dNa remains clipped"
+    },
+    "Na": {
+      "floor": 100.0,
+      "ceiling": 180.0,
+      "uses": [
+        "effective osmolality",
+        "osmotic burden"
+      ],
+      "denominator_role": "none",
+      "terminal_role": "reported osmotic burden only",
+      "guard": "dNa hourly rate clipped; osmotic injury non-terminal"
+    },
+    "Cr": {
+      "floor": 0.1,
+      "ceiling": null,
+      "uses": [
+        "renal marker",
+        "potassium-store prior outside live body"
+      ],
+      "denominator_role": "none",
+      "terminal_role": "none",
+      "guard": "lagged proxy only"
+    },
+    "counterregulatory_stress": {
+      "floor": 0.05,
+      "ceiling": 2.5,
+      "uses": [
+        "hepatic glucose output",
+        "ketogenesis"
+      ],
+      "denominator_role": "none",
+      "terminal_role": "none",
+      "guard": "bounded hidden drive"
+    },
+    "renal_perfusion_state": {
+      "floor": 0.0,
+      "ceiling": 1.0,
+      "uses": [
+        "renal glucose/ketone/K clearance",
+        "urine flow",
+        "creatinine"
+      ],
+      "denominator_role": "none",
+      "terminal_role": "none",
+      "guard": "bounded lag state"
+    },
+    "osmotic_injury": {
+      "floor": 0.0,
+      "ceiling": null,
+      "uses": [
+        "reported burden"
+      ],
+      "denominator_role": "none",
+      "terminal_role": "disabled",
+      "guard": "OSMOTIC_INJURY_TERMINAL=False"
+    }
+  },
+  "denominator_guards": {
+    "concentration_volume": {
+      "depends_on": "V",
+      "floor_formula": "max(V, 0.65 * volume_setpoint)",
+      "protects": [
+        "glucose",
+        "dextrose",
+        "nutrition carbohydrate",
+        "dilution"
+      ],
+      "status": "protected"
+    },
+    "electrolyte_distribution_volume": {
+      "depends_on": "V",
+      "floor_formula": "max(V, 0.55 * volume_setpoint)",
+      "protects": [
+        "serum potassium KCl effect",
+        "renal K serum effect"
+      ],
+      "status": "protected"
+    },
+    "bicarbonate_distribution_volume": {
+      "depends_on": "V",
+      "floor_formula": "max(V, 0.50 * weight_kg)",
+      "protects": [
+        "bicarbonate bolus effect"
+      ],
+      "status": "protected"
+    },
+    "sodium_balance_volume": {
+      "depends_on": "V",
+      "floor_formula": "actual V, but dNa is clipped to +/-1.5 mEq/L/hr",
+      "protects": [
+        "sodium concentration update"
+      ],
+      "status": "bounded_not_distribution_protected"
+    }
+  },
+  "summary": {
+    "trajectory_count": 16,
+    "death_count": 4,
+    "state_bound_hit_counts": {
+      "Na.ceiling": 6,
+      "counterregulatory_stress.ceiling": 9,
+      "osmotic_injury.floor": 315,
+      "renal_perfusion_state.ceiling": 52
+    },
+    "risky_bound_hit_counts": {
+      "Na.ceiling": 6,
+      "osmotic_injury.floor": 315
+    },
+    "death_case_bound_hits": {
+      "counterregulatory_stress.ceiling": 3,
+      "osmotic_injury.floor": 4,
+      "renal_perfusion_state.ceiling": 1
+    },
+    "examples": {
+      "Na.ceiling": [
+        {
+          "stay_id": 34617352,
+          "t": 22.5,
+          "value": 179.64235,
+          "death_cause": null
+        },
+        {
+          "stay_id": 34617352,
+          "t": 23.0,
+          "value": 180.0,
+          "death_cause": null
+        },
+        {
+          "stay_id": 34617352,
+          "t": 23.5,
+          "value": 180.0,
+          "death_cause": null
+        }
+      ],
+      "osmotic_injury.floor": [
+        {
+          "stay_id": 30932571,
+          "t": 0.0,
+          "value": 0.0,
+          "death_cause": "acidosis (pH<6.8)"
+        },
+        {
+          "stay_id": 30932571,
+          "t": 0.5,
+          "value": 0.0,
+          "death_cause": "acidosis (pH<6.8)"
+        },
+        {
+          "stay_id": 30932571,
+          "t": 1.0,
+          "value": 0.0,
+          "death_cause": "acidosis (pH<6.8)"
+        }
+      ]
+    }
+  },
+  "cases": [
+    {
+      "stay_id": 30932571,
+      "death_cause": "acidosis (pH<6.8)",
+      "simulated_alive": false,
+      "bound_hit_count": 27,
+      "bound_hits": [
+        {
+          "t": 0.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 0.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 1.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 1.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 2.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 2.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 3.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 3.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 4.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 4.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 5.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 5.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 6.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 6.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 7.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 7.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 8.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 8.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 9.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 9.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 10.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 10.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 11.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 11.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 12.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 12.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 23.5,
+          "state": "counterregulatory_stress",
+          "bound": "ceiling",
+          "value": 2.5,
+          "alive": true,
+          "death_cause": null
+        }
+      ]
+    },
+    {
+      "stay_id": 31316840,
+      "death_cause": null,
+      "simulated_alive": true,
+      "bound_hit_count": 21,
+      "bound_hits": [
+        {
+          "t": 0.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 0.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 1.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 1.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 2.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 2.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 3.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 3.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 4.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 4.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 5.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 5.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 6.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 6.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 7.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 7.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 8.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 8.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 9.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 9.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 10.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        }
+      ]
+    },
+    {
+      "stay_id": 32359580,
+      "death_cause": "acidosis (pH<6.8)",
+      "simulated_alive": false,
+      "bound_hit_count": 20,
+      "bound_hits": [
+        {
+          "t": 0.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 0.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 1.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 1.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 2.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 2.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 3.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 3.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 4.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 4.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 5.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 5.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 6.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 6.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 7.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 13.0,
+          "state": "counterregulatory_stress",
+          "bound": "ceiling",
+          "value": 2.47677,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 13.5,
+          "state": "counterregulatory_stress",
+          "bound": "ceiling",
+          "value": 2.5,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 14.0,
+          "state": "counterregulatory_stress",
+          "bound": "ceiling",
+          "value": 2.5,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 14.5,
+          "state": "counterregulatory_stress",
+          "bound": "ceiling",
+          "value": 2.5,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 14.583,
+          "state": "counterregulatory_stress",
+          "bound": "ceiling",
+          "value": 2.5,
+          "alive": false,
+          "death_cause": "acidosis (pH<6.8)"
+        }
+      ]
+    },
+    {
+      "stay_id": 32587226,
+      "death_cause": "acidosis (pH<6.8)",
+      "simulated_alive": false,
+      "bound_hit_count": 17,
+      "bound_hits": [
+        {
+          "t": 0.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 0.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 1.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 1.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 2.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 2.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 3.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 3.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 4.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 4.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 5.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 5.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 6.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 6.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 18.5,
+          "state": "counterregulatory_stress",
+          "bound": "ceiling",
+          "value": 2.48033,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 19.0,
+          "state": "counterregulatory_stress",
+          "bound": "ceiling",
+          "value": 2.5,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 19.15,
+          "state": "counterregulatory_stress",
+          "bound": "ceiling",
+          "value": 2.5,
+          "alive": false,
+          "death_cause": "acidosis (pH<6.8)"
+        }
+      ]
+    },
+    {
+      "stay_id": 33281088,
+      "death_cause": null,
+      "simulated_alive": true,
+      "bound_hit_count": 22,
+      "bound_hits": [
+        {
+          "t": 0.0,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 1.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 0.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 0.5,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 1.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 0.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 1.0,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 1.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 1.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 1.5,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 1.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 1.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 2.0,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 1.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 2.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 2.5,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 1.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 2.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 3.0,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 1.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 3.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 3.5,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 1.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 3.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 4.0,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 1.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 4.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 4.5,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 1.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 4.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 5.0,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 0.99915,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 5.5,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 0.9949,
+          "alive": true,
+          "death_cause": null
+        }
+      ]
+    },
+    {
+      "stay_id": 33846653,
+      "death_cause": null,
+      "simulated_alive": true,
+      "bound_hit_count": 39,
+      "bound_hits": [
+        {
+          "t": 0.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 0.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 1.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 1.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 2.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 2.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 3.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 3.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 4.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 4.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 5.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 5.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 6.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 6.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 7.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 7.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 8.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 8.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 9.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 9.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 10.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 10.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 11.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 11.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 12.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 12.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 13.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 13.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 14.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 14.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 15.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 15.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 16.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 16.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 17.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 17.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 18.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 18.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 19.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        }
+      ]
+    },
+    {
+      "stay_id": 34100191,
+      "death_cause": "hypokalemia (K<2.5)",
+      "simulated_alive": false,
+      "bound_hit_count": 18,
+      "bound_hits": [
+        {
+          "t": 0.0,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 1.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 0.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 0.5,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 1.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 0.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 1.0,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 1.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 1.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 1.5,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 1.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 1.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 2.0,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 1.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 2.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 2.5,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 1.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 2.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 3.0,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 0.99998,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 3.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 3.5,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 0.99782,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 3.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 4.0,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 0.99288,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 4.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        }
+      ]
+    },
+    {
+      "stay_id": 34107647,
+      "death_cause": null,
+      "simulated_alive": true,
+      "bound_hit_count": 17,
+      "bound_hits": [
+        {
+          "t": 0.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 0.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 1.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 1.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 2.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 2.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 3.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 3.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 4.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 4.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 5.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 5.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 6.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 6.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 7.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 7.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 8.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        }
+      ]
+    },
+    {
+      "stay_id": 34499716,
+      "death_cause": null,
+      "simulated_alive": true,
+      "bound_hit_count": 32,
+      "bound_hits": [
+        {
+          "t": 0.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 0.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 1.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 1.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 2.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 2.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 3.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 3.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 4.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 4.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 5.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 5.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 6.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 6.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 7.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 7.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 8.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 8.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 9.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 9.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 10.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 10.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 11.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 11.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 12.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 12.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 13.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 13.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 14.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 14.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 15.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 15.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        }
+      ]
+    },
+    {
+      "stay_id": 34600477,
+      "death_cause": null,
+      "simulated_alive": true,
+      "bound_hit_count": 52,
+      "bound_hits": [
+        {
+          "t": 0.0,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 1.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 0.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 0.5,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 1.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 0.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 1.0,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 1.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 1.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 1.5,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 1.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 1.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 2.0,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 1.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 2.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 2.5,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 1.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 2.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 3.0,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 1.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 3.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 3.5,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 1.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 3.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 4.0,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 1.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 4.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 4.5,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 1.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 4.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 5.0,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 1.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 5.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 5.5,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 1.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 5.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 6.0,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 1.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 6.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 6.5,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 1.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 6.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 7.0,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 1.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 7.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 7.5,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 0.99993,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 7.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 8.0,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 0.9967,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 8.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 8.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 9.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 9.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 10.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 10.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 11.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        }
+      ]
+    },
+    {
+      "stay_id": 34617352,
+      "death_cause": null,
+      "simulated_alive": true,
+      "bound_hit_count": 10,
+      "bound_hits": [
+        {
+          "t": 0.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 0.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 1.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 1.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 2.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 2.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 3.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 22.5,
+          "state": "Na",
+          "bound": "ceiling",
+          "value": 179.64235,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 23.0,
+          "state": "Na",
+          "bound": "ceiling",
+          "value": 180.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 23.5,
+          "state": "Na",
+          "bound": "ceiling",
+          "value": 180.0,
+          "alive": true,
+          "death_cause": null
+        }
+      ]
+    },
+    {
+      "stay_id": 35024147,
+      "death_cause": null,
+      "simulated_alive": true,
+      "bound_hit_count": 48,
+      "bound_hits": [
+        {
+          "t": 0.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 0.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 1.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 1.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 2.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 2.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 3.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 3.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 4.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 4.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 5.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 5.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 6.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 6.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 7.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 7.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 8.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 8.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 9.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 9.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 10.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 10.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 11.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 11.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 12.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 12.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 13.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 13.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 14.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 14.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 15.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 15.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 16.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 16.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 17.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 17.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 18.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 18.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 19.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 19.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        }
+      ]
+    },
+    {
+      "stay_id": 35396193,
+      "death_cause": null,
+      "simulated_alive": true,
+      "bound_hit_count": 9,
+      "bound_hits": [
+        {
+          "t": 0.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 0.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 1.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 1.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 2.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 2.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 3.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 3.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 4.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        }
+      ]
+    },
+    {
+      "stay_id": 36059427,
+      "death_cause": null,
+      "simulated_alive": true,
+      "bound_hit_count": 10,
+      "bound_hits": [
+        {
+          "t": 0.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 0.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 1.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 1.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 2.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 2.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 3.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 23.0,
+          "state": "Na",
+          "bound": "ceiling",
+          "value": 179.5,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 23.5,
+          "state": "Na",
+          "bound": "ceiling",
+          "value": 180.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 24.0,
+          "state": "Na",
+          "bound": "ceiling",
+          "value": 180.0,
+          "alive": true,
+          "death_cause": null
+        }
+      ]
+    },
+    {
+      "stay_id": 36753294,
+      "death_cause": null,
+      "simulated_alive": true,
+      "bound_hit_count": 22,
+      "bound_hits": [
+        {
+          "t": 0.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 0.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 1.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 1.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 2.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 2.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 3.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 3.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 4.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 4.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 5.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 5.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 6.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 6.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 7.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 7.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 8.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 8.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 9.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 9.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 10.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 10.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        }
+      ]
+    },
+    {
+      "stay_id": 38554095,
+      "death_cause": null,
+      "simulated_alive": true,
+      "bound_hit_count": 38,
+      "bound_hits": [
+        {
+          "t": 0.0,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 1.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 0.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 0.5,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 1.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 0.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 1.0,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 1.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 1.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 1.5,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 1.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 1.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 2.0,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 1.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 2.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 2.5,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 1.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 2.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 3.0,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 1.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 3.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 3.5,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 1.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 3.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 4.0,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 1.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 4.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 4.5,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 1.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 4.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 5.0,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 1.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 5.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 5.5,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 0.99909,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 5.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 6.0,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 0.99638,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 6.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 6.5,
+          "state": "renal_perfusion_state",
+          "bound": "ceiling",
+          "value": 0.99186,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 6.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 7.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 7.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 8.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 8.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 9.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 9.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 10.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 10.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 11.0,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        },
+        {
+          "t": 11.5,
+          "state": "osmotic_injury",
+          "bound": "floor",
+          "value": 0.0,
+          "alive": true,
+          "death_cause": null
+        }
+      ]
+    }
+  ],
+  "conclusion": "Bounds are acceptable only when they are either reporting guards or protected before entering concentration denominators. Remaining bound hits should be interpreted separately from physiology."
+}

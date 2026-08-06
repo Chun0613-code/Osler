@@ -1,0 +1,101 @@
+{
+  "schema": "whole_body_joint_final_gate_summary.v1",
+  "date": "2026-07-29",
+  "scope": "factual_observation_and_forecast_only",
+  "training_source": {
+    "contract": "canonical_event_ledger",
+    "rows": 566376,
+    "subjects": 3290,
+    "hospitals": 12,
+    "mean_modules_per_row": 6.592376795626933
+  },
+  "model": {
+    "history_mode": "multiscale",
+    "history_lags_hours": [48, 24, 12, 8, 6, 4, 3, 2, 1, 0],
+    "masked_forecast_probability": 0.15,
+    "module_mask_probability": 0.15,
+    "target_head_stage_epochs": 1,
+    "ema_target_encoder_eval_locked": true,
+    "finite_sample_conformal_quantile": true,
+    "mondrian_conformal": false
+  },
+  "full_gate": {
+    "promotion_status": "candidate_only",
+    "validated_target_horizon_cells": 0,
+    "validated_joint_runtime_cells": 0,
+    "evaluated_target_horizon_cells": 229,
+    "pass_counts": {
+      "patient_value": 156,
+      "patient_bootstrap": 115,
+      "patient_validated_router_value": 60,
+      "patient_validated_router_bootstrap": 20,
+      "patient_conformal": 101,
+      "patient_module_balanced": 142,
+      "hospital_value": 165,
+      "hospital_validated_router_value": 84,
+      "hospital_validated_router_bootstrap": 48,
+      "hospital_conformal": 141,
+      "hospital_module_balanced": 158,
+      "care_unit_value": 159,
+      "care_unit_validated_router_value": 127,
+      "care_unit_validated_router_bootstrap": 71,
+      "care_unit_conformal": 139,
+      "care_unit_module_balanced": 148,
+      "time_value": 115,
+      "time_validated_router_value": 113,
+      "time_validated_router_bootstrap": 57,
+      "time_conformal": 126,
+      "time_module_balanced": 108
+    },
+    "closest_cell": {
+      "cell": "ast@1h",
+      "missing_gate": "patient_conformal",
+      "pooled_coverage": 0.8967345799609266,
+      "pooled_test_n": 3583,
+      "split_coverages": [
+        0.8546168958742633,
+        0.9226804123711341,
+        0.8986615678776291,
+        0.8904109589041096,
+        0.9279661016949152,
+        0.8909090909090909,
+        0.890020366598778
+      ],
+      "interpretation": "One 509-row patient split is genuinely under-covered; this is not a finite-sample scoring artifact."
+    }
+  },
+  "scoring_and_svd_audit": {
+    "rows": 127404,
+    "subjects": 922,
+    "hospitals": 12,
+    "patient_splits": 7,
+    "learned_latent": {
+      "pass_splits": 7,
+      "median_fit_effective_rank": 29.22273668102264,
+      "median_test_effective_rank": 29.21830645668644,
+      "median_rank_ratio": 0.9950261543465231,
+      "median_mean_top_mode_cosine": 0.9460567771746297,
+      "median_mean_top_subspace_cosine": 0.9789946245548593,
+      "collapsed": false
+    },
+    "data_transition_modes": {
+      "median_fit_effective_rank": 28.753741240935152,
+      "median_test_effective_rank": 27.776707278120657,
+      "median_mean_top_mode_cosine": 0.1279573168074682,
+      "median_mean_top_subspace_cosine": 0.3376794536487814,
+      "interpretation": "The physiological transition modes are heterogeneous across held-out patient splits even though the learned representation is active."
+    },
+    "patient_equalized_cells_beating_persistence_7_of_7": 18,
+    "whole_body_input_beating_own_target_ablation_7_of_7": [
+      "bicarbonate@24h"
+    ]
+  },
+  "decision": {
+    "promote_checkpoint": false,
+    "replace_validated_router": false,
+    "runtime_policy": "target_horizon_fail_closed_with_persistence_or_missing_fallback",
+    "diagnosis": "The remaining limit is unstable incremental cross-organ signal versus the already validated target router, not latent collapse or a permissive scoring bug.",
+    "causal_claim_allowed": false,
+    "clinical_promotion_allowed": false
+  }
+}

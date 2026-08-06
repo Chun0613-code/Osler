@@ -1,0 +1,3841 @@
+{
+  "experiment": "eICU multi-hop body-system coupling audit",
+  "gate": {
+    "baseline": "direct_first_hop_to_downstream_ridge",
+    "candidate": "direct_baseline_plus_discovery_only_mediator_features",
+    "pass_rule": "candidate must significantly beat both direct baseline and placebo on held-out patients",
+    "placebo": "direct_baseline_plus_capacity_matched_random_features"
+  },
+  "multihop_specs": [
+    {
+      "baseline": "direct_sepsis_renal_ridge",
+      "candidate": "direct_sepsis_renal_plus_map_mediator_features",
+      "cohort": "eicu_sepsis_transitions_6h.parquet",
+      "first_hop": "sepsis_immune_inflammatory_to_map",
+      "future_suffix": "tp6",
+      "hospital_holdout": {
+        "discovery_groups": 137,
+        "first_hop_feature_count": 25,
+        "group_column": "hospitalid",
+        "heldout_groups": 67,
+        "multihop_feature_count": 10,
+        "overlap": 0,
+        "seed": 2029,
+        "targets": {
+          "bun": {
+            "active_only": {
+              "active_only": true,
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.001594,
+                  2.9e-05
+                ],
+                "point_delta": -0.00081,
+                "significant": false,
+                "subjects": 5326
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.001603,
+                  -0.000117
+                ],
+                "point_delta": -0.000859,
+                "significant": true,
+                "subjects": 5326
+              },
+              "feature_counts": {
+                "candidate": 75,
+                "direct": 65,
+                "multihop": 10,
+                "placebo": 10
+              },
+              "first_hop_features": [
+                "fbc_sepsis_inflammatory_burden_mean",
+                "fbc_sepsis_inflammatory_burden_sd",
+                "fbc_sepsis_inflammatory_burden_observation",
+                "fbc_sepsis_inflammatory_burden_innovation",
+                "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                "fbc_sepsis_inflammatory_burden_observation_confidence",
+                "fbc_sepsis_vasoplegia_burden_mean",
+                "fbc_sepsis_vasoplegia_burden_sd",
+                "fbc_sepsis_vasoplegia_burden_observation",
+                "fbc_sepsis_vasoplegia_burden_innovation",
+                "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                "fbc_sepsis_capillary_leak_mean",
+                "fbc_sepsis_capillary_leak_sd",
+                "fbc_sepsis_capillary_leak_observation",
+                "fbc_sepsis_capillary_leak_innovation",
+                "fbc_sepsis_capillary_leak_delta_since_prior",
+                "fbc_sepsis_capillary_leak_observation_confidence",
+                "fbc_sepsis_inflammation_x_low_map",
+                "fbc_sepsis_inflammation_x_lactate",
+                "fbc_sepsis_vasoplegia_x_tachycardia",
+                "fbc_sepsis_leak_x_lactate",
+                "fbc_sepsis_leak_x_hypoalbumin",
+                "fbc_sepsis_respiratory_stress",
+                "fbc_sepsis_treatment_context"
+              ],
+              "mae": {
+                "direct_sepsis_renal_ridge": 0.538331,
+                "multihop_ridge": 0.537759,
+                "placebo_ridge": 0.53835
+              },
+              "multihop_features": [
+                "mh_predicted_map_tp6",
+                "mh_predicted_map_delta",
+                "mh_predicted_low_map",
+                "mh_current_low_map",
+                "mh_predicted_map_recovery",
+                "mh_predicted_map_worsening",
+                "mh_low_map_x_creatinine",
+                "mh_low_map_x_bun",
+                "mh_low_map_x_oliguria",
+                "mh_low_map_x_lactate"
+              ],
+              "rows": 15353,
+              "subjects": 5326
+            },
+            "all_windows": {
+              "active_only": false,
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.001081,
+                  -0.000126
+                ],
+                "point_delta": -0.000614,
+                "significant": true,
+                "subjects": 7078
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.001222,
+                  -0.000136
+                ],
+                "point_delta": -0.000667,
+                "significant": true,
+                "subjects": 7078
+              },
+              "feature_counts": {
+                "candidate": 75,
+                "direct": 65,
+                "multihop": 10,
+                "placebo": 10
+              },
+              "first_hop_features": [
+                "fbc_sepsis_inflammatory_burden_mean",
+                "fbc_sepsis_inflammatory_burden_sd",
+                "fbc_sepsis_inflammatory_burden_observation",
+                "fbc_sepsis_inflammatory_burden_innovation",
+                "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                "fbc_sepsis_inflammatory_burden_observation_confidence",
+                "fbc_sepsis_vasoplegia_burden_mean",
+                "fbc_sepsis_vasoplegia_burden_sd",
+                "fbc_sepsis_vasoplegia_burden_observation",
+                "fbc_sepsis_vasoplegia_burden_innovation",
+                "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                "fbc_sepsis_capillary_leak_mean",
+                "fbc_sepsis_capillary_leak_sd",
+                "fbc_sepsis_capillary_leak_observation",
+                "fbc_sepsis_capillary_leak_innovation",
+                "fbc_sepsis_capillary_leak_delta_since_prior",
+                "fbc_sepsis_capillary_leak_observation_confidence",
+                "fbc_sepsis_inflammation_x_low_map",
+                "fbc_sepsis_inflammation_x_lactate",
+                "fbc_sepsis_vasoplegia_x_tachycardia",
+                "fbc_sepsis_leak_x_lactate",
+                "fbc_sepsis_leak_x_hypoalbumin",
+                "fbc_sepsis_respiratory_stress",
+                "fbc_sepsis_treatment_context"
+              ],
+              "mae": {
+                "direct_sepsis_renal_ridge": 0.569097,
+                "multihop_ridge": 0.568575,
+                "placebo_ridge": 0.569136
+              },
+              "multihop_features": [
+                "mh_predicted_map_tp6",
+                "mh_predicted_map_delta",
+                "mh_predicted_low_map",
+                "mh_current_low_map",
+                "mh_predicted_map_recovery",
+                "mh_predicted_map_worsening",
+                "mh_low_map_x_creatinine",
+                "mh_low_map_x_bun",
+                "mh_low_map_x_oliguria",
+                "mh_low_map_x_lactate"
+              ],
+              "rows": 26467,
+              "subjects": 7078
+            }
+          },
+          "creatinine": {
+            "active_only": {
+              "active_only": true,
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.002373,
+                  -0.00017
+                ],
+                "point_delta": -0.001292,
+                "significant": true,
+                "subjects": 5334
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.002258,
+                  -0.000196
+                ],
+                "point_delta": -0.001301,
+                "significant": true,
+                "subjects": 5334
+              },
+              "feature_counts": {
+                "candidate": 75,
+                "direct": 65,
+                "multihop": 10,
+                "placebo": 10
+              },
+              "first_hop_features": [
+                "fbc_sepsis_inflammatory_burden_mean",
+                "fbc_sepsis_inflammatory_burden_sd",
+                "fbc_sepsis_inflammatory_burden_observation",
+                "fbc_sepsis_inflammatory_burden_innovation",
+                "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                "fbc_sepsis_inflammatory_burden_observation_confidence",
+                "fbc_sepsis_vasoplegia_burden_mean",
+                "fbc_sepsis_vasoplegia_burden_sd",
+                "fbc_sepsis_vasoplegia_burden_observation",
+                "fbc_sepsis_vasoplegia_burden_innovation",
+                "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                "fbc_sepsis_capillary_leak_mean",
+                "fbc_sepsis_capillary_leak_sd",
+                "fbc_sepsis_capillary_leak_observation",
+                "fbc_sepsis_capillary_leak_innovation",
+                "fbc_sepsis_capillary_leak_delta_since_prior",
+                "fbc_sepsis_capillary_leak_observation_confidence",
+                "fbc_sepsis_inflammation_x_low_map",
+                "fbc_sepsis_inflammation_x_lactate",
+                "fbc_sepsis_vasoplegia_x_tachycardia",
+                "fbc_sepsis_leak_x_lactate",
+                "fbc_sepsis_leak_x_hypoalbumin",
+                "fbc_sepsis_respiratory_stress",
+                "fbc_sepsis_treatment_context"
+              ],
+              "mae": {
+                "direct_sepsis_renal_ridge": 0.53388,
+                "multihop_ridge": 0.53262,
+                "placebo_ridge": 0.533888
+              },
+              "multihop_features": [
+                "mh_predicted_map_tp6",
+                "mh_predicted_map_delta",
+                "mh_predicted_low_map",
+                "mh_current_low_map",
+                "mh_predicted_map_recovery",
+                "mh_predicted_map_worsening",
+                "mh_low_map_x_creatinine",
+                "mh_low_map_x_bun",
+                "mh_low_map_x_oliguria",
+                "mh_low_map_x_lactate"
+              ],
+              "rows": 15362,
+              "subjects": 5334
+            },
+            "all_windows": {
+              "active_only": false,
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.001985,
+                  -0.000631
+                ],
+                "point_delta": -0.001293,
+                "significant": true,
+                "subjects": 7079
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.002114,
+                  -0.000681
+                ],
+                "point_delta": -0.00138,
+                "significant": true,
+                "subjects": 7079
+              },
+              "feature_counts": {
+                "candidate": 75,
+                "direct": 65,
+                "multihop": 10,
+                "placebo": 10
+              },
+              "first_hop_features": [
+                "fbc_sepsis_inflammatory_burden_mean",
+                "fbc_sepsis_inflammatory_burden_sd",
+                "fbc_sepsis_inflammatory_burden_observation",
+                "fbc_sepsis_inflammatory_burden_innovation",
+                "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                "fbc_sepsis_inflammatory_burden_observation_confidence",
+                "fbc_sepsis_vasoplegia_burden_mean",
+                "fbc_sepsis_vasoplegia_burden_sd",
+                "fbc_sepsis_vasoplegia_burden_observation",
+                "fbc_sepsis_vasoplegia_burden_innovation",
+                "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                "fbc_sepsis_capillary_leak_mean",
+                "fbc_sepsis_capillary_leak_sd",
+                "fbc_sepsis_capillary_leak_observation",
+                "fbc_sepsis_capillary_leak_innovation",
+                "fbc_sepsis_capillary_leak_delta_since_prior",
+                "fbc_sepsis_capillary_leak_observation_confidence",
+                "fbc_sepsis_inflammation_x_low_map",
+                "fbc_sepsis_inflammation_x_lactate",
+                "fbc_sepsis_vasoplegia_x_tachycardia",
+                "fbc_sepsis_leak_x_lactate",
+                "fbc_sepsis_leak_x_hypoalbumin",
+                "fbc_sepsis_respiratory_stress",
+                "fbc_sepsis_treatment_context"
+              ],
+              "mae": {
+                "direct_sepsis_renal_ridge": 0.536864,
+                "multihop_ridge": 0.535836,
+                "placebo_ridge": 0.536935
+              },
+              "multihop_features": [
+                "mh_predicted_map_tp6",
+                "mh_predicted_map_delta",
+                "mh_predicted_low_map",
+                "mh_current_low_map",
+                "mh_predicted_map_recovery",
+                "mh_predicted_map_worsening",
+                "mh_low_map_x_creatinine",
+                "mh_low_map_x_bun",
+                "mh_low_map_x_oliguria",
+                "mh_low_map_x_lactate"
+              ],
+              "rows": 26514,
+              "subjects": 7079
+            }
+          },
+          "urine_output": {
+            "active_only": {
+              "active_only": true,
+              "candidate_vs_baseline": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  -0.000251,
+                  0.000756
+                ],
+                "point_delta": 0.000219,
+                "significant": false,
+                "subjects": 4371
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  -0.00016,
+                  0.00081
+                ],
+                "point_delta": 0.000291,
+                "significant": false,
+                "subjects": 4371
+              },
+              "feature_counts": {
+                "candidate": 75,
+                "direct": 65,
+                "multihop": 10,
+                "placebo": 10
+              },
+              "first_hop_features": [
+                "fbc_sepsis_inflammatory_burden_mean",
+                "fbc_sepsis_inflammatory_burden_sd",
+                "fbc_sepsis_inflammatory_burden_observation",
+                "fbc_sepsis_inflammatory_burden_innovation",
+                "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                "fbc_sepsis_inflammatory_burden_observation_confidence",
+                "fbc_sepsis_vasoplegia_burden_mean",
+                "fbc_sepsis_vasoplegia_burden_sd",
+                "fbc_sepsis_vasoplegia_burden_observation",
+                "fbc_sepsis_vasoplegia_burden_innovation",
+                "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                "fbc_sepsis_capillary_leak_mean",
+                "fbc_sepsis_capillary_leak_sd",
+                "fbc_sepsis_capillary_leak_observation",
+                "fbc_sepsis_capillary_leak_innovation",
+                "fbc_sepsis_capillary_leak_delta_since_prior",
+                "fbc_sepsis_capillary_leak_observation_confidence",
+                "fbc_sepsis_inflammation_x_low_map",
+                "fbc_sepsis_inflammation_x_lactate",
+                "fbc_sepsis_vasoplegia_x_tachycardia",
+                "fbc_sepsis_leak_x_lactate",
+                "fbc_sepsis_leak_x_hypoalbumin",
+                "fbc_sepsis_respiratory_stress",
+                "fbc_sepsis_treatment_context"
+              ],
+              "mae": {
+                "direct_sepsis_renal_ridge": 0.577658,
+                "multihop_ridge": 0.577816,
+                "placebo_ridge": 0.57759
+              },
+              "multihop_features": [
+                "mh_predicted_map_tp6",
+                "mh_predicted_map_delta",
+                "mh_predicted_low_map",
+                "mh_current_low_map",
+                "mh_predicted_map_recovery",
+                "mh_predicted_map_worsening",
+                "mh_low_map_x_creatinine",
+                "mh_low_map_x_bun",
+                "mh_low_map_x_oliguria",
+                "mh_low_map_x_lactate"
+              ],
+              "rows": 27126,
+              "subjects": 4371
+            },
+            "all_windows": {
+              "active_only": false,
+              "candidate_vs_baseline": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  -0.000266,
+                  0.000528
+                ],
+                "point_delta": 0.000138,
+                "significant": false,
+                "subjects": 5111
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  -0.000142,
+                  0.000657
+                ],
+                "point_delta": 0.000229,
+                "significant": false,
+                "subjects": 5111
+              },
+              "feature_counts": {
+                "candidate": 75,
+                "direct": 65,
+                "multihop": 10,
+                "placebo": 10
+              },
+              "first_hop_features": [
+                "fbc_sepsis_inflammatory_burden_mean",
+                "fbc_sepsis_inflammatory_burden_sd",
+                "fbc_sepsis_inflammatory_burden_observation",
+                "fbc_sepsis_inflammatory_burden_innovation",
+                "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                "fbc_sepsis_inflammatory_burden_observation_confidence",
+                "fbc_sepsis_vasoplegia_burden_mean",
+                "fbc_sepsis_vasoplegia_burden_sd",
+                "fbc_sepsis_vasoplegia_burden_observation",
+                "fbc_sepsis_vasoplegia_burden_innovation",
+                "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                "fbc_sepsis_capillary_leak_mean",
+                "fbc_sepsis_capillary_leak_sd",
+                "fbc_sepsis_capillary_leak_observation",
+                "fbc_sepsis_capillary_leak_innovation",
+                "fbc_sepsis_capillary_leak_delta_since_prior",
+                "fbc_sepsis_capillary_leak_observation_confidence",
+                "fbc_sepsis_inflammation_x_low_map",
+                "fbc_sepsis_inflammation_x_lactate",
+                "fbc_sepsis_vasoplegia_x_tachycardia",
+                "fbc_sepsis_leak_x_lactate",
+                "fbc_sepsis_leak_x_hypoalbumin",
+                "fbc_sepsis_respiratory_stress",
+                "fbc_sepsis_treatment_context"
+              ],
+              "mae": {
+                "direct_sepsis_renal_ridge": 0.652955,
+                "multihop_ridge": 0.653254,
+                "placebo_ridge": 0.652904
+              },
+              "multihop_features": [
+                "mh_predicted_map_tp6",
+                "mh_predicted_map_delta",
+                "mh_predicted_low_map",
+                "mh_current_low_map",
+                "mh_predicted_map_recovery",
+                "mh_predicted_map_worsening",
+                "mh_low_map_x_creatinine",
+                "mh_low_map_x_bun",
+                "mh_low_map_x_oliguria",
+                "mh_low_map_x_lactate"
+              ],
+              "rows": 44590,
+              "subjects": 5111
+            }
+          }
+        }
+      },
+      "hospitals": 204,
+      "mediator": "map",
+      "name": "sepsis_map_renal_6h",
+      "random_patient_splits": {
+        "runs": [
+          {
+            "discovery_groups": 16867,
+            "first_hop_feature_count": 25,
+            "group_column": "subject_id",
+            "heldout_groups": 8308,
+            "multihop_feature_count": 10,
+            "overlap": 0,
+            "seed": 7,
+            "targets": {
+              "bun": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.001737,
+                      -0.000268
+                    ],
+                    "point_delta": -0.001018,
+                    "significant": true,
+                    "subjects": 5847
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002127,
+                      -0.000563
+                    ],
+                    "point_delta": -0.001349,
+                    "significant": true,
+                    "subjects": 5847
+                  },
+                  "feature_counts": {
+                    "candidate": 75,
+                    "direct": 65,
+                    "multihop": 10,
+                    "placebo": 10
+                  },
+                  "first_hop_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "direct_sepsis_renal_ridge": 0.552026,
+                    "multihop_ridge": 0.551357,
+                    "placebo_ridge": 0.552189
+                  },
+                  "multihop_features": [
+                    "mh_predicted_map_tp6",
+                    "mh_predicted_map_delta",
+                    "mh_predicted_low_map",
+                    "mh_current_low_map",
+                    "mh_predicted_map_recovery",
+                    "mh_predicted_map_worsening",
+                    "mh_low_map_x_creatinine",
+                    "mh_low_map_x_bun",
+                    "mh_low_map_x_oliguria",
+                    "mh_low_map_x_lactate"
+                  ],
+                  "rows": 18388,
+                  "subjects": 5847
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.000996,
+                      2.6e-05
+                    ],
+                    "point_delta": -0.000544,
+                    "significant": false,
+                    "subjects": 7607
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.001438,
+                      -0.000484
+                    ],
+                    "point_delta": -0.000956,
+                    "significant": true,
+                    "subjects": 7607
+                  },
+                  "feature_counts": {
+                    "candidate": 75,
+                    "direct": 65,
+                    "multihop": 10,
+                    "placebo": 10
+                  },
+                  "first_hop_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "direct_sepsis_renal_ridge": 0.575147,
+                    "multihop_ridge": 0.574678,
+                    "placebo_ridge": 0.575399
+                  },
+                  "multihop_features": [
+                    "mh_predicted_map_tp6",
+                    "mh_predicted_map_delta",
+                    "mh_predicted_low_map",
+                    "mh_current_low_map",
+                    "mh_predicted_map_recovery",
+                    "mh_predicted_map_worsening",
+                    "mh_low_map_x_creatinine",
+                    "mh_low_map_x_bun",
+                    "mh_low_map_x_oliguria",
+                    "mh_low_map_x_lactate"
+                  ],
+                  "rows": 30267,
+                  "subjects": 7607
+                }
+              },
+              "creatinine": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002583,
+                      -0.000879
+                    ],
+                    "point_delta": -0.001795,
+                    "significant": true,
+                    "subjects": 5859
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002666,
+                      -0.000741
+                    ],
+                    "point_delta": -0.001707,
+                    "significant": true,
+                    "subjects": 5859
+                  },
+                  "feature_counts": {
+                    "candidate": 75,
+                    "direct": 65,
+                    "multihop": 10,
+                    "placebo": 10
+                  },
+                  "first_hop_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "direct_sepsis_renal_ridge": 0.536115,
+                    "multihop_ridge": 0.534938,
+                    "placebo_ridge": 0.536052
+                  },
+                  "multihop_features": [
+                    "mh_predicted_map_tp6",
+                    "mh_predicted_map_delta",
+                    "mh_predicted_low_map",
+                    "mh_current_low_map",
+                    "mh_predicted_map_recovery",
+                    "mh_predicted_map_worsening",
+                    "mh_low_map_x_creatinine",
+                    "mh_low_map_x_bun",
+                    "mh_low_map_x_oliguria",
+                    "mh_low_map_x_lactate"
+                  ],
+                  "rows": 18426,
+                  "subjects": 5859
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.001866,
+                      -0.000655
+                    ],
+                    "point_delta": -0.001282,
+                    "significant": true,
+                    "subjects": 7610
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.001767,
+                      -0.000544
+                    ],
+                    "point_delta": -0.001148,
+                    "significant": true,
+                    "subjects": 7610
+                  },
+                  "feature_counts": {
+                    "candidate": 75,
+                    "direct": 65,
+                    "multihop": 10,
+                    "placebo": 10
+                  },
+                  "first_hop_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "direct_sepsis_renal_ridge": 0.532379,
+                    "multihop_ridge": 0.531559,
+                    "placebo_ridge": 0.532306
+                  },
+                  "multihop_features": [
+                    "mh_predicted_map_tp6",
+                    "mh_predicted_map_delta",
+                    "mh_predicted_low_map",
+                    "mh_current_low_map",
+                    "mh_predicted_map_recovery",
+                    "mh_predicted_map_worsening",
+                    "mh_low_map_x_creatinine",
+                    "mh_low_map_x_bun",
+                    "mh_low_map_x_oliguria",
+                    "mh_low_map_x_lactate"
+                  ],
+                  "rows": 30293,
+                  "subjects": 7610
+                }
+              },
+              "urine_output": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": false,
+                    "bootstrap_95_ci": [
+                      -0.000142,
+                      0.000491
+                    ],
+                    "point_delta": 0.000185,
+                    "significant": false,
+                    "subjects": 5117
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": false,
+                    "bootstrap_95_ci": [
+                      -0.000161,
+                      0.000531
+                    ],
+                    "point_delta": 0.00021,
+                    "significant": false,
+                    "subjects": 5117
+                  },
+                  "feature_counts": {
+                    "candidate": 75,
+                    "direct": 65,
+                    "multihop": 10,
+                    "placebo": 10
+                  },
+                  "first_hop_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "direct_sepsis_renal_ridge": 0.505724,
+                    "multihop_ridge": 0.505658,
+                    "placebo_ridge": 0.505754
+                  },
+                  "multihop_features": [
+                    "mh_predicted_map_tp6",
+                    "mh_predicted_map_delta",
+                    "mh_predicted_low_map",
+                    "mh_current_low_map",
+                    "mh_predicted_map_recovery",
+                    "mh_predicted_map_worsening",
+                    "mh_low_map_x_creatinine",
+                    "mh_low_map_x_bun",
+                    "mh_low_map_x_oliguria",
+                    "mh_low_map_x_lactate"
+                  ],
+                  "rows": 38114,
+                  "subjects": 5117
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": false,
+                    "bootstrap_95_ci": [
+                      -0.000177,
+                      0.000287
+                    ],
+                    "point_delta": 3.2e-05,
+                    "significant": false,
+                    "subjects": 5908
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": false,
+                    "bootstrap_95_ci": [
+                      -0.000245,
+                      0.000255
+                    ],
+                    "point_delta": 8e-06,
+                    "significant": false,
+                    "subjects": 5908
+                  },
+                  "feature_counts": {
+                    "candidate": 75,
+                    "direct": 65,
+                    "multihop": 10,
+                    "placebo": 10
+                  },
+                  "first_hop_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "direct_sepsis_renal_ridge": 0.576001,
+                    "multihop_ridge": 0.575971,
+                    "placebo_ridge": 0.576067
+                  },
+                  "multihop_features": [
+                    "mh_predicted_map_tp6",
+                    "mh_predicted_map_delta",
+                    "mh_predicted_low_map",
+                    "mh_current_low_map",
+                    "mh_predicted_map_recovery",
+                    "mh_predicted_map_worsening",
+                    "mh_low_map_x_creatinine",
+                    "mh_low_map_x_bun",
+                    "mh_low_map_x_oliguria",
+                    "mh_low_map_x_lactate"
+                  ],
+                  "rows": 59879,
+                  "subjects": 5908
+                }
+              }
+            }
+          },
+          {
+            "discovery_groups": 16867,
+            "first_hop_feature_count": 25,
+            "group_column": "subject_id",
+            "heldout_groups": 8308,
+            "multihop_feature_count": 10,
+            "overlap": 0,
+            "seed": 11,
+            "targets": {
+              "bun": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.001784,
+                      -0.000472
+                    ],
+                    "point_delta": -0.001118,
+                    "significant": true,
+                    "subjects": 5866
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.001956,
+                      -0.000544
+                    ],
+                    "point_delta": -0.00124,
+                    "significant": true,
+                    "subjects": 5866
+                  },
+                  "feature_counts": {
+                    "candidate": 75,
+                    "direct": 65,
+                    "multihop": 10,
+                    "placebo": 10
+                  },
+                  "first_hop_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "direct_sepsis_renal_ridge": 0.544271,
+                    "multihop_ridge": 0.543481,
+                    "placebo_ridge": 0.544414
+                  },
+                  "multihop_features": [
+                    "mh_predicted_map_tp6",
+                    "mh_predicted_map_delta",
+                    "mh_predicted_low_map",
+                    "mh_current_low_map",
+                    "mh_predicted_map_recovery",
+                    "mh_predicted_map_worsening",
+                    "mh_low_map_x_creatinine",
+                    "mh_low_map_x_bun",
+                    "mh_low_map_x_oliguria",
+                    "mh_low_map_x_lactate"
+                  ],
+                  "rows": 18479,
+                  "subjects": 5866
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.001056,
+                      -0.000299
+                    ],
+                    "point_delta": -0.00066,
+                    "significant": true,
+                    "subjects": 7598
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.00118,
+                      -0.00033
+                    ],
+                    "point_delta": -0.000752,
+                    "significant": true,
+                    "subjects": 7598
+                  },
+                  "feature_counts": {
+                    "candidate": 75,
+                    "direct": 65,
+                    "multihop": 10,
+                    "placebo": 10
+                  },
+                  "first_hop_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "direct_sepsis_renal_ridge": 0.572789,
+                    "multihop_ridge": 0.572131,
+                    "placebo_ridge": 0.57289
+                  },
+                  "multihop_features": [
+                    "mh_predicted_map_tp6",
+                    "mh_predicted_map_delta",
+                    "mh_predicted_low_map",
+                    "mh_current_low_map",
+                    "mh_predicted_map_recovery",
+                    "mh_predicted_map_worsening",
+                    "mh_low_map_x_creatinine",
+                    "mh_low_map_x_bun",
+                    "mh_low_map_x_oliguria",
+                    "mh_low_map_x_lactate"
+                  ],
+                  "rows": 30244,
+                  "subjects": 7598
+                }
+              },
+              "creatinine": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.001853,
+                      5.1e-05
+                    ],
+                    "point_delta": -0.00091,
+                    "significant": false,
+                    "subjects": 5870
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.001894,
+                      0.000142
+                    ],
+                    "point_delta": -0.000887,
+                    "significant": false,
+                    "subjects": 5870
+                  },
+                  "feature_counts": {
+                    "candidate": 75,
+                    "direct": 65,
+                    "multihop": 10,
+                    "placebo": 10
+                  },
+                  "first_hop_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "direct_sepsis_renal_ridge": 0.513725,
+                    "multihop_ridge": 0.51292,
+                    "placebo_ridge": 0.513816
+                  },
+                  "multihop_features": [
+                    "mh_predicted_map_tp6",
+                    "mh_predicted_map_delta",
+                    "mh_predicted_low_map",
+                    "mh_current_low_map",
+                    "mh_predicted_map_recovery",
+                    "mh_predicted_map_worsening",
+                    "mh_low_map_x_creatinine",
+                    "mh_low_map_x_bun",
+                    "mh_low_map_x_oliguria",
+                    "mh_low_map_x_lactate"
+                  ],
+                  "rows": 18516,
+                  "subjects": 5870
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.001278,
+                      1.4e-05
+                    ],
+                    "point_delta": -0.000608,
+                    "significant": false,
+                    "subjects": 7598
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.001377,
+                      -0.000117
+                    ],
+                    "point_delta": -0.000729,
+                    "significant": true,
+                    "subjects": 7598
+                  },
+                  "feature_counts": {
+                    "candidate": 75,
+                    "direct": 65,
+                    "multihop": 10,
+                    "placebo": 10
+                  },
+                  "first_hop_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "direct_sepsis_renal_ridge": 0.520573,
+                    "multihop_ridge": 0.519848,
+                    "placebo_ridge": 0.520711
+                  },
+                  "multihop_features": [
+                    "mh_predicted_map_tp6",
+                    "mh_predicted_map_delta",
+                    "mh_predicted_low_map",
+                    "mh_current_low_map",
+                    "mh_predicted_map_recovery",
+                    "mh_predicted_map_worsening",
+                    "mh_low_map_x_creatinine",
+                    "mh_low_map_x_bun",
+                    "mh_low_map_x_oliguria",
+                    "mh_low_map_x_lactate"
+                  ],
+                  "rows": 30288,
+                  "subjects": 7598
+                }
+              },
+              "urine_output": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.000533,
+                      0.000332
+                    ],
+                    "point_delta": -0.000155,
+                    "significant": false,
+                    "subjects": 5119
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.000439,
+                      0.000472
+                    ],
+                    "point_delta": -4e-05,
+                    "significant": false,
+                    "subjects": 5119
+                  },
+                  "feature_counts": {
+                    "candidate": 75,
+                    "direct": 65,
+                    "multihop": 10,
+                    "placebo": 10
+                  },
+                  "first_hop_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "direct_sepsis_renal_ridge": 0.498415,
+                    "multihop_ridge": 0.498089,
+                    "placebo_ridge": 0.498406
+                  },
+                  "multihop_features": [
+                    "mh_predicted_map_tp6",
+                    "mh_predicted_map_delta",
+                    "mh_predicted_low_map",
+                    "mh_current_low_map",
+                    "mh_predicted_map_recovery",
+                    "mh_predicted_map_worsening",
+                    "mh_low_map_x_creatinine",
+                    "mh_low_map_x_bun",
+                    "mh_low_map_x_oliguria",
+                    "mh_low_map_x_lactate"
+                  ],
+                  "rows": 37483,
+                  "subjects": 5119
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.000496,
+                      0.000173
+                    ],
+                    "point_delta": -0.000179,
+                    "significant": false,
+                    "subjects": 5865
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.000486,
+                      0.000267
+                    ],
+                    "point_delta": -0.000124,
+                    "significant": false,
+                    "subjects": 5865
+                  },
+                  "feature_counts": {
+                    "candidate": 75,
+                    "direct": 65,
+                    "multihop": 10,
+                    "placebo": 10
+                  },
+                  "first_hop_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "direct_sepsis_renal_ridge": 0.565258,
+                    "multihop_ridge": 0.565124,
+                    "placebo_ridge": 0.565252
+                  },
+                  "multihop_features": [
+                    "mh_predicted_map_tp6",
+                    "mh_predicted_map_delta",
+                    "mh_predicted_low_map",
+                    "mh_current_low_map",
+                    "mh_predicted_map_recovery",
+                    "mh_predicted_map_worsening",
+                    "mh_low_map_x_creatinine",
+                    "mh_low_map_x_bun",
+                    "mh_low_map_x_oliguria",
+                    "mh_low_map_x_lactate"
+                  ],
+                  "rows": 58982,
+                  "subjects": 5865
+                }
+              }
+            }
+          },
+          {
+            "discovery_groups": 16867,
+            "first_hop_feature_count": 25,
+            "group_column": "subject_id",
+            "heldout_groups": 8308,
+            "multihop_feature_count": 10,
+            "overlap": 0,
+            "seed": 19,
+            "targets": {
+              "bun": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.001762,
+                      -0.000392
+                    ],
+                    "point_delta": -0.001108,
+                    "significant": true,
+                    "subjects": 5845
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.001834,
+                      -0.000494
+                    ],
+                    "point_delta": -0.001168,
+                    "significant": true,
+                    "subjects": 5845
+                  },
+                  "feature_counts": {
+                    "candidate": 75,
+                    "direct": 65,
+                    "multihop": 10,
+                    "placebo": 10
+                  },
+                  "first_hop_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "direct_sepsis_renal_ridge": 0.540667,
+                    "multihop_ridge": 0.53989,
+                    "placebo_ridge": 0.540685
+                  },
+                  "multihop_features": [
+                    "mh_predicted_map_tp6",
+                    "mh_predicted_map_delta",
+                    "mh_predicted_low_map",
+                    "mh_current_low_map",
+                    "mh_predicted_map_recovery",
+                    "mh_predicted_map_worsening",
+                    "mh_low_map_x_creatinine",
+                    "mh_low_map_x_bun",
+                    "mh_low_map_x_oliguria",
+                    "mh_low_map_x_lactate"
+                  ],
+                  "rows": 18398,
+                  "subjects": 5845
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.000997,
+                      -7.7e-05
+                    ],
+                    "point_delta": -0.000568,
+                    "significant": true,
+                    "subjects": 7603
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.001201,
+                      -0.000248
+                    ],
+                    "point_delta": -0.000715,
+                    "significant": true,
+                    "subjects": 7603
+                  },
+                  "feature_counts": {
+                    "candidate": 75,
+                    "direct": 65,
+                    "multihop": 10,
+                    "placebo": 10
+                  },
+                  "first_hop_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "direct_sepsis_renal_ridge": 0.566511,
+                    "multihop_ridge": 0.565948,
+                    "placebo_ridge": 0.566614
+                  },
+                  "multihop_features": [
+                    "mh_predicted_map_tp6",
+                    "mh_predicted_map_delta",
+                    "mh_predicted_low_map",
+                    "mh_current_low_map",
+                    "mh_predicted_map_recovery",
+                    "mh_predicted_map_worsening",
+                    "mh_low_map_x_creatinine",
+                    "mh_low_map_x_bun",
+                    "mh_low_map_x_oliguria",
+                    "mh_low_map_x_lactate"
+                  ],
+                  "rows": 30184,
+                  "subjects": 7603
+                }
+              },
+              "creatinine": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002315,
+                      -0.000379
+                    ],
+                    "point_delta": -0.00137,
+                    "significant": true,
+                    "subjects": 5852
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.00243,
+                      -0.000467
+                    ],
+                    "point_delta": -0.001416,
+                    "significant": true,
+                    "subjects": 5852
+                  },
+                  "feature_counts": {
+                    "candidate": 75,
+                    "direct": 65,
+                    "multihop": 10,
+                    "placebo": 10
+                  },
+                  "first_hop_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "direct_sepsis_renal_ridge": 0.52464,
+                    "multihop_ridge": 0.523466,
+                    "placebo_ridge": 0.524679
+                  },
+                  "multihop_features": [
+                    "mh_predicted_map_tp6",
+                    "mh_predicted_map_delta",
+                    "mh_predicted_low_map",
+                    "mh_current_low_map",
+                    "mh_predicted_map_recovery",
+                    "mh_predicted_map_worsening",
+                    "mh_low_map_x_creatinine",
+                    "mh_low_map_x_bun",
+                    "mh_low_map_x_oliguria",
+                    "mh_low_map_x_lactate"
+                  ],
+                  "rows": 18443,
+                  "subjects": 5852
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.001506,
+                      -0.000227
+                    ],
+                    "point_delta": -0.000855,
+                    "significant": true,
+                    "subjects": 7604
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.00151,
+                      -0.000178
+                    ],
+                    "point_delta": -0.000802,
+                    "significant": true,
+                    "subjects": 7604
+                  },
+                  "feature_counts": {
+                    "candidate": 75,
+                    "direct": 65,
+                    "multihop": 10,
+                    "placebo": 10
+                  },
+                  "first_hop_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "direct_sepsis_renal_ridge": 0.525861,
+                    "multihop_ridge": 0.524986,
+                    "placebo_ridge": 0.525841
+                  },
+                  "multihop_features": [
+                    "mh_predicted_map_tp6",
+                    "mh_predicted_map_delta",
+                    "mh_predicted_low_map",
+                    "mh_current_low_map",
+                    "mh_predicted_map_recovery",
+                    "mh_predicted_map_worsening",
+                    "mh_low_map_x_creatinine",
+                    "mh_low_map_x_bun",
+                    "mh_low_map_x_oliguria",
+                    "mh_low_map_x_lactate"
+                  ],
+                  "rows": 30271,
+                  "subjects": 7604
+                }
+              },
+              "urine_output": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": false,
+                    "bootstrap_95_ci": [
+                      -0.00025,
+                      0.000458
+                    ],
+                    "point_delta": 7.5e-05,
+                    "significant": false,
+                    "subjects": 5159
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.000481,
+                      0.000335
+                    ],
+                    "point_delta": -9.3e-05,
+                    "significant": false,
+                    "subjects": 5159
+                  },
+                  "feature_counts": {
+                    "candidate": 75,
+                    "direct": 65,
+                    "multihop": 10,
+                    "placebo": 10
+                  },
+                  "first_hop_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "direct_sepsis_renal_ridge": 0.493949,
+                    "multihop_ridge": 0.493751,
+                    "placebo_ridge": 0.494079
+                  },
+                  "multihop_features": [
+                    "mh_predicted_map_tp6",
+                    "mh_predicted_map_delta",
+                    "mh_predicted_low_map",
+                    "mh_current_low_map",
+                    "mh_predicted_map_recovery",
+                    "mh_predicted_map_worsening",
+                    "mh_low_map_x_creatinine",
+                    "mh_low_map_x_bun",
+                    "mh_low_map_x_oliguria",
+                    "mh_low_map_x_lactate"
+                  ],
+                  "rows": 37689,
+                  "subjects": 5159
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": false,
+                    "bootstrap_95_ci": [
+                      -0.000304,
+                      0.000344
+                    ],
+                    "point_delta": 9e-06,
+                    "significant": false,
+                    "subjects": 5901
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.000393,
+                      0.000349
+                    ],
+                    "point_delta": -8.9e-05,
+                    "significant": false,
+                    "subjects": 5901
+                  },
+                  "feature_counts": {
+                    "candidate": 75,
+                    "direct": 65,
+                    "multihop": 10,
+                    "placebo": 10
+                  },
+                  "first_hop_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "direct_sepsis_renal_ridge": 0.561438,
+                    "multihop_ridge": 0.561325,
+                    "placebo_ridge": 0.56156
+                  },
+                  "multihop_features": [
+                    "mh_predicted_map_tp6",
+                    "mh_predicted_map_delta",
+                    "mh_predicted_low_map",
+                    "mh_current_low_map",
+                    "mh_predicted_map_recovery",
+                    "mh_predicted_map_worsening",
+                    "mh_low_map_x_creatinine",
+                    "mh_low_map_x_bun",
+                    "mh_low_map_x_oliguria",
+                    "mh_low_map_x_lactate"
+                  ],
+                  "rows": 59971,
+                  "subjects": 5901
+                }
+              }
+            }
+          },
+          {
+            "discovery_groups": 16867,
+            "first_hop_feature_count": 25,
+            "group_column": "subject_id",
+            "heldout_groups": 8308,
+            "multihop_feature_count": 10,
+            "overlap": 0,
+            "seed": 23,
+            "targets": {
+              "bun": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.001275,
+                      -0.000209
+                    ],
+                    "point_delta": -0.000775,
+                    "significant": true,
+                    "subjects": 5796
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.001387,
+                      -0.000356
+                    ],
+                    "point_delta": -0.000868,
+                    "significant": true,
+                    "subjects": 5796
+                  },
+                  "feature_counts": {
+                    "candidate": 75,
+                    "direct": 65,
+                    "multihop": 10,
+                    "placebo": 10
+                  },
+                  "first_hop_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "direct_sepsis_renal_ridge": 0.542895,
+                    "multihop_ridge": 0.542388,
+                    "placebo_ridge": 0.542965
+                  },
+                  "multihop_features": [
+                    "mh_predicted_map_tp6",
+                    "mh_predicted_map_delta",
+                    "mh_predicted_low_map",
+                    "mh_current_low_map",
+                    "mh_predicted_map_recovery",
+                    "mh_predicted_map_worsening",
+                    "mh_low_map_x_creatinine",
+                    "mh_low_map_x_bun",
+                    "mh_low_map_x_oliguria",
+                    "mh_low_map_x_lactate"
+                  ],
+                  "rows": 18177,
+                  "subjects": 5796
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.000811,
+                      -0.000169
+                    ],
+                    "point_delta": -0.000502,
+                    "significant": true,
+                    "subjects": 7594
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.001003,
+                      -0.000216
+                    ],
+                    "point_delta": -0.000597,
+                    "significant": true,
+                    "subjects": 7594
+                  },
+                  "feature_counts": {
+                    "candidate": 75,
+                    "direct": 65,
+                    "multihop": 10,
+                    "placebo": 10
+                  },
+                  "first_hop_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "direct_sepsis_renal_ridge": 0.566235,
+                    "multihop_ridge": 0.565728,
+                    "placebo_ridge": 0.56633
+                  },
+                  "multihop_features": [
+                    "mh_predicted_map_tp6",
+                    "mh_predicted_map_delta",
+                    "mh_predicted_low_map",
+                    "mh_current_low_map",
+                    "mh_predicted_map_recovery",
+                    "mh_predicted_map_worsening",
+                    "mh_low_map_x_creatinine",
+                    "mh_low_map_x_bun",
+                    "mh_low_map_x_oliguria",
+                    "mh_low_map_x_lactate"
+                  ],
+                  "rows": 30038,
+                  "subjects": 7594
+                }
+              },
+              "creatinine": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002645,
+                      -0.000692
+                    ],
+                    "point_delta": -0.001693,
+                    "significant": true,
+                    "subjects": 5804
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002669,
+                      -0.000759
+                    ],
+                    "point_delta": -0.001665,
+                    "significant": true,
+                    "subjects": 5804
+                  },
+                  "feature_counts": {
+                    "candidate": 75,
+                    "direct": 65,
+                    "multihop": 10,
+                    "placebo": 10
+                  },
+                  "first_hop_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "direct_sepsis_renal_ridge": 0.514301,
+                    "multihop_ridge": 0.513234,
+                    "placebo_ridge": 0.51431
+                  },
+                  "multihop_features": [
+                    "mh_predicted_map_tp6",
+                    "mh_predicted_map_delta",
+                    "mh_predicted_low_map",
+                    "mh_current_low_map",
+                    "mh_predicted_map_recovery",
+                    "mh_predicted_map_worsening",
+                    "mh_low_map_x_creatinine",
+                    "mh_low_map_x_bun",
+                    "mh_low_map_x_oliguria",
+                    "mh_low_map_x_lactate"
+                  ],
+                  "rows": 18202,
+                  "subjects": 5804
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.001771,
+                      -0.000623
+                    ],
+                    "point_delta": -0.001181,
+                    "significant": true,
+                    "subjects": 7593
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.001891,
+                      -0.000582
+                    ],
+                    "point_delta": -0.001215,
+                    "significant": true,
+                    "subjects": 7593
+                  },
+                  "feature_counts": {
+                    "candidate": 75,
+                    "direct": 65,
+                    "multihop": 10,
+                    "placebo": 10
+                  },
+                  "first_hop_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "direct_sepsis_renal_ridge": 0.508456,
+                    "multihop_ridge": 0.507586,
+                    "placebo_ridge": 0.50847
+                  },
+                  "multihop_features": [
+                    "mh_predicted_map_tp6",
+                    "mh_predicted_map_delta",
+                    "mh_predicted_low_map",
+                    "mh_current_low_map",
+                    "mh_predicted_map_recovery",
+                    "mh_predicted_map_worsening",
+                    "mh_low_map_x_creatinine",
+                    "mh_low_map_x_bun",
+                    "mh_low_map_x_oliguria",
+                    "mh_low_map_x_lactate"
+                  ],
+                  "rows": 30082,
+                  "subjects": 7593
+                }
+              },
+              "urine_output": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.000435,
+                      0.000291
+                    ],
+                    "point_delta": -7.4e-05,
+                    "significant": false,
+                    "subjects": 5116
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.000536,
+                      0.000247
+                    ],
+                    "point_delta": -0.000133,
+                    "significant": false,
+                    "subjects": 5116
+                  },
+                  "feature_counts": {
+                    "candidate": 75,
+                    "direct": 65,
+                    "multihop": 10,
+                    "placebo": 10
+                  },
+                  "first_hop_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "direct_sepsis_renal_ridge": 0.494686,
+                    "multihop_ridge": 0.494437,
+                    "placebo_ridge": 0.494685
+                  },
+                  "multihop_features": [
+                    "mh_predicted_map_tp6",
+                    "mh_predicted_map_delta",
+                    "mh_predicted_low_map",
+                    "mh_current_low_map",
+                    "mh_predicted_map_recovery",
+                    "mh_predicted_map_worsening",
+                    "mh_low_map_x_creatinine",
+                    "mh_low_map_x_bun",
+                    "mh_low_map_x_oliguria",
+                    "mh_low_map_x_lactate"
+                  ],
+                  "rows": 38265,
+                  "subjects": 5116
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.00037,
+                      0.000224
+                    ],
+                    "point_delta": -0.000111,
+                    "significant": false,
+                    "subjects": 5890
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.000548,
+                      0.000125
+                    ],
+                    "point_delta": -0.00021,
+                    "significant": false,
+                    "subjects": 5890
+                  },
+                  "feature_counts": {
+                    "candidate": 75,
+                    "direct": 65,
+                    "multihop": 10,
+                    "placebo": 10
+                  },
+                  "first_hop_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "direct_sepsis_renal_ridge": 0.562213,
+                    "multihop_ridge": 0.562143,
+                    "placebo_ridge": 0.56225
+                  },
+                  "multihop_features": [
+                    "mh_predicted_map_tp6",
+                    "mh_predicted_map_delta",
+                    "mh_predicted_low_map",
+                    "mh_current_low_map",
+                    "mh_predicted_map_recovery",
+                    "mh_predicted_map_worsening",
+                    "mh_low_map_x_creatinine",
+                    "mh_low_map_x_bun",
+                    "mh_low_map_x_oliguria",
+                    "mh_low_map_x_lactate"
+                  ],
+                  "rows": 60113,
+                  "subjects": 5890
+                }
+              }
+            }
+          },
+          {
+            "discovery_groups": 16867,
+            "first_hop_feature_count": 25,
+            "group_column": "subject_id",
+            "heldout_groups": 8308,
+            "multihop_feature_count": 10,
+            "overlap": 0,
+            "seed": 37,
+            "targets": {
+              "bun": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.001788,
+                      -0.000444
+                    ],
+                    "point_delta": -0.001038,
+                    "significant": true,
+                    "subjects": 5779
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.001787,
+                      -0.000295
+                    ],
+                    "point_delta": -0.001027,
+                    "significant": true,
+                    "subjects": 5779
+                  },
+                  "feature_counts": {
+                    "candidate": 75,
+                    "direct": 65,
+                    "multihop": 10,
+                    "placebo": 10
+                  },
+                  "first_hop_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "direct_sepsis_renal_ridge": 0.560279,
+                    "multihop_ridge": 0.559441,
+                    "placebo_ridge": 0.560275
+                  },
+                  "multihop_features": [
+                    "mh_predicted_map_tp6",
+                    "mh_predicted_map_delta",
+                    "mh_predicted_low_map",
+                    "mh_current_low_map",
+                    "mh_predicted_map_recovery",
+                    "mh_predicted_map_worsening",
+                    "mh_low_map_x_creatinine",
+                    "mh_low_map_x_bun",
+                    "mh_low_map_x_oliguria",
+                    "mh_low_map_x_lactate"
+                  ],
+                  "rows": 18077,
+                  "subjects": 5779
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.001105,
+                      -0.000211
+                    ],
+                    "point_delta": -0.000654,
+                    "significant": true,
+                    "subjects": 7591
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.001081,
+                      -0.000201
+                    ],
+                    "point_delta": -0.000673,
+                    "significant": true,
+                    "subjects": 7591
+                  },
+                  "feature_counts": {
+                    "candidate": 75,
+                    "direct": 65,
+                    "multihop": 10,
+                    "placebo": 10
+                  },
+                  "first_hop_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "direct_sepsis_renal_ridge": 0.588861,
+                    "multihop_ridge": 0.588193,
+                    "placebo_ridge": 0.588831
+                  },
+                  "multihop_features": [
+                    "mh_predicted_map_tp6",
+                    "mh_predicted_map_delta",
+                    "mh_predicted_low_map",
+                    "mh_current_low_map",
+                    "mh_predicted_map_recovery",
+                    "mh_predicted_map_worsening",
+                    "mh_low_map_x_creatinine",
+                    "mh_low_map_x_bun",
+                    "mh_low_map_x_oliguria",
+                    "mh_low_map_x_lactate"
+                  ],
+                  "rows": 30035,
+                  "subjects": 7591
+                }
+              },
+              "creatinine": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002756,
+                      -0.00073
+                    ],
+                    "point_delta": -0.001683,
+                    "significant": true,
+                    "subjects": 5781
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002999,
+                      -0.000767
+                    ],
+                    "point_delta": -0.001879,
+                    "significant": true,
+                    "subjects": 5781
+                  },
+                  "feature_counts": {
+                    "candidate": 75,
+                    "direct": 65,
+                    "multihop": 10,
+                    "placebo": 10
+                  },
+                  "first_hop_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "direct_sepsis_renal_ridge": 0.519013,
+                    "multihop_ridge": 0.518004,
+                    "placebo_ridge": 0.519145
+                  },
+                  "multihop_features": [
+                    "mh_predicted_map_tp6",
+                    "mh_predicted_map_delta",
+                    "mh_predicted_low_map",
+                    "mh_current_low_map",
+                    "mh_predicted_map_recovery",
+                    "mh_predicted_map_worsening",
+                    "mh_low_map_x_creatinine",
+                    "mh_low_map_x_bun",
+                    "mh_low_map_x_oliguria",
+                    "mh_low_map_x_lactate"
+                  ],
+                  "rows": 18129,
+                  "subjects": 5781
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.001664,
+                      -0.00039
+                    ],
+                    "point_delta": -0.001065,
+                    "significant": true,
+                    "subjects": 7591
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.00174,
+                      -0.000537
+                    ],
+                    "point_delta": -0.001105,
+                    "significant": true,
+                    "subjects": 7591
+                  },
+                  "feature_counts": {
+                    "candidate": 75,
+                    "direct": 65,
+                    "multihop": 10,
+                    "placebo": 10
+                  },
+                  "first_hop_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "direct_sepsis_renal_ridge": 0.519793,
+                    "multihop_ridge": 0.518957,
+                    "placebo_ridge": 0.519864
+                  },
+                  "multihop_features": [
+                    "mh_predicted_map_tp6",
+                    "mh_predicted_map_delta",
+                    "mh_predicted_low_map",
+                    "mh_current_low_map",
+                    "mh_predicted_map_recovery",
+                    "mh_predicted_map_worsening",
+                    "mh_low_map_x_creatinine",
+                    "mh_low_map_x_bun",
+                    "mh_low_map_x_oliguria",
+                    "mh_low_map_x_lactate"
+                  ],
+                  "rows": 30116,
+                  "subjects": 7591
+                }
+              },
+              "urine_output": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": false,
+                    "bootstrap_95_ci": [
+                      -0.000318,
+                      0.000548
+                    ],
+                    "point_delta": 9.9e-05,
+                    "significant": false,
+                    "subjects": 5056
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": false,
+                    "bootstrap_95_ci": [
+                      -0.000379,
+                      0.000488
+                    ],
+                    "point_delta": 5e-05,
+                    "significant": false,
+                    "subjects": 5056
+                  },
+                  "feature_counts": {
+                    "candidate": 75,
+                    "direct": 65,
+                    "multihop": 10,
+                    "placebo": 10
+                  },
+                  "first_hop_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "direct_sepsis_renal_ridge": 0.499987,
+                    "multihop_ridge": 0.499871,
+                    "placebo_ridge": 0.50005
+                  },
+                  "multihop_features": [
+                    "mh_predicted_map_tp6",
+                    "mh_predicted_map_delta",
+                    "mh_predicted_low_map",
+                    "mh_current_low_map",
+                    "mh_predicted_map_recovery",
+                    "mh_predicted_map_worsening",
+                    "mh_low_map_x_creatinine",
+                    "mh_low_map_x_bun",
+                    "mh_low_map_x_oliguria",
+                    "mh_low_map_x_lactate"
+                  ],
+                  "rows": 36598,
+                  "subjects": 5056
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": false,
+                    "bootstrap_95_ci": [
+                      -0.000226,
+                      0.000497
+                    ],
+                    "point_delta": 8.3e-05,
+                    "significant": false,
+                    "subjects": 5847
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": false,
+                    "bootstrap_95_ci": [
+                      -0.000291,
+                      0.000499
+                    ],
+                    "point_delta": 9.5e-05,
+                    "significant": false,
+                    "subjects": 5847
+                  },
+                  "feature_counts": {
+                    "candidate": 75,
+                    "direct": 65,
+                    "multihop": 10,
+                    "placebo": 10
+                  },
+                  "first_hop_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "direct_sepsis_renal_ridge": 0.570942,
+                    "multihop_ridge": 0.570929,
+                    "placebo_ridge": 0.570938
+                  },
+                  "multihop_features": [
+                    "mh_predicted_map_tp6",
+                    "mh_predicted_map_delta",
+                    "mh_predicted_low_map",
+                    "mh_current_low_map",
+                    "mh_predicted_map_recovery",
+                    "mh_predicted_map_worsening",
+                    "mh_low_map_x_creatinine",
+                    "mh_low_map_x_bun",
+                    "mh_low_map_x_oliguria",
+                    "mh_low_map_x_lactate"
+                  ],
+                  "rows": 58182,
+                  "subjects": 5847
+                }
+              }
+            }
+          },
+          {
+            "discovery_groups": 16867,
+            "first_hop_feature_count": 25,
+            "group_column": "subject_id",
+            "heldout_groups": 8308,
+            "multihop_feature_count": 10,
+            "overlap": 0,
+            "seed": 53,
+            "targets": {
+              "bun": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002187,
+                      -0.000931
+                    ],
+                    "point_delta": -0.001549,
+                    "significant": true,
+                    "subjects": 5835
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002012,
+                      -0.00056
+                    ],
+                    "point_delta": -0.001365,
+                    "significant": true,
+                    "subjects": 5835
+                  },
+                  "feature_counts": {
+                    "candidate": 75,
+                    "direct": 65,
+                    "multihop": 10,
+                    "placebo": 10
+                  },
+                  "first_hop_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "direct_sepsis_renal_ridge": 0.56743,
+                    "multihop_ridge": 0.566376,
+                    "placebo_ridge": 0.567369
+                  },
+                  "multihop_features": [
+                    "mh_predicted_map_tp6",
+                    "mh_predicted_map_delta",
+                    "mh_predicted_low_map",
+                    "mh_current_low_map",
+                    "mh_predicted_map_recovery",
+                    "mh_predicted_map_worsening",
+                    "mh_low_map_x_creatinine",
+                    "mh_low_map_x_bun",
+                    "mh_low_map_x_oliguria",
+                    "mh_low_map_x_lactate"
+                  ],
+                  "rows": 18435,
+                  "subjects": 5835
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.001257,
+                      -0.000466
+                    ],
+                    "point_delta": -0.000872,
+                    "significant": true,
+                    "subjects": 7576
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.001204,
+                      -0.000153
+                    ],
+                    "point_delta": -0.000716,
+                    "significant": true,
+                    "subjects": 7576
+                  },
+                  "feature_counts": {
+                    "candidate": 75,
+                    "direct": 65,
+                    "multihop": 10,
+                    "placebo": 10
+                  },
+                  "first_hop_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "direct_sepsis_renal_ridge": 0.591199,
+                    "multihop_ridge": 0.590431,
+                    "placebo_ridge": 0.591118
+                  },
+                  "multihop_features": [
+                    "mh_predicted_map_tp6",
+                    "mh_predicted_map_delta",
+                    "mh_predicted_low_map",
+                    "mh_current_low_map",
+                    "mh_predicted_map_recovery",
+                    "mh_predicted_map_worsening",
+                    "mh_low_map_x_creatinine",
+                    "mh_low_map_x_bun",
+                    "mh_low_map_x_oliguria",
+                    "mh_low_map_x_lactate"
+                  ],
+                  "rows": 30076,
+                  "subjects": 7576
+                }
+              },
+              "creatinine": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.003155,
+                      -0.001457
+                    ],
+                    "point_delta": -0.002338,
+                    "significant": true,
+                    "subjects": 5838
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.003171,
+                      -0.001397
+                    ],
+                    "point_delta": -0.002251,
+                    "significant": true,
+                    "subjects": 5838
+                  },
+                  "feature_counts": {
+                    "candidate": 75,
+                    "direct": 65,
+                    "multihop": 10,
+                    "placebo": 10
+                  },
+                  "first_hop_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "direct_sepsis_renal_ridge": 0.536275,
+                    "multihop_ridge": 0.534555,
+                    "placebo_ridge": 0.536258
+                  },
+                  "multihop_features": [
+                    "mh_predicted_map_tp6",
+                    "mh_predicted_map_delta",
+                    "mh_predicted_low_map",
+                    "mh_current_low_map",
+                    "mh_predicted_map_recovery",
+                    "mh_predicted_map_worsening",
+                    "mh_low_map_x_creatinine",
+                    "mh_low_map_x_bun",
+                    "mh_low_map_x_oliguria",
+                    "mh_low_map_x_lactate"
+                  ],
+                  "rows": 18475,
+                  "subjects": 5838
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.001889,
+                      -0.000757
+                    ],
+                    "point_delta": -0.001238,
+                    "significant": true,
+                    "subjects": 7578
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.001778,
+                      -0.000553
+                    ],
+                    "point_delta": -0.001166,
+                    "significant": true,
+                    "subjects": 7578
+                  },
+                  "feature_counts": {
+                    "candidate": 75,
+                    "direct": 65,
+                    "multihop": 10,
+                    "placebo": 10
+                  },
+                  "first_hop_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "direct_sepsis_renal_ridge": 0.538863,
+                    "multihop_ridge": 0.537675,
+                    "placebo_ridge": 0.538819
+                  },
+                  "multihop_features": [
+                    "mh_predicted_map_tp6",
+                    "mh_predicted_map_delta",
+                    "mh_predicted_low_map",
+                    "mh_current_low_map",
+                    "mh_predicted_map_recovery",
+                    "mh_predicted_map_worsening",
+                    "mh_low_map_x_creatinine",
+                    "mh_low_map_x_bun",
+                    "mh_low_map_x_oliguria",
+                    "mh_low_map_x_lactate"
+                  ],
+                  "rows": 30159,
+                  "subjects": 7578
+                }
+              },
+              "urine_output": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.000527,
+                      0.00047
+                    ],
+                    "point_delta": -5.7e-05,
+                    "significant": false,
+                    "subjects": 5102
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.00049,
+                      0.000444
+                    ],
+                    "point_delta": -3.4e-05,
+                    "significant": false,
+                    "subjects": 5102
+                  },
+                  "feature_counts": {
+                    "candidate": 75,
+                    "direct": 65,
+                    "multihop": 10,
+                    "placebo": 10
+                  },
+                  "first_hop_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "direct_sepsis_renal_ridge": 0.502186,
+                    "multihop_ridge": 0.501902,
+                    "placebo_ridge": 0.502162
+                  },
+                  "multihop_features": [
+                    "mh_predicted_map_tp6",
+                    "mh_predicted_map_delta",
+                    "mh_predicted_low_map",
+                    "mh_current_low_map",
+                    "mh_predicted_map_recovery",
+                    "mh_predicted_map_worsening",
+                    "mh_low_map_x_creatinine",
+                    "mh_low_map_x_bun",
+                    "mh_low_map_x_oliguria",
+                    "mh_low_map_x_lactate"
+                  ],
+                  "rows": 37614,
+                  "subjects": 5102
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.000487,
+                      0.000315
+                    ],
+                    "point_delta": -0.000124,
+                    "significant": false,
+                    "subjects": 5868
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.000559,
+                      0.000271
+                    ],
+                    "point_delta": -0.000126,
+                    "significant": false,
+                    "subjects": 5868
+                  },
+                  "feature_counts": {
+                    "candidate": 75,
+                    "direct": 65,
+                    "multihop": 10,
+                    "placebo": 10
+                  },
+                  "first_hop_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "direct_sepsis_renal_ridge": 0.571119,
+                    "multihop_ridge": 0.570958,
+                    "placebo_ridge": 0.571112
+                  },
+                  "multihop_features": [
+                    "mh_predicted_map_tp6",
+                    "mh_predicted_map_delta",
+                    "mh_predicted_low_map",
+                    "mh_current_low_map",
+                    "mh_predicted_map_recovery",
+                    "mh_predicted_map_worsening",
+                    "mh_low_map_x_creatinine",
+                    "mh_low_map_x_bun",
+                    "mh_low_map_x_oliguria",
+                    "mh_low_map_x_lactate"
+                  ],
+                  "rows": 58438,
+                  "subjects": 5868
+                }
+              }
+            }
+          },
+          {
+            "discovery_groups": 16867,
+            "first_hop_feature_count": 25,
+            "group_column": "subject_id",
+            "heldout_groups": 8308,
+            "multihop_feature_count": 10,
+            "overlap": 0,
+            "seed": 71,
+            "targets": {
+              "bun": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002016,
+                      -0.000776
+                    ],
+                    "point_delta": -0.001395,
+                    "significant": true,
+                    "subjects": 5839
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002145,
+                      -0.000831
+                    ],
+                    "point_delta": -0.001484,
+                    "significant": true,
+                    "subjects": 5839
+                  },
+                  "feature_counts": {
+                    "candidate": 75,
+                    "direct": 65,
+                    "multihop": 10,
+                    "placebo": 10
+                  },
+                  "first_hop_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "direct_sepsis_renal_ridge": 0.544417,
+                    "multihop_ridge": 0.543374,
+                    "placebo_ridge": 0.544493
+                  },
+                  "multihop_features": [
+                    "mh_predicted_map_tp6",
+                    "mh_predicted_map_delta",
+                    "mh_predicted_low_map",
+                    "mh_current_low_map",
+                    "mh_predicted_map_recovery",
+                    "mh_predicted_map_worsening",
+                    "mh_low_map_x_creatinine",
+                    "mh_low_map_x_bun",
+                    "mh_low_map_x_oliguria",
+                    "mh_low_map_x_lactate"
+                  ],
+                  "rows": 18342,
+                  "subjects": 5839
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.001142,
+                      -0.000403
+                    ],
+                    "point_delta": -0.000755,
+                    "significant": true,
+                    "subjects": 7565
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.001225,
+                      -0.000268
+                    ],
+                    "point_delta": -0.000745,
+                    "significant": true,
+                    "subjects": 7565
+                  },
+                  "feature_counts": {
+                    "candidate": 75,
+                    "direct": 65,
+                    "multihop": 10,
+                    "placebo": 10
+                  },
+                  "first_hop_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "direct_sepsis_renal_ridge": 0.566225,
+                    "multihop_ridge": 0.565554,
+                    "placebo_ridge": 0.566184
+                  },
+                  "multihop_features": [
+                    "mh_predicted_map_tp6",
+                    "mh_predicted_map_delta",
+                    "mh_predicted_low_map",
+                    "mh_current_low_map",
+                    "mh_predicted_map_recovery",
+                    "mh_predicted_map_worsening",
+                    "mh_low_map_x_creatinine",
+                    "mh_low_map_x_bun",
+                    "mh_low_map_x_oliguria",
+                    "mh_low_map_x_lactate"
+                  ],
+                  "rows": 30361,
+                  "subjects": 7565
+                }
+              },
+              "creatinine": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.003257,
+                      -0.001154
+                    ],
+                    "point_delta": -0.002191,
+                    "significant": true,
+                    "subjects": 5843
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.003282,
+                      -0.00126
+                    ],
+                    "point_delta": -0.002314,
+                    "significant": true,
+                    "subjects": 5843
+                  },
+                  "feature_counts": {
+                    "candidate": 75,
+                    "direct": 65,
+                    "multihop": 10,
+                    "placebo": 10
+                  },
+                  "first_hop_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "direct_sepsis_renal_ridge": 0.508485,
+                    "multihop_ridge": 0.506944,
+                    "placebo_ridge": 0.508676
+                  },
+                  "multihop_features": [
+                    "mh_predicted_map_tp6",
+                    "mh_predicted_map_delta",
+                    "mh_predicted_low_map",
+                    "mh_current_low_map",
+                    "mh_predicted_map_recovery",
+                    "mh_predicted_map_worsening",
+                    "mh_low_map_x_creatinine",
+                    "mh_low_map_x_bun",
+                    "mh_low_map_x_oliguria",
+                    "mh_low_map_x_lactate"
+                  ],
+                  "rows": 18388,
+                  "subjects": 5843
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.001853,
+                      -0.000626
+                    ],
+                    "point_delta": -0.001154,
+                    "significant": true,
+                    "subjects": 7569
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.002134,
+                      -0.000832
+                    ],
+                    "point_delta": -0.001506,
+                    "significant": true,
+                    "subjects": 7569
+                  },
+                  "feature_counts": {
+                    "candidate": 75,
+                    "direct": 65,
+                    "multihop": 10,
+                    "placebo": 10
+                  },
+                  "first_hop_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "direct_sepsis_renal_ridge": 0.510302,
+                    "multihop_ridge": 0.509333,
+                    "placebo_ridge": 0.510545
+                  },
+                  "multihop_features": [
+                    "mh_predicted_map_tp6",
+                    "mh_predicted_map_delta",
+                    "mh_predicted_low_map",
+                    "mh_current_low_map",
+                    "mh_predicted_map_recovery",
+                    "mh_predicted_map_worsening",
+                    "mh_low_map_x_creatinine",
+                    "mh_low_map_x_bun",
+                    "mh_low_map_x_oliguria",
+                    "mh_low_map_x_lactate"
+                  ],
+                  "rows": 30424,
+                  "subjects": 7569
+                }
+              },
+              "urine_output": {
+                "active_only": {
+                  "active_only": true,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": false,
+                    "bootstrap_95_ci": [
+                      -0.000253,
+                      0.000524
+                    ],
+                    "point_delta": 0.000122,
+                    "significant": false,
+                    "subjects": 5094
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": false,
+                    "bootstrap_95_ci": [
+                      -0.000286,
+                      0.000489
+                    ],
+                    "point_delta": 0.000111,
+                    "significant": false,
+                    "subjects": 5094
+                  },
+                  "feature_counts": {
+                    "candidate": 75,
+                    "direct": 65,
+                    "multihop": 10,
+                    "placebo": 10
+                  },
+                  "first_hop_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "direct_sepsis_renal_ridge": 0.498182,
+                    "multihop_ridge": 0.498082,
+                    "placebo_ridge": 0.498262
+                  },
+                  "multihop_features": [
+                    "mh_predicted_map_tp6",
+                    "mh_predicted_map_delta",
+                    "mh_predicted_low_map",
+                    "mh_current_low_map",
+                    "mh_predicted_map_recovery",
+                    "mh_predicted_map_worsening",
+                    "mh_low_map_x_creatinine",
+                    "mh_low_map_x_bun",
+                    "mh_low_map_x_oliguria",
+                    "mh_low_map_x_lactate"
+                  ],
+                  "rows": 37285,
+                  "subjects": 5094
+                },
+                "all_windows": {
+                  "active_only": false,
+                  "candidate_vs_baseline": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.000325,
+                      0.000314
+                    ],
+                    "point_delta": -3.2e-05,
+                    "significant": false,
+                    "subjects": 5881
+                  },
+                  "candidate_vs_placebo": {
+                    "beats_baseline": true,
+                    "bootstrap_95_ci": [
+                      -0.000426,
+                      0.000275
+                    ],
+                    "point_delta": -0.000119,
+                    "significant": false,
+                    "subjects": 5881
+                  },
+                  "feature_counts": {
+                    "candidate": 75,
+                    "direct": 65,
+                    "multihop": 10,
+                    "placebo": 10
+                  },
+                  "first_hop_features": [
+                    "fbc_sepsis_inflammatory_burden_mean",
+                    "fbc_sepsis_inflammatory_burden_sd",
+                    "fbc_sepsis_inflammatory_burden_observation",
+                    "fbc_sepsis_inflammatory_burden_innovation",
+                    "fbc_sepsis_inflammatory_burden_delta_since_prior",
+                    "fbc_sepsis_inflammatory_burden_observation_confidence",
+                    "fbc_sepsis_vasoplegia_burden_mean",
+                    "fbc_sepsis_vasoplegia_burden_sd",
+                    "fbc_sepsis_vasoplegia_burden_observation",
+                    "fbc_sepsis_vasoplegia_burden_innovation",
+                    "fbc_sepsis_vasoplegia_burden_delta_since_prior",
+                    "fbc_sepsis_vasoplegia_burden_observation_confidence",
+                    "fbc_sepsis_capillary_leak_mean",
+                    "fbc_sepsis_capillary_leak_sd",
+                    "fbc_sepsis_capillary_leak_observation",
+                    "fbc_sepsis_capillary_leak_innovation",
+                    "fbc_sepsis_capillary_leak_delta_since_prior",
+                    "fbc_sepsis_capillary_leak_observation_confidence",
+                    "fbc_sepsis_inflammation_x_low_map",
+                    "fbc_sepsis_inflammation_x_lactate",
+                    "fbc_sepsis_vasoplegia_x_tachycardia",
+                    "fbc_sepsis_leak_x_lactate",
+                    "fbc_sepsis_leak_x_hypoalbumin",
+                    "fbc_sepsis_respiratory_stress",
+                    "fbc_sepsis_treatment_context"
+                  ],
+                  "mae": {
+                    "direct_sepsis_renal_ridge": 0.565865,
+                    "multihop_ridge": 0.565805,
+                    "placebo_ridge": 0.56593
+                  },
+                  "multihop_features": [
+                    "mh_predicted_map_tp6",
+                    "mh_predicted_map_delta",
+                    "mh_predicted_low_map",
+                    "mh_current_low_map",
+                    "mh_predicted_map_recovery",
+                    "mh_predicted_map_worsening",
+                    "mh_low_map_x_creatinine",
+                    "mh_low_map_x_bun",
+                    "mh_low_map_x_oliguria",
+                    "mh_low_map_x_lactate"
+                  ],
+                  "rows": 58855,
+                  "subjects": 5881
+                }
+              }
+            }
+          }
+        ],
+        "seeds": [
+          7,
+          11,
+          19,
+          23,
+          37,
+          53,
+          71
+        ],
+        "summary": {
+          "bun": {
+            "active_only": {
+              "candidate_beats_baseline_significant_count": 7,
+              "candidate_beats_placebo_significant_count": 7,
+              "candidate_passes_both_count": 7,
+              "median_delta_vs_baseline": -0.001108,
+              "median_delta_vs_placebo": -0.00124
+            },
+            "all_windows": {
+              "candidate_beats_baseline_significant_count": 6,
+              "candidate_beats_placebo_significant_count": 7,
+              "candidate_passes_both_count": 6,
+              "median_delta_vs_baseline": -0.000654,
+              "median_delta_vs_placebo": -0.000716
+            }
+          },
+          "creatinine": {
+            "active_only": {
+              "candidate_beats_baseline_significant_count": 6,
+              "candidate_beats_placebo_significant_count": 6,
+              "candidate_passes_both_count": 6,
+              "median_delta_vs_baseline": -0.001693,
+              "median_delta_vs_placebo": -0.001707
+            },
+            "all_windows": {
+              "candidate_beats_baseline_significant_count": 6,
+              "candidate_beats_placebo_significant_count": 7,
+              "candidate_passes_both_count": 6,
+              "median_delta_vs_baseline": -0.001154,
+              "median_delta_vs_placebo": -0.001148
+            }
+          },
+          "urine_output": {
+            "active_only": {
+              "candidate_beats_baseline_significant_count": 0,
+              "candidate_beats_placebo_significant_count": 0,
+              "candidate_passes_both_count": 0,
+              "median_delta_vs_baseline": 7.5e-05,
+              "median_delta_vs_placebo": -3.4e-05
+            },
+            "all_windows": {
+              "candidate_beats_baseline_significant_count": 0,
+              "candidate_beats_placebo_significant_count": 0,
+              "candidate_passes_both_count": 0,
+              "median_delta_vs_baseline": -3.2e-05,
+              "median_delta_vs_placebo": -0.000119
+            }
+          }
+        }
+      },
+      "rationale": "test whether validated sepsis->MAP signal adds renal prediction beyond direct sepsis->renal features",
+      "rows": 422244,
+      "stays": 30198,
+      "subjects": 25175,
+      "target_system": "renal",
+      "targets": [
+        "creatinine",
+        "bun",
+        "urine_output"
+      ]
+    }
+  ],
+  "safety_boundary": {
+    "active_rule_promotion_allowed": false,
+    "causal_claim_allowed": false,
+    "checkpoint_promotion_allowed": false,
+    "clinical_claim_allowed": false,
+    "counterfactual_claim_allowed": false,
+    "factual_predictive_signal_only": true,
+    "patient_ids_included_in_report": false,
+    "raw_rows_included": false,
+    "runtime_decision_authority": false
+  }
+}

@@ -1,0 +1,1628 @@
+{
+  "belief": {
+    "columns": [
+      "belief_bleeding_burden",
+      "belief_coagulation_reserve",
+      "belief_oxygen_carrying_reserve",
+      "belief_platelet_reserve",
+      "belief_transfusion_pressure",
+      "belief_anticoagulation_pressure",
+      "belief_rbc_transfusion_exposure",
+      "belief_hemostatic_product_exposure",
+      "belief_transfusion_dose_intensity",
+      "belief_hemostatic_stress",
+      "belief_observation_confidence"
+    ],
+    "direct_hidden_state_accuracy_claim_allowed": false,
+    "kind": "feature",
+    "name": "bleeding_coagulation_reserve_proxy",
+    "requires_capacity_matched_placebo": true,
+    "targets": [
+      "hemoglobin",
+      "hematocrit",
+      "inr",
+      "ptt",
+      "fibrinogen",
+      "platelets"
+    ]
+  },
+  "experiment": "eICU heme/coagulation belief downstream observable audit",
+  "gate": {
+    "baseline": "ridge_realfit",
+    "candidate": "ridge_realfit_plus_heme_coag_belief",
+    "pass_rule": "candidate must significantly beat both baseline and placebo on held-out patients",
+    "placebo": "ridge_realfit_plus_capacity_matched_noise_features"
+  },
+  "result": {
+    "belief_columns": [
+      "belief_bleeding_burden",
+      "belief_coagulation_reserve",
+      "belief_oxygen_carrying_reserve",
+      "belief_platelet_reserve",
+      "belief_transfusion_pressure",
+      "belief_anticoagulation_pressure",
+      "belief_rbc_transfusion_exposure",
+      "belief_hemostatic_product_exposure",
+      "belief_transfusion_dose_intensity",
+      "belief_hemostatic_stress",
+      "belief_observation_confidence"
+    ],
+    "belief_kind": "feature",
+    "cohort": "eicu_coagulopathy_heme_transitions_24h.parquet",
+    "cohort_summary": {
+      "active_heme_rows": 6266,
+      "hospitals": 12,
+      "rows": 12379,
+      "stays": 1044,
+      "subjects": 907
+    },
+    "future_suffix": "tp24",
+    "hospital_holdout": {
+      "discovery_groups": 8,
+      "group_column": "hospitalid",
+      "heldout_groups": 4,
+      "overlap": 0,
+      "passed_count": 1,
+      "passed_targets": [
+        "ptt"
+      ],
+      "seed": 9001,
+      "targets": {
+        "fibrinogen": {
+          "candidate_vs_baseline": {
+            "beats_baseline": null,
+            "bootstrap_95_ci": [
+              null,
+              null
+            ],
+            "point_delta": null,
+            "significant": false,
+            "subjects": 0
+          },
+          "candidate_vs_placebo": {
+            "beats_baseline": null,
+            "bootstrap_95_ci": [
+              null,
+              null
+            ],
+            "point_delta": null,
+            "significant": false,
+            "subjects": 0
+          },
+          "mae": {
+            "baseline_ridge": null,
+            "heme_belief_ridge": null,
+            "placebo_belief_ridge": null
+          },
+          "rows": 11,
+          "subjects": 6
+        },
+        "hematocrit": {
+          "candidate_vs_baseline": {
+            "beats_baseline": false,
+            "bootstrap_95_ci": [
+              -0.091168,
+              0.215748
+            ],
+            "point_delta": 0.052572,
+            "significant": false,
+            "subjects": 101
+          },
+          "candidate_vs_placebo": {
+            "beats_baseline": false,
+            "bootstrap_95_ci": [
+              -0.101393,
+              0.247618
+            ],
+            "point_delta": 0.053602,
+            "significant": false,
+            "subjects": 101
+          },
+          "mae": {
+            "baseline_ridge": 2.941105,
+            "heme_belief_ridge": 2.964992,
+            "placebo_belief_ridge": 2.949453
+          },
+          "rows": 278,
+          "subjects": 101
+        },
+        "hemoglobin": {
+          "candidate_vs_baseline": {
+            "beats_baseline": false,
+            "bootstrap_95_ci": [
+              -0.031791,
+              0.069885
+            ],
+            "point_delta": 0.020274,
+            "significant": false,
+            "subjects": 102
+          },
+          "candidate_vs_placebo": {
+            "beats_baseline": false,
+            "bootstrap_95_ci": [
+              -0.034031,
+              0.083248
+            ],
+            "point_delta": 0.019876,
+            "significant": false,
+            "subjects": 102
+          },
+          "mae": {
+            "baseline_ridge": 0.996538,
+            "heme_belief_ridge": 1.00587,
+            "placebo_belief_ridge": 1.01039
+          },
+          "rows": 291,
+          "subjects": 102
+        },
+        "inr": {
+          "candidate_vs_baseline": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.150927,
+              0.06053
+            ],
+            "point_delta": -0.042346,
+            "significant": false,
+            "subjects": 40
+          },
+          "candidate_vs_placebo": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.219606,
+              0.006452
+            ],
+            "point_delta": -0.091858,
+            "significant": false,
+            "subjects": 40
+          },
+          "mae": {
+            "baseline_ridge": 0.854741,
+            "heme_belief_ridge": 0.841963,
+            "placebo_belief_ridge": 0.90835
+          },
+          "rows": 72,
+          "subjects": 40
+        },
+        "platelets": {
+          "candidate_vs_baseline": {
+            "beats_baseline": false,
+            "bootstrap_95_ci": [
+              -1.280931,
+              1.682462
+            ],
+            "point_delta": 0.238157,
+            "significant": false,
+            "subjects": 87
+          },
+          "candidate_vs_placebo": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -2.153246,
+              0.896482
+            ],
+            "point_delta": -0.52602,
+            "significant": false,
+            "subjects": 87
+          },
+          "mae": {
+            "baseline_ridge": 27.804104,
+            "heme_belief_ridge": 27.674808,
+            "placebo_belief_ridge": 28.613758
+          },
+          "rows": 189,
+          "subjects": 87
+        },
+        "ptt": {
+          "candidate_vs_baseline": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -5.34762,
+              -1.112692
+            ],
+            "point_delta": -2.9154,
+            "significant": true,
+            "subjects": 13
+          },
+          "candidate_vs_placebo": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -5.551087,
+              -0.124896
+            ],
+            "point_delta": -3.04403,
+            "significant": true,
+            "subjects": 13
+          },
+          "mae": {
+            "baseline_ridge": 22.568715,
+            "heme_belief_ridge": 19.9005,
+            "placebo_belief_ridge": 22.540108
+          },
+          "rows": 23,
+          "subjects": 13
+        }
+      }
+    },
+    "random_patient_splits": {
+      "runs": [
+        {
+          "discovery_groups": 608,
+          "group_column": "subject_id",
+          "heldout_groups": 299,
+          "overlap": 0,
+          "passed_count": 2,
+          "passed_targets": [
+            "hemoglobin",
+            "hematocrit"
+          ],
+          "seed": 7,
+          "targets": {
+            "fibrinogen": {
+              "candidate_vs_baseline": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "mae": {
+                "baseline_ridge": null,
+                "heme_belief_ridge": null,
+                "placebo_belief_ridge": null
+              },
+              "rows": 9,
+              "subjects": 4
+            },
+            "hematocrit": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.21332,
+                  -0.013554
+                ],
+                "point_delta": -0.116422,
+                "significant": true,
+                "subjects": 201
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.210585,
+                  -0.001262
+                ],
+                "point_delta": -0.106819,
+                "significant": true,
+                "subjects": 201
+              },
+              "mae": {
+                "baseline_ridge": 2.572093,
+                "heme_belief_ridge": 2.527836,
+                "placebo_belief_ridge": 2.571345
+              },
+              "rows": 589,
+              "subjects": 201
+            },
+            "hemoglobin": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.079662,
+                  -0.00588
+                ],
+                "point_delta": -0.043525,
+                "significant": true,
+                "subjects": 203
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.076142,
+                  -0.000781
+                ],
+                "point_delta": -0.039275,
+                "significant": true,
+                "subjects": 203
+              },
+              "mae": {
+                "baseline_ridge": 0.861785,
+                "heme_belief_ridge": 0.832292,
+                "placebo_belief_ridge": 0.858297
+              },
+              "rows": 585,
+              "subjects": 203
+            },
+            "inr": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.108554,
+                  0.007625
+                ],
+                "point_delta": -0.049887,
+                "significant": false,
+                "subjects": 51
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.146101,
+                  0.00331
+                ],
+                "point_delta": -0.069184,
+                "significant": false,
+                "subjects": 51
+              },
+              "mae": {
+                "baseline_ridge": 0.665116,
+                "heme_belief_ridge": 0.591777,
+                "placebo_belief_ridge": 0.696172
+              },
+              "rows": 92,
+              "subjects": 51
+            },
+            "platelets": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.955518,
+                  0.149031
+                ],
+                "point_delta": -0.405998,
+                "significant": false,
+                "subjects": 171
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -1.013316,
+                  0.291573
+                ],
+                "point_delta": -0.442389,
+                "significant": false,
+                "subjects": 171
+              },
+              "mae": {
+                "baseline_ridge": 25.702863,
+                "heme_belief_ridge": 25.991384,
+                "placebo_belief_ridge": 25.641983
+              },
+              "rows": 394,
+              "subjects": 171
+            },
+            "ptt": {
+              "candidate_vs_baseline": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  -0.490856,
+                  0.571667
+                ],
+                "point_delta": 0.017717,
+                "significant": false,
+                "subjects": 35
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -1.160901,
+                  0.349991
+                ],
+                "point_delta": -0.413254,
+                "significant": false,
+                "subjects": 35
+              },
+              "mae": {
+                "baseline_ridge": 17.787188,
+                "heme_belief_ridge": 17.766162,
+                "placebo_belief_ridge": 18.302581
+              },
+              "rows": 79,
+              "subjects": 35
+            }
+          }
+        },
+        {
+          "discovery_groups": 608,
+          "group_column": "subject_id",
+          "heldout_groups": 299,
+          "overlap": 0,
+          "passed_count": 3,
+          "passed_targets": [
+            "hemoglobin",
+            "hematocrit",
+            "inr"
+          ],
+          "seed": 11,
+          "targets": {
+            "fibrinogen": {
+              "candidate_vs_baseline": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "mae": {
+                "baseline_ridge": null,
+                "heme_belief_ridge": null,
+                "placebo_belief_ridge": null
+              },
+              "rows": 5,
+              "subjects": 3
+            },
+            "hematocrit": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.232782,
+                  -0.048371
+                ],
+                "point_delta": -0.139708,
+                "significant": true,
+                "subjects": 209
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.239432,
+                  -0.050863
+                ],
+                "point_delta": -0.141428,
+                "significant": true,
+                "subjects": 209
+              },
+              "mae": {
+                "baseline_ridge": 2.619225,
+                "heme_belief_ridge": 2.564298,
+                "placebo_belief_ridge": 2.632544
+              },
+              "rows": 585,
+              "subjects": 209
+            },
+            "hemoglobin": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.085155,
+                  -0.020443
+                ],
+                "point_delta": -0.053791,
+                "significant": true,
+                "subjects": 212
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.086862,
+                  -0.024953
+                ],
+                "point_delta": -0.055998,
+                "significant": true,
+                "subjects": 212
+              },
+              "mae": {
+                "baseline_ridge": 0.894678,
+                "heme_belief_ridge": 0.862373,
+                "placebo_belief_ridge": 0.898878
+              },
+              "rows": 598,
+              "subjects": 212
+            },
+            "inr": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.144762,
+                  -0.007977
+                ],
+                "point_delta": -0.074496,
+                "significant": true,
+                "subjects": 71
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.149654,
+                  -0.016319
+                ],
+                "point_delta": -0.079712,
+                "significant": true,
+                "subjects": 71
+              },
+              "mae": {
+                "baseline_ridge": 0.689945,
+                "heme_belief_ridge": 0.642048,
+                "placebo_belief_ridge": 0.694258
+              },
+              "rows": 115,
+              "subjects": 71
+            },
+            "platelets": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -1.056491,
+                  0.818768
+                ],
+                "point_delta": -0.108809,
+                "significant": false,
+                "subjects": 184
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -1.715769,
+                  0.419359
+                ],
+                "point_delta": -0.72334,
+                "significant": false,
+                "subjects": 184
+              },
+              "mae": {
+                "baseline_ridge": 27.161901,
+                "heme_belief_ridge": 26.878693,
+                "placebo_belief_ridge": 27.64834
+              },
+              "rows": 391,
+              "subjects": 184
+            },
+            "ptt": {
+              "candidate_vs_baseline": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  -0.490222,
+                  1.301622
+                ],
+                "point_delta": 0.300531,
+                "significant": false,
+                "subjects": 33
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -2.753864,
+                  0.396325
+                ],
+                "point_delta": -1.252189,
+                "significant": false,
+                "subjects": 33
+              },
+              "mae": {
+                "baseline_ridge": 17.296368,
+                "heme_belief_ridge": 17.518017,
+                "placebo_belief_ridge": 18.328296
+              },
+              "rows": 90,
+              "subjects": 33
+            }
+          }
+        },
+        {
+          "discovery_groups": 608,
+          "group_column": "subject_id",
+          "heldout_groups": 299,
+          "overlap": 0,
+          "passed_count": 0,
+          "passed_targets": [],
+          "seed": 19,
+          "targets": {
+            "fibrinogen": {
+              "candidate_vs_baseline": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "mae": {
+                "baseline_ridge": null,
+                "heme_belief_ridge": null,
+                "placebo_belief_ridge": null
+              },
+              "rows": 11,
+              "subjects": 4
+            },
+            "hematocrit": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.18232,
+                  0.062833
+                ],
+                "point_delta": -0.070408,
+                "significant": false,
+                "subjects": 205
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.216417,
+                  0.047372
+                ],
+                "point_delta": -0.079267,
+                "significant": false,
+                "subjects": 205
+              },
+              "mae": {
+                "baseline_ridge": 2.74541,
+                "heme_belief_ridge": 2.751259,
+                "placebo_belief_ridge": 2.747268
+              },
+              "rows": 624,
+              "subjects": 205
+            },
+            "hemoglobin": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.07362,
+                  0.004655
+                ],
+                "point_delta": -0.034986,
+                "significant": false,
+                "subjects": 208
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.087493,
+                  -0.004664
+                ],
+                "point_delta": -0.048502,
+                "significant": true,
+                "subjects": 208
+              },
+              "mae": {
+                "baseline_ridge": 0.936335,
+                "heme_belief_ridge": 0.909208,
+                "placebo_belief_ridge": 0.944407
+              },
+              "rows": 643,
+              "subjects": 208
+            },
+            "inr": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.106216,
+                  0.005114
+                ],
+                "point_delta": -0.048565,
+                "significant": false,
+                "subjects": 63
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.121568,
+                  -0.000488
+                ],
+                "point_delta": -0.060956,
+                "significant": true,
+                "subjects": 63
+              },
+              "mae": {
+                "baseline_ridge": 0.783728,
+                "heme_belief_ridge": 0.712589,
+                "placebo_belief_ridge": 0.743199
+              },
+              "rows": 129,
+              "subjects": 63
+            },
+            "platelets": {
+              "candidate_vs_baseline": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  -0.612827,
+                  0.777505
+                ],
+                "point_delta": 0.057225,
+                "significant": false,
+                "subjects": 174
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  -0.757393,
+                  0.921437
+                ],
+                "point_delta": 0.00101,
+                "significant": false,
+                "subjects": 174
+              },
+              "mae": {
+                "baseline_ridge": 29.064341,
+                "heme_belief_ridge": 29.732622,
+                "placebo_belief_ridge": 29.22979
+              },
+              "rows": 391,
+              "subjects": 174
+            },
+            "ptt": {
+              "candidate_vs_baseline": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  -0.549922,
+                  1.408402
+                ],
+                "point_delta": 0.434422,
+                "significant": false,
+                "subjects": 25
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -2.380056,
+                  0.901137
+                ],
+                "point_delta": -0.669707,
+                "significant": false,
+                "subjects": 25
+              },
+              "mae": {
+                "baseline_ridge": 14.539075,
+                "heme_belief_ridge": 14.427349,
+                "placebo_belief_ridge": 15.208033
+              },
+              "rows": 65,
+              "subjects": 25
+            }
+          }
+        },
+        {
+          "discovery_groups": 608,
+          "group_column": "subject_id",
+          "heldout_groups": 299,
+          "overlap": 0,
+          "passed_count": 1,
+          "passed_targets": [
+            "inr"
+          ],
+          "seed": 23,
+          "targets": {
+            "fibrinogen": {
+              "candidate_vs_baseline": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "mae": {
+                "baseline_ridge": null,
+                "heme_belief_ridge": null,
+                "placebo_belief_ridge": null
+              },
+              "rows": 1,
+              "subjects": 1
+            },
+            "hematocrit": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.192505,
+                  0.048457
+                ],
+                "point_delta": -0.066284,
+                "significant": false,
+                "subjects": 201
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.262192,
+                  0.008051
+                ],
+                "point_delta": -0.12695,
+                "significant": false,
+                "subjects": 201
+              },
+              "mae": {
+                "baseline_ridge": 2.611314,
+                "heme_belief_ridge": 2.56341,
+                "placebo_belief_ridge": 2.649544
+              },
+              "rows": 570,
+              "subjects": 201
+            },
+            "hemoglobin": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.055854,
+                  0.024338
+                ],
+                "point_delta": -0.014055,
+                "significant": false,
+                "subjects": 205
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.056328,
+                  0.019734
+                ],
+                "point_delta": -0.016588,
+                "significant": false,
+                "subjects": 205
+              },
+              "mae": {
+                "baseline_ridge": 0.874006,
+                "heme_belief_ridge": 0.861781,
+                "placebo_belief_ridge": 0.880986
+              },
+              "rows": 588,
+              "subjects": 205
+            },
+            "inr": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.166231,
+                  -0.006558
+                ],
+                "point_delta": -0.078493,
+                "significant": true,
+                "subjects": 49
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.2483,
+                  -0.019309
+                ],
+                "point_delta": -0.13338,
+                "significant": true,
+                "subjects": 49
+              },
+              "mae": {
+                "baseline_ridge": 0.836487,
+                "heme_belief_ridge": 0.750801,
+                "placebo_belief_ridge": 0.855437
+              },
+              "rows": 107,
+              "subjects": 49
+            },
+            "platelets": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -1.078768,
+                  0.833686
+                ],
+                "point_delta": -0.144572,
+                "significant": false,
+                "subjects": 168
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -1.504456,
+                  0.691565
+                ],
+                "point_delta": -0.396993,
+                "significant": false,
+                "subjects": 168
+              },
+              "mae": {
+                "baseline_ridge": 29.96844,
+                "heme_belief_ridge": 29.610565,
+                "placebo_belief_ridge": 30.181674
+              },
+              "rows": 375,
+              "subjects": 168
+            },
+            "ptt": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -2.088591,
+                  -0.434678
+                ],
+                "point_delta": -1.232449,
+                "significant": true,
+                "subjects": 25
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -2.378191,
+                  1.142582
+                ],
+                "point_delta": -0.608128,
+                "significant": false,
+                "subjects": 25
+              },
+              "mae": {
+                "baseline_ridge": 14.31252,
+                "heme_belief_ridge": 13.554298,
+                "placebo_belief_ridge": 14.69608
+              },
+              "rows": 65,
+              "subjects": 25
+            }
+          }
+        },
+        {
+          "discovery_groups": 608,
+          "group_column": "subject_id",
+          "heldout_groups": 299,
+          "overlap": 0,
+          "passed_count": 2,
+          "passed_targets": [
+            "hemoglobin",
+            "hematocrit"
+          ],
+          "seed": 37,
+          "targets": {
+            "fibrinogen": {
+              "candidate_vs_baseline": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "mae": {
+                "baseline_ridge": null,
+                "heme_belief_ridge": null,
+                "placebo_belief_ridge": null
+              },
+              "rows": 8,
+              "subjects": 3
+            },
+            "hematocrit": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.246489,
+                  -0.079354
+                ],
+                "point_delta": -0.162045,
+                "significant": true,
+                "subjects": 210
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.262703,
+                  -0.076916
+                ],
+                "point_delta": -0.172974,
+                "significant": true,
+                "subjects": 210
+              },
+              "mae": {
+                "baseline_ridge": 2.615738,
+                "heme_belief_ridge": 2.519153,
+                "placebo_belief_ridge": 2.631044
+              },
+              "rows": 558,
+              "subjects": 210
+            },
+            "hemoglobin": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.086726,
+                  -0.020305
+                ],
+                "point_delta": -0.056125,
+                "significant": true,
+                "subjects": 210
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.097799,
+                  -0.030665
+                ],
+                "point_delta": -0.063162,
+                "significant": true,
+                "subjects": 210
+              },
+              "mae": {
+                "baseline_ridge": 0.87666,
+                "heme_belief_ridge": 0.839628,
+                "placebo_belief_ridge": 0.880236
+              },
+              "rows": 568,
+              "subjects": 210
+            },
+            "inr": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.125865,
+                  -0.008473
+                ],
+                "point_delta": -0.059575,
+                "significant": true,
+                "subjects": 61
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.11248,
+                  0.019439
+                ],
+                "point_delta": -0.04686,
+                "significant": false,
+                "subjects": 61
+              },
+              "mae": {
+                "baseline_ridge": 0.705298,
+                "heme_belief_ridge": 0.670265,
+                "placebo_belief_ridge": 0.729705
+              },
+              "rows": 100,
+              "subjects": 61
+            },
+            "platelets": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -1.235714,
+                  0.768493
+                ],
+                "point_delta": -0.273532,
+                "significant": false,
+                "subjects": 176
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -1.478125,
+                  0.623597
+                ],
+                "point_delta": -0.46165,
+                "significant": false,
+                "subjects": 176
+              },
+              "mae": {
+                "baseline_ridge": 25.190163,
+                "heme_belief_ridge": 24.73106,
+                "placebo_belief_ridge": 25.355066
+              },
+              "rows": 355,
+              "subjects": 176
+            },
+            "ptt": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -3.128773,
+                  0.308281
+                ],
+                "point_delta": -1.046813,
+                "significant": false,
+                "subjects": 31
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -4.421732,
+                  -0.209418
+                ],
+                "point_delta": -2.032084,
+                "significant": true,
+                "subjects": 31
+              },
+              "mae": {
+                "baseline_ridge": 14.929751,
+                "heme_belief_ridge": 14.458983,
+                "placebo_belief_ridge": 15.86532
+              },
+              "rows": 78,
+              "subjects": 31
+            }
+          }
+        },
+        {
+          "discovery_groups": 608,
+          "group_column": "subject_id",
+          "heldout_groups": 299,
+          "overlap": 0,
+          "passed_count": 2,
+          "passed_targets": [
+            "hemoglobin",
+            "hematocrit"
+          ],
+          "seed": 53,
+          "targets": {
+            "fibrinogen": {
+              "candidate_vs_baseline": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "mae": {
+                "baseline_ridge": null,
+                "heme_belief_ridge": null,
+                "placebo_belief_ridge": null
+              },
+              "rows": 7,
+              "subjects": 3
+            },
+            "hematocrit": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.248687,
+                  -0.113313
+                ],
+                "point_delta": -0.176363,
+                "significant": true,
+                "subjects": 212
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.273679,
+                  -0.107463
+                ],
+                "point_delta": -0.193945,
+                "significant": true,
+                "subjects": 212
+              },
+              "mae": {
+                "baseline_ridge": 2.589804,
+                "heme_belief_ridge": 2.463935,
+                "placebo_belief_ridge": 2.597396
+              },
+              "rows": 634,
+              "subjects": 212
+            },
+            "hemoglobin": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.083087,
+                  -0.033878
+                ],
+                "point_delta": -0.058343,
+                "significant": true,
+                "subjects": 214
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.085797,
+                  -0.035251
+                ],
+                "point_delta": -0.063078,
+                "significant": true,
+                "subjects": 214
+              },
+              "mae": {
+                "baseline_ridge": 0.864634,
+                "heme_belief_ridge": 0.818362,
+                "placebo_belief_ridge": 0.870161
+              },
+              "rows": 644,
+              "subjects": 214
+            },
+            "inr": {
+              "candidate_vs_baseline": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  -0.052643,
+                  0.05677
+                ],
+                "point_delta": 0.002161,
+                "significant": false,
+                "subjects": 58
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.100819,
+                  0.05077
+                ],
+                "point_delta": -0.023676,
+                "significant": false,
+                "subjects": 58
+              },
+              "mae": {
+                "baseline_ridge": 0.592526,
+                "heme_belief_ridge": 0.570399,
+                "placebo_belief_ridge": 0.617049
+              },
+              "rows": 95,
+              "subjects": 58
+            },
+            "platelets": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -1.183702,
+                  -0.054069
+                ],
+                "point_delta": -0.602546,
+                "significant": true,
+                "subjects": 187
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -1.370671,
+                  0.128972
+                ],
+                "point_delta": -0.620905,
+                "significant": false,
+                "subjects": 187
+              },
+              "mae": {
+                "baseline_ridge": 25.075801,
+                "heme_belief_ridge": 24.78183,
+                "placebo_belief_ridge": 24.994824
+              },
+              "rows": 416,
+              "subjects": 187
+            },
+            "ptt": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.992849,
+                  0.876362
+                ],
+                "point_delta": -0.100205,
+                "significant": false,
+                "subjects": 36
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -3.163345,
+                  -0.328711
+                ],
+                "point_delta": -1.556107,
+                "significant": true,
+                "subjects": 36
+              },
+              "mae": {
+                "baseline_ridge": 14.760282,
+                "heme_belief_ridge": 14.586626,
+                "placebo_belief_ridge": 16.438756
+              },
+              "rows": 84,
+              "subjects": 36
+            }
+          }
+        },
+        {
+          "discovery_groups": 608,
+          "group_column": "subject_id",
+          "heldout_groups": 299,
+          "overlap": 0,
+          "passed_count": 1,
+          "passed_targets": [
+            "hemoglobin"
+          ],
+          "seed": 71,
+          "targets": {
+            "fibrinogen": {
+              "candidate_vs_baseline": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "mae": {
+                "baseline_ridge": null,
+                "heme_belief_ridge": null,
+                "placebo_belief_ridge": null
+              },
+              "rows": 6,
+              "subjects": 3
+            },
+            "hematocrit": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.192009,
+                  0.02638
+                ],
+                "point_delta": -0.081616,
+                "significant": false,
+                "subjects": 215
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.214696,
+                  0.009473
+                ],
+                "point_delta": -0.104515,
+                "significant": false,
+                "subjects": 215
+              },
+              "mae": {
+                "baseline_ridge": 2.657618,
+                "heme_belief_ridge": 2.680886,
+                "placebo_belief_ridge": 2.678597
+              },
+              "rows": 584,
+              "subjects": 215
+            },
+            "hemoglobin": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.085556,
+                  -0.007359
+                ],
+                "point_delta": -0.045204,
+                "significant": true,
+                "subjects": 215
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.086175,
+                  -0.005276
+                ],
+                "point_delta": -0.046805,
+                "significant": true,
+                "subjects": 215
+              },
+              "mae": {
+                "baseline_ridge": 0.890928,
+                "heme_belief_ridge": 0.875992,
+                "placebo_belief_ridge": 0.883369
+              },
+              "rows": 588,
+              "subjects": 215
+            },
+            "inr": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.075864,
+                  0.024543
+                ],
+                "point_delta": -0.024085,
+                "significant": false,
+                "subjects": 82
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.072043,
+                  0.044084
+                ],
+                "point_delta": -0.01214,
+                "significant": false,
+                "subjects": 82
+              },
+              "mae": {
+                "baseline_ridge": 0.708781,
+                "heme_belief_ridge": 0.686661,
+                "placebo_belief_ridge": 0.717248
+              },
+              "rows": 153,
+              "subjects": 82
+            },
+            "platelets": {
+              "candidate_vs_baseline": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  -0.805757,
+                  1.543516
+                ],
+                "point_delta": 0.251023,
+                "significant": false,
+                "subjects": 194
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  -0.9891,
+                  1.291981
+                ],
+                "point_delta": 0.0997,
+                "significant": false,
+                "subjects": 194
+              },
+              "mae": {
+                "baseline_ridge": 26.65282,
+                "heme_belief_ridge": 27.055678,
+                "placebo_belief_ridge": 26.925591
+              },
+              "rows": 405,
+              "subjects": 194
+            },
+            "ptt": {
+              "candidate_vs_baseline": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "mae": {
+                "baseline_ridge": 16.461625,
+                "heme_belief_ridge": null,
+                "placebo_belief_ridge": null
+              },
+              "rows": 108,
+              "subjects": 42
+            }
+          }
+        }
+      ],
+      "seeds": [
+        7,
+        11,
+        19,
+        23,
+        37,
+        53,
+        71
+      ],
+      "summary": {
+        "fibrinogen": {
+          "candidate_beats_baseline_significant_count": 0,
+          "candidate_beats_placebo_significant_count": 0,
+          "candidate_passes_both_count": 0,
+          "median_delta_vs_baseline": null,
+          "median_delta_vs_placebo": null
+        },
+        "hematocrit": {
+          "candidate_beats_baseline_significant_count": 4,
+          "candidate_beats_placebo_significant_count": 4,
+          "candidate_passes_both_count": 4,
+          "median_delta_vs_baseline": -0.116422,
+          "median_delta_vs_placebo": -0.12695
+        },
+        "hemoglobin": {
+          "candidate_beats_baseline_significant_count": 5,
+          "candidate_beats_placebo_significant_count": 6,
+          "candidate_passes_both_count": 5,
+          "median_delta_vs_baseline": -0.045204,
+          "median_delta_vs_placebo": -0.048502
+        },
+        "inr": {
+          "candidate_beats_baseline_significant_count": 3,
+          "candidate_beats_placebo_significant_count": 3,
+          "candidate_passes_both_count": 2,
+          "median_delta_vs_baseline": -0.049887,
+          "median_delta_vs_placebo": -0.060956
+        },
+        "platelets": {
+          "candidate_beats_baseline_significant_count": 1,
+          "candidate_beats_placebo_significant_count": 0,
+          "candidate_passes_both_count": 0,
+          "median_delta_vs_baseline": -0.144572,
+          "median_delta_vs_placebo": -0.442389
+        },
+        "ptt": {
+          "candidate_beats_baseline_significant_count": 1,
+          "candidate_beats_placebo_significant_count": 2,
+          "candidate_passes_both_count": 0,
+          "median_delta_vs_baseline": -0.041244,
+          "median_delta_vs_placebo": -0.960948
+        }
+      }
+    }
+  },
+  "safety_boundary": {
+    "active_rule_promotion_allowed": false,
+    "causal_claim_allowed": false,
+    "checkpoint_promotion_allowed": false,
+    "clinical_claim_allowed": false,
+    "counterfactual_claim_allowed": false,
+    "direct_hidden_state_accuracy_claim_allowed": false,
+    "factual_observed_treatment_only": true,
+    "patient_ids_included_in_report": false,
+    "raw_rows_included": false
+  }
+}

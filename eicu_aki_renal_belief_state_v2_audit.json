@@ -1,0 +1,1788 @@
+{
+  "belief": {
+    "columns": [
+      "belief_renal_reserve",
+      "belief_azotemia_load",
+      "belief_oliguria",
+      "belief_perfusion_deficit",
+      "belief_rrt_context",
+      "belief_observation_confidence"
+    ],
+    "direct_hidden_state_accuracy_claim_allowed": false,
+    "name": "renal_reserve_gfr_proxy",
+    "requires_capacity_matched_placebo": true,
+    "targets": [
+      "creatinine",
+      "bun",
+      "urine_output"
+    ]
+  },
+  "experiment": "eICU AKI renal belief downstream observable audit",
+  "gate": {
+    "baseline": "ridge_realfit",
+    "candidate": "ridge_realfit_plus_renal_belief_features",
+    "pass_rule": "candidate must significantly beat both baseline and placebo on held-out patients",
+    "placebo": "ridge_realfit_plus_capacity_matched_noise_features"
+  },
+  "horizons": [
+    {
+      "belief_columns": [
+        "state2_belief_renal_reserve_mean",
+        "state2_belief_renal_reserve_sd",
+        "state2_belief_renal_stress",
+        "state2_belief_observation_confidence",
+        "state2_belief_delta_since_prior",
+        "state2_belief_creatinine_level",
+        "state2_belief_creatinine_slope",
+        "state2_belief_creatinine_sd",
+        "state2_belief_creatinine_innovation",
+        "state2_belief_creatinine_observation_confidence"
+      ],
+      "belief_kind": "state_v2",
+      "cohort": "eicu_aki_transitions_24h.parquet",
+      "cohort_summary": {
+        "active_aki_rows": 178294,
+        "hospitals": 203,
+        "rows": 530265,
+        "stays": 33975,
+        "subjects": 29508
+      },
+      "future_suffix": "tp24",
+      "hospital_holdout": {
+        "discovery_groups": 136,
+        "group_column": "hospitalid",
+        "heldout_groups": 67,
+        "overlap": 0,
+        "passed_count": 3,
+        "passed_targets": [
+          "creatinine",
+          "bun",
+          "urine_output"
+        ],
+        "seed": 9001,
+        "targets": {
+          "bun": {
+            "candidate_vs_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.250995,
+                -0.168905
+              ],
+              "point_delta": -0.210704,
+              "significant": true,
+              "subjects": 9534
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.252678,
+                -0.175472
+              ],
+              "point_delta": -0.21375,
+              "significant": true,
+              "subjects": 9534
+            },
+            "mae": {
+              "baseline_ridge": 8.722544,
+              "placebo_belief_ridge": 8.723455,
+              "renal_belief_ridge": 8.456075
+            },
+            "rows": 28370,
+            "subjects": 9534
+          },
+          "creatinine": {
+            "candidate_vs_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.008286,
+                -0.002116
+              ],
+              "point_delta": -0.005013,
+              "significant": true,
+              "subjects": 9555
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.008712,
+                -0.001807
+              ],
+              "point_delta": -0.005154,
+              "significant": true,
+              "subjects": 9555
+            },
+            "mae": {
+              "baseline_ridge": 0.525313,
+              "placebo_belief_ridge": 0.525481,
+              "renal_belief_ridge": 0.513638
+            },
+            "rows": 28454,
+            "subjects": 9555
+          },
+          "urine_output": {
+            "candidate_vs_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.747311,
+                -0.071996
+              ],
+              "point_delta": -0.412348,
+              "significant": true,
+              "subjects": 6344
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.798026,
+                -0.06837
+              ],
+              "point_delta": -0.423581,
+              "significant": true,
+              "subjects": 6344
+            },
+            "mae": {
+              "baseline_ridge": 136.070958,
+              "placebo_belief_ridge": 136.074677,
+              "renal_belief_ridge": 134.844034
+            },
+            "rows": 73540,
+            "subjects": 6344
+          }
+        }
+      },
+      "random_patient_splits": {
+        "runs": [
+          {
+            "discovery_groups": 19770,
+            "group_column": "subject_id",
+            "heldout_groups": 9738,
+            "overlap": 0,
+            "passed_count": 3,
+            "passed_targets": [
+              "creatinine",
+              "bun",
+              "urine_output"
+            ],
+            "seed": 7,
+            "targets": {
+              "bun": {
+                "candidate_vs_baseline": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.260064,
+                    -0.177827
+                  ],
+                  "point_delta": -0.22116,
+                  "significant": true,
+                  "subjects": 7913
+                },
+                "candidate_vs_placebo": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.261521,
+                    -0.185745
+                  ],
+                  "point_delta": -0.224519,
+                  "significant": true,
+                  "subjects": 7913
+                },
+                "mae": {
+                  "baseline_ridge": 8.569684,
+                  "placebo_belief_ridge": 8.572607,
+                  "renal_belief_ridge": 8.286979
+                },
+                "rows": 24521,
+                "subjects": 7913
+              },
+              "creatinine": {
+                "candidate_vs_baseline": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.010561,
+                    -0.004555
+                  ],
+                  "point_delta": -0.007597,
+                  "significant": true,
+                  "subjects": 7935
+                },
+                "candidate_vs_placebo": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.010848,
+                    -0.004815
+                  ],
+                  "point_delta": -0.007769,
+                  "significant": true,
+                  "subjects": 7935
+                },
+                "mae": {
+                  "baseline_ridge": 0.516845,
+                  "placebo_belief_ridge": 0.517087,
+                  "renal_belief_ridge": 0.501934
+                },
+                "rows": 24592,
+                "subjects": 7935
+              },
+              "urine_output": {
+                "candidate_vs_baseline": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -1.520036,
+                    -0.694872
+                  ],
+                  "point_delta": -1.122204,
+                  "significant": true,
+                  "subjects": 5442
+                },
+                "candidate_vs_placebo": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -1.568277,
+                    -0.692483
+                  ],
+                  "point_delta": -1.134624,
+                  "significant": true,
+                  "subjects": 5442
+                },
+                "mae": {
+                  "baseline_ridge": 129.760942,
+                  "placebo_belief_ridge": 129.774214,
+                  "renal_belief_ridge": 127.885404
+                },
+                "rows": 64878,
+                "subjects": 5442
+              }
+            }
+          },
+          {
+            "discovery_groups": 19770,
+            "group_column": "subject_id",
+            "heldout_groups": 9738,
+            "overlap": 0,
+            "passed_count": 3,
+            "passed_targets": [
+              "creatinine",
+              "bun",
+              "urine_output"
+            ],
+            "seed": 11,
+            "targets": {
+              "bun": {
+                "candidate_vs_baseline": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.256094,
+                    -0.178245
+                  ],
+                  "point_delta": -0.218927,
+                  "significant": true,
+                  "subjects": 7863
+                },
+                "candidate_vs_placebo": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.264665,
+                    -0.184794
+                  ],
+                  "point_delta": -0.222588,
+                  "significant": true,
+                  "subjects": 7863
+                },
+                "mae": {
+                  "baseline_ridge": 8.526655,
+                  "placebo_belief_ridge": 8.52907,
+                  "renal_belief_ridge": 8.239111
+                },
+                "rows": 23952,
+                "subjects": 7863
+              },
+              "creatinine": {
+                "candidate_vs_baseline": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.011362,
+                    -0.004892
+                  ],
+                  "point_delta": -0.007976,
+                  "significant": true,
+                  "subjects": 7879
+                },
+                "candidate_vs_placebo": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.011122,
+                    -0.005254
+                  ],
+                  "point_delta": -0.008075,
+                  "significant": true,
+                  "subjects": 7879
+                },
+                "mae": {
+                  "baseline_ridge": 0.518071,
+                  "placebo_belief_ridge": 0.51812,
+                  "renal_belief_ridge": 0.502995
+                },
+                "rows": 23995,
+                "subjects": 7879
+              },
+              "urine_output": {
+                "candidate_vs_baseline": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -1.083823,
+                    -0.207846
+                  ],
+                  "point_delta": -0.698308,
+                  "significant": true,
+                  "subjects": 5510
+                },
+                "candidate_vs_placebo": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -1.125928,
+                    -0.291898
+                  ],
+                  "point_delta": -0.732736,
+                  "significant": true,
+                  "subjects": 5510
+                },
+                "mae": {
+                  "baseline_ridge": 131.376123,
+                  "placebo_belief_ridge": 131.393312,
+                  "renal_belief_ridge": 130.126454
+                },
+                "rows": 66378,
+                "subjects": 5510
+              }
+            }
+          },
+          {
+            "discovery_groups": 19770,
+            "group_column": "subject_id",
+            "heldout_groups": 9738,
+            "overlap": 0,
+            "passed_count": 3,
+            "passed_targets": [
+              "creatinine",
+              "bun",
+              "urine_output"
+            ],
+            "seed": 19,
+            "targets": {
+              "bun": {
+                "candidate_vs_baseline": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.241392,
+                    -0.168766
+                  ],
+                  "point_delta": -0.206556,
+                  "significant": true,
+                  "subjects": 7840
+                },
+                "candidate_vs_placebo": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.248447,
+                    -0.166585
+                  ],
+                  "point_delta": -0.209537,
+                  "significant": true,
+                  "subjects": 7840
+                },
+                "mae": {
+                  "baseline_ridge": 8.647476,
+                  "placebo_belief_ridge": 8.648947,
+                  "renal_belief_ridge": 8.379174
+                },
+                "rows": 24479,
+                "subjects": 7840
+              },
+              "creatinine": {
+                "candidate_vs_baseline": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.00896,
+                    -0.00264
+                  ],
+                  "point_delta": -0.005765,
+                  "significant": true,
+                  "subjects": 7860
+                },
+                "candidate_vs_placebo": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.008776,
+                    -0.003228
+                  ],
+                  "point_delta": -0.005719,
+                  "significant": true,
+                  "subjects": 7860
+                },
+                "mae": {
+                  "baseline_ridge": 0.515675,
+                  "placebo_belief_ridge": 0.515797,
+                  "renal_belief_ridge": 0.502634
+                },
+                "rows": 24561,
+                "subjects": 7860
+              },
+              "urine_output": {
+                "candidate_vs_baseline": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -1.173586,
+                    -0.190376
+                  ],
+                  "point_delta": -0.668983,
+                  "significant": true,
+                  "subjects": 5431
+                },
+                "candidate_vs_placebo": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -1.180465,
+                    -0.263286
+                  ],
+                  "point_delta": -0.702158,
+                  "significant": true,
+                  "subjects": 5431
+                },
+                "mae": {
+                  "baseline_ridge": 129.670955,
+                  "placebo_belief_ridge": 129.684638,
+                  "renal_belief_ridge": 127.981446
+                },
+                "rows": 64708,
+                "subjects": 5431
+              }
+            }
+          },
+          {
+            "discovery_groups": 19770,
+            "group_column": "subject_id",
+            "heldout_groups": 9738,
+            "overlap": 0,
+            "passed_count": 3,
+            "passed_targets": [
+              "creatinine",
+              "bun",
+              "urine_output"
+            ],
+            "seed": 23,
+            "targets": {
+              "bun": {
+                "candidate_vs_baseline": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.226252,
+                    -0.140563
+                  ],
+                  "point_delta": -0.184219,
+                  "significant": true,
+                  "subjects": 7822
+                },
+                "candidate_vs_placebo": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.232523,
+                    -0.143225
+                  ],
+                  "point_delta": -0.186687,
+                  "significant": true,
+                  "subjects": 7822
+                },
+                "mae": {
+                  "baseline_ridge": 8.533979,
+                  "placebo_belief_ridge": 8.534501,
+                  "renal_belief_ridge": 8.298225
+                },
+                "rows": 23811,
+                "subjects": 7822
+              },
+              "creatinine": {
+                "candidate_vs_baseline": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.007703,
+                    -0.001475
+                  ],
+                  "point_delta": -0.004564,
+                  "significant": true,
+                  "subjects": 7836
+                },
+                "candidate_vs_placebo": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.007816,
+                    -0.001813
+                  ],
+                  "point_delta": -0.004817,
+                  "significant": true,
+                  "subjects": 7836
+                },
+                "mae": {
+                  "baseline_ridge": 0.515776,
+                  "placebo_belief_ridge": 0.515989,
+                  "renal_belief_ridge": 0.504681
+                },
+                "rows": 23857,
+                "subjects": 7836
+              },
+              "urine_output": {
+                "candidate_vs_baseline": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -1.091879,
+                    -0.247661
+                  ],
+                  "point_delta": -0.666947,
+                  "significant": true,
+                  "subjects": 5557
+                },
+                "candidate_vs_placebo": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -1.076377,
+                    -0.167376
+                  ],
+                  "point_delta": -0.667474,
+                  "significant": true,
+                  "subjects": 5557
+                },
+                "mae": {
+                  "baseline_ridge": 130.950702,
+                  "placebo_belief_ridge": 130.958517,
+                  "renal_belief_ridge": 129.460647
+                },
+                "rows": 66774,
+                "subjects": 5557
+              }
+            }
+          },
+          {
+            "discovery_groups": 19770,
+            "group_column": "subject_id",
+            "heldout_groups": 9738,
+            "overlap": 0,
+            "passed_count": 3,
+            "passed_targets": [
+              "creatinine",
+              "bun",
+              "urine_output"
+            ],
+            "seed": 37,
+            "targets": {
+              "bun": {
+                "candidate_vs_baseline": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.233625,
+                    -0.144658
+                  ],
+                  "point_delta": -0.195494,
+                  "significant": true,
+                  "subjects": 7867
+                },
+                "candidate_vs_placebo": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.237973,
+                    -0.154051
+                  ],
+                  "point_delta": -0.196537,
+                  "significant": true,
+                  "subjects": 7867
+                },
+                "mae": {
+                  "baseline_ridge": 8.529872,
+                  "placebo_belief_ridge": 8.530425,
+                  "renal_belief_ridge": 8.25945
+                },
+                "rows": 24259,
+                "subjects": 7867
+              },
+              "creatinine": {
+                "candidate_vs_baseline": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.008453,
+                    -0.002274
+                  ],
+                  "point_delta": -0.005681,
+                  "significant": true,
+                  "subjects": 7881
+                },
+                "candidate_vs_placebo": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.00954,
+                    -0.002516
+                  ],
+                  "point_delta": -0.006039,
+                  "significant": true,
+                  "subjects": 7881
+                },
+                "mae": {
+                  "baseline_ridge": 0.514746,
+                  "placebo_belief_ridge": 0.515045,
+                  "renal_belief_ridge": 0.501854
+                },
+                "rows": 24332,
+                "subjects": 7881
+              },
+              "urine_output": {
+                "candidate_vs_baseline": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -1.254443,
+                    -0.436508
+                  ],
+                  "point_delta": -0.891882,
+                  "significant": true,
+                  "subjects": 5525
+                },
+                "candidate_vs_placebo": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -1.270111,
+                    -0.451792
+                  ],
+                  "point_delta": -0.89463,
+                  "significant": true,
+                  "subjects": 5525
+                },
+                "mae": {
+                  "baseline_ridge": 131.15472,
+                  "placebo_belief_ridge": 131.166367,
+                  "renal_belief_ridge": 129.601046
+                },
+                "rows": 66915,
+                "subjects": 5525
+              }
+            }
+          },
+          {
+            "discovery_groups": 19770,
+            "group_column": "subject_id",
+            "heldout_groups": 9738,
+            "overlap": 0,
+            "passed_count": 3,
+            "passed_targets": [
+              "creatinine",
+              "bun",
+              "urine_output"
+            ],
+            "seed": 53,
+            "targets": {
+              "bun": {
+                "candidate_vs_baseline": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.257179,
+                    -0.171462
+                  ],
+                  "point_delta": -0.212657,
+                  "significant": true,
+                  "subjects": 7806
+                },
+                "candidate_vs_placebo": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.255383,
+                    -0.178036
+                  ],
+                  "point_delta": -0.215358,
+                  "significant": true,
+                  "subjects": 7806
+                },
+                "mae": {
+                  "baseline_ridge": 8.649463,
+                  "placebo_belief_ridge": 8.651943,
+                  "renal_belief_ridge": 8.367698
+                },
+                "rows": 23733,
+                "subjects": 7806
+              },
+              "creatinine": {
+                "candidate_vs_baseline": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.009131,
+                    -0.002926
+                  ],
+                  "point_delta": -0.006026,
+                  "significant": true,
+                  "subjects": 7830
+                },
+                "candidate_vs_placebo": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.009202,
+                    -0.00293
+                  ],
+                  "point_delta": -0.006057,
+                  "significant": true,
+                  "subjects": 7830
+                },
+                "mae": {
+                  "baseline_ridge": 0.517561,
+                  "placebo_belief_ridge": 0.517569,
+                  "renal_belief_ridge": 0.503759
+                },
+                "rows": 23803,
+                "subjects": 7830
+              },
+              "urine_output": {
+                "candidate_vs_baseline": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -1.445924,
+                    -0.553933
+                  ],
+                  "point_delta": -1.000737,
+                  "significant": true,
+                  "subjects": 5369
+                },
+                "candidate_vs_placebo": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -1.373304,
+                    -0.493561
+                  ],
+                  "point_delta": -0.975584,
+                  "significant": true,
+                  "subjects": 5369
+                },
+                "mae": {
+                  "baseline_ridge": 131.154455,
+                  "placebo_belief_ridge": 131.152376,
+                  "renal_belief_ridge": 129.151727
+                },
+                "rows": 64861,
+                "subjects": 5369
+              }
+            }
+          },
+          {
+            "discovery_groups": 19770,
+            "group_column": "subject_id",
+            "heldout_groups": 9738,
+            "overlap": 0,
+            "passed_count": 3,
+            "passed_targets": [
+              "creatinine",
+              "bun",
+              "urine_output"
+            ],
+            "seed": 71,
+            "targets": {
+              "bun": {
+                "candidate_vs_baseline": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.238005,
+                    -0.15096
+                  ],
+                  "point_delta": -0.198895,
+                  "significant": true,
+                  "subjects": 7804
+                },
+                "candidate_vs_placebo": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.242658,
+                    -0.158714
+                  ],
+                  "point_delta": -0.20044,
+                  "significant": true,
+                  "subjects": 7804
+                },
+                "mae": {
+                  "baseline_ridge": 8.569129,
+                  "placebo_belief_ridge": 8.570346,
+                  "renal_belief_ridge": 8.28178
+                },
+                "rows": 23685,
+                "subjects": 7804
+              },
+              "creatinine": {
+                "candidate_vs_baseline": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.009951,
+                    -0.003674
+                  ],
+                  "point_delta": -0.006866,
+                  "significant": true,
+                  "subjects": 7820
+                },
+                "candidate_vs_placebo": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.010194,
+                    -0.004321
+                  ],
+                  "point_delta": -0.007298,
+                  "significant": true,
+                  "subjects": 7820
+                },
+                "mae": {
+                  "baseline_ridge": 0.520633,
+                  "placebo_belief_ridge": 0.520899,
+                  "renal_belief_ridge": 0.505781
+                },
+                "rows": 23747,
+                "subjects": 7820
+              },
+              "urine_output": {
+                "candidate_vs_baseline": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -1.133958,
+                    -0.254217
+                  ],
+                  "point_delta": -0.690124,
+                  "significant": true,
+                  "subjects": 5399
+                },
+                "candidate_vs_placebo": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -1.15842,
+                    -0.212301
+                  ],
+                  "point_delta": -0.669079,
+                  "significant": true,
+                  "subjects": 5399
+                },
+                "mae": {
+                  "baseline_ridge": 129.032684,
+                  "placebo_belief_ridge": 129.039681,
+                  "renal_belief_ridge": 127.586552
+                },
+                "rows": 65458,
+                "subjects": 5399
+              }
+            }
+          }
+        ],
+        "seeds": [
+          7,
+          11,
+          19,
+          23,
+          37,
+          53,
+          71
+        ],
+        "summary": {
+          "bun": {
+            "candidate_beats_baseline_significant_count": 7,
+            "candidate_beats_placebo_significant_count": 7,
+            "candidate_passes_both_count": 7,
+            "median_delta_vs_baseline": -0.206556,
+            "median_delta_vs_placebo": -0.209537
+          },
+          "creatinine": {
+            "candidate_beats_baseline_significant_count": 7,
+            "candidate_beats_placebo_significant_count": 7,
+            "candidate_passes_both_count": 7,
+            "median_delta_vs_baseline": -0.006026,
+            "median_delta_vs_placebo": -0.006057
+          },
+          "urine_output": {
+            "candidate_beats_baseline_significant_count": 7,
+            "candidate_beats_placebo_significant_count": 7,
+            "candidate_passes_both_count": 7,
+            "median_delta_vs_baseline": -0.698308,
+            "median_delta_vs_placebo": -0.732736
+          }
+        }
+      }
+    },
+    {
+      "belief_columns": [
+        "state2_belief_renal_reserve_mean",
+        "state2_belief_renal_reserve_sd",
+        "state2_belief_renal_stress",
+        "state2_belief_observation_confidence",
+        "state2_belief_delta_since_prior",
+        "state2_belief_creatinine_level",
+        "state2_belief_creatinine_slope",
+        "state2_belief_creatinine_sd",
+        "state2_belief_creatinine_innovation",
+        "state2_belief_creatinine_observation_confidence"
+      ],
+      "belief_kind": "state_v2",
+      "cohort": "eicu_aki_transitions_48h.parquet",
+      "cohort_summary": {
+        "active_aki_rows": 135870,
+        "hospitals": 198,
+        "rows": 397897,
+        "stays": 24098,
+        "subjects": 21427
+      },
+      "future_suffix": "tp48",
+      "hospital_holdout": {
+        "discovery_groups": 133,
+        "group_column": "hospitalid",
+        "heldout_groups": 65,
+        "overlap": 0,
+        "passed_count": 2,
+        "passed_targets": [
+          "creatinine",
+          "bun"
+        ],
+        "seed": 9001,
+        "targets": {
+          "bun": {
+            "candidate_vs_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.250693,
+                -0.113156
+              ],
+              "point_delta": -0.180596,
+              "significant": true,
+              "subjects": 6057
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.239411,
+                -0.121509
+              ],
+              "point_delta": -0.181306,
+              "significant": true,
+              "subjects": 6057
+            },
+            "mae": {
+              "baseline_ridge": 12.053006,
+              "placebo_belief_ridge": 12.053073,
+              "renal_belief_ridge": 11.773665
+            },
+            "rows": 18188,
+            "subjects": 6057
+          },
+          "creatinine": {
+            "candidate_vs_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.008617,
+                -0.000331
+              ],
+              "point_delta": -0.004563,
+              "significant": true,
+              "subjects": 6072
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.008765,
+                -0.001001
+              ],
+              "point_delta": -0.005088,
+              "significant": true,
+              "subjects": 6072
+            },
+            "mae": {
+              "baseline_ridge": 0.622901,
+              "placebo_belief_ridge": 0.623188,
+              "renal_belief_ridge": 0.60989
+            },
+            "rows": 18268,
+            "subjects": 6072
+          },
+          "urine_output": {
+            "candidate_vs_baseline": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.717781,
+                0.344232
+              ],
+              "point_delta": -0.18682,
+              "significant": false,
+              "subjects": 3608
+            },
+            "candidate_vs_placebo": {
+              "beats_baseline": true,
+              "bootstrap_95_ci": [
+                -0.865394,
+                0.280877
+              ],
+              "point_delta": -0.265025,
+              "significant": false,
+              "subjects": 3608
+            },
+            "mae": {
+              "baseline_ridge": 140.920036,
+              "placebo_belief_ridge": 140.955681,
+              "renal_belief_ridge": 140.561383
+            },
+            "rows": 45294,
+            "subjects": 3608
+          }
+        }
+      },
+      "random_patient_splits": {
+        "runs": [
+          {
+            "discovery_groups": 14356,
+            "group_column": "subject_id",
+            "heldout_groups": 7071,
+            "overlap": 0,
+            "passed_count": 3,
+            "passed_targets": [
+              "creatinine",
+              "bun",
+              "urine_output"
+            ],
+            "seed": 7,
+            "targets": {
+              "bun": {
+                "candidate_vs_baseline": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.287711,
+                    -0.144617
+                  ],
+                  "point_delta": -0.217722,
+                  "significant": true,
+                  "subjects": 5646
+                },
+                "candidate_vs_placebo": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.285495,
+                    -0.148731
+                  ],
+                  "point_delta": -0.214608,
+                  "significant": true,
+                  "subjects": 5646
+                },
+                "mae": {
+                  "baseline_ridge": 11.978553,
+                  "placebo_belief_ridge": 11.976218,
+                  "renal_belief_ridge": 11.701242
+                },
+                "rows": 17233,
+                "subjects": 5646
+              },
+              "creatinine": {
+                "candidate_vs_baseline": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.009568,
+                    -0.000519
+                  ],
+                  "point_delta": -0.005409,
+                  "significant": true,
+                  "subjects": 5659
+                },
+                "candidate_vs_placebo": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.010367,
+                    -0.001174
+                  ],
+                  "point_delta": -0.005391,
+                  "significant": true,
+                  "subjects": 5659
+                },
+                "mae": {
+                  "baseline_ridge": 0.626554,
+                  "placebo_belief_ridge": 0.626601,
+                  "renal_belief_ridge": 0.614485
+                },
+                "rows": 17281,
+                "subjects": 5659
+              },
+              "urine_output": {
+                "candidate_vs_baseline": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -1.134042,
+                    -0.132015
+                  ],
+                  "point_delta": -0.572952,
+                  "significant": true,
+                  "subjects": 3794
+                },
+                "candidate_vs_placebo": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -1.053057,
+                    -0.056992
+                  ],
+                  "point_delta": -0.59888,
+                  "significant": true,
+                  "subjects": 3794
+                },
+                "mae": {
+                  "baseline_ridge": 142.540056,
+                  "placebo_belief_ridge": 142.575795,
+                  "renal_belief_ridge": 141.420515
+                },
+                "rows": 48749,
+                "subjects": 3794
+              }
+            }
+          },
+          {
+            "discovery_groups": 14356,
+            "group_column": "subject_id",
+            "heldout_groups": 7071,
+            "overlap": 0,
+            "passed_count": 2,
+            "passed_targets": [
+              "bun",
+              "urine_output"
+            ],
+            "seed": 11,
+            "targets": {
+              "bun": {
+                "candidate_vs_baseline": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.261539,
+                    -0.126898
+                  ],
+                  "point_delta": -0.193139,
+                  "significant": true,
+                  "subjects": 5697
+                },
+                "candidate_vs_placebo": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.259441,
+                    -0.127778
+                  ],
+                  "point_delta": -0.201949,
+                  "significant": true,
+                  "subjects": 5697
+                },
+                "mae": {
+                  "baseline_ridge": 11.674172,
+                  "placebo_belief_ridge": 11.67952,
+                  "renal_belief_ridge": 11.416298
+                },
+                "rows": 16877,
+                "subjects": 5697
+              },
+              "creatinine": {
+                "candidate_vs_baseline": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.00837,
+                    0.000545
+                  ],
+                  "point_delta": -0.004046,
+                  "significant": false,
+                  "subjects": 5716
+                },
+                "candidate_vs_placebo": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.008573,
+                    -9.1e-05
+                  ],
+                  "point_delta": -0.004403,
+                  "significant": true,
+                  "subjects": 5716
+                },
+                "mae": {
+                  "baseline_ridge": 0.620876,
+                  "placebo_belief_ridge": 0.621086,
+                  "renal_belief_ridge": 0.610414
+                },
+                "rows": 16908,
+                "subjects": 5716
+              },
+              "urine_output": {
+                "candidate_vs_baseline": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -1.328056,
+                    -0.292335
+                  ],
+                  "point_delta": -0.789695,
+                  "significant": true,
+                  "subjects": 3807
+                },
+                "candidate_vs_placebo": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -1.2784,
+                    -0.327919
+                  ],
+                  "point_delta": -0.803576,
+                  "significant": true,
+                  "subjects": 3807
+                },
+                "mae": {
+                  "baseline_ridge": 143.542251,
+                  "placebo_belief_ridge": 143.553542,
+                  "renal_belief_ridge": 142.151894
+                },
+                "rows": 48405,
+                "subjects": 3807
+              }
+            }
+          },
+          {
+            "discovery_groups": 14356,
+            "group_column": "subject_id",
+            "heldout_groups": 7071,
+            "overlap": 0,
+            "passed_count": 3,
+            "passed_targets": [
+              "creatinine",
+              "bun",
+              "urine_output"
+            ],
+            "seed": 19,
+            "targets": {
+              "bun": {
+                "candidate_vs_baseline": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.308602,
+                    -0.174964
+                  ],
+                  "point_delta": -0.249699,
+                  "significant": true,
+                  "subjects": 5744
+                },
+                "candidate_vs_placebo": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.32256,
+                    -0.186352
+                  ],
+                  "point_delta": -0.248305,
+                  "significant": true,
+                  "subjects": 5744
+                },
+                "mae": {
+                  "baseline_ridge": 11.978911,
+                  "placebo_belief_ridge": 11.97989,
+                  "renal_belief_ridge": 11.668588
+                },
+                "rows": 17700,
+                "subjects": 5744
+              },
+              "creatinine": {
+                "candidate_vs_baseline": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.010321,
+                    -0.001446
+                  ],
+                  "point_delta": -0.006051,
+                  "significant": true,
+                  "subjects": 5762
+                },
+                "candidate_vs_placebo": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.010718,
+                    -0.001847
+                  ],
+                  "point_delta": -0.006155,
+                  "significant": true,
+                  "subjects": 5762
+                },
+                "mae": {
+                  "baseline_ridge": 0.64244,
+                  "placebo_belief_ridge": 0.642541,
+                  "renal_belief_ridge": 0.629681
+                },
+                "rows": 17741,
+                "subjects": 5762
+              },
+              "urine_output": {
+                "candidate_vs_baseline": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -1.831213,
+                    -0.869309
+                  ],
+                  "point_delta": -1.361673,
+                  "significant": true,
+                  "subjects": 3779
+                },
+                "candidate_vs_placebo": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -1.845945,
+                    -0.933463
+                  ],
+                  "point_delta": -1.388525,
+                  "significant": true,
+                  "subjects": 3779
+                },
+                "mae": {
+                  "baseline_ridge": 140.101418,
+                  "placebo_belief_ridge": 140.135036,
+                  "renal_belief_ridge": 138.300319
+                },
+                "rows": 48737,
+                "subjects": 3779
+              }
+            }
+          },
+          {
+            "discovery_groups": 14356,
+            "group_column": "subject_id",
+            "heldout_groups": 7071,
+            "overlap": 0,
+            "passed_count": 2,
+            "passed_targets": [
+              "bun",
+              "urine_output"
+            ],
+            "seed": 23,
+            "targets": {
+              "bun": {
+                "candidate_vs_baseline": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.296201,
+                    -0.160572
+                  ],
+                  "point_delta": -0.226826,
+                  "significant": true,
+                  "subjects": 5775
+                },
+                "candidate_vs_placebo": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.302825,
+                    -0.154403
+                  ],
+                  "point_delta": -0.228928,
+                  "significant": true,
+                  "subjects": 5775
+                },
+                "mae": {
+                  "baseline_ridge": 11.911724,
+                  "placebo_belief_ridge": 11.914458,
+                  "renal_belief_ridge": 11.645559
+                },
+                "rows": 17349,
+                "subjects": 5775
+              },
+              "creatinine": {
+                "candidate_vs_baseline": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.007475,
+                    0.000998
+                  ],
+                  "point_delta": -0.003326,
+                  "significant": false,
+                  "subjects": 5785
+                },
+                "candidate_vs_placebo": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.007916,
+                    0.000578
+                  ],
+                  "point_delta": -0.003702,
+                  "significant": false,
+                  "subjects": 5785
+                },
+                "mae": {
+                  "baseline_ridge": 0.626514,
+                  "placebo_belief_ridge": 0.626897,
+                  "renal_belief_ridge": 0.615628
+                },
+                "rows": 17394,
+                "subjects": 5785
+              },
+              "urine_output": {
+                "candidate_vs_baseline": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -1.433977,
+                    -0.497969
+                  ],
+                  "point_delta": -0.960828,
+                  "significant": true,
+                  "subjects": 3861
+                },
+                "candidate_vs_placebo": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -1.41263,
+                    -0.421828
+                  ],
+                  "point_delta": -0.959881,
+                  "significant": true,
+                  "subjects": 3861
+                },
+                "mae": {
+                  "baseline_ridge": 144.398443,
+                  "placebo_belief_ridge": 144.413063,
+                  "renal_belief_ridge": 143.068675
+                },
+                "rows": 48913,
+                "subjects": 3861
+              }
+            }
+          },
+          {
+            "discovery_groups": 14356,
+            "group_column": "subject_id",
+            "heldout_groups": 7071,
+            "overlap": 0,
+            "passed_count": 3,
+            "passed_targets": [
+              "creatinine",
+              "bun",
+              "urine_output"
+            ],
+            "seed": 37,
+            "targets": {
+              "bun": {
+                "candidate_vs_baseline": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.349168,
+                    -0.215135
+                  ],
+                  "point_delta": -0.284945,
+                  "significant": true,
+                  "subjects": 5690
+                },
+                "candidate_vs_placebo": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.358359,
+                    -0.220306
+                  ],
+                  "point_delta": -0.286852,
+                  "significant": true,
+                  "subjects": 5690
+                },
+                "mae": {
+                  "baseline_ridge": 12.023688,
+                  "placebo_belief_ridge": 12.023343,
+                  "renal_belief_ridge": 11.715219
+                },
+                "rows": 17384,
+                "subjects": 5690
+              },
+              "creatinine": {
+                "candidate_vs_baseline": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.010958,
+                    -0.003177
+                  ],
+                  "point_delta": -0.007185,
+                  "significant": true,
+                  "subjects": 5701
+                },
+                "candidate_vs_placebo": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.01186,
+                    -0.003363
+                  ],
+                  "point_delta": -0.007603,
+                  "significant": true,
+                  "subjects": 5701
+                },
+                "mae": {
+                  "baseline_ridge": 0.632935,
+                  "placebo_belief_ridge": 0.633334,
+                  "renal_belief_ridge": 0.618868
+                },
+                "rows": 17430,
+                "subjects": 5701
+              },
+              "urine_output": {
+                "candidate_vs_baseline": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -1.086995,
+                    -0.128962
+                  ],
+                  "point_delta": -0.581284,
+                  "significant": true,
+                  "subjects": 3855
+                },
+                "candidate_vs_placebo": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -1.179407,
+                    -0.125495
+                  ],
+                  "point_delta": -0.628785,
+                  "significant": true,
+                  "subjects": 3855
+                },
+                "mae": {
+                  "baseline_ridge": 144.415432,
+                  "placebo_belief_ridge": 144.437585,
+                  "renal_belief_ridge": 143.143287
+                },
+                "rows": 49078,
+                "subjects": 3855
+              }
+            }
+          },
+          {
+            "discovery_groups": 14356,
+            "group_column": "subject_id",
+            "heldout_groups": 7071,
+            "overlap": 0,
+            "passed_count": 3,
+            "passed_targets": [
+              "creatinine",
+              "bun",
+              "urine_output"
+            ],
+            "seed": 53,
+            "targets": {
+              "bun": {
+                "candidate_vs_baseline": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.282464,
+                    -0.1509
+                  ],
+                  "point_delta": -0.217934,
+                  "significant": true,
+                  "subjects": 5779
+                },
+                "candidate_vs_placebo": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.280077,
+                    -0.144906
+                  ],
+                  "point_delta": -0.216761,
+                  "significant": true,
+                  "subjects": 5779
+                },
+                "mae": {
+                  "baseline_ridge": 12.171715,
+                  "placebo_belief_ridge": 12.171023,
+                  "renal_belief_ridge": 11.880064
+                },
+                "rows": 17431,
+                "subjects": 5779
+              },
+              "creatinine": {
+                "candidate_vs_baseline": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.010926,
+                    -0.00219
+                  ],
+                  "point_delta": -0.006682,
+                  "significant": true,
+                  "subjects": 5791
+                },
+                "candidate_vs_placebo": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.01096,
+                    -0.002549
+                  ],
+                  "point_delta": -0.006869,
+                  "significant": true,
+                  "subjects": 5791
+                },
+                "mae": {
+                  "baseline_ridge": 0.640985,
+                  "placebo_belief_ridge": 0.641205,
+                  "renal_belief_ridge": 0.625914
+                },
+                "rows": 17432,
+                "subjects": 5791
+              },
+              "urine_output": {
+                "candidate_vs_baseline": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -1.372035,
+                    -0.398606
+                  ],
+                  "point_delta": -0.890572,
+                  "significant": true,
+                  "subjects": 3856
+                },
+                "candidate_vs_placebo": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -1.40625,
+                    -0.412239
+                  ],
+                  "point_delta": -0.903,
+                  "significant": true,
+                  "subjects": 3856
+                },
+                "mae": {
+                  "baseline_ridge": 140.815182,
+                  "placebo_belief_ridge": 140.828161,
+                  "renal_belief_ridge": 139.618201
+                },
+                "rows": 50532,
+                "subjects": 3856
+              }
+            }
+          },
+          {
+            "discovery_groups": 14356,
+            "group_column": "subject_id",
+            "heldout_groups": 7071,
+            "overlap": 0,
+            "passed_count": 3,
+            "passed_targets": [
+              "creatinine",
+              "bun",
+              "urine_output"
+            ],
+            "seed": 71,
+            "targets": {
+              "bun": {
+                "candidate_vs_baseline": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.323637,
+                    -0.182298
+                  ],
+                  "point_delta": -0.253038,
+                  "significant": true,
+                  "subjects": 5706
+                },
+                "candidate_vs_placebo": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.325896,
+                    -0.182983
+                  ],
+                  "point_delta": -0.256427,
+                  "significant": true,
+                  "subjects": 5706
+                },
+                "mae": {
+                  "baseline_ridge": 11.836299,
+                  "placebo_belief_ridge": 11.841905,
+                  "renal_belief_ridge": 11.546322
+                },
+                "rows": 16997,
+                "subjects": 5706
+              },
+              "creatinine": {
+                "candidate_vs_baseline": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.011188,
+                    -0.002496
+                  ],
+                  "point_delta": -0.006772,
+                  "significant": true,
+                  "subjects": 5714
+                },
+                "candidate_vs_placebo": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -0.010837,
+                    -0.002382
+                  ],
+                  "point_delta": -0.006852,
+                  "significant": true,
+                  "subjects": 5714
+                },
+                "mae": {
+                  "baseline_ridge": 0.620932,
+                  "placebo_belief_ridge": 0.620927,
+                  "renal_belief_ridge": 0.606939
+                },
+                "rows": 17037,
+                "subjects": 5714
+              },
+              "urine_output": {
+                "candidate_vs_baseline": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -1.208894,
+                    -0.180574
+                  ],
+                  "point_delta": -0.68446,
+                  "significant": true,
+                  "subjects": 3852
+                },
+                "candidate_vs_placebo": {
+                  "beats_baseline": true,
+                  "bootstrap_95_ci": [
+                    -1.225669,
+                    -0.234143
+                  ],
+                  "point_delta": -0.707554,
+                  "significant": true,
+                  "subjects": 3852
+                },
+                "mae": {
+                  "baseline_ridge": 144.353769,
+                  "placebo_belief_ridge": 144.35981,
+                  "renal_belief_ridge": 143.08299
+                },
+                "rows": 49207,
+                "subjects": 3852
+              }
+            }
+          }
+        ],
+        "seeds": [
+          7,
+          11,
+          19,
+          23,
+          37,
+          53,
+          71
+        ],
+        "summary": {
+          "bun": {
+            "candidate_beats_baseline_significant_count": 7,
+            "candidate_beats_placebo_significant_count": 7,
+            "candidate_passes_both_count": 7,
+            "median_delta_vs_baseline": -0.226826,
+            "median_delta_vs_placebo": -0.228928
+          },
+          "creatinine": {
+            "candidate_beats_baseline_significant_count": 5,
+            "candidate_beats_placebo_significant_count": 6,
+            "candidate_passes_both_count": 5,
+            "median_delta_vs_baseline": -0.006051,
+            "median_delta_vs_placebo": -0.006155
+          },
+          "urine_output": {
+            "candidate_beats_baseline_significant_count": 7,
+            "candidate_beats_placebo_significant_count": 7,
+            "candidate_passes_both_count": 7,
+            "median_delta_vs_baseline": -0.789695,
+            "median_delta_vs_placebo": -0.803576
+          }
+        }
+      }
+    }
+  ],
+  "safety_boundary": {
+    "causal_claim_allowed": false,
+    "checkpoint_promotion_allowed": false,
+    "clinical_claim_allowed": false,
+    "counterfactual_claim_allowed": false,
+    "direct_hidden_state_accuracy_claim_allowed": false,
+    "factual_observed_treatment_only": true,
+    "patient_ids_included_in_report": false,
+    "raw_rows_included": false
+  }
+}

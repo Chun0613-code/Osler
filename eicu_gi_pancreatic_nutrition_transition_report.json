@@ -1,0 +1,409 @@
+{
+  "action_evidence": {
+    "by_action": {
+      "albumin": 2032,
+      "antibiotics": 3808,
+      "fluids": 10576,
+      "insulin": 2841,
+      "ppi": 2630,
+      "vasopressor": 358
+    },
+    "dose_observed_fraction": 0.0,
+    "rows": 22245,
+    "sources": {
+      "eicu_medication": 22245
+    }
+  },
+  "action_support": {
+    "albumin": {
+      "active_stays": 313,
+      "active_windows": 2064,
+      "dose_observed_windows": 0,
+      "stays": 339,
+      "windows": 2554
+    },
+    "antibiotics": {
+      "active_stays": 664,
+      "active_windows": 5876,
+      "dose_observed_windows": 0,
+      "stays": 739,
+      "windows": 7552
+    },
+    "fluids": {
+      "active_stays": 1058,
+      "active_windows": 9881,
+      "dose_observed_windows": 0,
+      "stays": 1162,
+      "windows": 12884
+    },
+    "insulin": {
+      "active_stays": 603,
+      "active_windows": 5958,
+      "dose_observed_windows": 0,
+      "stays": 645,
+      "windows": 7470
+    },
+    "nutrition": {
+      "active_stays": 0,
+      "active_windows": 0,
+      "dose_observed_windows": 0,
+      "stays": 0,
+      "windows": 0
+    },
+    "octreotide": {
+      "active_stays": 0,
+      "active_windows": 0,
+      "dose_observed_windows": 0,
+      "stays": 0,
+      "windows": 0
+    },
+    "ppi": {
+      "active_stays": 990,
+      "active_windows": 10365,
+      "dose_observed_windows": 0,
+      "stays": 1017,
+      "windows": 10779
+    },
+    "vasopressor": {
+      "active_stays": 215,
+      "active_windows": 1965,
+      "dose_observed_windows": 0,
+      "stays": 220,
+      "windows": 2408
+    }
+  },
+  "active_transitions": 12045,
+  "body_system": "gastrointestinal_pancreatic_nutrition",
+  "bounded_max_stays": 1500,
+  "candidate_stay_count_before_bound": 37650,
+  "criteria_counts_before_filter": {
+    "diagnosis_text_or_code:admissionDx.csv.gz": 827,
+    "diagnosis_text_or_code:diagnosis.csv.gz": 673
+  },
+  "data_root": "eicu-collaborative-research-database-2.0",
+  "dataset": "PhysioNet eICU Collaborative Research Database 2.0",
+  "disease": "gi_pancreatic_nutrition",
+  "display_name": "GI / pancreatic / nutrition failure",
+  "hospitals": 12,
+  "measurements": {
+    "by_var": {
+      "albumin": 6983,
+      "alkaline_phos": 6963,
+      "alt": 6945,
+      "amylase": 204,
+      "anion_gap": 12976,
+      "ast": 6959,
+      "bicarbonate": 17457,
+      "bilirubin": 6973,
+      "bilirubin_direct": 663,
+      "bnp": 761,
+      "bun": 12950,
+      "calcium": 12956,
+      "chloride": 13048,
+      "ck_mb": 78,
+      "cortisol": 103,
+      "cpk": 342,
+      "creatinine": 13161,
+      "crp": 212,
+      "crp_hs": 2,
+      "esr": 93,
+      "ferritin": 124,
+      "fibrinogen": 381,
+      "free_t4": 62,
+      "glucose": 51738,
+      "heart_rate": 1548965,
+      "hematocrit": 15850,
+      "hemoglobin": 15936,
+      "inr": 5284,
+      "ionized_calcium": 164,
+      "lactate": 1555,
+      "ldh": 201,
+      "lipase": 882,
+      "magnesium": 7276,
+      "map": 657264,
+      "myoglobin": 19,
+      "o2sat": 1387819,
+      "ph": 4445,
+      "phosphate": 4445,
+      "platelets": 13197,
+      "potassium": 17016,
+      "prealbumin": 742,
+      "ptt": 3985,
+      "respiratory_rate": 1142562,
+      "serum_osmolality": 68,
+      "sodium": 13243,
+      "temperature": 295363,
+      "total_protein": 6968,
+      "triglycerides": 715,
+      "troponin_i": 1150,
+      "tsh": 339,
+      "uric_acid": 107,
+      "urine_output": 22712,
+      "wbc": 13070
+    },
+    "rows": 5353476,
+    "stays": 1500
+  },
+  "output": "eicu_gi_pancreatic_nutrition_transitions_6h.parquet",
+  "restricted_stay_count": null,
+  "restricted_stay_source": null,
+  "safety_boundary": {
+    "bounded_engineering_cohort": true,
+    "causal_claim_allowed": false,
+    "clinical_claim_allowed": false,
+    "coarse_treatment_rows_used_as_numeric_administrations": false,
+    "counterfactual_claim_allowed": false,
+    "factual_observed_treatment_only": true,
+    "medication_orders_used_as_numeric_administrations": false,
+    "patient_ids_included_in_report": false,
+    "raw_rows_included": false,
+    "restricted_stay_ids_used_internally": false
+  },
+  "schema": {
+    "action_channels": [
+      "fluids",
+      "nutrition",
+      "ppi",
+      "octreotide",
+      "albumin",
+      "antibiotics",
+      "vasopressor",
+      "insulin"
+    ],
+    "active_column": "gi_pancreatic_nutrition_active_t",
+    "anchor_step_hours": 4.0,
+    "config": {
+      "action_keys": [
+        "fluids",
+        "nutrition",
+        "ppi",
+        "octreotide",
+        "albumin",
+        "antibiotics",
+        "vasopressor",
+        "insulin"
+      ],
+      "action_terms": {
+        "albumin": [
+          "albumin"
+        ],
+        "antibiotics": [
+          "vancomycin",
+          "zosyn",
+          "piperacillin",
+          "tazobactam",
+          "meropenem",
+          "imipenem",
+          "ertapenem",
+          "cefepime",
+          "ceftriaxone",
+          "ceftazidime",
+          "cefazolin",
+          "cefuroxime",
+          "ciprofloxacin",
+          "levofloxacin",
+          "metronidazole",
+          "gentamicin",
+          "tobramycin",
+          "linezolid",
+          "daptomycin",
+          "clindamycin",
+          "aztreonam",
+          "ampicillin",
+          "amoxicillin",
+          "penicillin",
+          "nafcillin",
+          "oxacillin"
+        ],
+        "fluids": [
+          "normal saline",
+          "sodium chloride",
+          "nacl",
+          "lactated",
+          "ringer",
+          "crystalloid",
+          "fluid bolus",
+          "iv fluid",
+          "saline bolus"
+        ],
+        "insulin": [
+          "insulin",
+          "regular insulin",
+          "humalog",
+          "lispro",
+          "novolog",
+          "aspart",
+          "lantus",
+          "glargine",
+          "nph"
+        ],
+        "nutrition": [
+          "tpn",
+          "total parenteral nutrition",
+          "parenteral nutrition",
+          "enteral",
+          "tube feed",
+          "tube feeding",
+          "nutrition",
+          "lipid",
+          "lipids"
+        ],
+        "octreotide": [
+          "octreotide",
+          "sandostatin"
+        ],
+        "ppi": [
+          "pantoprazole",
+          "protonix",
+          "omeprazole",
+          "prilosec",
+          "lansoprazole",
+          "esomeprazole"
+        ],
+        "vasopressor": [
+          "norepinephrine",
+          "levophed",
+          "epinephrine",
+          "vasopressin",
+          "phenylephrine",
+          "neosynephrine",
+          "dopamine"
+        ]
+      },
+      "active_actions": [
+        "hist_nutrition",
+        "hist_ppi",
+        "hist_octreotide"
+      ],
+      "active_high": {
+        "amylase": 180.0,
+        "bilirubin": 2.0,
+        "glucose": 250.0,
+        "lactate": 2.0,
+        "lipase": 180.0,
+        "triglycerides": 500.0
+      },
+      "active_low": {
+        "albumin": 2.5,
+        "calcium": 7.5,
+        "map": 65.0,
+        "prealbumin": 10.0
+      },
+      "body_system": "gastrointestinal_pancreatic_nutrition",
+      "diagnosis_patterns": [
+        "pancreatitis",
+        "gastrointestinal",
+        "malnutrition",
+        "nutrition",
+        "ileus",
+        "bowel",
+        "colitis",
+        "gastritis",
+        "peptic ulcer",
+        "upper gi",
+        "lower gi",
+        "k85",
+        "k86",
+        "k90",
+        "k92",
+        "577"
+      ],
+      "display_name": "GI / pancreatic / nutrition failure",
+      "name": "gi_pancreatic_nutrition",
+      "notes": [
+        "GI/pancreatic/nutrition module uses lab proxies available in ICU EHR.",
+        "No nutrition, PPI, octreotide, or feeding recommendation claim is allowed."
+      ],
+      "state_vars": [
+        "lipase",
+        "amylase",
+        "triglycerides",
+        "albumin",
+        "prealbumin",
+        "total_protein",
+        "calcium",
+        "ionized_calcium",
+        "glucose",
+        "lactate",
+        "map",
+        "bilirubin",
+        "bilirubin_direct",
+        "ast",
+        "alt",
+        "alkaline_phos",
+        "wbc",
+        "bicarbonate",
+        "ph",
+        "creatinine"
+      ],
+      "targets": [
+        "lipase",
+        "amylase",
+        "triglycerides",
+        "albumin",
+        "prealbumin",
+        "total_protein",
+        "calcium",
+        "glucose",
+        "lactate",
+        "map",
+        "bilirubin"
+      ]
+    },
+    "future_suffix": "tp6",
+    "horizon_hours": 6.0,
+    "lookback_hours": 6.0,
+    "state_vars": [
+      "lipase",
+      "amylase",
+      "triglycerides",
+      "albumin",
+      "prealbumin",
+      "total_protein",
+      "calcium",
+      "ionized_calcium",
+      "glucose",
+      "lactate",
+      "map",
+      "bilirubin",
+      "bilirubin_direct",
+      "ast",
+      "alt",
+      "alkaline_phos",
+      "wbc",
+      "bicarbonate",
+      "ph",
+      "creatinine"
+    ],
+    "target_tolerance_hours": 2.0,
+    "targets": [
+      "lipase",
+      "amylase",
+      "triglycerides",
+      "albumin",
+      "prealbumin",
+      "total_protein",
+      "calcium",
+      "glucose",
+      "lactate",
+      "map",
+      "bilirubin"
+    ]
+  },
+  "stays": 1387,
+  "subjects": 1159,
+  "target_pair_counts": {
+    "albumin": 276,
+    "amylase": 1,
+    "bilirubin": 281,
+    "calcium": 793,
+    "glucose": 7827,
+    "lactate": 240,
+    "lipase": 5,
+    "map": 15789,
+    "prealbumin": 6,
+    "total_protein": 278,
+    "triglycerides": 6
+  },
+  "transitions": 16043
+}

@@ -1,0 +1,462 @@
+{
+  "action_evidence": {
+    "by_action": {
+      "antibiotics": 3168,
+      "anticoagulant": 2895,
+      "antiplatelet": 922,
+      "fluids": 9512,
+      "nephrotoxin": 1439,
+      "transfusion": 3777,
+      "vasopressor": 301
+    },
+    "dose_observed_fraction": 0.170891,
+    "rows": 22014,
+    "sources": {
+      "eicu_intakeoutput": 3777,
+      "eicu_medication": 18237
+    }
+  },
+  "action_support": {
+    "antibiotics": {
+      "active_stays": 522,
+      "active_windows": 3424,
+      "dose_observed_windows": 0,
+      "stays": 612,
+      "windows": 6423
+    },
+    "anticoagulant": {
+      "active_stays": 403,
+      "active_windows": 2228,
+      "dose_observed_windows": 0,
+      "stays": 498,
+      "windows": 5087
+    },
+    "antiplatelet": {
+      "active_stays": 227,
+      "active_windows": 1195,
+      "dose_observed_windows": 0,
+      "stays": 294,
+      "windows": 2816
+    },
+    "fluids": {
+      "active_stays": 949,
+      "active_windows": 6416,
+      "dose_observed_windows": 0,
+      "stays": 1128,
+      "windows": 13545
+    },
+    "nephrotoxin": {
+      "active_stays": 251,
+      "active_windows": 1181,
+      "dose_observed_windows": 0,
+      "stays": 292,
+      "windows": 2211
+    },
+    "transfusion": {
+      "active_stays": 538,
+      "active_windows": 1598,
+      "dose_observed_windows": 1858,
+      "stays": 577,
+      "windows": 1860
+    },
+    "vasopressor": {
+      "active_stays": 176,
+      "active_windows": 2052,
+      "dose_observed_windows": 0,
+      "stays": 177,
+      "windows": 2095
+    }
+  },
+  "active_transitions": 8055,
+  "body_system": "hematologic",
+  "bounded_max_stays": 1500,
+  "candidate_stay_count_before_bound": 37686,
+  "criteria_counts_before_filter": {
+    "diagnosis_text_or_code:admissionDx.csv.gz": 781,
+    "diagnosis_text_or_code:diagnosis.csv.gz": 719
+  },
+  "data_root": "eicu-collaborative-research-database-2.0",
+  "dataset": "PhysioNet eICU Collaborative Research Database 2.0",
+  "disease": "coagulopathy_heme",
+  "display_name": "Coagulopathy / thrombocytopenia / hematologic instability",
+  "hospitals": 12,
+  "measurements": {
+    "by_var": {
+      "albumin": 5106,
+      "alkaline_phos": 5072,
+      "alt": 5051,
+      "amylase": 129,
+      "anion_gap": 11951,
+      "ast": 5063,
+      "bicarbonate": 16508,
+      "bilirubin": 5076,
+      "bilirubin_direct": 550,
+      "bnp": 731,
+      "bun": 11908,
+      "calcium": 11904,
+      "chloride": 11994,
+      "ck_mb": 107,
+      "cortisol": 92,
+      "cpk": 284,
+      "creatinine": 12093,
+      "crp": 156,
+      "esr": 103,
+      "ferritin": 133,
+      "fibrinogen": 539,
+      "free_t4": 74,
+      "glucose": 49515,
+      "heart_rate": 1649697,
+      "hematocrit": 15336,
+      "hemoglobin": 15373,
+      "inr": 5522,
+      "ionized_calcium": 157,
+      "lactate": 1166,
+      "ldh": 274,
+      "lipase": 433,
+      "magnesium": 6223,
+      "map": 713545,
+      "myoglobin": 17,
+      "o2sat": 1486610,
+      "ph": 4533,
+      "phosphate": 3749,
+      "platelets": 12528,
+      "potassium": 16097,
+      "prealbumin": 405,
+      "ptt": 3955,
+      "respiratory_rate": 1244347,
+      "serum_osmolality": 705,
+      "sodium": 13182,
+      "temperature": 326871,
+      "total_protein": 5087,
+      "triglycerides": 621,
+      "troponin_i": 1211,
+      "tsh": 321,
+      "uric_acid": 143,
+      "urine_output": 18936,
+      "wbc": 12350
+    },
+    "rows": 5713533,
+    "stays": 1500
+  },
+  "output": "eicu_coagulopathy_heme_transitions_6h.parquet",
+  "restricted_stay_count": null,
+  "restricted_stay_source": null,
+  "safety_boundary": {
+    "bounded_engineering_cohort": true,
+    "causal_claim_allowed": false,
+    "clinical_claim_allowed": false,
+    "coarse_treatment_rows_used_as_numeric_administrations": false,
+    "counterfactual_claim_allowed": false,
+    "factual_observed_treatment_only": true,
+    "medication_orders_used_as_numeric_administrations": false,
+    "patient_ids_included_in_report": false,
+    "raw_rows_included": false,
+    "restricted_stay_ids_used_internally": false
+  },
+  "schema": {
+    "action_channels": [
+      "transfusion",
+      "anticoagulant",
+      "antiplatelet",
+      "fluids",
+      "vasopressor",
+      "antibiotics",
+      "nephrotoxin"
+    ],
+    "active_column": "coagulopathy_heme_active_t",
+    "anchor_step_hours": 4.0,
+    "config": {
+      "action_keys": [
+        "transfusion",
+        "anticoagulant",
+        "antiplatelet",
+        "fluids",
+        "vasopressor",
+        "antibiotics",
+        "nephrotoxin"
+      ],
+      "action_terms": {
+        "antibiotics": [
+          "vancomycin",
+          "zosyn",
+          "piperacillin",
+          "tazobactam",
+          "meropenem",
+          "imipenem",
+          "ertapenem",
+          "cefepime",
+          "ceftriaxone",
+          "ceftazidime",
+          "cefazolin",
+          "cefuroxime",
+          "ciprofloxacin",
+          "levofloxacin",
+          "metronidazole",
+          "gentamicin",
+          "tobramycin",
+          "linezolid",
+          "daptomycin",
+          "clindamycin",
+          "aztreonam",
+          "ampicillin",
+          "amoxicillin",
+          "penicillin",
+          "nafcillin",
+          "oxacillin"
+        ],
+        "anticoagulant": [
+          "heparin",
+          "enoxaparin",
+          "lovenox",
+          "warfarin",
+          "argatroban",
+          "bivalirudin"
+        ],
+        "antiplatelet": [
+          "aspirin",
+          "clopidogrel",
+          "plavix",
+          "ticagrelor",
+          "prasugrel"
+        ],
+        "fluids": [
+          "normal saline",
+          "sodium chloride",
+          "nacl",
+          "lactated",
+          "ringer",
+          "crystalloid",
+          "fluid bolus",
+          "iv fluid",
+          "saline bolus"
+        ],
+        "nephrotoxin": [
+          "vancomycin",
+          "gentamicin",
+          "tobramycin",
+          "amikacin",
+          "amphotericin",
+          "acyclovir",
+          "ketorolac",
+          "ibuprofen",
+          "naproxen",
+          "tacrolimus",
+          "cyclosporine",
+          "cisplatin"
+        ],
+        "transfusion": [
+          "packed red blood",
+          "packed red blood cells",
+          "prbc",
+          "prbcs",
+          "rbc transfusion",
+          "red blood cell",
+          "red blood cells",
+          "platelet transfusion",
+          "platelet concentrate",
+          "fresh frozen plasma",
+          "ffp",
+          "cryoprecipitate",
+          "blood product",
+          "blood products",
+          "transfusion",
+          "transfuse"
+        ],
+        "vasopressor": [
+          "norepinephrine",
+          "levophed",
+          "epinephrine",
+          "vasopressin",
+          "phenylephrine",
+          "neosynephrine",
+          "dopamine"
+        ]
+      },
+      "active_actions": [
+        "hist_transfusion",
+        "hist_vasopressor"
+      ],
+      "active_high": {
+        "creatinine": 2.0,
+        "inr": 1.5,
+        "lactate": 2.0,
+        "ptt": 45.0,
+        "wbc": 12.0
+      },
+      "active_low": {
+        "hemoglobin": 8.0,
+        "map": 65.0,
+        "ph": 7.3,
+        "platelets": 100.0
+      },
+      "body_system": "hematologic",
+      "diagnosis_patterns": [
+        "thrombocytopenia",
+        "coagulopathy",
+        "disseminated intravascular",
+        "dic",
+        "anemia",
+        "hemorrhage",
+        "gastrointestinal bleeding",
+        "gi bleed",
+        "bleeding",
+        "d65",
+        "d69",
+        "d62",
+        "285",
+        "286"
+      ],
+      "display_name": "Coagulopathy / thrombocytopenia / hematologic instability",
+      "name": "coagulopathy_heme",
+      "notes": [
+        "Hemoglobin, hematocrit, INR, PTT, fibrinogen, and transfusion evidence are first-class inputs.",
+        "Transfusion and anticoagulation effects remain causal-closed."
+      ],
+      "state_vars": [
+        "platelets",
+        "hemoglobin",
+        "hematocrit",
+        "inr",
+        "ptt",
+        "fibrinogen",
+        "wbc",
+        "lactate",
+        "map",
+        "bicarbonate",
+        "ph",
+        "creatinine",
+        "bun",
+        "potassium",
+        "sodium",
+        "heart_rate",
+        "temperature",
+        "glucose"
+      ],
+      "targets": [
+        "platelets",
+        "hemoglobin",
+        "hematocrit",
+        "inr",
+        "ptt",
+        "fibrinogen",
+        "wbc",
+        "lactate",
+        "map",
+        "bicarbonate",
+        "ph",
+        "creatinine"
+      ]
+    },
+    "future_suffix": "tp6",
+    "horizon_hours": 6.0,
+    "lookback_hours": 6.0,
+    "state_vars": [
+      "platelets",
+      "hemoglobin",
+      "hematocrit",
+      "inr",
+      "ptt",
+      "fibrinogen",
+      "wbc",
+      "lactate",
+      "map",
+      "bicarbonate",
+      "ph",
+      "creatinine",
+      "bun",
+      "potassium",
+      "sodium",
+      "heart_rate",
+      "temperature",
+      "glucose"
+    ],
+    "target_tolerance_hours": 2.0,
+    "targets": [
+      "platelets",
+      "hemoglobin",
+      "hematocrit",
+      "inr",
+      "ptt",
+      "fibrinogen",
+      "wbc",
+      "lactate",
+      "map",
+      "bicarbonate",
+      "ph",
+      "creatinine"
+    ]
+  },
+  "stays": 1382,
+  "subjects": 1189,
+  "target_pair_counts": {
+    "bicarbonate": 1429,
+    "creatinine": 746,
+    "fibrinogen": 61,
+    "hematocrit": 2392,
+    "hemoglobin": 2472,
+    "inr": 340,
+    "lactate": 138,
+    "map": 16685,
+    "ph": 544,
+    "platelets": 946,
+    "ptt": 309,
+    "wbc": 905
+  },
+  "transfusion_subtype_support": {
+    "cryo": {
+      "active_future_windows": 66,
+      "dose_observed_windows": 72,
+      "future_stays": 26,
+      "future_unit_like_count": 190.55,
+      "future_volume_like_ml": 19055.0,
+      "future_windows": 72,
+      "history_windows": 75
+    },
+    "plasma": {
+      "active_future_windows": 221,
+      "dose_observed_windows": 252,
+      "future_stays": 111,
+      "future_unit_like_count": 542.65408,
+      "future_volume_like_ml": 135663.52,
+      "future_windows": 254,
+      "history_windows": 303
+    },
+    "platelet": {
+      "active_future_windows": 262,
+      "dose_observed_windows": 306,
+      "future_stays": 102,
+      "future_unit_like_count": 348.624031,
+      "future_volume_like_ml": 104587.21,
+      "future_windows": 306,
+      "history_windows": 309
+    },
+    "prbc": {
+      "active_future_windows": 1310,
+      "dose_observed_windows": 1509,
+      "future_stays": 515,
+      "future_unit_like_count": 2408.191536,
+      "future_volume_like_ml": 722457.46,
+      "future_windows": 1509,
+      "history_windows": 1611
+    },
+    "unknown": {
+      "active_future_windows": 14,
+      "dose_observed_windows": 14,
+      "future_stays": 7,
+      "future_unit_like_count": 161.1,
+      "future_volume_like_ml": 48330.0,
+      "future_windows": 14,
+      "history_windows": 22
+    },
+    "whole_blood": {
+      "active_future_windows": 0,
+      "dose_observed_windows": 0,
+      "future_stays": 0,
+      "future_unit_like_count": 0.0,
+      "future_volume_like_ml": 0.0,
+      "future_windows": 0,
+      "history_windows": 0
+    }
+  },
+  "transitions": 16870
+}

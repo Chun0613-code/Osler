@@ -1,0 +1,232 @@
+{
+  "experiment": "full-budget PhysioNet-calibrated DKABody candidate vs v5/persistence",
+  "budget": {
+    "scenarios": 1000,
+    "sequence_length": 12,
+    "epochs": 55,
+    "greybox_residual": "dka_greybox_residual_candidate_v1.pt",
+    "action_prior": "dka_action_prior_demo_v1.json",
+    "physionet_calibration": {
+      "path": "physionet2019_dkabody_calibration.json",
+      "patients_scanned": 40336,
+      "presentation_records": {
+        "criteria": "first per-patient row with Glucose>=200 and (HCO3<=18 or pH<=7.30), requiring Glucose/HCO3/Potassium/MAP",
+        "complete_records_used": 653,
+        "all_presentation_records": 673
+      },
+      "uses_presentation_prior": true,
+      "uses_patient_variability_proxies": true,
+      "uses_measurement_model": true,
+      "uses_action_unobserved_drift_as_target_only": true,
+      "treatment_effect_claim_allowed": false,
+      "causal_no_treatment_claim_allowed": false
+    }
+  },
+  "candidate": "dka_physionet_calibrated_candidate.pt",
+  "baseline": "dka_symbolic_jepa_v5.pt",
+  "decision": "do_not_promote_full_checkpoint_over_v5",
+  "important_positive_signal": "This is the first DKA candidate in this run series to beat active-DKA persistence on glucose while also beating persistence on MAP, pH, and anion_gap.",
+  "reason_not_promoted": "The calibrated candidate still fails persistence on potassium, bicarbonate, sodium, osmolality, creatinine, and urine output; no rules were promoted; external symbolic changed-only accuracy regressed versus v5. It is therefore a partial-signal research candidate, not a runtime replacement.",
+  "simulator_side": {
+    "calibrated_collapse": {
+      "mean_latent_std": 0.424199,
+      "min_latent_std": 0.226887,
+      "effective_rank": 6.055,
+      "active_dimensions_std_gt_0_01": 48,
+      "low_rank_physiology_warning": true,
+      "collapsed": false
+    },
+    "calibrated_counterfactual_sign_accuracy_6_steps": 0.8437,
+    "v5_counterfactual_sign_accuracy_6_steps": 0.9783,
+    "v6_counterfactual_sign_accuracy_6_steps": 0.9639,
+    "calibrated_action_conditioning": {
+      "factual_normalized_mse_6h": 1.115254,
+      "shuffled_action_normalized_mse_6h": 1.58312,
+      "shuffled_minus_factual": 0.467866,
+      "uses_interventions": true
+    }
+  },
+  "external_symbolic": {
+    "v5": {
+      "factual_direction_accuracy_all": 0.5625,
+      "factual_direction_accuracy_changed_only": 0.6429,
+      "direction_comparisons": 32,
+      "changed_direction_comparisons": 28,
+      "mean_proposal_confidence": 0.9372,
+      "interpretation": "Observational factual-direction check; it is not a causal effect test."
+    },
+    "physionet_calibrated": {
+      "factual_direction_accuracy_all": 0.5312,
+      "factual_direction_accuracy_changed_only": 0.6071,
+      "direction_comparisons": 32,
+      "changed_direction_comparisons": 28,
+      "mean_proposal_confidence": 0.8511,
+      "interpretation": "Observational factual-direction check; it is not a causal effect test."
+    }
+  },
+  "candidate_rule_gate": {
+    "proposed": 0,
+    "retrospectively_validated": 0,
+    "active_rule_conflicts": 0,
+    "automatically_promoted_to_active": 0,
+    "candidate_file": "/Users/chunyouchang/Desktop/llm_project/medical_jepa/rules/candidate/symbolic_real_test_1781700949.json"
+  },
+  "mimic_active_dka_mae": {
+    "glucose": {
+      "n": 17,
+      "v5_jepa": 148.3214,
+      "physionet_calibrated_jepa": 94.4103,
+      "persistence": 96.6471,
+      "calibrated_beats_persistence": true,
+      "calibrated_beats_v5": true
+    },
+    "ph": {
+      "n": 11,
+      "v5_jepa": 0.087,
+      "physionet_calibrated_jepa": 0.0575,
+      "persistence": 0.06,
+      "calibrated_beats_persistence": true,
+      "calibrated_beats_v5": true
+    },
+    "bicarbonate": {
+      "n": 16,
+      "v5_jepa": 5.2205,
+      "physionet_calibrated_jepa": 6.4371,
+      "persistence": 2.75,
+      "calibrated_beats_persistence": false,
+      "calibrated_beats_v5": false
+    },
+    "anion_gap": {
+      "n": 16,
+      "v5_jepa": 3.0388,
+      "physionet_calibrated_jepa": 3.229,
+      "persistence": 3.25,
+      "calibrated_beats_persistence": true,
+      "calibrated_beats_v5": false
+    },
+    "potassium": {
+      "n": 20,
+      "v5_jepa": 0.6896,
+      "physionet_calibrated_jepa": 0.9137,
+      "persistence": 0.44,
+      "calibrated_beats_persistence": false,
+      "calibrated_beats_v5": false
+    },
+    "map": {
+      "n": 41,
+      "v5_jepa": 13.0363,
+      "physionet_calibrated_jepa": 9.8653,
+      "persistence": 16.2683,
+      "calibrated_beats_persistence": true,
+      "calibrated_beats_v5": true
+    },
+    "sodium": {
+      "n": 19,
+      "v5_jepa": 9.8295,
+      "physionet_calibrated_jepa": 5.9171,
+      "persistence": 4.1579,
+      "calibrated_beats_persistence": false,
+      "calibrated_beats_v5": true
+    },
+    "osmolality": {
+      "n": 18,
+      "v5_jepa": 22.1216,
+      "physionet_calibrated_jepa": 11.6501,
+      "persistence": 9.534,
+      "calibrated_beats_persistence": false,
+      "calibrated_beats_v5": true
+    },
+    "creatinine": {
+      "n": 15,
+      "v5_jepa": 0.4819,
+      "physionet_calibrated_jepa": 6.0188,
+      "persistence": 0.34,
+      "calibrated_beats_persistence": false,
+      "calibrated_beats_v5": false
+    },
+    "urine_output": {
+      "n": 34,
+      "v5_jepa": 144.9714,
+      "physionet_calibrated_jepa": 86.8858,
+      "persistence": 53.7868,
+      "calibrated_beats_persistence": false,
+      "calibrated_beats_v5": true
+    }
+  },
+  "persistence_wins": {
+    "calibrated_beats_persistence_on": [
+      "glucose",
+      "ph",
+      "anion_gap",
+      "map"
+    ],
+    "calibrated_loses_persistence_on": [
+      "bicarbonate",
+      "potassium",
+      "sodium",
+      "osmolality",
+      "creatinine",
+      "urine_output"
+    ],
+    "passes_full_persistence_gate": false
+  },
+  "measurement_model_observation": {
+    "used_physionet_mask_age_model": true,
+    "mimic_evaluation_has_real_masks_and_ages": true,
+    "data_adequacy": {
+      "rows": 187,
+      "complete_core_input_rows": 103,
+      "fully_observed_clinical_state_rows": 0,
+      "median_measurement_age_hours": {
+        "glucose": 2.517,
+        "ph": 2.267,
+        "bicarbonate": 2.4,
+        "anion_gap": 2.433,
+        "potassium": 2.4,
+        "map": 0.35,
+        "sodium": 2.475,
+        "osmolality": 0.833,
+        "creatinine": 2.517,
+        "urine_output": 0.85
+      },
+      "mean_anchor_state": {
+        "glucose": 205.8,
+        "ph": 7.348,
+        "bicarbonate": 17.526,
+        "anion_gap": 18.407,
+        "potassium": 4.119,
+        "map": 73.13,
+        "sodium": 140.169,
+        "osmolality": 298.6,
+        "creatinine": 2.266,
+        "urine_output": 112.51
+      },
+      "positive_action_rows": {
+        "insulin": 110,
+        "fluids": 179,
+        "kcl": 46,
+        "bicarbonate": 17,
+        "dextrose": 156
+      },
+      "has_exact_dose_and_timing": true,
+      "has_explicit_start_stop_events": false,
+      "has_pre_anchor_treatment_history": true,
+      "sufficient_for_causal_validation": false
+    },
+    "interpretation": "The calibrated candidate improved glucose/MAP/pH/anion-gap under the same sparse MIMIC demo proxy, but this is not an isolated measurement model ablation; presentation and patient-variability priors changed too."
+  },
+  "promotion_gate": {
+    "passes_full_persistence_gate": false,
+    "passes_partial_state_signal_gate": true,
+    "partial_state_signal_states": [
+      "glucose",
+      "ph",
+      "anion_gap",
+      "map"
+    ],
+    "rules_promoted": 0,
+    "clinical_or_causal_claim_allowed": false,
+    "runtime_replacement_for_v5": false
+  },
+  "interpretation": "PhysioNet calibration did not produce a promotable full DKA JEPA, but it did change the evidence: calibrated presentation/missingness priors converted active-DKA glucose from clearly losing persistence to a small win in the 15-stay demo. That is a research signal for the calibrated textbook path, not a clinical or causal validation."
+}

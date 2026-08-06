@@ -1,0 +1,356 @@
+{
+  "action_evidence": {
+    "by_action": {
+      "dextrose": 8810,
+      "fluids": 8903,
+      "insulin": 6191,
+      "potassium_repletion": 7872,
+      "systemic_steroid": 1743,
+      "vasopressor": 251
+    },
+    "dose_observed_fraction": 0.0,
+    "rows": 33770,
+    "sources": {
+      "eicu_medication": 33770
+    }
+  },
+  "action_support": {
+    "dextrose": {
+      "active_stays": 1254,
+      "active_windows": 14739,
+      "dose_observed_windows": 0,
+      "stays": 1270,
+      "windows": 14950
+    },
+    "fluids": {
+      "active_stays": 1125,
+      "active_windows": 12837,
+      "dose_observed_windows": 0,
+      "stays": 1160,
+      "windows": 13615
+    },
+    "insulin": {
+      "active_stays": 1167,
+      "active_windows": 13323,
+      "dose_observed_windows": 0,
+      "stays": 1178,
+      "windows": 13463
+    },
+    "potassium_repletion": {
+      "active_stays": 1002,
+      "active_windows": 11243,
+      "dose_observed_windows": 0,
+      "stays": 1030,
+      "windows": 11515
+    },
+    "systemic_steroid": {
+      "active_stays": 432,
+      "active_windows": 3971,
+      "dose_observed_windows": 0,
+      "stays": 433,
+      "windows": 4020
+    },
+    "vasopressor": {
+      "active_stays": 175,
+      "active_windows": 1856,
+      "dose_observed_windows": 0,
+      "stays": 176,
+      "windows": 1946
+    }
+  },
+  "active_transitions": 15710,
+  "body_system": "endocrine_metabolic",
+  "bounded_max_stays": 1500,
+  "candidate_stay_count_before_bound": 33212,
+  "criteria_counts_before_filter": {
+    "diagnosis_text_or_code:admissionDx.csv.gz": 20,
+    "diagnosis_text_or_code:diagnosis.csv.gz": 1480
+  },
+  "data_root": "eicu-collaborative-research-database-2.0",
+  "dataset": "PhysioNet eICU Collaborative Research Database 2.0",
+  "disease": "endocrine_stress",
+  "display_name": "Endocrine / glycemic / adrenal-thyroid stress",
+  "hospitals": 12,
+  "measurements": {
+    "by_var": {
+      "albumin": 3907,
+      "alkaline_phos": 3877,
+      "alt": 3855,
+      "amylase": 113,
+      "anion_gap": 10881,
+      "ast": 3875,
+      "bicarbonate": 15814,
+      "bilirubin": 3876,
+      "bilirubin_direct": 405,
+      "bnp": 954,
+      "bun": 10897,
+      "calcium": 10890,
+      "chloride": 10966,
+      "ck_mb": 107,
+      "cortisol": 103,
+      "cpk": 343,
+      "creatinine": 11135,
+      "crp": 183,
+      "crp_hs": 4,
+      "esr": 140,
+      "ferritin": 128,
+      "fibrinogen": 514,
+      "free_t4": 109,
+      "glucose": 65859,
+      "heart_rate": 1297509,
+      "hematocrit": 11607,
+      "hemoglobin": 11387,
+      "inr": 4145,
+      "ionized_calcium": 72,
+      "lactate": 870,
+      "ldh": 136,
+      "lipase": 388,
+      "magnesium": 5126,
+      "map": 551865,
+      "myoglobin": 13,
+      "o2sat": 1174049,
+      "ph": 4880,
+      "phosphate": 2504,
+      "platelets": 10460,
+      "potassium": 14869,
+      "prealbumin": 246,
+      "ptt": 3730,
+      "respiratory_rate": 917659,
+      "serum_osmolality": 201,
+      "sodium": 11405,
+      "temperature": 218266,
+      "total_protein": 3884,
+      "triglycerides": 564,
+      "troponin_i": 1500,
+      "tsh": 461,
+      "uric_acid": 108,
+      "urine_output": 19686,
+      "wbc": 10310
+    },
+    "rows": 4436835,
+    "stays": 1500
+  },
+  "output": "eicu_endocrine_stress_transitions_6h.parquet",
+  "restricted_stay_count": null,
+  "restricted_stay_source": null,
+  "safety_boundary": {
+    "bounded_engineering_cohort": true,
+    "causal_claim_allowed": false,
+    "clinical_claim_allowed": false,
+    "coarse_treatment_rows_used_as_numeric_administrations": false,
+    "counterfactual_claim_allowed": false,
+    "factual_observed_treatment_only": true,
+    "medication_orders_used_as_numeric_administrations": false,
+    "patient_ids_included_in_report": false,
+    "raw_rows_included": false,
+    "restricted_stay_ids_used_internally": false
+  },
+  "schema": {
+    "action_channels": [
+      "insulin",
+      "dextrose",
+      "fluids",
+      "potassium_repletion",
+      "systemic_steroid",
+      "vasopressor"
+    ],
+    "active_column": "endocrine_stress_active_t",
+    "anchor_step_hours": 4.0,
+    "config": {
+      "action_keys": [
+        "insulin",
+        "dextrose",
+        "fluids",
+        "potassium_repletion",
+        "systemic_steroid",
+        "vasopressor"
+      ],
+      "action_terms": {
+        "dextrose": [
+          "dextrose",
+          "d50",
+          "d10",
+          "d5w",
+          "glucose"
+        ],
+        "fluids": [
+          "normal saline",
+          "sodium chloride",
+          "nacl",
+          "lactated",
+          "ringer",
+          "crystalloid",
+          "fluid bolus",
+          "iv fluid",
+          "saline bolus"
+        ],
+        "insulin": [
+          "insulin",
+          "regular insulin",
+          "humalog",
+          "lispro",
+          "novolog",
+          "aspart",
+          "lantus",
+          "glargine",
+          "nph"
+        ],
+        "potassium_repletion": [
+          "potassium chloride",
+          "kcl",
+          "potassium"
+        ],
+        "systemic_steroid": [
+          "methylprednisolone",
+          "solumedrol",
+          "solu-medrol",
+          "prednisone",
+          "prednisolone",
+          "hydrocortisone",
+          "dexamethasone",
+          "decadron"
+        ],
+        "vasopressor": [
+          "norepinephrine",
+          "levophed",
+          "epinephrine",
+          "vasopressin",
+          "phenylephrine",
+          "neosynephrine",
+          "dopamine"
+        ]
+      },
+      "active_actions": [
+        "hist_insulin",
+        "hist_dextrose",
+        "hist_systemic_steroid"
+      ],
+      "active_high": {
+        "anion_gap": 16.0,
+        "free_t4": 2.5,
+        "glucose": 250.0,
+        "serum_ketones": 1.0,
+        "serum_osmolality": 310.0,
+        "temperature": 39.0,
+        "tsh": 20.0
+      },
+      "active_low": {
+        "cortisol": 5.0,
+        "glucose": 70.0,
+        "map": 65.0,
+        "temperature": 35.0
+      },
+      "body_system": "endocrine_metabolic",
+      "diagnosis_patterns": [
+        "diabetes",
+        "hyperglycemia",
+        "hypoglycemia",
+        "hyperosmolar",
+        "hhs",
+        "adrenal",
+        "adrenal insufficiency",
+        "adrenal crisis",
+        "thyroid storm",
+        "thyrotoxicosis",
+        "myxedema",
+        "hypothyroid",
+        "e11",
+        "e10",
+        "e27",
+        "e05",
+        "e03"
+      ],
+      "display_name": "Endocrine / glycemic / adrenal-thyroid stress",
+      "name": "endocrine_stress",
+      "notes": [
+        "Extends endocrine coverage beyond DKA using glycemic, osmotic, thyroid, and adrenal proxies.",
+        "No insulin, steroid, or thyroid-treatment effect claim is allowed."
+      ],
+      "state_vars": [
+        "glucose",
+        "serum_osmolality",
+        "serum_ketones",
+        "anion_gap",
+        "bicarbonate",
+        "ph",
+        "sodium",
+        "potassium",
+        "tsh",
+        "free_t4",
+        "cortisol",
+        "map",
+        "heart_rate",
+        "temperature",
+        "creatinine",
+        "bun"
+      ],
+      "targets": [
+        "glucose",
+        "serum_osmolality",
+        "serum_ketones",
+        "anion_gap",
+        "bicarbonate",
+        "sodium",
+        "potassium",
+        "tsh",
+        "free_t4",
+        "cortisol",
+        "map",
+        "temperature"
+      ]
+    },
+    "future_suffix": "tp6",
+    "horizon_hours": 6.0,
+    "lookback_hours": 6.0,
+    "state_vars": [
+      "glucose",
+      "serum_osmolality",
+      "serum_ketones",
+      "anion_gap",
+      "bicarbonate",
+      "ph",
+      "sodium",
+      "potassium",
+      "tsh",
+      "free_t4",
+      "cortisol",
+      "map",
+      "heart_rate",
+      "temperature",
+      "creatinine",
+      "bun"
+    ],
+    "target_tolerance_hours": 2.0,
+    "targets": [
+      "glucose",
+      "serum_osmolality",
+      "serum_ketones",
+      "anion_gap",
+      "bicarbonate",
+      "sodium",
+      "potassium",
+      "tsh",
+      "free_t4",
+      "cortisol",
+      "map",
+      "temperature"
+    ]
+  },
+  "stays": 1420,
+  "subjects": 1149,
+  "target_pair_counts": {
+    "anion_gap": 866,
+    "bicarbonate": 2060,
+    "cortisol": 5,
+    "free_t4": 1,
+    "glucose": 11801,
+    "map": 16615,
+    "potassium": 2329,
+    "serum_ketones": 0,
+    "serum_osmolality": 64,
+    "sodium": 1068,
+    "temperature": 2295,
+    "tsh": 4
+  },
+  "transitions": 17009
+}

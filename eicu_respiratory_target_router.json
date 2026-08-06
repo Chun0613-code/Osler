@@ -1,0 +1,5558 @@
+{
+  "action_channels": [
+    "ventilation",
+    "bronchodilator",
+    "systemic_steroid",
+    "antibiotics",
+    "fluids",
+    "vasopressor"
+  ],
+  "cohort": "eicu_respiratory_transitions_6h.parquet",
+  "cohort_summary": {
+    "active_respiratory_rows": 26558,
+    "bicarbonate_pairs": 4847,
+    "heart_rate_pairs": 57453,
+    "hospitals": 55,
+    "map_pairs": 56549,
+    "o2sat_pairs": 54525,
+    "ph_pairs": 2337,
+    "respiratory_rate_pairs": 46379,
+    "rows": 57673,
+    "stays": 4170,
+    "subjects": 3618
+  },
+  "experiment": "Full eICU respiratory nested factual target router",
+  "future_suffix": "tp6",
+  "hospital_holdout_split": {
+    "available": true,
+    "discovery_groups": 37,
+    "discovery_selector": {
+      "bicarbonate": {
+        "method_stats": {
+          "persistence": {
+            "delta_vs_persistence": {
+              "beats_persistence": false,
+              "bootstrap_95_ci": [
+                0.0,
+                0.0
+              ],
+              "point_delta": 0.0,
+              "significant": false,
+              "subjects": 977
+            },
+            "mae": 2.608724,
+            "rows": 2453,
+            "stays": 1037,
+            "subjects": 977
+          },
+          "population_delta": {
+            "delta_vs_persistence": {
+              "beats_persistence": false,
+              "bootstrap_95_ci": [
+                -0.004525,
+                0.02558
+              ],
+              "point_delta": 0.010216,
+              "significant": false,
+              "subjects": 977
+            },
+            "mae": 2.614196,
+            "rows": 2453,
+            "stays": 1037,
+            "subjects": 977
+          },
+          "ridge_realfit": {
+            "delta_vs_persistence": {
+              "beats_persistence": true,
+              "bootstrap_95_ci": [
+                -0.121854,
+                0.009187
+              ],
+              "point_delta": -0.059241,
+              "significant": false,
+              "subjects": 977
+            },
+            "mae": 2.562885,
+            "rows": 2453,
+            "stays": 1037,
+            "subjects": 977
+          }
+        },
+        "min_pairs": 100,
+        "min_subjects": 40,
+        "reason": "no_source_passed_discovery_significance_gate",
+        "selected_method": "persistence"
+      },
+      "heart_rate": {
+        "method_stats": {
+          "persistence": {
+            "delta_vs_persistence": {
+              "beats_persistence": false,
+              "bootstrap_95_ci": [
+                0.0,
+                0.0
+              ],
+              "point_delta": 0.0,
+              "significant": false,
+              "subjects": 2512
+            },
+            "mae": 9.399698,
+            "rows": 19202,
+            "stays": 2852,
+            "subjects": 2512
+          },
+          "population_delta": {
+            "delta_vs_persistence": {
+              "beats_persistence": true,
+              "bootstrap_95_ci": [
+                -0.068201,
+                -0.042916
+              ],
+              "point_delta": -0.055309,
+              "significant": true,
+              "subjects": 2512
+            },
+            "mae": 9.366453,
+            "rows": 19202,
+            "stays": 2852,
+            "subjects": 2512
+          },
+          "ridge_realfit": {
+            "delta_vs_persistence": {
+              "beats_persistence": true,
+              "bootstrap_95_ci": [
+                -0.65006,
+                -0.39865
+              ],
+              "point_delta": -0.518387,
+              "significant": true,
+              "subjects": 2512
+            },
+            "mae": 9.056713,
+            "rows": 19202,
+            "stays": 2852,
+            "subjects": 2512
+          }
+        },
+        "min_pairs": 100,
+        "min_subjects": 40,
+        "reason": "lowest_discovery_mae_among_significant_supported_sources",
+        "selected_method": "ridge_realfit"
+      },
+      "map": {
+        "method_stats": {
+          "persistence": {
+            "delta_vs_persistence": {
+              "beats_persistence": false,
+              "bootstrap_95_ci": [
+                0.0,
+                0.0
+              ],
+              "point_delta": 0.0,
+              "significant": false,
+              "subjects": 2488
+            },
+            "mae": 11.814815,
+            "rows": 18846,
+            "stays": 2821,
+            "subjects": 2488
+          },
+          "population_delta": {
+            "delta_vs_persistence": {
+              "beats_persistence": false,
+              "bootstrap_95_ci": [
+                0.007851,
+                0.018364
+              ],
+              "point_delta": 0.013388,
+              "significant": false,
+              "subjects": 2488
+            },
+            "mae": 11.823798,
+            "rows": 18846,
+            "stays": 2821,
+            "subjects": 2488
+          },
+          "ridge_realfit": {
+            "delta_vs_persistence": {
+              "beats_persistence": true,
+              "bootstrap_95_ci": [
+                -1.568707,
+                -1.198011
+              ],
+              "point_delta": -1.401577,
+              "significant": true,
+              "subjects": 2488
+            },
+            "mae": 10.61391,
+            "rows": 18846,
+            "stays": 2821,
+            "subjects": 2488
+          }
+        },
+        "min_pairs": 100,
+        "min_subjects": 40,
+        "reason": "lowest_discovery_mae_among_significant_supported_sources",
+        "selected_method": "ridge_realfit"
+      },
+      "o2sat": {
+        "method_stats": {
+          "persistence": {
+            "delta_vs_persistence": {
+              "beats_persistence": false,
+              "bootstrap_95_ci": [
+                0.0,
+                0.0
+              ],
+              "point_delta": 0.0,
+              "significant": false,
+              "subjects": 2443
+            },
+            "mae": 6.201708,
+            "rows": 18145,
+            "stays": 2769,
+            "subjects": 2443
+          },
+          "population_delta": {
+            "delta_vs_persistence": {
+              "beats_persistence": true,
+              "bootstrap_95_ci": [
+                -0.141615,
+                -0.089077
+              ],
+              "point_delta": -0.117093,
+              "significant": true,
+              "subjects": 2443
+            },
+            "mae": 6.275725,
+            "rows": 18145,
+            "stays": 2769,
+            "subjects": 2443
+          },
+          "ridge_realfit": {
+            "delta_vs_persistence": {
+              "beats_persistence": true,
+              "bootstrap_95_ci": [
+                -6.410149,
+                -5.514193
+              ],
+              "point_delta": -5.949884,
+              "significant": true,
+              "subjects": 2443
+            },
+            "mae": 3.767122,
+            "rows": 18145,
+            "stays": 2769,
+            "subjects": 2443
+          }
+        },
+        "min_pairs": 100,
+        "min_subjects": 40,
+        "reason": "lowest_discovery_mae_among_significant_supported_sources",
+        "selected_method": "ridge_realfit"
+      },
+      "ph": {
+        "method_stats": {
+          "persistence": {
+            "delta_vs_persistence": {
+              "beats_persistence": false,
+              "bootstrap_95_ci": [
+                0.0,
+                0.0
+              ],
+              "point_delta": 0.0,
+              "significant": false,
+              "subjects": 619
+            },
+            "mae": 0.073252,
+            "rows": 1340,
+            "stays": 639,
+            "subjects": 619
+          },
+          "population_delta": {
+            "delta_vs_persistence": {
+              "beats_persistence": true,
+              "bootstrap_95_ci": [
+                -0.002415,
+                -0.000391
+              ],
+              "point_delta": -0.001363,
+              "significant": true,
+              "subjects": 619
+            },
+            "mae": 0.072073,
+            "rows": 1340,
+            "stays": 639,
+            "subjects": 619
+          },
+          "ridge_realfit": {
+            "delta_vs_persistence": {
+              "beats_persistence": true,
+              "bootstrap_95_ci": [
+                -0.010835,
+                -0.003889
+              ],
+              "point_delta": -0.007311,
+              "significant": true,
+              "subjects": 619
+            },
+            "mae": 0.067841,
+            "rows": 1340,
+            "stays": 639,
+            "subjects": 619
+          }
+        },
+        "min_pairs": 100,
+        "min_subjects": 40,
+        "reason": "lowest_discovery_mae_among_significant_supported_sources",
+        "selected_method": "ridge_realfit"
+      },
+      "respiratory_rate": {
+        "method_stats": {
+          "persistence": {
+            "delta_vs_persistence": {
+              "beats_persistence": false,
+              "bootstrap_95_ci": [
+                0.0,
+                0.0
+              ],
+              "point_delta": 0.0,
+              "significant": false,
+              "subjects": 2148
+            },
+            "mae": 4.960325,
+            "rows": 16736,
+            "stays": 2397,
+            "subjects": 2148
+          },
+          "population_delta": {
+            "delta_vs_persistence": {
+              "beats_persistence": true,
+              "bootstrap_95_ci": [
+                -0.009714,
+                -0.005958
+              ],
+              "point_delta": -0.007783,
+              "significant": true,
+              "subjects": 2148
+            },
+            "mae": 4.956631,
+            "rows": 16736,
+            "stays": 2397,
+            "subjects": 2148
+          },
+          "ridge_realfit": {
+            "delta_vs_persistence": {
+              "beats_persistence": true,
+              "bootstrap_95_ci": [
+                -0.667759,
+                -0.48341
+              ],
+              "point_delta": -0.57855,
+              "significant": true,
+              "subjects": 2148
+            },
+            "mae": 4.563805,
+            "rows": 16736,
+            "stays": 2397,
+            "subjects": 2148
+          }
+        },
+        "min_pairs": 100,
+        "min_subjects": 40,
+        "reason": "lowest_discovery_mae_among_significant_supported_sources",
+        "selected_method": "ridge_realfit"
+      }
+    },
+    "group_column": "hospitalid",
+    "heldout_active_respiratory_only": {
+      "normalized_mae": {
+        "persistence": 0.707634,
+        "population_delta": 0.712808,
+        "ridge_realfit": 0.588468,
+        "target_router": 0.588886
+      },
+      "per_target": {
+        "bicarbonate": {
+          "mae": {
+            "persistence": 2.750202,
+            "population_delta": 2.734575,
+            "ridge_realfit": 2.644239,
+            "target_router": 2.750202
+          },
+          "router_delta_vs_persistence": {
+            "beats_persistence": false,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "point_delta": 0.0,
+            "significant": false,
+            "subjects": 281
+          },
+          "rows": 741,
+          "selected_method": "persistence",
+          "stays": 298,
+          "subjects": 281
+        },
+        "heart_rate": {
+          "mae": {
+            "persistence": 8.94179,
+            "population_delta": 8.921069,
+            "ridge_realfit": 8.700468,
+            "target_router": 8.700468
+          },
+          "router_delta_vs_persistence": {
+            "beats_persistence": true,
+            "bootstrap_95_ci": [
+              -0.664522,
+              -0.285762
+            ],
+            "point_delta": -0.472276,
+            "significant": true,
+            "subjects": 897
+          },
+          "rows": 7284,
+          "selected_method": "ridge_realfit",
+          "stays": 1012,
+          "subjects": 897
+        },
+        "map": {
+          "mae": {
+            "persistence": 11.689234,
+            "population_delta": 11.692094,
+            "ridge_realfit": 10.492637,
+            "target_router": 10.492637
+          },
+          "router_delta_vs_persistence": {
+            "beats_persistence": true,
+            "bootstrap_95_ci": [
+              -1.668887,
+              -1.064881
+            ],
+            "point_delta": -1.353086,
+            "significant": true,
+            "subjects": 883
+          },
+          "rows": 7208,
+          "selected_method": "ridge_realfit",
+          "stays": 996,
+          "subjects": 883
+        },
+        "o2sat": {
+          "mae": {
+            "persistence": 5.413585,
+            "population_delta": 5.535874,
+            "ridge_realfit": 3.494011,
+            "target_router": 3.494011
+          },
+          "router_delta_vs_persistence": {
+            "beats_persistence": true,
+            "bootstrap_95_ci": [
+              -6.20989,
+              -4.824045
+            ],
+            "point_delta": -5.520731,
+            "significant": true,
+            "subjects": 889
+          },
+          "rows": 7140,
+          "selected_method": "ridge_realfit",
+          "stays": 1003,
+          "subjects": 889
+        },
+        "ph": {
+          "mae": {
+            "persistence": 0.077437,
+            "population_delta": 0.074493,
+            "ridge_realfit": 0.067079,
+            "target_router": 0.067079
+          },
+          "router_delta_vs_persistence": {
+            "beats_persistence": true,
+            "bootstrap_95_ci": [
+              -0.021082,
+              -0.007069
+            ],
+            "point_delta": -0.013857,
+            "significant": true,
+            "subjects": 176
+          },
+          "rows": 380,
+          "selected_method": "ridge_realfit",
+          "stays": 182,
+          "subjects": 176
+        },
+        "respiratory_rate": {
+          "mae": {
+            "persistence": 4.968224,
+            "population_delta": 4.967894,
+            "ridge_realfit": 4.614473,
+            "target_router": 4.614473
+          },
+          "router_delta_vs_persistence": {
+            "beats_persistence": true,
+            "bootstrap_95_ci": [
+              -0.796013,
+              -0.552585
+            ],
+            "point_delta": -0.66689,
+            "significant": true,
+            "subjects": 831
+          },
+          "rows": 6829,
+          "selected_method": "ridge_realfit",
+          "stays": 937,
+          "subjects": 831
+        }
+      },
+      "router_delta_vs_persistence": {
+        "beats_persistence": true,
+        "bootstrap_95_ci": [
+          -0.342021,
+          -0.26934
+        ],
+        "point_delta": -0.305452,
+        "significant": true,
+        "subjects": 897
+      },
+      "rows": 29582,
+      "stays": 1012,
+      "subjects": 897
+    },
+    "heldout_all_windows": {
+      "normalized_mae": {
+        "persistence": 0.616135,
+        "population_delta": 0.630322,
+        "ridge_realfit": 0.551461,
+        "target_router": 0.551782
+      },
+      "per_target": {
+        "bicarbonate": {
+          "mae": {
+            "persistence": 2.641546,
+            "population_delta": 2.629585,
+            "ridge_realfit": 2.534158,
+            "target_router": 2.641546
+          },
+          "router_delta_vs_persistence": {
+            "beats_persistence": false,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "point_delta": 0.0,
+            "significant": false,
+            "subjects": 364
+          },
+          "rows": 1035,
+          "selected_method": "persistence",
+          "stays": 388,
+          "subjects": 364
+        },
+        "heart_rate": {
+          "mae": {
+            "persistence": 8.505607,
+            "population_delta": 8.524574,
+            "ridge_realfit": 8.405584,
+            "target_router": 8.405584
+          },
+          "router_delta_vs_persistence": {
+            "beats_persistence": true,
+            "bootstrap_95_ci": [
+              -0.350185,
+              -0.028032
+            ],
+            "point_delta": -0.193011,
+            "significant": true,
+            "subjects": 953
+          },
+          "rows": 13734,
+          "selected_method": "ridge_realfit",
+          "stays": 1082,
+          "subjects": 953
+        },
+        "map": {
+          "mae": {
+            "persistence": 11.534889,
+            "population_delta": 11.533973,
+            "ridge_realfit": 10.509032,
+            "target_router": 10.509032
+          },
+          "router_delta_vs_persistence": {
+            "beats_persistence": true,
+            "bootstrap_95_ci": [
+              -1.114611,
+              -0.714745
+            ],
+            "point_delta": -0.922105,
+            "significant": true,
+            "subjects": 942
+          },
+          "rows": 13586,
+          "selected_method": "ridge_realfit",
+          "stays": 1070,
+          "subjects": 942
+        },
+        "o2sat": {
+          "mae": {
+            "persistence": 3.880657,
+            "population_delta": 4.175843,
+            "ridge_realfit": 3.023748,
+            "target_router": 3.023748
+          },
+          "router_delta_vs_persistence": {
+            "beats_persistence": true,
+            "bootstrap_95_ci": [
+              -2.916529,
+              -2.047959
+            ],
+            "point_delta": -2.456969,
+            "significant": true,
+            "subjects": 948
+          },
+          "rows": 13457,
+          "selected_method": "ridge_realfit",
+          "stays": 1077,
+          "subjects": 948
+        },
+        "ph": {
+          "mae": {
+            "persistence": 0.073667,
+            "population_delta": 0.071259,
+            "ridge_realfit": 0.064765,
+            "target_router": 0.064765
+          },
+          "router_delta_vs_persistence": {
+            "beats_persistence": true,
+            "bootstrap_95_ci": [
+              -0.017454,
+              -0.005717
+            ],
+            "point_delta": -0.011832,
+            "significant": true,
+            "subjects": 209
+          },
+          "rows": 471,
+          "selected_method": "ridge_realfit",
+          "stays": 217,
+          "subjects": 209
+        },
+        "respiratory_rate": {
+          "mae": {
+            "persistence": 4.464549,
+            "population_delta": 4.474247,
+            "ridge_realfit": 4.20347,
+            "target_router": 4.20347
+          },
+          "router_delta_vs_persistence": {
+            "beats_persistence": true,
+            "bootstrap_95_ci": [
+              -0.484566,
+              -0.292751
+            ],
+            "point_delta": -0.38157,
+            "significant": true,
+            "subjects": 879
+          },
+          "rows": 12059,
+          "selected_method": "ridge_realfit",
+          "stays": 996,
+          "subjects": 879
+        }
+      },
+      "router_delta_vs_persistence": {
+        "beats_persistence": true,
+        "bootstrap_95_ci": [
+          -0.165259,
+          -0.118997
+        ],
+        "point_delta": -0.141562,
+        "significant": true,
+        "subjects": 954
+      },
+      "rows": 54342,
+      "stays": 1083,
+      "subjects": 954
+    },
+    "heldout_groups": 18,
+    "overlap": 0,
+    "seed": 9001,
+    "selected_methods": {
+      "bicarbonate": "persistence",
+      "heart_rate": "ridge_realfit",
+      "map": "ridge_realfit",
+      "o2sat": "ridge_realfit",
+      "ph": "ridge_realfit",
+      "respiratory_rate": "ridge_realfit"
+    },
+    "source_diagnostics": {
+      "feature_count_by_target": {
+        "bicarbonate": 63,
+        "heart_rate": 63,
+        "map": 63,
+        "o2sat": 63,
+        "ph": 63,
+        "respiratory_rate": 63
+      },
+      "future_suffix": "tp6",
+      "inner_oof_folds": 3,
+      "ridge_alpha": 10.0,
+      "sources": {
+        "persistence": "current observed value",
+        "population_delta": "discovery-only mean target delta",
+        "ridge_realfit": "small linear residual model fit on discovery patients"
+      }
+    },
+    "split_type": "hospital-held-out"
+  },
+  "random_patient_splits": {
+    "runs": [
+      {
+        "discovery_groups": 2424,
+        "discovery_selector": {
+          "bicarbonate": {
+            "method_stats": {
+              "persistence": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.0,
+                    0.0
+                  ],
+                  "point_delta": 0.0,
+                  "significant": false,
+                  "subjects": 833
+                },
+                "mae": 2.65428,
+                "rows": 1951,
+                "stays": 873,
+                "subjects": 833
+              },
+              "population_delta": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    -0.017316,
+                    0.023312
+                  ],
+                  "point_delta": 0.003156,
+                  "significant": false,
+                  "subjects": 833
+                },
+                "mae": 2.656305,
+                "rows": 1951,
+                "stays": 873,
+                "subjects": 833
+              },
+              "ridge_realfit": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.180912,
+                    -0.031271
+                  ],
+                  "point_delta": -0.109294,
+                  "significant": true,
+                  "subjects": 833
+                },
+                "mae": 2.558694,
+                "rows": 1951,
+                "stays": 873,
+                "subjects": 833
+              }
+            },
+            "min_pairs": 100,
+            "min_subjects": 40,
+            "reason": "lowest_discovery_mae_among_significant_supported_sources",
+            "selected_method": "ridge_realfit"
+          },
+          "heart_rate": {
+            "method_stats": {
+              "persistence": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.0,
+                    0.0
+                  ],
+                  "point_delta": 0.0,
+                  "significant": false,
+                  "subjects": 2269
+                },
+                "mae": 9.177043,
+                "rows": 17459,
+                "stays": 2577,
+                "subjects": 2269
+              },
+              "population_delta": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.059312,
+                    -0.034228
+                  ],
+                  "point_delta": -0.047828,
+                  "significant": true,
+                  "subjects": 2269
+                },
+                "mae": 9.150069,
+                "rows": 17459,
+                "stays": 2577,
+                "subjects": 2269
+              },
+              "ridge_realfit": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.65526,
+                    -0.421914
+                  ],
+                  "point_delta": -0.534505,
+                  "significant": true,
+                  "subjects": 2269
+                },
+                "mae": 8.832627,
+                "rows": 17459,
+                "stays": 2577,
+                "subjects": 2269
+              }
+            },
+            "min_pairs": 100,
+            "min_subjects": 40,
+            "reason": "lowest_discovery_mae_among_significant_supported_sources",
+            "selected_method": "ridge_realfit"
+          },
+          "map": {
+            "method_stats": {
+              "persistence": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.0,
+                    0.0
+                  ],
+                  "point_delta": 0.0,
+                  "significant": false,
+                  "subjects": 2248
+                },
+                "mae": 11.743464,
+                "rows": 17175,
+                "stays": 2552,
+                "subjects": 2248
+              },
+              "population_delta": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.007192,
+                    0.018765
+                  ],
+                  "point_delta": 0.013097,
+                  "significant": false,
+                  "subjects": 2248
+                },
+                "mae": 11.751517,
+                "rows": 17175,
+                "stays": 2552,
+                "subjects": 2248
+              },
+              "ridge_realfit": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -1.582767,
+                    -1.209532
+                  ],
+                  "point_delta": -1.394983,
+                  "significant": true,
+                  "subjects": 2248
+                },
+                "mae": 10.529058,
+                "rows": 17175,
+                "stays": 2552,
+                "subjects": 2248
+              }
+            },
+            "min_pairs": 100,
+            "min_subjects": 40,
+            "reason": "lowest_discovery_mae_among_significant_supported_sources",
+            "selected_method": "ridge_realfit"
+          },
+          "o2sat": {
+            "method_stats": {
+              "persistence": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.0,
+                    0.0
+                  ],
+                  "point_delta": 0.0,
+                  "significant": false,
+                  "subjects": 2213
+                },
+                "mae": 5.930503,
+                "rows": 16677,
+                "stays": 2514,
+                "subjects": 2213
+              },
+              "population_delta": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.146263,
+                    -0.091144
+                  ],
+                  "point_delta": -0.118778,
+                  "significant": true,
+                  "subjects": 2213
+                },
+                "mae": 6.002105,
+                "rows": 16677,
+                "stays": 2514,
+                "subjects": 2213
+              },
+              "ridge_realfit": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -6.233269,
+                    -5.308287
+                  ],
+                  "point_delta": -5.790741,
+                  "significant": true,
+                  "subjects": 2213
+                },
+                "mae": 3.543597,
+                "rows": 16677,
+                "stays": 2514,
+                "subjects": 2213
+              }
+            },
+            "min_pairs": 100,
+            "min_subjects": 40,
+            "reason": "lowest_discovery_mae_among_significant_supported_sources",
+            "selected_method": "ridge_realfit"
+          },
+          "ph": {
+            "method_stats": {
+              "persistence": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.0,
+                    0.0
+                  ],
+                  "point_delta": 0.0,
+                  "significant": false,
+                  "subjects": 527
+                },
+                "mae": 0.076026,
+                "rows": 1045,
+                "stays": 541,
+                "subjects": 527
+              },
+              "population_delta": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.003086,
+                    -0.000488
+                  ],
+                  "point_delta": -0.001766,
+                  "significant": true,
+                  "subjects": 527
+                },
+                "mae": 0.074576,
+                "rows": 1045,
+                "stays": 541,
+                "subjects": 527
+              },
+              "ridge_realfit": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.012743,
+                    -0.00373
+                  ],
+                  "point_delta": -0.008464,
+                  "significant": true,
+                  "subjects": 527
+                },
+                "mae": 0.069313,
+                "rows": 1045,
+                "stays": 541,
+                "subjects": 527
+              }
+            },
+            "min_pairs": 100,
+            "min_subjects": 40,
+            "reason": "lowest_discovery_mae_among_significant_supported_sources",
+            "selected_method": "ridge_realfit"
+          },
+          "respiratory_rate": {
+            "method_stats": {
+              "persistence": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.0,
+                    0.0
+                  ],
+                  "point_delta": 0.0,
+                  "significant": false,
+                  "subjects": 2005
+                },
+                "mae": 4.938058,
+                "rows": 15692,
+                "stays": 2247,
+                "subjects": 2005
+              },
+              "population_delta": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.011875,
+                    -0.007856
+                  ],
+                  "point_delta": -0.009911,
+                  "significant": true,
+                  "subjects": 2005
+                },
+                "mae": 4.932952,
+                "rows": 15692,
+                "stays": 2247,
+                "subjects": 2005
+              },
+              "ridge_realfit": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.707421,
+                    -0.536923
+                  ],
+                  "point_delta": -0.620061,
+                  "significant": true,
+                  "subjects": 2005
+                },
+                "mae": 4.532486,
+                "rows": 15692,
+                "stays": 2247,
+                "subjects": 2005
+              }
+            },
+            "min_pairs": 100,
+            "min_subjects": 40,
+            "reason": "lowest_discovery_mae_among_significant_supported_sources",
+            "selected_method": "ridge_realfit"
+          }
+        },
+        "group_column": "subject_id",
+        "heldout_active_respiratory_only": {
+          "normalized_mae": {
+            "persistence": 0.749802,
+            "population_delta": 0.752977,
+            "ridge_realfit": 0.606144,
+            "target_router": 0.606144
+          },
+          "per_target": {
+            "bicarbonate": {
+              "mae": {
+                "persistence": 2.621561,
+                "population_delta": 2.620588,
+                "ridge_realfit": 2.569561,
+                "target_router": 2.569561
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.162883,
+                  0.053679
+                ],
+                "point_delta": -0.057406,
+                "significant": false,
+                "subjects": 421
+              },
+              "rows": 1243,
+              "selected_method": "ridge_realfit",
+              "stays": 462,
+              "subjects": 421
+            },
+            "heart_rate": {
+              "mae": {
+                "persistence": 9.46084,
+                "population_delta": 9.428934,
+                "ridge_realfit": 9.117404,
+                "target_router": 9.117404
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.752172,
+                  -0.39553
+                ],
+                "point_delta": -0.572245,
+                "significant": true,
+                "subjects": 1116
+              },
+              "rows": 9027,
+              "selected_method": "ridge_realfit",
+              "stays": 1287,
+              "subjects": 1116
+            },
+            "map": {
+              "mae": {
+                "persistence": 11.850884,
+                "population_delta": 11.85917,
+                "ridge_realfit": 10.554118,
+                "target_router": 10.554118
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -1.732599,
+                  -1.190054
+                ],
+                "point_delta": -1.456179,
+                "significant": true,
+                "subjects": 1099
+              },
+              "rows": 8879,
+              "selected_method": "ridge_realfit",
+              "stays": 1265,
+              "subjects": 1099
+            },
+            "o2sat": {
+              "mae": {
+                "persistence": 6.07342,
+                "population_delta": 6.15185,
+                "ridge_realfit": 3.71087,
+                "target_router": 3.71087
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -6.860918,
+                  -5.468497
+                ],
+                "point_delta": -6.166171,
+                "significant": true,
+                "subjects": 1095
+              },
+              "rows": 8608,
+              "selected_method": "ridge_realfit",
+              "stays": 1258,
+              "subjects": 1095
+            },
+            "ph": {
+              "mae": {
+                "persistence": 0.071314,
+                "population_delta": 0.06993,
+                "ridge_realfit": 0.063709,
+                "target_router": 0.063709
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.019325,
+                  -0.008402
+                ],
+                "point_delta": -0.013817,
+                "significant": true,
+                "subjects": 265
+              },
+              "rows": 675,
+              "selected_method": "ridge_realfit",
+              "stays": 280,
+              "subjects": 265
+            },
+            "respiratory_rate": {
+              "mae": {
+                "persistence": 5.011558,
+                "population_delta": 5.008785,
+                "ridge_realfit": 4.649671,
+                "target_router": 4.649671
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.790891,
+                  -0.486053
+                ],
+                "point_delta": -0.648241,
+                "significant": true,
+                "subjects": 954
+              },
+              "rows": 7873,
+              "selected_method": "ridge_realfit",
+              "stays": 1087,
+              "subjects": 954
+            }
+          },
+          "router_delta_vs_persistence": {
+            "beats_persistence": true,
+            "bootstrap_95_ci": [
+              -0.386479,
+              -0.316244
+            ],
+            "point_delta": -0.349796,
+            "significant": true,
+            "subjects": 1119
+          },
+          "rows": 36305,
+          "stays": 1290,
+          "subjects": 1119
+        },
+        "heldout_all_windows": {
+          "normalized_mae": {
+            "persistence": 0.625744,
+            "population_delta": 0.640516,
+            "ridge_realfit": 0.556433,
+            "target_router": 0.556433
+          },
+          "per_target": {
+            "bicarbonate": {
+              "mae": {
+                "persistence": 2.438822,
+                "population_delta": 2.451651,
+                "ridge_realfit": 2.39134,
+                "target_router": 2.39134
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.110192,
+                  0.056366
+                ],
+                "point_delta": -0.023144,
+                "significant": false,
+                "subjects": 524
+              },
+              "rows": 1816,
+              "selected_method": "ridge_realfit",
+              "stays": 576,
+              "subjects": 524
+            },
+            "heart_rate": {
+              "mae": {
+                "persistence": 8.840102,
+                "population_delta": 8.851003,
+                "ridge_realfit": 8.64174,
+                "target_router": 8.64174
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.436114,
+                  -0.161006
+                ],
+                "point_delta": -0.297396,
+                "significant": true,
+                "subjects": 1191
+              },
+              "rows": 19206,
+              "selected_method": "ridge_realfit",
+              "stays": 1392,
+              "subjects": 1191
+            },
+            "map": {
+              "mae": {
+                "persistence": 11.540728,
+                "population_delta": 11.542338,
+                "ridge_realfit": 10.445392,
+                "target_router": 10.445392
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -1.376148,
+                  -0.96208
+                ],
+                "point_delta": -1.18373,
+                "significant": true,
+                "subjects": 1177
+              },
+              "rows": 18906,
+              "selected_method": "ridge_realfit",
+              "stays": 1376,
+              "subjects": 1177
+            },
+            "o2sat": {
+              "mae": {
+                "persistence": 3.981874,
+                "population_delta": 4.278256,
+                "ridge_realfit": 3.087257,
+                "target_router": 3.087257
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -2.908154,
+                  -2.068446
+                ],
+                "point_delta": -2.475702,
+                "significant": true,
+                "subjects": 1173
+              },
+              "rows": 18206,
+              "selected_method": "ridge_realfit",
+              "stays": 1368,
+              "subjects": 1173
+            },
+            "ph": {
+              "mae": {
+                "persistence": 0.065458,
+                "population_delta": 0.065074,
+                "ridge_realfit": 0.059908,
+                "target_router": 0.059908
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.015785,
+                  -0.006145
+                ],
+                "point_delta": -0.010878,
+                "significant": true,
+                "subjects": 304
+              },
+              "rows": 896,
+              "selected_method": "ridge_realfit",
+              "stays": 323,
+              "subjects": 304
+            },
+            "respiratory_rate": {
+              "mae": {
+                "persistence": 4.393517,
+                "population_delta": 4.405687,
+                "ridge_realfit": 4.140453,
+                "target_router": 4.140453
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.463612,
+                  -0.263669
+                ],
+                "point_delta": -0.369713,
+                "significant": true,
+                "subjects": 1007
+              },
+              "rows": 14993,
+              "selected_method": "ridge_realfit",
+              "stays": 1158,
+              "subjects": 1007
+            }
+          },
+          "router_delta_vs_persistence": {
+            "beats_persistence": true,
+            "bootstrap_95_ci": [
+              -0.172033,
+              -0.12803
+            ],
+            "point_delta": -0.148301,
+            "significant": true,
+            "subjects": 1194
+          },
+          "rows": 74023,
+          "stays": 1395,
+          "subjects": 1194
+        },
+        "heldout_groups": 1194,
+        "overlap": 0,
+        "seed": 7,
+        "selected_methods": {
+          "bicarbonate": "ridge_realfit",
+          "heart_rate": "ridge_realfit",
+          "map": "ridge_realfit",
+          "o2sat": "ridge_realfit",
+          "ph": "ridge_realfit",
+          "respiratory_rate": "ridge_realfit"
+        },
+        "source_diagnostics": {
+          "feature_count_by_target": {
+            "bicarbonate": 63,
+            "heart_rate": 63,
+            "map": 63,
+            "o2sat": 63,
+            "ph": 63,
+            "respiratory_rate": 63
+          },
+          "future_suffix": "tp6",
+          "inner_oof_folds": 3,
+          "ridge_alpha": 10.0,
+          "sources": {
+            "persistence": "current observed value",
+            "population_delta": "discovery-only mean target delta",
+            "ridge_realfit": "small linear residual model fit on discovery patients"
+          }
+        }
+      },
+      {
+        "discovery_groups": 2424,
+        "discovery_selector": {
+          "bicarbonate": {
+            "method_stats": {
+              "persistence": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.0,
+                    0.0
+                  ],
+                  "point_delta": 0.0,
+                  "significant": false,
+                  "subjects": 842
+                },
+                "mae": 2.610367,
+                "rows": 2151,
+                "stays": 898,
+                "subjects": 842
+              },
+              "population_delta": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    -0.001365,
+                    0.03259
+                  ],
+                  "point_delta": 0.016119,
+                  "significant": false,
+                  "subjects": 842
+                },
+                "mae": 2.615675,
+                "rows": 2151,
+                "stays": 898,
+                "subjects": 842
+              },
+              "ridge_realfit": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.132685,
+                    0.013008
+                  ],
+                  "point_delta": -0.062494,
+                  "significant": false,
+                  "subjects": 842
+                },
+                "mae": 2.563131,
+                "rows": 2151,
+                "stays": 898,
+                "subjects": 842
+              }
+            },
+            "min_pairs": 100,
+            "min_subjects": 40,
+            "reason": "no_source_passed_discovery_significance_gate",
+            "selected_method": "persistence"
+          },
+          "heart_rate": {
+            "method_stats": {
+              "persistence": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.0,
+                    0.0
+                  ],
+                  "point_delta": 0.0,
+                  "significant": false,
+                  "subjects": 2266
+                },
+                "mae": 9.217755,
+                "rows": 17933,
+                "stays": 2567,
+                "subjects": 2266
+              },
+              "population_delta": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.065692,
+                    -0.040345
+                  ],
+                  "point_delta": -0.054073,
+                  "significant": true,
+                  "subjects": 2266
+                },
+                "mae": 9.18099,
+                "rows": 17933,
+                "stays": 2567,
+                "subjects": 2266
+              },
+              "ridge_realfit": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.650306,
+                    -0.409833
+                  ],
+                  "point_delta": -0.527601,
+                  "significant": true,
+                  "subjects": 2266
+                },
+                "mae": 8.871635,
+                "rows": 17933,
+                "stays": 2567,
+                "subjects": 2266
+              }
+            },
+            "min_pairs": 100,
+            "min_subjects": 40,
+            "reason": "lowest_discovery_mae_among_significant_supported_sources",
+            "selected_method": "ridge_realfit"
+          },
+          "map": {
+            "method_stats": {
+              "persistence": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.0,
+                    0.0
+                  ],
+                  "point_delta": 0.0,
+                  "significant": false,
+                  "subjects": 2244
+                },
+                "mae": 11.636255,
+                "rows": 17647,
+                "stays": 2539,
+                "subjects": 2244
+              },
+              "population_delta": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.010568,
+                    0.024388
+                  ],
+                  "point_delta": 0.017783,
+                  "significant": false,
+                  "subjects": 2244
+                },
+                "mae": 11.645516,
+                "rows": 17647,
+                "stays": 2539,
+                "subjects": 2244
+              },
+              "ridge_realfit": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -1.4732,
+                    -1.091755
+                  ],
+                  "point_delta": -1.282735,
+                  "significant": true,
+                  "subjects": 2244
+                },
+                "mae": 10.526615,
+                "rows": 17647,
+                "stays": 2539,
+                "subjects": 2244
+              }
+            },
+            "min_pairs": 100,
+            "min_subjects": 40,
+            "reason": "lowest_discovery_mae_among_significant_supported_sources",
+            "selected_method": "ridge_realfit"
+          },
+          "o2sat": {
+            "method_stats": {
+              "persistence": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.0,
+                    0.0
+                  ],
+                  "point_delta": 0.0,
+                  "significant": false,
+                  "subjects": 2219
+                },
+                "mae": 5.952659,
+                "rows": 17152,
+                "stays": 2511,
+                "subjects": 2219
+              },
+              "population_delta": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.130803,
+                    -0.076382
+                  ],
+                  "point_delta": -0.103421,
+                  "significant": true,
+                  "subjects": 2219
+                },
+                "mae": 6.038531,
+                "rows": 17152,
+                "stays": 2511,
+                "subjects": 2219
+              },
+              "ridge_realfit": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -6.284653,
+                    -5.374027
+                  ],
+                  "point_delta": -5.832348,
+                  "significant": true,
+                  "subjects": 2219
+                },
+                "mae": 3.623912,
+                "rows": 17152,
+                "stays": 2511,
+                "subjects": 2219
+              }
+            },
+            "min_pairs": 100,
+            "min_subjects": 40,
+            "reason": "lowest_discovery_mae_among_significant_supported_sources",
+            "selected_method": "ridge_realfit"
+          },
+          "ph": {
+            "method_stats": {
+              "persistence": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.0,
+                    0.0
+                  ],
+                  "point_delta": 0.0,
+                  "significant": false,
+                  "subjects": 528
+                },
+                "mae": 0.073305,
+                "rows": 1170,
+                "stays": 548,
+                "subjects": 528
+              },
+              "population_delta": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.002539,
+                    -0.000359
+                  ],
+                  "point_delta": -0.00139,
+                  "significant": true,
+                  "subjects": 528
+                },
+                "mae": 0.07229,
+                "rows": 1170,
+                "stays": 548,
+                "subjects": 528
+              },
+              "ridge_realfit": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.010799,
+                    -0.003464
+                  ],
+                  "point_delta": -0.007157,
+                  "significant": true,
+                  "subjects": 528
+                },
+                "mae": 0.068454,
+                "rows": 1170,
+                "stays": 548,
+                "subjects": 528
+              }
+            },
+            "min_pairs": 100,
+            "min_subjects": 40,
+            "reason": "lowest_discovery_mae_among_significant_supported_sources",
+            "selected_method": "ridge_realfit"
+          },
+          "respiratory_rate": {
+            "method_stats": {
+              "persistence": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.0,
+                    0.0
+                  ],
+                  "point_delta": 0.0,
+                  "significant": false,
+                  "subjects": 1974
+                },
+                "mae": 4.970773,
+                "rows": 15944,
+                "stays": 2214,
+                "subjects": 1974
+              },
+              "population_delta": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.009303,
+                    -0.006278
+                  ],
+                  "point_delta": -0.007797,
+                  "significant": true,
+                  "subjects": 1974
+                },
+                "mae": 4.967966,
+                "rows": 15944,
+                "stays": 2214,
+                "subjects": 1974
+              },
+              "ridge_realfit": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.669153,
+                    -0.497184
+                  ],
+                  "point_delta": -0.581423,
+                  "significant": true,
+                  "subjects": 1974
+                },
+                "mae": 4.597532,
+                "rows": 15944,
+                "stays": 2214,
+                "subjects": 1974
+              }
+            },
+            "min_pairs": 100,
+            "min_subjects": 40,
+            "reason": "lowest_discovery_mae_among_significant_supported_sources",
+            "selected_method": "ridge_realfit"
+          }
+        },
+        "group_column": "subject_id",
+        "heldout_active_respiratory_only": {
+          "normalized_mae": {
+            "persistence": 0.74015,
+            "population_delta": 0.743004,
+            "ridge_realfit": 0.592033,
+            "target_router": 0.592823
+          },
+          "per_target": {
+            "bicarbonate": {
+              "mae": {
+                "persistence": 2.705849,
+                "population_delta": 2.698966,
+                "ridge_realfit": 2.538919,
+                "target_router": 2.705849
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": false,
+                "bootstrap_95_ci": [
+                  0.0,
+                  0.0
+                ],
+                "point_delta": 0.0,
+                "significant": false,
+                "subjects": 412
+              },
+              "rows": 1043,
+              "selected_method": "persistence",
+              "stays": 437,
+              "subjects": 412
+            },
+            "heart_rate": {
+              "mae": {
+                "persistence": 9.391208,
+                "population_delta": 9.368302,
+                "ridge_realfit": 9.091,
+                "target_router": 9.091
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.713934,
+                  -0.368912
+                ],
+                "point_delta": -0.536987,
+                "significant": true,
+                "subjects": 1119
+              },
+              "rows": 8553,
+              "selected_method": "ridge_realfit",
+              "stays": 1297,
+              "subjects": 1119
+            },
+            "map": {
+              "mae": {
+                "persistence": 12.081956,
+                "population_delta": 12.095012,
+                "ridge_realfit": 10.599936,
+                "target_router": 10.599936
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -1.909342,
+                  -1.367131
+                ],
+                "point_delta": -1.667867,
+                "significant": true,
+                "subjects": 1103
+              },
+              "rows": 8407,
+              "selected_method": "ridge_realfit",
+              "stays": 1278,
+              "subjects": 1103
+            },
+            "o2sat": {
+              "mae": {
+                "persistence": 6.035042,
+                "population_delta": 6.105711,
+                "ridge_realfit": 3.616382,
+                "target_router": 3.616382
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -6.673355,
+                  -5.326736
+                ],
+                "point_delta": -6.006344,
+                "significant": true,
+                "subjects": 1089
+              },
+              "rows": 8133,
+              "selected_method": "ridge_realfit",
+              "stays": 1261,
+              "subjects": 1089
+            },
+            "ph": {
+              "mae": {
+                "persistence": 0.076031,
+                "population_delta": 0.073375,
+                "ridge_realfit": 0.062808,
+                "target_router": 0.062808
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.020398,
+                  -0.009633
+                ],
+                "point_delta": -0.014715,
+                "significant": true,
+                "subjects": 264
+              },
+              "rows": 550,
+              "selected_method": "ridge_realfit",
+              "stays": 273,
+              "subjects": 264
+            },
+            "respiratory_rate": {
+              "mae": {
+                "persistence": 4.945545,
+                "population_delta": 4.942043,
+                "ridge_realfit": 4.514343,
+                "target_router": 4.514343
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.783538,
+                  -0.523386
+                ],
+                "point_delta": -0.657606,
+                "significant": true,
+                "subjects": 985
+              },
+              "rows": 7621,
+              "selected_method": "ridge_realfit",
+              "stays": 1120,
+              "subjects": 985
+            }
+          },
+          "router_delta_vs_persistence": {
+            "beats_persistence": true,
+            "bootstrap_95_ci": [
+              -0.370301,
+              -0.302009
+            ],
+            "point_delta": -0.336612,
+            "significant": true,
+            "subjects": 1123
+          },
+          "rows": 34307,
+          "stays": 1301,
+          "subjects": 1123
+        },
+        "heldout_all_windows": {
+          "normalized_mae": {
+            "persistence": 0.613206,
+            "population_delta": 0.628211,
+            "ridge_realfit": 0.543374,
+            "target_router": 0.543709
+          },
+          "per_target": {
+            "bicarbonate": {
+              "mae": {
+                "persistence": 2.439248,
+                "population_delta": 2.449186,
+                "ridge_realfit": 2.339756,
+                "target_router": 2.439248
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": false,
+                "bootstrap_95_ci": [
+                  0.0,
+                  0.0
+                ],
+                "point_delta": 0.0,
+                "significant": false,
+                "subjects": 533
+              },
+              "rows": 1595,
+              "selected_method": "persistence",
+              "stays": 579,
+              "subjects": 533
+            },
+            "heart_rate": {
+              "mae": {
+                "persistence": 8.668166,
+                "population_delta": 8.691223,
+                "ridge_realfit": 8.52948,
+                "target_router": 8.52948
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.423505,
+                  -0.144633
+                ],
+                "point_delta": -0.285798,
+                "significant": true,
+                "subjects": 1190
+              },
+              "rows": 19124,
+              "selected_method": "ridge_realfit",
+              "stays": 1399,
+              "subjects": 1190
+            },
+            "map": {
+              "mae": {
+                "persistence": 11.843856,
+                "population_delta": 11.851199,
+                "ridge_realfit": 10.635429,
+                "target_router": 10.635429
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -1.565319,
+                  -1.188468
+                ],
+                "point_delta": -1.379948,
+                "significant": true,
+                "subjects": 1179
+              },
+              "rows": 18848,
+              "selected_method": "ridge_realfit",
+              "stays": 1388,
+              "subjects": 1179
+            },
+            "o2sat": {
+              "mae": {
+                "persistence": 3.874419,
+                "population_delta": 4.183395,
+                "ridge_realfit": 2.979905,
+                "target_router": 2.979905
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -2.862198,
+                  -2.081668
+                ],
+                "point_delta": -2.45711,
+                "significant": true,
+                "subjects": 1165
+              },
+              "rows": 18068,
+              "selected_method": "ridge_realfit",
+              "stays": 1370,
+              "subjects": 1165
+            },
+            "ph": {
+              "mae": {
+                "persistence": 0.066319,
+                "population_delta": 0.064791,
+                "ridge_realfit": 0.057229,
+                "target_router": 0.057229
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.016263,
+                  -0.006668
+                ],
+                "point_delta": -0.011597,
+                "significant": true,
+                "subjects": 306
+              },
+              "rows": 764,
+              "selected_method": "ridge_realfit",
+              "stays": 320,
+              "subjects": 306
+            },
+            "respiratory_rate": {
+              "mae": {
+                "persistence": 4.281299,
+                "population_delta": 4.289324,
+                "ridge_realfit": 4.004105,
+                "target_router": 4.004105
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.46377,
+                  -0.274265
+                ],
+                "point_delta": -0.36967,
+                "significant": true,
+                "subjects": 1029
+              },
+              "rows": 15400,
+              "selected_method": "ridge_realfit",
+              "stays": 1185,
+              "subjects": 1029
+            }
+          },
+          "router_delta_vs_persistence": {
+            "beats_persistence": true,
+            "bootstrap_95_ci": [
+              -0.163518,
+              -0.127697
+            ],
+            "point_delta": -0.14565,
+            "significant": true,
+            "subjects": 1194
+          },
+          "rows": 73799,
+          "stays": 1403,
+          "subjects": 1194
+        },
+        "heldout_groups": 1194,
+        "overlap": 0,
+        "seed": 11,
+        "selected_methods": {
+          "bicarbonate": "persistence",
+          "heart_rate": "ridge_realfit",
+          "map": "ridge_realfit",
+          "o2sat": "ridge_realfit",
+          "ph": "ridge_realfit",
+          "respiratory_rate": "ridge_realfit"
+        },
+        "source_diagnostics": {
+          "feature_count_by_target": {
+            "bicarbonate": 63,
+            "heart_rate": 63,
+            "map": 63,
+            "o2sat": 63,
+            "ph": 63,
+            "respiratory_rate": 63
+          },
+          "future_suffix": "tp6",
+          "inner_oof_folds": 3,
+          "ridge_alpha": 10.0,
+          "sources": {
+            "persistence": "current observed value",
+            "population_delta": "discovery-only mean target delta",
+            "ridge_realfit": "small linear residual model fit on discovery patients"
+          }
+        }
+      },
+      {
+        "discovery_groups": 2424,
+        "discovery_selector": {
+          "bicarbonate": {
+            "method_stats": {
+              "persistence": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.0,
+                    0.0
+                  ],
+                  "point_delta": 0.0,
+                  "significant": false,
+                  "subjects": 820
+                },
+                "mae": 2.653766,
+                "rows": 2018,
+                "stays": 871,
+                "subjects": 820
+              },
+              "population_delta": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    -0.002254,
+                    0.034679
+                  ],
+                  "point_delta": 0.016609,
+                  "significant": false,
+                  "subjects": 820
+                },
+                "mae": 2.660241,
+                "rows": 2018,
+                "stays": 871,
+                "subjects": 820
+              },
+              "ridge_realfit": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.219386,
+                    -0.061935
+                  ],
+                  "point_delta": -0.135554,
+                  "significant": true,
+                  "subjects": 820
+                },
+                "mae": 2.548814,
+                "rows": 2018,
+                "stays": 871,
+                "subjects": 820
+              }
+            },
+            "min_pairs": 100,
+            "min_subjects": 40,
+            "reason": "lowest_discovery_mae_among_significant_supported_sources",
+            "selected_method": "ridge_realfit"
+          },
+          "heart_rate": {
+            "method_stats": {
+              "persistence": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.0,
+                    0.0
+                  ],
+                  "point_delta": 0.0,
+                  "significant": false,
+                  "subjects": 2276
+                },
+                "mae": 9.385594,
+                "rows": 17687,
+                "stays": 2601,
+                "subjects": 2276
+              },
+              "population_delta": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.055979,
+                    -0.029232
+                  ],
+                  "point_delta": -0.042486,
+                  "significant": true,
+                  "subjects": 2276
+                },
+                "mae": 9.356047,
+                "rows": 17687,
+                "stays": 2601,
+                "subjects": 2276
+              },
+              "ridge_realfit": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.580492,
+                    -0.335335
+                  ],
+                  "point_delta": -0.460768,
+                  "significant": true,
+                  "subjects": 2276
+                },
+                "mae": 9.061167,
+                "rows": 17687,
+                "stays": 2601,
+                "subjects": 2276
+              }
+            },
+            "min_pairs": 100,
+            "min_subjects": 40,
+            "reason": "lowest_discovery_mae_among_significant_supported_sources",
+            "selected_method": "ridge_realfit"
+          },
+          "map": {
+            "method_stats": {
+              "persistence": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.0,
+                    0.0
+                  ],
+                  "point_delta": 0.0,
+                  "significant": false,
+                  "subjects": 2255
+                },
+                "mae": 11.774475,
+                "rows": 17426,
+                "stays": 2574,
+                "subjects": 2255
+              },
+              "population_delta": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.004408,
+                    0.010952
+                  ],
+                  "point_delta": 0.007498,
+                  "significant": false,
+                  "subjects": 2255
+                },
+                "mae": 11.77934,
+                "rows": 17426,
+                "stays": 2574,
+                "subjects": 2255
+              },
+              "ridge_realfit": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -1.597354,
+                    -1.21696
+                  ],
+                  "point_delta": -1.401367,
+                  "significant": true,
+                  "subjects": 2255
+                },
+                "mae": 10.5501,
+                "rows": 17426,
+                "stays": 2574,
+                "subjects": 2255
+              }
+            },
+            "min_pairs": 100,
+            "min_subjects": 40,
+            "reason": "lowest_discovery_mae_among_significant_supported_sources",
+            "selected_method": "ridge_realfit"
+          },
+          "o2sat": {
+            "method_stats": {
+              "persistence": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.0,
+                    0.0
+                  ],
+                  "point_delta": 0.0,
+                  "significant": false,
+                  "subjects": 2223
+                },
+                "mae": 5.943676,
+                "rows": 16920,
+                "stays": 2539,
+                "subjects": 2223
+              },
+              "population_delta": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.148573,
+                    -0.087539
+                  ],
+                  "point_delta": -0.118768,
+                  "significant": true,
+                  "subjects": 2223
+                },
+                "mae": 6.030867,
+                "rows": 16920,
+                "stays": 2539,
+                "subjects": 2223
+              },
+              "ridge_realfit": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -6.511062,
+                    -5.57768
+                  ],
+                  "point_delta": -6.054854,
+                  "significant": true,
+                  "subjects": 2223
+                },
+                "mae": 3.505971,
+                "rows": 16920,
+                "stays": 2539,
+                "subjects": 2223
+              }
+            },
+            "min_pairs": 100,
+            "min_subjects": 40,
+            "reason": "lowest_discovery_mae_among_significant_supported_sources",
+            "selected_method": "ridge_realfit"
+          },
+          "ph": {
+            "method_stats": {
+              "persistence": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.0,
+                    0.0
+                  ],
+                  "point_delta": 0.0,
+                  "significant": false,
+                  "subjects": 515
+                },
+                "mae": 0.074023,
+                "rows": 1068,
+                "stays": 533,
+                "subjects": 515
+              },
+              "population_delta": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.003298,
+                    -0.001034
+                  ],
+                  "point_delta": -0.00224,
+                  "significant": true,
+                  "subjects": 515
+                },
+                "mae": 0.072256,
+                "rows": 1068,
+                "stays": 533,
+                "subjects": 515
+              },
+              "ridge_realfit": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.015881,
+                    -0.007657
+                  ],
+                  "point_delta": -0.011779,
+                  "significant": true,
+                  "subjects": 515
+                },
+                "mae": 0.065708,
+                "rows": 1068,
+                "stays": 533,
+                "subjects": 515
+              }
+            },
+            "min_pairs": 100,
+            "min_subjects": 40,
+            "reason": "lowest_discovery_mae_among_significant_supported_sources",
+            "selected_method": "ridge_realfit"
+          },
+          "respiratory_rate": {
+            "method_stats": {
+              "persistence": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.0,
+                    0.0
+                  ],
+                  "point_delta": 0.0,
+                  "significant": false,
+                  "subjects": 1990
+                },
+                "mae": 4.881509,
+                "rows": 15689,
+                "stays": 2238,
+                "subjects": 1990
+              },
+              "population_delta": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.014217,
+                    -0.009629
+                  ],
+                  "point_delta": -0.011943,
+                  "significant": true,
+                  "subjects": 1990
+                },
+                "mae": 4.876372,
+                "rows": 15689,
+                "stays": 2238,
+                "subjects": 1990
+              },
+              "ridge_realfit": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.692417,
+                    -0.503899
+                  ],
+                  "point_delta": -0.598569,
+                  "significant": true,
+                  "subjects": 1990
+                },
+                "mae": 4.494117,
+                "rows": 15689,
+                "stays": 2238,
+                "subjects": 1990
+              }
+            },
+            "min_pairs": 100,
+            "min_subjects": 40,
+            "reason": "lowest_discovery_mae_among_significant_supported_sources",
+            "selected_method": "ridge_realfit"
+          }
+        },
+        "group_column": "subject_id",
+        "heldout_active_respiratory_only": {
+          "normalized_mae": {
+            "persistence": 0.750413,
+            "population_delta": 0.752666,
+            "ridge_realfit": 0.608874,
+            "target_router": 0.608874
+          },
+          "per_target": {
+            "bicarbonate": {
+              "mae": {
+                "persistence": 2.620578,
+                "population_delta": 2.610097,
+                "ridge_realfit": 2.54425,
+                "target_router": 2.54425
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.1442,
+                  0.034173
+                ],
+                "point_delta": -0.05643,
+                "significant": false,
+                "subjects": 434
+              },
+              "rows": 1176,
+              "selected_method": "ridge_realfit",
+              "stays": 464,
+              "subjects": 434
+            },
+            "heart_rate": {
+              "mae": {
+                "persistence": 9.048983,
+                "population_delta": 9.015679,
+                "ridge_realfit": 8.675708,
+                "target_router": 8.675708
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.874035,
+                  -0.540683
+                ],
+                "point_delta": -0.705716,
+                "significant": true,
+                "subjects": 1109
+              },
+              "rows": 8799,
+              "selected_method": "ridge_realfit",
+              "stays": 1263,
+              "subjects": 1109
+            },
+            "map": {
+              "mae": {
+                "persistence": 11.791377,
+                "population_delta": 11.79745,
+                "ridge_realfit": 10.543545,
+                "target_router": 10.543545
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -1.718546,
+                  -1.191906
+                ],
+                "point_delta": -1.457137,
+                "significant": true,
+                "subjects": 1092
+              },
+              "rows": 8628,
+              "selected_method": "ridge_realfit",
+              "stays": 1243,
+              "subjects": 1092
+            },
+            "o2sat": {
+              "mae": {
+                "persistence": 6.050926,
+                "population_delta": 6.111474,
+                "ridge_realfit": 3.771674,
+                "target_router": 3.771674
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -6.332591,
+                  -5.046516
+                ],
+                "point_delta": -5.673186,
+                "significant": true,
+                "subjects": 1085
+              },
+              "rows": 8365,
+              "selected_method": "ridge_realfit",
+              "stays": 1233,
+              "subjects": 1085
+            },
+            "ph": {
+              "mae": {
+                "persistence": 0.074428,
+                "population_delta": 0.073204,
+                "ridge_realfit": 0.067001,
+                "target_router": 0.067001
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.012959,
+                  -0.000915
+                ],
+                "point_delta": -0.006952,
+                "significant": true,
+                "subjects": 277
+              },
+              "rows": 652,
+              "selected_method": "ridge_realfit",
+              "stays": 288,
+              "subjects": 277
+            },
+            "respiratory_rate": {
+              "mae": {
+                "persistence": 5.124175,
+                "population_delta": 5.120856,
+                "ridge_realfit": 4.728174,
+                "target_router": 4.728174
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.809241,
+                  -0.544647
+                ],
+                "point_delta": -0.675435,
+                "significant": true,
+                "subjects": 969
+              },
+              "rows": 7876,
+              "selected_method": "ridge_realfit",
+              "stays": 1096,
+              "subjects": 969
+            }
+          },
+          "router_delta_vs_persistence": {
+            "beats_persistence": true,
+            "bootstrap_95_ci": [
+              -0.367215,
+              -0.302292
+            ],
+            "point_delta": -0.334511,
+            "significant": true,
+            "subjects": 1112
+          },
+          "rows": 35496,
+          "stays": 1266,
+          "subjects": 1112
+        },
+        "heldout_all_windows": {
+          "normalized_mae": {
+            "persistence": 0.626153,
+            "population_delta": 0.640522,
+            "ridge_realfit": 0.556655,
+            "target_router": 0.556655
+          },
+          "per_target": {
+            "bicarbonate": {
+              "mae": {
+                "persistence": 2.444165,
+                "population_delta": 2.450744,
+                "ridge_realfit": 2.391324,
+                "target_router": 2.391324
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.113306,
+                  0.042827
+                ],
+                "point_delta": -0.037623,
+                "significant": false,
+                "subjects": 562
+              },
+              "rows": 1748,
+              "selected_method": "ridge_realfit",
+              "stays": 610,
+              "subjects": 562
+            },
+            "heart_rate": {
+              "mae": {
+                "persistence": 8.537374,
+                "population_delta": 8.550864,
+                "ridge_realfit": 8.310766,
+                "target_router": 8.310766
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.492706,
+                  -0.239313
+                ],
+                "point_delta": -0.362617,
+                "significant": true,
+                "subjects": 1190
+              },
+              "rows": 18890,
+              "selected_method": "ridge_realfit",
+              "stays": 1369,
+              "subjects": 1190
+            },
+            "map": {
+              "mae": {
+                "persistence": 11.626335,
+                "population_delta": 11.62764,
+                "ridge_realfit": 10.529291,
+                "target_router": 10.529291
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -1.399577,
+                  -1.025888
+                ],
+                "point_delta": -1.215899,
+                "significant": true,
+                "subjects": 1180
+              },
+              "rows": 18538,
+              "selected_method": "ridge_realfit",
+              "stays": 1357,
+              "subjects": 1180
+            },
+            "o2sat": {
+              "mae": {
+                "persistence": 3.96081,
+                "population_delta": 4.248192,
+                "ridge_realfit": 3.076742,
+                "target_router": 3.076742
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -2.682406,
+                  -1.855559
+                ],
+                "point_delta": -2.241851,
+                "significant": true,
+                "subjects": 1168
+              },
+              "rows": 17836,
+              "selected_method": "ridge_realfit",
+              "stays": 1341,
+              "subjects": 1168
+            },
+            "ph": {
+              "mae": {
+                "persistence": 0.067491,
+                "population_delta": 0.066792,
+                "ridge_realfit": 0.062231,
+                "target_router": 0.062231
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.010365,
+                  -0.000277
+                ],
+                "point_delta": -0.005269,
+                "significant": true,
+                "subjects": 321
+              },
+              "rows": 851,
+              "selected_method": "ridge_realfit",
+              "stays": 337,
+              "subjects": 321
+            },
+            "respiratory_rate": {
+              "mae": {
+                "persistence": 4.421152,
+                "population_delta": 4.434022,
+                "ridge_realfit": 4.171609,
+                "target_router": 4.171609
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.427376,
+                  -0.245274
+                ],
+                "point_delta": -0.342226,
+                "significant": true,
+                "subjects": 1032
+              },
+              "rows": 15365,
+              "selected_method": "ridge_realfit",
+              "stays": 1175,
+              "subjects": 1032
+            }
+          },
+          "router_delta_vs_persistence": {
+            "beats_persistence": true,
+            "bootstrap_95_ci": [
+              -0.156233,
+              -0.118216
+            ],
+            "point_delta": -0.136803,
+            "significant": true,
+            "subjects": 1194
+          },
+          "rows": 73228,
+          "stays": 1373,
+          "subjects": 1194
+        },
+        "heldout_groups": 1194,
+        "overlap": 0,
+        "seed": 19,
+        "selected_methods": {
+          "bicarbonate": "ridge_realfit",
+          "heart_rate": "ridge_realfit",
+          "map": "ridge_realfit",
+          "o2sat": "ridge_realfit",
+          "ph": "ridge_realfit",
+          "respiratory_rate": "ridge_realfit"
+        },
+        "source_diagnostics": {
+          "feature_count_by_target": {
+            "bicarbonate": 63,
+            "heart_rate": 63,
+            "map": 63,
+            "o2sat": 63,
+            "ph": 63,
+            "respiratory_rate": 63
+          },
+          "future_suffix": "tp6",
+          "inner_oof_folds": 3,
+          "ridge_alpha": 10.0,
+          "sources": {
+            "persistence": "current observed value",
+            "population_delta": "discovery-only mean target delta",
+            "ridge_realfit": "small linear residual model fit on discovery patients"
+          }
+        }
+      },
+      {
+        "discovery_groups": 2424,
+        "discovery_selector": {
+          "bicarbonate": {
+            "method_stats": {
+              "persistence": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.0,
+                    0.0
+                  ],
+                  "point_delta": 0.0,
+                  "significant": false,
+                  "subjects": 836
+                },
+                "mae": 2.591855,
+                "rows": 2075,
+                "stays": 890,
+                "subjects": 836
+              },
+              "population_delta": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.00308,
+                    0.039611
+                  ],
+                  "point_delta": 0.020503,
+                  "significant": false,
+                  "subjects": 836
+                },
+                "mae": 2.600099,
+                "rows": 2075,
+                "stays": 890,
+                "subjects": 836
+              },
+              "ridge_realfit": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.140167,
+                    -0.002288
+                  ],
+                  "point_delta": -0.066718,
+                  "significant": true,
+                  "subjects": 836
+                },
+                "mae": 2.532857,
+                "rows": 2075,
+                "stays": 890,
+                "subjects": 836
+              }
+            },
+            "min_pairs": 100,
+            "min_subjects": 40,
+            "reason": "lowest_discovery_mae_among_significant_supported_sources",
+            "selected_method": "ridge_realfit"
+          },
+          "heart_rate": {
+            "method_stats": {
+              "persistence": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.0,
+                    0.0
+                  ],
+                  "point_delta": 0.0,
+                  "significant": false,
+                  "subjects": 2267
+                },
+                "mae": 9.191465,
+                "rows": 17528,
+                "stays": 2573,
+                "subjects": 2267
+              },
+              "population_delta": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.050126,
+                    -0.028964
+                  ],
+                  "point_delta": -0.039496,
+                  "significant": true,
+                  "subjects": 2267
+                },
+                "mae": 9.166413,
+                "rows": 17528,
+                "stays": 2573,
+                "subjects": 2267
+              },
+              "ridge_realfit": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.654437,
+                    -0.412388
+                  ],
+                  "point_delta": -0.525255,
+                  "significant": true,
+                  "subjects": 2267
+                },
+                "mae": 8.830827,
+                "rows": 17528,
+                "stays": 2573,
+                "subjects": 2267
+              }
+            },
+            "min_pairs": 100,
+            "min_subjects": 40,
+            "reason": "lowest_discovery_mae_among_significant_supported_sources",
+            "selected_method": "ridge_realfit"
+          },
+          "map": {
+            "method_stats": {
+              "persistence": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.0,
+                    0.0
+                  ],
+                  "point_delta": 0.0,
+                  "significant": false,
+                  "subjects": 2233
+                },
+                "mae": 11.691969,
+                "rows": 17245,
+                "stays": 2533,
+                "subjects": 2233
+              },
+              "population_delta": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.010303,
+                    0.025571
+                  ],
+                  "point_delta": 0.017719,
+                  "significant": false,
+                  "subjects": 2233
+                },
+                "mae": 11.702311,
+                "rows": 17245,
+                "stays": 2533,
+                "subjects": 2233
+              },
+              "ridge_realfit": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -1.694442,
+                    -1.303475
+                  ],
+                  "point_delta": -1.487261,
+                  "significant": true,
+                  "subjects": 2233
+                },
+                "mae": 10.485996,
+                "rows": 17245,
+                "stays": 2533,
+                "subjects": 2233
+              }
+            },
+            "min_pairs": 100,
+            "min_subjects": 40,
+            "reason": "lowest_discovery_mae_among_significant_supported_sources",
+            "selected_method": "ridge_realfit"
+          },
+          "o2sat": {
+            "method_stats": {
+              "persistence": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.0,
+                    0.0
+                  ],
+                  "point_delta": 0.0,
+                  "significant": false,
+                  "subjects": 2211
+                },
+                "mae": 5.972176,
+                "rows": 16676,
+                "stays": 2507,
+                "subjects": 2211
+              },
+              "population_delta": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.155243,
+                    -0.095432
+                  ],
+                  "point_delta": -0.124082,
+                  "significant": true,
+                  "subjects": 2211
+                },
+                "mae": 6.056347,
+                "rows": 16676,
+                "stays": 2507,
+                "subjects": 2211
+              },
+              "ridge_realfit": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -6.45684,
+                    -5.52507
+                  ],
+                  "point_delta": -5.983938,
+                  "significant": true,
+                  "subjects": 2211
+                },
+                "mae": 3.617656,
+                "rows": 16676,
+                "stays": 2507,
+                "subjects": 2211
+              }
+            },
+            "min_pairs": 100,
+            "min_subjects": 40,
+            "reason": "lowest_discovery_mae_among_significant_supported_sources",
+            "selected_method": "ridge_realfit"
+          },
+          "ph": {
+            "method_stats": {
+              "persistence": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.0,
+                    0.0
+                  ],
+                  "point_delta": 0.0,
+                  "significant": false,
+                  "subjects": 524
+                },
+                "mae": 0.075435,
+                "rows": 1108,
+                "stays": 542,
+                "subjects": 524
+              },
+              "population_delta": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.003041,
+                    -0.000549
+                  ],
+                  "point_delta": -0.001734,
+                  "significant": true,
+                  "subjects": 524
+                },
+                "mae": 0.074124,
+                "rows": 1108,
+                "stays": 542,
+                "subjects": 524
+              },
+              "ridge_realfit": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.014878,
+                    -0.006663
+                  ],
+                  "point_delta": -0.011092,
+                  "significant": true,
+                  "subjects": 524
+                },
+                "mae": 0.066689,
+                "rows": 1108,
+                "stays": 542,
+                "subjects": 524
+              }
+            },
+            "min_pairs": 100,
+            "min_subjects": 40,
+            "reason": "lowest_discovery_mae_among_significant_supported_sources",
+            "selected_method": "ridge_realfit"
+          },
+          "respiratory_rate": {
+            "method_stats": {
+              "persistence": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.0,
+                    0.0
+                  ],
+                  "point_delta": 0.0,
+                  "significant": false,
+                  "subjects": 1981
+                },
+                "mae": 4.927166,
+                "rows": 15707,
+                "stays": 2232,
+                "subjects": 1981
+              },
+              "population_delta": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.012844,
+                    -0.008367
+                  ],
+                  "point_delta": -0.010633,
+                  "significant": true,
+                  "subjects": 1981
+                },
+                "mae": 4.922506,
+                "rows": 15707,
+                "stays": 2232,
+                "subjects": 1981
+              },
+              "ridge_realfit": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.720987,
+                    -0.533353
+                  ],
+                  "point_delta": -0.626449,
+                  "significant": true,
+                  "subjects": 1981
+                },
+                "mae": 4.535611,
+                "rows": 15707,
+                "stays": 2232,
+                "subjects": 1981
+              }
+            },
+            "min_pairs": 100,
+            "min_subjects": 40,
+            "reason": "lowest_discovery_mae_among_significant_supported_sources",
+            "selected_method": "ridge_realfit"
+          }
+        },
+        "group_column": "subject_id",
+        "heldout_active_respiratory_only": {
+          "normalized_mae": {
+            "persistence": 0.743832,
+            "population_delta": 0.746128,
+            "ridge_realfit": 0.60053,
+            "target_router": 0.60053
+          },
+          "per_target": {
+            "bicarbonate": {
+              "mae": {
+                "persistence": 2.733691,
+                "population_delta": 2.725015,
+                "ridge_realfit": 2.614338,
+                "target_router": 2.614338
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.243386,
+                  -0.046577
+                ],
+                "point_delta": -0.145523,
+                "significant": true,
+                "subjects": 418
+              },
+              "rows": 1119,
+              "selected_method": "ridge_realfit",
+              "stays": 445,
+              "subjects": 418
+            },
+            "heart_rate": {
+              "mae": {
+                "persistence": 9.434807,
+                "population_delta": 9.412391,
+                "ridge_realfit": 9.124378,
+                "target_router": 9.124378
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.740888,
+                  -0.397983
+                ],
+                "point_delta": -0.569453,
+                "significant": true,
+                "subjects": 1118
+              },
+              "rows": 8958,
+              "selected_method": "ridge_realfit",
+              "stays": 1291,
+              "subjects": 1118
+            },
+            "map": {
+              "mae": {
+                "persistence": 11.952549,
+                "population_delta": 11.965343,
+                "ridge_realfit": 10.618078,
+                "target_router": 10.618078
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -1.582917,
+                  -1.117126
+                ],
+                "point_delta": -1.336245,
+                "significant": true,
+                "subjects": 1114
+              },
+              "rows": 8809,
+              "selected_method": "ridge_realfit",
+              "stays": 1284,
+              "subjects": 1114
+            },
+            "o2sat": {
+              "mae": {
+                "persistence": 5.992682,
+                "population_delta": 6.050873,
+                "ridge_realfit": 3.627278,
+                "target_router": 3.627278
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -6.261923,
+                  -4.978316
+                ],
+                "point_delta": -5.624621,
+                "significant": true,
+                "subjects": 1097
+              },
+              "rows": 8609,
+              "selected_method": "ridge_realfit",
+              "stays": 1265,
+              "subjects": 1097
+            },
+            "ph": {
+              "mae": {
+                "persistence": 0.071899,
+                "population_delta": 0.070099,
+                "ridge_realfit": 0.063698,
+                "target_router": 0.063698
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.015049,
+                  -0.004462
+                ],
+                "point_delta": -0.00982,
+                "significant": true,
+                "subjects": 268
+              },
+              "rows": 612,
+              "selected_method": "ridge_realfit",
+              "stays": 279,
+              "subjects": 268
+            },
+            "respiratory_rate": {
+              "mae": {
+                "persistence": 5.033469,
+                "population_delta": 5.029458,
+                "ridge_realfit": 4.633026,
+                "target_router": 4.633026
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.743111,
+                  -0.502888
+                ],
+                "point_delta": -0.623308,
+                "significant": true,
+                "subjects": 978
+              },
+              "rows": 7858,
+              "selected_method": "ridge_realfit",
+              "stays": 1102,
+              "subjects": 978
+            }
+          },
+          "router_delta_vs_persistence": {
+            "beats_persistence": true,
+            "bootstrap_95_ci": [
+              -0.34515,
+              -0.287279
+            ],
+            "point_delta": -0.315385,
+            "significant": true,
+            "subjects": 1121
+          },
+          "rows": 35965,
+          "stays": 1294,
+          "subjects": 1121
+        },
+        "heldout_all_windows": {
+          "normalized_mae": {
+            "persistence": 0.619948,
+            "population_delta": 0.63366,
+            "ridge_realfit": 0.550576,
+            "target_router": 0.550576
+          },
+          "per_target": {
+            "bicarbonate": {
+              "mae": {
+                "persistence": 2.477641,
+                "population_delta": 2.489844,
+                "ridge_realfit": 2.400611,
+                "target_router": 2.400611
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.219555,
+                  -0.060358
+                ],
+                "point_delta": -0.132884,
+                "significant": true,
+                "subjects": 515
+              },
+              "rows": 1704,
+              "selected_method": "ridge_realfit",
+              "stays": 557,
+              "subjects": 515
+            },
+            "heart_rate": {
+              "mae": {
+                "persistence": 8.712493,
+                "population_delta": 8.725007,
+                "ridge_realfit": 8.577426,
+                "target_router": 8.577426
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.396434,
+                  -0.11625
+                ],
+                "point_delta": -0.263659,
+                "significant": true,
+                "subjects": 1191
+              },
+              "rows": 19363,
+              "selected_method": "ridge_realfit",
+              "stays": 1383,
+              "subjects": 1191
+            },
+            "map": {
+              "mae": {
+                "persistence": 11.696693,
+                "population_delta": 11.70333,
+                "ridge_realfit": 10.563324,
+                "target_router": 10.563324
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -1.35299,
+                  -0.948165
+                ],
+                "point_delta": -1.14671,
+                "significant": true,
+                "subjects": 1188
+              },
+              "rows": 19050,
+              "selected_method": "ridge_realfit",
+              "stays": 1378,
+              "subjects": 1188
+            },
+            "o2sat": {
+              "mae": {
+                "persistence": 3.924784,
+                "population_delta": 4.206154,
+                "ridge_realfit": 2.99943,
+                "target_router": 2.99943
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -2.700766,
+                  -1.905175
+                ],
+                "point_delta": -2.285425,
+                "significant": true,
+                "subjects": 1173
+              },
+              "rows": 18387,
+              "selected_method": "ridge_realfit",
+              "stays": 1360,
+              "subjects": 1173
+            },
+            "ph": {
+              "mae": {
+                "persistence": 0.064031,
+                "population_delta": 0.063084,
+                "ridge_realfit": 0.057429,
+                "target_router": 0.057429
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.012845,
+                  -0.003879
+                ],
+                "point_delta": -0.008347,
+                "significant": true,
+                "subjects": 299
+              },
+              "rows": 844,
+              "selected_method": "ridge_realfit",
+              "stays": 313,
+              "subjects": 299
+            },
+            "respiratory_rate": {
+              "mae": {
+                "persistence": 4.399765,
+                "population_delta": 4.411074,
+                "ridge_realfit": 4.148296,
+                "target_router": 4.148296
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.398427,
+                  -0.220413
+                ],
+                "point_delta": -0.310371,
+                "significant": true,
+                "subjects": 1032
+              },
+              "rows": 15329,
+              "selected_method": "ridge_realfit",
+              "stays": 1167,
+              "subjects": 1032
+            }
+          },
+          "router_delta_vs_persistence": {
+            "beats_persistence": true,
+            "bootstrap_95_ci": [
+              -0.15674,
+              -0.118907
+            ],
+            "point_delta": -0.137888,
+            "significant": true,
+            "subjects": 1194
+          },
+          "rows": 74677,
+          "stays": 1386,
+          "subjects": 1194
+        },
+        "heldout_groups": 1194,
+        "overlap": 0,
+        "seed": 23,
+        "selected_methods": {
+          "bicarbonate": "ridge_realfit",
+          "heart_rate": "ridge_realfit",
+          "map": "ridge_realfit",
+          "o2sat": "ridge_realfit",
+          "ph": "ridge_realfit",
+          "respiratory_rate": "ridge_realfit"
+        },
+        "source_diagnostics": {
+          "feature_count_by_target": {
+            "bicarbonate": 63,
+            "heart_rate": 63,
+            "map": 63,
+            "o2sat": 63,
+            "ph": 63,
+            "respiratory_rate": 63
+          },
+          "future_suffix": "tp6",
+          "inner_oof_folds": 3,
+          "ridge_alpha": 10.0,
+          "sources": {
+            "persistence": "current observed value",
+            "population_delta": "discovery-only mean target delta",
+            "ridge_realfit": "small linear residual model fit on discovery patients"
+          }
+        }
+      },
+      {
+        "discovery_groups": 2424,
+        "discovery_selector": {
+          "bicarbonate": {
+            "method_stats": {
+              "persistence": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.0,
+                    0.0
+                  ],
+                  "point_delta": 0.0,
+                  "significant": false,
+                  "subjects": 872
+                },
+                "mae": 2.635871,
+                "rows": 2272,
+                "stays": 924,
+                "subjects": 872
+              },
+              "population_delta": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    -0.005678,
+                    0.02744
+                  ],
+                  "point_delta": 0.010555,
+                  "significant": false,
+                  "subjects": 872
+                },
+                "mae": 2.640991,
+                "rows": 2272,
+                "stays": 924,
+                "subjects": 872
+              },
+              "ridge_realfit": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.156786,
+                    -0.010193
+                  ],
+                  "point_delta": -0.082757,
+                  "significant": true,
+                  "subjects": 872
+                },
+                "mae": 2.576969,
+                "rows": 2272,
+                "stays": 924,
+                "subjects": 872
+              }
+            },
+            "min_pairs": 100,
+            "min_subjects": 40,
+            "reason": "lowest_discovery_mae_among_significant_supported_sources",
+            "selected_method": "ridge_realfit"
+          },
+          "heart_rate": {
+            "method_stats": {
+              "persistence": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.0,
+                    0.0
+                  ],
+                  "point_delta": 0.0,
+                  "significant": false,
+                  "subjects": 2274
+                },
+                "mae": 9.308086,
+                "rows": 17956,
+                "stays": 2575,
+                "subjects": 2274
+              },
+              "population_delta": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.061224,
+                    -0.03741
+                  ],
+                  "point_delta": -0.049696,
+                  "significant": true,
+                  "subjects": 2274
+                },
+                "mae": 9.279246,
+                "rows": 17956,
+                "stays": 2575,
+                "subjects": 2274
+              },
+              "ridge_realfit": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.730755,
+                    -0.465299
+                  ],
+                  "point_delta": -0.592676,
+                  "significant": true,
+                  "subjects": 2274
+                },
+                "mae": 8.984769,
+                "rows": 17956,
+                "stays": 2575,
+                "subjects": 2274
+              }
+            },
+            "min_pairs": 100,
+            "min_subjects": 40,
+            "reason": "lowest_discovery_mae_among_significant_supported_sources",
+            "selected_method": "ridge_realfit"
+          },
+          "map": {
+            "method_stats": {
+              "persistence": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.0,
+                    0.0
+                  ],
+                  "point_delta": 0.0,
+                  "significant": false,
+                  "subjects": 2249
+                },
+                "mae": 11.693814,
+                "rows": 17669,
+                "stays": 2545,
+                "subjects": 2249
+              },
+              "population_delta": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.00654,
+                    0.014602
+                  ],
+                  "point_delta": 0.010965,
+                  "significant": false,
+                  "subjects": 2249
+                },
+                "mae": 11.7004,
+                "rows": 17669,
+                "stays": 2545,
+                "subjects": 2249
+              },
+              "ridge_realfit": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -1.63446,
+                    -1.266455
+                  ],
+                  "point_delta": -1.456652,
+                  "significant": true,
+                  "subjects": 2249
+                },
+                "mae": 10.395225,
+                "rows": 17669,
+                "stays": 2545,
+                "subjects": 2249
+              }
+            },
+            "min_pairs": 100,
+            "min_subjects": 40,
+            "reason": "lowest_discovery_mae_among_significant_supported_sources",
+            "selected_method": "ridge_realfit"
+          },
+          "o2sat": {
+            "method_stats": {
+              "persistence": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.0,
+                    0.0
+                  ],
+                  "point_delta": 0.0,
+                  "significant": false,
+                  "subjects": 2224
+                },
+                "mae": 5.891122,
+                "rows": 17166,
+                "stays": 2516,
+                "subjects": 2224
+              },
+              "population_delta": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.138406,
+                    -0.07861
+                  ],
+                  "point_delta": -0.110603,
+                  "significant": true,
+                  "subjects": 2224
+                },
+                "mae": 5.9768,
+                "rows": 17166,
+                "stays": 2516,
+                "subjects": 2224
+              },
+              "ridge_realfit": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -6.374141,
+                    -5.433201
+                  ],
+                  "point_delta": -5.919637,
+                  "significant": true,
+                  "subjects": 2224
+                },
+                "mae": 3.578769,
+                "rows": 17166,
+                "stays": 2516,
+                "subjects": 2224
+              }
+            },
+            "min_pairs": 100,
+            "min_subjects": 40,
+            "reason": "lowest_discovery_mae_among_significant_supported_sources",
+            "selected_method": "ridge_realfit"
+          },
+          "ph": {
+            "method_stats": {
+              "persistence": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.0,
+                    0.0
+                  ],
+                  "point_delta": 0.0,
+                  "significant": false,
+                  "subjects": 553
+                },
+                "mae": 0.074144,
+                "rows": 1257,
+                "stays": 573,
+                "subjects": 553
+              },
+              "population_delta": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.003366,
+                    -0.001111
+                  ],
+                  "point_delta": -0.002235,
+                  "significant": true,
+                  "subjects": 553
+                },
+                "mae": 0.072609,
+                "rows": 1257,
+                "stays": 573,
+                "subjects": 553
+              },
+              "ridge_realfit": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.01559,
+                    -0.007421
+                  ],
+                  "point_delta": -0.011693,
+                  "significant": true,
+                  "subjects": 553
+                },
+                "mae": 0.065664,
+                "rows": 1257,
+                "stays": 573,
+                "subjects": 553
+              }
+            },
+            "min_pairs": 100,
+            "min_subjects": 40,
+            "reason": "lowest_discovery_mae_among_significant_supported_sources",
+            "selected_method": "ridge_realfit"
+          },
+          "respiratory_rate": {
+            "method_stats": {
+              "persistence": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.0,
+                    0.0
+                  ],
+                  "point_delta": 0.0,
+                  "significant": false,
+                  "subjects": 1985
+                },
+                "mae": 4.968844,
+                "rows": 15984,
+                "stays": 2220,
+                "subjects": 1985
+              },
+              "population_delta": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.014718,
+                    -0.010212
+                  ],
+                  "point_delta": -0.012451,
+                  "significant": true,
+                  "subjects": 1985
+                },
+                "mae": 4.963987,
+                "rows": 15984,
+                "stays": 2220,
+                "subjects": 1985
+              },
+              "ridge_realfit": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.676894,
+                    -0.496754
+                  ],
+                  "point_delta": -0.587318,
+                  "significant": true,
+                  "subjects": 1985
+                },
+                "mae": 4.60363,
+                "rows": 15984,
+                "stays": 2220,
+                "subjects": 1985
+              }
+            },
+            "min_pairs": 100,
+            "min_subjects": 40,
+            "reason": "lowest_discovery_mae_among_significant_supported_sources",
+            "selected_method": "ridge_realfit"
+          }
+        },
+        "group_column": "subject_id",
+        "heldout_active_respiratory_only": {
+          "normalized_mae": {
+            "persistence": 0.747052,
+            "population_delta": 0.748698,
+            "ridge_realfit": 0.598755,
+            "target_router": 0.598755
+          },
+          "per_target": {
+            "bicarbonate": {
+              "mae": {
+                "persistence": 2.655531,
+                "population_delta": 2.646603,
+                "ridge_realfit": 2.501381,
+                "target_router": 2.501381
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.270672,
+                  -0.043912
+                ],
+                "point_delta": -0.157458,
+                "significant": true,
+                "subjects": 382
+              },
+              "rows": 922,
+              "selected_method": "ridge_realfit",
+              "stays": 411,
+              "subjects": 382
+            },
+            "heart_rate": {
+              "mae": {
+                "persistence": 9.201524,
+                "population_delta": 9.174336,
+                "ridge_realfit": 8.826468,
+                "target_router": 8.826468
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.602882,
+                  -0.242343
+                ],
+                "point_delta": -0.433083,
+                "significant": true,
+                "subjects": 1111
+              },
+              "rows": 8530,
+              "selected_method": "ridge_realfit",
+              "stays": 1289,
+              "subjects": 1111
+            },
+            "map": {
+              "mae": {
+                "persistence": 11.961837,
+                "population_delta": 11.965708,
+                "ridge_realfit": 10.789459,
+                "target_router": 10.789459
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -1.693942,
+                  -1.133853
+                ],
+                "point_delta": -1.430798,
+                "significant": true,
+                "subjects": 1098
+              },
+              "rows": 8385,
+              "selected_method": "ridge_realfit",
+              "stays": 1272,
+              "subjects": 1098
+            },
+            "o2sat": {
+              "mae": {
+                "persistence": 6.165291,
+                "population_delta": 6.212503,
+                "ridge_realfit": 3.709666,
+                "target_router": 3.709666
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -6.485983,
+                  -5.153784
+                ],
+                "point_delta": -5.817762,
+                "significant": true,
+                "subjects": 1084
+              },
+              "rows": 8119,
+              "selected_method": "ridge_realfit",
+              "stays": 1256,
+              "subjects": 1084
+            },
+            "ph": {
+              "mae": {
+                "persistence": 0.074266,
+                "population_delta": 0.072535,
+                "ridge_realfit": 0.066955,
+                "target_router": 0.066955
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.013704,
+                  -0.000496
+                ],
+                "point_delta": -0.00722,
+                "significant": true,
+                "subjects": 239
+              },
+              "rows": 463,
+              "selected_method": "ridge_realfit",
+              "stays": 248,
+              "subjects": 239
+            },
+            "respiratory_rate": {
+              "mae": {
+                "persistence": 4.949479,
+                "population_delta": 4.945641,
+                "ridge_realfit": 4.509075,
+                "target_router": 4.509075
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.809732,
+                  -0.550699
+                ],
+                "point_delta": -0.66656,
+                "significant": true,
+                "subjects": 974
+              },
+              "rows": 7581,
+              "selected_method": "ridge_realfit",
+              "stays": 1114,
+              "subjects": 974
+            }
+          },
+          "router_delta_vs_persistence": {
+            "beats_persistence": true,
+            "bootstrap_95_ci": [
+              -0.365096,
+              -0.293086
+            ],
+            "point_delta": -0.327496,
+            "significant": true,
+            "subjects": 1118
+          },
+          "rows": 34000,
+          "stays": 1296,
+          "subjects": 1118
+        },
+        "heldout_all_windows": {
+          "normalized_mae": {
+            "persistence": 0.621915,
+            "population_delta": 0.635896,
+            "ridge_realfit": 0.550448,
+            "target_router": 0.550448
+          },
+          "per_target": {
+            "bicarbonate": {
+              "mae": {
+                "persistence": 2.499857,
+                "population_delta": 2.500817,
+                "ridge_realfit": 2.381223,
+                "target_router": 2.381223
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.211081,
+                  -0.020712
+                ],
+                "point_delta": -0.116448,
+                "significant": true,
+                "subjects": 506
+              },
+              "rows": 1400,
+              "selected_method": "ridge_realfit",
+              "stays": 551,
+              "subjects": 506
+            },
+            "heart_rate": {
+              "mae": {
+                "persistence": 8.647378,
+                "population_delta": 8.660007,
+                "ridge_realfit": 8.421313,
+                "target_router": 8.421313
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.400849,
+                  -0.122077
+                ],
+                "point_delta": -0.251735,
+                "significant": true,
+                "subjects": 1186
+              },
+              "rows": 18405,
+              "selected_method": "ridge_realfit",
+              "stays": 1387,
+              "subjects": 1186
+            },
+            "map": {
+              "mae": {
+                "persistence": 11.72044,
+                "population_delta": 11.720894,
+                "ridge_realfit": 10.643829,
+                "target_router": 10.643829
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -1.375845,
+                  -1.018234
+                ],
+                "point_delta": -1.201826,
+                "significant": true,
+                "subjects": 1176
+              },
+              "rows": 18107,
+              "selected_method": "ridge_realfit",
+              "stays": 1375,
+              "subjects": 1176
+            },
+            "o2sat": {
+              "mae": {
+                "persistence": 4.004016,
+                "population_delta": 4.291096,
+                "ridge_realfit": 3.066061,
+                "target_router": 3.066061
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -2.960022,
+                  -2.078456
+                ],
+                "point_delta": -2.485332,
+                "significant": true,
+                "subjects": 1163
+              },
+              "rows": 17432,
+              "selected_method": "ridge_realfit",
+              "stays": 1357,
+              "subjects": 1163
+            },
+            "ph": {
+              "mae": {
+                "persistence": 0.066893,
+                "population_delta": 0.066508,
+                "ridge_realfit": 0.06076,
+                "target_router": 0.06076
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.011018,
+                  -0.001627
+                ],
+                "point_delta": -0.006317,
+                "significant": true,
+                "subjects": 284
+              },
+              "rows": 636,
+              "selected_method": "ridge_realfit",
+              "stays": 295,
+              "subjects": 284
+            },
+            "respiratory_rate": {
+              "mae": {
+                "persistence": 4.336119,
+                "population_delta": 4.347674,
+                "ridge_realfit": 4.07086,
+                "target_router": 4.07086
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.429932,
+                  -0.259672
+                ],
+                "point_delta": -0.343459,
+                "significant": true,
+                "subjects": 1036
+              },
+              "rows": 14840,
+              "selected_method": "ridge_realfit",
+              "stays": 1190,
+              "subjects": 1036
+            }
+          },
+          "router_delta_vs_persistence": {
+            "beats_persistence": true,
+            "bootstrap_95_ci": [
+              -0.170392,
+              -0.125414
+            ],
+            "point_delta": -0.147597,
+            "significant": true,
+            "subjects": 1194
+          },
+          "rows": 70820,
+          "stays": 1396,
+          "subjects": 1194
+        },
+        "heldout_groups": 1194,
+        "overlap": 0,
+        "seed": 37,
+        "selected_methods": {
+          "bicarbonate": "ridge_realfit",
+          "heart_rate": "ridge_realfit",
+          "map": "ridge_realfit",
+          "o2sat": "ridge_realfit",
+          "ph": "ridge_realfit",
+          "respiratory_rate": "ridge_realfit"
+        },
+        "source_diagnostics": {
+          "feature_count_by_target": {
+            "bicarbonate": 63,
+            "heart_rate": 63,
+            "map": 63,
+            "o2sat": 63,
+            "ph": 63,
+            "respiratory_rate": 63
+          },
+          "future_suffix": "tp6",
+          "inner_oof_folds": 3,
+          "ridge_alpha": 10.0,
+          "sources": {
+            "persistence": "current observed value",
+            "population_delta": "discovery-only mean target delta",
+            "ridge_realfit": "small linear residual model fit on discovery patients"
+          }
+        }
+      },
+      {
+        "discovery_groups": 2424,
+        "discovery_selector": {
+          "bicarbonate": {
+            "method_stats": {
+              "persistence": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.0,
+                    0.0
+                  ],
+                  "point_delta": 0.0,
+                  "significant": false,
+                  "subjects": 839
+                },
+                "mae": 2.62101,
+                "rows": 2118,
+                "stays": 900,
+                "subjects": 839
+              },
+              "population_delta": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    -0.003708,
+                    0.025119
+                  ],
+                  "point_delta": 0.011348,
+                  "significant": false,
+                  "subjects": 839
+                },
+                "mae": 2.627442,
+                "rows": 2118,
+                "stays": 900,
+                "subjects": 839
+              },
+              "ridge_realfit": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.170593,
+                    -0.018933
+                  ],
+                  "point_delta": -0.096531,
+                  "significant": true,
+                  "subjects": 839
+                },
+                "mae": 2.56449,
+                "rows": 2118,
+                "stays": 900,
+                "subjects": 839
+              }
+            },
+            "min_pairs": 100,
+            "min_subjects": 40,
+            "reason": "lowest_discovery_mae_among_significant_supported_sources",
+            "selected_method": "ridge_realfit"
+          },
+          "heart_rate": {
+            "method_stats": {
+              "persistence": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.0,
+                    0.0
+                  ],
+                  "point_delta": 0.0,
+                  "significant": false,
+                  "subjects": 2259
+                },
+                "mae": 9.278502,
+                "rows": 17867,
+                "stays": 2594,
+                "subjects": 2259
+              },
+              "population_delta": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.056581,
+                    -0.031363
+                  ],
+                  "point_delta": -0.044918,
+                  "significant": true,
+                  "subjects": 2259
+                },
+                "mae": 9.254859,
+                "rows": 17867,
+                "stays": 2594,
+                "subjects": 2259
+              },
+              "ridge_realfit": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.600006,
+                    -0.349506
+                  ],
+                  "point_delta": -0.47194,
+                  "significant": true,
+                  "subjects": 2259
+                },
+                "mae": 8.960806,
+                "rows": 17867,
+                "stays": 2594,
+                "subjects": 2259
+              }
+            },
+            "min_pairs": 100,
+            "min_subjects": 40,
+            "reason": "lowest_discovery_mae_among_significant_supported_sources",
+            "selected_method": "ridge_realfit"
+          },
+          "map": {
+            "method_stats": {
+              "persistence": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.0,
+                    0.0
+                  ],
+                  "point_delta": 0.0,
+                  "significant": false,
+                  "subjects": 2230
+                },
+                "mae": 11.6668,
+                "rows": 17539,
+                "stays": 2559,
+                "subjects": 2230
+              },
+              "population_delta": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.010916,
+                    0.020506
+                  ],
+                  "point_delta": 0.015531,
+                  "significant": false,
+                  "subjects": 2230
+                },
+                "mae": 11.675001,
+                "rows": 17539,
+                "stays": 2559,
+                "subjects": 2230
+              },
+              "ridge_realfit": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -1.625652,
+                    -1.252115
+                  ],
+                  "point_delta": -1.443067,
+                  "significant": true,
+                  "subjects": 2230
+                },
+                "mae": 10.465866,
+                "rows": 17539,
+                "stays": 2559,
+                "subjects": 2230
+              }
+            },
+            "min_pairs": 100,
+            "min_subjects": 40,
+            "reason": "lowest_discovery_mae_among_significant_supported_sources",
+            "selected_method": "ridge_realfit"
+          },
+          "o2sat": {
+            "method_stats": {
+              "persistence": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.0,
+                    0.0
+                  ],
+                  "point_delta": 0.0,
+                  "significant": false,
+                  "subjects": 2207
+                },
+                "mae": 5.988007,
+                "rows": 17093,
+                "stays": 2531,
+                "subjects": 2207
+              },
+              "population_delta": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.158172,
+                    -0.102531
+                  ],
+                  "point_delta": -0.129524,
+                  "significant": true,
+                  "subjects": 2207
+                },
+                "mae": 6.054798,
+                "rows": 17093,
+                "stays": 2531,
+                "subjects": 2207
+              },
+              "ridge_realfit": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -6.408134,
+                    -5.51243
+                  ],
+                  "point_delta": -5.964216,
+                  "significant": true,
+                  "subjects": 2207
+                },
+                "mae": 3.656186,
+                "rows": 17093,
+                "stays": 2531,
+                "subjects": 2207
+              }
+            },
+            "min_pairs": 100,
+            "min_subjects": 40,
+            "reason": "lowest_discovery_mae_among_significant_supported_sources",
+            "selected_method": "ridge_realfit"
+          },
+          "ph": {
+            "method_stats": {
+              "persistence": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.0,
+                    0.0
+                  ],
+                  "point_delta": 0.0,
+                  "significant": false,
+                  "subjects": 516
+                },
+                "mae": 0.073884,
+                "rows": 1093,
+                "stays": 536,
+                "subjects": 516
+              },
+              "population_delta": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.002433,
+                    -0.000333
+                  ],
+                  "point_delta": -0.001334,
+                  "significant": true,
+                  "subjects": 516
+                },
+                "mae": 0.072657,
+                "rows": 1093,
+                "stays": 536,
+                "subjects": 516
+              },
+              "ridge_realfit": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.012825,
+                    -0.004687
+                  ],
+                  "point_delta": -0.008909,
+                  "significant": true,
+                  "subjects": 516
+                },
+                "mae": 0.066418,
+                "rows": 1093,
+                "stays": 536,
+                "subjects": 516
+              }
+            },
+            "min_pairs": 100,
+            "min_subjects": 40,
+            "reason": "lowest_discovery_mae_among_significant_supported_sources",
+            "selected_method": "ridge_realfit"
+          },
+          "respiratory_rate": {
+            "method_stats": {
+              "persistence": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.0,
+                    0.0
+                  ],
+                  "point_delta": 0.0,
+                  "significant": false,
+                  "subjects": 1971
+                },
+                "mae": 4.96938,
+                "rows": 15872,
+                "stays": 2234,
+                "subjects": 1971
+              },
+              "population_delta": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.007683,
+                    -0.004638
+                  ],
+                  "point_delta": -0.006072,
+                  "significant": true,
+                  "subjects": 1971
+                },
+                "mae": 4.966902,
+                "rows": 15872,
+                "stays": 2234,
+                "subjects": 1971
+              },
+              "ridge_realfit": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.748838,
+                    -0.545306
+                  ],
+                  "point_delta": -0.64406,
+                  "significant": true,
+                  "subjects": 1971
+                },
+                "mae": 4.56519,
+                "rows": 15872,
+                "stays": 2234,
+                "subjects": 1971
+              }
+            },
+            "min_pairs": 100,
+            "min_subjects": 40,
+            "reason": "lowest_discovery_mae_among_significant_supported_sources",
+            "selected_method": "ridge_realfit"
+          }
+        },
+        "group_column": "subject_id",
+        "heldout_active_respiratory_only": {
+          "normalized_mae": {
+            "persistence": 0.732162,
+            "population_delta": 0.734484,
+            "ridge_realfit": 0.590318,
+            "target_router": 0.590318
+          },
+          "per_target": {
+            "bicarbonate": {
+              "mae": {
+                "persistence": 2.68197,
+                "population_delta": 2.668133,
+                "ridge_realfit": 2.517039,
+                "target_router": 2.517039
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.272849,
+                  -0.073355
+                ],
+                "point_delta": -0.16145,
+                "significant": true,
+                "subjects": 415
+              },
+              "rows": 1076,
+              "selected_method": "ridge_realfit",
+              "stays": 435,
+              "subjects": 415
+            },
+            "heart_rate": {
+              "mae": {
+                "persistence": 9.263952,
+                "population_delta": 9.222639,
+                "ridge_realfit": 8.885592,
+                "target_router": 8.885592
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.820482,
+                  -0.45283
+                ],
+                "point_delta": -0.640313,
+                "significant": true,
+                "subjects": 1126
+              },
+              "rows": 8619,
+              "selected_method": "ridge_realfit",
+              "stays": 1270,
+              "subjects": 1126
+            },
+            "map": {
+              "mae": {
+                "persistence": 12.013388,
+                "population_delta": 12.018154,
+                "ridge_realfit": 10.680621,
+                "target_router": 10.680621
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -1.662837,
+                  -1.152589
+                ],
+                "point_delta": -1.415376,
+                "significant": true,
+                "subjects": 1117
+              },
+              "rows": 8515,
+              "selected_method": "ridge_realfit",
+              "stays": 1258,
+              "subjects": 1117
+            },
+            "o2sat": {
+              "mae": {
+                "persistence": 5.960693,
+                "population_delta": 6.028644,
+                "ridge_realfit": 3.551717,
+                "target_router": 3.551717
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -6.319561,
+                  -5.132424
+                ],
+                "point_delta": -5.701669,
+                "significant": true,
+                "subjects": 1101
+              },
+              "rows": 8192,
+              "selected_method": "ridge_realfit",
+              "stays": 1241,
+              "subjects": 1101
+            },
+            "ph": {
+              "mae": {
+                "persistence": 0.074687,
+                "population_delta": 0.073173,
+                "ridge_realfit": 0.067123,
+                "target_router": 0.067123
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.016052,
+                  -0.005338
+                ],
+                "point_delta": -0.010746,
+                "significant": true,
+                "subjects": 276
+              },
+              "rows": 627,
+              "selected_method": "ridge_realfit",
+              "stays": 285,
+              "subjects": 276
+            },
+            "respiratory_rate": {
+              "mae": {
+                "persistence": 4.948655,
+                "population_delta": 4.945641,
+                "ridge_realfit": 4.62662,
+                "target_router": 4.62662
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.657711,
+                  -0.407739
+                ],
+                "point_delta": -0.539832,
+                "significant": true,
+                "subjects": 988
+              },
+              "rows": 7693,
+              "selected_method": "ridge_realfit",
+              "stays": 1100,
+              "subjects": 988
+            }
+          },
+          "router_delta_vs_persistence": {
+            "beats_persistence": true,
+            "bootstrap_95_ci": [
+              -0.349269,
+              -0.289331
+            ],
+            "point_delta": -0.316823,
+            "significant": true,
+            "subjects": 1131
+          },
+          "rows": 34722,
+          "stays": 1275,
+          "subjects": 1131
+        },
+        "heldout_all_windows": {
+          "normalized_mae": {
+            "persistence": 0.612091,
+            "population_delta": 0.624868,
+            "ridge_realfit": 0.542498,
+            "target_router": 0.542498
+          },
+          "per_target": {
+            "bicarbonate": {
+              "mae": {
+                "persistence": 2.459218,
+                "population_delta": 2.449998,
+                "ridge_realfit": 2.363643,
+                "target_router": 2.363643
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.181812,
+                  -0.016862
+                ],
+                "point_delta": -0.098245,
+                "significant": true,
+                "subjects": 536
+              },
+              "rows": 1611,
+              "selected_method": "ridge_realfit",
+              "stays": 569,
+              "subjects": 536
+            },
+            "heart_rate": {
+              "mae": {
+                "persistence": 8.753886,
+                "population_delta": 8.764983,
+                "ridge_realfit": 8.511588,
+                "target_router": 8.511588
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.505727,
+                  -0.248345
+                ],
+                "point_delta": -0.386041,
+                "significant": true,
+                "subjects": 1189
+              },
+              "rows": 18207,
+              "selected_method": "ridge_realfit",
+              "stays": 1354,
+              "subjects": 1189
+            },
+            "map": {
+              "mae": {
+                "persistence": 11.597116,
+                "population_delta": 11.596161,
+                "ridge_realfit": 10.477744,
+                "target_router": 10.477744
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -1.401783,
+                  -0.988224
+                ],
+                "point_delta": -1.20121,
+                "significant": true,
+                "subjects": 1184
+              },
+              "rows": 17963,
+              "selected_method": "ridge_realfit",
+              "stays": 1347,
+              "subjects": 1184
+            },
+            "o2sat": {
+              "mae": {
+                "persistence": 3.894746,
+                "population_delta": 4.166698,
+                "ridge_realfit": 2.949262,
+                "target_router": 2.949262
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -2.88523,
+                  -2.089083
+                ],
+                "point_delta": -2.484238,
+                "significant": true,
+                "subjects": 1167
+              },
+              "rows": 17263,
+              "selected_method": "ridge_realfit",
+              "stays": 1329,
+              "subjects": 1167
+            },
+            "ph": {
+              "mae": {
+                "persistence": 0.067114,
+                "population_delta": 0.06622,
+                "ridge_realfit": 0.062975,
+                "target_router": 0.062975
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.012069,
+                  -0.002638
+                ],
+                "point_delta": -0.007286,
+                "significant": true,
+                "subjects": 317
+              },
+              "rows": 822,
+              "selected_method": "ridge_realfit",
+              "stays": 329,
+              "subjects": 317
+            },
+            "respiratory_rate": {
+              "mae": {
+                "persistence": 4.322966,
+                "population_delta": 4.329527,
+                "ridge_realfit": 4.123607,
+                "target_router": 4.123607
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.386701,
+                  -0.202092
+                ],
+                "point_delta": -0.292734,
+                "significant": true,
+                "subjects": 1038
+              },
+              "rows": 14726,
+              "selected_method": "ridge_realfit",
+              "stays": 1160,
+              "subjects": 1038
+            }
+          },
+          "router_delta_vs_persistence": {
+            "beats_persistence": true,
+            "bootstrap_95_ci": [
+              -0.170673,
+              -0.129458
+            ],
+            "point_delta": -0.149844,
+            "significant": true,
+            "subjects": 1194
+          },
+          "rows": 70592,
+          "stays": 1360,
+          "subjects": 1194
+        },
+        "heldout_groups": 1194,
+        "overlap": 0,
+        "seed": 53,
+        "selected_methods": {
+          "bicarbonate": "ridge_realfit",
+          "heart_rate": "ridge_realfit",
+          "map": "ridge_realfit",
+          "o2sat": "ridge_realfit",
+          "ph": "ridge_realfit",
+          "respiratory_rate": "ridge_realfit"
+        },
+        "source_diagnostics": {
+          "feature_count_by_target": {
+            "bicarbonate": 63,
+            "heart_rate": 63,
+            "map": 63,
+            "o2sat": 63,
+            "ph": 63,
+            "respiratory_rate": 63
+          },
+          "future_suffix": "tp6",
+          "inner_oof_folds": 3,
+          "ridge_alpha": 10.0,
+          "sources": {
+            "persistence": "current observed value",
+            "population_delta": "discovery-only mean target delta",
+            "ridge_realfit": "small linear residual model fit on discovery patients"
+          }
+        }
+      },
+      {
+        "discovery_groups": 2424,
+        "discovery_selector": {
+          "bicarbonate": {
+            "method_stats": {
+              "persistence": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.0,
+                    0.0
+                  ],
+                  "point_delta": 0.0,
+                  "significant": false,
+                  "subjects": 853
+                },
+                "mae": 2.597291,
+                "rows": 2215,
+                "stays": 908,
+                "subjects": 853
+              },
+              "population_delta": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    -0.009761,
+                    0.02771
+                  ],
+                  "point_delta": 0.008165,
+                  "significant": false,
+                  "subjects": 853
+                },
+                "mae": 2.59816,
+                "rows": 2215,
+                "stays": 908,
+                "subjects": 853
+              },
+              "ridge_realfit": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.145903,
+                    0.006839
+                  ],
+                  "point_delta": -0.069235,
+                  "significant": false,
+                  "subjects": 853
+                },
+                "mae": 2.526097,
+                "rows": 2215,
+                "stays": 908,
+                "subjects": 853
+              }
+            },
+            "min_pairs": 100,
+            "min_subjects": 40,
+            "reason": "no_source_passed_discovery_significance_gate",
+            "selected_method": "persistence"
+          },
+          "heart_rate": {
+            "method_stats": {
+              "persistence": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.0,
+                    0.0
+                  ],
+                  "point_delta": 0.0,
+                  "significant": false,
+                  "subjects": 2269
+                },
+                "mae": 9.368247,
+                "rows": 17863,
+                "stays": 2587,
+                "subjects": 2269
+              },
+              "population_delta": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.074483,
+                    -0.044255
+                  ],
+                  "point_delta": -0.059569,
+                  "significant": true,
+                  "subjects": 2269
+                },
+                "mae": 9.333319,
+                "rows": 17863,
+                "stays": 2587,
+                "subjects": 2269
+              },
+              "ridge_realfit": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.69285,
+                    -0.434972
+                  ],
+                  "point_delta": -0.569295,
+                  "significant": true,
+                  "subjects": 2269
+                },
+                "mae": 8.999259,
+                "rows": 17863,
+                "stays": 2587,
+                "subjects": 2269
+              }
+            },
+            "min_pairs": 100,
+            "min_subjects": 40,
+            "reason": "lowest_discovery_mae_among_significant_supported_sources",
+            "selected_method": "ridge_realfit"
+          },
+          "map": {
+            "method_stats": {
+              "persistence": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.0,
+                    0.0
+                  ],
+                  "point_delta": 0.0,
+                  "significant": false,
+                  "subjects": 2247
+                },
+                "mae": 11.776913,
+                "rows": 17594,
+                "stays": 2558,
+                "subjects": 2247
+              },
+              "population_delta": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.011061,
+                    0.022411
+                  ],
+                  "point_delta": 0.016543,
+                  "significant": false,
+                  "subjects": 2247
+                },
+                "mae": 11.786157,
+                "rows": 17594,
+                "stays": 2558,
+                "subjects": 2247
+              },
+              "ridge_realfit": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -1.575807,
+                    -1.208124
+                  ],
+                  "point_delta": -1.39312,
+                  "significant": true,
+                  "subjects": 2247
+                },
+                "mae": 10.600649,
+                "rows": 17594,
+                "stays": 2558,
+                "subjects": 2247
+              }
+            },
+            "min_pairs": 100,
+            "min_subjects": 40,
+            "reason": "lowest_discovery_mae_among_significant_supported_sources",
+            "selected_method": "ridge_realfit"
+          },
+          "o2sat": {
+            "method_stats": {
+              "persistence": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.0,
+                    0.0
+                  ],
+                  "point_delta": 0.0,
+                  "significant": false,
+                  "subjects": 2219
+                },
+                "mae": 5.962479,
+                "rows": 17137,
+                "stays": 2530,
+                "subjects": 2219
+              },
+              "population_delta": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.147642,
+                    -0.093594
+                  ],
+                  "point_delta": -0.120278,
+                  "significant": true,
+                  "subjects": 2219
+                },
+                "mae": 6.020846,
+                "rows": 17137,
+                "stays": 2530,
+                "subjects": 2219
+              },
+              "ridge_realfit": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -6.106089,
+                    -5.247274
+                  ],
+                  "point_delta": -5.65598,
+                  "significant": true,
+                  "subjects": 2219
+                },
+                "mae": 3.612237,
+                "rows": 17137,
+                "stays": 2530,
+                "subjects": 2219
+              }
+            },
+            "min_pairs": 100,
+            "min_subjects": 40,
+            "reason": "lowest_discovery_mae_among_significant_supported_sources",
+            "selected_method": "ridge_realfit"
+          },
+          "ph": {
+            "method_stats": {
+              "persistence": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.0,
+                    0.0
+                  ],
+                  "point_delta": 0.0,
+                  "significant": false,
+                  "subjects": 547
+                },
+                "mae": 0.073486,
+                "rows": 1210,
+                "stays": 569,
+                "subjects": 547
+              },
+              "population_delta": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.00285,
+                    -0.000865
+                  ],
+                  "point_delta": -0.001875,
+                  "significant": true,
+                  "subjects": 547
+                },
+                "mae": 0.072075,
+                "rows": 1210,
+                "stays": 569,
+                "subjects": 547
+              },
+              "ridge_realfit": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.013282,
+                    -0.005549
+                  ],
+                  "point_delta": -0.009275,
+                  "significant": true,
+                  "subjects": 547
+                },
+                "mae": 0.065845,
+                "rows": 1210,
+                "stays": 569,
+                "subjects": 547
+              }
+            },
+            "min_pairs": 100,
+            "min_subjects": 40,
+            "reason": "lowest_discovery_mae_among_significant_supported_sources",
+            "selected_method": "ridge_realfit"
+          },
+          "respiratory_rate": {
+            "method_stats": {
+              "persistence": {
+                "delta_vs_persistence": {
+                  "beats_persistence": false,
+                  "bootstrap_95_ci": [
+                    0.0,
+                    0.0
+                  ],
+                  "point_delta": 0.0,
+                  "significant": false,
+                  "subjects": 1975
+                },
+                "mae": 4.969708,
+                "rows": 15813,
+                "stays": 2229,
+                "subjects": 1975
+              },
+              "population_delta": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.014085,
+                    -0.009554
+                  ],
+                  "point_delta": -0.011923,
+                  "significant": true,
+                  "subjects": 1975
+                },
+                "mae": 4.964656,
+                "rows": 15813,
+                "stays": 2229,
+                "subjects": 1975
+              },
+              "ridge_realfit": {
+                "delta_vs_persistence": {
+                  "beats_persistence": true,
+                  "bootstrap_95_ci": [
+                    -0.698971,
+                    -0.5218
+                  ],
+                  "point_delta": -0.611531,
+                  "significant": true,
+                  "subjects": 1975
+                },
+                "mae": 4.555406,
+                "rows": 15813,
+                "stays": 2229,
+                "subjects": 1975
+              }
+            },
+            "min_pairs": 100,
+            "min_subjects": 40,
+            "reason": "lowest_discovery_mae_among_significant_supported_sources",
+            "selected_method": "ridge_realfit"
+          }
+        },
+        "group_column": "subject_id",
+        "heldout_active_respiratory_only": {
+          "normalized_mae": {
+            "persistence": 0.736014,
+            "population_delta": 0.739557,
+            "ridge_realfit": 0.594732,
+            "target_router": 0.595382
+          },
+          "per_target": {
+            "bicarbonate": {
+              "mae": {
+                "persistence": 2.741675,
+                "population_delta": 2.743986,
+                "ridge_realfit": 2.596795,
+                "target_router": 2.741675
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": false,
+                "bootstrap_95_ci": [
+                  0.0,
+                  0.0
+                ],
+                "point_delta": 0.0,
+                "significant": false,
+                "subjects": 401
+              },
+              "rows": 979,
+              "selected_method": "persistence",
+              "stays": 427,
+              "subjects": 401
+            },
+            "heart_rate": {
+              "mae": {
+                "persistence": 9.078047,
+                "population_delta": 9.046136,
+                "ridge_realfit": 8.819125,
+                "target_router": 8.819125
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.59849,
+                  -0.247456
+                ],
+                "point_delta": -0.429775,
+                "significant": true,
+                "subjects": 1116
+              },
+              "rows": 8623,
+              "selected_method": "ridge_realfit",
+              "stays": 1277,
+              "subjects": 1116
+            },
+            "map": {
+              "mae": {
+                "persistence": 11.786643,
+                "population_delta": 11.796556,
+                "ridge_realfit": 10.461896,
+                "target_router": 10.461896
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -1.714258,
+                  -1.179848
+                ],
+                "point_delta": -1.417843,
+                "significant": true,
+                "subjects": 1100
+              },
+              "rows": 8460,
+              "selected_method": "ridge_realfit",
+              "stays": 1259,
+              "subjects": 1100
+            },
+            "o2sat": {
+              "mae": {
+                "persistence": 6.014237,
+                "population_delta": 6.102242,
+                "ridge_realfit": 3.646949,
+                "target_router": 3.646949
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -7.03311,
+                  -5.612505
+                ],
+                "point_delta": -6.319296,
+                "significant": true,
+                "subjects": 1089
+              },
+              "rows": 8148,
+              "selected_method": "ridge_realfit",
+              "stays": 1242,
+              "subjects": 1089
+            },
+            "ph": {
+              "mae": {
+                "persistence": 0.075816,
+                "population_delta": 0.07386,
+                "ridge_realfit": 0.065812,
+                "target_router": 0.065812
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.016695,
+                  -0.005901
+                ],
+                "point_delta": -0.010996,
+                "significant": true,
+                "subjects": 245
+              },
+              "rows": 510,
+              "selected_method": "ridge_realfit",
+              "stays": 252,
+              "subjects": 245
+            },
+            "respiratory_rate": {
+              "mae": {
+                "persistence": 4.948142,
+                "population_delta": 4.945311,
+                "ridge_realfit": 4.582888,
+                "target_router": 4.582888
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.782866,
+                  -0.50246
+                ],
+                "point_delta": -0.643266,
+                "significant": true,
+                "subjects": 984
+              },
+              "rows": 7752,
+              "selected_method": "ridge_realfit",
+              "stays": 1105,
+              "subjects": 984
+            }
+          },
+          "router_delta_vs_persistence": {
+            "beats_persistence": true,
+            "bootstrap_95_ci": [
+              -0.378718,
+              -0.307724
+            ],
+            "point_delta": -0.34202,
+            "significant": true,
+            "subjects": 1117
+          },
+          "rows": 34472,
+          "stays": 1278,
+          "subjects": 1117
+        },
+        "heldout_all_windows": {
+          "normalized_mae": {
+            "persistence": 0.614819,
+            "population_delta": 0.629311,
+            "ridge_realfit": 0.548462,
+            "target_router": 0.54886
+          },
+          "per_target": {
+            "bicarbonate": {
+              "mae": {
+                "persistence": 2.542347,
+                "population_delta": 2.559981,
+                "ridge_realfit": 2.419938,
+                "target_router": 2.542347
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": false,
+                "bootstrap_95_ci": [
+                  0.0,
+                  0.0
+                ],
+                "point_delta": 0.0,
+                "significant": false,
+                "subjects": 510
+              },
+              "rows": 1457,
+              "selected_method": "persistence",
+              "stays": 549,
+              "subjects": 510
+            },
+            "heart_rate": {
+              "mae": {
+                "persistence": 8.576111,
+                "population_delta": 8.596268,
+                "ridge_realfit": 8.474344,
+                "target_router": 8.474344
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.314372,
+                  -0.047392
+                ],
+                "point_delta": -0.175569,
+                "significant": true,
+                "subjects": 1192
+              },
+              "rows": 18335,
+              "selected_method": "ridge_realfit",
+              "stays": 1375,
+              "subjects": 1192
+            },
+            "map": {
+              "mae": {
+                "persistence": 11.519408,
+                "population_delta": 11.520858,
+                "ridge_realfit": 10.398654,
+                "target_router": 10.398654
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -1.326592,
+                  -0.973368
+                ],
+                "point_delta": -1.146705,
+                "significant": true,
+                "subjects": 1179
+              },
+              "rows": 17982,
+              "selected_method": "ridge_realfit",
+              "stays": 1360,
+              "subjects": 1179
+            },
+            "o2sat": {
+              "mae": {
+                "persistence": 3.914383,
+                "population_delta": 4.211073,
+                "ridge_realfit": 3.024692,
+                "target_router": 3.024692
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -3.08729,
+                  -2.290821
+                ],
+                "point_delta": -2.730017,
+                "significant": true,
+                "subjects": 1172
+              },
+              "rows": 17263,
+              "selected_method": "ridge_realfit",
+              "stays": 1350,
+              "subjects": 1172
+            },
+            "ph": {
+              "mae": {
+                "persistence": 0.069777,
+                "population_delta": 0.068592,
+                "ridge_realfit": 0.061254,
+                "target_router": 0.061254
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.014908,
+                  -0.005556
+                ],
+                "point_delta": -0.01003,
+                "significant": true,
+                "subjects": 286
+              },
+              "rows": 664,
+              "selected_method": "ridge_realfit",
+              "stays": 296,
+              "subjects": 286
+            },
+            "respiratory_rate": {
+              "mae": {
+                "persistence": 4.34543,
+                "population_delta": 4.356869,
+                "ridge_realfit": 4.125462,
+                "target_router": 4.125462
+              },
+              "router_delta_vs_persistence": {
+                "beats_persistence": true,
+                "bootstrap_95_ci": [
+                  -0.405974,
+                  -0.223851
+                ],
+                "point_delta": -0.315372,
+                "significant": true,
+                "subjects": 1045
+              },
+              "rows": 14935,
+              "selected_method": "ridge_realfit",
+              "stays": 1178,
+              "subjects": 1045
+            }
+          },
+          "router_delta_vs_persistence": {
+            "beats_persistence": true,
+            "bootstrap_95_ci": [
+              -0.170192,
+              -0.131526
+            ],
+            "point_delta": -0.150363,
+            "significant": true,
+            "subjects": 1194
+          },
+          "rows": 70636,
+          "stays": 1377,
+          "subjects": 1194
+        },
+        "heldout_groups": 1194,
+        "overlap": 0,
+        "seed": 71,
+        "selected_methods": {
+          "bicarbonate": "persistence",
+          "heart_rate": "ridge_realfit",
+          "map": "ridge_realfit",
+          "o2sat": "ridge_realfit",
+          "ph": "ridge_realfit",
+          "respiratory_rate": "ridge_realfit"
+        },
+        "source_diagnostics": {
+          "feature_count_by_target": {
+            "bicarbonate": 63,
+            "heart_rate": 63,
+            "map": 63,
+            "o2sat": 63,
+            "ph": 63,
+            "respiratory_rate": 63
+          },
+          "future_suffix": "tp6",
+          "inner_oof_folds": 3,
+          "ridge_alpha": 10.0,
+          "sources": {
+            "persistence": "current observed value",
+            "population_delta": "discovery-only mean target delta",
+            "ridge_realfit": "small linear residual model fit on discovery patients"
+          }
+        }
+      }
+    ],
+    "seeds": [
+      7,
+      11,
+      19,
+      23,
+      37,
+      53,
+      71
+    ],
+    "summary": {
+      "selected_method_counts_by_target": {
+        "bicarbonate": {
+          "persistence": 2,
+          "ridge_realfit": 5
+        },
+        "heart_rate": {
+          "ridge_realfit": 7
+        },
+        "map": {
+          "ridge_realfit": 7
+        },
+        "o2sat": {
+          "ridge_realfit": 7
+        },
+        "ph": {
+          "ridge_realfit": 7
+        },
+        "respiratory_rate": {
+          "ridge_realfit": 7
+        }
+      },
+      "target_router": {
+        "active_respiratory_only": {
+          "beats_persistence_count": 7,
+          "delta_max": -0.315385,
+          "delta_median": -0.334511,
+          "delta_min": -0.349796,
+          "significant_count": 7,
+          "splits": 7
+        },
+        "all_windows": {
+          "beats_persistence_count": 7,
+          "delta_max": -0.136803,
+          "delta_median": -0.147597,
+          "delta_min": -0.150363,
+          "significant_count": 7,
+          "splits": 7
+        }
+      }
+    }
+  },
+  "safety_boundary": {
+    "causal_claim_allowed": false,
+    "checkpoint_promotion_allowed": false,
+    "clinical_claim_allowed": false,
+    "counterfactual_claim_allowed": false,
+    "factual_observed_treatment_only": true,
+    "patient_ids_included_in_report": false,
+    "raw_rows_included": false
+  },
+  "selector_gate": {
+    "min_pairs": 100,
+    "min_subjects": 40,
+    "rule": "A non-persistence source can be selected only if its discovery subject-level bootstrap CI versus persistence excludes zero; among passing sources choose lowest discovery MAE. Otherwise fallback to persistence.",
+    "scope": "discovery active-respiratory rows"
+  },
+  "sources": {
+    "persistence": "current observed value",
+    "population_delta": "discovery-only mean target delta; discovery selection uses inner OOF predictions",
+    "ridge_realfit": "small discovery-only ridge residual; discovery selection uses inner OOF predictions"
+  },
+  "targets": [
+    "o2sat",
+    "respiratory_rate",
+    "heart_rate",
+    "map",
+    "bicarbonate",
+    "ph"
+  ]
+}

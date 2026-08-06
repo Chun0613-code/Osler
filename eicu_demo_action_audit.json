@@ -1,0 +1,258 @@
+{
+  "action_contract": {
+    "channels": [
+      "insulin_iv",
+      "insulin_rapid_sc",
+      "insulin_intermediate_sc",
+      "insulin_basal_sc",
+      "fluids",
+      "kcl",
+      "bicarbonate",
+      "dextrose"
+    ],
+    "dose_time_resolution_note": "medication has start/stop offsets and dosage text; infusiondrug has time-stamped rates/amounts but no explicit stop rows; treatment is coarse presence/procedure text.",
+    "sources": [
+      "medication",
+      "infusiondrug",
+      "treatment"
+    ]
+  },
+  "all_stay_action_coverage": {
+    "by_action": {
+      "bicarbonate": {
+        "has_dose_text_rows": 126,
+        "has_rate_rows": 9,
+        "has_start_stop_rows": 119,
+        "rows": 310,
+        "stays": 130
+      },
+      "dextrose": {
+        "has_dose_text_rows": 2374,
+        "has_rate_rows": 272,
+        "has_start_stop_rows": 2406,
+        "rows": 4311,
+        "stays": 1081
+      },
+      "fluids": {
+        "has_dose_text_rows": 7274,
+        "has_rate_rows": 1393,
+        "has_start_stop_rows": 7064,
+        "rows": 12644,
+        "stays": 1856
+      },
+      "insulin_basal_sc": {
+        "has_dose_text_rows": 174,
+        "has_rate_rows": 0,
+        "has_start_stop_rows": 279,
+        "rows": 312,
+        "stays": 160
+      },
+      "insulin_iv": {
+        "has_dose_text_rows": 1370,
+        "has_rate_rows": 2224,
+        "has_start_stop_rows": 187,
+        "rows": 2438,
+        "stays": 211
+      },
+      "insulin_rapid_sc": {
+        "has_dose_text_rows": 637,
+        "has_rate_rows": 0,
+        "has_start_stop_rows": 775,
+        "rows": 2362,
+        "stays": 723
+      },
+      "kcl": {
+        "has_dose_text_rows": 2437,
+        "has_rate_rows": 52,
+        "has_start_stop_rows": 2294,
+        "rows": 2558,
+        "stays": 767
+      }
+    },
+    "by_source": {
+      "infusiondrug": {
+        "rows": 3971,
+        "stays": 207
+      },
+      "medication": {
+        "rows": 14911,
+        "stays": 1579
+      },
+      "treatment": {
+        "rows": 6053,
+        "stays": 859
+      }
+    },
+    "rows": 24935,
+    "stays": 1958
+  },
+  "data_root": "physionet.org/files/eicu-crd-demo/2.0.1",
+  "dataset": "PhysioNet eICU Collaborative Research Database Demo 2.0.1",
+  "dka_like_anytime_action_coverage": {
+    "by_action": {
+      "bicarbonate": {
+        "has_dose_text_rows": 42,
+        "has_rate_rows": 8,
+        "has_start_stop_rows": 32,
+        "rows": 125,
+        "stays": 44
+      },
+      "dextrose": {
+        "has_dose_text_rows": 626,
+        "has_rate_rows": 60,
+        "has_start_stop_rows": 644,
+        "rows": 1249,
+        "stays": 235
+      },
+      "fluids": {
+        "has_dose_text_rows": 1451,
+        "has_rate_rows": 178,
+        "has_start_stop_rows": 1418,
+        "rows": 2631,
+        "stays": 269
+      },
+      "insulin_basal_sc": {
+        "has_dose_text_rows": 69,
+        "has_rate_rows": 0,
+        "has_start_stop_rows": 96,
+        "rows": 112,
+        "stays": 54
+      },
+      "insulin_iv": {
+        "has_dose_text_rows": 857,
+        "has_rate_rows": 1364,
+        "has_start_stop_rows": 109,
+        "rows": 1490,
+        "stays": 103
+      },
+      "insulin_rapid_sc": {
+        "has_dose_text_rows": 192,
+        "has_rate_rows": 0,
+        "has_start_stop_rows": 220,
+        "rows": 776,
+        "stays": 199
+      },
+      "kcl": {
+        "has_dose_text_rows": 363,
+        "has_rate_rows": 0,
+        "has_start_stop_rows": 331,
+        "rows": 372,
+        "stays": 120
+      }
+    },
+    "by_source": {
+      "infusiondrug": {
+        "rows": 1624,
+        "stays": 88
+      },
+      "medication": {
+        "rows": 3209,
+        "stays": 202
+      },
+      "treatment": {
+        "rows": 1922,
+        "stays": 193
+      }
+    },
+    "rows": 6755,
+    "stays": 280
+  },
+  "dka_like_stays": {
+    "count": 304,
+    "criteria_counts": {
+      "diagnosis_and_lab_dka_like": 88,
+      "diagnosis_text_or_code:admissionDx.csv.gz": 26,
+      "diagnosis_text_or_code:diagnosis.csv.gz": 12,
+      "glucose_and_acidemia_or_low_hco3_within_4h": 178
+    },
+    "definition": {
+      "diagnosis_patterns": [
+        "diabetic ketoacidosis",
+        "ketoacidosis",
+        "dka",
+        "250.1",
+        "e10.1",
+        "e11.1"
+      ],
+      "lab": "Glucose >= 200.0 and (HCO3 <= 18.0 or pH <= 7.3) within 4h"
+    }
+  },
+  "dka_like_window_action_coverage": {
+    "by_action": {
+      "bicarbonate": {
+        "has_dose_text_rows": 34,
+        "has_rate_rows": 8,
+        "has_start_stop_rows": 25,
+        "rows": 71,
+        "stays": 33
+      },
+      "dextrose": {
+        "has_dose_text_rows": 378,
+        "has_rate_rows": 56,
+        "has_start_stop_rows": 386,
+        "rows": 711,
+        "stays": 208
+      },
+      "fluids": {
+        "has_dose_text_rows": 862,
+        "has_rate_rows": 149,
+        "has_start_stop_rows": 869,
+        "rows": 1533,
+        "stays": 249
+      },
+      "insulin_basal_sc": {
+        "has_dose_text_rows": 33,
+        "has_rate_rows": 0,
+        "has_start_stop_rows": 42,
+        "rows": 46,
+        "stays": 41
+      },
+      "insulin_iv": {
+        "has_dose_text_rows": 357,
+        "has_rate_rows": 645,
+        "has_start_stop_rows": 98,
+        "rows": 752,
+        "stays": 98
+      },
+      "insulin_rapid_sc": {
+        "has_dose_text_rows": 73,
+        "has_rate_rows": 0,
+        "has_start_stop_rows": 129,
+        "rows": 367,
+        "stays": 173
+      },
+      "kcl": {
+        "has_dose_text_rows": 153,
+        "has_rate_rows": 0,
+        "has_start_stop_rows": 145,
+        "rows": 155,
+        "stays": 81
+      }
+    },
+    "by_source": {
+      "infusiondrug": {
+        "rows": 864,
+        "stays": 86
+      },
+      "medication": {
+        "rows": 1818,
+        "stays": 183
+      },
+      "treatment": {
+        "rows": 953,
+        "stays": 167
+      }
+    },
+    "rows": 3635,
+    "stays": 265
+  },
+  "patient_table_stays": 2520,
+  "safety_boundary": {
+    "action_conditioned_training_ready": true,
+    "causal_treatment_claim_allowed": false,
+    "clinical_claim_allowed": false,
+    "counterfactual_claim_allowed": false,
+    "patient_ids_included": false,
+    "raw_rows_included": false
+  }
+}

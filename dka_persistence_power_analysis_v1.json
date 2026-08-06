@@ -1,0 +1,906 @@
+{
+  "analysis": "patient-held-out power analysis versus persistence",
+  "unit_of_evidence": "ICU stay; transition rows are averaged within stay",
+  "alpha": 0.05,
+  "target_power": 0.8,
+  "delta_definition": "normalized MAE(method) - normalized MAE(persistence); negative is better",
+  "factual_forecast_promotion_allowed": false,
+  "causal_claim_allowed": false,
+  "oof_jepa_adapter": {
+    "source": "dka_real_world_oof_predictions_v2.csv",
+    "stay_count": 15,
+    "methods": {
+      "base_jepa": {
+        "all_states": {
+          "all_windows": {
+            "stay_count": 15,
+            "mean_method_minus_persistence": 0.278624,
+            "sd_stay_delta": 0.180182,
+            "bootstrap_95_ci": [
+              0.198103,
+              0.372051
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "active_dka_only": {
+            "stay_count": 13,
+            "mean_method_minus_persistence": 0.172467,
+            "sd_stay_delta": 0.261908,
+            "bootstrap_95_ci": [
+              0.02354,
+              0.298353
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          }
+        },
+        "dense_core": {
+          "all_windows": {
+            "stay_count": 15,
+            "mean_method_minus_persistence": 0.438777,
+            "sd_stay_delta": 0.26377,
+            "bootstrap_95_ci": [
+              0.318261,
+              0.579452
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "active_dka_only": {
+            "stay_count": 11,
+            "mean_method_minus_persistence": 0.36778,
+            "sd_stay_delta": 0.278126,
+            "bootstrap_95_ci": [
+              0.215856,
+              0.530917
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          }
+        },
+        "per_state": {
+          "G": {
+            "stay_count": 14,
+            "mean_method_minus_persistence": 0.644605,
+            "sd_stay_delta": 0.543022,
+            "bootstrap_95_ci": [
+              0.407307,
+              0.942863
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "HCO3": {
+            "stay_count": 14,
+            "mean_method_minus_persistence": 0.441028,
+            "sd_stay_delta": 0.409842,
+            "bootstrap_95_ci": [
+              0.241792,
+              0.652244
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "Ke": {
+            "stay_count": 15,
+            "mean_method_minus_persistence": 0.220516,
+            "sd_stay_delta": 0.326785,
+            "bootstrap_95_ci": [
+              0.063259,
+              0.379776
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "MAP": {
+            "stay_count": 15,
+            "mean_method_minus_persistence": -0.035635,
+            "sd_stay_delta": 0.082216,
+            "bootstrap_95_ci": [
+              -0.075982,
+              0.004888
+            ],
+            "required_stays_for_95ci_80power": 42,
+            "additional_stays_needed_from_current_demo": 27,
+            "interpretation": "underpowered_for_current_observed_effect"
+          },
+          "Na": {
+            "stay_count": 15,
+            "mean_method_minus_persistence": 0.49621,
+            "sd_stay_delta": 0.263491,
+            "bootstrap_95_ci": [
+              0.358535,
+              0.610814
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "anion_gap": {
+            "stay_count": 14,
+            "mean_method_minus_persistence": 0.226013,
+            "sd_stay_delta": 0.249828,
+            "bootstrap_95_ci": [
+              0.106224,
+              0.356494
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "creatinine": {
+            "stay_count": 14,
+            "mean_method_minus_persistence": 0.093891,
+            "sd_stay_delta": 0.223864,
+            "bootstrap_95_ci": [
+              -0.013058,
+              0.211585
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "osmolality": {
+            "stay_count": 14,
+            "mean_method_minus_persistence": 0.513479,
+            "sd_stay_delta": 0.233593,
+            "bootstrap_95_ci": [
+              0.401612,
+              0.632239
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "pH": {
+            "stay_count": 15,
+            "mean_method_minus_persistence": 0.09947,
+            "sd_stay_delta": 0.126636,
+            "bootstrap_95_ci": [
+              0.038291,
+              0.164099
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "urine_output": {
+            "stay_count": 15,
+            "mean_method_minus_persistence": 0.476297,
+            "sd_stay_delta": 0.587586,
+            "bootstrap_95_ci": [
+              0.234407,
+              0.798623
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          }
+        }
+      },
+      "ensemble_adapter": {
+        "all_states": {
+          "all_windows": {
+            "stay_count": 15,
+            "mean_method_minus_persistence": 0.120757,
+            "sd_stay_delta": 0.165786,
+            "bootstrap_95_ci": [
+              0.051595,
+              0.213389
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "active_dka_only": {
+            "stay_count": 13,
+            "mean_method_minus_persistence": 0.131506,
+            "sd_stay_delta": 0.273531,
+            "bootstrap_95_ci": [
+              0.000758,
+              0.282977
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          }
+        },
+        "dense_core": {
+          "all_windows": {
+            "stay_count": 15,
+            "mean_method_minus_persistence": 0.138077,
+            "sd_stay_delta": 0.210122,
+            "bootstrap_95_ci": [
+              0.04749,
+              0.249305
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "active_dka_only": {
+            "stay_count": 11,
+            "mean_method_minus_persistence": 0.202916,
+            "sd_stay_delta": 0.450636,
+            "bootstrap_95_ci": [
+              -0.013026,
+              0.473883
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          }
+        },
+        "per_state": {
+          "G": {
+            "stay_count": 14,
+            "mean_method_minus_persistence": 0.1891,
+            "sd_stay_delta": 0.321051,
+            "bootstrap_95_ci": [
+              0.041272,
+              0.360047
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "HCO3": {
+            "stay_count": 14,
+            "mean_method_minus_persistence": 0.227758,
+            "sd_stay_delta": 0.175331,
+            "bootstrap_95_ci": [
+              0.135394,
+              0.315215
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "Ke": {
+            "stay_count": 15,
+            "mean_method_minus_persistence": 0.26739,
+            "sd_stay_delta": 0.241952,
+            "bootstrap_95_ci": [
+              0.154821,
+              0.385671
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "MAP": {
+            "stay_count": 15,
+            "mean_method_minus_persistence": -0.02041,
+            "sd_stay_delta": 0.118655,
+            "bootstrap_95_ci": [
+              -0.075568,
+              0.038357
+            ],
+            "required_stays_for_95ci_80power": 266,
+            "additional_stays_needed_from_current_demo": 251,
+            "interpretation": "underpowered_for_current_observed_effect"
+          },
+          "Na": {
+            "stay_count": 15,
+            "mean_method_minus_persistence": 0.15376,
+            "sd_stay_delta": 0.369316,
+            "bootstrap_95_ci": [
+              0.028599,
+              0.357427
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "anion_gap": {
+            "stay_count": 14,
+            "mean_method_minus_persistence": 0.179869,
+            "sd_stay_delta": 0.193893,
+            "bootstrap_95_ci": [
+              0.082589,
+              0.276942
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "creatinine": {
+            "stay_count": 14,
+            "mean_method_minus_persistence": 0.056677,
+            "sd_stay_delta": 0.150127,
+            "bootstrap_95_ci": [
+              -0.018268,
+              0.13225
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "osmolality": {
+            "stay_count": 14,
+            "mean_method_minus_persistence": 0.131293,
+            "sd_stay_delta": 0.363948,
+            "bootstrap_95_ci": [
+              0.01089,
+              0.334344
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "pH": {
+            "stay_count": 15,
+            "mean_method_minus_persistence": 0.110973,
+            "sd_stay_delta": 0.357238,
+            "bootstrap_95_ci": [
+              -0.005837,
+              0.307106
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "urine_output": {
+            "stay_count": 15,
+            "mean_method_minus_persistence": 0.137762,
+            "sd_stay_delta": 0.271224,
+            "bootstrap_95_ci": [
+              0.009365,
+              0.27551
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          }
+        }
+      },
+      "safe_hybrid": {
+        "all_states": {
+          "all_windows": {
+            "stay_count": 15,
+            "mean_method_minus_persistence": 0.008607,
+            "sd_stay_delta": 0.017345,
+            "bootstrap_95_ci": [
+              0.000546,
+              0.017298
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "active_dka_only": {
+            "stay_count": 13,
+            "mean_method_minus_persistence": -0.004473,
+            "sd_stay_delta": 0.049879,
+            "bootstrap_95_ci": [
+              -0.033737,
+              0.01744
+            ],
+            "required_stays_for_95ci_80power": 976,
+            "additional_stays_needed_from_current_demo": 963,
+            "interpretation": "underpowered_for_current_observed_effect"
+          }
+        },
+        "dense_core": {
+          "all_windows": {
+            "stay_count": 15,
+            "mean_method_minus_persistence": 0.013048,
+            "sd_stay_delta": 0.02951,
+            "bootstrap_95_ci": [
+              0.00097,
+              0.029064
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "active_dka_only": {
+            "stay_count": 11,
+            "mean_method_minus_persistence": 0.016164,
+            "sd_stay_delta": 0.028181,
+            "bootstrap_95_ci": [
+              0.0,
+              0.03247
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          }
+        },
+        "per_state": {
+          "G": {
+            "stay_count": 14,
+            "mean_method_minus_persistence": 0.0,
+            "sd_stay_delta": 0.0,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "HCO3": {
+            "stay_count": 14,
+            "mean_method_minus_persistence": 0.0,
+            "sd_stay_delta": 0.0,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "Ke": {
+            "stay_count": 15,
+            "mean_method_minus_persistence": 0.0,
+            "sd_stay_delta": 0.0,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "MAP": {
+            "stay_count": 15,
+            "mean_method_minus_persistence": 0.001249,
+            "sd_stay_delta": 0.099894,
+            "bootstrap_95_ci": [
+              -0.048913,
+              0.049127
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "Na": {
+            "stay_count": 15,
+            "mean_method_minus_persistence": 0.0,
+            "sd_stay_delta": 0.0,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "anion_gap": {
+            "stay_count": 14,
+            "mean_method_minus_persistence": 0.0,
+            "sd_stay_delta": 0.0,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "creatinine": {
+            "stay_count": 14,
+            "mean_method_minus_persistence": 0.043823,
+            "sd_stay_delta": 0.094843,
+            "bootstrap_95_ci": [
+              0.003117,
+              0.097036
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "osmolality": {
+            "stay_count": 14,
+            "mean_method_minus_persistence": 0.0,
+            "sd_stay_delta": 0.0,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "pH": {
+            "stay_count": 15,
+            "mean_method_minus_persistence": 0.0,
+            "sd_stay_delta": 0.0,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "urine_output": {
+            "stay_count": 15,
+            "mean_method_minus_persistence": 0.0,
+            "sd_stay_delta": 0.0,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          }
+        }
+      },
+      "active_safe_hybrid": {
+        "all_states": {
+          "all_windows": {
+            "stay_count": 15,
+            "mean_method_minus_persistence": 0.035036,
+            "sd_stay_delta": 0.073228,
+            "bootstrap_95_ci": [
+              0.005032,
+              0.07555
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "active_dka_only": {
+            "stay_count": 13,
+            "mean_method_minus_persistence": 0.0553,
+            "sd_stay_delta": 0.106099,
+            "bootstrap_95_ci": [
+              0.006776,
+              0.11572
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          }
+        },
+        "dense_core": {
+          "all_windows": {
+            "stay_count": 15,
+            "mean_method_minus_persistence": 0.006157,
+            "sd_stay_delta": 0.039321,
+            "bootstrap_95_ci": [
+              -0.012424,
+              0.025879
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "active_dka_only": {
+            "stay_count": 11,
+            "mean_method_minus_persistence": -0.001216,
+            "sd_stay_delta": 0.041246,
+            "bootstrap_95_ci": [
+              -0.025409,
+              0.021733
+            ],
+            "required_stays_for_95ci_80power": 9034,
+            "additional_stays_needed_from_current_demo": 9023,
+            "interpretation": "underpowered_for_current_observed_effect"
+          }
+        },
+        "per_state": {
+          "G": {
+            "stay_count": 14,
+            "mean_method_minus_persistence": -0.022781,
+            "sd_stay_delta": 0.071051,
+            "bootstrap_95_ci": [
+              -0.062887,
+              0.003025
+            ],
+            "required_stays_for_95ci_80power": 77,
+            "additional_stays_needed_from_current_demo": 63,
+            "interpretation": "underpowered_for_current_observed_effect"
+          },
+          "HCO3": {
+            "stay_count": 14,
+            "mean_method_minus_persistence": 0.038121,
+            "sd_stay_delta": 0.110347,
+            "bootstrap_95_ci": [
+              0.0,
+              0.104915
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "Ke": {
+            "stay_count": 15,
+            "mean_method_minus_persistence": 0.0,
+            "sd_stay_delta": 0.0,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "MAP": {
+            "stay_count": 15,
+            "mean_method_minus_persistence": -0.001151,
+            "sd_stay_delta": 0.114338,
+            "bootstrap_95_ci": [
+              -0.057953,
+              0.052607
+            ],
+            "required_stays_for_95ci_80power": 77400,
+            "additional_stays_needed_from_current_demo": 77385,
+            "interpretation": "underpowered_for_current_observed_effect"
+          },
+          "Na": {
+            "stay_count": 15,
+            "mean_method_minus_persistence": 0.0,
+            "sd_stay_delta": 0.0,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "anion_gap": {
+            "stay_count": 14,
+            "mean_method_minus_persistence": 0.167092,
+            "sd_stay_delta": 0.389116,
+            "bootstrap_95_ci": [
+              0.01461,
+              0.386746
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "creatinine": {
+            "stay_count": 14,
+            "mean_method_minus_persistence": 0.044691,
+            "sd_stay_delta": 0.096932,
+            "bootstrap_95_ci": [
+              0.001898,
+              0.099507
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "osmolality": {
+            "stay_count": 14,
+            "mean_method_minus_persistence": 0.099374,
+            "sd_stay_delta": 0.401898,
+            "bootstrap_95_ci": [
+              -0.018741,
+              0.318919
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "pH": {
+            "stay_count": 15,
+            "mean_method_minus_persistence": 0.0,
+            "sd_stay_delta": 0.0,
+            "bootstrap_95_ci": [
+              0.0,
+              0.0
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "urine_output": {
+            "stay_count": 15,
+            "mean_method_minus_persistence": 0.051548,
+            "sd_stay_delta": 0.202502,
+            "bootstrap_95_ci": [
+              -0.007036,
+              0.15945
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          }
+        }
+      }
+    }
+  },
+  "greybox_residual": {
+    "source": "dka_transitions_maintenance.parquet",
+    "stay_count": 15,
+    "methods": {
+      "mechanism": {
+        "all_residual_states": {
+          "all_windows": {
+            "stay_count": 15,
+            "mean_method_minus_persistence": 0.430943,
+            "sd_stay_delta": 0.279592,
+            "bootstrap_95_ci": [
+              0.298682,
+              0.571104
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          }
+        },
+        "per_state": {
+          "G": {
+            "stay_count": 14,
+            "mean_method_minus_persistence": 0.959408,
+            "sd_stay_delta": 1.061997,
+            "bootstrap_95_ci": [
+              0.49708,
+              1.541895
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "Ket": {
+            "stay_count": 14,
+            "mean_method_minus_persistence": 0.34623,
+            "sd_stay_delta": 0.2594,
+            "bootstrap_95_ci": [
+              0.222294,
+              0.482803
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "HCO3": {
+            "stay_count": 14,
+            "mean_method_minus_persistence": 0.298737,
+            "sd_stay_delta": 0.353145,
+            "bootstrap_95_ci": [
+              0.133548,
+              0.488473
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "Ke": {
+            "stay_count": 15,
+            "mean_method_minus_persistence": 0.192219,
+            "sd_stay_delta": 0.313178,
+            "bootstrap_95_ci": [
+              0.042246,
+              0.344921
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "Na": {
+            "stay_count": 15,
+            "mean_method_minus_persistence": 0.523308,
+            "sd_stay_delta": 0.292062,
+            "bootstrap_95_ci": [
+              0.369943,
+              0.649931
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "Cr": {
+            "stay_count": 14,
+            "mean_method_minus_persistence": 0.315037,
+            "sd_stay_delta": 0.258686,
+            "bootstrap_95_ci": [
+              0.189169,
+              0.449744
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          }
+        }
+      },
+      "greybox": {
+        "all_residual_states": {
+          "all_windows": {
+            "stay_count": 15,
+            "mean_method_minus_persistence": 0.236483,
+            "sd_stay_delta": 0.23417,
+            "bootstrap_95_ci": [
+              0.125982,
+              0.353717
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          }
+        },
+        "per_state": {
+          "G": {
+            "stay_count": 14,
+            "mean_method_minus_persistence": 0.506418,
+            "sd_stay_delta": 0.729776,
+            "bootstrap_95_ci": [
+              0.18592,
+              0.903793
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "Ket": {
+            "stay_count": 14,
+            "mean_method_minus_persistence": 0.159222,
+            "sd_stay_delta": 0.227168,
+            "bootstrap_95_ci": [
+              0.05538,
+              0.286665
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "HCO3": {
+            "stay_count": 14,
+            "mean_method_minus_persistence": 0.225799,
+            "sd_stay_delta": 0.355103,
+            "bootstrap_95_ci": [
+              0.062867,
+              0.419229
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "Ke": {
+            "stay_count": 15,
+            "mean_method_minus_persistence": 0.116357,
+            "sd_stay_delta": 0.270827,
+            "bootstrap_95_ci": [
+              -0.006807,
+              0.254119
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "Na": {
+            "stay_count": 15,
+            "mean_method_minus_persistence": 0.202151,
+            "sd_stay_delta": 0.237602,
+            "bootstrap_95_ci": [
+              0.083898,
+              0.314637
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          },
+          "Cr": {
+            "stay_count": 14,
+            "mean_method_minus_persistence": 0.274954,
+            "sd_stay_delta": 0.237662,
+            "bootstrap_95_ci": [
+              0.157621,
+              0.395768
+            ],
+            "required_stays_for_95ci_80power": null,
+            "additional_stays_needed_from_current_demo": null,
+            "interpretation": "observed_candidate_not_better_than_persistence; increasing N alone does not promote this candidate"
+          }
+        }
+      }
+    }
+  },
+  "conclusion": "Power can only rescue candidates with a negative stay-level delta. For dense glucose/sodium/creatinine targets in this demo cohort, the dominant result remains either wrong-signed or too uncertain; promotion requires a causal-grade, larger held-out cohort."
+}

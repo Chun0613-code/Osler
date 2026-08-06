@@ -1,0 +1,611 @@
+{
+  "test_type": "patient-held-out eICU demo symbolic rule test",
+  "checkpoint": "/Users/chunyouchang/Desktop/llm_project/medical_jepa/dka_symbolic_jepa_v5.pt",
+  "symbolic_heads_trained": true,
+  "cohort": "/Users/chunyouchang/Desktop/llm_project/medical_jepa/eicu_dka_transitions_6h_demo.parquet",
+  "cohort_label": "eICU demo",
+  "patient_split": {
+    "discovery_stays": 174,
+    "heldout_stays": 85,
+    "overlap": 0,
+    "discovery_records": 16,
+    "heldout_records": 4
+  },
+  "external_symbolic_metrics": {
+    "factual_direction_accuracy_all": 0.5294,
+    "factual_direction_accuracy_changed_only": 0.5806,
+    "direction_comparisons": 34,
+    "changed_direction_comparisons": 31,
+    "mean_proposal_confidence": 0.9272,
+    "interpretation": "Observational factual-direction check; it is not a causal effect test."
+  },
+  "factual_numerical_benchmark": {
+    "available": true,
+    "rows_with_any_comparison": 1188,
+    "rows_with_active_dka_comparison": 233,
+    "stays": 259,
+    "warning": "Factual check only: 259 stays; dose/time grids and prior history are present, but targets remain sparse and treatment selection is unadjusted.",
+    "data_adequacy": {
+      "rows": 2762,
+      "complete_core_input_rows": 1188,
+      "fully_observed_clinical_state_rows": 0,
+      "median_measurement_age_hours": {
+        "glucose": 1.283,
+        "ph": 2.883,
+        "bicarbonate": 2.5,
+        "anion_gap": 2.867,
+        "potassium": 2.683,
+        "map": 0.167,
+        "sodium": 2.717,
+        "osmolality": 3.083,
+        "creatinine": 2.833,
+        "urine_output": 0.0,
+        "BHB": 3.667
+      },
+      "mean_anchor_state": {
+        "glucose": 189.609,
+        "ph": 7.336,
+        "bicarbonate": 20.654,
+        "anion_gap": 13.269,
+        "potassium": 4.049,
+        "map": 82.163,
+        "sodium": 138.997,
+        "osmolality": 305.0,
+        "creatinine": 1.645,
+        "urine_output": 71.187,
+        "BHB": 8.745
+      },
+      "positive_action_rows": {
+        "insulin": 186,
+        "fluids": 37,
+        "kcl": 0,
+        "bicarbonate": 0,
+        "dextrose": 17
+      },
+      "has_exact_dose_and_timing": true,
+      "has_explicit_start_stop_events": true,
+      "has_pre_anchor_treatment_history": true,
+      "sufficient_for_causal_validation": false
+    },
+    "action_rate_support": {
+      "insulin_iv": {
+        "n_active_cells": 930,
+        "median": 3.0,
+        "p95": 9.0,
+        "max": 16.0,
+        "training_max": 20.0,
+        "fraction_above_training_max": 0.0
+      },
+      "insulin_rapid_sc": {
+        "n_active_cells": 0,
+        "median": null,
+        "p95": null,
+        "max": null,
+        "training_max": 40.0,
+        "fraction_above_training_max": null
+      },
+      "insulin_intermediate_sc": {
+        "n_active_cells": 0,
+        "median": null,
+        "p95": null,
+        "max": null,
+        "training_max": 40.0,
+        "fraction_above_training_max": null
+      },
+      "insulin_basal_sc": {
+        "n_active_cells": 0,
+        "median": null,
+        "p95": null,
+        "max": null,
+        "training_max": 80.0,
+        "fraction_above_training_max": null
+      },
+      "fluids": {
+        "n_active_cells": 197,
+        "median": 37.0,
+        "p95": 150.0,
+        "max": 700.0,
+        "training_max": 500.0,
+        "fraction_above_training_max": 0.0051
+      },
+      "kcl": {
+        "n_active_cells": 0,
+        "median": null,
+        "p95": null,
+        "max": null,
+        "training_max": 20.0,
+        "fraction_above_training_max": null
+      },
+      "bicarbonate": {
+        "n_active_cells": 0,
+        "median": null,
+        "p95": null,
+        "max": null,
+        "training_max": 50.0,
+        "fraction_above_training_max": null
+      },
+      "dextrose": {
+        "n_active_cells": 87,
+        "median": 5.0,
+        "p95": 5.0,
+        "max": 5.0,
+        "training_max": 20.0,
+        "fraction_above_training_max": 0.0
+      }
+    },
+    "mae": {
+      "glucose": {
+        "n": 940,
+        "jepa": 92.1863,
+        "persistence": 56.9106
+      },
+      "ph": {
+        "n": 105,
+        "jepa": 0.0743,
+        "persistence": 0.0705
+      },
+      "bicarbonate": {
+        "n": 501,
+        "jepa": 3.3475,
+        "persistence": 2.8503
+      },
+      "anion_gap": {
+        "n": 352,
+        "jepa": 6.6678,
+        "persistence": 3.2188
+      },
+      "potassium": {
+        "n": 473,
+        "jepa": 0.5912,
+        "persistence": 0.4421
+      },
+      "map": {
+        "n": 1169,
+        "jepa": 11.9407,
+        "persistence": 12.065
+      },
+      "sodium": {
+        "n": 435,
+        "jepa": 6.0401,
+        "persistence": 2.4322
+      },
+      "osmolality": {
+        "n": 430,
+        "jepa": 17.8575,
+        "persistence": 5.1063
+      },
+      "creatinine": {
+        "n": 392,
+        "jepa": 0.3523,
+        "persistence": 0.2515
+      },
+      "urine_output": {
+        "n": 467,
+        "jepa": 101.2125,
+        "persistence": 34.3458
+      },
+      "BHB": {
+        "n": 0,
+        "jepa": null,
+        "persistence": null
+      }
+    },
+    "mae_active_dka": {
+      "glucose": {
+        "n": 183,
+        "jepa": 132.6278,
+        "persistence": 92.5628
+      },
+      "ph": {
+        "n": 21,
+        "jepa": 0.0841,
+        "persistence": 0.0765
+      },
+      "bicarbonate": {
+        "n": 128,
+        "jepa": 3.8799,
+        "persistence": 4.0555
+      },
+      "anion_gap": {
+        "n": 97,
+        "jepa": 7.872,
+        "persistence": 5.0031
+      },
+      "potassium": {
+        "n": 114,
+        "jepa": 0.5655,
+        "persistence": 0.6061
+      },
+      "map": {
+        "n": 229,
+        "jepa": 13.685,
+        "persistence": 14.4279
+      },
+      "sodium": {
+        "n": 112,
+        "jepa": 5.9272,
+        "persistence": 2.8125
+      },
+      "osmolality": {
+        "n": 112,
+        "jepa": 18.7829,
+        "persistence": 5.6071
+      },
+      "creatinine": {
+        "n": 106,
+        "jepa": 0.463,
+        "persistence": 0.2299
+      },
+      "urine_output": {
+        "n": 94,
+        "jepa": 150.1651,
+        "persistence": 35.508
+      },
+      "BHB": {
+        "n": 0,
+        "jepa": null,
+        "persistence": null
+      }
+    }
+  },
+  "candidate_rule_gate": {
+    "proposed": 8,
+    "retrospectively_validated": 2,
+    "active_rule_conflicts": 0,
+    "automatically_promoted_to_active": 0,
+    "candidate_file": "/Users/chunyouchang/Desktop/llm_project/medical_jepa/rules/candidate/symbolic_real_test_1782433095.json"
+  },
+  "safety_boundary": {
+    "active_sandbox_unchanged": true,
+    "validator_source_unchanged": true,
+    "causal_claims_allowed": false,
+    "human_review_required": true
+  },
+  "issues": [],
+  "rules": [
+    {
+      "rule_id": "jepa_observational_1997659fcd",
+      "level": "retrospective_validated",
+      "context": {
+        "disease": "DKA",
+        "population": "eICU demo ICU DKA-like anchors",
+        "cointerventions_observed": {}
+      },
+      "action": {
+        "type": "intervention",
+        "name": "insulin_iv"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.bicarbonate",
+        "model_variable": "HCO3",
+        "direction": "increase",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.9988,
+      "evidence": {
+        "support_count": 9,
+        "patient_stay_count": 7,
+        "discovery_factual_direction_accuracy": 0.8889,
+        "proposal_direction_consistency": 1.0,
+        "isolated_action_support_count": 9
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + eICU demo",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "awaiting_human_review",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 4,
+        "patient_stay_count": 3,
+        "direction_accuracy": 1.0,
+        "persistence_direction_accuracy": 0.0,
+        "isolated_action_support_count": 4,
+        "action_specificity_identifiable": true,
+        "passes_automated_retrospective_gate": true
+      }
+    },
+    {
+      "rule_id": "jepa_observational_2074d218d5",
+      "level": "observational_association",
+      "context": {
+        "disease": "DKA",
+        "population": "eICU demo ICU DKA-like anchors",
+        "cointerventions_observed": {}
+      },
+      "action": {
+        "type": "intervention",
+        "name": "insulin_iv"
+      },
+      "predicted_transition": {
+        "variable": "electrolyte.potassium",
+        "model_variable": "Ke",
+        "direction": "decrease",
+        "time_window": "0-6h"
+      },
+      "confidence": 1.0,
+      "evidence": {
+        "support_count": 8,
+        "patient_stay_count": 6,
+        "discovery_factual_direction_accuracy": 0.625,
+        "proposal_direction_consistency": 1.0,
+        "isolated_action_support_count": 8
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + eICU demo",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "insufficient_or_failed_heldout_evidence",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 3,
+        "patient_stay_count": 3,
+        "direction_accuracy": 0.6667,
+        "persistence_direction_accuracy": 0.0,
+        "isolated_action_support_count": 3,
+        "action_specificity_identifiable": true,
+        "passes_automated_retrospective_gate": false
+      }
+    },
+    {
+      "rule_id": "jepa_observational_216646886d",
+      "level": "observational_association",
+      "context": {
+        "disease": "DKA",
+        "population": "eICU demo ICU DKA-like anchors",
+        "cointerventions_observed": {}
+      },
+      "action": {
+        "type": "intervention",
+        "name": "insulin_iv"
+      },
+      "predicted_transition": {
+        "variable": "renal.creatinine",
+        "model_variable": "creatinine",
+        "direction": "decrease",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.9542,
+      "evidence": {
+        "support_count": 8,
+        "patient_stay_count": 6,
+        "discovery_factual_direction_accuracy": 0.625,
+        "proposal_direction_consistency": 1.0,
+        "isolated_action_support_count": 8
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + eICU demo",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "insufficient_or_failed_heldout_evidence",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 3,
+        "patient_stay_count": 3,
+        "direction_accuracy": 0.3333,
+        "persistence_direction_accuracy": 0.0,
+        "isolated_action_support_count": 3,
+        "action_specificity_identifiable": true,
+        "passes_automated_retrospective_gate": false
+      }
+    },
+    {
+      "rule_id": "jepa_observational_21ac5d7318",
+      "level": "observational_association",
+      "context": {
+        "disease": "DKA",
+        "population": "eICU demo ICU DKA-like anchors",
+        "cointerventions_observed": {}
+      },
+      "action": {
+        "type": "intervention",
+        "name": "insulin_iv"
+      },
+      "predicted_transition": {
+        "variable": "renal.urine_output",
+        "model_variable": "urine_output",
+        "direction": "decrease",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.9987,
+      "evidence": {
+        "support_count": 11,
+        "patient_stay_count": 8,
+        "discovery_factual_direction_accuracy": 0.6364,
+        "proposal_direction_consistency": 1.0,
+        "isolated_action_support_count": 11
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + eICU demo",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "insufficient_or_failed_heldout_evidence",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 4,
+        "patient_stay_count": 3,
+        "direction_accuracy": 0.25,
+        "persistence_direction_accuracy": 0.5,
+        "isolated_action_support_count": 4,
+        "action_specificity_identifiable": true,
+        "passes_automated_retrospective_gate": false
+      }
+    },
+    {
+      "rule_id": "jepa_observational_3f4a9a1528",
+      "level": "observational_association",
+      "context": {
+        "disease": "DKA",
+        "population": "eICU demo ICU DKA-like anchors",
+        "cointerventions_observed": {}
+      },
+      "action": {
+        "type": "intervention",
+        "name": "insulin_iv"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.ph",
+        "model_variable": "pH",
+        "direction": "increase",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.9928,
+      "evidence": {
+        "support_count": 9,
+        "patient_stay_count": 7,
+        "discovery_factual_direction_accuracy": 0.8889,
+        "proposal_direction_consistency": 1.0,
+        "isolated_action_support_count": 9
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + eICU demo",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "insufficient_or_failed_heldout_evidence",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 4,
+        "patient_stay_count": 3,
+        "direction_accuracy": 0.5,
+        "persistence_direction_accuracy": 0.0,
+        "isolated_action_support_count": 4,
+        "action_specificity_identifiable": true,
+        "passes_automated_retrospective_gate": false
+      }
+    },
+    {
+      "rule_id": "jepa_observational_915cbec304",
+      "level": "retrospective_validated",
+      "context": {
+        "disease": "DKA",
+        "population": "eICU demo ICU DKA-like anchors",
+        "cointerventions_observed": {}
+      },
+      "action": {
+        "type": "intervention",
+        "name": "insulin_iv"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.glucose",
+        "model_variable": "G",
+        "direction": "decrease",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.9998,
+      "evidence": {
+        "support_count": 14,
+        "patient_stay_count": 10,
+        "discovery_factual_direction_accuracy": 0.9286,
+        "proposal_direction_consistency": 1.0,
+        "isolated_action_support_count": 14
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + eICU demo",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "awaiting_human_review",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 4,
+        "patient_stay_count": 3,
+        "direction_accuracy": 1.0,
+        "persistence_direction_accuracy": 0.0,
+        "isolated_action_support_count": 4,
+        "action_specificity_identifiable": true,
+        "passes_automated_retrospective_gate": true
+      }
+    },
+    {
+      "rule_id": "jepa_observational_c38192a9ca",
+      "level": "observational_association",
+      "context": {
+        "disease": "DKA",
+        "population": "eICU demo ICU DKA-like anchors",
+        "cointerventions_observed": {}
+      },
+      "action": {
+        "type": "intervention",
+        "name": "insulin_iv"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.effective_osmolality",
+        "model_variable": "osmolality",
+        "direction": "decrease",
+        "time_window": "0-6h"
+      },
+      "confidence": 0.9997,
+      "evidence": {
+        "support_count": 8,
+        "patient_stay_count": 6,
+        "discovery_factual_direction_accuracy": 0.875,
+        "proposal_direction_consistency": 1.0,
+        "isolated_action_support_count": 8
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + eICU demo",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "insufficient_or_failed_heldout_evidence",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 3,
+        "patient_stay_count": 3,
+        "direction_accuracy": 0.3333,
+        "persistence_direction_accuracy": 0.3333,
+        "isolated_action_support_count": 3,
+        "action_specificity_identifiable": true,
+        "passes_automated_retrospective_gate": false
+      }
+    },
+    {
+      "rule_id": "jepa_observational_fc584adae9",
+      "level": "observational_association",
+      "context": {
+        "disease": "DKA",
+        "population": "eICU demo ICU DKA-like anchors",
+        "cointerventions_observed": {}
+      },
+      "action": {
+        "type": "intervention",
+        "name": "insulin_iv"
+      },
+      "predicted_transition": {
+        "variable": "metabolic.anion_gap",
+        "model_variable": "anion_gap",
+        "direction": "decrease",
+        "time_window": "0-6h"
+      },
+      "confidence": 1.0,
+      "evidence": {
+        "support_count": 8,
+        "patient_stay_count": 6,
+        "discovery_factual_direction_accuracy": 0.875,
+        "proposal_direction_consistency": 1.0,
+        "isolated_action_support_count": 8
+      },
+      "provenance": {
+        "source": "JEPA symbolic RuleProposalHead + eICU demo",
+        "causal_claim": false,
+        "confounding_warning": true
+      },
+      "status": "insufficient_or_failed_heldout_evidence",
+      "active_rule_conflict": null,
+      "heldout_test": {
+        "support_count": 2,
+        "patient_stay_count": 2,
+        "direction_accuracy": 1.0,
+        "persistence_direction_accuracy": 0.0,
+        "isolated_action_support_count": 2,
+        "action_specificity_identifiable": true,
+        "passes_automated_retrospective_gate": false
+      }
+    }
+  ]
+}

@@ -1,0 +1,3171 @@
+{
+  "audit": {
+    "belief_columns": [
+      "endo_belief_glycemic_stress_mean",
+      "endo_belief_glycemic_stress_sd",
+      "endo_belief_glycemic_stress_innovation",
+      "endo_belief_glycemic_stress_confidence",
+      "endo_belief_osmotic_ketotic_stress_mean",
+      "endo_belief_osmotic_ketotic_stress_sd",
+      "endo_belief_osmotic_ketotic_stress_innovation",
+      "endo_belief_osmotic_ketotic_stress_confidence",
+      "endo_belief_adrenal_hemodynamic_stress_mean",
+      "endo_belief_adrenal_hemodynamic_stress_sd",
+      "endo_belief_adrenal_hemodynamic_stress_innovation",
+      "endo_belief_adrenal_hemodynamic_stress_confidence",
+      "endo_belief_glucose_slope_per_hr",
+      "endo_belief_glucose_innovation",
+      "endo_belief_serum_osmolality_slope_per_hr",
+      "endo_belief_serum_osmolality_innovation",
+      "endo_belief_anion_gap_slope_per_hr",
+      "endo_belief_anion_gap_innovation",
+      "endo_belief_bicarbonate_slope_per_hr",
+      "endo_belief_bicarbonate_innovation",
+      "endo_belief_sodium_slope_per_hr",
+      "endo_belief_sodium_innovation",
+      "endo_belief_potassium_slope_per_hr",
+      "endo_belief_potassium_innovation",
+      "endo_belief_map_slope_per_hr",
+      "endo_belief_map_innovation",
+      "endo_belief_temperature_slope_per_hr",
+      "endo_belief_temperature_innovation",
+      "endo_belief_hyperglycemia_burden",
+      "endo_belief_hypoglycemia_burden",
+      "endo_belief_osmotic_burden",
+      "endo_belief_ketotic_gap_burden",
+      "endo_belief_low_bicarbonate_burden",
+      "endo_belief_hypernatremia_burden",
+      "endo_belief_hyponatremia_burden",
+      "endo_belief_hyperkalemia_burden",
+      "endo_belief_hypokalemia_burden",
+      "endo_belief_low_map_burden",
+      "endo_belief_fever_burden",
+      "endo_belief_hypothermia_burden",
+      "endo_belief_insulin_context",
+      "endo_belief_dextrose_context",
+      "endo_belief_fluid_context",
+      "endo_belief_steroid_context",
+      "endo_belief_vasopressor_context"
+    ],
+    "cohort": "eicu_endocrine_stress_full_transitions_6h.parquet",
+    "cohort_summary": {
+      "active_rows": 266061,
+      "hospitals": 202,
+      "rows": 369605,
+      "stays": 31393,
+      "subjects": 24597
+    },
+    "future_suffix": "tp6",
+    "hospital_holdout": {
+      "discovery_groups": 135,
+      "group_column": "hospitalid",
+      "heldout_groups": 67,
+      "overlap": 0,
+      "passed_count": 6,
+      "passed_targets": [
+        "glucose",
+        "anion_gap",
+        "bicarbonate",
+        "sodium",
+        "potassium",
+        "map"
+      ],
+      "seed": 9001,
+      "targets": {
+        "anion_gap": {
+          "candidate_vs_baseline": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.19253,
+              -0.139529
+            ],
+            "point_delta": -0.165656,
+            "significant": true,
+            "subjects": 2512
+          },
+          "candidate_vs_placebo": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.191156,
+              -0.140144
+            ],
+            "point_delta": -0.166364,
+            "significant": true,
+            "subjects": 2512
+          },
+          "mae": {
+            "baseline_ridge": 2.516132,
+            "endocrine_belief_ridge": 2.334629,
+            "placebo_belief_ridge": 2.516854
+          },
+          "rows": 8287,
+          "subjects": 2512
+        },
+        "bicarbonate": {
+          "candidate_vs_baseline": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.06947,
+              -0.041476
+            ],
+            "point_delta": -0.055375,
+            "significant": true,
+            "subjects": 4673
+          },
+          "candidate_vs_placebo": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.068869,
+              -0.043419
+            ],
+            "point_delta": -0.057142,
+            "significant": true,
+            "subjects": 4673
+          },
+          "mae": {
+            "baseline_ridge": 2.152542,
+            "endocrine_belief_ridge": 2.091248,
+            "placebo_belief_ridge": 2.153933
+          },
+          "rows": 17022,
+          "subjects": 4673
+        },
+        "cortisol": {
+          "candidate_vs_baseline": {
+            "beats_baseline": null,
+            "bootstrap_95_ci": [
+              null,
+              null
+            ],
+            "point_delta": null,
+            "significant": false,
+            "subjects": 0
+          },
+          "candidate_vs_placebo": {
+            "beats_baseline": null,
+            "bootstrap_95_ci": [
+              null,
+              null
+            ],
+            "point_delta": null,
+            "significant": false,
+            "subjects": 0
+          },
+          "mae": {
+            "baseline_ridge": null,
+            "endocrine_belief_ridge": null,
+            "placebo_belief_ridge": null
+          },
+          "rows": 11,
+          "subjects": 8
+        },
+        "free_t4": {
+          "candidate_vs_baseline": {
+            "beats_baseline": null,
+            "bootstrap_95_ci": [
+              null,
+              null
+            ],
+            "point_delta": null,
+            "significant": false,
+            "subjects": 0
+          },
+          "candidate_vs_placebo": {
+            "beats_baseline": null,
+            "bootstrap_95_ci": [
+              null,
+              null
+            ],
+            "point_delta": null,
+            "significant": false,
+            "subjects": 0
+          },
+          "mae": {
+            "baseline_ridge": null,
+            "endocrine_belief_ridge": null,
+            "placebo_belief_ridge": null
+          },
+          "rows": 2,
+          "subjects": 2
+        },
+        "glucose": {
+          "candidate_vs_baseline": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.713433,
+              -0.473718
+            ],
+            "point_delta": -0.59832,
+            "significant": true,
+            "subjects": 7257
+          },
+          "candidate_vs_placebo": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.733214,
+              -0.48083
+            ],
+            "point_delta": -0.615388,
+            "significant": true,
+            "subjects": 7257
+          },
+          "mae": {
+            "baseline_ridge": 42.959333,
+            "endocrine_belief_ridge": 42.587148,
+            "placebo_belief_ridge": 42.968112
+          },
+          "rows": 76961,
+          "subjects": 7257
+        },
+        "map": {
+          "candidate_vs_baseline": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.488571,
+              -0.411072
+            ],
+            "point_delta": -0.449986,
+            "significant": true,
+            "subjects": 8642
+          },
+          "candidate_vs_placebo": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.493192,
+              -0.415302
+            ],
+            "point_delta": -0.452365,
+            "significant": true,
+            "subjects": 8642
+          },
+          "mae": {
+            "baseline_ridge": 10.657422,
+            "endocrine_belief_ridge": 10.098679,
+            "placebo_belief_ridge": 10.660138
+          },
+          "rows": 126208,
+          "subjects": 8642
+        },
+        "potassium": {
+          "candidate_vs_baseline": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.007405,
+              -0.003699
+            ],
+            "point_delta": -0.005517,
+            "significant": true,
+            "subjects": 4707
+          },
+          "candidate_vs_placebo": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.007806,
+              -0.004317
+            ],
+            "point_delta": -0.006044,
+            "significant": true,
+            "subjects": 4707
+          },
+          "mae": {
+            "baseline_ridge": 0.369383,
+            "endocrine_belief_ridge": 0.362452,
+            "placebo_belief_ridge": 0.369564
+          },
+          "rows": 17490,
+          "subjects": 4707
+        },
+        "serum_ketones": {
+          "candidate_vs_baseline": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -1.953775,
+              0.120608
+            ],
+            "point_delta": -0.646727,
+            "significant": false,
+            "subjects": 15
+          },
+          "candidate_vs_placebo": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -1.46914,
+              -0.014838
+            ],
+            "point_delta": -0.608175,
+            "significant": true,
+            "subjects": 15
+          },
+          "mae": {
+            "baseline_ridge": 3.895255,
+            "endocrine_belief_ridge": 3.349362,
+            "placebo_belief_ridge": 3.974515
+          },
+          "rows": 31,
+          "subjects": 15
+        },
+        "serum_osmolality": {
+          "candidate_vs_baseline": {
+            "beats_baseline": false,
+            "bootstrap_95_ci": [
+              -0.573944,
+              1.721377
+            ],
+            "point_delta": 0.407086,
+            "significant": false,
+            "subjects": 137
+          },
+          "candidate_vs_placebo": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -1.596545,
+              0.954318
+            ],
+            "point_delta": -0.432604,
+            "significant": false,
+            "subjects": 137
+          },
+          "mae": {
+            "baseline_ridge": 8.642536,
+            "endocrine_belief_ridge": 8.757796,
+            "placebo_belief_ridge": 9.380198
+          },
+          "rows": 600,
+          "subjects": 137
+        },
+        "sodium": {
+          "candidate_vs_baseline": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.025695,
+              -0.003274
+            ],
+            "point_delta": -0.014585,
+            "significant": true,
+            "subjects": 3826
+          },
+          "candidate_vs_placebo": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.032151,
+              -0.007606
+            ],
+            "point_delta": -0.020082,
+            "significant": true,
+            "subjects": 3826
+          },
+          "mae": {
+            "baseline_ridge": 2.255098,
+            "endocrine_belief_ridge": 2.230525,
+            "placebo_belief_ridge": 2.260234
+          },
+          "rows": 13780,
+          "subjects": 3826
+        },
+        "temperature": {
+          "candidate_vs_baseline": {
+            "beats_baseline": false,
+            "bootstrap_95_ci": [
+              1.5e-05,
+              0.006754
+            ],
+            "point_delta": 0.003156,
+            "significant": false,
+            "subjects": 1123
+          },
+          "candidate_vs_placebo": {
+            "beats_baseline": false,
+            "bootstrap_95_ci": [
+              -0.001809,
+              0.004702
+            ],
+            "point_delta": 0.001538,
+            "significant": false,
+            "subjects": 1123
+          },
+          "mae": {
+            "baseline_ridge": 0.469076,
+            "endocrine_belief_ridge": 0.469129,
+            "placebo_belief_ridge": 0.470038
+          },
+          "rows": 11873,
+          "subjects": 1123
+        },
+        "tsh": {
+          "candidate_vs_baseline": {
+            "beats_baseline": null,
+            "bootstrap_95_ci": [
+              null,
+              null
+            ],
+            "point_delta": null,
+            "significant": false,
+            "subjects": 0
+          },
+          "candidate_vs_placebo": {
+            "beats_baseline": null,
+            "bootstrap_95_ci": [
+              null,
+              null
+            ],
+            "point_delta": null,
+            "significant": false,
+            "subjects": 0
+          },
+          "mae": {
+            "baseline_ridge": null,
+            "endocrine_belief_ridge": null,
+            "placebo_belief_ridge": null
+          },
+          "rows": 13,
+          "subjects": 13
+        }
+      }
+    },
+    "random_patient_splits": {
+      "runs": [
+        {
+          "discovery_groups": 16480,
+          "group_column": "subject_id",
+          "heldout_groups": 8117,
+          "overlap": 0,
+          "passed_count": 6,
+          "passed_targets": [
+            "glucose",
+            "anion_gap",
+            "bicarbonate",
+            "sodium",
+            "potassium",
+            "map"
+          ],
+          "seed": 7,
+          "targets": {
+            "anion_gap": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.155081,
+                  -0.103219
+                ],
+                "point_delta": -0.128671,
+                "significant": true,
+                "subjects": 2999
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.163137,
+                  -0.107789
+                ],
+                "point_delta": -0.135737,
+                "significant": true,
+                "subjects": 2999
+              },
+              "mae": {
+                "baseline_ridge": 2.391746,
+                "endocrine_belief_ridge": 2.259437,
+                "placebo_belief_ridge": 2.39339
+              },
+              "rows": 9666,
+              "subjects": 2999
+            },
+            "bicarbonate": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.069777,
+                  -0.042018
+                ],
+                "point_delta": -0.055838,
+                "significant": true,
+                "subjects": 4450
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.069798,
+                  -0.041488
+                ],
+                "point_delta": -0.055708,
+                "significant": true,
+                "subjects": 4450
+              },
+              "mae": {
+                "baseline_ridge": 2.123289,
+                "endocrine_belief_ridge": 2.064922,
+                "placebo_belief_ridge": 2.123523
+              },
+              "rows": 15988,
+              "subjects": 4450
+            },
+            "cortisol": {
+              "candidate_vs_baseline": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "mae": {
+                "baseline_ridge": null,
+                "endocrine_belief_ridge": null,
+                "placebo_belief_ridge": null
+              },
+              "rows": 7,
+              "subjects": 5
+            },
+            "free_t4": {
+              "candidate_vs_baseline": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "mae": {
+                "baseline_ridge": null,
+                "endocrine_belief_ridge": null,
+                "placebo_belief_ridge": null
+              },
+              "rows": 4,
+              "subjects": 2
+            },
+            "glucose": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.77793,
+                  -0.563168
+                ],
+                "point_delta": -0.66967,
+                "significant": true,
+                "subjects": 7097
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.794538,
+                  -0.564948
+                ],
+                "point_delta": -0.676166,
+                "significant": true,
+                "subjects": 7097
+              },
+              "mae": {
+                "baseline_ridge": 40.576104,
+                "endocrine_belief_ridge": 40.164365,
+                "placebo_belief_ridge": 40.583936
+              },
+              "rows": 80266,
+              "subjects": 7097
+            },
+            "map": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.448517,
+                  -0.373202
+                ],
+                "point_delta": -0.410686,
+                "significant": true,
+                "subjects": 8042
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.451582,
+                  -0.375241
+                ],
+                "point_delta": -0.413193,
+                "significant": true,
+                "subjects": 8042
+              },
+              "mae": {
+                "baseline_ridge": 10.34231,
+                "endocrine_belief_ridge": 9.814747,
+                "placebo_belief_ridge": 10.343454
+              },
+              "rows": 118536,
+              "subjects": 8042
+            },
+            "potassium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.007271,
+                  -0.003307
+                ],
+                "point_delta": -0.005174,
+                "significant": true,
+                "subjects": 4454
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.007352,
+                  -0.003518
+                ],
+                "point_delta": -0.0055,
+                "significant": true,
+                "subjects": 4454
+              },
+              "mae": {
+                "baseline_ridge": 0.368003,
+                "endocrine_belief_ridge": 0.362161,
+                "placebo_belief_ridge": 0.368284
+              },
+              "rows": 15776,
+              "subjects": 4454
+            },
+            "serum_ketones": {
+              "candidate_vs_baseline": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "mae": {
+                "baseline_ridge": 1.789435,
+                "endocrine_belief_ridge": null,
+                "placebo_belief_ridge": null
+              },
+              "rows": 41,
+              "subjects": 23
+            },
+            "serum_osmolality": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -1.220232,
+                  0.262883
+                ],
+                "point_delta": -0.472353,
+                "significant": false,
+                "subjects": 89
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -1.326767,
+                  0.226706
+                ],
+                "point_delta": -0.55221,
+                "significant": false,
+                "subjects": 89
+              },
+              "mae": {
+                "baseline_ridge": 8.184077,
+                "endocrine_belief_ridge": 7.704303,
+                "placebo_belief_ridge": 8.343377
+              },
+              "rows": 332,
+              "subjects": 89
+            },
+            "sodium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.044445,
+                  -0.020886
+                ],
+                "point_delta": -0.032005,
+                "significant": true,
+                "subjects": 3851
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.044341,
+                  -0.020617
+                ],
+                "point_delta": -0.031896,
+                "significant": true,
+                "subjects": 3851
+              },
+              "mae": {
+                "baseline_ridge": 2.303762,
+                "endocrine_belief_ridge": 2.264697,
+                "placebo_belief_ridge": 2.303977
+              },
+              "rows": 13690,
+              "subjects": 3851
+            },
+            "temperature": {
+              "candidate_vs_baseline": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  -0.000681,
+                  0.006533
+                ],
+                "point_delta": 0.003157,
+                "significant": false,
+                "subjects": 1252
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  -0.002742,
+                  0.004241
+                ],
+                "point_delta": 0.000653,
+                "significant": false,
+                "subjects": 1252
+              },
+              "mae": {
+                "baseline_ridge": 0.492379,
+                "endocrine_belief_ridge": 0.49396,
+                "placebo_belief_ridge": 0.494302
+              },
+              "rows": 13285,
+              "subjects": 1252
+            },
+            "tsh": {
+              "candidate_vs_baseline": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "mae": {
+                "baseline_ridge": null,
+                "endocrine_belief_ridge": null,
+                "placebo_belief_ridge": null
+              },
+              "rows": 7,
+              "subjects": 7
+            }
+          }
+        },
+        {
+          "discovery_groups": 16480,
+          "group_column": "subject_id",
+          "heldout_groups": 8117,
+          "overlap": 0,
+          "passed_count": 6,
+          "passed_targets": [
+            "glucose",
+            "anion_gap",
+            "bicarbonate",
+            "sodium",
+            "potassium",
+            "map"
+          ],
+          "seed": 11,
+          "targets": {
+            "anion_gap": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.15686,
+                  -0.107089
+                ],
+                "point_delta": -0.131154,
+                "significant": true,
+                "subjects": 2931
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.157786,
+                  -0.110833
+                ],
+                "point_delta": -0.135081,
+                "significant": true,
+                "subjects": 2931
+              },
+              "mae": {
+                "baseline_ridge": 2.407641,
+                "endocrine_belief_ridge": 2.261291,
+                "placebo_belief_ridge": 2.409369
+              },
+              "rows": 9798,
+              "subjects": 2931
+            },
+            "bicarbonate": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.061102,
+                  -0.032189
+                ],
+                "point_delta": -0.046008,
+                "significant": true,
+                "subjects": 4376
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.06373,
+                  -0.037408
+                ],
+                "point_delta": -0.050432,
+                "significant": true,
+                "subjects": 4376
+              },
+              "mae": {
+                "baseline_ridge": 2.175297,
+                "endocrine_belief_ridge": 2.112498,
+                "placebo_belief_ridge": 2.177347
+              },
+              "rows": 15996,
+              "subjects": 4376
+            },
+            "cortisol": {
+              "candidate_vs_baseline": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "mae": {
+                "baseline_ridge": null,
+                "endocrine_belief_ridge": null,
+                "placebo_belief_ridge": null
+              },
+              "rows": 9,
+              "subjects": 8
+            },
+            "free_t4": {
+              "candidate_vs_baseline": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "mae": {
+                "baseline_ridge": null,
+                "endocrine_belief_ridge": null,
+                "placebo_belief_ridge": null
+              },
+              "rows": 0,
+              "subjects": 0
+            },
+            "glucose": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.829722,
+                  -0.609698
+                ],
+                "point_delta": -0.722672,
+                "significant": true,
+                "subjects": 7053
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.827039,
+                  -0.611121
+                ],
+                "point_delta": -0.724116,
+                "significant": true,
+                "subjects": 7053
+              },
+              "mae": {
+                "baseline_ridge": 40.999259,
+                "endocrine_belief_ridge": 40.560423,
+                "placebo_belief_ridge": 41.005767
+              },
+              "rows": 80012,
+              "subjects": 7053
+            },
+            "map": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.441811,
+                  -0.363621
+                ],
+                "point_delta": -0.402846,
+                "significant": true,
+                "subjects": 8044
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.440767,
+                  -0.363503
+                ],
+                "point_delta": -0.403301,
+                "significant": true,
+                "subjects": 8044
+              },
+              "mae": {
+                "baseline_ridge": 10.431713,
+                "endocrine_belief_ridge": 9.896088,
+                "placebo_belief_ridge": 10.432283
+              },
+              "rows": 118592,
+              "subjects": 8044
+            },
+            "potassium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.007111,
+                  -0.002989
+                ],
+                "point_delta": -0.005042,
+                "significant": true,
+                "subjects": 4344
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.007212,
+                  -0.003368
+                ],
+                "point_delta": -0.005399,
+                "significant": true,
+                "subjects": 4344
+              },
+              "mae": {
+                "baseline_ridge": 0.365556,
+                "endocrine_belief_ridge": 0.358802,
+                "placebo_belief_ridge": 0.36597
+              },
+              "rows": 15854,
+              "subjects": 4344
+            },
+            "serum_ketones": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -1.772214,
+                  0.109543
+                ],
+                "point_delta": -0.637425,
+                "significant": false,
+                "subjects": 14
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -1.799127,
+                  0.186135
+                ],
+                "point_delta": -0.651334,
+                "significant": false,
+                "subjects": 14
+              },
+              "mae": {
+                "baseline_ridge": 2.501472,
+                "endocrine_belief_ridge": 2.211579,
+                "placebo_belief_ridge": 2.496941
+              },
+              "rows": 29,
+              "subjects": 14
+            },
+            "serum_osmolality": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.8548,
+                  0.262798
+                ],
+                "point_delta": -0.28562,
+                "significant": false,
+                "subjects": 105
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -1.37422,
+                  -0.085345
+                ],
+                "point_delta": -0.693332,
+                "significant": true,
+                "subjects": 105
+              },
+              "mae": {
+                "baseline_ridge": 7.605181,
+                "endocrine_belief_ridge": 7.24686,
+                "placebo_belief_ridge": 8.03437
+              },
+              "rows": 424,
+              "subjects": 105
+            },
+            "sodium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.040446,
+                  -0.019057
+                ],
+                "point_delta": -0.030666,
+                "significant": true,
+                "subjects": 3778
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.044531,
+                  -0.022189
+                ],
+                "point_delta": -0.034026,
+                "significant": true,
+                "subjects": 3778
+              },
+              "mae": {
+                "baseline_ridge": 2.277044,
+                "endocrine_belief_ridge": 2.241432,
+                "placebo_belief_ridge": 2.280332
+              },
+              "rows": 13634,
+              "subjects": 3778
+            },
+            "temperature": {
+              "candidate_vs_baseline": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  -0.002179,
+                  0.004493
+                ],
+                "point_delta": 0.001151,
+                "significant": false,
+                "subjects": 1185
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.003876,
+                  0.003773
+                ],
+                "point_delta": -0.000137,
+                "significant": false,
+                "subjects": 1185
+              },
+              "mae": {
+                "baseline_ridge": 0.487228,
+                "endocrine_belief_ridge": 0.488059,
+                "placebo_belief_ridge": 0.488487
+              },
+              "rows": 13329,
+              "subjects": 1185
+            },
+            "tsh": {
+              "candidate_vs_baseline": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "mae": {
+                "baseline_ridge": null,
+                "endocrine_belief_ridge": null,
+                "placebo_belief_ridge": null
+              },
+              "rows": 11,
+              "subjects": 11
+            }
+          }
+        },
+        {
+          "discovery_groups": 16480,
+          "group_column": "subject_id",
+          "heldout_groups": 8117,
+          "overlap": 0,
+          "passed_count": 6,
+          "passed_targets": [
+            "glucose",
+            "anion_gap",
+            "bicarbonate",
+            "sodium",
+            "potassium",
+            "map"
+          ],
+          "seed": 19,
+          "targets": {
+            "anion_gap": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.157723,
+                  -0.113105
+                ],
+                "point_delta": -0.13654,
+                "significant": true,
+                "subjects": 2946
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.159074,
+                  -0.110778
+                ],
+                "point_delta": -0.135552,
+                "significant": true,
+                "subjects": 2946
+              },
+              "mae": {
+                "baseline_ridge": 2.466388,
+                "endocrine_belief_ridge": 2.318477,
+                "placebo_belief_ridge": 2.467214
+              },
+              "rows": 9883,
+              "subjects": 2946
+            },
+            "bicarbonate": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.076588,
+                  -0.049727
+                ],
+                "point_delta": -0.063173,
+                "significant": true,
+                "subjects": 4387
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.077036,
+                  -0.049764
+                ],
+                "point_delta": -0.063388,
+                "significant": true,
+                "subjects": 4387
+              },
+              "mae": {
+                "baseline_ridge": 2.170635,
+                "endocrine_belief_ridge": 2.104077,
+                "placebo_belief_ridge": 2.171689
+              },
+              "rows": 16121,
+              "subjects": 4387
+            },
+            "cortisol": {
+              "candidate_vs_baseline": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "mae": {
+                "baseline_ridge": null,
+                "endocrine_belief_ridge": null,
+                "placebo_belief_ridge": null
+              },
+              "rows": 9,
+              "subjects": 8
+            },
+            "free_t4": {
+              "candidate_vs_baseline": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "mae": {
+                "baseline_ridge": null,
+                "endocrine_belief_ridge": null,
+                "placebo_belief_ridge": null
+              },
+              "rows": 2,
+              "subjects": 2
+            },
+            "glucose": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.679842,
+                  -0.464818
+                ],
+                "point_delta": -0.581138,
+                "significant": true,
+                "subjects": 7105
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.709955,
+                  -0.487869
+                ],
+                "point_delta": -0.595506,
+                "significant": true,
+                "subjects": 7105
+              },
+              "mae": {
+                "baseline_ridge": 40.067695,
+                "endocrine_belief_ridge": 39.666748,
+                "placebo_belief_ridge": 40.078133
+              },
+              "rows": 80072,
+              "subjects": 7105
+            },
+            "map": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.473321,
+                  -0.389636
+                ],
+                "point_delta": -0.427539,
+                "significant": true,
+                "subjects": 8049
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.470526,
+                  -0.387686
+                ],
+                "point_delta": -0.428872,
+                "significant": true,
+                "subjects": 8049
+              },
+              "mae": {
+                "baseline_ridge": 10.38345,
+                "endocrine_belief_ridge": 9.846608,
+                "placebo_belief_ridge": 10.384583
+              },
+              "rows": 117627,
+              "subjects": 8049
+            },
+            "potassium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.00723,
+                  -0.003393
+                ],
+                "point_delta": -0.005288,
+                "significant": true,
+                "subjects": 4390
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.007614,
+                  -0.003739
+                ],
+                "point_delta": -0.005799,
+                "significant": true,
+                "subjects": 4390
+              },
+              "mae": {
+                "baseline_ridge": 0.374478,
+                "endocrine_belief_ridge": 0.368061,
+                "placebo_belief_ridge": 0.374778
+              },
+              "rows": 15939,
+              "subjects": 4390
+            },
+            "serum_ketones": {
+              "candidate_vs_baseline": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "mae": {
+                "baseline_ridge": 4.926318,
+                "endocrine_belief_ridge": null,
+                "placebo_belief_ridge": null
+              },
+              "rows": 40,
+              "subjects": 13
+            },
+            "serum_osmolality": {
+              "candidate_vs_baseline": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  -0.622352,
+                  0.827391
+                ],
+                "point_delta": 0.073754,
+                "significant": false,
+                "subjects": 77
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -1.158599,
+                  0.327045
+                ],
+                "point_delta": -0.373079,
+                "significant": false,
+                "subjects": 77
+              },
+              "mae": {
+                "baseline_ridge": 7.554606,
+                "endocrine_belief_ridge": 7.540367,
+                "placebo_belief_ridge": 7.911348
+              },
+              "rows": 302,
+              "subjects": 77
+            },
+            "sodium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.039088,
+                  -0.017838
+                ],
+                "point_delta": -0.028716,
+                "significant": true,
+                "subjects": 3792
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.041521,
+                  -0.019191
+                ],
+                "point_delta": -0.030315,
+                "significant": true,
+                "subjects": 3792
+              },
+              "mae": {
+                "baseline_ridge": 2.268301,
+                "endocrine_belief_ridge": 2.233156,
+                "placebo_belief_ridge": 2.269894
+              },
+              "rows": 13734,
+              "subjects": 3792
+            },
+            "temperature": {
+              "candidate_vs_baseline": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  -0.002031,
+                  0.004717
+                ],
+                "point_delta": 0.001492,
+                "significant": false,
+                "subjects": 1278
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  -0.002989,
+                  0.003457
+                ],
+                "point_delta": 0.000314,
+                "significant": false,
+                "subjects": 1278
+              },
+              "mae": {
+                "baseline_ridge": 0.470928,
+                "endocrine_belief_ridge": 0.470369,
+                "placebo_belief_ridge": 0.472666
+              },
+              "rows": 13706,
+              "subjects": 1278
+            },
+            "tsh": {
+              "candidate_vs_baseline": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "mae": {
+                "baseline_ridge": null,
+                "endocrine_belief_ridge": null,
+                "placebo_belief_ridge": null
+              },
+              "rows": 16,
+              "subjects": 15
+            }
+          }
+        },
+        {
+          "discovery_groups": 16480,
+          "group_column": "subject_id",
+          "heldout_groups": 8117,
+          "overlap": 0,
+          "passed_count": 6,
+          "passed_targets": [
+            "glucose",
+            "anion_gap",
+            "bicarbonate",
+            "sodium",
+            "potassium",
+            "map"
+          ],
+          "seed": 23,
+          "targets": {
+            "anion_gap": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.173698,
+                  -0.129361
+                ],
+                "point_delta": -0.151934,
+                "significant": true,
+                "subjects": 2961
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.180425,
+                  -0.131987
+                ],
+                "point_delta": -0.154932,
+                "significant": true,
+                "subjects": 2961
+              },
+              "mae": {
+                "baseline_ridge": 2.365844,
+                "endocrine_belief_ridge": 2.210435,
+                "placebo_belief_ridge": 2.370234
+              },
+              "rows": 9440,
+              "subjects": 2961
+            },
+            "bicarbonate": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.071388,
+                  -0.045353
+                ],
+                "point_delta": -0.058053,
+                "significant": true,
+                "subjects": 4398
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.071676,
+                  -0.045206
+                ],
+                "point_delta": -0.05969,
+                "significant": true,
+                "subjects": 4398
+              },
+              "mae": {
+                "baseline_ridge": 2.154149,
+                "endocrine_belief_ridge": 2.086718,
+                "placebo_belief_ridge": 2.155196
+              },
+              "rows": 15870,
+              "subjects": 4398
+            },
+            "cortisol": {
+              "candidate_vs_baseline": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "mae": {
+                "baseline_ridge": null,
+                "endocrine_belief_ridge": null,
+                "placebo_belief_ridge": null
+              },
+              "rows": 7,
+              "subjects": 7
+            },
+            "free_t4": {
+              "candidate_vs_baseline": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "mae": {
+                "baseline_ridge": null,
+                "endocrine_belief_ridge": null,
+                "placebo_belief_ridge": null
+              },
+              "rows": 1,
+              "subjects": 1
+            },
+            "glucose": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.741552,
+                  -0.535456
+                ],
+                "point_delta": -0.641704,
+                "significant": true,
+                "subjects": 7050
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.773097,
+                  -0.545639
+                ],
+                "point_delta": -0.652898,
+                "significant": true,
+                "subjects": 7050
+              },
+              "mae": {
+                "baseline_ridge": 40.104625,
+                "endocrine_belief_ridge": 39.674973,
+                "placebo_belief_ridge": 40.108313
+              },
+              "rows": 81166,
+              "subjects": 7050
+            },
+            "map": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.470484,
+                  -0.391027
+                ],
+                "point_delta": -0.427554,
+                "significant": true,
+                "subjects": 8046
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.465305,
+                  -0.390559
+                ],
+                "point_delta": -0.428398,
+                "significant": true,
+                "subjects": 8046
+              },
+              "mae": {
+                "baseline_ridge": 10.452116,
+                "endocrine_belief_ridge": 9.915499,
+                "placebo_belief_ridge": 10.45258
+              },
+              "rows": 121035,
+              "subjects": 8046
+            },
+            "potassium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.005239,
+                  -0.001294
+                ],
+                "point_delta": -0.003234,
+                "significant": true,
+                "subjects": 4384
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.005537,
+                  -0.001785
+                ],
+                "point_delta": -0.003618,
+                "significant": true,
+                "subjects": 4384
+              },
+              "mae": {
+                "baseline_ridge": 0.366221,
+                "endocrine_belief_ridge": 0.361295,
+                "placebo_belief_ridge": 0.366606
+              },
+              "rows": 15734,
+              "subjects": 4384
+            },
+            "serum_ketones": {
+              "candidate_vs_baseline": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "mae": {
+                "baseline_ridge": null,
+                "endocrine_belief_ridge": null,
+                "placebo_belief_ridge": null
+              },
+              "rows": 79,
+              "subjects": 22
+            },
+            "serum_osmolality": {
+              "candidate_vs_baseline": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  0.21391,
+                  1.652822
+                ],
+                "point_delta": 0.915695,
+                "significant": false,
+                "subjects": 77
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  -0.261966,
+                  1.585118
+                ],
+                "point_delta": 0.576498,
+                "significant": false,
+                "subjects": 77
+              },
+              "mae": {
+                "baseline_ridge": 7.232864,
+                "endocrine_belief_ridge": 7.84543,
+                "placebo_belief_ridge": 7.65372
+              },
+              "rows": 303,
+              "subjects": 77
+            },
+            "sodium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.030836,
+                  -0.008255
+                ],
+                "point_delta": -0.019555,
+                "significant": true,
+                "subjects": 3783
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.036748,
+                  -0.01209
+                ],
+                "point_delta": -0.024267,
+                "significant": true,
+                "subjects": 3783
+              },
+              "mae": {
+                "baseline_ridge": 2.272317,
+                "endocrine_belief_ridge": 2.244587,
+                "placebo_belief_ridge": 2.276956
+              },
+              "rows": 13429,
+              "subjects": 3783
+            },
+            "temperature": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.004446,
+                  0.002491
+                ],
+                "point_delta": -0.000698,
+                "significant": false,
+                "subjects": 1191
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.005165,
+                  0.001973
+                ],
+                "point_delta": -0.001712,
+                "significant": false,
+                "subjects": 1191
+              },
+              "mae": {
+                "baseline_ridge": 0.489668,
+                "endocrine_belief_ridge": 0.487584,
+                "placebo_belief_ridge": 0.491079
+              },
+              "rows": 12919,
+              "subjects": 1191
+            },
+            "tsh": {
+              "candidate_vs_baseline": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "mae": {
+                "baseline_ridge": null,
+                "endocrine_belief_ridge": null,
+                "placebo_belief_ridge": null
+              },
+              "rows": 3,
+              "subjects": 3
+            }
+          }
+        },
+        {
+          "discovery_groups": 16480,
+          "group_column": "subject_id",
+          "heldout_groups": 8117,
+          "overlap": 0,
+          "passed_count": 6,
+          "passed_targets": [
+            "glucose",
+            "anion_gap",
+            "bicarbonate",
+            "sodium",
+            "potassium",
+            "map"
+          ],
+          "seed": 37,
+          "targets": {
+            "anion_gap": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.147294,
+                  -0.099347
+                ],
+                "point_delta": -0.12367,
+                "significant": true,
+                "subjects": 2994
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.153101,
+                  -0.103615
+                ],
+                "point_delta": -0.126168,
+                "significant": true,
+                "subjects": 2994
+              },
+              "mae": {
+                "baseline_ridge": 2.411257,
+                "endocrine_belief_ridge": 2.276049,
+                "placebo_belief_ridge": 2.414036
+              },
+              "rows": 9788,
+              "subjects": 2994
+            },
+            "bicarbonate": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.065452,
+                  -0.038869
+                ],
+                "point_delta": -0.051615,
+                "significant": true,
+                "subjects": 4438
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.065228,
+                  -0.039421
+                ],
+                "point_delta": -0.052142,
+                "significant": true,
+                "subjects": 4438
+              },
+              "mae": {
+                "baseline_ridge": 2.165789,
+                "endocrine_belief_ridge": 2.097888,
+                "placebo_belief_ridge": 2.167548
+              },
+              "rows": 16305,
+              "subjects": 4438
+            },
+            "cortisol": {
+              "candidate_vs_baseline": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "mae": {
+                "baseline_ridge": null,
+                "endocrine_belief_ridge": null,
+                "placebo_belief_ridge": null
+              },
+              "rows": 9,
+              "subjects": 9
+            },
+            "free_t4": {
+              "candidate_vs_baseline": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "mae": {
+                "baseline_ridge": null,
+                "endocrine_belief_ridge": null,
+                "placebo_belief_ridge": null
+              },
+              "rows": 1,
+              "subjects": 1
+            },
+            "glucose": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.79134,
+                  -0.58223
+                ],
+                "point_delta": -0.684898,
+                "significant": true,
+                "subjects": 7084
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.790474,
+                  -0.583065
+                ],
+                "point_delta": -0.685011,
+                "significant": true,
+                "subjects": 7084
+              },
+              "mae": {
+                "baseline_ridge": 40.767707,
+                "endocrine_belief_ridge": 40.297362,
+                "placebo_belief_ridge": 40.77045
+              },
+              "rows": 80493,
+              "subjects": 7084
+            },
+            "map": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.459173,
+                  -0.380424
+                ],
+                "point_delta": -0.419226,
+                "significant": true,
+                "subjects": 8043
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.463991,
+                  -0.378121
+                ],
+                "point_delta": -0.420753,
+                "significant": true,
+                "subjects": 8043
+              },
+              "mae": {
+                "baseline_ridge": 10.477225,
+                "endocrine_belief_ridge": 9.953559,
+                "placebo_belief_ridge": 10.477866
+              },
+              "rows": 119650,
+              "subjects": 8043
+            },
+            "potassium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.007382,
+                  -0.003308
+                ],
+                "point_delta": -0.00543,
+                "significant": true,
+                "subjects": 4439
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.00811,
+                  -0.004021
+                ],
+                "point_delta": -0.005923,
+                "significant": true,
+                "subjects": 4439
+              },
+              "mae": {
+                "baseline_ridge": 0.369925,
+                "endocrine_belief_ridge": 0.363277,
+                "placebo_belief_ridge": 0.370485
+              },
+              "rows": 16192,
+              "subjects": 4439
+            },
+            "serum_ketones": {
+              "candidate_vs_baseline": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "mae": {
+                "baseline_ridge": 2.433816,
+                "endocrine_belief_ridge": null,
+                "placebo_belief_ridge": null
+              },
+              "rows": 37,
+              "subjects": 17
+            },
+            "serum_osmolality": {
+              "candidate_vs_baseline": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  -0.601653,
+                  0.686422
+                ],
+                "point_delta": 0.029367,
+                "significant": false,
+                "subjects": 102
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -1.075571,
+                  0.277514
+                ],
+                "point_delta": -0.44642,
+                "significant": false,
+                "subjects": 102
+              },
+              "mae": {
+                "baseline_ridge": 8.516438,
+                "endocrine_belief_ridge": 8.240268,
+                "placebo_belief_ridge": 8.977918
+              },
+              "rows": 362,
+              "subjects": 102
+            },
+            "sodium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.034324,
+                  -0.010711
+                ],
+                "point_delta": -0.022757,
+                "significant": true,
+                "subjects": 3835
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.039298,
+                  -0.014478
+                ],
+                "point_delta": -0.025662,
+                "significant": true,
+                "subjects": 3835
+              },
+              "mae": {
+                "baseline_ridge": 2.288198,
+                "endocrine_belief_ridge": 2.2525,
+                "placebo_belief_ridge": 2.289897
+              },
+              "rows": 13712,
+              "subjects": 3835
+            },
+            "temperature": {
+              "candidate_vs_baseline": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  -0.001181,
+                  0.005207
+                ],
+                "point_delta": 0.002165,
+                "significant": false,
+                "subjects": 1247
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  -0.002932,
+                  0.004126
+                ],
+                "point_delta": 0.000458,
+                "significant": false,
+                "subjects": 1247
+              },
+              "mae": {
+                "baseline_ridge": 0.478745,
+                "endocrine_belief_ridge": 0.47815,
+                "placebo_belief_ridge": 0.480223
+              },
+              "rows": 13599,
+              "subjects": 1247
+            },
+            "tsh": {
+              "candidate_vs_baseline": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "mae": {
+                "baseline_ridge": null,
+                "endocrine_belief_ridge": null,
+                "placebo_belief_ridge": null
+              },
+              "rows": 5,
+              "subjects": 5
+            }
+          }
+        },
+        {
+          "discovery_groups": 16480,
+          "group_column": "subject_id",
+          "heldout_groups": 8117,
+          "overlap": 0,
+          "passed_count": 6,
+          "passed_targets": [
+            "glucose",
+            "anion_gap",
+            "bicarbonate",
+            "sodium",
+            "potassium",
+            "map"
+          ],
+          "seed": 53,
+          "targets": {
+            "anion_gap": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.150254,
+                  -0.101788
+                ],
+                "point_delta": -0.126553,
+                "significant": true,
+                "subjects": 3007
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.149268,
+                  -0.103094
+                ],
+                "point_delta": -0.126624,
+                "significant": true,
+                "subjects": 3007
+              },
+              "mae": {
+                "baseline_ridge": 2.434847,
+                "endocrine_belief_ridge": 2.294379,
+                "placebo_belief_ridge": 2.436175
+              },
+              "rows": 9931,
+              "subjects": 3007
+            },
+            "bicarbonate": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.071413,
+                  -0.042982
+                ],
+                "point_delta": -0.056937,
+                "significant": true,
+                "subjects": 4463
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.070557,
+                  -0.043367
+                ],
+                "point_delta": -0.057628,
+                "significant": true,
+                "subjects": 4463
+              },
+              "mae": {
+                "baseline_ridge": 2.152236,
+                "endocrine_belief_ridge": 2.085954,
+                "placebo_belief_ridge": 2.15305
+              },
+              "rows": 15997,
+              "subjects": 4463
+            },
+            "cortisol": {
+              "candidate_vs_baseline": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "mae": {
+                "baseline_ridge": null,
+                "endocrine_belief_ridge": null,
+                "placebo_belief_ridge": null
+              },
+              "rows": 6,
+              "subjects": 5
+            },
+            "free_t4": {
+              "candidate_vs_baseline": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "mae": {
+                "baseline_ridge": null,
+                "endocrine_belief_ridge": null,
+                "placebo_belief_ridge": null
+              },
+              "rows": 2,
+              "subjects": 2
+            },
+            "glucose": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.809217,
+                  -0.604774
+                ],
+                "point_delta": -0.702802,
+                "significant": true,
+                "subjects": 7067
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.811398,
+                  -0.591544
+                ],
+                "point_delta": -0.703939,
+                "significant": true,
+                "subjects": 7067
+              },
+              "mae": {
+                "baseline_ridge": 40.559067,
+                "endocrine_belief_ridge": 40.105553,
+                "placebo_belief_ridge": 40.561213
+              },
+              "rows": 80005,
+              "subjects": 7067
+            },
+            "map": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.440514,
+                  -0.360917
+                ],
+                "point_delta": -0.403214,
+                "significant": true,
+                "subjects": 8036
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.444262,
+                  -0.364623
+                ],
+                "point_delta": -0.404797,
+                "significant": true,
+                "subjects": 8036
+              },
+              "mae": {
+                "baseline_ridge": 10.390026,
+                "endocrine_belief_ridge": 9.867358,
+                "placebo_belief_ridge": 10.391257
+              },
+              "rows": 119086,
+              "subjects": 8036
+            },
+            "potassium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.007457,
+                  -0.003086
+                ],
+                "point_delta": -0.005223,
+                "significant": true,
+                "subjects": 4404
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.007548,
+                  -0.003369
+                ],
+                "point_delta": -0.005447,
+                "significant": true,
+                "subjects": 4404
+              },
+              "mae": {
+                "baseline_ridge": 0.368652,
+                "endocrine_belief_ridge": 0.361598,
+                "placebo_belief_ridge": 0.368964
+              },
+              "rows": 15829,
+              "subjects": 4404
+            },
+            "serum_ketones": {
+              "candidate_vs_baseline": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "mae": {
+                "baseline_ridge": 1.345582,
+                "endocrine_belief_ridge": null,
+                "placebo_belief_ridge": null
+              },
+              "rows": 47,
+              "subjects": 15
+            },
+            "serum_osmolality": {
+              "candidate_vs_baseline": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  -0.326297,
+                  1.456596
+                ],
+                "point_delta": 0.522548,
+                "significant": false,
+                "subjects": 103
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  -0.688553,
+                  1.232017
+                ],
+                "point_delta": 0.201923,
+                "significant": false,
+                "subjects": 103
+              },
+              "mae": {
+                "baseline_ridge": 8.522169,
+                "endocrine_belief_ridge": 8.623103,
+                "placebo_belief_ridge": 8.675652
+              },
+              "rows": 344,
+              "subjects": 103
+            },
+            "sodium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.036689,
+                  -0.013836
+                ],
+                "point_delta": -0.025109,
+                "significant": true,
+                "subjects": 3856
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.040924,
+                  -0.017673
+                ],
+                "point_delta": -0.028349,
+                "significant": true,
+                "subjects": 3856
+              },
+              "mae": {
+                "baseline_ridge": 2.251639,
+                "endocrine_belief_ridge": 2.217958,
+                "placebo_belief_ridge": 2.255333
+              },
+              "rows": 13544,
+              "subjects": 3856
+            },
+            "temperature": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.003749,
+                  0.003091
+                ],
+                "point_delta": -1.1e-05,
+                "significant": false,
+                "subjects": 1254
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.005001,
+                  0.001797
+                ],
+                "point_delta": -0.001456,
+                "significant": false,
+                "subjects": 1254
+              },
+              "mae": {
+                "baseline_ridge": 0.482464,
+                "endocrine_belief_ridge": 0.484077,
+                "placebo_belief_ridge": 0.483722
+              },
+              "rows": 13375,
+              "subjects": 1254
+            },
+            "tsh": {
+              "candidate_vs_baseline": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "mae": {
+                "baseline_ridge": null,
+                "endocrine_belief_ridge": null,
+                "placebo_belief_ridge": null
+              },
+              "rows": 11,
+              "subjects": 11
+            }
+          }
+        },
+        {
+          "discovery_groups": 16480,
+          "group_column": "subject_id",
+          "heldout_groups": 8117,
+          "overlap": 0,
+          "passed_count": 6,
+          "passed_targets": [
+            "glucose",
+            "anion_gap",
+            "bicarbonate",
+            "sodium",
+            "potassium",
+            "map"
+          ],
+          "seed": 71,
+          "targets": {
+            "anion_gap": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.152079,
+                  -0.106917
+                ],
+                "point_delta": -0.130909,
+                "significant": true,
+                "subjects": 2950
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.15908,
+                  -0.111541
+                ],
+                "point_delta": -0.135452,
+                "significant": true,
+                "subjects": 2950
+              },
+              "mae": {
+                "baseline_ridge": 2.413124,
+                "endocrine_belief_ridge": 2.264895,
+                "placebo_belief_ridge": 2.418052
+              },
+              "rows": 9813,
+              "subjects": 2950
+            },
+            "bicarbonate": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.076724,
+                  -0.049636
+                ],
+                "point_delta": -0.0638,
+                "significant": true,
+                "subjects": 4407
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.07902,
+                  -0.052302
+                ],
+                "point_delta": -0.065356,
+                "significant": true,
+                "subjects": 4407
+              },
+              "mae": {
+                "baseline_ridge": 2.175956,
+                "endocrine_belief_ridge": 2.103445,
+                "placebo_belief_ridge": 2.176004
+              },
+              "rows": 16220,
+              "subjects": 4407
+            },
+            "cortisol": {
+              "candidate_vs_baseline": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "mae": {
+                "baseline_ridge": null,
+                "endocrine_belief_ridge": null,
+                "placebo_belief_ridge": null
+              },
+              "rows": 3,
+              "subjects": 3
+            },
+            "free_t4": {
+              "candidate_vs_baseline": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "mae": {
+                "baseline_ridge": null,
+                "endocrine_belief_ridge": null,
+                "placebo_belief_ridge": null
+              },
+              "rows": 2,
+              "subjects": 2
+            },
+            "glucose": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.781853,
+                  -0.566932
+                ],
+                "point_delta": -0.671441,
+                "significant": true,
+                "subjects": 7076
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.788339,
+                  -0.580312
+                ],
+                "point_delta": -0.682936,
+                "significant": true,
+                "subjects": 7076
+              },
+              "mae": {
+                "baseline_ridge": 40.540228,
+                "endocrine_belief_ridge": 40.042575,
+                "placebo_belief_ridge": 40.545304
+              },
+              "rows": 80584,
+              "subjects": 7076
+            },
+            "map": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.468277,
+                  -0.387619
+                ],
+                "point_delta": -0.428601,
+                "significant": true,
+                "subjects": 8052
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.46782,
+                  -0.391007
+                ],
+                "point_delta": -0.429174,
+                "significant": true,
+                "subjects": 8052
+              },
+              "mae": {
+                "baseline_ridge": 10.430995,
+                "endocrine_belief_ridge": 9.888892,
+                "placebo_belief_ridge": 10.432103
+              },
+              "rows": 120102,
+              "subjects": 8052
+            },
+            "potassium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.00834,
+                  -0.004783
+                ],
+                "point_delta": -0.006635,
+                "significant": true,
+                "subjects": 4401
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.008653,
+                  -0.004884
+                ],
+                "point_delta": -0.006717,
+                "significant": true,
+                "subjects": 4401
+              },
+              "mae": {
+                "baseline_ridge": 0.36965,
+                "endocrine_belief_ridge": 0.361605,
+                "placebo_belief_ridge": 0.369816
+              },
+              "rows": 16122,
+              "subjects": 4401
+            },
+            "serum_ketones": {
+              "candidate_vs_baseline": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "mae": {
+                "baseline_ridge": 1.400704,
+                "endocrine_belief_ridge": null,
+                "placebo_belief_ridge": null
+              },
+              "rows": 49,
+              "subjects": 13
+            },
+            "serum_osmolality": {
+              "candidate_vs_baseline": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  -0.156706,
+                  1.270355
+                ],
+                "point_delta": 0.553698,
+                "significant": false,
+                "subjects": 88
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  -0.212654,
+                  1.360545
+                ],
+                "point_delta": 0.543948,
+                "significant": false,
+                "subjects": 88
+              },
+              "mae": {
+                "baseline_ridge": 9.494553,
+                "endocrine_belief_ridge": 9.947518,
+                "placebo_belief_ridge": 9.770944
+              },
+              "rows": 337,
+              "subjects": 88
+            },
+            "sodium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.038638,
+                  -0.013305
+                ],
+                "point_delta": -0.025322,
+                "significant": true,
+                "subjects": 3809
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.038917,
+                  -0.013683
+                ],
+                "point_delta": -0.026558,
+                "significant": true,
+                "subjects": 3809
+              },
+              "mae": {
+                "baseline_ridge": 2.270801,
+                "endocrine_belief_ridge": 2.23949,
+                "placebo_belief_ridge": 2.272684
+              },
+              "rows": 13880,
+              "subjects": 3809
+            },
+            "temperature": {
+              "candidate_vs_baseline": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  -0.003147,
+                  0.00328
+                ],
+                "point_delta": 6.5e-05,
+                "significant": false,
+                "subjects": 1219
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.005348,
+                  0.001637
+                ],
+                "point_delta": -0.001788,
+                "significant": false,
+                "subjects": 1219
+              },
+              "mae": {
+                "baseline_ridge": 0.499563,
+                "endocrine_belief_ridge": 0.499323,
+                "placebo_belief_ridge": 0.501171
+              },
+              "rows": 13467,
+              "subjects": 1219
+            },
+            "tsh": {
+              "candidate_vs_baseline": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": null,
+                "bootstrap_95_ci": [
+                  null,
+                  null
+                ],
+                "point_delta": null,
+                "significant": false,
+                "subjects": 0
+              },
+              "mae": {
+                "baseline_ridge": null,
+                "endocrine_belief_ridge": null,
+                "placebo_belief_ridge": null
+              },
+              "rows": 15,
+              "subjects": 15
+            }
+          }
+        }
+      ],
+      "seeds": [
+        7,
+        11,
+        19,
+        23,
+        37,
+        53,
+        71
+      ],
+      "summary": {
+        "anion_gap": {
+          "candidate_beats_baseline_significant_count": 7,
+          "candidate_beats_placebo_significant_count": 7,
+          "candidate_passes_both_count": 7,
+          "median_delta_vs_baseline": -0.130909,
+          "median_delta_vs_placebo": -0.135452
+        },
+        "bicarbonate": {
+          "candidate_beats_baseline_significant_count": 7,
+          "candidate_beats_placebo_significant_count": 7,
+          "candidate_passes_both_count": 7,
+          "median_delta_vs_baseline": -0.056937,
+          "median_delta_vs_placebo": -0.057628
+        },
+        "cortisol": {
+          "candidate_beats_baseline_significant_count": 0,
+          "candidate_beats_placebo_significant_count": 0,
+          "candidate_passes_both_count": 0,
+          "median_delta_vs_baseline": null,
+          "median_delta_vs_placebo": null
+        },
+        "free_t4": {
+          "candidate_beats_baseline_significant_count": 0,
+          "candidate_beats_placebo_significant_count": 0,
+          "candidate_passes_both_count": 0,
+          "median_delta_vs_baseline": null,
+          "median_delta_vs_placebo": null
+        },
+        "glucose": {
+          "candidate_beats_baseline_significant_count": 7,
+          "candidate_beats_placebo_significant_count": 7,
+          "candidate_passes_both_count": 7,
+          "median_delta_vs_baseline": -0.671441,
+          "median_delta_vs_placebo": -0.682936
+        },
+        "map": {
+          "candidate_beats_baseline_significant_count": 7,
+          "candidate_beats_placebo_significant_count": 7,
+          "candidate_passes_both_count": 7,
+          "median_delta_vs_baseline": -0.419226,
+          "median_delta_vs_placebo": -0.420753
+        },
+        "potassium": {
+          "candidate_beats_baseline_significant_count": 7,
+          "candidate_beats_placebo_significant_count": 7,
+          "candidate_passes_both_count": 7,
+          "median_delta_vs_baseline": -0.005223,
+          "median_delta_vs_placebo": -0.0055
+        },
+        "serum_ketones": {
+          "candidate_beats_baseline_significant_count": 0,
+          "candidate_beats_placebo_significant_count": 0,
+          "candidate_passes_both_count": 0,
+          "median_delta_vs_baseline": -0.637425,
+          "median_delta_vs_placebo": -0.651334
+        },
+        "serum_osmolality": {
+          "candidate_beats_baseline_significant_count": 0,
+          "candidate_beats_placebo_significant_count": 1,
+          "candidate_passes_both_count": 0,
+          "median_delta_vs_baseline": 0.073754,
+          "median_delta_vs_placebo": -0.373079
+        },
+        "sodium": {
+          "candidate_beats_baseline_significant_count": 7,
+          "candidate_beats_placebo_significant_count": 7,
+          "candidate_passes_both_count": 7,
+          "median_delta_vs_baseline": -0.025322,
+          "median_delta_vs_placebo": -0.028349
+        },
+        "temperature": {
+          "candidate_beats_baseline_significant_count": 0,
+          "candidate_beats_placebo_significant_count": 0,
+          "candidate_passes_both_count": 0,
+          "median_delta_vs_baseline": 0.001151,
+          "median_delta_vs_placebo": -0.000137
+        },
+        "tsh": {
+          "candidate_beats_baseline_significant_count": 0,
+          "candidate_beats_placebo_significant_count": 0,
+          "candidate_passes_both_count": 0,
+          "median_delta_vs_baseline": null,
+          "median_delta_vs_placebo": null
+        }
+      }
+    }
+  },
+  "belief": {
+    "columns": [
+      "endo_belief_glycemic_stress_mean",
+      "endo_belief_glycemic_stress_sd",
+      "endo_belief_glycemic_stress_innovation",
+      "endo_belief_glycemic_stress_confidence",
+      "endo_belief_osmotic_ketotic_stress_mean",
+      "endo_belief_osmotic_ketotic_stress_sd",
+      "endo_belief_osmotic_ketotic_stress_innovation",
+      "endo_belief_osmotic_ketotic_stress_confidence",
+      "endo_belief_adrenal_hemodynamic_stress_mean",
+      "endo_belief_adrenal_hemodynamic_stress_sd",
+      "endo_belief_adrenal_hemodynamic_stress_innovation",
+      "endo_belief_adrenal_hemodynamic_stress_confidence",
+      "endo_belief_glucose_slope_per_hr",
+      "endo_belief_glucose_innovation",
+      "endo_belief_serum_osmolality_slope_per_hr",
+      "endo_belief_serum_osmolality_innovation",
+      "endo_belief_anion_gap_slope_per_hr",
+      "endo_belief_anion_gap_innovation",
+      "endo_belief_bicarbonate_slope_per_hr",
+      "endo_belief_bicarbonate_innovation",
+      "endo_belief_sodium_slope_per_hr",
+      "endo_belief_sodium_innovation",
+      "endo_belief_potassium_slope_per_hr",
+      "endo_belief_potassium_innovation",
+      "endo_belief_map_slope_per_hr",
+      "endo_belief_map_innovation",
+      "endo_belief_temperature_slope_per_hr",
+      "endo_belief_temperature_innovation",
+      "endo_belief_hyperglycemia_burden",
+      "endo_belief_hypoglycemia_burden",
+      "endo_belief_osmotic_burden",
+      "endo_belief_ketotic_gap_burden",
+      "endo_belief_low_bicarbonate_burden",
+      "endo_belief_hypernatremia_burden",
+      "endo_belief_hyponatremia_burden",
+      "endo_belief_hyperkalemia_burden",
+      "endo_belief_hypokalemia_burden",
+      "endo_belief_low_map_burden",
+      "endo_belief_fever_burden",
+      "endo_belief_hypothermia_burden",
+      "endo_belief_insulin_context",
+      "endo_belief_dextrose_context",
+      "endo_belief_fluid_context",
+      "endo_belief_steroid_context",
+      "endo_belief_vasopressor_context"
+    ],
+    "direct_hidden_state_accuracy_claim_allowed": false,
+    "name": "endocrine_glycemic_stress_patient_specific_state",
+    "requires_capacity_matched_placebo": true,
+    "targets": [
+      "glucose",
+      "serum_osmolality",
+      "serum_ketones",
+      "anion_gap",
+      "bicarbonate",
+      "sodium",
+      "potassium",
+      "tsh",
+      "free_t4",
+      "cortisol",
+      "map",
+      "temperature"
+    ]
+  },
+  "experiment": "eICU endocrine predict-update belief downstream observable audit",
+  "gate": {
+    "baseline": "ridge_realfit",
+    "candidate": "ridge_realfit_plus_endocrine_belief_features",
+    "pass_rule": "candidate must significantly beat both baseline and placebo on held-out patients",
+    "placebo": "ridge_realfit_plus_capacity_matched_noise_features"
+  },
+  "safety_boundary": {
+    "active_rule_promotion_allowed": false,
+    "causal_claim_allowed": false,
+    "checkpoint_promotion_allowed": false,
+    "clinical_claim_allowed": false,
+    "counterfactual_claim_allowed": false,
+    "direct_hidden_state_accuracy_claim_allowed": false,
+    "factual_observed_treatment_only": true,
+    "patient_ids_included_in_report": false,
+    "raw_rows_included": false
+  }
+}

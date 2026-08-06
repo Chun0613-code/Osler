@@ -1,0 +1,209 @@
+{
+  "experiment": "full-budget v6 candidate vs v5",
+  "budget": {
+    "scenarios": 1000,
+    "sequence_length": 12,
+    "epochs": 55
+  },
+  "candidate": "dka_symbolic_jepa_v6_full_candidate.pt",
+  "baseline": "dka_symbolic_jepa_v5.pt",
+  "decision": "do_not_promote_v6_over_v5",
+  "reason": "v6 improves simulator/counterfactual learning but still fails the external MIMIC factual persistence gate on most targets.",
+  "simulator_side": {
+    "v5_collapse": {
+      "mean_latent_std": 0.358683,
+      "min_latent_std": 0.278938,
+      "effective_rank": 13.338,
+      "active_dimensions_std_gt_0_01": 48,
+      "low_rank_physiology_warning": false,
+      "collapsed": false
+    },
+    "v6_collapse": {
+      "mean_latent_std": 0.349991,
+      "min_latent_std": 0.229083,
+      "effective_rank": 10.854,
+      "active_dimensions_std_gt_0_01": 48,
+      "low_rank_physiology_warning": false,
+      "collapsed": false
+    },
+    "v5_counterfactual_sign_accuracy_6_steps": 0.9783,
+    "v6_counterfactual_sign_accuracy_6_steps": 0.9639,
+    "v5_action_conditioning": {
+      "factual_normalized_mse_6h": 0.043675,
+      "shuffled_action_normalized_mse_6h": 0.549099,
+      "shuffled_minus_factual": 0.505424,
+      "uses_interventions": true
+    },
+    "v6_action_conditioning": {
+      "factual_normalized_mse_6h": 0.07805,
+      "shuffled_action_normalized_mse_6h": 0.676082,
+      "shuffled_minus_factual": 0.598031,
+      "uses_interventions": true
+    }
+  },
+  "external_symbolic": {
+    "factual_direction_accuracy_all": 0.625,
+    "factual_direction_accuracy_changed_only": 0.6786,
+    "direction_comparisons": 32,
+    "changed_direction_comparisons": 28,
+    "mean_proposal_confidence": 0.9322,
+    "interpretation": "Observational factual-direction check; it is not a causal effect test."
+  },
+  "candidate_rule_gate": {
+    "proposed": 0,
+    "retrospectively_validated": 0,
+    "active_rule_conflicts": 0,
+    "automatically_promoted_to_active": 0,
+    "candidate_file": "/Users/chunyouchang/Desktop/llm_project/medical_jepa/rules/candidate/symbolic_real_test_1781594319.json"
+  },
+  "mimic_mae": {
+    "glucose": {
+      "v5_jepa": 145.784,
+      "v6_jepa": 315.9117,
+      "persistence": 63.0,
+      "v6_beats_persistence": false,
+      "v6_beats_v5": false
+    },
+    "ph": {
+      "v5_jepa": 0.0976,
+      "v6_jepa": 0.094,
+      "persistence": 0.0585,
+      "v6_beats_persistence": false,
+      "v6_beats_v5": true
+    },
+    "bicarbonate": {
+      "v5_jepa": 5.4721,
+      "v6_jepa": 10.6904,
+      "persistence": 2.3488,
+      "v6_beats_persistence": false,
+      "v6_beats_v5": false
+    },
+    "anion_gap": {
+      "v5_jepa": 3.2537,
+      "v6_jepa": 3.4437,
+      "persistence": 2.9535,
+      "v6_beats_persistence": false,
+      "v6_beats_v5": false
+    },
+    "potassium": {
+      "v5_jepa": 0.6623,
+      "v6_jepa": 0.5818,
+      "persistence": 0.4125,
+      "v6_beats_persistence": false,
+      "v6_beats_v5": true
+    },
+    "map": {
+      "v5_jepa": 10.0654,
+      "v6_jepa": 9.6294,
+      "persistence": 11.7426,
+      "v6_beats_persistence": true,
+      "v6_beats_v5": true
+    },
+    "sodium": {
+      "v5_jepa": 8.5176,
+      "v6_jepa": 9.5251,
+      "persistence": 3.1702,
+      "v6_beats_persistence": false,
+      "v6_beats_v5": false
+    },
+    "osmolality": {
+      "v5_jepa": 23.6758,
+      "v6_jepa": 34.0763,
+      "persistence": 7.0642,
+      "v6_beats_persistence": false,
+      "v6_beats_v5": false
+    },
+    "creatinine": {
+      "v5_jepa": 0.3761,
+      "v6_jepa": 0.7725,
+      "persistence": 0.3325,
+      "v6_beats_persistence": false,
+      "v6_beats_v5": false
+    },
+    "urine_output": {
+      "v5_jepa": 133.4096,
+      "v6_jepa": 117.4828,
+      "persistence": 54.4324,
+      "v6_beats_persistence": false,
+      "v6_beats_v5": true
+    }
+  },
+  "mimic_active_dka_mae": {
+    "glucose": {
+      "v5_jepa": 148.3214,
+      "v6_jepa": 318.4619,
+      "persistence": 96.6471,
+      "v6_beats_persistence": false,
+      "v6_beats_v5": false
+    },
+    "ph": {
+      "v5_jepa": 0.087,
+      "v6_jepa": 0.0716,
+      "persistence": 0.06,
+      "v6_beats_persistence": false,
+      "v6_beats_v5": true
+    },
+    "bicarbonate": {
+      "v5_jepa": 5.2205,
+      "v6_jepa": 10.8804,
+      "persistence": 2.75,
+      "v6_beats_persistence": false,
+      "v6_beats_v5": false
+    },
+    "anion_gap": {
+      "v5_jepa": 3.0388,
+      "v6_jepa": 4.132,
+      "persistence": 3.25,
+      "v6_beats_persistence": false,
+      "v6_beats_v5": false
+    },
+    "potassium": {
+      "v5_jepa": 0.6896,
+      "v6_jepa": 0.6332,
+      "persistence": 0.44,
+      "v6_beats_persistence": false,
+      "v6_beats_v5": true
+    },
+    "map": {
+      "v5_jepa": 13.0363,
+      "v6_jepa": 11.1997,
+      "persistence": 16.2683,
+      "v6_beats_persistence": true,
+      "v6_beats_v5": true
+    },
+    "sodium": {
+      "v5_jepa": 9.8295,
+      "v6_jepa": 11.5094,
+      "persistence": 4.1579,
+      "v6_beats_persistence": false,
+      "v6_beats_v5": false
+    },
+    "osmolality": {
+      "v5_jepa": 22.1216,
+      "v6_jepa": 34.3989,
+      "persistence": 9.534,
+      "v6_beats_persistence": false,
+      "v6_beats_v5": false
+    },
+    "creatinine": {
+      "v5_jepa": 0.4819,
+      "v6_jepa": 0.6573,
+      "persistence": 0.34,
+      "v6_beats_persistence": false,
+      "v6_beats_v5": false
+    },
+    "urine_output": {
+      "v5_jepa": 144.9714,
+      "v6_jepa": 150.6815,
+      "persistence": 53.7868,
+      "v6_beats_persistence": false,
+      "v6_beats_v5": false
+    }
+  },
+  "promotion_gate": {
+    "passes_persistence_gate": false,
+    "rules_promoted": 0,
+    "clinical_or_causal_claim_allowed": false,
+    "runtime_replacement_for_v5": false
+  }
+}

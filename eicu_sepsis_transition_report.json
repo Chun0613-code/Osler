@@ -1,0 +1,153 @@
+{
+  "action_evidence": {
+    "by_action": {
+      "antibiotics": 141948,
+      "fluids": 184982,
+      "renal_replacement": 19322,
+      "vasopressor": 568157,
+      "ventilation": 513652
+    },
+    "dose_observed_fraction": 0.355087,
+    "rows": 1428061,
+    "sources": {
+      "eicu_infusiondrug": 521212,
+      "eicu_medication": 194334,
+      "eicu_respiratorycare": 253184,
+      "eicu_respiratorycharting": 176632,
+      "eicu_treatment": 282699
+    }
+  },
+  "action_support": {
+    "antibiotics": {
+      "active_stays": 17191,
+      "active_windows": 110492,
+      "dose_observed_windows": 421,
+      "stays": 19392,
+      "windows": 170081
+    },
+    "fluids": {
+      "active_stays": 20859,
+      "active_windows": 143134,
+      "dose_observed_windows": 2663,
+      "stays": 23133,
+      "windows": 223852
+    },
+    "renal_replacement": {
+      "active_stays": 2182,
+      "active_windows": 7528,
+      "dose_observed_windows": 2,
+      "stays": 2484,
+      "windows": 9239
+    },
+    "vasopressor": {
+      "active_stays": 12313,
+      "active_windows": 128033,
+      "dose_observed_windows": 86925,
+      "stays": 12757,
+      "windows": 133323
+    },
+    "ventilation": {
+      "active_stays": 9738,
+      "active_windows": 45863,
+      "dose_observed_windows": 0,
+      "stays": 10936,
+      "windows": 62984
+    }
+  },
+  "active_sepsis_transitions": 252177,
+  "data_root": "eicu-collaborative-research-database-2.0",
+  "dataset": "PhysioNet eICU Collaborative Research Database 2.0",
+  "hospitals": 204,
+  "measurements": {
+    "by_var": {
+      "bicarbonate": 380720,
+      "bilirubin": 119884,
+      "bilirubin_direct": 20858,
+      "bun": 296311,
+      "creatinine": 297549,
+      "glucose": 1080433,
+      "heart_rate": 36313247,
+      "lactate": 81649,
+      "map": 13690346,
+      "o2sat": 33755359,
+      "ph": 108800,
+      "platelets": 262460,
+      "potassium": 340441,
+      "respiratory_rate": 32193432,
+      "sodium": 316862,
+      "temperature": 4264795,
+      "urine_output": 909726,
+      "wbc": 260525
+    },
+    "rows": 124693397,
+    "stays": 31754
+  },
+  "output": "eicu_sepsis_transitions_6h.parquet",
+  "safety_boundary": {
+    "causal_claim_allowed": false,
+    "clinical_claim_allowed": false,
+    "coarse_treatment_rows_used_as_numeric_administrations": false,
+    "counterfactual_claim_allowed": false,
+    "factual_observed_treatment_only": true,
+    "medication_orders_used_as_numeric_administrations": false,
+    "patient_ids_included_in_report": false,
+    "raw_rows_included": false
+  },
+  "schema": {
+    "action_channels": [
+      "vasopressor",
+      "fluids",
+      "antibiotics",
+      "ventilation",
+      "renal_replacement"
+    ],
+    "anchor_step_hours": 4.0,
+    "horizon_hours": 6.0,
+    "lookback_hours": 6.0,
+    "state_vars": [
+      "map",
+      "lactate",
+      "creatinine",
+      "urine_output",
+      "o2sat",
+      "heart_rate",
+      "respiratory_rate",
+      "temperature",
+      "wbc",
+      "bilirubin",
+      "bilirubin_direct",
+      "platelets",
+      "bicarbonate",
+      "ph",
+      "sodium",
+      "potassium",
+      "bun",
+      "glucose"
+    ],
+    "target_tolerance_hours": 2.0,
+    "targets": [
+      "map",
+      "lactate",
+      "creatinine",
+      "urine_output",
+      "o2sat",
+      "heart_rate",
+      "respiratory_rate",
+      "vasopressor_requirement"
+    ]
+  },
+  "sepsis_like_stay_count_before_evaluable_filter": 31770,
+  "stays": 30198,
+  "subjects": 25175,
+  "target_pair_counts": {
+    "creatinine": 28552,
+    "heart_rate": 412164,
+    "lactate": 16250,
+    "map": 408388,
+    "o2sat": 399636,
+    "respiratory_rate": 372480,
+    "urine_output": 153144,
+    "vasopressor_requirement": 422244
+  },
+  "transitions": 422244
+}

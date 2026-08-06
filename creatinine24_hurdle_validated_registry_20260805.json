@@ -1,0 +1,39 @@
+{
+  "schema": "whole_body_promotion_registry.v2",
+  "candidate_id": "creatinine_robust_change_hurdle_factual_model_20260805",
+  "input_contract_id": "joint_asof_whole_body_state_aligned_treatment_interval_urine.v1",
+  "input_contract": "anchor-time measurements, causal lag/slope history, and strictly pre-anchor treatment context; hospital/care-unit/database provenance excluded from model inputs",
+  "variable_units": {
+    "creatinine": "mg/dL"
+  },
+  "output_contract": {
+    "creatinine": {
+      "task_type": "continuous_value_with_change_hurdle",
+      "change_definition": "abs(future-current) >= 0.1 mg/dL",
+      "interval": "patient-grouped normalized split conformal"
+    }
+  },
+  "source_audit_schema": "target_specific_event_hurdle_audit.v1",
+  "factual_only": true,
+  "causal_claim_allowed": false,
+  "clinical_promotion_allowed": false,
+  "promotion_status": "validated_target_gated_joint_research_only",
+  "validated_target_horizon_cells": [
+    "creatinine@24h"
+  ],
+  "target_horizon_registry": {
+    "creatinine@24h": {
+      "validated_for_joint_runtime": true,
+      "can_move": true,
+      "task_type": "continuous_value_with_change_hurdle",
+      "source_audit_cell": "creatinine@24h",
+      "requirements": {
+        "patient_7seed": true,
+        "hospital_heldout": true,
+        "careunit_heldout": true,
+        "forward_time_heldout": true,
+        "causal_claim_allowed": false
+      }
+    }
+  }
+}

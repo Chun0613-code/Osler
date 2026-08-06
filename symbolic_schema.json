@@ -1,0 +1,43 @@
+{
+  "version": "1.0.0",
+  "ownership": {
+    "active_rules": "Osler validator and human review",
+    "candidate_rules": "JEPA observational proposals only"
+  },
+  "state_variables": [
+    {"model_name": "G", "canonical": "metabolic.glucose"},
+    {"model_name": "pH", "canonical": "metabolic.ph"},
+    {"model_name": "HCO3", "canonical": "metabolic.bicarbonate"},
+    {"model_name": "anion_gap", "canonical": "metabolic.anion_gap"},
+    {"model_name": "Ke", "canonical": "electrolyte.potassium"},
+    {"model_name": "MAP", "canonical": "cardiovascular.map"},
+    {"model_name": "V", "canonical": "fluid.extracellular_volume"},
+    {"model_name": "I", "canonical": "endocrine.insulin_signal"},
+    {"model_name": "Na", "canonical": "electrolyte.sodium"},
+    {"model_name": "osmolality", "canonical": "metabolic.effective_osmolality"},
+    {"model_name": "creatinine", "canonical": "renal.creatinine"},
+    {"model_name": "urine_output", "canonical": "renal.urine_output"},
+    {"model_name": "BHB", "canonical": "metabolic.beta_hydroxybutyrate"},
+    {"model_name": "K_store", "canonical": "electrolyte.total_body_potassium_store"},
+    {"model_name": "osmotic_injury", "canonical": "neurologic.hyperosmolar_injury"}
+  ],
+  "actions": [
+    "insulin_iv", "insulin_rapid_sc", "insulin_intermediate_sc",
+    "insulin_basal_sc", "fluids", "kcl", "bicarbonate", "dextrose"
+  ],
+  "directions": ["decrease", "stable", "increase"],
+  "transition_status": ["verified", "contradicted", "unexplained"],
+  "proof_paths": [
+    "iv_insulin_lowers_glucose",
+    "rapid_sc_insulin_lowers_glucose",
+    "iv_insulin_lowers_potassium_without_kcl",
+    "fluids_raise_map",
+    "fluids_raise_volume",
+    "kcl_raises_potassium_without_iv_insulin",
+    "kcl_raises_total_body_store",
+    "bicarbonate_raises_hco3",
+    "bicarbonate_raises_ph",
+    "dextrose_raises_glucose_without_iv_insulin"
+  ],
+  "candidate_rule_level": "observational_association"
+}

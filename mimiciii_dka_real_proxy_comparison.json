@@ -1,0 +1,473 @@
+{
+  "experiment": "mimiciii_demo_dka_observed_treatment_real_proxy",
+  "dataset": "PhysioNet MIMIC-III Clinical Database Demo 1.4",
+  "cohort_role": "third external observed-treatment schema smoke test; not a robust DKA promotion cohort because the demo has no ICD-confirmed DKA stays and does not pass action-target power references",
+  "cohort_summary": {
+    "evaluable_stays": 40,
+    "transitions": 482,
+    "active_dka_transitions": 66,
+    "lab_dka_like_stays_before_filter": 42,
+    "diagnosis_confirmed_dka_stays": 0,
+    "diagnosis_pure_dka": false,
+    "core_pair_counts": {
+      "glucose": 332,
+      "potassium": 124,
+      "bicarbonate": 95,
+      "ph": 128,
+      "map": 455
+    },
+    "action_target_support": {
+      "insulin_any_to_glucose": {
+        "transitions": 122,
+        "stays": 18,
+        "active_dka_transitions": 10,
+        "active_dka_stays": 7
+      },
+      "insulin_iv_to_glucose": {
+        "transitions": 89,
+        "stays": 13,
+        "active_dka_transitions": 9,
+        "active_dka_stays": 6
+      },
+      "rapid_sc_insulin_to_glucose": {
+        "transitions": 28,
+        "stays": 6,
+        "active_dka_transitions": 1,
+        "active_dka_stays": 1
+      },
+      "fluids_to_map": {
+        "transitions": 440,
+        "stays": 37,
+        "active_dka_transitions": 52,
+        "active_dka_stays": 29
+      },
+      "kcl_to_potassium": {
+        "transitions": 36,
+        "stays": 9,
+        "active_dka_transitions": 1,
+        "active_dka_stays": 1
+      },
+      "bicarbonate_to_hco3": {
+        "transitions": 8,
+        "stays": 5,
+        "active_dka_transitions": 1,
+        "active_dka_stays": 1
+      },
+      "dextrose_to_glucose": {
+        "transitions": 278,
+        "stays": 32,
+        "active_dka_transitions": 32,
+        "active_dka_stays": 22
+      }
+    },
+    "power_proxy": {
+      "map_gate_reference_stays": 42,
+      "glucose_gate_reference_stays": 77,
+      "note": "Reference thresholds come from prior MIMIC-demo power analysis; MIMIC-III demo is too small and has no ICD-confirmed DKA.",
+      "support_passes_reference": {
+        "fluids_to_map": false,
+        "insulin_any_to_glucose": false,
+        "kcl_to_potassium": false
+      }
+    },
+    "action_quality": {
+      "normalized_event_rows": 23696,
+      "sources": {
+        "inputevents": 23696
+      },
+      "exact_timing_fraction": 0.269539,
+      "high_confidence_dose_fraction": 1.0,
+      "prescription_order_matches_not_used_as_administrations": 2849
+    },
+    "schema": {
+      "compatible_with_evaluate_mimic_proxy": true,
+      "has_exact_action_grids": true,
+      "has_treatment_lifecycle": true,
+      "has_treatment_history": true
+    }
+  },
+  "models": {
+    "v5_symbolic_jepa": {
+      "checkpoint": "/Users/chunyouchang/Desktop/llm_project/medical_jepa/dka_symbolic_jepa_v5.pt",
+      "checkpoint_model": "Symbolic-grounded Osler intervention DKA JEPA",
+      "rows_with_any_comparison": 233,
+      "rows_with_active_dka_comparison": 56,
+      "stays": 40,
+      "warning": "Factual check only: 40 stays; dose/time grids and prior history are present, but targets remain sparse and treatment selection is unadjusted.",
+      "all_windows": {
+        "glucose": {
+          "n": 178,
+          "model_mae": 159.9953,
+          "persistence_mae": 47.7303,
+          "delta_model_minus_persistence": 112.265,
+          "beats_persistence_point_estimate": false
+        },
+        "ph": {
+          "n": 78,
+          "model_mae": 0.0846,
+          "persistence_mae": 0.0569,
+          "delta_model_minus_persistence": 0.0277,
+          "beats_persistence_point_estimate": false
+        },
+        "bicarbonate": {
+          "n": 78,
+          "model_mae": 4.4986,
+          "persistence_mae": 2.5385,
+          "delta_model_minus_persistence": 1.9601,
+          "beats_persistence_point_estimate": false
+        },
+        "anion_gap": {
+          "n": 76,
+          "model_mae": 4.5335,
+          "persistence_mae": 2.4474,
+          "delta_model_minus_persistence": 2.0861,
+          "beats_persistence_point_estimate": false
+        },
+        "potassium": {
+          "n": 95,
+          "model_mae": 0.732,
+          "persistence_mae": 0.4758,
+          "delta_model_minus_persistence": 0.2562,
+          "beats_persistence_point_estimate": false
+        },
+        "map": {
+          "n": 232,
+          "model_mae": 10.9318,
+          "persistence_mae": 11.3247,
+          "delta_model_minus_persistence": -0.3929,
+          "beats_persistence_point_estimate": true
+        },
+        "sodium": {
+          "n": 86,
+          "model_mae": 6.7363,
+          "persistence_mae": 2.3488,
+          "delta_model_minus_persistence": 4.3875,
+          "beats_persistence_point_estimate": false
+        },
+        "osmolality": {
+          "n": 83,
+          "model_mae": 23.8407,
+          "persistence_mae": 4.419,
+          "delta_model_minus_persistence": 19.4217,
+          "beats_persistence_point_estimate": false
+        },
+        "creatinine": {
+          "n": 71,
+          "model_mae": 0.2796,
+          "persistence_mae": 0.2028,
+          "delta_model_minus_persistence": 0.0768,
+          "beats_persistence_point_estimate": false
+        },
+        "urine_output": {
+          "n": 201,
+          "model_mae": 166.8248,
+          "persistence_mae": 42.8234,
+          "delta_model_minus_persistence": 124.0014,
+          "beats_persistence_point_estimate": false
+        },
+        "BHB": {
+          "n": 0,
+          "model_mae": null,
+          "persistence_mae": null,
+          "delta_model_minus_persistence": null,
+          "beats_persistence_point_estimate": false
+        }
+      },
+      "active_dka": {
+        "glucose": {
+          "n": 34,
+          "model_mae": 180.9064,
+          "persistence_mae": 98.4706,
+          "delta_model_minus_persistence": 82.4358,
+          "beats_persistence_point_estimate": false
+        },
+        "ph": {
+          "n": 11,
+          "model_mae": 0.1471,
+          "persistence_mae": 0.1391,
+          "delta_model_minus_persistence": 0.008,
+          "beats_persistence_point_estimate": false
+        },
+        "bicarbonate": {
+          "n": 12,
+          "model_mae": 4.1669,
+          "persistence_mae": 4.9167,
+          "delta_model_minus_persistence": -0.7498,
+          "beats_persistence_point_estimate": true
+        },
+        "anion_gap": {
+          "n": 12,
+          "model_mae": 5.7697,
+          "persistence_mae": 4.25,
+          "delta_model_minus_persistence": 1.5197,
+          "beats_persistence_point_estimate": false
+        },
+        "potassium": {
+          "n": 14,
+          "model_mae": 0.8014,
+          "persistence_mae": 0.7571,
+          "delta_model_minus_persistence": 0.0443,
+          "beats_persistence_point_estimate": false
+        },
+        "map": {
+          "n": 55,
+          "model_mae": 14.3401,
+          "persistence_mae": 13.8485,
+          "delta_model_minus_persistence": 0.4916,
+          "beats_persistence_point_estimate": false
+        },
+        "sodium": {
+          "n": 14,
+          "model_mae": 5.0867,
+          "persistence_mae": 5.0,
+          "delta_model_minus_persistence": 0.0867,
+          "beats_persistence_point_estimate": false
+        },
+        "osmolality": {
+          "n": 13,
+          "model_mae": 17.6294,
+          "persistence_mae": 7.5342,
+          "delta_model_minus_persistence": 10.0952,
+          "beats_persistence_point_estimate": false
+        },
+        "creatinine": {
+          "n": 13,
+          "model_mae": 0.3267,
+          "persistence_mae": 0.1538,
+          "delta_model_minus_persistence": 0.1729,
+          "beats_persistence_point_estimate": false
+        },
+        "urine_output": {
+          "n": 46,
+          "model_mae": 191.9655,
+          "persistence_mae": 55.0543,
+          "delta_model_minus_persistence": 136.9112,
+          "beats_persistence_point_estimate": false
+        },
+        "BHB": {
+          "n": 0,
+          "model_mae": null,
+          "persistence_mae": null,
+          "delta_model_minus_persistence": null,
+          "beats_persistence_point_estimate": false
+        }
+      }
+    },
+    "physionet_presentation_only_candidate": {
+      "checkpoint": "/Users/chunyouchang/Desktop/llm_project/medical_jepa/dka_physionet_presentation_only_candidate.pt",
+      "checkpoint_model": "Symbolic-grounded Osler intervention DKA JEPA",
+      "rows_with_any_comparison": 233,
+      "rows_with_active_dka_comparison": 56,
+      "stays": 40,
+      "warning": "Factual check only: 40 stays; dose/time grids and prior history are present, but targets remain sparse and treatment selection is unadjusted.",
+      "all_windows": {
+        "glucose": {
+          "n": 178,
+          "model_mae": 81.4488,
+          "persistence_mae": 47.7303,
+          "delta_model_minus_persistence": 33.7185,
+          "beats_persistence_point_estimate": false
+        },
+        "ph": {
+          "n": 78,
+          "model_mae": 0.0639,
+          "persistence_mae": 0.0569,
+          "delta_model_minus_persistence": 0.007,
+          "beats_persistence_point_estimate": false
+        },
+        "bicarbonate": {
+          "n": 78,
+          "model_mae": 4.406,
+          "persistence_mae": 2.5385,
+          "delta_model_minus_persistence": 1.8675,
+          "beats_persistence_point_estimate": false
+        },
+        "anion_gap": {
+          "n": 76,
+          "model_mae": 3.5934,
+          "persistence_mae": 2.4474,
+          "delta_model_minus_persistence": 1.146,
+          "beats_persistence_point_estimate": false
+        },
+        "potassium": {
+          "n": 95,
+          "model_mae": 0.6916,
+          "persistence_mae": 0.4758,
+          "delta_model_minus_persistence": 0.2158,
+          "beats_persistence_point_estimate": false
+        },
+        "map": {
+          "n": 232,
+          "model_mae": 11.3519,
+          "persistence_mae": 11.3247,
+          "delta_model_minus_persistence": 0.0272,
+          "beats_persistence_point_estimate": false
+        },
+        "sodium": {
+          "n": 86,
+          "model_mae": 2.83,
+          "persistence_mae": 2.3488,
+          "delta_model_minus_persistence": 0.4812,
+          "beats_persistence_point_estimate": false
+        },
+        "osmolality": {
+          "n": 83,
+          "model_mae": 8.6242,
+          "persistence_mae": 4.419,
+          "delta_model_minus_persistence": 4.2052,
+          "beats_persistence_point_estimate": false
+        },
+        "creatinine": {
+          "n": 71,
+          "model_mae": 6.3573,
+          "persistence_mae": 0.2028,
+          "delta_model_minus_persistence": 6.1545,
+          "beats_persistence_point_estimate": false
+        },
+        "urine_output": {
+          "n": 201,
+          "model_mae": 57.7069,
+          "persistence_mae": 42.8234,
+          "delta_model_minus_persistence": 14.8835,
+          "beats_persistence_point_estimate": false
+        },
+        "BHB": {
+          "n": 0,
+          "model_mae": null,
+          "persistence_mae": null,
+          "delta_model_minus_persistence": null,
+          "beats_persistence_point_estimate": false
+        }
+      },
+      "active_dka": {
+        "glucose": {
+          "n": 34,
+          "model_mae": 101.4579,
+          "persistence_mae": 98.4706,
+          "delta_model_minus_persistence": 2.9873,
+          "beats_persistence_point_estimate": false
+        },
+        "ph": {
+          "n": 11,
+          "model_mae": 0.1334,
+          "persistence_mae": 0.1391,
+          "delta_model_minus_persistence": -0.0057,
+          "beats_persistence_point_estimate": true
+        },
+        "bicarbonate": {
+          "n": 12,
+          "model_mae": 7.4982,
+          "persistence_mae": 4.9167,
+          "delta_model_minus_persistence": 2.5815,
+          "beats_persistence_point_estimate": false
+        },
+        "anion_gap": {
+          "n": 12,
+          "model_mae": 4.9117,
+          "persistence_mae": 4.25,
+          "delta_model_minus_persistence": 0.6617,
+          "beats_persistence_point_estimate": false
+        },
+        "potassium": {
+          "n": 14,
+          "model_mae": 0.738,
+          "persistence_mae": 0.7571,
+          "delta_model_minus_persistence": -0.0191,
+          "beats_persistence_point_estimate": true
+        },
+        "map": {
+          "n": 55,
+          "model_mae": 14.16,
+          "persistence_mae": 13.8485,
+          "delta_model_minus_persistence": 0.3115,
+          "beats_persistence_point_estimate": false
+        },
+        "sodium": {
+          "n": 14,
+          "model_mae": 3.6561,
+          "persistence_mae": 5.0,
+          "delta_model_minus_persistence": -1.3439,
+          "beats_persistence_point_estimate": true
+        },
+        "osmolality": {
+          "n": 13,
+          "model_mae": 9.2318,
+          "persistence_mae": 7.5342,
+          "delta_model_minus_persistence": 1.6976,
+          "beats_persistence_point_estimate": false
+        },
+        "creatinine": {
+          "n": 13,
+          "model_mae": 4.0615,
+          "persistence_mae": 0.1538,
+          "delta_model_minus_persistence": 3.9077,
+          "beats_persistence_point_estimate": false
+        },
+        "urine_output": {
+          "n": 46,
+          "model_mae": 63.7291,
+          "persistence_mae": 55.0543,
+          "delta_model_minus_persistence": 8.6748,
+          "beats_persistence_point_estimate": false
+        },
+        "BHB": {
+          "n": 0,
+          "model_mae": null,
+          "persistence_mae": null,
+          "delta_model_minus_persistence": null,
+          "beats_persistence_point_estimate": false
+        }
+      }
+    }
+  },
+  "symbolic_real_test": {
+    "test_type": "patient-held-out MIMIC-III demo symbolic rule test",
+    "cohort_label": "MIMIC-III demo",
+    "patient_split": {
+      "discovery_stays": 27,
+      "heldout_stays": 13,
+      "overlap": 0,
+      "discovery_records": 29,
+      "heldout_records": 14
+    },
+    "external_symbolic_metrics": {
+      "factual_direction_accuracy_all": 0.5658,
+      "factual_direction_accuracy_changed_only": 0.6087,
+      "direction_comparisons": 76,
+      "changed_direction_comparisons": 69,
+      "mean_proposal_confidence": 0.8829,
+      "interpretation": "Observational factual-direction check; it is not a causal effect test."
+    },
+    "candidate_rule_gate": {
+      "proposed": 10,
+      "retrospectively_validated": 2,
+      "active_rule_conflicts": 0,
+      "automatically_promoted_to_active": 0,
+      "candidate_file": "/Users/chunyouchang/Desktop/llm_project/medical_jepa/rules/candidate/symbolic_real_test_1781953547.json"
+    }
+  },
+  "decision": {
+    "checkpoint_promotion": false,
+    "causal_claim_allowed": false,
+    "counterfactual_claim_allowed": false,
+    "clinical_claim_allowed": false,
+    "reason": "MIMIC-III demo is small, lab-defined only, underpowered for all action-target reference gates, and model wins are sparse point estimates."
+  },
+  "interpretation": [
+    "The adapter successfully maps MIMIC-III demo labs, ICU vitals, urine output, and INPUTEVENTS_CV/MV treatments into the same observed-treatment 6h DKA proxy schema used by MIMIC-IV/eICU evaluators.",
+    "The demo contains 42 lab-defined DKA-like stays before evaluable filtering and 40 evaluable stays, but 0 ICD-confirmed DKA stays in the local demo files.",
+    "Action grids, treatment lifecycle grids, and pre-anchor history are present, but action-target support remains below the prior reference gates for fluids-to-MAP, insulin-to-glucose, and KCl-to-potassium.",
+    "V5 only beats persistence for all-window MAP and active-DKA bicarbonate as point estimates; the presentation-only candidate only has small active-DKA point-estimate wins for pH, potassium, and sodium.",
+    "This is useful as a third cross-dataset schema/robustness smoke test, not as evidence for checkpoint promotion or treatment-effect inference."
+  ],
+  "safety_boundary": {
+    "raw_rows_included": false,
+    "patient_ids_included_in_report": false,
+    "diagnosis_pure_dka": false,
+    "factual_observed_treatment_only": true,
+    "causal_claim_allowed": false,
+    "counterfactual_claim_allowed": false,
+    "clinical_claim_allowed": false,
+    "checkpoint_promotion_allowed": false
+  }
+}

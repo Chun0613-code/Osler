@@ -1,0 +1,899 @@
+{
+  "experiment": "dka_buffer_hypothesis_audit",
+  "question": "Does DKABody lack enough homeostatic buffering/mean reversion for HCO3 and serum potassium?",
+  "data_boundary": {
+    "physionet_dynamics": "action-unobserved factual ICU dynamics; no medication channels",
+    "simulator_dynamics": "DKABody no-action trajectories",
+    "contains_patient_rows": false,
+    "contains_patient_identifiers": false
+  },
+  "horizons_hours": [
+    1,
+    2,
+    4,
+    6
+  ],
+  "physionet": {
+    "metadata": {
+      "patients_scanned": 40336,
+      "patients_with_dka_like_anchor": 1177,
+      "dka_like_anchor_rows": 1985,
+      "selection": "Glucose>=200 and (HCO3<=18 or pH<=7.30), using only directly observed feature pairs at current and future rows"
+    },
+    "summary": {
+      "1": {
+        "HCO3": {
+          "n": 280,
+          "mean_delta_per_hour": 0.253214,
+          "std_delta_per_hour": 1.636418,
+          "median_abs_delta_per_hour": 0.0,
+          "p90_abs_delta_per_hour": 2.0,
+          "delta_quantiles": {
+            "p10": -0.75,
+            "p25": 0.0,
+            "p50": 0.0,
+            "p75": 0.0,
+            "p90": 1.230001
+          },
+          "current_target_autocorrelation": 0.923156,
+          "mean_reversion_beta_per_hour": 0.063279
+        },
+        "Potassium": {
+          "n": 478,
+          "mean_delta_per_hour": -0.076151,
+          "std_delta_per_hour": 0.459223,
+          "median_abs_delta_per_hour": 0.1,
+          "p90_abs_delta_per_hour": 0.7,
+          "delta_quantiles": {
+            "p10": -0.512,
+            "p25": -0.2,
+            "p50": 0.0,
+            "p75": 0.0,
+            "p90": 0.3
+          },
+          "current_target_autocorrelation": 0.891279,
+          "mean_reversion_beta_per_hour": 0.140517
+        },
+        "pH": {
+          "n": 673,
+          "mean_delta_per_hour": 0.033358,
+          "std_delta_per_hour": 0.074125,
+          "median_abs_delta_per_hour": 0.04,
+          "p90_abs_delta_per_hour": 0.13,
+          "delta_quantiles": {
+            "p10": -0.03,
+            "p25": 0.0,
+            "p50": 0.02,
+            "p75": 0.07,
+            "p90": 0.11
+          },
+          "current_target_autocorrelation": 0.712533,
+          "mean_reversion_beta_per_hour": 0.282647
+        },
+        "Glucose": {
+          "n": 635,
+          "mean_delta_per_hour": -20.559055,
+          "std_delta_per_hour": 55.177987,
+          "median_abs_delta_per_hour": 25.0,
+          "p90_abs_delta_per_hour": 86.4,
+          "delta_quantiles": {
+            "p10": -75.0,
+            "p25": -41.75,
+            "p50": -16.0,
+            "p75": 4.0,
+            "p90": 29.3
+          },
+          "current_target_autocorrelation": 0.851889,
+          "mean_reversion_beta_per_hour": 0.163996
+        },
+        "MAP": {
+          "n": 1599,
+          "mean_delta_per_hour": -0.720763,
+          "std_delta_per_hour": 14.379067,
+          "median_abs_delta_per_hour": 6.0,
+          "p90_abs_delta_per_hour": 19.0,
+          "delta_quantiles": {
+            "p10": -13.534,
+            "p25": -6.0,
+            "p50": 0.0,
+            "p75": 6.0,
+            "p90": 12.0
+          },
+          "current_target_autocorrelation": 0.640419,
+          "mean_reversion_beta_per_hour": 0.419473
+        }
+      },
+      "2": {
+        "HCO3": {
+          "n": 149,
+          "mean_delta_per_hour": 0.72802,
+          "std_delta_per_hour": 1.356401,
+          "median_abs_delta_per_hour": 1.0,
+          "p90_abs_delta_per_hour": 2.5,
+          "delta_quantiles": {
+            "p10": -1.0,
+            "p25": -0.05,
+            "p50": 0.5,
+            "p75": 1.5,
+            "p90": 2.5
+          },
+          "current_target_autocorrelation": 0.784526,
+          "mean_reversion_beta_per_hour": 0.092015
+        },
+        "Potassium": {
+          "n": 396,
+          "mean_delta_per_hour": -0.07601,
+          "std_delta_per_hour": 0.403724,
+          "median_abs_delta_per_hour": 0.2,
+          "p90_abs_delta_per_hour": 0.625,
+          "delta_quantiles": {
+            "p10": -0.45,
+            "p25": -0.25,
+            "p50": -0.05,
+            "p75": 0.1,
+            "p90": 0.35
+          },
+          "current_target_autocorrelation": 0.680092,
+          "mean_reversion_beta_per_hour": 0.218767
+        },
+        "pH": {
+          "n": 652,
+          "mean_delta_per_hour": 0.026641,
+          "std_delta_per_hour": 0.042547,
+          "median_abs_delta_per_hour": 0.03,
+          "p90_abs_delta_per_hour": 0.08,
+          "delta_quantiles": {
+            "p10": -0.015,
+            "p25": 0.00375,
+            "p50": 0.025,
+            "p75": 0.05,
+            "p90": 0.08
+          },
+          "current_target_autocorrelation": 0.584217,
+          "mean_reversion_beta_per_hour": 0.163565
+        },
+        "Glucose": {
+          "n": 750,
+          "mean_delta_per_hour": -20.528113,
+          "std_delta_per_hour": 40.976033,
+          "median_abs_delta_per_hour": 20.5,
+          "p90_abs_delta_per_hour": 63.05,
+          "delta_quantiles": {
+            "p10": -59.05,
+            "p25": -34.9375,
+            "p50": -15.5,
+            "p75": 0.0,
+            "p90": 14.0
+          },
+          "current_target_autocorrelation": 0.718887,
+          "mean_reversion_beta_per_hour": 0.163559
+        },
+        "MAP": {
+          "n": 1555,
+          "mean_delta_per_hour": -0.245434,
+          "std_delta_per_hour": 7.924229,
+          "median_abs_delta_per_hour": 3.5,
+          "p90_abs_delta_per_hour": 11.5,
+          "delta_quantiles": {
+            "p10": -8.0,
+            "p25": -3.75,
+            "p50": 0.0,
+            "p75": 3.5,
+            "p90": 7.5
+          },
+          "current_target_autocorrelation": 0.538806,
+          "mean_reversion_beta_per_hour": 0.266312
+        }
+      },
+      "4": {
+        "HCO3": {
+          "n": 208,
+          "mean_delta_per_hour": 0.357873,
+          "std_delta_per_hour": 0.808946,
+          "median_abs_delta_per_hour": 0.5,
+          "p90_abs_delta_per_hour": 1.25,
+          "delta_quantiles": {
+            "p10": -0.5,
+            "p25": 0.0,
+            "p50": 0.25,
+            "p75": 0.75,
+            "p90": 1.25
+          },
+          "current_target_autocorrelation": 0.741475,
+          "mean_reversion_beta_per_hour": 0.07253
+        },
+        "Potassium": {
+          "n": 413,
+          "mean_delta_per_hour": -0.040466,
+          "std_delta_per_hour": 0.190439,
+          "median_abs_delta_per_hour": 0.1,
+          "p90_abs_delta_per_hour": 0.32,
+          "delta_quantiles": {
+            "p10": -0.275,
+            "p25": -0.1375,
+            "p50": -0.05,
+            "p75": 0.075,
+            "p90": 0.175
+          },
+          "current_target_autocorrelation": 0.668097,
+          "mean_reversion_beta_per_hour": 0.106638
+        },
+        "pH": {
+          "n": 540,
+          "mean_delta_per_hour": 0.018032,
+          "std_delta_per_hour": 0.025448,
+          "median_abs_delta_per_hour": 0.0175,
+          "p90_abs_delta_per_hour": 0.0525,
+          "delta_quantiles": {
+            "p10": -0.01,
+            "p25": 0.0025,
+            "p50": 0.015,
+            "p75": 0.0325,
+            "p90": 0.0525
+          },
+          "current_target_autocorrelation": 0.472749,
+          "mean_reversion_beta_per_hour": 0.116577
+        },
+        "Glucose": {
+          "n": 719,
+          "mean_delta_per_hour": -16.251304,
+          "std_delta_per_hour": 22.764008,
+          "median_abs_delta_per_hour": 15.75,
+          "p90_abs_delta_per_hour": 40.775,
+          "delta_quantiles": {
+            "p10": -40.65,
+            "p25": -25.5625,
+            "p50": -13.75,
+            "p75": -3.75,
+            "p90": 5.9
+          },
+          "current_target_autocorrelation": 0.6052,
+          "mean_reversion_beta_per_hour": 0.103902
+        },
+        "MAP": {
+          "n": 1509,
+          "mean_delta_per_hour": -0.073232,
+          "std_delta_per_hour": 4.401946,
+          "median_abs_delta_per_hour": 2.25,
+          "p90_abs_delta_per_hour": 6.0,
+          "delta_quantiles": {
+            "p10": -4.5,
+            "p25": -2.25,
+            "p50": 0.0,
+            "p75": 2.25,
+            "p90": 4.275
+          },
+          "current_target_autocorrelation": 0.453415,
+          "mean_reversion_beta_per_hour": 0.146565
+        }
+      },
+      "6": {
+        "HCO3": {
+          "n": 183,
+          "mean_delta_per_hour": 0.363661,
+          "std_delta_per_hour": 0.583801,
+          "median_abs_delta_per_hour": 0.333333,
+          "p90_abs_delta_per_hour": 1.14,
+          "delta_quantiles": {
+            "p10": -0.333333,
+            "p25": 0.0,
+            "p50": 0.333333,
+            "p75": 0.666667,
+            "p90": 1.133333
+          },
+          "current_target_autocorrelation": 0.676988,
+          "mean_reversion_beta_per_hour": 0.050169
+        },
+        "Potassium": {
+          "n": 383,
+          "mean_delta_per_hour": -0.02413,
+          "std_delta_per_hour": 0.151312,
+          "median_abs_delta_per_hour": 0.083333,
+          "p90_abs_delta_per_hour": 0.241667,
+          "delta_quantiles": {
+            "p10": -0.2,
+            "p25": -0.1,
+            "p50": -0.016667,
+            "p75": 0.05,
+            "p90": 0.133333
+          },
+          "current_target_autocorrelation": 0.529111,
+          "mean_reversion_beta_per_hour": 0.092607
+        },
+        "pH": {
+          "n": 478,
+          "mean_delta_per_hour": 0.014979,
+          "std_delta_per_hour": 0.017328,
+          "median_abs_delta_per_hour": 0.016667,
+          "p90_abs_delta_per_hour": 0.035,
+          "delta_quantiles": {
+            "p10": -0.005,
+            "p25": 0.005,
+            "p50": 0.015,
+            "p75": 0.026667,
+            "p90": 0.035
+          },
+          "current_target_autocorrelation": 0.404795,
+          "mean_reversion_beta_per_hour": 0.09687
+        },
+        "Glucose": {
+          "n": 659,
+          "mean_delta_per_hour": -13.645465,
+          "std_delta_per_hour": 16.049487,
+          "median_abs_delta_per_hour": 13.333333,
+          "p90_abs_delta_per_hour": 32.5,
+          "delta_quantiles": {
+            "p10": -31.933333,
+            "p25": -21.0,
+            "p50": -12.5,
+            "p75": -4.541667,
+            "p90": 2.566667
+          },
+          "current_target_autocorrelation": 0.52837,
+          "mean_reversion_beta_per_hour": 0.078744
+        },
+        "MAP": {
+          "n": 1454,
+          "mean_delta_per_hour": -0.186478,
+          "std_delta_per_hour": 3.0157,
+          "median_abs_delta_per_hour": 1.445,
+          "p90_abs_delta_per_hour": 4.333333,
+          "delta_quantiles": {
+            "p10": -3.25,
+            "p25": -1.583333,
+            "p50": -0.110001,
+            "p75": 1.333333,
+            "p90": 2.833333
+          },
+          "current_target_autocorrelation": 0.410677,
+          "mean_reversion_beta_per_hour": 0.103913
+        }
+      }
+    }
+  },
+  "simulator": {
+    "metadata": {
+      "samples": 1000,
+      "deaths_before_or_at_max_horizon": {
+        "acidosis (pH<6.8)": 35
+      },
+      "action": "no_action"
+    },
+    "summary": {
+      "1": {
+        "HCO3": {
+          "n": 1000,
+          "mean_delta_per_hour": -0.560193,
+          "std_delta_per_hour": 0.50799,
+          "median_abs_delta_per_hour": 0.569957,
+          "p90_abs_delta_per_hour": 1.242568,
+          "delta_quantiles": {
+            "p10": -1.240519,
+            "p25": -0.883189,
+            "p50": -0.560305,
+            "p75": -0.193604,
+            "p90": 0.049304
+          },
+          "current_target_autocorrelation": 0.993886,
+          "mean_reversion_beta_per_hour": -0.001904
+        },
+        "Potassium": {
+          "n": 1000,
+          "mean_delta_per_hour": 0.033853,
+          "std_delta_per_hour": 0.190863,
+          "median_abs_delta_per_hour": 0.134337,
+          "p90_abs_delta_per_hour": 0.316542,
+          "delta_quantiles": {
+            "p10": -0.218055,
+            "p25": -0.094121,
+            "p50": 0.044162,
+            "p75": 0.169604,
+            "p90": 0.279186
+          },
+          "current_target_autocorrelation": 0.995963,
+          "mean_reversion_beta_per_hour": 0.2013
+        },
+        "pH": {
+          "n": 1000,
+          "mean_delta_per_hour": -0.006131,
+          "std_delta_per_hour": 0.008595,
+          "median_abs_delta_per_hour": 0.004484,
+          "p90_abs_delta_per_hour": 0.014649,
+          "delta_quantiles": {
+            "p10": -0.014635,
+            "p25": -0.008714,
+            "p50": -0.004216,
+            "p75": -0.001431,
+            "p90": 0.000381
+          },
+          "current_target_autocorrelation": 0.984633,
+          "mean_reversion_beta_per_hour": -0.032553
+        },
+        "Glucose": {
+          "n": 1000,
+          "mean_delta_per_hour": 22.968802,
+          "std_delta_per_hour": 13.304415,
+          "median_abs_delta_per_hour": 21.473799,
+          "p90_abs_delta_per_hour": 41.303716,
+          "delta_quantiles": {
+            "p10": 6.685838,
+            "p25": 12.711639,
+            "p50": 21.473799,
+            "p75": 31.885948,
+            "p90": 41.303716
+          },
+          "current_target_autocorrelation": 0.986955,
+          "mean_reversion_beta_per_hour": -0.01642
+        },
+        "MAP": {
+          "n": 1000,
+          "mean_delta_per_hour": -0.829998,
+          "std_delta_per_hour": 0.514173,
+          "median_abs_delta_per_hour": 0.674072,
+          "p90_abs_delta_per_hour": 1.525634,
+          "delta_quantiles": {
+            "p10": -1.525634,
+            "p25": -1.054117,
+            "p50": -0.674072,
+            "p75": -0.462648,
+            "p90": -0.348307
+          },
+          "current_target_autocorrelation": 0.99931,
+          "mean_reversion_beta_per_hour": 0.01983
+        }
+      },
+      "2": {
+        "HCO3": {
+          "n": 1000,
+          "mean_delta_per_hour": -0.561765,
+          "std_delta_per_hour": 0.529316,
+          "median_abs_delta_per_hour": 0.566903,
+          "p90_abs_delta_per_hour": 1.282559,
+          "delta_quantiles": {
+            "p10": -1.282559,
+            "p25": -0.887317,
+            "p50": -0.559123,
+            "p75": -0.171789,
+            "p90": 0.068932
+          },
+          "current_target_autocorrelation": 0.974912,
+          "mean_reversion_beta_per_hour": -0.007095
+        },
+        "Potassium": {
+          "n": 1000,
+          "mean_delta_per_hour": 0.034943,
+          "std_delta_per_hour": 0.170506,
+          "median_abs_delta_per_hour": 0.122597,
+          "p90_abs_delta_per_hour": 0.282252,
+          "delta_quantiles": {
+            "p10": -0.190515,
+            "p25": -0.076996,
+            "p50": 0.044047,
+            "p75": 0.155046,
+            "p90": 0.25335
+          },
+          "current_target_autocorrelation": 0.978923,
+          "mean_reversion_beta_per_hour": 0.178844
+        },
+        "pH": {
+          "n": 1000,
+          "mean_delta_per_hour": -0.006771,
+          "std_delta_per_hour": 0.011896,
+          "median_abs_delta_per_hour": 0.00442,
+          "p90_abs_delta_per_hour": 0.01549,
+          "delta_quantiles": {
+            "p10": -0.01549,
+            "p25": -0.009234,
+            "p50": -0.004126,
+            "p75": -0.001293,
+            "p90": 0.000531
+          },
+          "current_target_autocorrelation": 0.916915,
+          "mean_reversion_beta_per_hour": -0.069511
+        },
+        "Glucose": {
+          "n": 1000,
+          "mean_delta_per_hour": 23.387419,
+          "std_delta_per_hour": 14.040057,
+          "median_abs_delta_per_hour": 21.552432,
+          "p90_abs_delta_per_hour": 42.951366,
+          "delta_quantiles": {
+            "p10": 6.632062,
+            "p25": 12.690349,
+            "p50": 21.552432,
+            "p75": 32.652341,
+            "p90": 42.951366
+          },
+          "current_target_autocorrelation": 0.947589,
+          "mean_reversion_beta_per_hour": -0.018575
+        },
+        "MAP": {
+          "n": 1000,
+          "mean_delta_per_hour": -0.86644,
+          "std_delta_per_hour": 0.523001,
+          "median_abs_delta_per_hour": 0.719129,
+          "p90_abs_delta_per_hour": 1.563285,
+          "delta_quantiles": {
+            "p10": -1.563285,
+            "p25": -1.113977,
+            "p50": -0.719129,
+            "p75": -0.49042,
+            "p90": -0.36736
+          },
+          "current_target_autocorrelation": 0.997081,
+          "mean_reversion_beta_per_hour": 0.020828
+        }
+      },
+      "4": {
+        "HCO3": {
+          "n": 997,
+          "mean_delta_per_hour": -0.580799,
+          "std_delta_per_hour": 0.579311,
+          "median_abs_delta_per_hour": 0.545538,
+          "p90_abs_delta_per_hour": 1.41325,
+          "delta_quantiles": {
+            "p10": -1.41325,
+            "p25": -0.921234,
+            "p50": -0.533397,
+            "p75": -0.147184,
+            "p90": 0.093128
+          },
+          "current_target_autocorrelation": 0.899612,
+          "mean_reversion_beta_per_hour": -0.012
+        },
+        "Potassium": {
+          "n": 997,
+          "mean_delta_per_hour": 0.036798,
+          "std_delta_per_hour": 0.138839,
+          "median_abs_delta_per_hour": 0.102655,
+          "p90_abs_delta_per_hour": 0.236145,
+          "delta_quantiles": {
+            "p10": -0.148431,
+            "p25": -0.053689,
+            "p50": 0.043279,
+            "p75": 0.137256,
+            "p90": 0.218972
+          },
+          "current_target_autocorrelation": 0.86656,
+          "mean_reversion_beta_per_hour": 0.143564
+        },
+        "pH": {
+          "n": 997,
+          "mean_delta_per_hour": -0.009231,
+          "std_delta_per_hour": 0.021725,
+          "median_abs_delta_per_hour": 0.004516,
+          "p90_abs_delta_per_hour": 0.020202,
+          "delta_quantiles": {
+            "p10": -0.020202,
+            "p25": -0.010251,
+            "p50": -0.004265,
+            "p75": -0.001221,
+            "p90": 0.000755
+          },
+          "current_target_autocorrelation": 0.657796,
+          "mean_reversion_beta_per_hour": -0.146397
+        },
+        "Glucose": {
+          "n": 997,
+          "mean_delta_per_hour": 24.62284,
+          "std_delta_per_hour": 15.343875,
+          "median_abs_delta_per_hour": 22.436607,
+          "p90_abs_delta_per_hour": 47.194758,
+          "delta_quantiles": {
+            "p10": 6.246536,
+            "p25": 12.333954,
+            "p50": 22.436607,
+            "p75": 35.189348,
+            "p90": 47.194758
+          },
+          "current_target_autocorrelation": 0.814589,
+          "mean_reversion_beta_per_hour": -0.020003
+        },
+        "MAP": {
+          "n": 997,
+          "mean_delta_per_hour": -0.924268,
+          "std_delta_per_hour": 0.533246,
+          "median_abs_delta_per_hour": 0.793868,
+          "p90_abs_delta_per_hour": 1.638206,
+          "delta_quantiles": {
+            "p10": -1.638206,
+            "p25": -1.185423,
+            "p50": -0.793868,
+            "p75": -0.527478,
+            "p90": -0.392881
+          },
+          "current_target_autocorrelation": 0.98723,
+          "mean_reversion_beta_per_hour": 0.022472
+        }
+      },
+      "6": {
+        "HCO3": {
+          "n": 987,
+          "mean_delta_per_hour": -0.602136,
+          "std_delta_per_hour": 0.614224,
+          "median_abs_delta_per_hour": 0.551013,
+          "p90_abs_delta_per_hour": 1.480553,
+          "delta_quantiles": {
+            "p10": -1.480553,
+            "p25": -0.994952,
+            "p50": -0.529102,
+            "p75": -0.135625,
+            "p90": 0.122952
+          },
+          "current_target_autocorrelation": 0.791115,
+          "mean_reversion_beta_per_hour": -0.010085
+        },
+        "Potassium": {
+          "n": 987,
+          "mean_delta_per_hour": 0.038299,
+          "std_delta_per_hour": 0.11711,
+          "median_abs_delta_per_hour": 0.086372,
+          "p90_abs_delta_per_hour": 0.203559,
+          "delta_quantiles": {
+            "p10": -0.117839,
+            "p25": -0.037262,
+            "p50": 0.040539,
+            "p75": 0.124222,
+            "p90": 0.191075
+          },
+          "current_target_autocorrelation": 0.640651,
+          "mean_reversion_beta_per_hour": 0.117924
+        },
+        "pH": {
+          "n": 987,
+          "mean_delta_per_hour": -0.013607,
+          "std_delta_per_hour": 0.029965,
+          "median_abs_delta_per_hour": 0.005081,
+          "p90_abs_delta_per_hour": 0.031776,
+          "delta_quantiles": {
+            "p10": -0.031776,
+            "p25": -0.012879,
+            "p50": -0.004643,
+            "p75": -0.001117,
+            "p90": 0.000882
+          },
+          "current_target_autocorrelation": 0.487692,
+          "mean_reversion_beta_per_hour": -0.192324
+        },
+        "Glucose": {
+          "n": 987,
+          "mean_delta_per_hour": 25.812114,
+          "std_delta_per_hour": 15.87961,
+          "median_abs_delta_per_hour": 23.681555,
+          "p90_abs_delta_per_hour": 49.216127,
+          "delta_quantiles": {
+            "p10": 5.992487,
+            "p25": 13.041915,
+            "p50": 23.681555,
+            "p75": 37.821223,
+            "p90": 49.216127
+          },
+          "current_target_autocorrelation": 0.681997,
+          "mean_reversion_beta_per_hour": -0.020243
+        },
+        "MAP": {
+          "n": 987,
+          "mean_delta_per_hour": -0.964684,
+          "std_delta_per_hour": 0.536309,
+          "median_abs_delta_per_hour": 0.830465,
+          "p90_abs_delta_per_hour": 1.690699,
+          "delta_quantiles": {
+            "p10": -1.690699,
+            "p25": -1.234157,
+            "p50": -0.830465,
+            "p75": -0.563338,
+            "p90": -0.416883
+          },
+          "current_target_autocorrelation": 0.969648,
+          "mean_reversion_beta_per_hour": 0.023896
+        }
+      }
+    }
+  },
+  "comparison": {
+    "1": {
+      "HCO3": {
+        "sim_to_physionet_median_abs_delta_ratio": null,
+        "sim_to_physionet_p90_abs_delta_ratio": 0.621284,
+        "autocorrelation_gap_sim_minus_physionet": 0.07073,
+        "mean_reversion_beta_gap_sim_minus_physionet": -0.065183,
+        "supports_over_volatility": false,
+        "supports_lower_autocorrelation": false
+      },
+      "Potassium": {
+        "sim_to_physionet_median_abs_delta_ratio": 1.34337,
+        "sim_to_physionet_p90_abs_delta_ratio": 0.452203,
+        "autocorrelation_gap_sim_minus_physionet": 0.104684,
+        "mean_reversion_beta_gap_sim_minus_physionet": 0.060783,
+        "supports_over_volatility": false,
+        "supports_lower_autocorrelation": false
+      },
+      "pH": {
+        "sim_to_physionet_median_abs_delta_ratio": 0.1121,
+        "sim_to_physionet_p90_abs_delta_ratio": 0.112685,
+        "autocorrelation_gap_sim_minus_physionet": 0.2721,
+        "mean_reversion_beta_gap_sim_minus_physionet": -0.3152,
+        "supports_over_volatility": false,
+        "supports_lower_autocorrelation": false
+      },
+      "Glucose": {
+        "sim_to_physionet_median_abs_delta_ratio": 0.858952,
+        "sim_to_physionet_p90_abs_delta_ratio": 0.478052,
+        "autocorrelation_gap_sim_minus_physionet": 0.135066,
+        "mean_reversion_beta_gap_sim_minus_physionet": -0.180416,
+        "supports_over_volatility": false,
+        "supports_lower_autocorrelation": false
+      },
+      "MAP": {
+        "sim_to_physionet_median_abs_delta_ratio": 0.112345,
+        "sim_to_physionet_p90_abs_delta_ratio": 0.080297,
+        "autocorrelation_gap_sim_minus_physionet": 0.358891,
+        "mean_reversion_beta_gap_sim_minus_physionet": -0.399643,
+        "supports_over_volatility": false,
+        "supports_lower_autocorrelation": false
+      }
+    },
+    "2": {
+      "HCO3": {
+        "sim_to_physionet_median_abs_delta_ratio": 0.566903,
+        "sim_to_physionet_p90_abs_delta_ratio": 0.513024,
+        "autocorrelation_gap_sim_minus_physionet": 0.190386,
+        "mean_reversion_beta_gap_sim_minus_physionet": -0.09911,
+        "supports_over_volatility": false,
+        "supports_lower_autocorrelation": false
+      },
+      "Potassium": {
+        "sim_to_physionet_median_abs_delta_ratio": 0.612985,
+        "sim_to_physionet_p90_abs_delta_ratio": 0.451603,
+        "autocorrelation_gap_sim_minus_physionet": 0.298831,
+        "mean_reversion_beta_gap_sim_minus_physionet": -0.039923,
+        "supports_over_volatility": false,
+        "supports_lower_autocorrelation": false
+      },
+      "pH": {
+        "sim_to_physionet_median_abs_delta_ratio": 0.147333,
+        "sim_to_physionet_p90_abs_delta_ratio": 0.193625,
+        "autocorrelation_gap_sim_minus_physionet": 0.332698,
+        "mean_reversion_beta_gap_sim_minus_physionet": -0.233076,
+        "supports_over_volatility": false,
+        "supports_lower_autocorrelation": false
+      },
+      "Glucose": {
+        "sim_to_physionet_median_abs_delta_ratio": 1.051338,
+        "sim_to_physionet_p90_abs_delta_ratio": 0.681227,
+        "autocorrelation_gap_sim_minus_physionet": 0.228702,
+        "mean_reversion_beta_gap_sim_minus_physionet": -0.182134,
+        "supports_over_volatility": false,
+        "supports_lower_autocorrelation": false
+      },
+      "MAP": {
+        "sim_to_physionet_median_abs_delta_ratio": 0.205465,
+        "sim_to_physionet_p90_abs_delta_ratio": 0.135938,
+        "autocorrelation_gap_sim_minus_physionet": 0.458275,
+        "mean_reversion_beta_gap_sim_minus_physionet": -0.245484,
+        "supports_over_volatility": false,
+        "supports_lower_autocorrelation": false
+      }
+    },
+    "4": {
+      "HCO3": {
+        "sim_to_physionet_median_abs_delta_ratio": 1.091076,
+        "sim_to_physionet_p90_abs_delta_ratio": 1.1306,
+        "autocorrelation_gap_sim_minus_physionet": 0.158137,
+        "mean_reversion_beta_gap_sim_minus_physionet": -0.08453,
+        "supports_over_volatility": false,
+        "supports_lower_autocorrelation": false
+      },
+      "Potassium": {
+        "sim_to_physionet_median_abs_delta_ratio": 1.02655,
+        "sim_to_physionet_p90_abs_delta_ratio": 0.737953,
+        "autocorrelation_gap_sim_minus_physionet": 0.198463,
+        "mean_reversion_beta_gap_sim_minus_physionet": 0.036926,
+        "supports_over_volatility": false,
+        "supports_lower_autocorrelation": false
+      },
+      "pH": {
+        "sim_to_physionet_median_abs_delta_ratio": 0.258057,
+        "sim_to_physionet_p90_abs_delta_ratio": 0.3848,
+        "autocorrelation_gap_sim_minus_physionet": 0.185047,
+        "mean_reversion_beta_gap_sim_minus_physionet": -0.262974,
+        "supports_over_volatility": false,
+        "supports_lower_autocorrelation": false
+      },
+      "Glucose": {
+        "sim_to_physionet_median_abs_delta_ratio": 1.424546,
+        "sim_to_physionet_p90_abs_delta_ratio": 1.157443,
+        "autocorrelation_gap_sim_minus_physionet": 0.209389,
+        "mean_reversion_beta_gap_sim_minus_physionet": -0.123905,
+        "supports_over_volatility": false,
+        "supports_lower_autocorrelation": false
+      },
+      "MAP": {
+        "sim_to_physionet_median_abs_delta_ratio": 0.35283,
+        "sim_to_physionet_p90_abs_delta_ratio": 0.273034,
+        "autocorrelation_gap_sim_minus_physionet": 0.533815,
+        "mean_reversion_beta_gap_sim_minus_physionet": -0.124093,
+        "supports_over_volatility": false,
+        "supports_lower_autocorrelation": false
+      }
+    },
+    "6": {
+      "HCO3": {
+        "sim_to_physionet_median_abs_delta_ratio": 1.653041,
+        "sim_to_physionet_p90_abs_delta_ratio": 1.298731,
+        "autocorrelation_gap_sim_minus_physionet": 0.114127,
+        "mean_reversion_beta_gap_sim_minus_physionet": -0.060254,
+        "supports_over_volatility": false,
+        "supports_lower_autocorrelation": false
+      },
+      "Potassium": {
+        "sim_to_physionet_median_abs_delta_ratio": 1.036468,
+        "sim_to_physionet_p90_abs_delta_ratio": 0.842312,
+        "autocorrelation_gap_sim_minus_physionet": 0.11154,
+        "mean_reversion_beta_gap_sim_minus_physionet": 0.025317,
+        "supports_over_volatility": false,
+        "supports_lower_autocorrelation": false
+      },
+      "pH": {
+        "sim_to_physionet_median_abs_delta_ratio": 0.304854,
+        "sim_to_physionet_p90_abs_delta_ratio": 0.907886,
+        "autocorrelation_gap_sim_minus_physionet": 0.082897,
+        "mean_reversion_beta_gap_sim_minus_physionet": -0.289194,
+        "supports_over_volatility": false,
+        "supports_lower_autocorrelation": false
+      },
+      "Glucose": {
+        "sim_to_physionet_median_abs_delta_ratio": 1.776117,
+        "sim_to_physionet_p90_abs_delta_ratio": 1.514342,
+        "autocorrelation_gap_sim_minus_physionet": 0.153627,
+        "mean_reversion_beta_gap_sim_minus_physionet": -0.098987,
+        "supports_over_volatility": true,
+        "supports_lower_autocorrelation": false
+      },
+      "MAP": {
+        "sim_to_physionet_median_abs_delta_ratio": 0.574716,
+        "sim_to_physionet_p90_abs_delta_ratio": 0.390161,
+        "autocorrelation_gap_sim_minus_physionet": 0.558971,
+        "mean_reversion_beta_gap_sim_minus_physionet": -0.080017,
+        "supports_over_volatility": false,
+        "supports_lower_autocorrelation": false
+      }
+    }
+  },
+  "hypothesis_decision": {
+    "supports_under_buffering_hypothesis": false,
+    "supportive_features": [],
+    "supports_recovery_mismatch_hypothesis": true,
+    "recovery_mismatch_features": [
+      "HCO3",
+      "pH",
+      "Glucose"
+    ],
+    "feature_votes": {
+      "HCO3": {
+        "over_volatility": false,
+        "lower_autocorrelation": false,
+        "less_recovery_mean_reversion": true
+      },
+      "Potassium": {
+        "over_volatility": false,
+        "lower_autocorrelation": false,
+        "less_recovery_mean_reversion": false
+      },
+      "pH": {
+        "over_volatility": false,
+        "lower_autocorrelation": false,
+        "less_recovery_mean_reversion": true
+      },
+      "Glucose": {
+        "over_volatility": false,
+        "lower_autocorrelation": false,
+        "less_recovery_mean_reversion": true
+      }
+    },
+    "hard_runtime_change_allowed": false,
+    "clinical_or_causal_claim_allowed": false,
+    "bottom_line": "The audit separates two ideas. It does not support a simple over-volatility/low-autocorrelation under-buffering story. It does support a recovery mismatch for variables whose PhysioNet action-unobserved dynamics move toward setpoint while DKABody no-action dynamics do not. That points more to missing observed treatment/recovery dynamics than to passive blood buffering alone.",
+    "interpretation": "A positive result means DKABody no-action trajectories are more volatile or less autocorrelated than action-unobserved PhysioNet ICU trajectories. Because PhysioNet has no medication channels, this is a simulator-integrity signal, not a treatment-effect calibration target."
+  }
+}

@@ -1,0 +1,353 @@
+{
+  "action_evidence": {
+    "by_action": {
+      "antibiotics": 11159,
+      "anticoagulant": 7032,
+      "fluids": 10228,
+      "systemic_steroid": 2044,
+      "vasopressor": 18260
+    },
+    "dose_observed_fraction": 0.373704,
+    "rows": 48723,
+    "sources": {
+      "eicu_infusiondrug": 18336,
+      "eicu_medication": 9651,
+      "eicu_treatment": 20736
+    }
+  },
+  "action_support": {
+    "antibiotics": {
+      "active_stays": 896,
+      "active_windows": 4856,
+      "dose_observed_windows": 21,
+      "stays": 1037,
+      "windows": 5872
+    },
+    "anticoagulant": {
+      "active_stays": 690,
+      "active_windows": 4708,
+      "dose_observed_windows": 320,
+      "stays": 785,
+      "windows": 6561
+    },
+    "fluids": {
+      "active_stays": 1009,
+      "active_windows": 7125,
+      "dose_observed_windows": 73,
+      "stays": 1128,
+      "windows": 10371
+    },
+    "systemic_steroid": {
+      "active_stays": 312,
+      "active_windows": 2581,
+      "dose_observed_windows": 20,
+      "stays": 335,
+      "windows": 2785
+    },
+    "vasopressor": {
+      "active_stays": 389,
+      "active_windows": 3292,
+      "dose_observed_windows": 2407,
+      "stays": 415,
+      "windows": 3544
+    }
+  },
+  "active_transitions": 11957,
+  "body_system": "immune_inflammatory",
+  "bounded_max_stays": 1500,
+  "candidate_stay_count_before_bound": 7995,
+  "criteria_counts_before_filter": {
+    "diagnosis_text_or_code:admissionDx.csv.gz": 31,
+    "diagnosis_text_or_code:diagnosis.csv.gz": 1469
+  },
+  "data_root": "eicu-collaborative-research-database-2.0",
+  "dataset": "PhysioNet eICU Collaborative Research Database 2.0",
+  "disease": "immune_inflammatory",
+  "display_name": "Immune / inflammatory activation",
+  "hospitals": 40,
+  "measurements": {
+    "by_var": {
+      "albumin": 5480,
+      "alkaline_phos": 4301,
+      "alt": 4294,
+      "amylase": 281,
+      "anion_gap": 9028,
+      "ast": 4315,
+      "bicarbonate": 18785,
+      "bilirubin": 4330,
+      "bilirubin_direct": 878,
+      "bnp": 712,
+      "bun": 13062,
+      "calcium": 12665,
+      "chloride": 13152,
+      "ck_mb": 404,
+      "ck_mb_index": 166,
+      "cortisol": 130,
+      "cpk": 1006,
+      "creatinine": 13218,
+      "crp": 450,
+      "crp_hs": 12,
+      "esr": 270,
+      "ferritin": 174,
+      "fibrinogen": 338,
+      "free_t4": 111,
+      "glucose": 49166,
+      "heart_rate": 1838916,
+      "hematocrit": 13040,
+      "hemoglobin": 13150,
+      "inr": 3494,
+      "ionized_calcium": 805,
+      "lactate": 1860,
+      "ldh": 373,
+      "lipase": 516,
+      "magnesium": 6391,
+      "map": 706183,
+      "myoglobin": 28,
+      "o2sat": 1656128,
+      "ph": 5705,
+      "phosphate": 4964,
+      "platelets": 11996,
+      "potassium": 15368,
+      "prealbumin": 433,
+      "ptt": 2325,
+      "respiratory_rate": 1572073,
+      "serum_osmolality": 228,
+      "sodium": 13843,
+      "temperature": 275152,
+      "total_protein": 4317,
+      "triglycerides": 396,
+      "troponin_i": 941,
+      "troponin_t": 283,
+      "tsh": 401,
+      "uric_acid": 149,
+      "urine_output": 42863,
+      "wbc": 11950
+    },
+    "rows": 6360999,
+    "stays": 1499
+  },
+  "output": "eicu_immune_inflammatory_transitions_6h.parquet",
+  "restricted_stay_count": null,
+  "restricted_stay_source": null,
+  "safety_boundary": {
+    "bounded_engineering_cohort": true,
+    "causal_claim_allowed": false,
+    "clinical_claim_allowed": false,
+    "coarse_treatment_rows_used_as_numeric_administrations": false,
+    "counterfactual_claim_allowed": false,
+    "factual_observed_treatment_only": true,
+    "medication_orders_used_as_numeric_administrations": false,
+    "patient_ids_included_in_report": false,
+    "raw_rows_included": false,
+    "restricted_stay_ids_used_internally": false
+  },
+  "schema": {
+    "action_channels": [
+      "antibiotics",
+      "systemic_steroid",
+      "fluids",
+      "vasopressor",
+      "anticoagulant"
+    ],
+    "active_column": "immune_inflammatory_active_t",
+    "anchor_step_hours": 4.0,
+    "config": {
+      "action_keys": [
+        "antibiotics",
+        "systemic_steroid",
+        "fluids",
+        "vasopressor",
+        "anticoagulant"
+      ],
+      "action_terms": {
+        "antibiotics": [
+          "vancomycin",
+          "zosyn",
+          "piperacillin",
+          "tazobactam",
+          "meropenem",
+          "imipenem",
+          "ertapenem",
+          "cefepime",
+          "ceftriaxone",
+          "ceftazidime",
+          "cefazolin",
+          "cefuroxime",
+          "ciprofloxacin",
+          "levofloxacin",
+          "metronidazole",
+          "gentamicin",
+          "tobramycin",
+          "linezolid",
+          "daptomycin",
+          "clindamycin",
+          "aztreonam",
+          "ampicillin",
+          "amoxicillin",
+          "penicillin",
+          "nafcillin",
+          "oxacillin"
+        ],
+        "anticoagulant": [
+          "heparin",
+          "enoxaparin",
+          "lovenox",
+          "warfarin",
+          "argatroban",
+          "bivalirudin"
+        ],
+        "fluids": [
+          "normal saline",
+          "sodium chloride",
+          "nacl",
+          "lactated",
+          "ringer",
+          "crystalloid",
+          "fluid bolus",
+          "iv fluid",
+          "saline bolus"
+        ],
+        "systemic_steroid": [
+          "methylprednisolone",
+          "solumedrol",
+          "solu-medrol",
+          "prednisone",
+          "prednisolone",
+          "hydrocortisone",
+          "dexamethasone",
+          "decadron"
+        ],
+        "vasopressor": [
+          "norepinephrine",
+          "levophed",
+          "epinephrine",
+          "vasopressin",
+          "phenylephrine",
+          "neosynephrine",
+          "dopamine"
+        ]
+      },
+      "active_actions": [
+        "hist_systemic_steroid",
+        "hist_antibiotics",
+        "hist_vasopressor"
+      ],
+      "active_high": {
+        "crp": 50.0,
+        "crp_hs": 50.0,
+        "esr": 50.0,
+        "ferritin": 1000.0,
+        "lactate": 2.0,
+        "temperature": 38.5,
+        "wbc": 12.0
+      },
+      "active_low": {
+        "albumin": 2.5,
+        "map": 65.0,
+        "platelets": 100.0
+      },
+      "body_system": "immune_inflammatory",
+      "diagnosis_patterns": [
+        "inflammatory",
+        "autoimmune",
+        "lupus",
+        "vasculitis",
+        "rheumatoid",
+        "cytokine",
+        "hlh",
+        "fever",
+        "sirs",
+        "immunosuppression",
+        "d89",
+        "m32",
+        "m31",
+        "m06"
+      ],
+      "display_name": "Immune / inflammatory activation",
+      "name": "immune_inflammatory",
+      "notes": [
+        "Immune/inflammatory module uses sparse inflammatory markers plus dense physiologic proxies.",
+        "No immunosuppression, steroid, or antibiotic treatment-effect claim is allowed."
+      ],
+      "state_vars": [
+        "crp",
+        "crp_hs",
+        "esr",
+        "ferritin",
+        "wbc",
+        "temperature",
+        "lactate",
+        "platelets",
+        "albumin",
+        "map",
+        "heart_rate",
+        "respiratory_rate",
+        "o2sat",
+        "creatinine",
+        "bilirubin",
+        "glucose"
+      ],
+      "targets": [
+        "crp",
+        "crp_hs",
+        "esr",
+        "ferritin",
+        "wbc",
+        "temperature",
+        "lactate",
+        "platelets",
+        "albumin",
+        "map"
+      ]
+    },
+    "future_suffix": "tp6",
+    "horizon_hours": 6.0,
+    "lookback_hours": 6.0,
+    "state_vars": [
+      "crp",
+      "crp_hs",
+      "esr",
+      "ferritin",
+      "wbc",
+      "temperature",
+      "lactate",
+      "platelets",
+      "albumin",
+      "map",
+      "heart_rate",
+      "respiratory_rate",
+      "o2sat",
+      "creatinine",
+      "bilirubin",
+      "glucose"
+    ],
+    "target_tolerance_hours": 2.0,
+    "targets": [
+      "crp",
+      "crp_hs",
+      "esr",
+      "ferritin",
+      "wbc",
+      "temperature",
+      "lactate",
+      "platelets",
+      "albumin",
+      "map"
+    ]
+  },
+  "stays": 1411,
+  "subjects": 1240,
+  "target_pair_counts": {
+    "albumin": 162,
+    "crp": 1,
+    "crp_hs": 0,
+    "esr": 0,
+    "ferritin": 1,
+    "lactate": 212,
+    "map": 18369,
+    "platelets": 495,
+    "temperature": 2282,
+    "wbc": 449
+  },
+  "transitions": 18392
+}

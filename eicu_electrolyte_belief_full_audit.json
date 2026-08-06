@@ -1,0 +1,3197 @@
+{
+  "audit": {
+    "belief_columns": [
+      "el_belief_sodium_water_mean",
+      "el_belief_sodium_water_sd",
+      "el_belief_sodium_water_innovation",
+      "el_belief_sodium_water_confidence",
+      "el_belief_potassium_store_mean",
+      "el_belief_potassium_store_sd",
+      "el_belief_potassium_store_innovation",
+      "el_belief_potassium_store_confidence",
+      "el_belief_acid_base_buffer_mean",
+      "el_belief_acid_base_buffer_sd",
+      "el_belief_acid_base_buffer_innovation",
+      "el_belief_acid_base_buffer_confidence",
+      "el_belief_divalent_mineral_mean",
+      "el_belief_divalent_mineral_sd",
+      "el_belief_divalent_mineral_innovation",
+      "el_belief_divalent_mineral_confidence",
+      "el_belief_osmotic_renal_mean",
+      "el_belief_osmotic_renal_sd",
+      "el_belief_osmotic_renal_innovation",
+      "el_belief_osmotic_renal_confidence",
+      "el_belief_sodium_slope_per_hr",
+      "el_belief_sodium_innovation",
+      "el_belief_potassium_slope_per_hr",
+      "el_belief_potassium_innovation",
+      "el_belief_bicarbonate_slope_per_hr",
+      "el_belief_bicarbonate_innovation",
+      "el_belief_anion_gap_slope_per_hr",
+      "el_belief_anion_gap_innovation",
+      "el_belief_chloride_slope_per_hr",
+      "el_belief_chloride_innovation",
+      "el_belief_calcium_slope_per_hr",
+      "el_belief_calcium_innovation",
+      "el_belief_magnesium_slope_per_hr",
+      "el_belief_magnesium_innovation",
+      "el_belief_phosphate_slope_per_hr",
+      "el_belief_phosphate_innovation",
+      "el_belief_serum_osmolality_slope_per_hr",
+      "el_belief_serum_osmolality_innovation",
+      "el_belief_creatinine_slope_per_hr",
+      "el_belief_creatinine_innovation",
+      "el_belief_sodium_low_burden",
+      "el_belief_sodium_high_burden",
+      "el_belief_potassium_low_burden",
+      "el_belief_potassium_high_burden",
+      "el_belief_acid_burden",
+      "el_belief_alkalosis_burden",
+      "el_belief_anion_gap_burden",
+      "el_belief_chloride_high_burden",
+      "el_belief_divalent_depletion_burden",
+      "el_belief_osmotic_burden",
+      "el_belief_renal_context",
+      "el_belief_repletion_context"
+    ],
+    "cohort": "eicu_electrolyte_acid_base_full_transitions_6h.parquet",
+    "cohort_summary": {
+      "active_rows": 192258,
+      "hospitals": 200,
+      "rows": 259944,
+      "stays": 20542,
+      "subjects": 17727
+    },
+    "future_suffix": "tp6",
+    "hospital_holdout": {
+      "discovery_groups": 134,
+      "group_column": "hospitalid",
+      "heldout_groups": 66,
+      "overlap": 0,
+      "passed_count": 7,
+      "passed_targets": [
+        "potassium",
+        "chloride",
+        "bicarbonate",
+        "anion_gap",
+        "phosphate",
+        "map",
+        "creatinine"
+      ],
+      "seed": 9001,
+      "targets": {
+        "anion_gap": {
+          "candidate_vs_baseline": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.139403,
+              -0.103228
+            ],
+            "point_delta": -0.121006,
+            "significant": true,
+            "subjects": 3394
+          },
+          "candidate_vs_placebo": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.15189,
+              -0.110988
+            ],
+            "point_delta": -0.130729,
+            "significant": true,
+            "subjects": 3394
+          },
+          "mae": {
+            "baseline_ridge": 2.268594,
+            "electrolyte_belief_ridge": 2.152876,
+            "placebo_belief_ridge": 2.275951
+          },
+          "rows": 10651,
+          "subjects": 3394
+        },
+        "bicarbonate": {
+          "candidate_vs_baseline": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.051994,
+              -0.027733
+            ],
+            "point_delta": -0.040373,
+            "significant": true,
+            "subjects": 4636
+          },
+          "candidate_vs_placebo": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.05408,
+              -0.029007
+            ],
+            "point_delta": -0.042423,
+            "significant": true,
+            "subjects": 4636
+          },
+          "mae": {
+            "baseline_ridge": 2.109711,
+            "electrolyte_belief_ridge": 2.070523,
+            "placebo_belief_ridge": 2.11315
+          },
+          "rows": 16794,
+          "subjects": 4636
+        },
+        "calcium": {
+          "candidate_vs_baseline": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.002921,
+              0.000691
+            ],
+            "point_delta": -0.001193,
+            "significant": false,
+            "subjects": 3853
+          },
+          "candidate_vs_placebo": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.004673,
+              -0.001099
+            ],
+            "point_delta": -0.002988,
+            "significant": true,
+            "subjects": 3853
+          },
+          "mae": {
+            "baseline_ridge": 0.368551,
+            "electrolyte_belief_ridge": 0.364468,
+            "placebo_belief_ridge": 0.369495
+          },
+          "rows": 11919,
+          "subjects": 3853
+        },
+        "chloride": {
+          "candidate_vs_baseline": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.043695,
+              -0.013419
+            ],
+            "point_delta": -0.029999,
+            "significant": true,
+            "subjects": 3948
+          },
+          "candidate_vs_placebo": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.059165,
+              -0.026854
+            ],
+            "point_delta": -0.042542,
+            "significant": true,
+            "subjects": 3948
+          },
+          "mae": {
+            "baseline_ridge": 2.474435,
+            "electrolyte_belief_ridge": 2.438326,
+            "placebo_belief_ridge": 2.485899
+          },
+          "rows": 12322,
+          "subjects": 3948
+        },
+        "creatinine": {
+          "candidate_vs_baseline": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.017785,
+              -0.008315
+            ],
+            "point_delta": -0.012879,
+            "significant": true,
+            "subjects": 3915
+          },
+          "candidate_vs_placebo": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.020064,
+              -0.009731
+            ],
+            "point_delta": -0.014886,
+            "significant": true,
+            "subjects": 3915
+          },
+          "mae": {
+            "baseline_ridge": 0.313349,
+            "electrolyte_belief_ridge": 0.301255,
+            "placebo_belief_ridge": 0.315313
+          },
+          "rows": 12035,
+          "subjects": 3915
+        },
+        "ionized_calcium": {
+          "candidate_vs_baseline": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.013838,
+              0.009511
+            ],
+            "point_delta": -0.001879,
+            "significant": false,
+            "subjects": 137
+          },
+          "candidate_vs_placebo": {
+            "beats_baseline": false,
+            "bootstrap_95_ci": [
+              -0.012441,
+              0.016589
+            ],
+            "point_delta": 0.000972,
+            "significant": false,
+            "subjects": 137
+          },
+          "mae": {
+            "baseline_ridge": 0.34339,
+            "electrolyte_belief_ridge": 0.32926,
+            "placebo_belief_ridge": 0.34031
+          },
+          "rows": 371,
+          "subjects": 137
+        },
+        "magnesium": {
+          "candidate_vs_baseline": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.005024,
+              0.000117
+            ],
+            "point_delta": -0.002332,
+            "significant": false,
+            "subjects": 2199
+          },
+          "candidate_vs_placebo": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.006814,
+              -0.000468
+            ],
+            "point_delta": -0.003366,
+            "significant": true,
+            "subjects": 2199
+          },
+          "mae": {
+            "baseline_ridge": 0.246928,
+            "electrolyte_belief_ridge": 0.243985,
+            "placebo_belief_ridge": 0.248498
+          },
+          "rows": 5380,
+          "subjects": 2199
+        },
+        "map": {
+          "candidate_vs_baseline": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.021264,
+              -0.001758
+            ],
+            "point_delta": -0.012265,
+            "significant": true,
+            "subjects": 8153
+          },
+          "candidate_vs_placebo": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.026191,
+              -0.006669
+            ],
+            "point_delta": -0.017424,
+            "significant": true,
+            "subjects": 8153
+          },
+          "mae": {
+            "baseline_ridge": 10.278225,
+            "electrolyte_belief_ridge": 10.274001,
+            "placebo_belief_ridge": 10.281782
+          },
+          "rows": 127255,
+          "subjects": 8153
+        },
+        "phosphate": {
+          "candidate_vs_baseline": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.028767,
+              -0.012712
+            ],
+            "point_delta": -0.020471,
+            "significant": true,
+            "subjects": 1659
+          },
+          "candidate_vs_placebo": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.037061,
+              -0.018541
+            ],
+            "point_delta": -0.028137,
+            "significant": true,
+            "subjects": 1659
+          },
+          "mae": {
+            "baseline_ridge": 0.757548,
+            "electrolyte_belief_ridge": 0.741884,
+            "placebo_belief_ridge": 0.765124
+          },
+          "rows": 4406,
+          "subjects": 1659
+        },
+        "potassium": {
+          "candidate_vs_baseline": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.007502,
+              -0.002745
+            ],
+            "point_delta": -0.00512,
+            "significant": true,
+            "subjects": 4557
+          },
+          "candidate_vs_placebo": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.008226,
+              -0.003271
+            ],
+            "point_delta": -0.005594,
+            "significant": true,
+            "subjects": 4557
+          },
+          "mae": {
+            "baseline_ridge": 0.383543,
+            "electrolyte_belief_ridge": 0.377268,
+            "placebo_belief_ridge": 0.384161
+          },
+          "rows": 15235,
+          "subjects": 4557
+        },
+        "serum_osmolality": {
+          "candidate_vs_baseline": {
+            "beats_baseline": false,
+            "bootstrap_95_ci": [
+              0.36816,
+              1.774776
+            ],
+            "point_delta": 0.997547,
+            "significant": false,
+            "subjects": 104
+          },
+          "candidate_vs_placebo": {
+            "beats_baseline": false,
+            "bootstrap_95_ci": [
+              -0.577953,
+              1.411705
+            ],
+            "point_delta": 0.355329,
+            "significant": false,
+            "subjects": 104
+          },
+          "mae": {
+            "baseline_ridge": 10.77503,
+            "electrolyte_belief_ridge": 11.735364,
+            "placebo_belief_ridge": 11.475626
+          },
+          "rows": 385,
+          "subjects": 104
+        },
+        "sodium": {
+          "candidate_vs_baseline": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.018377,
+              0.004809
+            ],
+            "point_delta": -0.00621,
+            "significant": false,
+            "subjects": 4174
+          },
+          "candidate_vs_placebo": {
+            "beats_baseline": true,
+            "bootstrap_95_ci": [
+              -0.024893,
+              0.000168
+            ],
+            "point_delta": -0.012305,
+            "significant": false,
+            "subjects": 4174
+          },
+          "mae": {
+            "baseline_ridge": 2.228525,
+            "electrolyte_belief_ridge": 2.212023,
+            "placebo_belief_ridge": 2.233926
+          },
+          "rows": 14709,
+          "subjects": 4174
+        }
+      }
+    },
+    "random_patient_splits": {
+      "runs": [
+        {
+          "discovery_groups": 11877,
+          "group_column": "subject_id",
+          "heldout_groups": 5850,
+          "overlap": 0,
+          "passed_count": 6,
+          "passed_targets": [
+            "sodium",
+            "potassium",
+            "bicarbonate",
+            "anion_gap",
+            "magnesium",
+            "creatinine"
+          ],
+          "seed": 7,
+          "targets": {
+            "anion_gap": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.047239,
+                  -0.004519
+                ],
+                "point_delta": -0.025176,
+                "significant": true,
+                "subjects": 2258
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.055657,
+                  -0.012191
+                ],
+                "point_delta": -0.035351,
+                "significant": true,
+                "subjects": 2258
+              },
+              "mae": {
+                "baseline_ridge": 2.173844,
+                "electrolyte_belief_ridge": 2.138166,
+                "placebo_belief_ridge": 2.181345
+              },
+              "rows": 7293,
+              "subjects": 2258
+            },
+            "bicarbonate": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.051804,
+                  -0.023368
+                ],
+                "point_delta": -0.037602,
+                "significant": true,
+                "subjects": 3265
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.053046,
+                  -0.025079
+                ],
+                "point_delta": -0.038475,
+                "significant": true,
+                "subjects": 3265
+              },
+              "mae": {
+                "baseline_ridge": 2.114429,
+                "electrolyte_belief_ridge": 2.079981,
+                "placebo_belief_ridge": 2.117178
+              },
+              "rows": 11793,
+              "subjects": 3265
+            },
+            "calcium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.004074,
+                  0.00077
+                ],
+                "point_delta": -0.001779,
+                "significant": false,
+                "subjects": 2672
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.004943,
+                  -0.000309
+                ],
+                "point_delta": -0.002739,
+                "significant": true,
+                "subjects": 2672
+              },
+              "mae": {
+                "baseline_ridge": 0.365961,
+                "electrolyte_belief_ridge": 0.362358,
+                "placebo_belief_ridge": 0.366902
+              },
+              "rows": 8582,
+              "subjects": 2672
+            },
+            "chloride": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.020122,
+                  0.017492
+                ],
+                "point_delta": -0.001301,
+                "significant": false,
+                "subjects": 2784
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.021945,
+                  0.017708
+                ],
+                "point_delta": -0.003327,
+                "significant": false,
+                "subjects": 2784
+              },
+              "mae": {
+                "baseline_ridge": 2.423539,
+                "electrolyte_belief_ridge": 2.417819,
+                "placebo_belief_ridge": 2.429201
+              },
+              "rows": 9089,
+              "subjects": 2784
+            },
+            "creatinine": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.018712,
+                  -0.004179
+                ],
+                "point_delta": -0.011436,
+                "significant": true,
+                "subjects": 2755
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.020496,
+                  -0.006459
+                ],
+                "point_delta": -0.013673,
+                "significant": true,
+                "subjects": 2755
+              },
+              "mae": {
+                "baseline_ridge": 0.328859,
+                "electrolyte_belief_ridge": 0.319093,
+                "placebo_belief_ridge": 0.330369
+              },
+              "rows": 8841,
+              "subjects": 2755
+            },
+            "ionized_calcium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  0.021563,
+                  0.057708
+                ],
+                "point_delta": 0.038985,
+                "significant": false,
+                "subjects": 103
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.036719,
+                  0.015495
+                ],
+                "point_delta": -0.009772,
+                "significant": false,
+                "subjects": 103
+              },
+              "mae": {
+                "baseline_ridge": 0.18037,
+                "electrolyte_belief_ridge": 0.218824,
+                "placebo_belief_ridge": 0.231863
+              },
+              "rows": 288,
+              "subjects": 103
+            },
+            "magnesium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.006915,
+                  -0.00033
+                ],
+                "point_delta": -0.003546,
+                "significant": true,
+                "subjects": 1473
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.00752,
+                  -0.000918
+                ],
+                "point_delta": -0.00455,
+                "significant": true,
+                "subjects": 1473
+              },
+              "mae": {
+                "baseline_ridge": 0.251432,
+                "electrolyte_belief_ridge": 0.247806,
+                "placebo_belief_ridge": 0.252203
+              },
+              "rows": 3619,
+              "subjects": 1473
+            },
+            "map": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.019271,
+                  0.000268
+                ],
+                "point_delta": -0.010241,
+                "significant": false,
+                "subjects": 5820
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.020052,
+                  0.000116
+                ],
+                "point_delta": -0.010062,
+                "significant": false,
+                "subjects": 5820
+              },
+              "mae": {
+                "baseline_ridge": 10.391851,
+                "electrolyte_belief_ridge": 10.384953,
+                "placebo_belief_ridge": 10.391724
+              },
+              "rows": 86126,
+              "subjects": 5820
+            },
+            "phosphate": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.019593,
+                  0.00606
+                ],
+                "point_delta": -0.006346,
+                "significant": false,
+                "subjects": 1014
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.021186,
+                  0.003548
+                ],
+                "point_delta": -0.009521,
+                "significant": false,
+                "subjects": 1014
+              },
+              "mae": {
+                "baseline_ridge": 0.749066,
+                "electrolyte_belief_ridge": 0.741498,
+                "placebo_belief_ridge": 0.752156
+              },
+              "rows": 2776,
+              "subjects": 1014
+            },
+            "potassium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.009996,
+                  -0.004116
+                ],
+                "point_delta": -0.007025,
+                "significant": true,
+                "subjects": 3290
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.009727,
+                  -0.00443
+                ],
+                "point_delta": -0.007187,
+                "significant": true,
+                "subjects": 3290
+              },
+              "mae": {
+                "baseline_ridge": 0.382555,
+                "electrolyte_belief_ridge": 0.374727,
+                "placebo_belief_ridge": 0.382818
+              },
+              "rows": 11318,
+              "subjects": 3290
+            },
+            "serum_osmolality": {
+              "candidate_vs_baseline": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  -0.173849,
+                  2.214828
+                ],
+                "point_delta": 1.03989,
+                "significant": false,
+                "subjects": 89
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  -1.562111,
+                  1.569031
+                ],
+                "point_delta": 0.010366,
+                "significant": false,
+                "subjects": 89
+              },
+              "mae": {
+                "baseline_ridge": 9.547793,
+                "electrolyte_belief_ridge": 10.468552,
+                "placebo_belief_ridge": 10.651662
+              },
+              "rows": 334,
+              "subjects": 89
+            },
+            "sodium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.032945,
+                  -0.00627
+                ],
+                "point_delta": -0.019458,
+                "significant": true,
+                "subjects": 2981
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.036742,
+                  -0.009655
+                ],
+                "point_delta": -0.023472,
+                "significant": true,
+                "subjects": 2981
+              },
+              "mae": {
+                "baseline_ridge": 2.253526,
+                "electrolyte_belief_ridge": 2.23227,
+                "placebo_belief_ridge": 2.256443
+              },
+              "rows": 10951,
+              "subjects": 2981
+            }
+          }
+        },
+        {
+          "discovery_groups": 11877,
+          "group_column": "subject_id",
+          "heldout_groups": 5850,
+          "overlap": 0,
+          "passed_count": 8,
+          "passed_targets": [
+            "sodium",
+            "potassium",
+            "chloride",
+            "bicarbonate",
+            "anion_gap",
+            "magnesium",
+            "map",
+            "creatinine"
+          ],
+          "seed": 11,
+          "targets": {
+            "anion_gap": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.055089,
+                  -0.011106
+                ],
+                "point_delta": -0.032712,
+                "significant": true,
+                "subjects": 2323
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.060648,
+                  -0.019471
+                ],
+                "point_delta": -0.038877,
+                "significant": true,
+                "subjects": 2323
+              },
+              "mae": {
+                "baseline_ridge": 2.141236,
+                "electrolyte_belief_ridge": 2.097033,
+                "placebo_belief_ridge": 2.145239
+              },
+              "rows": 7435,
+              "subjects": 2323
+            },
+            "bicarbonate": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.056655,
+                  -0.028932
+                ],
+                "point_delta": -0.042316,
+                "significant": true,
+                "subjects": 3230
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.062223,
+                  -0.032751
+                ],
+                "point_delta": -0.047858,
+                "significant": true,
+                "subjects": 3230
+              },
+              "mae": {
+                "baseline_ridge": 2.128949,
+                "electrolyte_belief_ridge": 2.091631,
+                "placebo_belief_ridge": 2.133024
+              },
+              "rows": 11568,
+              "subjects": 3230
+            },
+            "calcium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.004052,
+                  0.00082
+                ],
+                "point_delta": -0.001618,
+                "significant": false,
+                "subjects": 2673
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.006537,
+                  -0.001521
+                ],
+                "point_delta": -0.0039,
+                "significant": true,
+                "subjects": 2673
+              },
+              "mae": {
+                "baseline_ridge": 0.357,
+                "electrolyte_belief_ridge": 0.353887,
+                "placebo_belief_ridge": 0.358913
+              },
+              "rows": 8350,
+              "subjects": 2673
+            },
+            "chloride": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.047386,
+                  -0.012573
+                ],
+                "point_delta": -0.030637,
+                "significant": true,
+                "subjects": 2789
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.052107,
+                  -0.015146
+                ],
+                "point_delta": -0.03385,
+                "significant": true,
+                "subjects": 2789
+              },
+              "mae": {
+                "baseline_ridge": 2.474151,
+                "electrolyte_belief_ridge": 2.449966,
+                "placebo_belief_ridge": 2.478098
+              },
+              "rows": 8814,
+              "subjects": 2789
+            },
+            "creatinine": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.01713,
+                  -0.005029
+                ],
+                "point_delta": -0.010939,
+                "significant": true,
+                "subjects": 2767
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.019398,
+                  -0.006821
+                ],
+                "point_delta": -0.012731,
+                "significant": true,
+                "subjects": 2767
+              },
+              "mae": {
+                "baseline_ridge": 0.315255,
+                "electrolyte_belief_ridge": 0.308221,
+                "placebo_belief_ridge": 0.316631
+              },
+              "rows": 8645,
+              "subjects": 2767
+            },
+            "ionized_calcium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  0.001533,
+                  0.02655
+                ],
+                "point_delta": 0.014301,
+                "significant": false,
+                "subjects": 110
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.023772,
+                  0.009932
+                ],
+                "point_delta": -0.008312,
+                "significant": false,
+                "subjects": 110
+              },
+              "mae": {
+                "baseline_ridge": 0.198024,
+                "electrolyte_belief_ridge": 0.216934,
+                "placebo_belief_ridge": 0.212943
+              },
+              "rows": 288,
+              "subjects": 110
+            },
+            "magnesium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.007012,
+                  -0.000998
+                ],
+                "point_delta": -0.003922,
+                "significant": true,
+                "subjects": 1472
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.00879,
+                  -0.001751
+                ],
+                "point_delta": -0.005357,
+                "significant": true,
+                "subjects": 1472
+              },
+              "mae": {
+                "baseline_ridge": 0.247058,
+                "electrolyte_belief_ridge": 0.243832,
+                "placebo_belief_ridge": 0.249027
+              },
+              "rows": 3457,
+              "subjects": 1472
+            },
+            "map": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.029294,
+                  -0.00643
+                ],
+                "point_delta": -0.018391,
+                "significant": true,
+                "subjects": 5832
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.032127,
+                  -0.011124
+                ],
+                "point_delta": -0.022057,
+                "significant": true,
+                "subjects": 5832
+              },
+              "mae": {
+                "baseline_ridge": 10.315861,
+                "electrolyte_belief_ridge": 10.30677,
+                "placebo_belief_ridge": 10.318937
+              },
+              "rows": 85557,
+              "subjects": 5832
+            },
+            "phosphate": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.019925,
+                  0.002452
+                ],
+                "point_delta": -0.008406,
+                "significant": false,
+                "subjects": 985
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.030464,
+                  -0.007043
+                ],
+                "point_delta": -0.01806,
+                "significant": true,
+                "subjects": 985
+              },
+              "mae": {
+                "baseline_ridge": 0.743924,
+                "electrolyte_belief_ridge": 0.731178,
+                "placebo_belief_ridge": 0.751444
+              },
+              "rows": 2625,
+              "subjects": 985
+            },
+            "potassium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.012455,
+                  -0.006932
+                ],
+                "point_delta": -0.009618,
+                "significant": true,
+                "subjects": 3294
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.01333,
+                  -0.007663
+                ],
+                "point_delta": -0.01071,
+                "significant": true,
+                "subjects": 3294
+              },
+              "mae": {
+                "baseline_ridge": 0.3831,
+                "electrolyte_belief_ridge": 0.37455,
+                "placebo_belief_ridge": 0.384007
+              },
+              "rows": 10966,
+              "subjects": 3294
+            },
+            "serum_osmolality": {
+              "candidate_vs_baseline": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  0.11438,
+                  2.310519
+                ],
+                "point_delta": 1.160011,
+                "significant": false,
+                "subjects": 87
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  -0.591553,
+                  1.97255
+                ],
+                "point_delta": 0.676348,
+                "significant": false,
+                "subjects": 87
+              },
+              "mae": {
+                "baseline_ridge": 9.072741,
+                "electrolyte_belief_ridge": 10.011343,
+                "placebo_belief_ridge": 9.701698
+              },
+              "rows": 316,
+              "subjects": 87
+            },
+            "sodium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.027816,
+                  -0.000248
+                ],
+                "point_delta": -0.014249,
+                "significant": true,
+                "subjects": 2971
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.033899,
+                  -0.004356
+                ],
+                "point_delta": -0.018565,
+                "significant": true,
+                "subjects": 2971
+              },
+              "mae": {
+                "baseline_ridge": 2.244966,
+                "electrolyte_belief_ridge": 2.224096,
+                "placebo_belief_ridge": 2.248885
+              },
+              "rows": 10495,
+              "subjects": 2971
+            }
+          }
+        },
+        {
+          "discovery_groups": 11877,
+          "group_column": "subject_id",
+          "heldout_groups": 5850,
+          "overlap": 0,
+          "passed_count": 10,
+          "passed_targets": [
+            "sodium",
+            "potassium",
+            "chloride",
+            "bicarbonate",
+            "anion_gap",
+            "calcium",
+            "magnesium",
+            "phosphate",
+            "map",
+            "creatinine"
+          ],
+          "seed": 19,
+          "targets": {
+            "anion_gap": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.062112,
+                  -0.016969
+                ],
+                "point_delta": -0.038464,
+                "significant": true,
+                "subjects": 2269
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.061706,
+                  -0.018777
+                ],
+                "point_delta": -0.040761,
+                "significant": true,
+                "subjects": 2269
+              },
+              "mae": {
+                "baseline_ridge": 2.187651,
+                "electrolyte_belief_ridge": 2.135105,
+                "placebo_belief_ridge": 2.191437
+              },
+              "rows": 7422,
+              "subjects": 2269
+            },
+            "bicarbonate": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.05411,
+                  -0.022134
+                ],
+                "point_delta": -0.037661,
+                "significant": true,
+                "subjects": 3227
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.055172,
+                  -0.024843
+                ],
+                "point_delta": -0.040065,
+                "significant": true,
+                "subjects": 3227
+              },
+              "mae": {
+                "baseline_ridge": 2.125653,
+                "electrolyte_belief_ridge": 2.09221,
+                "placebo_belief_ridge": 2.129284
+              },
+              "rows": 11557,
+              "subjects": 3227
+            },
+            "calcium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.005093,
+                  -0.000437
+                ],
+                "point_delta": -0.002834,
+                "significant": true,
+                "subjects": 2614
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.005751,
+                  -0.000824
+                ],
+                "point_delta": -0.003379,
+                "significant": true,
+                "subjects": 2614
+              },
+              "mae": {
+                "baseline_ridge": 0.357048,
+                "electrolyte_belief_ridge": 0.35246,
+                "placebo_belief_ridge": 0.357698
+              },
+              "rows": 8430,
+              "subjects": 2614
+            },
+            "chloride": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.038576,
+                  -0.003633
+                ],
+                "point_delta": -0.020982,
+                "significant": true,
+                "subjects": 2748
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.046181,
+                  -0.009729
+                ],
+                "point_delta": -0.028093,
+                "significant": true,
+                "subjects": 2748
+              },
+              "mae": {
+                "baseline_ridge": 2.466951,
+                "electrolyte_belief_ridge": 2.448772,
+                "placebo_belief_ridge": 2.472695
+              },
+              "rows": 9011,
+              "subjects": 2748
+            },
+            "creatinine": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.02035,
+                  -0.007968
+                ],
+                "point_delta": -0.013899,
+                "significant": true,
+                "subjects": 2717
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.020842,
+                  -0.009045
+                ],
+                "point_delta": -0.015025,
+                "significant": true,
+                "subjects": 2717
+              },
+              "mae": {
+                "baseline_ridge": 0.319514,
+                "electrolyte_belief_ridge": 0.308685,
+                "placebo_belief_ridge": 0.320687
+              },
+              "rows": 8766,
+              "subjects": 2717
+            },
+            "ionized_calcium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  0.014793,
+                  0.054302
+                ],
+                "point_delta": 0.032674,
+                "significant": false,
+                "subjects": 95
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.027657,
+                  0.021296
+                ],
+                "point_delta": -0.002502,
+                "significant": false,
+                "subjects": 95
+              },
+              "mae": {
+                "baseline_ridge": 0.195225,
+                "electrolyte_belief_ridge": 0.22082,
+                "placebo_belief_ridge": 0.230077
+              },
+              "rows": 273,
+              "subjects": 95
+            },
+            "magnesium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.006575,
+                  -0.000969
+                ],
+                "point_delta": -0.00396,
+                "significant": true,
+                "subjects": 1465
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.009546,
+                  -0.003188
+                ],
+                "point_delta": -0.006241,
+                "significant": true,
+                "subjects": 1465
+              },
+              "mae": {
+                "baseline_ridge": 0.25079,
+                "electrolyte_belief_ridge": 0.246169,
+                "placebo_belief_ridge": 0.2527
+              },
+              "rows": 3502,
+              "subjects": 1465
+            },
+            "map": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.025573,
+                  -0.006908
+                ],
+                "point_delta": -0.015989,
+                "significant": true,
+                "subjects": 5825
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.027617,
+                  -0.008605
+                ],
+                "point_delta": -0.018271,
+                "significant": true,
+                "subjects": 5825
+              },
+              "mae": {
+                "baseline_ridge": 10.48667,
+                "electrolyte_belief_ridge": 10.474411,
+                "placebo_belief_ridge": 10.489445
+              },
+              "rows": 87150,
+              "subjects": 5825
+            },
+            "phosphate": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.027053,
+                  -0.005834
+                ],
+                "point_delta": -0.016202,
+                "significant": true,
+                "subjects": 1001
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.033619,
+                  -0.010028
+                ],
+                "point_delta": -0.021781,
+                "significant": true,
+                "subjects": 1001
+              },
+              "mae": {
+                "baseline_ridge": 0.748582,
+                "electrolyte_belief_ridge": 0.737751,
+                "placebo_belief_ridge": 0.752681
+              },
+              "rows": 2644,
+              "subjects": 1001
+            },
+            "potassium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.010611,
+                  -0.00503
+                ],
+                "point_delta": -0.007765,
+                "significant": true,
+                "subjects": 3259
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.010634,
+                  -0.00494
+                ],
+                "point_delta": -0.007882,
+                "significant": true,
+                "subjects": 3259
+              },
+              "mae": {
+                "baseline_ridge": 0.380149,
+                "electrolyte_belief_ridge": 0.371375,
+                "placebo_belief_ridge": 0.380489
+              },
+              "rows": 11181,
+              "subjects": 3259
+            },
+            "serum_osmolality": {
+              "candidate_vs_baseline": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  0.104985,
+                  1.601237
+                ],
+                "point_delta": 0.843481,
+                "significant": false,
+                "subjects": 79
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -1.296646,
+                  0.989371
+                ],
+                "point_delta": -0.208177,
+                "significant": false,
+                "subjects": 79
+              },
+              "mae": {
+                "baseline_ridge": 7.984454,
+                "electrolyte_belief_ridge": 8.783006,
+                "placebo_belief_ridge": 9.096009
+              },
+              "rows": 252,
+              "subjects": 79
+            },
+            "sodium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.028008,
+                  -0.000798
+                ],
+                "point_delta": -0.013916,
+                "significant": true,
+                "subjects": 2933
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.032284,
+                  -0.004634
+                ],
+                "point_delta": -0.018757,
+                "significant": true,
+                "subjects": 2933
+              },
+              "mae": {
+                "baseline_ridge": 2.283183,
+                "electrolyte_belief_ridge": 2.267525,
+                "placebo_belief_ridge": 2.287305
+              },
+              "rows": 10766,
+              "subjects": 2933
+            }
+          }
+        },
+        {
+          "discovery_groups": 11877,
+          "group_column": "subject_id",
+          "heldout_groups": 5850,
+          "overlap": 0,
+          "passed_count": 8,
+          "passed_targets": [
+            "sodium",
+            "potassium",
+            "chloride",
+            "bicarbonate",
+            "anion_gap",
+            "magnesium",
+            "map",
+            "creatinine"
+          ],
+          "seed": 23,
+          "targets": {
+            "anion_gap": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.058714,
+                  -0.019712
+                ],
+                "point_delta": -0.038153,
+                "significant": true,
+                "subjects": 2290
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.059679,
+                  -0.01655
+                ],
+                "point_delta": -0.039234,
+                "significant": true,
+                "subjects": 2290
+              },
+              "mae": {
+                "baseline_ridge": 2.200773,
+                "electrolyte_belief_ridge": 2.14102,
+                "placebo_belief_ridge": 2.203729
+              },
+              "rows": 7185,
+              "subjects": 2290
+            },
+            "bicarbonate": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.051658,
+                  -0.026348
+                ],
+                "point_delta": -0.038519,
+                "significant": true,
+                "subjects": 3225
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.054647,
+                  -0.026886
+                ],
+                "point_delta": -0.040721,
+                "significant": true,
+                "subjects": 3225
+              },
+              "mae": {
+                "baseline_ridge": 2.094527,
+                "electrolyte_belief_ridge": 2.057487,
+                "placebo_belief_ridge": 2.098434
+              },
+              "rows": 11162,
+              "subjects": 3225
+            },
+            "calcium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  -0.001803,
+                  0.003151
+                ],
+                "point_delta": 0.000731,
+                "significant": false,
+                "subjects": 2658
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.003342,
+                  0.002291
+                ],
+                "point_delta": -0.000601,
+                "significant": false,
+                "subjects": 2658
+              },
+              "mae": {
+                "baseline_ridge": 0.35079,
+                "electrolyte_belief_ridge": 0.349377,
+                "placebo_belief_ridge": 0.352019
+              },
+              "rows": 8105,
+              "subjects": 2658
+            },
+            "chloride": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.048529,
+                  -0.013432
+                ],
+                "point_delta": -0.032499,
+                "significant": true,
+                "subjects": 2758
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.055278,
+                  -0.018356
+                ],
+                "point_delta": -0.037684,
+                "significant": true,
+                "subjects": 2758
+              },
+              "mae": {
+                "baseline_ridge": 2.465454,
+                "electrolyte_belief_ridge": 2.43337,
+                "placebo_belief_ridge": 2.469589
+              },
+              "rows": 8601,
+              "subjects": 2758
+            },
+            "creatinine": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.020052,
+                  -0.008405
+                ],
+                "point_delta": -0.014061,
+                "significant": true,
+                "subjects": 2732
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.023217,
+                  -0.011312
+                ],
+                "point_delta": -0.016917,
+                "significant": true,
+                "subjects": 2732
+              },
+              "mae": {
+                "baseline_ridge": 0.3255,
+                "electrolyte_belief_ridge": 0.314307,
+                "placebo_belief_ridge": 0.328143
+              },
+              "rows": 8368,
+              "subjects": 2732
+            },
+            "ionized_calcium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  0.020131,
+                  0.07232
+                ],
+                "point_delta": 0.043449,
+                "significant": false,
+                "subjects": 83
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  -0.000809,
+                  0.053694
+                ],
+                "point_delta": 0.025123,
+                "significant": false,
+                "subjects": 83
+              },
+              "mae": {
+                "baseline_ridge": 0.177351,
+                "electrolyte_belief_ridge": 0.210323,
+                "placebo_belief_ridge": 0.193386
+              },
+              "rows": 190,
+              "subjects": 83
+            },
+            "magnesium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.008172,
+                  -0.002133
+                ],
+                "point_delta": -0.005069,
+                "significant": true,
+                "subjects": 1421
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.009289,
+                  -0.002723
+                ],
+                "point_delta": -0.006176,
+                "significant": true,
+                "subjects": 1421
+              },
+              "mae": {
+                "baseline_ridge": 0.253601,
+                "electrolyte_belief_ridge": 0.247377,
+                "placebo_belief_ridge": 0.255131
+              },
+              "rows": 3325,
+              "subjects": 1421
+            },
+            "map": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.021765,
+                  -0.000723
+                ],
+                "point_delta": -0.010974,
+                "significant": true,
+                "subjects": 5827
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.025115,
+                  -0.003713
+                ],
+                "point_delta": -0.014703,
+                "significant": true,
+                "subjects": 5827
+              },
+              "mae": {
+                "baseline_ridge": 10.469224,
+                "electrolyte_belief_ridge": 10.462915,
+                "placebo_belief_ridge": 10.471458
+              },
+              "rows": 85205,
+              "subjects": 5827
+            },
+            "phosphate": {
+              "candidate_vs_baseline": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  -0.007799,
+                  0.015899
+                ],
+                "point_delta": 0.004434,
+                "significant": false,
+                "subjects": 1011
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  -0.012816,
+                  0.01283
+                ],
+                "point_delta": 0.000114,
+                "significant": false,
+                "subjects": 1011
+              },
+              "mae": {
+                "baseline_ridge": 0.74282,
+                "electrolyte_belief_ridge": 0.743249,
+                "placebo_belief_ridge": 0.747948
+              },
+              "rows": 2541,
+              "subjects": 1011
+            },
+            "potassium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.012619,
+                  -0.007379
+                ],
+                "point_delta": -0.010152,
+                "significant": true,
+                "subjects": 3279
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.013409,
+                  -0.008006
+                ],
+                "point_delta": -0.010637,
+                "significant": true,
+                "subjects": 3279
+              },
+              "mae": {
+                "baseline_ridge": 0.385588,
+                "electrolyte_belief_ridge": 0.375334,
+                "placebo_belief_ridge": 0.386077
+              },
+              "rows": 10798,
+              "subjects": 3279
+            },
+            "serum_osmolality": {
+              "candidate_vs_baseline": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  0.357584,
+                  1.726514
+                ],
+                "point_delta": 1.022044,
+                "significant": false,
+                "subjects": 92
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  -0.588175,
+                  1.134377
+                ],
+                "point_delta": 0.238164,
+                "significant": false,
+                "subjects": 92
+              },
+              "mae": {
+                "baseline_ridge": 8.51027,
+                "electrolyte_belief_ridge": 9.586086,
+                "placebo_belief_ridge": 9.141847
+              },
+              "rows": 267,
+              "subjects": 92
+            },
+            "sodium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.037174,
+                  -0.009576
+                ],
+                "point_delta": -0.024447,
+                "significant": true,
+                "subjects": 2944
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.04227,
+                  -0.013138
+                ],
+                "point_delta": -0.028392,
+                "significant": true,
+                "subjects": 2944
+              },
+              "mae": {
+                "baseline_ridge": 2.265408,
+                "electrolyte_belief_ridge": 2.232446,
+                "placebo_belief_ridge": 2.271263
+              },
+              "rows": 10362,
+              "subjects": 2944
+            }
+          }
+        },
+        {
+          "discovery_groups": 11877,
+          "group_column": "subject_id",
+          "heldout_groups": 5850,
+          "overlap": 0,
+          "passed_count": 8,
+          "passed_targets": [
+            "sodium",
+            "potassium",
+            "chloride",
+            "bicarbonate",
+            "anion_gap",
+            "magnesium",
+            "map",
+            "creatinine"
+          ],
+          "seed": 37,
+          "targets": {
+            "anion_gap": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.056864,
+                  -0.019419
+                ],
+                "point_delta": -0.037734,
+                "significant": true,
+                "subjects": 2357
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.068446,
+                  -0.03082
+                ],
+                "point_delta": -0.049235,
+                "significant": true,
+                "subjects": 2357
+              },
+              "mae": {
+                "baseline_ridge": 2.126217,
+                "electrolyte_belief_ridge": 2.071059,
+                "placebo_belief_ridge": 2.136662
+              },
+              "rows": 7606,
+              "subjects": 2357
+            },
+            "bicarbonate": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.055099,
+                  -0.026788
+                ],
+                "point_delta": -0.040742,
+                "significant": true,
+                "subjects": 3256
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.060149,
+                  -0.029329
+                ],
+                "point_delta": -0.044846,
+                "significant": true,
+                "subjects": 3256
+              },
+              "mae": {
+                "baseline_ridge": 2.104954,
+                "electrolyte_belief_ridge": 2.063667,
+                "placebo_belief_ridge": 2.108881
+              },
+              "rows": 11588,
+              "subjects": 3256
+            },
+            "calcium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.002994,
+                  0.002075
+                ],
+                "point_delta": -0.000384,
+                "significant": false,
+                "subjects": 2674
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.003517,
+                  0.001732
+                ],
+                "point_delta": -0.000826,
+                "significant": false,
+                "subjects": 2674
+              },
+              "mae": {
+                "baseline_ridge": 0.350226,
+                "electrolyte_belief_ridge": 0.348675,
+                "placebo_belief_ridge": 0.350617
+              },
+              "rows": 8440,
+              "subjects": 2674
+            },
+            "chloride": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.038748,
+                  -0.003163
+                ],
+                "point_delta": -0.020787,
+                "significant": true,
+                "subjects": 2805
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.043347,
+                  -0.003613
+                ],
+                "point_delta": -0.023902,
+                "significant": true,
+                "subjects": 2805
+              },
+              "mae": {
+                "baseline_ridge": 2.414418,
+                "electrolyte_belief_ridge": 2.392257,
+                "placebo_belief_ridge": 2.416764
+              },
+              "rows": 9022,
+              "subjects": 2805
+            },
+            "creatinine": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.019564,
+                  -0.005901
+                ],
+                "point_delta": -0.012976,
+                "significant": true,
+                "subjects": 2781
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.021411,
+                  -0.007396
+                ],
+                "point_delta": -0.014491,
+                "significant": true,
+                "subjects": 2781
+              },
+              "mae": {
+                "baseline_ridge": 0.318378,
+                "electrolyte_belief_ridge": 0.311702,
+                "placebo_belief_ridge": 0.319813
+              },
+              "rows": 8754,
+              "subjects": 2781
+            },
+            "ionized_calcium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  -0.007567,
+                  0.026188
+                ],
+                "point_delta": 0.009166,
+                "significant": false,
+                "subjects": 91
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.035051,
+                  0.013855
+                ],
+                "point_delta": -0.009244,
+                "significant": false,
+                "subjects": 91
+              },
+              "mae": {
+                "baseline_ridge": 0.184953,
+                "electrolyte_belief_ridge": 0.201495,
+                "placebo_belief_ridge": 0.212985
+              },
+              "rows": 240,
+              "subjects": 91
+            },
+            "magnesium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.00581,
+                  -3.7e-05
+                ],
+                "point_delta": -0.002895,
+                "significant": true,
+                "subjects": 1455
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.006478,
+                  -0.000636
+                ],
+                "point_delta": -0.00379,
+                "significant": true,
+                "subjects": 1455
+              },
+              "mae": {
+                "baseline_ridge": 0.241202,
+                "electrolyte_belief_ridge": 0.237065,
+                "placebo_belief_ridge": 0.242632
+              },
+              "rows": 3592,
+              "subjects": 1455
+            },
+            "map": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.023722,
+                  -0.003406
+                ],
+                "point_delta": -0.012914,
+                "significant": true,
+                "subjects": 5824
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.024619,
+                  -0.005445
+                ],
+                "point_delta": -0.014902,
+                "significant": true,
+                "subjects": 5824
+              },
+              "mae": {
+                "baseline_ridge": 10.383399,
+                "electrolyte_belief_ridge": 10.372768,
+                "placebo_belief_ridge": 10.38456
+              },
+              "rows": 85528,
+              "subjects": 5824
+            },
+            "phosphate": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.023438,
+                  0.000221
+                ],
+                "point_delta": -0.010875,
+                "significant": false,
+                "subjects": 1020
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.025501,
+                  -0.000568
+                ],
+                "point_delta": -0.01353,
+                "significant": true,
+                "subjects": 1020
+              },
+              "mae": {
+                "baseline_ridge": 0.750433,
+                "electrolyte_belief_ridge": 0.735772,
+                "placebo_belief_ridge": 0.752498
+              },
+              "rows": 2708,
+              "subjects": 1020
+            },
+            "potassium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.009986,
+                  -0.004556
+                ],
+                "point_delta": -0.007087,
+                "significant": true,
+                "subjects": 3311
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.010445,
+                  -0.004792
+                ],
+                "point_delta": -0.007559,
+                "significant": true,
+                "subjects": 3311
+              },
+              "mae": {
+                "baseline_ridge": 0.385459,
+                "electrolyte_belief_ridge": 0.377616,
+                "placebo_belief_ridge": 0.385862
+              },
+              "rows": 11184,
+              "subjects": 3311
+            },
+            "serum_osmolality": {
+              "candidate_vs_baseline": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  -0.516186,
+                  1.96808
+                ],
+                "point_delta": 0.835418,
+                "significant": false,
+                "subjects": 78
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -1.638481,
+                  0.766556
+                ],
+                "point_delta": -0.340635,
+                "significant": false,
+                "subjects": 78
+              },
+              "mae": {
+                "baseline_ridge": 7.613204,
+                "electrolyte_belief_ridge": 8.411848,
+                "placebo_belief_ridge": 8.628965
+              },
+              "rows": 248,
+              "subjects": 78
+            },
+            "sodium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.03413,
+                  -0.005256
+                ],
+                "point_delta": -0.018475,
+                "significant": true,
+                "subjects": 2984
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.039159,
+                  -0.011587
+                ],
+                "point_delta": -0.024903,
+                "significant": true,
+                "subjects": 2984
+              },
+              "mae": {
+                "baseline_ridge": 2.237683,
+                "electrolyte_belief_ridge": 2.213065,
+                "placebo_belief_ridge": 2.243433
+              },
+              "rows": 10655,
+              "subjects": 2984
+            }
+          }
+        },
+        {
+          "discovery_groups": 11877,
+          "group_column": "subject_id",
+          "heldout_groups": 5850,
+          "overlap": 0,
+          "passed_count": 6,
+          "passed_targets": [
+            "potassium",
+            "chloride",
+            "bicarbonate",
+            "anion_gap",
+            "magnesium",
+            "creatinine"
+          ],
+          "seed": 53,
+          "targets": {
+            "anion_gap": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.062617,
+                  -0.020244
+                ],
+                "point_delta": -0.039103,
+                "significant": true,
+                "subjects": 2342
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.062375,
+                  -0.019939
+                ],
+                "point_delta": -0.040482,
+                "significant": true,
+                "subjects": 2342
+              },
+              "mae": {
+                "baseline_ridge": 2.153189,
+                "electrolyte_belief_ridge": 2.100059,
+                "placebo_belief_ridge": 2.157573
+              },
+              "rows": 7579,
+              "subjects": 2342
+            },
+            "bicarbonate": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.055609,
+                  -0.030352
+                ],
+                "point_delta": -0.042873,
+                "significant": true,
+                "subjects": 3238
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.060605,
+                  -0.03135
+                ],
+                "point_delta": -0.04715,
+                "significant": true,
+                "subjects": 3238
+              },
+              "mae": {
+                "baseline_ridge": 2.116654,
+                "electrolyte_belief_ridge": 2.08013,
+                "placebo_belief_ridge": 2.121672
+              },
+              "rows": 11775,
+              "subjects": 3238
+            },
+            "calcium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.003881,
+                  0.000791
+                ],
+                "point_delta": -0.001658,
+                "significant": false,
+                "subjects": 2735
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.005184,
+                  -0.000147
+                ],
+                "point_delta": -0.002564,
+                "significant": true,
+                "subjects": 2735
+              },
+              "mae": {
+                "baseline_ridge": 0.347693,
+                "electrolyte_belief_ridge": 0.345275,
+                "placebo_belief_ridge": 0.348695
+              },
+              "rows": 8682,
+              "subjects": 2735
+            },
+            "chloride": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.055949,
+                  -0.023698
+                ],
+                "point_delta": -0.039481,
+                "significant": true,
+                "subjects": 2844
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.062942,
+                  -0.028229
+                ],
+                "point_delta": -0.045315,
+                "significant": true,
+                "subjects": 2844
+              },
+              "mae": {
+                "baseline_ridge": 2.429139,
+                "electrolyte_belief_ridge": 2.395637,
+                "placebo_belief_ridge": 2.434503
+              },
+              "rows": 9190,
+              "subjects": 2844
+            },
+            "creatinine": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.017725,
+                  -0.004702
+                ],
+                "point_delta": -0.010811,
+                "significant": true,
+                "subjects": 2828
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.01817,
+                  -0.006075
+                ],
+                "point_delta": -0.012109,
+                "significant": true,
+                "subjects": 2828
+              },
+              "mae": {
+                "baseline_ridge": 0.317324,
+                "electrolyte_belief_ridge": 0.311374,
+                "placebo_belief_ridge": 0.318733
+              },
+              "rows": 8963,
+              "subjects": 2828
+            },
+            "ionized_calcium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  -0.00229,
+                  0.026079
+                ],
+                "point_delta": 0.010995,
+                "significant": false,
+                "subjects": 104
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.025765,
+                  0.005315
+                ],
+                "point_delta": -0.010639,
+                "significant": false,
+                "subjects": 104
+              },
+              "mae": {
+                "baseline_ridge": 0.205234,
+                "electrolyte_belief_ridge": 0.225164,
+                "placebo_belief_ridge": 0.224746
+              },
+              "rows": 317,
+              "subjects": 104
+            },
+            "magnesium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.008863,
+                  -0.002176
+                ],
+                "point_delta": -0.005369,
+                "significant": true,
+                "subjects": 1474
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.01036,
+                  -0.002648
+                ],
+                "point_delta": -0.006411,
+                "significant": true,
+                "subjects": 1474
+              },
+              "mae": {
+                "baseline_ridge": 0.247162,
+                "electrolyte_belief_ridge": 0.242495,
+                "placebo_belief_ridge": 0.249039
+              },
+              "rows": 3649,
+              "subjects": 1474
+            },
+            "map": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.018104,
+                  0.002847
+                ],
+                "point_delta": -0.007377,
+                "significant": false,
+                "subjects": 5830
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.020176,
+                  0.000128
+                ],
+                "point_delta": -0.010086,
+                "significant": false,
+                "subjects": 5830
+              },
+              "mae": {
+                "baseline_ridge": 10.425077,
+                "electrolyte_belief_ridge": 10.420957,
+                "placebo_belief_ridge": 10.429084
+              },
+              "rows": 86125,
+              "subjects": 5830
+            },
+            "phosphate": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.017001,
+                  0.007357
+                ],
+                "point_delta": -0.004778,
+                "significant": false,
+                "subjects": 1045
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.019559,
+                  0.004232
+                ],
+                "point_delta": -0.006638,
+                "significant": false,
+                "subjects": 1045
+              },
+              "mae": {
+                "baseline_ridge": 0.73179,
+                "electrolyte_belief_ridge": 0.720234,
+                "placebo_belief_ridge": 0.734639
+              },
+              "rows": 2793,
+              "subjects": 1045
+            },
+            "potassium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.012839,
+                  -0.007487
+                ],
+                "point_delta": -0.010174,
+                "significant": true,
+                "subjects": 3358
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.013992,
+                  -0.008418
+                ],
+                "point_delta": -0.011094,
+                "significant": true,
+                "subjects": 3358
+              },
+              "mae": {
+                "baseline_ridge": 0.379295,
+                "electrolyte_belief_ridge": 0.37105,
+                "placebo_belief_ridge": 0.380123
+              },
+              "rows": 11530,
+              "subjects": 3358
+            },
+            "serum_osmolality": {
+              "candidate_vs_baseline": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  0.699539,
+                  2.687078
+                ],
+                "point_delta": 1.664751,
+                "significant": false,
+                "subjects": 90
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  -0.462474,
+                  1.956912
+                ],
+                "point_delta": 0.771699,
+                "significant": false,
+                "subjects": 90
+              },
+              "mae": {
+                "baseline_ridge": 7.864766,
+                "electrolyte_belief_ridge": 9.400912,
+                "placebo_belief_ridge": 8.88549
+              },
+              "rows": 400,
+              "subjects": 90
+            },
+            "sodium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.025831,
+                  0.000542
+                ],
+                "point_delta": -0.012597,
+                "significant": false,
+                "subjects": 3005
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.032243,
+                  -0.004534
+                ],
+                "point_delta": -0.018382,
+                "significant": true,
+                "subjects": 3005
+              },
+              "mae": {
+                "baseline_ridge": 2.24879,
+                "electrolyte_belief_ridge": 2.22611,
+                "placebo_belief_ridge": 2.252984
+              },
+              "rows": 10886,
+              "subjects": 3005
+            }
+          }
+        },
+        {
+          "discovery_groups": 11877,
+          "group_column": "subject_id",
+          "heldout_groups": 5850,
+          "overlap": 0,
+          "passed_count": 7,
+          "passed_targets": [
+            "sodium",
+            "potassium",
+            "chloride",
+            "bicarbonate",
+            "anion_gap",
+            "magnesium",
+            "creatinine"
+          ],
+          "seed": 71,
+          "targets": {
+            "anion_gap": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.058481,
+                  -0.019034
+                ],
+                "point_delta": -0.040579,
+                "significant": true,
+                "subjects": 2318
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.066973,
+                  -0.026758
+                ],
+                "point_delta": -0.047933,
+                "significant": true,
+                "subjects": 2318
+              },
+              "mae": {
+                "baseline_ridge": 2.195155,
+                "electrolyte_belief_ridge": 2.132875,
+                "placebo_belief_ridge": 2.200395
+              },
+              "rows": 7661,
+              "subjects": 2318
+            },
+            "bicarbonate": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.053009,
+                  -0.02371
+                ],
+                "point_delta": -0.038529,
+                "significant": true,
+                "subjects": 3241
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.055446,
+                  -0.027191
+                ],
+                "point_delta": -0.040478,
+                "significant": true,
+                "subjects": 3241
+              },
+              "mae": {
+                "baseline_ridge": 2.139785,
+                "electrolyte_belief_ridge": 2.098521,
+                "placebo_belief_ridge": 2.141824
+              },
+              "rows": 11766,
+              "subjects": 3241
+            },
+            "calcium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.004592,
+                  0.000627
+                ],
+                "point_delta": -0.002016,
+                "significant": false,
+                "subjects": 2689
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.005752,
+                  -0.000491
+                ],
+                "point_delta": -0.003046,
+                "significant": true,
+                "subjects": 2689
+              },
+              "mae": {
+                "baseline_ridge": 0.36009,
+                "electrolyte_belief_ridge": 0.357042,
+                "placebo_belief_ridge": 0.361107
+              },
+              "rows": 8731,
+              "subjects": 2689
+            },
+            "chloride": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.058424,
+                  -0.027137
+                ],
+                "point_delta": -0.042138,
+                "significant": true,
+                "subjects": 2800
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.064615,
+                  -0.032395
+                ],
+                "point_delta": -0.049293,
+                "significant": true,
+                "subjects": 2800
+              },
+              "mae": {
+                "baseline_ridge": 2.514305,
+                "electrolyte_belief_ridge": 2.472273,
+                "placebo_belief_ridge": 2.523427
+              },
+              "rows": 9188,
+              "subjects": 2800
+            },
+            "creatinine": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.020221,
+                  -0.007403
+                ],
+                "point_delta": -0.01359,
+                "significant": true,
+                "subjects": 2772
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.021999,
+                  -0.009139
+                ],
+                "point_delta": -0.015307,
+                "significant": true,
+                "subjects": 2772
+              },
+              "mae": {
+                "baseline_ridge": 0.316161,
+                "electrolyte_belief_ridge": 0.307958,
+                "placebo_belief_ridge": 0.317467
+              },
+              "rows": 9009,
+              "subjects": 2772
+            },
+            "ionized_calcium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  0.008519,
+                  0.044543
+                ],
+                "point_delta": 0.026176,
+                "significant": false,
+                "subjects": 101
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  -0.01833,
+                  0.023918
+                ],
+                "point_delta": 0.003364,
+                "significant": false,
+                "subjects": 101
+              },
+              "mae": {
+                "baseline_ridge": 0.195022,
+                "electrolyte_belief_ridge": 0.219341,
+                "placebo_belief_ridge": 0.216194
+              },
+              "rows": 295,
+              "subjects": 101
+            },
+            "magnesium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.008641,
+                  -0.001942
+                ],
+                "point_delta": -0.005047,
+                "significant": true,
+                "subjects": 1452
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.00993,
+                  -0.002613
+                ],
+                "point_delta": -0.006297,
+                "significant": true,
+                "subjects": 1452
+              },
+              "mae": {
+                "baseline_ridge": 0.255249,
+                "electrolyte_belief_ridge": 0.250369,
+                "placebo_belief_ridge": 0.256602
+              },
+              "rows": 3513,
+              "subjects": 1452
+            },
+            "map": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.02068,
+                  -0.001245
+                ],
+                "point_delta": -0.010815,
+                "significant": true,
+                "subjects": 5824
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.021239,
+                  0.000217
+                ],
+                "point_delta": -0.010407,
+                "significant": false,
+                "subjects": 5824
+              },
+              "mae": {
+                "baseline_ridge": 10.407827,
+                "electrolyte_belief_ridge": 10.398198,
+                "placebo_belief_ridge": 10.408826
+              },
+              "rows": 85217,
+              "subjects": 5824
+            },
+            "phosphate": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.01902,
+                  0.003208
+                ],
+                "point_delta": -0.006733,
+                "significant": false,
+                "subjects": 1018
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.025177,
+                  0.000466
+                ],
+                "point_delta": -0.011728,
+                "significant": false,
+                "subjects": 1018
+              },
+              "mae": {
+                "baseline_ridge": 0.736019,
+                "electrolyte_belief_ridge": 0.727292,
+                "placebo_belief_ridge": 0.741559
+              },
+              "rows": 2670,
+              "subjects": 1018
+            },
+            "potassium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.010443,
+                  -0.004585
+                ],
+                "point_delta": -0.007575,
+                "significant": true,
+                "subjects": 3313
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.011109,
+                  -0.00543
+                ],
+                "point_delta": -0.008191,
+                "significant": true,
+                "subjects": 3313
+              },
+              "mae": {
+                "baseline_ridge": 0.390201,
+                "electrolyte_belief_ridge": 0.382609,
+                "placebo_belief_ridge": 0.390729
+              },
+              "rows": 11297,
+              "subjects": 3313
+            },
+            "serum_osmolality": {
+              "candidate_vs_baseline": {
+                "beats_baseline": false,
+                "bootstrap_95_ci": [
+                  -0.535709,
+                  1.342994
+                ],
+                "point_delta": 0.36478,
+                "significant": false,
+                "subjects": 71
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -1.490631,
+                  0.615427
+                ],
+                "point_delta": -0.44209,
+                "significant": false,
+                "subjects": 71
+              },
+              "mae": {
+                "baseline_ridge": 10.692401,
+                "electrolyte_belief_ridge": 10.670537,
+                "placebo_belief_ridge": 11.225497
+              },
+              "rows": 259,
+              "subjects": 71
+            },
+            "sodium": {
+              "candidate_vs_baseline": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.035007,
+                  -0.009435
+                ],
+                "point_delta": -0.021568,
+                "significant": true,
+                "subjects": 2973
+              },
+              "candidate_vs_placebo": {
+                "beats_baseline": true,
+                "bootstrap_95_ci": [
+                  -0.039786,
+                  -0.013244
+                ],
+                "point_delta": -0.026352,
+                "significant": true,
+                "subjects": 2973
+              },
+              "mae": {
+                "baseline_ridge": 2.287295,
+                "electrolyte_belief_ridge": 2.255731,
+                "placebo_belief_ridge": 2.290856
+              },
+              "rows": 10856,
+              "subjects": 2973
+            }
+          }
+        }
+      ],
+      "seeds": [
+        7,
+        11,
+        19,
+        23,
+        37,
+        53,
+        71
+      ],
+      "summary": {
+        "anion_gap": {
+          "candidate_beats_baseline_significant_count": 7,
+          "candidate_beats_placebo_significant_count": 7,
+          "candidate_passes_both_count": 7,
+          "median_delta_vs_baseline": -0.038153,
+          "median_delta_vs_placebo": -0.040482
+        },
+        "bicarbonate": {
+          "candidate_beats_baseline_significant_count": 7,
+          "candidate_beats_placebo_significant_count": 7,
+          "candidate_passes_both_count": 7,
+          "median_delta_vs_baseline": -0.038529,
+          "median_delta_vs_placebo": -0.040721
+        },
+        "calcium": {
+          "candidate_beats_baseline_significant_count": 1,
+          "candidate_beats_placebo_significant_count": 5,
+          "candidate_passes_both_count": 1,
+          "median_delta_vs_baseline": -0.001658,
+          "median_delta_vs_placebo": -0.002739
+        },
+        "chloride": {
+          "candidate_beats_baseline_significant_count": 6,
+          "candidate_beats_placebo_significant_count": 6,
+          "candidate_passes_both_count": 6,
+          "median_delta_vs_baseline": -0.030637,
+          "median_delta_vs_placebo": -0.03385
+        },
+        "creatinine": {
+          "candidate_beats_baseline_significant_count": 7,
+          "candidate_beats_placebo_significant_count": 7,
+          "candidate_passes_both_count": 7,
+          "median_delta_vs_baseline": -0.012976,
+          "median_delta_vs_placebo": -0.014491
+        },
+        "ionized_calcium": {
+          "candidate_beats_baseline_significant_count": 0,
+          "candidate_beats_placebo_significant_count": 0,
+          "candidate_passes_both_count": 0,
+          "median_delta_vs_baseline": 0.026176,
+          "median_delta_vs_placebo": -0.008312
+        },
+        "magnesium": {
+          "candidate_beats_baseline_significant_count": 7,
+          "candidate_beats_placebo_significant_count": 7,
+          "candidate_passes_both_count": 7,
+          "median_delta_vs_baseline": -0.00396,
+          "median_delta_vs_placebo": -0.006176
+        },
+        "map": {
+          "candidate_beats_baseline_significant_count": 5,
+          "candidate_beats_placebo_significant_count": 4,
+          "candidate_passes_both_count": 4,
+          "median_delta_vs_baseline": -0.010974,
+          "median_delta_vs_placebo": -0.014703
+        },
+        "phosphate": {
+          "candidate_beats_baseline_significant_count": 1,
+          "candidate_beats_placebo_significant_count": 3,
+          "candidate_passes_both_count": 1,
+          "median_delta_vs_baseline": -0.006733,
+          "median_delta_vs_placebo": -0.011728
+        },
+        "potassium": {
+          "candidate_beats_baseline_significant_count": 7,
+          "candidate_beats_placebo_significant_count": 7,
+          "candidate_passes_both_count": 7,
+          "median_delta_vs_baseline": -0.007765,
+          "median_delta_vs_placebo": -0.008191
+        },
+        "serum_osmolality": {
+          "candidate_beats_baseline_significant_count": 0,
+          "candidate_beats_placebo_significant_count": 0,
+          "candidate_passes_both_count": 0,
+          "median_delta_vs_baseline": 1.022044,
+          "median_delta_vs_placebo": 0.010366
+        },
+        "sodium": {
+          "candidate_beats_baseline_significant_count": 6,
+          "candidate_beats_placebo_significant_count": 7,
+          "candidate_passes_both_count": 6,
+          "median_delta_vs_baseline": -0.018475,
+          "median_delta_vs_placebo": -0.023472
+        }
+      }
+    }
+  },
+  "belief": {
+    "columns": [
+      "el_belief_sodium_water_mean",
+      "el_belief_sodium_water_sd",
+      "el_belief_sodium_water_innovation",
+      "el_belief_sodium_water_confidence",
+      "el_belief_potassium_store_mean",
+      "el_belief_potassium_store_sd",
+      "el_belief_potassium_store_innovation",
+      "el_belief_potassium_store_confidence",
+      "el_belief_acid_base_buffer_mean",
+      "el_belief_acid_base_buffer_sd",
+      "el_belief_acid_base_buffer_innovation",
+      "el_belief_acid_base_buffer_confidence",
+      "el_belief_divalent_mineral_mean",
+      "el_belief_divalent_mineral_sd",
+      "el_belief_divalent_mineral_innovation",
+      "el_belief_divalent_mineral_confidence",
+      "el_belief_osmotic_renal_mean",
+      "el_belief_osmotic_renal_sd",
+      "el_belief_osmotic_renal_innovation",
+      "el_belief_osmotic_renal_confidence",
+      "el_belief_sodium_slope_per_hr",
+      "el_belief_sodium_innovation",
+      "el_belief_potassium_slope_per_hr",
+      "el_belief_potassium_innovation",
+      "el_belief_bicarbonate_slope_per_hr",
+      "el_belief_bicarbonate_innovation",
+      "el_belief_anion_gap_slope_per_hr",
+      "el_belief_anion_gap_innovation",
+      "el_belief_chloride_slope_per_hr",
+      "el_belief_chloride_innovation",
+      "el_belief_calcium_slope_per_hr",
+      "el_belief_calcium_innovation",
+      "el_belief_magnesium_slope_per_hr",
+      "el_belief_magnesium_innovation",
+      "el_belief_phosphate_slope_per_hr",
+      "el_belief_phosphate_innovation",
+      "el_belief_serum_osmolality_slope_per_hr",
+      "el_belief_serum_osmolality_innovation",
+      "el_belief_creatinine_slope_per_hr",
+      "el_belief_creatinine_innovation",
+      "el_belief_sodium_low_burden",
+      "el_belief_sodium_high_burden",
+      "el_belief_potassium_low_burden",
+      "el_belief_potassium_high_burden",
+      "el_belief_acid_burden",
+      "el_belief_alkalosis_burden",
+      "el_belief_anion_gap_burden",
+      "el_belief_chloride_high_burden",
+      "el_belief_divalent_depletion_burden",
+      "el_belief_osmotic_burden",
+      "el_belief_renal_context",
+      "el_belief_repletion_context"
+    ],
+    "direct_hidden_state_accuracy_claim_allowed": false,
+    "name": "electrolyte_acid_base_patient_specific_state",
+    "requires_capacity_matched_placebo": true,
+    "targets": [
+      "sodium",
+      "potassium",
+      "chloride",
+      "bicarbonate",
+      "anion_gap",
+      "calcium",
+      "ionized_calcium",
+      "magnesium",
+      "phosphate",
+      "serum_osmolality",
+      "map",
+      "creatinine"
+    ]
+  },
+  "experiment": "eICU electrolyte predict-update belief downstream observable audit",
+  "gate": {
+    "baseline": "ridge_realfit",
+    "candidate": "ridge_realfit_plus_electrolyte_belief_features",
+    "pass_rule": "candidate must significantly beat both baseline and placebo on held-out patients",
+    "placebo": "ridge_realfit_plus_capacity_matched_noise_features"
+  },
+  "safety_boundary": {
+    "active_rule_promotion_allowed": false,
+    "causal_claim_allowed": false,
+    "checkpoint_promotion_allowed": false,
+    "clinical_claim_allowed": false,
+    "counterfactual_claim_allowed": false,
+    "direct_hidden_state_accuracy_claim_allowed": false,
+    "factual_observed_treatment_only": true,
+    "patient_ids_included_in_report": false,
+    "raw_rows_included": false
+  }
+}
