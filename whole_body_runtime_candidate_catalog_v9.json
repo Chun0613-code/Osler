@@ -1,0 +1,418 @@
+{
+  "schema": "whole_body_runtime_candidate_catalog.v1",
+  "factual_only": true,
+  "causal_claim_allowed": false,
+  "clinical_promotion_allowed": false,
+  "candidates": [
+    {
+      "candidate_id": "shared_module_nested_stack",
+      "input_contract_id": "shared_module_row.v1",
+      "input_contract": "shared module rows; true-patient outer splits; module-local histories",
+      "prediction_source": "nested convex stack selected on disjoint patient calibration rows",
+      "validated_cells": [
+        "bicarbonate@12h",
+        "creatinine@48h",
+        "glucose@12h",
+        "glucose@24h",
+        "glucose@3h",
+        "glucose@48h",
+        "glucose@6h",
+        "heart_rate@12h",
+        "heart_rate@24h",
+        "heart_rate@48h",
+        "heart_rate@6h",
+        "map@12h",
+        "map@1h",
+        "map@24h",
+        "map@3h",
+        "map@48h",
+        "map@6h",
+        "potassium@12h",
+        "potassium@24h",
+        "potassium@3h",
+        "potassium@48h",
+        "potassium@6h",
+        "respiratory_rate@12h",
+        "respiratory_rate@6h",
+        "sodium@24h"
+      ],
+      "validated_cell_count": 25,
+      "runtime_status": "target_gated_factual_research_only",
+      "fallback": "persistence for every cell absent from validated_cells"
+    },
+    {
+      "candidate_id": "joint_asof_whole_body_jepa",
+      "input_contract_id": "joint_asof_whole_body_state.v3",
+      "input_contract": "as-of aligned whole-body state; exact anchor-linked future labels; target-gated joint-JEPA only",
+      "source_gate_schema": "whole_body_joint_jepa_gate.v3",
+      "schema_current": true,
+      "validated_cells": [],
+      "validated_cell_count": 0,
+      "runtime_status": "candidate_only",
+      "fallback": "do not invoke joint-JEPA; use the matching contract's validated source or persistence"
+    },
+    {
+      "candidate_id": "teacher_anchored_hierarchical_joint_jepa",
+      "input_contract_id": "unspecified_fail_closed",
+      "input_contract": "materialized target-gated joint-JEPA registry",
+      "variable_units": {},
+      "output_contract": {},
+      "source_gate_schema": "whole_body_promotion_registry.v2",
+      "schema_current": true,
+      "validated_cells": [
+        "creatinine@12h",
+        "creatinine@6h",
+        "heart_rate@3h"
+      ],
+      "validated_cell_count": 3,
+      "runtime_status": "target_gated_factual_research_only",
+      "fallback": "persistence unless registry, input contract, target horizon, and units all match"
+    },
+    {
+      "candidate_id": "teacher_anchored_sparse_distributional_joint_jepa",
+      "input_contract_id": "joint_asof_whole_body_state_interval_urine.v1",
+      "input_contract": "as-of aligned whole-body state with interval-normalized urine output; urine events represent volume divided by the actual preceding collection interval",
+      "variable_units": {
+        "urine_output": "mL/hour"
+      },
+      "output_contract": {},
+      "source_gate_schema": "whole_body_promotion_registry.v2",
+      "schema_current": true,
+      "validated_cells": [
+        "urine_output@3h"
+      ],
+      "validated_cell_count": 1,
+      "runtime_status": "target_gated_factual_research_only",
+      "fallback": "persistence unless registry, input contract, target horizon, and units all match"
+    },
+    {
+      "candidate_id": "teacher_anchored_aligned_treatment_sparse_distributional_joint_jepa",
+      "input_contract_id": "joint_asof_whole_body_state_aligned_treatment_interval_urine.v1",
+      "input_contract": "as-of aligned whole-body state with eICU measurements and strictly pre-anchor treatment events on one shared synthetic epoch; interval-normalized urine output",
+      "variable_units": {
+        "urine_output": "mL/hour"
+      },
+      "output_contract": {},
+      "source_gate_schema": "whole_body_promotion_registry.v2",
+      "schema_current": true,
+      "validated_cells": [
+        "urine_output@1h"
+      ],
+      "validated_cell_count": 1,
+      "runtime_status": "target_gated_factual_research_only",
+      "fallback": "persistence unless registry, input contract, target horizon, and units all match"
+    },
+    {
+      "candidate_id": "teacher_anchored_aligned_treatment_glucose_hierarchical_joint_jepa",
+      "input_contract_id": "joint_asof_whole_body_state_aligned_treatment_interval_urine.v1",
+      "input_contract": "as-of aligned whole-body state with administration-grade treatment history and interval urine semantics",
+      "variable_units": {
+        "glucose": "mg/dL"
+      },
+      "output_contract": {},
+      "source_gate_schema": "whole_body_promotion_registry.v2",
+      "schema_current": true,
+      "validated_cells": [
+        "glucose@12h",
+        "glucose@1h"
+      ],
+      "validated_cell_count": 2,
+      "runtime_status": "target_gated_factual_research_only",
+      "fallback": "persistence unless registry, input contract, target horizon, and units all match"
+    },
+    {
+      "candidate_id": "teacher_anchored_two_level_glucose3_sparse_distributional_joint_jepa",
+      "input_contract_id": "joint_asof_whole_body_state.v3",
+      "input_contract": "as-of aligned whole-body state; exact anchor-linked future labels",
+      "variable_units": {
+        "glucose": "mg/dL"
+      },
+      "output_contract": {},
+      "source_gate_schema": "whole_body_promotion_registry.v2",
+      "schema_current": true,
+      "validated_cells": [
+        "glucose@3h"
+      ],
+      "validated_cell_count": 1,
+      "runtime_status": "target_gated_factual_research_only",
+      "fallback": "persistence unless registry, input contract, target horizon, and units all match"
+    },
+    {
+      "candidate_id": "teacher_anchored_aligned_treatment_respiratory_sparse_distributional_joint_jepa",
+      "input_contract_id": "joint_asof_whole_body_state_aligned_treatment_interval_urine.v1",
+      "input_contract": "as-of aligned whole-body state with eICU measurements and strictly pre-anchor treatment events on one shared synthetic epoch; interval-normalized urine output",
+      "variable_units": {
+        "respiratory_rate": "breaths/minute"
+      },
+      "output_contract": {},
+      "source_gate_schema": "whole_body_promotion_registry.v2",
+      "schema_current": true,
+      "validated_cells": [
+        "respiratory_rate@24h"
+      ],
+      "validated_cell_count": 1,
+      "runtime_status": "target_gated_factual_research_only",
+      "fallback": "persistence unless registry, input contract, target horizon, and units all match"
+    },
+    {
+      "candidate_id": "teacher_anchored_aligned_treatment_respiratory_short_sparse_distributional_joint_jepa",
+      "input_contract_id": "joint_asof_whole_body_state_aligned_treatment_interval_urine.v1",
+      "input_contract": "as-of aligned whole-body state with eICU measurements and strictly pre-anchor treatment events on one shared synthetic epoch; interval-normalized urine output",
+      "variable_units": {
+        "respiratory_rate": "breaths/minute"
+      },
+      "output_contract": {},
+      "source_gate_schema": "whole_body_promotion_registry.v2",
+      "schema_current": true,
+      "validated_cells": [
+        "respiratory_rate@3h"
+      ],
+      "validated_cell_count": 1,
+      "runtime_status": "target_gated_factual_research_only",
+      "fallback": "persistence unless registry, input contract, target horizon, and units all match"
+    },
+    {
+      "candidate_id": "teacher_anchored_aligned_treatment_o2sat_sparse_target_joint_jepa",
+      "input_contract_id": "joint_asof_whole_body_state_aligned_treatment_interval_urine.v1",
+      "input_contract": "as-of aligned whole-body state with strictly pre-anchor treatment history and interval-normalized urine output",
+      "variable_units": {
+        "o2sat": "%"
+      },
+      "output_contract": {},
+      "source_gate_schema": "whole_body_promotion_registry.v2",
+      "schema_current": true,
+      "validated_cells": [
+        "o2sat@12h"
+      ],
+      "validated_cell_count": 1,
+      "runtime_status": "target_gated_factual_research_only",
+      "fallback": "persistence unless registry, input contract, target horizon, and units all match"
+    },
+    {
+      "candidate_id": "teacher_anchored_hierarchical_joint_jepa_heart_rate_full_cohort_20260805",
+      "input_contract_id": "joint_asof_whole_body_state.v3",
+      "input_contract": "as-of aligned whole-body state; exact anchor-linked future labels",
+      "variable_units": {
+        "heart_rate": "bpm"
+      },
+      "output_contract": {},
+      "source_gate_schema": "whole_body_promotion_registry.v2",
+      "schema_current": true,
+      "validated_cells": [
+        "heart_rate@3h",
+        "heart_rate@6h"
+      ],
+      "validated_cell_count": 2,
+      "runtime_status": "target_gated_factual_research_only",
+      "fallback": "persistence unless registry, input contract, target horizon, and units all match"
+    },
+    {
+      "candidate_id": "calibrated_hypoxemia_event_factual_model_20260805",
+      "input_contract_id": "joint_asof_whole_body_state_aligned_treatment_interval_urine.v1",
+      "input_contract": "anchor-time measurements, causal lag/slope history, and strictly pre-anchor treatment context; hospital/care-unit/database provenance excluded from model inputs",
+      "variable_units": {
+        "hypoxemia_event": "probability"
+      },
+      "output_contract": {
+        "hypoxemia_event": {
+          "task_type": "binary_event_probability",
+          "event_definition": "future_o2sat <= 92",
+          "not_equivalent_to": "continuous oxygen-saturation value forecast"
+        }
+      },
+      "source_gate_schema": "whole_body_promotion_registry.v2",
+      "schema_current": true,
+      "validated_cells": [
+        "hypoxemia_event@1h",
+        "hypoxemia_event@3h"
+      ],
+      "validated_cell_count": 2,
+      "runtime_status": "target_gated_factual_research_only",
+      "fallback": "persistence unless registry, input contract, target horizon, and units all match"
+    },
+    {
+      "candidate_id": "creatinine_robust_change_hurdle_factual_model_20260805",
+      "input_contract_id": "joint_asof_whole_body_state_aligned_treatment_interval_urine.v1",
+      "input_contract": "anchor-time measurements, causal lag/slope history, and strictly pre-anchor treatment context; hospital/care-unit/database provenance excluded from model inputs",
+      "variable_units": {
+        "creatinine": "mg/dL"
+      },
+      "output_contract": {
+        "creatinine": {
+          "task_type": "continuous_value_with_change_hurdle",
+          "change_definition": "abs(future-current) >= 0.1 mg/dL",
+          "interval": "patient-grouped normalized split conformal"
+        }
+      },
+      "source_gate_schema": "whole_body_promotion_registry.v2",
+      "schema_current": true,
+      "validated_cells": [
+        "creatinine@24h"
+      ],
+      "validated_cell_count": 1,
+      "runtime_status": "target_gated_factual_research_only",
+      "fallback": "persistence unless registry, input contract, target horizon, and units all match"
+    },
+    {
+      "candidate_id": "platelets_change_hurdle_joint_jepa",
+      "input_contract_id": "joint_asof_whole_body_state_aligned_treatment_interval_urine.v1",
+      "input_contract": "anchor-time measurements, causal lag/slope history, and strictly pre-anchor treatment context; hospital/care-unit/database provenance excluded from model inputs",
+      "variable_units": {
+        "platelets": "K/uL"
+      },
+      "output_contract": {
+        "platelets": {
+          "task_type": "continuous_value_with_change_hurdle",
+          "change_definition": "abs(future-current) >= 10.0 K/uL",
+          "change_threshold": 10.0,
+          "interval": "patient-grouped crossfit adaptive normalized split conformal",
+          "point_prediction": "persistence-anchored target-specific change hurdle"
+        }
+      },
+      "source_gate_schema": "whole_body_promotion_registry.v2",
+      "schema_current": true,
+      "validated_cells": [
+        "platelets@3h"
+      ],
+      "validated_cell_count": 1,
+      "runtime_status": "target_gated_factual_research_only",
+      "fallback": "persistence unless registry, input contract, target horizon, and units all match"
+    },
+    {
+      "candidate_id": "hemoglobin_change_hurdle_joint_jepa",
+      "input_contract_id": "joint_asof_whole_body_state_aligned_treatment_interval_urine.v1",
+      "input_contract": "anchor-time measurements, causal lag/slope history, and strictly pre-anchor treatment context; hospital/care-unit/database provenance excluded from model inputs",
+      "variable_units": {
+        "hemoglobin": "g/dL"
+      },
+      "output_contract": {
+        "hemoglobin": {
+          "task_type": "continuous_value_with_change_hurdle",
+          "change_definition": "abs(future-current) >= 0.5 g/dL",
+          "change_threshold": 0.5,
+          "interval": "patient-grouped crossfit adaptive normalized split conformal",
+          "point_prediction": "persistence-anchored target-specific change hurdle"
+        }
+      },
+      "source_gate_schema": "whole_body_promotion_registry.v2",
+      "schema_current": true,
+      "validated_cells": [
+        "hemoglobin@12h",
+        "hemoglobin@3h",
+        "hemoglobin@6h"
+      ],
+      "validated_cell_count": 3,
+      "runtime_status": "target_gated_factual_research_only",
+      "fallback": "persistence unless registry, input contract, target horizon, and units all match"
+    },
+    {
+      "candidate_id": "hematocrit_change_hurdle_joint_jepa",
+      "input_contract_id": "joint_asof_whole_body_state_aligned_treatment_interval_urine.v1",
+      "input_contract": "anchor-time measurements, causal lag/slope history, and strictly pre-anchor treatment context; hospital/care-unit/database provenance excluded from model inputs",
+      "variable_units": {
+        "hematocrit": "%"
+      },
+      "output_contract": {
+        "hematocrit": {
+          "task_type": "continuous_value_with_change_hurdle",
+          "change_definition": "abs(future-current) >= 1.5 %",
+          "change_threshold": 1.5,
+          "interval": "patient-grouped crossfit adaptive normalized split conformal",
+          "point_prediction": "persistence-anchored target-specific change hurdle"
+        }
+      },
+      "source_gate_schema": "whole_body_promotion_registry.v2",
+      "schema_current": true,
+      "validated_cells": [
+        "hematocrit@3h",
+        "hematocrit@6h"
+      ],
+      "validated_cell_count": 2,
+      "runtime_status": "target_gated_factual_research_only",
+      "fallback": "persistence unless registry, input contract, target horizon, and units all match"
+    },
+    {
+      "candidate_id": "bicarbonate_change_hurdle_joint_jepa",
+      "input_contract_id": "joint_asof_whole_body_state_aligned_treatment_interval_urine.v1",
+      "input_contract": "anchor-time measurements, causal lag/slope history, and strictly pre-anchor treatment context; hospital/care-unit/database provenance excluded from model inputs",
+      "variable_units": {
+        "bicarbonate": "mmol/L"
+      },
+      "output_contract": {
+        "bicarbonate": {
+          "task_type": "continuous_value_with_change_hurdle",
+          "change_definition": "abs(future-current) >= 1.0 mmol/L",
+          "change_threshold": 1.0,
+          "interval": "patient-grouped crossfit adaptive normalized split conformal",
+          "point_prediction": "persistence-anchored target-specific change hurdle"
+        }
+      },
+      "source_gate_schema": "whole_body_promotion_registry.v2",
+      "schema_current": true,
+      "validated_cells": [
+        "bicarbonate@24h"
+      ],
+      "validated_cell_count": 1,
+      "runtime_status": "target_gated_factual_research_only",
+      "fallback": "persistence unless registry, input contract, target horizon, and units all match"
+    },
+    {
+      "candidate_id": "bun_change_hurdle_joint_jepa",
+      "input_contract_id": "joint_asof_whole_body_state_aligned_treatment_interval_urine.v1",
+      "input_contract": "anchor-time measurements, causal lag/slope history, and strictly pre-anchor treatment context; hospital/care-unit/database provenance excluded from model inputs",
+      "variable_units": {
+        "bun": "mg/dL"
+      },
+      "output_contract": {
+        "bun": {
+          "task_type": "continuous_value_with_change_hurdle",
+          "change_definition": "abs(future-current) >= 2.0 mg/dL",
+          "change_threshold": 2.0,
+          "interval": "patient-grouped crossfit adaptive normalized split conformal",
+          "point_prediction": "persistence-anchored target-specific change hurdle"
+        }
+      },
+      "source_gate_schema": "whole_body_promotion_registry.v2",
+      "schema_current": true,
+      "validated_cells": [
+        "bun@24h"
+      ],
+      "validated_cell_count": 1,
+      "runtime_status": "target_gated_factual_research_only",
+      "fallback": "persistence unless registry, input contract, target horizon, and units all match"
+    },
+    {
+      "candidate_id": "platelets_domain_calibrated_change_hurdle_joint_jepa",
+      "input_contract_id": "joint_asof_whole_body_state_aligned_treatment_interval_urine.v1",
+      "input_contract": "anchor-time measurements, causal lag/slope history, and strictly pre-anchor treatment context; hospital/care-unit/database provenance excluded from model inputs",
+      "variable_units": {
+        "platelets": "K/uL"
+      },
+      "output_contract": {
+        "platelets": {
+          "task_type": "continuous_value_with_change_hurdle",
+          "change_definition": "abs(future-current) >= 10.0 K/uL",
+          "change_threshold": 10.0,
+          "interval": "external-domain-heldout adaptive normalized split conformal",
+          "point_prediction": "persistence-anchored target-specific change hurdle"
+        }
+      },
+      "source_gate_schema": "whole_body_promotion_registry.v2",
+      "schema_current": true,
+      "validated_cells": [
+        "platelets@1h"
+      ],
+      "validated_cell_count": 1,
+      "runtime_status": "target_gated_factual_research_only",
+      "fallback": "persistence unless registry, input contract, target horizon, and units all match"
+    }
+  ],
+  "resolution_policy": {
+    "rule": "Choose only candidates whose input_contract_id exactly matches the live feature schema.",
+    "forbidden": [
+      "Do not blend shared-module and joint-asof predictions during validation.",
+      "Do not promote any cell absent from that candidate's validated_cells.",
+      "Do not use this catalog for treatment-effect or clinical-decision claims."
+    ]
+  }
+}

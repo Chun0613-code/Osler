@@ -1,0 +1,83 @@
+{
+  "schema": "whole_body_promotion_registry.v2",
+  "candidate_id": "hematocrit_change_hurdle_joint_jepa",
+  "input_contract_id": "joint_asof_whole_body_state_aligned_treatment_interval_urine.v1",
+  "input_contract": "anchor-time measurements, causal lag/slope history, and strictly pre-anchor treatment context; hospital/care-unit/database provenance excluded from model inputs",
+  "variable_units": {
+    "hematocrit": "%"
+  },
+  "output_contract": {
+    "hematocrit": {
+      "task_type": "continuous_value_with_change_hurdle",
+      "change_definition": "abs(future-current) >= 1.5 %",
+      "change_threshold": 1.5,
+      "interval": "patient-grouped crossfit adaptive normalized split conformal",
+      "point_prediction": "persistence-anchored target-specific change hurdle"
+    }
+  },
+  "source_audit_schema": "target_specific_event_hurdle_audit.v1",
+  "factual_only": true,
+  "causal_claim_allowed": false,
+  "clinical_promotion_allowed": false,
+  "promotion_status": "validated_target_gated_joint_research_only",
+  "validated_target_horizon_cells": [
+    "hematocrit@3h",
+    "hematocrit@6h"
+  ],
+  "target_horizon_registry": {
+    "hematocrit@12h": {
+      "validated_for_joint_runtime": false,
+      "can_move": false,
+      "task_type": "continuous_value_with_change_hurdle",
+      "source_model": "hematocrit_change_hurdle_joint_jepa",
+      "source_audit_cell": "hematocrit@12h",
+      "patient_conformal": false,
+      "hospital_conformal": true,
+      "care_unit_conformal": true,
+      "time_conformal": true,
+      "requirements": {
+        "patient_7seed": false,
+        "hospital_heldout": true,
+        "careunit_heldout": true,
+        "forward_time_heldout": true,
+        "causal_claim_allowed": false
+      }
+    },
+    "hematocrit@3h": {
+      "validated_for_joint_runtime": true,
+      "can_move": true,
+      "task_type": "continuous_value_with_change_hurdle",
+      "source_model": "hematocrit_change_hurdle_joint_jepa",
+      "source_audit_cell": "hematocrit@3h",
+      "patient_conformal": true,
+      "hospital_conformal": true,
+      "care_unit_conformal": true,
+      "time_conformal": true,
+      "requirements": {
+        "patient_7seed": true,
+        "hospital_heldout": true,
+        "careunit_heldout": true,
+        "forward_time_heldout": true,
+        "causal_claim_allowed": false
+      }
+    },
+    "hematocrit@6h": {
+      "validated_for_joint_runtime": true,
+      "can_move": true,
+      "task_type": "continuous_value_with_change_hurdle",
+      "source_model": "hematocrit_change_hurdle_joint_jepa",
+      "source_audit_cell": "hematocrit@6h",
+      "patient_conformal": true,
+      "hospital_conformal": true,
+      "care_unit_conformal": true,
+      "time_conformal": true,
+      "requirements": {
+        "patient_7seed": true,
+        "hospital_heldout": true,
+        "careunit_heldout": true,
+        "forward_time_heldout": true,
+        "causal_claim_allowed": false
+      }
+    }
+  }
+}

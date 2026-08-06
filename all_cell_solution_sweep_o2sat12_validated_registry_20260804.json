@@ -1,0 +1,539 @@
+{
+  "schema": "whole_body_promotion_registry.v2",
+  "candidate_id": "teacher_anchored_aligned_treatment_o2sat_sparse_target_joint_jepa",
+  "input_contract_id": "joint_asof_whole_body_state_aligned_treatment_interval_urine.v1",
+  "input_contract": "as-of aligned whole-body state with strictly pre-anchor treatment history and interval-normalized urine output",
+  "variable_units": {
+    "o2sat": "%"
+  },
+  "candidate_configuration": {
+    "validated_router_teacher_anchor": true,
+    "zero_initialized_bounded_residual": true,
+    "two_level_latent_hierarchy": true,
+    "level_1_shared_whole_body_latent": true,
+    "level_2_canonical_organ_latent_tokens": true,
+    "target_heads_above_two_level_latents": true,
+    "shared_slow_context_latent": true,
+    "target_specific_fast_future_latent": true,
+    "dynamic_cross_organ_route": false,
+    "sparse_target_horizon_experts": true,
+    "target_specific_distributional_scale": false,
+    "pcgrad": false,
+    "conformal_method": "patient_cluster_cv_adaptive",
+    "conformal_nominal_coverage": 0.9,
+    "target_empirical_interval_coverage": 0.9
+  },
+  "target_horizon_registry": {
+    "o2sat@12h": {
+      "validated": true,
+      "validated_for_joint_runtime": true,
+      "can_move": true,
+      "status": "validated_move",
+      "source_model": "teacher_anchored_sparse_target_distributional_joint_jepa",
+      "requirements": {
+        "patient_7seed_teacher_and_persistence": true,
+        "external_hospital_care_unit_time_conformal_module": true,
+        "direction_delta_and_patient_bootstrap": true,
+        "patient_conformal_7seed": true,
+        "svd_mode_stability": true
+      },
+      "rejection_reasons": [],
+      "external_requirements": {
+        "patient_7seed_teacher_and_persistence": true,
+        "hospital_teacher_bootstrap": true,
+        "hospital_persistence_bootstrap": true,
+        "hospital_conformal": true,
+        "hospital_module_balanced": true,
+        "hospital_no_expert_bootstrap": true,
+        "care_unit_teacher_bootstrap": true,
+        "care_unit_persistence_bootstrap": true,
+        "care_unit_conformal": true,
+        "care_unit_module_balanced": true,
+        "care_unit_no_expert_bootstrap": true,
+        "time_teacher_bootstrap": true,
+        "time_persistence_bootstrap": true,
+        "time_conformal": true,
+        "time_module_balanced": true,
+        "time_no_expert_bootstrap": true
+      },
+      "scoring": {
+        "split_count": 7,
+        "splits": [
+          {
+            "direction_accuracy": 0.7232628398791541,
+            "delta_correlation": 0.40616703443034907,
+            "teacher_bootstrap": true,
+            "persistence_bootstrap": true,
+            "pass": true
+          },
+          {
+            "direction_accuracy": 0.7162162162162162,
+            "delta_correlation": 0.4055034126325128,
+            "teacher_bootstrap": true,
+            "persistence_bootstrap": true,
+            "pass": true
+          },
+          {
+            "direction_accuracy": 0.7080581241743725,
+            "delta_correlation": 0.4124676524398363,
+            "teacher_bootstrap": true,
+            "persistence_bootstrap": true,
+            "pass": true
+          },
+          {
+            "direction_accuracy": 0.7219477769936485,
+            "delta_correlation": 0.40406004776991655,
+            "teacher_bootstrap": true,
+            "persistence_bootstrap": true,
+            "pass": true
+          },
+          {
+            "direction_accuracy": 0.7088444157520981,
+            "delta_correlation": 0.4385964070087035,
+            "teacher_bootstrap": true,
+            "persistence_bootstrap": true,
+            "pass": true
+          },
+          {
+            "direction_accuracy": 0.7138869504535938,
+            "delta_correlation": 0.3873156582944354,
+            "teacher_bootstrap": true,
+            "persistence_bootstrap": true,
+            "pass": true
+          },
+          {
+            "direction_accuracy": 0.7259493670886076,
+            "delta_correlation": 0.4164634644964255,
+            "teacher_bootstrap": true,
+            "persistence_bootstrap": true,
+            "pass": true
+          }
+        ],
+        "patient_conformal_splits": [
+          {
+            "calibration_n": 1068,
+            "test_n": 2082,
+            "q90": 4.9433746337890625,
+            "median_lower_width": 4.9433746337890625,
+            "median_upper_width": 4.9433746337890625,
+            "q90_rank": 957,
+            "coverage": 0.8716451398913935,
+            "row_coverage": 0.8611911623439001,
+            "patient_equalized_coverage": 0.8716451398913935,
+            "patient_coverage_ci95": [
+              0.8448710197974175,
+              0.8999325107273343
+            ],
+            "test_subjects": 168,
+            "pass": true,
+            "finite_sample_corrected": true,
+            "adaptive_calibration": {
+              "method": "patient_grouped_crossfit_adaptive_conformal",
+              "selected_nominal_coverage": 0.89,
+              "patient_finite_sample_coverage": 0.9007228915662652,
+              "target_empirical_coverage": 0.9,
+              "calibration_rows": 1068,
+              "calibration_subjects": 83,
+              "q90_rank": 957,
+              "equal_total_weight_per_patient": true,
+              "test_labels_used": false,
+              "cv_folds": 5,
+              "cv_coverage": 0.9056287330166684,
+              "candidate_cv_coverage": {
+                "0.80": 0.8099168807093402,
+                "0.81": 0.8199152865122068,
+                "0.82": 0.8320157363176227,
+                "0.83": 0.8398182294257888,
+                "0.84": 0.8545870863940697,
+                "0.85": 0.8643483767078262,
+                "0.86": 0.8759034707172225,
+                "0.87": 0.8846124429272578,
+                "0.88": 0.8913122288893836,
+                "0.89": 0.9056287330166684,
+                "0.90": 0.9143918261902898,
+                "0.91": 0.924345897448208
+              },
+              "all_calibration_rows_used_after_crossfit_selection": true
+            },
+            "calibration_rows_untouched_during_training": true,
+            "test_labels_used_for_calibration": false
+          },
+          {
+            "calibration_n": 1297,
+            "test_n": 1889,
+            "q90": 4.985038757324219,
+            "median_lower_width": 4.985038757324219,
+            "median_upper_width": 4.985038757324219,
+            "q90_rank": 1155,
+            "coverage": 0.919811670475673,
+            "row_coverage": 0.9115934356802541,
+            "patient_equalized_coverage": 0.919811670475673,
+            "patient_coverage_ci95": [
+              0.9004175017923719,
+              0.9397543559777078
+            ],
+            "test_subjects": 144,
+            "pass": true,
+            "finite_sample_corrected": true,
+            "adaptive_calibration": {
+              "method": "patient_grouped_crossfit_adaptive_conformal",
+              "selected_nominal_coverage": 0.89,
+              "patient_finite_sample_coverage": 0.8988118811881188,
+              "target_empirical_coverage": 0.9,
+              "calibration_rows": 1297,
+              "calibration_subjects": 101,
+              "q90_rank": 1155,
+              "equal_total_weight_per_patient": true,
+              "test_labels_used": false,
+              "cv_folds": 5,
+              "cv_coverage": 0.8947444781703442,
+              "candidate_cv_coverage": {
+                "0.80": 0.8117950104610739,
+                "0.81": 0.8217089831301178,
+                "0.82": 0.8295480392032127,
+                "0.83": 0.8341456478286674,
+                "0.84": 0.8411516738722379,
+                "0.85": 0.8530545221589128,
+                "0.86": 0.8695128346568294,
+                "0.87": 0.8801780372685354,
+                "0.88": 0.8866891547808624,
+                "0.89": 0.8947444781703442,
+                "0.90": 0.9125138752333458,
+                "0.91": 0.9238652296763643
+              },
+              "all_calibration_rows_used_after_crossfit_selection": true
+            },
+            "calibration_rows_untouched_during_training": true,
+            "test_labels_used_for_calibration": false
+          },
+          {
+            "calibration_n": 1312,
+            "test_n": 1916,
+            "q90": 4.969825744628906,
+            "median_lower_width": 4.969825744628906,
+            "median_upper_width": 4.969825744628906,
+            "q90_rank": 1158,
+            "coverage": 0.8857295350731488,
+            "row_coverage": 0.8799582463465553,
+            "patient_equalized_coverage": 0.8857295350731488,
+            "patient_coverage_ci95": [
+              0.8545323835435208,
+              0.9119856065776366
+            ],
+            "test_subjects": 149,
+            "pass": true,
+            "finite_sample_corrected": true,
+            "adaptive_calibration": {
+              "method": "patient_grouped_crossfit_adaptive_conformal",
+              "selected_nominal_coverage": 0.89,
+              "patient_finite_sample_coverage": 0.8992708333333334,
+              "target_empirical_coverage": 0.9,
+              "calibration_rows": 1312,
+              "calibration_subjects": 96,
+              "q90_rank": 1158,
+              "equal_total_weight_per_patient": true,
+              "test_labels_used": false,
+              "cv_folds": 5,
+              "cv_coverage": 0.8996685585901293,
+              "candidate_cv_coverage": {
+                "0.80": 0.8140612256857356,
+                "0.81": 0.819285319644974,
+                "0.82": 0.8321286789937097,
+                "0.83": 0.8406301721801827,
+                "0.84": 0.8456485810776503,
+                "0.85": 0.8548632480093165,
+                "0.86": 0.8694216848210427,
+                "0.87": 0.878707605223085,
+                "0.88": 0.8923704601242677,
+                "0.89": 0.8996685585901293,
+                "0.90": 0.9130293875004813,
+                "0.91": 0.920160764647771
+              },
+              "all_calibration_rows_used_after_crossfit_selection": true
+            },
+            "calibration_rows_untouched_during_training": true,
+            "test_labels_used_for_calibration": false
+          },
+          {
+            "calibration_n": 1233,
+            "test_n": 1805,
+            "q90": 4.9544219970703125,
+            "median_lower_width": 4.9544219970703125,
+            "median_upper_width": 4.9544219970703125,
+            "q90_rank": 1090,
+            "coverage": 0.9007824649399283,
+            "row_coverage": 0.8936288088642659,
+            "patient_equalized_coverage": 0.9007824649399283,
+            "patient_coverage_ci95": [
+              0.8731842976002135,
+              0.9253107281762896
+            ],
+            "test_subjects": 154,
+            "pass": true,
+            "finite_sample_corrected": true,
+            "adaptive_calibration": {
+              "method": "patient_grouped_crossfit_adaptive_conformal",
+              "selected_nominal_coverage": 0.89,
+              "patient_finite_sample_coverage": 0.8992708333333334,
+              "target_empirical_coverage": 0.9,
+              "calibration_rows": 1233,
+              "calibration_subjects": 96,
+              "q90_rank": 1090,
+              "equal_total_weight_per_patient": true,
+              "test_labels_used": false,
+              "cv_folds": 5,
+              "cv_coverage": 0.8904990728494906,
+              "candidate_cv_coverage": {
+                "0.80": 0.80830035791393,
+                "0.81": 0.8199330876929166,
+                "0.82": 0.830407004177418,
+                "0.83": 0.8350337393366614,
+                "0.84": 0.8478226452583343,
+                "0.85": 0.8604019408309886,
+                "0.86": 0.8714326401097893,
+                "0.87": 0.8791352447819817,
+                "0.88": 0.8866619423233043,
+                "0.89": 0.8904990728494906,
+                "0.90": 0.910847915778522,
+                "0.91": 0.9212470189279612
+              },
+              "all_calibration_rows_used_after_crossfit_selection": true
+            },
+            "calibration_rows_untouched_during_training": true,
+            "test_labels_used_for_calibration": false
+          },
+          {
+            "calibration_n": 1175,
+            "test_n": 1965,
+            "q90": 4.967781066894531,
+            "median_lower_width": 4.967781066894531,
+            "median_upper_width": 4.967781066894531,
+            "q90_rank": 1046,
+            "coverage": 0.8872439376374868,
+            "row_coverage": 0.8977099236641222,
+            "patient_equalized_coverage": 0.8872439376374868,
+            "patient_coverage_ci95": [
+              0.8571758121232903,
+              0.913925870206853
+            ],
+            "test_subjects": 144,
+            "pass": true,
+            "finite_sample_corrected": true,
+            "adaptive_calibration": {
+              "method": "patient_grouped_crossfit_adaptive_conformal",
+              "selected_nominal_coverage": 0.89,
+              "patient_finite_sample_coverage": 0.899468085106383,
+              "target_empirical_coverage": 0.9,
+              "calibration_rows": 1175,
+              "calibration_subjects": 94,
+              "q90_rank": 1046,
+              "equal_total_weight_per_patient": true,
+              "test_labels_used": false,
+              "cv_folds": 5,
+              "cv_coverage": 0.900715110997168,
+              "candidate_cv_coverage": {
+                "0.80": 0.81543133581809,
+                "0.81": 0.8166786700441477,
+                "0.82": 0.8274555555221342,
+                "0.83": 0.83474541723368,
+                "0.84": 0.8555314243753166,
+                "0.85": 0.8584611249022294,
+                "0.86": 0.8671960972253567,
+                "0.87": 0.8828057527256551,
+                "0.88": 0.8873269830166564,
+                "0.89": 0.900715110997168,
+                "0.90": 0.9128793725353265,
+                "0.91": 0.9237208872496061
+              },
+              "all_calibration_rows_used_after_crossfit_selection": true
+            },
+            "calibration_rows_untouched_during_training": true,
+            "test_labels_used_for_calibration": false
+          },
+          {
+            "calibration_n": 1121,
+            "test_n": 1785,
+            "q90": 4.9521026611328125,
+            "median_lower_width": 4.9521026611328125,
+            "median_upper_width": 4.9521026611328125,
+            "q90_rank": 990,
+            "coverage": 0.877476137891677,
+            "row_coverage": 0.8733893557422969,
+            "patient_equalized_coverage": 0.877476137891677,
+            "patient_coverage_ci95": [
+              0.8446106052768477,
+              0.9069773809187557
+            ],
+            "test_subjects": 157,
+            "pass": true,
+            "finite_sample_corrected": true,
+            "adaptive_calibration": {
+              "method": "patient_grouped_crossfit_adaptive_conformal",
+              "selected_nominal_coverage": 0.89,
+              "patient_finite_sample_coverage": 0.8991752577319587,
+              "target_empirical_coverage": 0.9,
+              "calibration_rows": 1121,
+              "calibration_subjects": 97,
+              "q90_rank": 990,
+              "equal_total_weight_per_patient": true,
+              "test_labels_used": false,
+              "cv_folds": 5,
+              "cv_coverage": 0.8936159820341678,
+              "candidate_cv_coverage": {
+                "0.80": 0.818853139890503,
+                "0.81": 0.8251907507344796,
+                "0.82": 0.8306290528044915,
+                "0.83": 0.8342376697353566,
+                "0.84": 0.8441598618690551,
+                "0.85": 0.8533593886602934,
+                "0.86": 0.8574977479282655,
+                "0.87": 0.872650822385419,
+                "0.88": 0.8845810298083275,
+                "0.89": 0.8936159820341678,
+                "0.90": 0.9074308623036708,
+                "0.91": 0.9153650927265194
+              },
+              "all_calibration_rows_used_after_crossfit_selection": true
+            },
+            "calibration_rows_untouched_during_training": true,
+            "test_labels_used_for_calibration": false
+          },
+          {
+            "calibration_n": 903,
+            "test_n": 1969,
+            "q90": 5.9276123046875,
+            "median_lower_width": 5.9276123046875,
+            "median_upper_width": 5.9276123046875,
+            "q90_rank": 793,
+            "coverage": 0.8958410764945982,
+            "row_coverage": 0.9014728288471305,
+            "patient_equalized_coverage": 0.8958410764945982,
+            "patient_coverage_ci95": [
+              0.8688397338285673,
+              0.9197919978537573
+            ],
+            "test_subjects": 159,
+            "pass": true,
+            "finite_sample_corrected": true,
+            "adaptive_calibration": {
+              "method": "patient_grouped_crossfit_adaptive_conformal",
+              "selected_nominal_coverage": 0.9,
+              "patient_finite_sample_coverage": 0.9102272727272728,
+              "target_empirical_coverage": 0.9,
+              "calibration_rows": 903,
+              "calibration_subjects": 88,
+              "q90_rank": 793,
+              "equal_total_weight_per_patient": true,
+              "test_labels_used": false,
+              "cv_folds": 5,
+              "cv_coverage": 0.9070931003051008,
+              "candidate_cv_coverage": {
+                "0.80": 0.8106694100941879,
+                "0.81": 0.8232424284882847,
+                "0.82": 0.8316259595391586,
+                "0.83": 0.8388747305565425,
+                "0.84": 0.8583191184570432,
+                "0.85": 0.8619328538595716,
+                "0.86": 0.8706530919548098,
+                "0.87": 0.8812923767793741,
+                "0.88": 0.8844712966249606,
+                "0.89": 0.8923697285393863,
+                "0.90": 0.9070931003051008,
+                "0.91": 0.9198239542916596
+              },
+              "all_calibration_rows_used_after_crossfit_selection": true
+            },
+            "calibration_rows_untouched_during_training": true,
+            "test_labels_used_for_calibration": false
+          }
+        ],
+        "patient_conformal_pass": true,
+        "pass": true
+      },
+      "patient_conformal": true,
+      "hospital_conformal": true,
+      "care_unit_conformal": true,
+      "time_conformal": true,
+      "cross_organ_claim_allowed": false,
+      "causal_claim_allowed": false
+    }
+  },
+  "validated_target_horizon_cells": [
+    "o2sat@12h"
+  ],
+  "validated_target_horizon_count": 1,
+  "global_svd_gate": {
+    "split_count": 7,
+    "splits": [
+      {
+        "seed": 211,
+        "fit_effective_rank": 16.79969667783838,
+        "test_effective_rank": 15.726162116788972,
+        "rank_ratio": 0.9360979795268816,
+        "mean_top_subspace_cosine": 0.9822727931462276,
+        "pass": true
+      },
+      {
+        "seed": 223,
+        "fit_effective_rank": 13.790599568529263,
+        "test_effective_rank": 13.202574623577819,
+        "rank_ratio": 0.9573604510790567,
+        "mean_top_subspace_cosine": 0.9884174254882812,
+        "pass": true
+      },
+      {
+        "seed": 227,
+        "fit_effective_rank": 13.8744895690456,
+        "test_effective_rank": 15.928360025316742,
+        "rank_ratio": 1.1480321453304767,
+        "mean_top_subspace_cosine": 0.9860444109861397,
+        "pass": true
+      },
+      {
+        "seed": 229,
+        "fit_effective_rank": 15.089003260438687,
+        "test_effective_rank": 15.154994536671671,
+        "rank_ratio": 1.004373468220131,
+        "mean_top_subspace_cosine": 0.9406164863393585,
+        "pass": true
+      },
+      {
+        "seed": 233,
+        "fit_effective_rank": 18.0396680975201,
+        "test_effective_rank": 17.442506683739715,
+        "rank_ratio": 0.9668973170375305,
+        "mean_top_subspace_cosine": 0.950676434951012,
+        "pass": true
+      },
+      {
+        "seed": 239,
+        "fit_effective_rank": 17.478704418207656,
+        "test_effective_rank": 18.2924874587815,
+        "rank_ratio": 1.0465585446782957,
+        "mean_top_subspace_cosine": 0.8951589019976188,
+        "pass": true
+      },
+      {
+        "seed": 241,
+        "fit_effective_rank": 14.475479815217312,
+        "test_effective_rank": 14.625942298624214,
+        "rank_ratio": 1.010394300246181,
+        "mean_top_subspace_cosine": 0.960689070737432,
+        "pass": true
+      }
+    ],
+    "pass": true
+  },
+  "policy": {
+    "minimum_direction_accuracy": 0.55,
+    "minimum_delta_correlation": 0.05,
+    "requires_7_patient_splits": true,
+    "requires_hospital_care_unit_time_and_conformal_gate": true,
+    "requires_current_router_comparison": true,
+    "cross_organ_attribution_requires_separate_ablation": true,
+    "missing_evidence_action": "fallback_persistence",
+    "causal_claim_allowed": false,
+    "clinical_promotion_allowed": false
+  },
+  "promotion_status": "validated_target_gated_joint_research_only"
+}
