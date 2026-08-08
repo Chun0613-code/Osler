@@ -1,0 +1,223 @@
+{
+  "policy": {
+    "fail_closed": true,
+    "unvalidated_target_action": "persistence",
+    "causal_claim_allowed": false,
+    "clinical_promotion_allowed": false,
+    "research_only": true,
+    "independent_holdout_audit_required": true,
+    "measurement_process_heads_are_separate_gates": true
+  },
+  "modules": {
+    "aki": {
+      "map": {
+        "can_move": true,
+        "promotion_ready": true,
+        "status": "validated_move_research_only",
+        "source": "sparse_aware_full_gate_plus_full_cohort_retrain",
+        "checkpoint": "/Users/chunyouchang/Desktop/llm_project/medical_jepa/sparse_aware_validated_checkpoints/aki.pt",
+        "validated_target": true,
+        "clinical_promotion_allowed": false,
+        "causal_claim_allowed": false,
+        "independent_holdout_audit": true
+      }
+    },
+    "acute_neuro": {
+      "heart_rate": {
+        "can_move": true,
+        "promotion_ready": true,
+        "status": "validated_move_research_only",
+        "source": "sparse_aware_full_gate_plus_full_cohort_retrain",
+        "checkpoint": "/Users/chunyouchang/Desktop/llm_project/medical_jepa/sparse_aware_validated_checkpoints/acute_neuro.pt",
+        "validated_target": true,
+        "clinical_promotion_allowed": false,
+        "causal_claim_allowed": false,
+        "independent_holdout_audit": true
+      },
+      "o2sat": {
+        "can_move": false,
+        "promotion_ready": false,
+        "status": "external_holdout_audit_required",
+        "source": "sparse_aware_full_gate_plus_full_cohort_retrain",
+        "checkpoint": "/Users/chunyouchang/Desktop/llm_project/medical_jepa/sparse_aware_validated_checkpoints/acute_neuro.pt",
+        "validated_target": true,
+        "clinical_promotion_allowed": false,
+        "causal_claim_allowed": false,
+        "independent_holdout_audit": false
+      },
+      "respiratory_rate": {
+        "can_move": false,
+        "promotion_ready": false,
+        "status": "external_holdout_audit_required",
+        "source": "sparse_aware_full_gate_plus_full_cohort_retrain",
+        "checkpoint": "/Users/chunyouchang/Desktop/llm_project/medical_jepa/sparse_aware_validated_checkpoints/acute_neuro.pt",
+        "validated_target": true,
+        "clinical_promotion_allowed": false,
+        "causal_claim_allowed": false,
+        "independent_holdout_audit": false
+      }
+    },
+    "cardiac_injury": {
+      "heart_rate": {
+        "can_move": true,
+        "promotion_ready": true,
+        "status": "validated_move_research_only",
+        "source": "sparse_aware_full_gate_plus_full_cohort_retrain",
+        "checkpoint": "/Users/chunyouchang/Desktop/llm_project/medical_jepa/sparse_aware_validated_checkpoints/cardiac_injury.pt",
+        "validated_target": true,
+        "clinical_promotion_allowed": false,
+        "causal_claim_allowed": false,
+        "independent_holdout_audit": true
+      },
+      "map": {
+        "can_move": true,
+        "promotion_ready": true,
+        "status": "validated_move_research_only",
+        "source": "sparse_aware_full_gate_plus_full_cohort_retrain",
+        "checkpoint": "/Users/chunyouchang/Desktop/llm_project/medical_jepa/sparse_aware_validated_checkpoints/cardiac_injury.pt",
+        "validated_target": true,
+        "clinical_promotion_allowed": false,
+        "causal_claim_allowed": false,
+        "independent_holdout_audit": true
+      }
+    },
+    "cardiovascular_instability": {},
+    "coagulopathy_heme": {},
+    "electrolyte_acid_base": {},
+    "endocrine_stress": {},
+    "gi_pancreatic_nutrition": {
+      "map": {
+        "can_move": true,
+        "promotion_ready": true,
+        "status": "validated_move_research_only",
+        "source": "sparse_aware_full_gate_plus_full_cohort_retrain",
+        "checkpoint": "/Users/chunyouchang/Desktop/llm_project/medical_jepa/sparse_aware_validated_checkpoints/gi_pancreatic_nutrition.pt",
+        "validated_target": true,
+        "clinical_promotion_allowed": false,
+        "causal_claim_allowed": false,
+        "independent_holdout_audit": true
+      }
+    },
+    "hepatic_failure": {
+      "map": {
+        "can_move": true,
+        "promotion_ready": true,
+        "status": "validated_move_research_only",
+        "source": "sparse_aware_full_gate_plus_full_cohort_retrain",
+        "checkpoint": "/Users/chunyouchang/Desktop/llm_project/medical_jepa/sparse_aware_validated_checkpoints/hepatic_failure.pt",
+        "validated_target": true,
+        "clinical_promotion_allowed": false,
+        "causal_claim_allowed": false,
+        "independent_holdout_audit": true
+      }
+    },
+    "immune_inflammatory": {
+      "heart_rate": {
+        "can_move": true,
+        "promotion_ready": true,
+        "status": "validated_move_research_only",
+        "source": "sparse_aware_full_gate_plus_full_cohort_retrain",
+        "checkpoint": "/Users/chunyouchang/Desktop/llm_project/medical_jepa/sparse_aware_validated_checkpoints/immune_inflammatory.pt",
+        "validated_target": true,
+        "clinical_promotion_allowed": false,
+        "causal_claim_allowed": false,
+        "independent_holdout_audit": true
+      },
+      "map": {
+        "can_move": true,
+        "promotion_ready": true,
+        "status": "validated_move_research_only",
+        "source": "sparse_aware_full_gate_plus_full_cohort_retrain",
+        "checkpoint": "/Users/chunyouchang/Desktop/llm_project/medical_jepa/sparse_aware_validated_checkpoints/immune_inflammatory.pt",
+        "validated_target": true,
+        "clinical_promotion_allowed": false,
+        "causal_claim_allowed": false,
+        "independent_holdout_audit": true
+      },
+      "o2sat": {
+        "can_move": true,
+        "promotion_ready": true,
+        "status": "validated_move_research_only",
+        "source": "sparse_aware_full_gate_plus_full_cohort_retrain",
+        "checkpoint": "/Users/chunyouchang/Desktop/llm_project/medical_jepa/sparse_aware_validated_checkpoints/immune_inflammatory.pt",
+        "validated_target": true,
+        "clinical_promotion_allowed": false,
+        "causal_claim_allowed": false,
+        "independent_holdout_audit": true
+      }
+    },
+    "integumentary_skin_wound": {
+      "heart_rate": {
+        "can_move": false,
+        "promotion_ready": false,
+        "status": "external_holdout_audit_required",
+        "source": "sparse_aware_full_gate_plus_full_cohort_retrain",
+        "checkpoint": "/Users/chunyouchang/Desktop/llm_project/medical_jepa/sparse_aware_validated_checkpoints/integumentary_skin_wound.pt",
+        "validated_target": true,
+        "clinical_promotion_allowed": false,
+        "causal_claim_allowed": false,
+        "independent_holdout_audit": false
+      },
+      "map": {
+        "can_move": true,
+        "promotion_ready": true,
+        "status": "validated_move_research_only",
+        "source": "sparse_aware_full_gate_plus_full_cohort_retrain",
+        "checkpoint": "/Users/chunyouchang/Desktop/llm_project/medical_jepa/sparse_aware_validated_checkpoints/integumentary_skin_wound.pt",
+        "validated_target": true,
+        "clinical_promotion_allowed": false,
+        "causal_claim_allowed": false,
+        "independent_holdout_audit": true
+      },
+      "respiratory_rate": {
+        "can_move": false,
+        "promotion_ready": false,
+        "status": "external_holdout_audit_required",
+        "source": "sparse_aware_full_gate_plus_full_cohort_retrain",
+        "checkpoint": "/Users/chunyouchang/Desktop/llm_project/medical_jepa/sparse_aware_validated_checkpoints/integumentary_skin_wound.pt",
+        "validated_target": true,
+        "clinical_promotion_allowed": false,
+        "causal_claim_allowed": false,
+        "independent_holdout_audit": false
+      }
+    },
+    "musculoskeletal_rhabdo": {},
+    "respiratory": {
+      "heart_rate": {
+        "can_move": true,
+        "promotion_ready": true,
+        "status": "validated_move_research_only",
+        "source": "sparse_aware_full_gate_plus_full_cohort_retrain",
+        "checkpoint": "/Users/chunyouchang/Desktop/llm_project/medical_jepa/sparse_aware_validated_checkpoints/respiratory.pt",
+        "validated_target": true,
+        "clinical_promotion_allowed": false,
+        "causal_claim_allowed": false,
+        "independent_holdout_audit": true
+      },
+      "map": {
+        "can_move": true,
+        "promotion_ready": true,
+        "status": "validated_move_research_only",
+        "source": "sparse_aware_full_gate_plus_full_cohort_retrain",
+        "checkpoint": "/Users/chunyouchang/Desktop/llm_project/medical_jepa/sparse_aware_validated_checkpoints/respiratory.pt",
+        "validated_target": true,
+        "clinical_promotion_allowed": false,
+        "causal_claim_allowed": false,
+        "independent_holdout_audit": true
+      },
+      "respiratory_rate": {
+        "can_move": true,
+        "promotion_ready": true,
+        "status": "validated_move_research_only",
+        "source": "sparse_aware_full_gate_plus_full_cohort_retrain",
+        "checkpoint": "/Users/chunyouchang/Desktop/llm_project/medical_jepa/sparse_aware_validated_checkpoints/respiratory.pt",
+        "validated_target": true,
+        "clinical_promotion_allowed": false,
+        "causal_claim_allowed": false,
+        "independent_holdout_audit": true
+      }
+    },
+    "sepsis": {},
+    "toxic_metabolic": {}
+  }
+}
