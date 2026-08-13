@@ -243,17 +243,17 @@
 <main>
   <section class="hero">
     <div>
-      <h1>Osler Personalized Belief Demo</h1>
+      <h1>Osler Factual Forecast Demo</h1>
       <p>
-        Submit a patient trajectory. The backend calls the real validated
-        predict-update belief builders and returns population persistence plus
-        a personalized belief-adjusted forecast.
+        Submit a patient trajectory. Twelve exact target/horizon cells use
+        serialized validated artifacts. Other belief-derived values are
+        explicitly illustrative and have no calibrated interval.
       </p>
       <div class="panel warning">
         <strong>Research boundary:</strong>
-        no clinical claim, no causal claim, no treatment recommendation. The
-        intervals are demo validation-scale bands, not clinical confidence
-        intervals.
+        no diagnosis, clinical or causal claim, treatment recommendation,
+        automated prescription, or drug-ranking change. Intervals appear only
+        for the 12 exact artifact-authorized cells.
       </div>
     </div>
     <div class="panel">
@@ -363,9 +363,9 @@ async function loadSample() {
 }
 
 async function loadCapabilities() {
-  const response = await fetch("/api/capabilities");
+  const response = await fetch("/api/forecast/capabilities");
   const data = await response.json();
-  capabilitiesEl.textContent = data.validated_belief_systems
+  capabilitiesEl.textContent = data.belief_systems
     .map(system => `${system.display_name} (${system.targets.length})`)
     .join(" · ");
 }
@@ -375,15 +375,18 @@ function render(data) {
   for (const item of data.forecasts) {
     const card = document.createElement("article");
     card.className = "card";
-    if (item.status === "missing_current_value") {
+    if (item.tier === "unsupported") {
       card.innerHTML = `
-        <div class="label"><span>${item.system}</span><span>${item.horizon_hours}h</span></div>
+        <div class="label"><span>${item.system}</span><span>${item.horizon_hours}h · unsupported</span></div>
         <div class="target">${item.target}</div>
         <p class="meta">${item.reason}</p>
       `;
     } else {
+      const interval = item.tier === "validated_artifact"
+        ? `calibrated interval [${fmt(item.lower)}, ${fmt(item.upper)}]`
+        : "no calibrated interval";
       card.innerHTML = `
-        <div class="label"><span>${item.system}</span><span>${item.horizon_hours}h</span></div>
+        <div class="label"><span>${item.system}</span><span>${item.horizon_hours}h · ${item.tier}</span></div>
         <div class="target">${item.target}</div>
         <div class="numbers">
           <div class="num">
@@ -396,8 +399,7 @@ function render(data) {
           </div>
         </div>
         <div class="meta">
-          Δ ${fmt(item.personalized.delta_vs_population)} ·
-          interval [${fmt(item.lower)}, ${fmt(item.upper)}]
+          Δ ${fmt(item.personalized.delta_vs_population)} · ${interval}
         </div>
         <div class="meta">${item.personalized.source}</div>
       `;

@@ -44,7 +44,6 @@ class TargetSpec:
     horizon_hours: int
     max_abs_delta: float
     system: str
-    status: str = "validated_demo_runtime"
 
 
 @dataclass(frozen=True)
@@ -62,16 +61,16 @@ SYSTEMS: tuple[BeliefSystemSpec, ...] = (
         display_name="Renal Reserve",
         belief_fn=renal_belief_state_v2_features,
         targets=(
-            TargetSpec("creatinine", 3, 0.8, "renal", "validated_precision_runtime"),
-            TargetSpec("creatinine", 12, 0.8, "renal", "validated_precision_runtime"),
-            TargetSpec("creatinine", 24, 0.8, "renal", "validated_precision_runtime"),
-            TargetSpec("bun", 3, 12.0, "renal", "validated_precision_runtime"),
-            TargetSpec("bun", 6, 12.0, "renal", "validated_precision_runtime"),
-            TargetSpec("bun", 12, 12.0, "renal", "validated_precision_runtime"),
-            TargetSpec("bun", 24, 12.0, "renal", "validated_precision_runtime"),
-            TargetSpec("bun", 48, 12.0, "renal", "validated_precision_runtime"),
-            TargetSpec("urine_output", 6, 200.0, "renal", "validated_precision_runtime"),
-            TargetSpec("urine_output", 12, 200.0, "renal", "validated_precision_runtime"),
+            TargetSpec("creatinine", 3, 0.8, "renal"),
+            TargetSpec("creatinine", 12, 0.8, "renal"),
+            TargetSpec("creatinine", 24, 0.8, "renal"),
+            TargetSpec("bun", 3, 12.0, "renal"),
+            TargetSpec("bun", 6, 12.0, "renal"),
+            TargetSpec("bun", 12, 12.0, "renal"),
+            TargetSpec("bun", 24, 12.0, "renal"),
+            TargetSpec("bun", 48, 12.0, "renal"),
+            TargetSpec("urine_output", 6, 200.0, "renal"),
+            TargetSpec("urine_output", 12, 200.0, "renal"),
         ),
         key_features=(
             "state2_belief_renal_reserve_mean",
@@ -87,8 +86,8 @@ SYSTEMS: tuple[BeliefSystemSpec, ...] = (
         belief_fn=cardiovascular_belief_state_features,
         targets=(
             TargetSpec("heart_rate", 6, 18.0, "cardiovascular"),
-            TargetSpec("map", 3, 24.0, "cardiovascular", "validated_precision_runtime"),
-            TargetSpec("map", 6, 24.0, "cardiovascular", "validated_precision_runtime"),
+            TargetSpec("map", 3, 24.0, "cardiovascular"),
+            TargetSpec("map", 6, 24.0, "cardiovascular"),
         ),
         key_features=(
             "cv_belief_shock_burden_mean",
@@ -256,7 +255,7 @@ def capabilities() -> dict[str, Any]:
     return {
         "object": "osler_personalized_belief_demo",
         "model_version": MODEL_VERSION,
-        "validated_belief_systems": [
+        "belief_systems": [
             {
                 "name": system.name,
                 "display_name": system.display_name,
@@ -264,7 +263,12 @@ def capabilities() -> dict[str, Any]:
                     {
                         "target": target.target,
                         "horizon_hours": target.horizon_hours,
-                        "status": target.status,
+                        "tier": (
+                            "validated_artifact"
+                            if f"{target.target}@{target.horizon_hours}h"
+                            in _precision_cell_names()
+                            else "illustrative"
+                        ),
                     }
                     for target in system.targets
                 ],
@@ -289,9 +293,12 @@ def capabilities() -> dict[str, Any]:
         },
         "safety_boundary": {
             "clinical_claim_allowed": False,
+            "diagnostic_claim_allowed": False,
             "causal_claim_allowed": False,
             "counterfactual_claim_allowed": False,
             "treatment_recommendation_allowed": False,
+            "automated_prescribing_allowed": False,
+            "drug_ranking_changes_allowed": False,
             "patient_ids_persisted": False,
         },
     }
@@ -302,12 +309,20 @@ def make_frame(payload: dict[str, Any]) -> pd.DataFrame:
     if not isinstance(rows, list) or not rows:
         raise ValueError("payload must include a non-empty trajectory list")
     normalized = []
+    anchor_hour = _as_float(payload.get("anchor_hour"), default=None)
     for index, raw in enumerate(rows):
         if not isinstance(raw, dict):
             raise ValueError("each trajectory row must be an object")
         row: dict[str, Any] = {"stay_id": "demo", "hours_since_onset": float(index)}
         for key, value in raw.items():
             canonical = ALIASES.get(key, key)
+            lowered = canonical.lower()
+            if (
+                lowered.startswith("future_")
+                or lowered.endswith("_future")
+                or lowered.endswith("_outcome")
+            ):
+                raise ValueError(f"future/outcome field is not allowed: {key}")
             if canonical in {"stay_id", "subject_id", "patient_id"}:
                 continue
             if canonical in {"t", "hour", "hours", "hours_since_onset"}:
@@ -339,6 +354,8 @@ def make_frame(payload: dict[str, Any]) -> pd.DataFrame:
     frame = pd.DataFrame(normalized)
     frame["stay_id"] = "demo"
     frame = frame.sort_values("hours_since_onset").reset_index(drop=True)
+    if anchor_hour is not None and bool((frame["hours_since_onset"] > anchor_hour).any()):
+        raise ValueError("trajectory contains observations after anchor_hour")
     return frame
 
 
@@ -365,6 +382,7 @@ def forecast(payload: dict[str, Any]) -> dict[str, Any]:
                     "target": target.target,
                     "horizon_hours": target.horizon_hours,
                     "status": "missing_current_value",
+                    "tier": "unsupported",
                     "population": None,
                     "personalized": None,
                     "lower": None,
@@ -379,7 +397,8 @@ def forecast(payload: dict[str, Any]) -> dict[str, Any]:
                     "system": system.name,
                     "target": target.target,
                     "horizon_hours": target.horizon_hours,
-                    "status": target.status,
+                    "status": "ready",
+                    "tier": "validated_artifact",
                     "population": {
                         "point": precision.population_point,
                         "source": "serialized_population_ridge",
@@ -399,13 +418,31 @@ def forecast(payload: dict[str, Any]) -> dict[str, Any]:
                     "can_personalize": True,
                 })
                 continue
+            cell_name = f"{target.target}@{target.horizon_hours}h"
+            if cell_name in _precision_cell_names():
+                outputs.append({
+                    "system": system.name,
+                    "target": target.target,
+                    "horizon_hours": target.horizon_hours,
+                    "status": "artifact_unavailable",
+                    "tier": "unsupported",
+                    "population": None,
+                    "personalized": None,
+                    "lower": None,
+                    "upper": None,
+                    "interval_status": "artifact_unavailable_fail_closed",
+                    "can_personalize": False,
+                    "reason": "serialized validated artifact failed to load",
+                })
+                continue
             adjustment, source = _belief_adjustment(system.name, target, latest_features, latest_row)
             personalized = float(current + adjustment)
             outputs.append({
                 "system": system.name,
                 "target": target.target,
                 "horizon_hours": target.horizon_hours,
-                "status": target.status,
+                "status": "illustrative_only",
+                "tier": "illustrative",
                 "population": {
                     "point": float(current),
                     "source": "persistence_population_baseline",
@@ -420,8 +457,11 @@ def forecast(payload: dict[str, Any]) -> dict[str, Any]:
                 "interval_status": "needs_serialized_patient_specific_conformal_artifact",
                 "can_personalize": True,
             })
+    outputs = _select_requested_cells(payload, outputs)
     return {
         "patient_id": payload.get("patient_id"),
+        "model_version": MODEL_VERSION,
+        "case_source": str(payload.get("case_source") or "user_supplied"),
         "latest_hour": float(frame["hours_since_onset"].iloc[-1]),
         "input_rows": int(len(frame)),
         "forecasts": outputs,
@@ -429,6 +469,53 @@ def forecast(payload: dict[str, Any]) -> dict[str, Any]:
         "contract": capabilities()["forecast_policy"],
         "safety_boundary": capabilities()["safety_boundary"],
     }
+
+
+def _select_requested_cells(
+    payload: dict[str, Any], outputs: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    requested = payload.get("requested_cells")
+    if requested is None:
+        return outputs
+    if not isinstance(requested, list) or not requested:
+        raise ValueError("requested_cells must be a non-empty array")
+    keys = []
+    for item in requested:
+        if not isinstance(item, dict):
+            raise ValueError("each requested cell must be an object")
+        target = str(item.get("target") or "").strip()
+        try:
+            horizon = int(item.get("horizon_hours"))
+        except (TypeError, ValueError) as exc:
+            raise ValueError("requested cell horizon_hours must be an integer") from exc
+        if not target or horizon <= 0:
+            raise ValueError("requested cells require target and positive horizon_hours")
+        keys.append((target, horizon))
+    wanted = set(keys)
+    selected = [
+        item
+        for item in outputs
+        if (item["target"], int(item["horizon_hours"])) in wanted
+    ]
+    returned = {(item["target"], int(item["horizon_hours"])) for item in selected}
+    for target, horizon in keys:
+        if (target, horizon) in returned:
+            continue
+        selected.append({
+            "system": "unknown",
+            "target": target,
+            "horizon_hours": horizon,
+            "status": "unsupported_cell",
+            "tier": "unsupported",
+            "population": None,
+            "personalized": None,
+            "lower": None,
+            "upper": None,
+            "interval_status": "no_exact_validated_artifact",
+            "can_personalize": False,
+            "reason": "target/horizon is not available in this runtime",
+        })
+    return selected
 
 
 @lru_cache(maxsize=1)
