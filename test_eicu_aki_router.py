@@ -7,12 +7,14 @@ from aki_renal_belief import (
     RENAL_BELIEF_COLUMNS,
     RENAL_STATE_BELIEF_COLUMNS,
     RENAL_STATE_V2_BELIEF_COLUMNS,
+    RENAL_STATE_V3_BELIEF_COLUMNS,
     CreatinineKineticsBelief,
     RenalReserveBelief,
     placebo_belief_features,
     renal_belief_features,
     renal_belief_state_features,
     renal_belief_state_v2_features,
+    renal_belief_state_v3_features,
 )
 from eicu_aki_transition_extract import classify_aki_action
 from eicu_sepsis_target_router import _feature_columns
@@ -208,6 +210,27 @@ class EicuAkiRouterTests(unittest.TestCase):
         self.assertEqual(tuple(features.columns), RENAL_STATE_V2_BELIEF_COLUMNS)
         self.assertFalse(features.isna().any().any())
         self.assertGreater(features.loc[1, "state2_belief_creatinine_slope"], 0.0)
+
+    def test_renal_belief_state_v3_features_include_causal_urine_kinetics(self):
+        frame = pd.DataFrame({
+            "stay_id": [1, 1, 1],
+            "hours_since_onset": [0.0, 3.0, 6.0],
+            "creatinine_t": [1.2, 1.3, 1.4],
+            "bun_t": [20.0, 22.0, 24.0],
+            "urine_output_t": [90.0, 45.0, 20.0],
+            "map_t": [75.0, 68.0, 62.0],
+            "creatinine_age_hr": [1.0, 1.0, 1.0],
+            "bun_age_hr": [2.0, 2.0, 2.0],
+            "urine_output_age_hr": [1.0, 1.0, 1.0],
+        })
+
+        full = renal_belief_state_v3_features(frame)
+        prefix = renal_belief_state_v3_features(frame.iloc[:2])
+
+        self.assertEqual(tuple(full.columns), RENAL_STATE_V3_BELIEF_COLUMNS)
+        self.assertFalse(full.isna().any().any())
+        self.assertLess(full.loc[1, "state3_belief_urine_slope"], 0.0)
+        pd.testing.assert_series_equal(full.loc[1], prefix.loc[1])
 
 
 if __name__ == "__main__":

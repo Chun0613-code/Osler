@@ -1,0 +1,771 @@
+{
+  "schema": "organ_patient_state_adapter_audit.v1",
+  "target": "urine_output",
+  "horizon_hours": 12,
+  "cohort": "/Users/chunyouchang/Desktop/llm_project/medical_jepa/eicu_aki_transitions_12h.parquet",
+  "cohort_summary": {
+    "rows": 231423,
+    "subjects": 34321,
+    "hospitals": 202,
+    "care_units": 8
+  },
+  "architecture": {
+    "population_anchor": "ridge_current_state",
+    "patient_history": "causal_neural_predict_update_filter",
+    "mechanistic_belief": "renal_belief_state_v3",
+    "adapter_placement": "kidney_organ_token_only",
+    "residual_bounded": true,
+    "capacity_matched_placebo": "same_model_with_patient_mismatched_history_and_belief",
+    "parameter_counts_equal": true
+  },
+  "patient_heldout": {
+    "summary": {
+      "runs": 7,
+      "point_gate_passes": 7,
+      "conformal_gate_passes": 7,
+      "all_point_gates_pass": true,
+      "all_conformal_gates_pass": true,
+      "matched_interval_narrowing_passes": 7,
+      "all_matched_interval_narrowing_gates_pass": true,
+      "median_patient_equalized_delta_half_width": -37.609662,
+      "median_delta_vs_population": -12.220458,
+      "median_delta_vs_placebo": -3.454147
+    },
+    "runs": [
+      {
+        "seed": 7,
+        "group_column": "subject_id",
+        "late_stage_only": false,
+        "rows": 28671,
+        "subjects": 6050,
+        "parameter_count_candidate": 16051,
+        "parameter_count_placebo": 16051,
+        "mae": {
+          "population_baseline": 140.053607,
+          "patient_state_candidate": 126.992453,
+          "capacity_matched_placebo": 129.102515
+        },
+        "candidate_vs_population": {
+          "patient_equalized_delta_mae": -11.807493,
+          "patient_bootstrap_95_ci": [
+            -12.922352,
+            -10.751196
+          ],
+          "significant": true
+        },
+        "candidate_vs_placebo": {
+          "patient_equalized_delta_mae": -2.023072,
+          "patient_bootstrap_95_ci": [
+            -2.879549,
+            -1.275287
+          ],
+          "significant": true
+        },
+        "adaptive_conformal": {
+          "coverage": 0.907921,
+          "mean_half_width": 272.496081,
+          "personalized_rows": 1052,
+          "personalized_rate": 0.036692,
+          "personalized_coverage": 0.921103,
+          "passes_0_87_to_0_93": true
+        },
+        "matched_population_conformal": {
+          "coverage": 0.909037,
+          "mean_half_width": 322.137994,
+          "median_half_width": 327.919922,
+          "personalized_rows": 1052,
+          "passes_0_87_to_0_93": true
+        },
+        "matched_interval_width": {
+          "candidate_mean_half_width": 272.496081,
+          "population_mean_half_width": 322.137994,
+          "candidate_median_half_width": 223.962474,
+          "population_median_half_width": 327.919922,
+          "patient_equalized_delta_half_width": -27.255184,
+          "patient_bootstrap_95_ci": [
+            -30.896677,
+            -23.176143
+          ],
+          "candidate_significantly_narrower": true,
+          "both_coverage_gates_pass": true,
+          "narrower_interval_claim_allowed": true
+        },
+        "development_selected_policy": {
+          "candidate_residual_gain": 1.0,
+          "placebo_residual_gain": 1.0,
+          "candidate_nominal_coverage": 0.9,
+          "population_nominal_coverage": 0.9,
+          "population_residual_scale": false,
+          "temporal_mondrian_conformal": true,
+          "candidate_inner_coverage": null
+        },
+        "passes_point_gate": true
+      },
+      {
+        "seed": 11,
+        "group_column": "subject_id",
+        "late_stage_only": false,
+        "rows": 28799,
+        "subjects": 6050,
+        "parameter_count_candidate": 16051,
+        "parameter_count_placebo": 16051,
+        "mae": {
+          "population_baseline": 138.08037,
+          "patient_state_candidate": 127.377467,
+          "capacity_matched_placebo": 128.305012
+        },
+        "candidate_vs_population": {
+          "patient_equalized_delta_mae": -9.243429,
+          "patient_bootstrap_95_ci": [
+            -10.34468,
+            -8.076009
+          ],
+          "significant": true
+        },
+        "candidate_vs_placebo": {
+          "patient_equalized_delta_mae": -1.346538,
+          "patient_bootstrap_95_ci": [
+            -1.955295,
+            -0.73274
+          ],
+          "significant": true
+        },
+        "adaptive_conformal": {
+          "coverage": 0.91781,
+          "mean_half_width": 269.899907,
+          "personalized_rows": 1063,
+          "personalized_rate": 0.036911,
+          "personalized_coverage": 0.919097,
+          "passes_0_87_to_0_93": true
+        },
+        "matched_population_conformal": {
+          "coverage": 0.919025,
+          "mean_half_width": 341.20234,
+          "median_half_width": 344.518341,
+          "personalized_rows": 1063,
+          "passes_0_87_to_0_93": true
+        },
+        "matched_interval_width": {
+          "candidate_mean_half_width": 269.899907,
+          "population_mean_half_width": 341.20234,
+          "candidate_median_half_width": 224.975068,
+          "population_median_half_width": 344.518341,
+          "patient_equalized_delta_half_width": -45.320569,
+          "patient_bootstrap_95_ci": [
+            -49.194476,
+            -41.571994
+          ],
+          "candidate_significantly_narrower": true,
+          "both_coverage_gates_pass": true,
+          "narrower_interval_claim_allowed": true
+        },
+        "development_selected_policy": {
+          "candidate_residual_gain": 1.0,
+          "placebo_residual_gain": 1.0,
+          "candidate_nominal_coverage": 0.9,
+          "population_nominal_coverage": 0.9,
+          "population_residual_scale": false,
+          "temporal_mondrian_conformal": true,
+          "candidate_inner_coverage": null
+        },
+        "passes_point_gate": true
+      },
+      {
+        "seed": 19,
+        "group_column": "subject_id",
+        "late_stage_only": false,
+        "rows": 28513,
+        "subjects": 6050,
+        "parameter_count_candidate": 16051,
+        "parameter_count_placebo": 16051,
+        "mae": {
+          "population_baseline": 138.561791,
+          "patient_state_candidate": 125.029936,
+          "capacity_matched_placebo": 130.705768
+        },
+        "candidate_vs_population": {
+          "patient_equalized_delta_mae": -11.799478,
+          "patient_bootstrap_95_ci": [
+            -12.837422,
+            -10.752295
+          ],
+          "significant": true
+        },
+        "candidate_vs_placebo": {
+          "patient_equalized_delta_mae": -5.053706,
+          "patient_bootstrap_95_ci": [
+            -5.713256,
+            -4.381483
+          ],
+          "significant": true
+        },
+        "adaptive_conformal": {
+          "coverage": 0.911339,
+          "mean_half_width": 264.613162,
+          "personalized_rows": 1078,
+          "personalized_rate": 0.037807,
+          "personalized_coverage": 0.927644,
+          "passes_0_87_to_0_93": true
+        },
+        "matched_population_conformal": {
+          "coverage": 0.915056,
+          "mean_half_width": 332.651059,
+          "median_half_width": 328.339539,
+          "personalized_rows": 1078,
+          "passes_0_87_to_0_93": true
+        },
+        "matched_interval_width": {
+          "candidate_mean_half_width": 264.613162,
+          "population_mean_half_width": 332.651059,
+          "candidate_median_half_width": 223.354492,
+          "population_median_half_width": 328.339539,
+          "patient_equalized_delta_half_width": -43.713272,
+          "patient_bootstrap_95_ci": [
+            -47.433182,
+            -40.00981
+          ],
+          "candidate_significantly_narrower": true,
+          "both_coverage_gates_pass": true,
+          "narrower_interval_claim_allowed": true
+        },
+        "development_selected_policy": {
+          "candidate_residual_gain": 1.0,
+          "placebo_residual_gain": 1.0,
+          "candidate_nominal_coverage": 0.9,
+          "population_nominal_coverage": 0.9,
+          "population_residual_scale": false,
+          "temporal_mondrian_conformal": true,
+          "candidate_inner_coverage": null
+        },
+        "passes_point_gate": true
+      },
+      {
+        "seed": 23,
+        "group_column": "subject_id",
+        "late_stage_only": false,
+        "rows": 28581,
+        "subjects": 6050,
+        "parameter_count_candidate": 16051,
+        "parameter_count_placebo": 16051,
+        "mae": {
+          "population_baseline": 135.840063,
+          "patient_state_candidate": 121.053594,
+          "capacity_matched_placebo": 125.281079
+        },
+        "candidate_vs_population": {
+          "patient_equalized_delta_mae": -12.782137,
+          "patient_bootstrap_95_ci": [
+            -13.839641,
+            -11.611171
+          ],
+          "significant": true
+        },
+        "candidate_vs_placebo": {
+          "patient_equalized_delta_mae": -3.798416,
+          "patient_bootstrap_95_ci": [
+            -4.429691,
+            -3.149937
+          ],
+          "significant": true
+        },
+        "adaptive_conformal": {
+          "coverage": 0.913579,
+          "mean_half_width": 274.306223,
+          "personalized_rows": 1054,
+          "personalized_rate": 0.036878,
+          "personalized_coverage": 0.931689,
+          "passes_0_87_to_0_93": true
+        },
+        "matched_population_conformal": {
+          "coverage": 0.920157,
+          "mean_half_width": 334.46463,
+          "median_half_width": 334.434021,
+          "personalized_rows": 1054,
+          "passes_0_87_to_0_93": true
+        },
+        "matched_interval_width": {
+          "candidate_mean_half_width": 274.306223,
+          "population_mean_half_width": 334.46463,
+          "candidate_median_half_width": 232.103409,
+          "population_median_half_width": 334.434021,
+          "patient_equalized_delta_half_width": -37.609662,
+          "patient_bootstrap_95_ci": [
+            -41.078662,
+            -34.132391
+          ],
+          "candidate_significantly_narrower": true,
+          "both_coverage_gates_pass": true,
+          "narrower_interval_claim_allowed": true
+        },
+        "development_selected_policy": {
+          "candidate_residual_gain": 1.0,
+          "placebo_residual_gain": 1.0,
+          "candidate_nominal_coverage": 0.9,
+          "population_nominal_coverage": 0.9,
+          "population_residual_scale": false,
+          "temporal_mondrian_conformal": true,
+          "candidate_inner_coverage": null
+        },
+        "passes_point_gate": true
+      },
+      {
+        "seed": 37,
+        "group_column": "subject_id",
+        "late_stage_only": false,
+        "rows": 28585,
+        "subjects": 6050,
+        "parameter_count_candidate": 16051,
+        "parameter_count_placebo": 16051,
+        "mae": {
+          "population_baseline": 138.907647,
+          "patient_state_candidate": 125.049834,
+          "capacity_matched_placebo": 128.558823
+        },
+        "candidate_vs_population": {
+          "patient_equalized_delta_mae": -12.220458,
+          "patient_bootstrap_95_ci": [
+            -13.341434,
+            -11.068372
+          ],
+          "significant": true
+        },
+        "candidate_vs_placebo": {
+          "patient_equalized_delta_mae": -3.042197,
+          "patient_bootstrap_95_ci": [
+            -3.793115,
+            -2.360407
+          ],
+          "significant": true
+        },
+        "adaptive_conformal": {
+          "coverage": 0.908239,
+          "mean_half_width": 252.115563,
+          "personalized_rows": 1031,
+          "personalized_rate": 0.036068,
+          "personalized_coverage": 0.924345,
+          "passes_0_87_to_0_93": true
+        },
+        "matched_population_conformal": {
+          "coverage": 0.910163,
+          "mean_half_width": 315.926326,
+          "median_half_width": 310.913818,
+          "personalized_rows": 1031,
+          "passes_0_87_to_0_93": true
+        },
+        "matched_interval_width": {
+          "candidate_mean_half_width": 252.115563,
+          "population_mean_half_width": 315.926326,
+          "candidate_median_half_width": 215.292959,
+          "population_median_half_width": 310.913818,
+          "patient_equalized_delta_half_width": -44.681417,
+          "patient_bootstrap_95_ci": [
+            -47.67265,
+            -40.811027
+          ],
+          "candidate_significantly_narrower": true,
+          "both_coverage_gates_pass": true,
+          "narrower_interval_claim_allowed": true
+        },
+        "development_selected_policy": {
+          "candidate_residual_gain": 1.0,
+          "placebo_residual_gain": 1.0,
+          "candidate_nominal_coverage": 0.9,
+          "population_nominal_coverage": 0.9,
+          "population_residual_scale": false,
+          "temporal_mondrian_conformal": true,
+          "candidate_inner_coverage": null
+        },
+        "passes_point_gate": true
+      },
+      {
+        "seed": 53,
+        "group_column": "subject_id",
+        "late_stage_only": false,
+        "rows": 28075,
+        "subjects": 6050,
+        "parameter_count_candidate": 16051,
+        "parameter_count_placebo": 16051,
+        "mae": {
+          "population_baseline": 137.904637,
+          "patient_state_candidate": 122.649086,
+          "capacity_matched_placebo": 127.963312
+        },
+        "candidate_vs_population": {
+          "patient_equalized_delta_mae": -12.998709,
+          "patient_bootstrap_95_ci": [
+            -14.146415,
+            -11.873195
+          ],
+          "significant": true
+        },
+        "candidate_vs_placebo": {
+          "patient_equalized_delta_mae": -4.76848,
+          "patient_bootstrap_95_ci": [
+            -5.596813,
+            -4.011846
+          ],
+          "significant": true
+        },
+        "adaptive_conformal": {
+          "coverage": 0.915583,
+          "mean_half_width": 283.788059,
+          "personalized_rows": 1040,
+          "personalized_rate": 0.037044,
+          "personalized_coverage": 0.933654,
+          "passes_0_87_to_0_93": true
+        },
+        "matched_population_conformal": {
+          "coverage": 0.917471,
+          "mean_half_width": 328.892896,
+          "median_half_width": 331.473053,
+          "personalized_rows": 1040,
+          "passes_0_87_to_0_93": true
+        },
+        "matched_interval_width": {
+          "candidate_mean_half_width": 283.788059,
+          "population_mean_half_width": 328.892896,
+          "candidate_median_half_width": 231.60178,
+          "population_median_half_width": 331.473053,
+          "patient_equalized_delta_half_width": -19.235187,
+          "patient_bootstrap_95_ci": [
+            -23.662797,
+            -15.130248
+          ],
+          "candidate_significantly_narrower": true,
+          "both_coverage_gates_pass": true,
+          "narrower_interval_claim_allowed": true
+        },
+        "development_selected_policy": {
+          "candidate_residual_gain": 1.0,
+          "placebo_residual_gain": 1.0,
+          "candidate_nominal_coverage": 0.9,
+          "population_nominal_coverage": 0.9,
+          "population_residual_scale": false,
+          "temporal_mondrian_conformal": true,
+          "candidate_inner_coverage": null
+        },
+        "passes_point_gate": true
+      },
+      {
+        "seed": 71,
+        "group_column": "subject_id",
+        "late_stage_only": false,
+        "rows": 28608,
+        "subjects": 6050,
+        "parameter_count_candidate": 16051,
+        "parameter_count_placebo": 16051,
+        "mae": {
+          "population_baseline": 137.797806,
+          "patient_state_candidate": 122.651977,
+          "capacity_matched_placebo": 126.265842
+        },
+        "candidate_vs_population": {
+          "patient_equalized_delta_mae": -13.60238,
+          "patient_bootstrap_95_ci": [
+            -14.774145,
+            -12.396506
+          ],
+          "significant": true
+        },
+        "candidate_vs_placebo": {
+          "patient_equalized_delta_mae": -3.454147,
+          "patient_bootstrap_95_ci": [
+            -4.231077,
+            -2.644845
+          ],
+          "significant": true
+        },
+        "adaptive_conformal": {
+          "coverage": 0.911388,
+          "mean_half_width": 273.429807,
+          "personalized_rows": 1046,
+          "personalized_rate": 0.036563,
+          "personalized_coverage": 0.93021,
+          "passes_0_87_to_0_93": true
+        },
+        "matched_population_conformal": {
+          "coverage": 0.916527,
+          "mean_half_width": 329.344774,
+          "median_half_width": 328.786255,
+          "personalized_rows": 1046,
+          "passes_0_87_to_0_93": true
+        },
+        "matched_interval_width": {
+          "candidate_mean_half_width": 273.429807,
+          "population_mean_half_width": 329.344774,
+          "candidate_median_half_width": 231.693644,
+          "population_median_half_width": 328.786255,
+          "patient_equalized_delta_half_width": -33.835959,
+          "patient_bootstrap_95_ci": [
+            -37.350697,
+            -30.667379
+          ],
+          "candidate_significantly_narrower": true,
+          "both_coverage_gates_pass": true,
+          "narrower_interval_claim_allowed": true
+        },
+        "development_selected_policy": {
+          "candidate_residual_gain": 1.0,
+          "placebo_residual_gain": 1.0,
+          "candidate_nominal_coverage": 0.9,
+          "population_nominal_coverage": 0.9,
+          "population_residual_scale": false,
+          "temporal_mondrian_conformal": true,
+          "candidate_inner_coverage": null
+        },
+        "passes_point_gate": true
+      }
+    ]
+  },
+  "external_heldout": {
+    "summary": {
+      "runs": 3,
+      "point_gate_passes": 3,
+      "conformal_gate_passes": 3,
+      "all_point_gates_pass": true,
+      "all_conformal_gates_pass": true,
+      "matched_interval_narrowing_passes": 3,
+      "all_matched_interval_narrowing_gates_pass": true,
+      "median_patient_equalized_delta_half_width": -42.240924,
+      "median_delta_vs_population": -12.138988,
+      "median_delta_vs_placebo": -3.846136
+    },
+    "runs": [
+      {
+        "seed": 9001,
+        "group_column": "hospitalid",
+        "late_stage_only": false,
+        "rows": 36080,
+        "subjects": 7414,
+        "parameter_count_candidate": 16051,
+        "parameter_count_placebo": 16051,
+        "mae": {
+          "population_baseline": 138.596114,
+          "patient_state_candidate": 124.819387,
+          "capacity_matched_placebo": 129.404651
+        },
+        "candidate_vs_population": {
+          "patient_equalized_delta_mae": -12.138988,
+          "patient_bootstrap_95_ci": [
+            -13.126005,
+            -11.158533
+          ],
+          "significant": true
+        },
+        "candidate_vs_placebo": {
+          "patient_equalized_delta_mae": -3.846136,
+          "patient_bootstrap_95_ci": [
+            -4.495206,
+            -3.254694
+          ],
+          "significant": true
+        },
+        "adaptive_conformal": {
+          "coverage": 0.917156,
+          "mean_half_width": 281.804766,
+          "personalized_rows": 1375,
+          "personalized_rate": 0.03811,
+          "personalized_coverage": 0.930182,
+          "passes_0_87_to_0_93": true
+        },
+        "matched_population_conformal": {
+          "coverage": 0.922894,
+          "mean_half_width": 347.774594,
+          "median_half_width": 364.323242,
+          "personalized_rows": 1375,
+          "passes_0_87_to_0_93": true
+        },
+        "matched_interval_width": {
+          "candidate_mean_half_width": 281.804766,
+          "population_mean_half_width": 347.774594,
+          "candidate_median_half_width": 244.840318,
+          "population_median_half_width": 364.323242,
+          "patient_equalized_delta_half_width": -42.240924,
+          "patient_bootstrap_95_ci": [
+            -45.660268,
+            -39.032818
+          ],
+          "candidate_significantly_narrower": true,
+          "both_coverage_gates_pass": true,
+          "narrower_interval_claim_allowed": true
+        },
+        "development_selected_policy": {
+          "candidate_residual_gain": 1.0,
+          "placebo_residual_gain": 1.0,
+          "candidate_nominal_coverage": 0.9,
+          "population_nominal_coverage": 0.9,
+          "population_residual_scale": false,
+          "temporal_mondrian_conformal": true,
+          "candidate_inner_coverage": null
+        },
+        "passes_point_gate": true
+      },
+      {
+        "seed": 9002,
+        "group_column": "unittype",
+        "late_stage_only": false,
+        "rows": 12235,
+        "subjects": 2879,
+        "parameter_count_candidate": 16051,
+        "parameter_count_placebo": 16051,
+        "mae": {
+          "population_baseline": 144.261947,
+          "patient_state_candidate": 132.41028,
+          "capacity_matched_placebo": 136.32001
+        },
+        "candidate_vs_population": {
+          "patient_equalized_delta_mae": -9.041913,
+          "patient_bootstrap_95_ci": [
+            -10.816995,
+            -7.115495
+          ],
+          "significant": true
+        },
+        "candidate_vs_placebo": {
+          "patient_equalized_delta_mae": -2.932108,
+          "patient_bootstrap_95_ci": [
+            -4.001443,
+            -1.878084
+          ],
+          "significant": true
+        },
+        "adaptive_conformal": {
+          "coverage": 0.900695,
+          "mean_half_width": 273.786469,
+          "personalized_rows": 373,
+          "personalized_rate": 0.030486,
+          "personalized_coverage": 0.908847,
+          "passes_0_87_to_0_93": true
+        },
+        "matched_population_conformal": {
+          "coverage": 0.901594,
+          "mean_half_width": 323.275258,
+          "median_half_width": 325.705688,
+          "personalized_rows": 373,
+          "passes_0_87_to_0_93": true
+        },
+        "matched_interval_width": {
+          "candidate_mean_half_width": 273.786469,
+          "population_mean_half_width": 323.275258,
+          "candidate_median_half_width": 229.887769,
+          "population_median_half_width": 325.705688,
+          "patient_equalized_delta_half_width": -32.165124,
+          "patient_bootstrap_95_ci": [
+            -37.47982,
+            -26.974961
+          ],
+          "candidate_significantly_narrower": true,
+          "both_coverage_gates_pass": true,
+          "narrower_interval_claim_allowed": true
+        },
+        "development_selected_policy": {
+          "candidate_residual_gain": 1.0,
+          "placebo_residual_gain": 1.0,
+          "candidate_nominal_coverage": 0.9,
+          "population_nominal_coverage": 0.9,
+          "population_residual_scale": false,
+          "temporal_mondrian_conformal": true,
+          "candidate_inner_coverage": null
+        },
+        "passes_point_gate": true
+      },
+      {
+        "seed": 9003,
+        "group_column": "subject_id",
+        "late_stage_only": true,
+        "rows": 9467,
+        "subjects": 3135,
+        "parameter_count_candidate": 16051,
+        "parameter_count_placebo": 16051,
+        "mae": {
+          "population_baseline": 140.816396,
+          "patient_state_candidate": 126.143724,
+          "capacity_matched_placebo": 130.020602
+        },
+        "candidate_vs_population": {
+          "patient_equalized_delta_mae": -13.840209,
+          "patient_bootstrap_95_ci": [
+            -15.503821,
+            -12.307893
+          ],
+          "significant": true
+        },
+        "candidate_vs_placebo": {
+          "patient_equalized_delta_mae": -5.458424,
+          "patient_bootstrap_95_ci": [
+            -6.58538,
+            -4.292798
+          ],
+          "significant": true
+        },
+        "adaptive_conformal": {
+          "coverage": 0.901025,
+          "mean_half_width": 239.585833,
+          "personalized_rows": 42,
+          "personalized_rate": 0.004436,
+          "personalized_coverage": 0.928571,
+          "passes_0_87_to_0_93": true
+        },
+        "matched_population_conformal": {
+          "coverage": 0.910214,
+          "mean_half_width": 321.871452,
+          "median_half_width": 313.114807,
+          "personalized_rows": 42,
+          "passes_0_87_to_0_93": true
+        },
+        "matched_interval_width": {
+          "candidate_mean_half_width": 239.585833,
+          "population_mean_half_width": 321.871452,
+          "candidate_median_half_width": 199.095715,
+          "population_median_half_width": 313.114807,
+          "patient_equalized_delta_half_width": -62.15681,
+          "patient_bootstrap_95_ci": [
+            -66.342146,
+            -57.169753
+          ],
+          "candidate_significantly_narrower": true,
+          "both_coverage_gates_pass": true,
+          "narrower_interval_claim_allowed": true
+        },
+        "development_selected_policy": {
+          "candidate_residual_gain": 1.0,
+          "placebo_residual_gain": 1.0,
+          "candidate_nominal_coverage": 0.9,
+          "population_nominal_coverage": 0.9,
+          "population_residual_scale": false,
+          "temporal_mondrian_conformal": true,
+          "candidate_inner_coverage": null
+        },
+        "passes_point_gate": true
+      }
+    ]
+  },
+  "promotion": {
+    "status": "promoted",
+    "patient_state_adapter_allowed": true,
+    "precision_status": "promoted",
+    "narrower_patient_interval_allowed": true,
+    "requires_point_and_conformal_pass_on_all_patient_and_external_gates": true
+  },
+  "interval_narrowing": {
+    "claim_allowed": true,
+    "requires_equal_coverage_gate": true,
+    "requires_patient_level_paired_bootstrap": true
+  },
+  "boundary": {
+    "factual_only": true,
+    "direct_hidden_state_truth_claim_allowed": false,
+    "causal_claim_allowed": false,
+    "clinical_claim_allowed": false,
+    "raw_rows_or_patient_ids_included": false
+  },
+  "artifact": {
+    "directory": "/Users/chunyouchang/Desktop/llm_project/medical_jepa/patient_state_precision_urine_output12_v1",
+    "schema": "organ_patient_state_artifact.v1",
+    "model": "model.pt",
+    "population_anchor": "population_anchor.joblib",
+    "preprocessing_and_conformal": "preprocessing_and_conformal.npz",
+    "metadata": "metadata.json",
+    "manifest": "MANIFEST.sha256"
+  }
+}

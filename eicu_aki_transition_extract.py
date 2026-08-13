@@ -27,6 +27,7 @@ from eicu_sepsis_transition_extract import (
     ID,
     LOOKBACK_H,
     TARGET_TOL_H,
+    target_tolerance_for_horizon,
     _finite_number,
     _read_csv_chunks,
     _text_series_contains_any,
@@ -502,6 +503,7 @@ def assemble_states(
     horizon_hours: float = DELTA_H,
 ) -> pd.DataFrame:
     lookup = measurement_lookup(measurements)
+    target_tolerance = target_tolerance_for_horizon(horizon_hours)
     rows = []
     for anchor in anchors.itertuples(index=False):
         row = {}
@@ -509,7 +511,7 @@ def assemble_states(
             times, values = lookup.get((int(anchor.stay_id), var), (np.asarray([]), np.asarray([])))
             if len(times):
                 current, age = backward_value(times, values, float(anchor.t_hour), LOOKBACK_H)
-                future = nearest_value(times, values, float(anchor.t_plus_hour), TARGET_TOL_H)
+                future = nearest_value(times, values, float(anchor.t_plus_hour), target_tolerance)
             else:
                 current, age, future = np.nan, np.nan, np.nan
             row[f"{var}_t"] = current
@@ -681,7 +683,7 @@ def cohort_report(
             "future_suffix": horizon_suffix(horizon_hours),
             "anchor_step_hours": ANCHOR_STEP_H,
             "lookback_hours": LOOKBACK_H,
-            "target_tolerance_hours": TARGET_TOL_H,
+            "target_tolerance_hours": target_tolerance_for_horizon(horizon_hours),
         },
         "safety_boundary": {
             "raw_rows_included": False,

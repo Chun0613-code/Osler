@@ -1,0 +1,43 @@
+{
+  "schema": "organ_patient_state_artifact.v1",
+  "target": "bun",
+  "horizon_hours": 6,
+  "organ": "kidneys",
+  "feature_columns": [
+    "creatinine_t",
+    "creatinine_age_hr",
+    "bun_t",
+    "bun_age_hr",
+    "urine_output_t",
+    "urine_output_age_hr",
+    "potassium_t",
+    "potassium_age_hr",
+    "bicarbonate_t",
+    "bicarbonate_age_hr",
+    "sodium_t",
+    "sodium_age_hr",
+    "map_t",
+    "map_age_hr",
+    "hist_fluids",
+    "hist_vasopressor",
+    "hist_diuretics",
+    "hist_renal_replacement",
+    "hist_nephrotoxin"
+  ],
+  "belief": "renal_belief_state_v2",
+  "conformal_target_coverage": 0.9,
+  "conformal_policy": "temporal_mondrian",
+  "temporal_regime_cutpoints_hours": [
+    24.0,
+    72.0
+  ],
+  "history_steps": 6,
+  "fit_rows": 19894,
+  "fit_subjects": 10957,
+  "calibration_rows": 3463,
+  "calibration_subjects": 1934,
+  "validation_report": "patient_state_precision_bun6_full_20260814.json",
+  "factual_only": true,
+  "causal_claim_allowed": false,
+  "direct_hidden_state_truth_claim_allowed": false
+}

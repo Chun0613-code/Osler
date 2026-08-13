@@ -47,6 +47,14 @@ RENAL_STATE_V2_BELIEF_COLUMNS = (
     "state2_belief_creatinine_observation_confidence",
 )
 
+RENAL_STATE_V3_BELIEF_COLUMNS = RENAL_STATE_V2_BELIEF_COLUMNS + (
+    "state3_belief_urine_level",
+    "state3_belief_urine_slope",
+    "state3_belief_urine_sd",
+    "state3_belief_urine_innovation",
+    "state3_belief_urine_observation_confidence",
+)
+
 
 def _num(frame: pd.DataFrame, column: str, default=np.nan) -> np.ndarray:
     if column not in frame:
@@ -263,6 +271,78 @@ class CreatinineKineticsBelief:
         }
 
 
+@dataclass(frozen=True)
+class UrineOutputKineticsBelief:
+    """Online local-level/slope state for observed urine output."""
+
+    level: float
+    slope: float
+    variance: float
+
+    @property
+    def standard_deviation(self) -> float:
+        return math.sqrt(max(float(self.variance), 1e-6))
+
+    @classmethod
+    def from_row(cls, row: pd.Series) -> "UrineOutputKineticsBelief":
+        level = float(np.clip(_scalar(row, "urine_output_t", 60.0), 0.0, 1000.0))
+        age = float(np.clip(_scalar(row, "urine_output_age_hr", 24.0), 0.0, 72.0))
+        variance = float(np.clip(25.0 + 400.0 * (age / 72.0), 25.0, 900.0))
+        return cls(level=level, slope=0.0, variance=variance)
+
+    def predict(self, delta_hours: float) -> "UrineOutputKineticsBelief":
+        hours = max(float(delta_hours), 0.0)
+        slope = float(np.clip(0.80 * self.slope, -100.0, 100.0))
+        level = float(np.clip(self.level + slope * hours, 0.0, 1000.0))
+        variance = float(np.clip(self.variance + 36.0 * max(hours, 0.25), 25.0, 5000.0))
+        return UrineOutputKineticsBelief(level=level, slope=slope, variance=variance)
+
+    def update(
+        self, row: pd.Series, delta_hours: float
+    ) -> tuple["UrineOutputKineticsBelief", float, float]:
+        observation = _scalar(row, "urine_output_t", np.nan)
+        if not np.isfinite(observation):
+            return self, 0.0, 0.0
+        observation = float(np.clip(observation, 0.0, 1000.0))
+        age = float(np.clip(_scalar(row, "urine_output_age_hr", 24.0), 0.0, 72.0))
+        confidence = float(np.clip(1.0 - 0.85 * (age / 72.0), 0.05, 1.0))
+        observation_variance = float(
+            np.clip(16.0 + (1.0 - confidence) * 625.0, 16.0, 900.0)
+        )
+        prior_variance = max(float(self.variance), 1e-6)
+        posterior_variance = 1.0 / (
+            1.0 / prior_variance + 1.0 / observation_variance
+        )
+        posterior_level = posterior_variance * (
+            self.level / prior_variance + observation / observation_variance
+        )
+        innovation = float(observation - self.level)
+        observed_slope = float(
+            np.clip(innovation / max(float(delta_hours), 0.25), -150.0, 150.0)
+        )
+        posterior_slope = float(
+            np.clip(0.65 * self.slope + 0.35 * observed_slope, -100.0, 100.0)
+        )
+        return (
+            UrineOutputKineticsBelief(
+                level=float(np.clip(posterior_level, 0.0, 1000.0)),
+                slope=posterior_slope,
+                variance=float(np.clip(posterior_variance, 9.0, 5000.0)),
+            ),
+            innovation,
+            confidence,
+        )
+
+    def to_features(self, innovation: float, confidence: float) -> dict[str, float]:
+        return {
+            "state3_belief_urine_level": float(self.level),
+            "state3_belief_urine_slope": float(self.slope),
+            "state3_belief_urine_sd": float(self.standard_deviation),
+            "state3_belief_urine_innovation": float(innovation),
+            "state3_belief_urine_observation_confidence": float(confidence),
+        }
+
+
 def renal_belief_features(frame: pd.DataFrame) -> pd.DataFrame:
     """Return candidate renal belief features for downstream prediction gates."""
 
@@ -411,6 +491,34 @@ def renal_belief_state_v2_features(frame: pd.DataFrame) -> pd.DataFrame:
                 output.loc[index, column] = value
             previous_hour = hour
             previous_row = row
+    return output.astype(np.float64)
+
+
+def renal_belief_state_v3_features(frame: pd.DataFrame) -> pd.DataFrame:
+    """Return renal v2 state plus urine-specific online kinetics."""
+
+    output = renal_belief_state_v2_features(frame).reindex(
+        columns=RENAL_STATE_V3_BELIEF_COLUMNS
+    )
+    if frame.empty:
+        return output.astype(np.float64)
+    sort_column = "hours_since_onset" if "hours_since_onset" in frame else None
+    for _stay_id, group in frame.groupby("stay_id", sort=False):
+        ordered = group.sort_values(sort_column) if sort_column else group
+        belief: UrineOutputKineticsBelief | None = None
+        previous_hour: float | None = None
+        for index, row in ordered.iterrows():
+            hour = _scalar(row, "hours_since_onset", 0.0)
+            if belief is None:
+                belief = UrineOutputKineticsBelief.from_row(row)
+                innovation = 0.0
+                confidence = 1.0
+            else:
+                delta = max(0.0, hour - (previous_hour if previous_hour is not None else hour))
+                belief, innovation, confidence = belief.predict(delta).update(row, delta)
+            for column, value in belief.to_features(innovation, confidence).items():
+                output.loc[index, column] = value
+            previous_hour = hour
     return output.astype(np.float64)
 
 
