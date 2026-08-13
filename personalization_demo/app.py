@@ -24,7 +24,8 @@ app = FastAPI(
     title="Osler Personalized Belief Demo",
     version="0.1.0",
     description=(
-        "Research demo for validated Osler predict-update belief features. "
+        "Research demo for 12 exact serialized forecast artifacts and clearly "
+        "labeled illustrative belief features. "
         "No clinical, causal, counterfactual, or treatment claims."
     ),
 )

@@ -1,15 +1,14 @@
-# Osler·Rx — Drug Recommendation Agent (demo)
+# Osler Research Demo
 
-A clinician-facing demo: **import a patient case → get ranked drug recommendations →
-see the full reasoning as a mind-map → chat to ask why.**
+A research-only demo with two separate paths: a symbolic candidate-ranking
+illustration and a factual patient-state forecast API. The forecast API never
+changes the candidate ranking.
 
 It reuses the project's existing **symbolic pharmacology engine** (`reasoning_engine.py`
-in the project root) unchanged. The recommendation, ranking, safety gating and graph are
-100% computed by that engine — fast, deterministic, explainable. An LLM is used **only**
+in the project root) unchanged. The candidate ranking, safety gating and graph are
+computed by that engine. An LLM is used **only**
 to (a) parse messy free-text case notes and (b) explain the result in chat. The LLM never
 makes a medical decision.
-
-> Everything in this `demo/` folder is new. No legacy file in the project root was modified.
 
 ---
 
@@ -20,21 +19,45 @@ This is a **methodology / architecture demo, NOT a clinically validated tool.**
 - The drug `delta` values (`drugs_pkpd.json`) and the disease perturbations (organ JSONs)
   are **hand-authored estimates** marked `review_status: unreviewed`.
 - `demo_clinical_data.json` is **illustrative, hand-written label text — not real FDA labels.**
-- Therefore: **direction (↑/↓) is reliable; exact magnitudes are soft.** Use it for
-  *explainable relative ranking*, never for absolute dose/efficacy claims.
+- Directions and magnitudes are illustrative. They are not evidence of diagnosis,
+  efficacy, treatment effect, or a patient-specific prescription.
 - **The AI agent does NOT make it more medically accurate.** Accuracy comes from the
   *knowledge base*, not the LLM. To make it production-grade you must:
-  1. tick **"fetch live openFDA labels"** to pull real FDA label + FAERS data (already wired);
+  1. use **"fetch live openFDA labels"** only for drug-label and safety evidence;
   2. have clinicians validate/anchor the `delta` knowledge base to guidelines;
   3. align the variable vocabulary between drugs and disease models.
 
-Decision support only. A licensed clinician makes the final call.
+No diagnosis, clinical claim, causal claim, treatment recommendation, or
+automated prescribing is authorized.
+
+---
+
+## Factual forecast API
+
+The backend exposes:
+
+- `POST /api/forecast`
+- `GET /api/forecast/capabilities`
+- `GET /api/forecast/validation-summary`
+- `GET /api/health/models`
+- `GET /api/monitoring/cases`
+
+Every forecast item has one tier:
+
+- `validated_artifact`: one of 12 exact serialized target×horizon artifacts;
+  only these cells can return calibrated `lower` and `upper` values.
+- `illustrative`: belief-derived research illustration with no interval.
+- `unsupported`: fail-closed abstention with no point or interval.
+
+The interval-width summary is held-out cohort aggregate evidence (120 runs,
+approximately 1.1%–34.5%, median approximately 11.8%). It is never presented as
+real-time shrinkage for an individual case.
 
 ---
 
 ## Run
 
-From the **project root** (`E:\jingbinqian\Osler`):
+From the project root:
 
 ```bat
 py -m pip install -r requirements.txt
@@ -79,9 +102,20 @@ set OPENAI_API_KEY=sk-...
 | Parse a **free-text** case → fields + indication | `case_parser` | ✅ if key set (else regex rules) |
 | "Why this drug?" chat | `llm_client` | ✅ if key set (else fallback notice) |
 
-A preset case sends structured fields, so it triggers **no** LLM — that's why it's instant.
-"Instant" = the symbolic engine runs in ~0.2 ms, not that it is hardcoded; change the BP or
-add an allergy and the verdicts change.
+A preset case sends structured fields, so it triggers no LLM.
+
+## Rebuild the public monitoring case
+
+Download the four public eICU CRD Demo 2.0.1 tables (`patient`, `lab`,
+`vitalPeriodic`, and `intakeOutput`) from PhysioNet, then run:
+
+```bat
+py demo\eicu_demo_adapter.py --data-dir PATH_TO_TABLES --stay-id 2677807 --anchor-offset-minutes 980
+```
+
+The adapter uses backward-only observation lookup and canonical interval-aware
+urine-output normalization. Only the small converted JSON is committed; the
+source CSV files are not.
 
 ---
 
@@ -89,7 +123,10 @@ add an allergy and the verdicts change.
 
 | File | Role |
 |---|---|
-| `demo_app.py` | Flask backend: `/`, `/api/cases`, `/api/analyze`, `/api/chat` |
+| `demo_app.py` | Flask backend for symbolic and factual forecast routes |
+| `forecast_api.py` | Framework-independent forecast HTTP contract |
+| `eicu_demo_adapter.py` | Public eICU demo table converter with anchor-time guard |
+| `monitoring_cases.json` | Small deidentified public monitoring case |
 | `agent.py` | Orchestrator: parse → recommend → disease world-model → build graph; optional openFDA |
 | `case_parser.py` | Free-text case → structured fields (LLM or deterministic rules) |
 | `case_targets.py` | Indication → physiological treatment targets (15 indications) |

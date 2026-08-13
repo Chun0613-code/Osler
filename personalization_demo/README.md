@@ -14,8 +14,8 @@ It calls the real predict-update belief builders:
 - `respiratory_belief.py`
 - `endocrine_belief.py`
 
-The green personalized value in the UI is not a fixed illustrative gain. It is
-computed from the submitted patient trajectory through those belief builders.
+Each output card displays its tier. Illustrative values are computed from the
+submitted trajectory, but that computation does not make them validated.
 
 ## What This Demo Serves
 
@@ -40,7 +40,7 @@ This demo is research-only:
 - no treatment recommendation
 - no diagnosis
 - no automated prescribing or drug-ranking changes
-- no patient identifiers persisted
+- no direct identifiers persisted; submitted API data is not stored
 
 The model health endpoint (`/api/health/models`) performs strict manifest
 verification and loads all 12 artifacts. It returns a failing status if any
@@ -52,7 +52,7 @@ From the repository root:
 
 ```bash
 pip install -r personalization_demo/requirements.txt
-uvicorn personalization_demo.app:app --host 0.0.0.0 --port 7860
+waitress-serve --host=0.0.0.0 --port=7860 demo.demo_app:app
 ```
 
 Then open `http://localhost:7860`.

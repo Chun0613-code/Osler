@@ -1,13 +1,15 @@
 """
-demo_app.py — Drug-recommendation agent demo (for clinicians).
+demo_app.py — Research decision-support demo.
 
-  import a case (free text or form)  ─▶  agent parses + symbolic engine recommends
+  import a case (free text or form)  ─▶  agent parses + symbolic engine ranks
   ─▶ mind-map reasoning graph (case ▸ disease ▸ targets ▸ drugs)  ─▶ chat to ask why.
 
-The symbolic engine (reasoning_engine) makes every recommendation; the LLM only
-parses the case and explains the result. Knowledge sources: drugs_pkpd.json (drug
-deltas), the organ JSONs via disease_world (local disease "wiki"), and optional
-live openFDA labels via agent.enrich_openfda.
+The symbolic engine (reasoning_engine) produces a research candidate ranking;
+the LLM only parses the case and explains that fixed result. The factual
+forecast API is separate and never changes the ranking. Nothing here diagnoses,
+prescribes, or estimates a causal treatment effect. Knowledge sources:
+drugs_pkpd.json (drug deltas), the organ JSONs via disease_world (local disease
+"wiki"), and optional live openFDA labels via agent.enrich_openfda.
 
 Run:  py -m pip install -r requirements.txt
       py demo_app.py   →  http://127.0.0.1:5000
@@ -21,7 +23,8 @@ from pathlib import Path
 
 # This demo (demo/) reuses the pharmacology engine in engine/ and data in data/.
 _ROOT = Path(__file__).resolve().parent.parent
-for _p in (_ROOT / "engine", _ROOT):
+_HERE = Path(__file__).resolve().parent
+for _p in (_HERE, _ROOT / "engine", _ROOT):
     if str(_p) not in sys.path:
         sys.path.insert(0, str(_p))
 
@@ -31,8 +34,13 @@ import reasoning_engine as RE
 import case_targets
 import agent
 import llm_client
+from demo.forecast_api import (
+    capabilities_response,
+    forecast_response,
+    model_health_response,
+    validation_summary_response,
+)
 
-_HERE = Path(__file__).parent
 app = Flask(__name__)
 
 DRUGS_PKPD = RE._load("drugs_pkpd.json")["drugs"]
@@ -50,6 +58,9 @@ def _load_optional(name: str) -> dict:
 
 CLINICAL = _load_optional("demo_clinical_data.json")
 SAMPLE_CASES = json.loads((_HERE / "sample_cases.json").read_text(encoding="utf-8"))["cases"]
+MONITORING_CASES = json.loads(
+    (_HERE / "monitoring_cases.json").read_text(encoding="utf-8")
+)
 
 # patient_id -> last analyze bundle, used to ground chat.
 _CACHE: dict[str, dict] = {}
@@ -64,6 +75,40 @@ def index():
 def api_cases():
     return jsonify({"cases": SAMPLE_CASES, "indications": case_targets.list_indications(),
                     "env_llm": llm_client.available()})
+
+
+@app.route("/api/monitoring/cases")
+def api_monitoring_cases():
+    contract = capabilities_response()
+    return jsonify({
+        **MONITORING_CASES,
+        "model_version": contract["model_version"],
+        "safety_boundary": contract["safety_boundary"],
+    })
+
+
+@app.route("/api/forecast", methods=["POST"])
+def api_forecast():
+    try:
+        return jsonify(forecast_response(request.get_json(silent=True)))
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
+
+
+@app.route("/api/forecast/capabilities")
+def api_forecast_capabilities():
+    return jsonify(capabilities_response())
+
+
+@app.route("/api/forecast/validation-summary")
+def api_forecast_validation_summary():
+    return jsonify(validation_summary_response())
+
+
+@app.route("/api/health/models")
+def api_model_health():
+    health = model_health_response()
+    return jsonify(health), 200 if health["ready"] else 503
 
 
 @app.route("/api/analyze", methods=["POST"])
@@ -116,8 +161,8 @@ def api_analyze_stream():
 
 
 _SYSTEM = (
-    "You are the explanation assistant for a clinician-facing drug-recommendation system. "
-    "Your ONLY job is to explain, in clear clinical language, the recommendation that the "
+    "You explain a research-only decision-support candidate ranking. "
+    "Your ONLY job is to explain, in clear language, the candidate ranking that the "
     "symbolic reasoning engine has ALREADY computed (provided below).\n"
     "Rules:\n"
     "1) Do not make independent medical decisions, change the ranking, or suggest drugs not "
@@ -128,8 +173,8 @@ _SYSTEM = (
     "confirm it.\n"
     "4) If asked about a drug not in the list, say it was not matched and why "
     "(mechanism mismatch / not in the drug knowledge base).\n"
-    "5) delta magnitudes are estimates; direction is more reliable. Decision support only — "
-    "a licensed clinician makes the final call.\n"
+    "5) delta magnitudes and directions are illustrative. Decision support only — "
+    "a licensed clinician makes the final call. This system does not diagnose or prescribe.\n"
     "Answer concisely, in the user's language, citing specific drugs and target variables."
 )
 

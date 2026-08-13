@@ -1,7 +1,7 @@
 """Runtime helpers for the Osler personalized belief demo.
 
-This module is intentionally small and explicit. It calls validated belief
-modules and exact serialized patient-state artifacts:
+This module is intentionally small and explicit. It calls illustrative belief
+feature builders and exact serialized patient-state artifacts:
 
 * precision-promoted renal cells use a serialized population ridge plus neural
   patient-state residual and conformal interval;
@@ -282,7 +282,7 @@ def capabilities() -> dict[str, Any]:
             ),
             "personalized_forecast": (
                 "serialized neural patient-state residual for precision-promoted "
-                "cells; validated belief demonstration otherwise"
+                "cells; illustrative belief computation otherwise"
             ),
             "serialized_precision_cells": _precision_cell_names(),
             "interval_policy": (
