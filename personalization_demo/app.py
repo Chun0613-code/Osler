@@ -6,9 +6,9 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 
-from personalization_demo.runtime import capabilities, forecast, sample_payload
+from personalization_demo.runtime import capabilities, forecast, model_health, sample_payload
 
 
 APP_DIR = Path(__file__).resolve().parent
@@ -34,6 +34,12 @@ def index() -> str:
 @app.get("/api/capabilities")
 def get_capabilities() -> dict[str, Any]:
     return capabilities()
+
+
+@app.get("/api/health/models")
+def get_model_health() -> JSONResponse:
+    health = model_health()
+    return JSONResponse(health, status_code=200 if health["ready"] else 503)
 
 
 @app.get("/api/sample")

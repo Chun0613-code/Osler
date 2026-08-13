@@ -1,6 +1,12 @@
 import unittest
 
-from personalization_demo.runtime import capabilities, forecast, make_frame, sample_payload
+from personalization_demo.runtime import (
+    capabilities,
+    forecast,
+    make_frame,
+    model_health,
+    sample_payload,
+)
 from osler_jepa.state_completion import complete_current_state
 
 
@@ -78,6 +84,14 @@ class PersonalizationDemoTests(unittest.TestCase):
         self.assertFalse(contract["safety_boundary"]["clinical_claim_allowed"])
         self.assertFalse(contract["safety_boundary"]["counterfactual_claim_allowed"])
         self.assertFalse(contract["safety_boundary"]["treatment_recommendation_allowed"])
+
+    def test_all_serialized_artifacts_pass_strict_health_check(self):
+        health = model_health()
+        self.assertTrue(health["strict_manifest_verification"])
+        self.assertTrue(health["ready"], health["checks"])
+        self.assertEqual(health["expected_artifacts"], 12)
+        self.assertEqual(health["loaded_artifacts"], 12)
+        self.assertTrue(all(check["status"] == "loaded" for check in health["checks"]))
 
     def test_make_frame_computes_map_from_sbp_dbp(self):
         frame = make_frame({

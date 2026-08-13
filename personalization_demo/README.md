@@ -1,6 +1,10 @@
-# Osler Personalized Belief Demo
+# Osler Factual Forecast Demo
 
-This is a research demo for Osler's validated patient-specific belief layer.
+This research-only demo serves 12 serialized patient-state forecast artifacts.
+Those exact target/horizon cells have byte-verified model, preprocessing,
+population-anchor, metadata, and conformal files. Other belief-derived values
+are illustrative model-internal state summaries; they are not validated
+artifacts and never receive calibrated intervals.
 
 It calls the real predict-update belief builders:
 
@@ -15,14 +19,16 @@ computed from the submitted patient trajectory through those belief builders.
 
 ## What This Demo Serves
 
-- Population forecast: persistence baseline from the latest observed value.
-- Personalized forecast: belief-derived adjustment from the patient's own
-  trajectory.
-- Interval: conservative validation-scale demo band.
+- `validated_artifact`: one of the 12 exact serialized target/horizon cells;
+  point forecasts and calibrated intervals come from that artifact.
+- `illustrative`: a transparent belief-derived research illustration with no
+  calibrated interval and no promotion authority.
+- `unsupported`: no authorized forecast or interval.
 
-The audit ridge coefficients are not serialized as production artifacts yet, so
-this app does not claim to serve the full nested router. It demonstrates the
-validated personalization layer and keeps that boundary explicit.
+Reported interval-width reduction is held-out cohort aggregate evidence only.
+Across the 120 validation runs it was approximately 1.1% to 34.5%, with an
+approximately 11.8% median. It is not a real-time claim about an individual
+case.
 
 ## Safety Boundary
 
@@ -32,7 +38,13 @@ This demo is research-only:
 - no causal claim
 - no counterfactual claim
 - no treatment recommendation
+- no diagnosis
+- no automated prescribing or drug-ranking changes
 - no patient identifiers persisted
+
+The model health endpoint (`/api/health/models`) performs strict manifest
+verification and loads all 12 artifacts. It returns a failing status if any
+artifact is missing, modified, or unloadable.
 
 ## Run Locally
 

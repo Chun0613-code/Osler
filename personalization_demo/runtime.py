@@ -35,6 +35,9 @@ from osler_jepa.patient_state import (
 )
 
 
+MODEL_VERSION = "patient-state-precision-20260813"
+
+
 @dataclass(frozen=True)
 class TargetSpec:
     target: str
@@ -252,6 +255,7 @@ def capabilities() -> dict[str, Any]:
 
     return {
         "object": "osler_personalized_belief_demo",
+        "model_version": MODEL_VERSION,
         "validated_belief_systems": [
             {
                 "name": system.name,
@@ -445,16 +449,59 @@ def _precision_cell_names() -> list[str]:
 
 
 @lru_cache(maxsize=1)
-def _precision_artifacts() -> dict[tuple[str, int], Any]:
+def _precision_artifact_load_state() -> tuple[
+    dict[tuple[str, int], Any], tuple[dict[str, Any], ...]
+]:
     root = Path(__file__).resolve().parents[1]
-    loaded = {}
-    for cell in _precision_registry()["cells"].values():
+    loaded: dict[tuple[str, int], Any] = {}
+    checks = []
+    for cell_name, cell in sorted(_precision_registry()["cells"].items()):
         artifact_name = cell.get("artifact")
         if not cell.get("precision_promoted") or not artifact_name:
             continue
         key = (str(cell["target"]), int(cell["horizon_hours"]))
-        loaded[key] = load_patient_state_artifact(root / artifact_name)
-    return loaded
+        try:
+            artifact = load_patient_state_artifact(root / artifact_name)
+            if artifact.metadata.get("target") != key[0]:
+                raise ValueError("artifact target does not match registry")
+            if int(artifact.metadata.get("horizon_hours", -1)) != key[1]:
+                raise ValueError("artifact horizon does not match registry")
+            loaded[key] = artifact
+            checks.append({
+                "cell": cell_name,
+                "artifact": artifact_name,
+                "status": "loaded",
+            })
+        except Exception as exc:
+            checks.append({
+                "cell": cell_name,
+                "artifact": artifact_name,
+                "status": "error",
+                "error": f"{type(exc).__name__}: {exc}",
+            })
+    return loaded, tuple(checks)
+
+
+def _precision_artifacts() -> dict[tuple[str, int], Any]:
+    return _precision_artifact_load_state()[0]
+
+
+def model_health() -> dict[str, Any]:
+    """Strictly verify and load every serialized precision artifact."""
+
+    loaded, checks = _precision_artifact_load_state()
+    expected = len(_precision_cell_names())
+    loaded_count = len(loaded)
+    ready = expected == 12 and loaded_count == expected
+    return {
+        "status": "healthy" if ready else "degraded",
+        "ready": ready,
+        "model_version": MODEL_VERSION,
+        "strict_manifest_verification": True,
+        "expected_artifacts": expected,
+        "loaded_artifacts": loaded_count,
+        "checks": list(checks),
+    }
 
 
 def _precision_forecast(frame: pd.DataFrame, target: TargetSpec):
