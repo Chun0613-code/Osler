@@ -647,7 +647,8 @@ body[data-sub="validation"] #fx-validation { display: block; }
   border-radius: 50%; background: var(--ink); border: 1px solid var(--ink);
 }
 .track .tick.withheld { background: var(--surface); }
-.track .tick.current { background: var(--oxide); border-color: var(--oxide); box-shadow: 0 0 0 3px var(--oxide-tint); }
+/* the current anchor is verified data provenance, not an alert — teal */
+.track .tick.current { background: var(--teal); border-color: var(--teal); box-shadow: 0 0 0 3px #E2ECEA; }
 .track-labels { display: flex; align-items: baseline; gap: 12px; margin-top: 4px;
   font-family: var(--mono); font-size: 11.5px; color: var(--ink-2); }
 .track-labels > span { white-space: nowrap; }
@@ -658,34 +659,50 @@ body[data-sub="validation"] #fx-validation { display: block; }
 .speed-wrap { display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--ink-2); }
 
 /* ── continuous retrospective replay stage ─────────────────────────────── */
+/* Colour discipline on the dark stage: teal for data, provenance and the
+   time cursor. Warm oxide tones appear nowhere on the healthy path — they are
+   reserved for errors and safety states. No glow, no gradient. */
 .replay-shell { padding-top: 28px; }
 .replay-stage {
   overflow: hidden; padding: 22px; background: #121818; color: #EDECE6;
   border: 1px solid #293131; box-shadow: 0 16px 44px rgba(18, 24, 24, .12);
 }
-.replay-stage-head { display: flex; justify-content: space-between; align-items: end; gap: 24px; }
+.replay-stage-head { display: flex; justify-content: space-between; align-items: end; gap: 20px 24px; flex-wrap: wrap; }
 .replay-stage .eyebrow { display: block; color: #91A09B; font-family: var(--mono); font-size: 10px;
   letter-spacing: .11em; text-transform: uppercase; }
 .replay-clock { display: block; margin-top: 4px; font-family: var(--mono); font-size: 34px; font-weight: 500;
   color: #FFF; font-variant-numeric: tabular-nums; }
-.replay-stage-head dl { display: flex; gap: 28px; margin: 0; }
+.clock-range { display: block; margin-top: 2px; color: #91A09B; font-family: var(--mono); font-size: 10.5px; }
+.replay-stage-head dl { display: flex; gap: 28px; margin: 0; flex-wrap: wrap; }
 .replay-stage-head dl div { min-width: 92px; }
 .replay-stage-head dt { color: #91A09B; font-size: 11px; }
 .replay-stage-head dd { margin: 3px 0 0; font-family: var(--mono); font-size: 13px; color: #FFF; }
+.prov-chip { align-self: flex-start; padding: 5px 10px; border: 1px solid #3A4744; color: #9CC8C0;
+  font-size: 11px; white-space: nowrap; }
 .replay-traces { margin-top: 18px; min-height: 280px; }
 .replay-traces svg { display: block; width: 100%; height: auto; overflow: visible; }
 .rt-grid { stroke: #34403E; stroke-width: 1; }
+.rt-axis { stroke: #46534F; stroke-width: 1; }
+.rt-tick { stroke: #46534F; stroke-width: 1; }
 .rt-anchor-line { stroke: #2D3735; stroke-width: 1; stroke-dasharray: 3 5; }
+.rt-anchor-line.revealed { stroke: #3A4744; }
 .rt-label { fill: #EDECE6; font: 600 12px var(--sans); }
 .rt-unit, .rt-hour { fill: #91A09B; font: 10px var(--mono); }
-.rt-path { fill: none; stroke: #61B5A7; stroke-width: 2.25; stroke-linecap: round; stroke-linejoin: round; }
+.rt-anchor-hour { fill: #77827F; font: 10px var(--mono); }
+.rt-anchor-hour.revealed { fill: #9CC8C0; }
+/* sample-and-hold trace: horizontal holds with vertical step transitions */
+.rt-hold { fill: none; stroke: #61B5A7; stroke-width: 2.25; stroke-linecap: round; stroke-linejoin: round; }
+.rt-readout { fill: #EDECE6; font: 600 15px var(--mono); }
 .rt-point circle:not(.pulse) { fill: #7CC8BA; stroke: #121818; stroke-width: 2; }
 .rt-point text { fill: #D8E5E0; font: 10px var(--mono); }
 .rt-point .pulse { fill: none; stroke: transparent; }
-.rt-point.current .pulse { stroke: #E2775F; animation: replay-pulse 1.5s ease-out infinite; }
-.rt-point.current circle:not(.pulse) { fill: #E2775F; }
-.rt-cursor { stroke: #F0A38E; stroke-width: 2; filter: drop-shadow(0 0 5px rgba(240, 163, 142, .8)); }
+.rt-point.current .pulse { stroke: #7CC8BA; animation: replay-pulse 1.5s ease-out infinite; }
+.rt-point.current circle:not(.pulse) { fill: #B7E3DA; }
+.rt-trail { fill: rgba(124, 200, 186, .07); }
+.rt-cursor { stroke: #9CC8C0; stroke-width: 2; }
 @keyframes replay-pulse { 0% { r: 5; opacity: .9; } 100% { r: 18; opacity: 0; } }
+.hold-mark { display: flex; align-items: center; gap: 8px; margin: 6px 0 10px; color: #91A09B; font-size: 11px; }
+.hold-mark .hm-line { width: 26px; height: 0; border-top: 2px solid #61B5A7; flex: none; }
 .interpolation-note { padding: 10px 12px; border-left: 2px solid #5D716D; background: #192120;
   color: #AAB7B2; font-size: 11.5px; line-height: 1.55; }
 .interpolation-note b { color: #EDECE6; }
@@ -695,11 +712,13 @@ body[data-sub="validation"] #fx-validation { display: block; }
 .input-provenance-note .mono { color: #C7D2CE; }
 .scrubber-label { display: flex; justify-content: space-between; gap: 16px; margin-top: 18px;
   color: #AAB7B2; font-size: 11px; }
-.replay-scrubber { display: block; width: 100%; margin: 8px 0 0; accent-color: #E2775F; cursor: pointer; }
-.replay-scrubber:focus-visible { outline: 2px solid #F0A38E; outline-offset: 4px; }
+.replay-scrubber { display: block; width: 100%; margin: 8px 0 0; accent-color: #61B5A7; cursor: pointer; }
+.replay-scrubber:disabled { cursor: default; opacity: .5; }
+.replay-scrubber:focus-visible { outline: 2px solid #9CC8C0; outline-offset: 4px; }
 .replay-stage-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px;
   margin-top: 24px; padding-top: 22px; border-top: 1px solid #2D3735; }
 .replay-stage .h-sec { color: #EDECE6; margin-bottom: 10px; }
+.replay-stage .spin { border-color: #34403E; border-top-color: #61B5A7; }
 .observation-arrivals, .replay-events { list-style: none; margin: 0; padding: 0; }
 .observation-arrivals li, .replay-events li { display: grid; grid-template-columns: 68px 1fr; gap: 2px 12px;
   min-width: 0; padding: 9px 0; border-top: 1px solid #27302F; }
@@ -710,11 +729,14 @@ body[data-sub="validation"] #fx-validation { display: block; }
 .observation-arrivals small, .replay-events small { min-width: 0; color: #91A09B; font-size: 10.5px;
   line-height: 1.45; overflow-wrap: anywhere; }
 .observation-arrivals .future b { color: #77827F; }
-.observation-arrivals .current { box-shadow: inset 2px 0 0 #E2775F; padding-left: 10px;
+.observation-arrivals .current { box-shadow: inset 2px 0 0 #61B5A7; padding-left: 10px;
   animation: replay-arrival 420ms ease-out; }
 @keyframes replay-arrival { from { opacity: .25; transform: translateY(5px); } to { opacity: 1; transform: none; } }
 .replay-awaiting { margin: 24px 0 0; padding: 22px; background: var(--surface); border: 1px solid var(--divider); }
 .replay-awaiting .h-sec { margin: 5px 0 8px; }
+/* forecast-side pending spinners run teal: a healthy in-flight request is not
+   an action or an error state */
+.replay-awaiting .spin, .replay-bar .spin, .replay-pending .spin { border-top-color: var(--teal); }
 .replay-pending { margin-top: 24px; }
 .replay-forecast-update { padding-top: 28px; }
 .replay-result-grid { padding-top: 0; }
@@ -814,6 +836,91 @@ body[data-sub="validation"] #fx-validation { display: block; }
 .prerun-facts dd .stat { justify-content: flex-end; }
 .prerun-facts dd .disc { display: none; }
 
+/* ── snapshot · model input manifest ────────────────────────────────────── */
+/* The pre-run page is an honest manifest of what will be sent: recorded facts,
+   last observed values, missing fields and the exact payload. Nothing here
+   resembles a result. */
+.input-block { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--divider); }
+.input-grid { display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: var(--gutter); align-items: start; }
+.input-facts {
+  display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 9px 16px;
+  padding: 16px 18px; font-size: 12.5px;
+  background: var(--surface); border: 1px solid var(--divider); border-radius: var(--radius);
+}
+.input-facts dt { color: var(--ink-2); white-space: nowrap; }
+.input-facts dd { color: var(--ink); text-align: right; min-width: 0; overflow-wrap: anywhere; }
+.input-facts dd.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.input-facts dd .stat { justify-content: flex-end; }
+.input-facts dd .disc { display: none; }
+.input-vars { min-width: 0; }
+.input-vars-h { font-size: 12.5px; font-weight: 600; color: var(--ink);
+  padding-bottom: 8px; border-bottom: 1px solid var(--ink); margin-bottom: 2px; }
+.input-vars .note { margin-top: 10px; }
+.input-cells { margin-top: 16px; }
+.input-cells .input-vars-h { margin-bottom: 10px; }
+.cell-chip {
+  display: inline-block; margin: 0 6px 6px 0; padding: 3px 8px;
+  font-family: var(--mono); font-size: 11.5px; color: var(--ink);
+  background: var(--surface); border: 1px solid var(--divider);
+}
+.cell-sub { font-family: var(--mono); font-size: 11px; color: var(--ink-2); }
+.run-block { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--divider); }
+.run-caption { margin-top: 10px; max-width: 560px; }
+
+/* exact request / response payload disclosure */
+.payload { margin-top: 16px; }
+.payload > summary {
+  display: inline-block; cursor: pointer; font-size: 12.5px; color: var(--blue);
+  list-style: none;
+}
+.payload > summary::-webkit-details-marker { display: none; }
+.payload > summary::after { content: " ⌄"; }
+.payload[open] > summary::after { content: " ⌃"; }
+.payload > summary:hover { text-decoration: underline; }
+.payload-pre {
+  font-family: var(--mono); font-size: 11.5px; line-height: 1.55; color: var(--ink);
+  white-space: pre-wrap; word-break: break-word; margin-top: 10px; padding: 12px 14px;
+  max-height: 420px; overflow-y: auto;
+  background: var(--app-bg); border-left: 2px solid var(--teal);
+}
+.payload .note { margin-top: 8px; }
+
+/* ── snapshot · model execution ─────────────────────────────────────────── */
+/* Each state is driven by a real request event. The teal square marks a state
+   whose event has fired; the spinner marks the one in flight. Oxide never
+   appears on this healthy path. */
+.exec-block { margin-top: 8px; }
+.exec-chip {
+  display: inline-block; margin-bottom: 14px; padding: 6px 12px;
+  font-size: 12.5px; color: var(--teal); border: 1px solid var(--teal);
+}
+.run-states { list-style: none; max-width: 640px; }
+.run-state {
+  display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; gap: 12px; align-items: baseline;
+  padding: 9px 0; border-bottom: 1px solid var(--divider-soft);
+}
+.run-state .m { display: inline-flex; align-items: center; }
+.run-state .m .sq { width: 8px; height: 8px; display: inline-block; background: var(--teal); }
+.run-state .m .sq.idle { background: var(--null); opacity: .5; }
+.run-state .m .spin { border-top-color: var(--teal); }
+.run-state .t { display: block; font-size: 13px; font-weight: 600; color: var(--ink); }
+.run-state.idle .t { color: var(--ink-2); font-weight: 500; }
+.run-state .d { display: block; font-size: 12px; color: var(--ink-2); }
+.run-state .ts { font-family: var(--mono); font-size: 11.5px; color: var(--ink-2); white-space: nowrap; }
+.run-state.done .ts { color: var(--teal); }
+
+/* ── snapshot · output summary strip ────────────────────────────────────── */
+.output-summary {
+  display: flex; flex-wrap: wrap; gap: 16px 32px;
+  padding: 14px 18px; margin-bottom: 8px;
+  background: var(--surface); border: 1px solid var(--divider); border-radius: var(--radius);
+}
+.output-summary .os { min-width: 0; }
+.output-summary .k { font-size: 11.5px; color: var(--ink-2); }
+.output-summary .v { margin-top: 2px; font-size: 12.5px; color: var(--ink); }
+.output-summary .v.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.input-recap { margin-top: 4px; }
+
 /* ── result provenance line ─────────────────────────────────────────────── */
 /* A session result is never called "cached": the fixture owns that word. */
 .source-line {
@@ -824,9 +931,16 @@ body[data-sub="validation"] #fx-validation { display: block; }
 .source-line .d { font-family: var(--mono); font-size: 11.5px; color: var(--ink-2); }
 
 /* ── explanatory stages ─────────────────────────────────────────────────── */
-/* An ordered walk over information already on screen. A stage that has not been
-   reached yet is quiet, never hidden — nothing is withheld for the animation. */
-.stages-block { margin: 4px 0 28px; }
+/* Demoted to a supporting disclosure below the actual output. An ordered walk
+   over information already on screen. A stage that has not been reached yet is
+   quiet, never hidden — nothing is withheld for the animation. */
+.stages-block { margin: 28px 0 8px; padding-top: 18px; border-top: 1px solid var(--divider); }
+.stages-summary { cursor: pointer; font-size: 13px; font-weight: 600; color: var(--ink); list-style: none; }
+.stages-summary::-webkit-details-marker { display: none; }
+.stages-summary::after { content: " ⌄"; color: var(--blue); font-weight: 400; }
+.stages-block[open] .stages-summary::after { content: " ⌃"; }
+.stages-summary:hover { color: var(--blue); }
+.stages-summary .meta { font-weight: 400; }
 .stages { list-style: none; border-top: 1px solid var(--divider); }
 .stage {
   display: grid; grid-template-columns: 26px 1fr; gap: 12px;
@@ -834,7 +948,9 @@ body[data-sub="validation"] #fx-validation { display: block; }
   opacity: .38; transition: opacity 220ms ease;
 }
 .stage.on { opacity: 1; }
-.stage.current .t { color: var(--oxide); }
+/* the walking highlight marks a completed explanatory reading — teal, never
+   the oxide action/error colour */
+.stage.current .t { color: var(--teal); }
 .stage .n { font-family: var(--mono); font-size: 11.5px; color: var(--teal); padding-top: 2px; }
 .stage .b { min-width: 0; }
 .stage .t { display: block; font-size: 13px; font-weight: 600; color: var(--ink); }
@@ -851,8 +967,9 @@ body[data-sub="validation"] #fx-validation { display: block; }
 }
 .chg { display: block; font-size: 12.5px; color: var(--ink-2); line-height: 1.5; }
 .chg.new { color: var(--teal); font-weight: 600; }
-/* a changed cell is marked on its leading edge; unchanged rows stay quiet */
-.dtable tr.row-changed td:first-child { box-shadow: inset 2px 0 0 var(--oxide); padding-left: 10px; }
+/* a changed cell is marked on its leading edge; unchanged rows stay quiet.
+   blue: a changed forecast value is still forecast data, not an alert */
+.dtable tr.row-changed td:first-child { box-shadow: inset 2px 0 0 var(--blue); padding-left: 10px; }
 /* the change report and the closing note are separate readings, not a
    continuation of the chart column's prose */
 .change-block, .final-note { padding-top: 24px; border-top: 1px solid var(--divider); }
@@ -896,6 +1013,8 @@ body[data-sub="validation"] #fx-validation { display: block; }
   .split, .split.wide, .split.graph-expanded { grid-template-columns: 1fr; }
   .prerun { grid-template-columns: 1fr; gap: 20px; }
   .prerun-facts { max-width: 420px; }
+  .input-grid { grid-template-columns: 1fr; }
+  .input-facts { max-width: 440px; }
   .split > .side {
     padding: 24px 0 0; margin-top: 28px;
     border-left: 0; border-top: 1px solid var(--divider);
@@ -993,9 +1112,18 @@ body[data-sub="validation"] #fx-validation { display: block; }
   .replay-shell { padding-top: 16px; }
   .replay-stage { padding: 16px 12px; }
   .replay-stage-head { align-items: start; flex-direction: column; gap: 12px; }
-  .replay-stage-head dl { width: 100%; gap: 18px; }
-  .replay-stage-head dl div { min-width: 0; flex: 1 1 0; }
+  .replay-stage-head dl { width: 100%; gap: 14px 18px; }
+  .replay-stage-head dl div { min-width: 0; flex: 1 1 40%; }
   .replay-clock { font-size: 28px; }
+  .prov-chip { white-space: normal; }
+  /* the monitor stage keeps a readable scale and scrolls inside its own
+     container — the page itself never scrolls sideways */
+  .replay-traces { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .replay-traces svg { min-width: 640px; }
+  .input-facts { max-width: none; }
+  .output-summary { gap: 12px 24px; }
+  .run-state .ts { font-size: 10.5px; }
+  .payload-pre { max-height: 300px; }
   .replay-traces { margin-left: -2px; margin-right: -2px; min-height: 0; }
   .scrubber-label { font-size: 10px; }
   .tiers { width: 100%; }
@@ -1015,7 +1143,7 @@ body[data-sub="validation"] #fx-validation { display: block; }
   .validation-static { padding-left: 14px; }
   /* the change table stacks with the rest; keep the changed marker readable */
   .dtable tr.row-changed td:first-child { box-shadow: none; padding-left: 0; }
-  .dtable tr.row-changed { box-shadow: inset 2px 0 0 var(--oxide); padding-left: 12px; }
+  .dtable tr.row-changed { box-shadow: inset 2px 0 0 var(--blue); padding-left: 12px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

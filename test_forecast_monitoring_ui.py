@@ -177,7 +177,11 @@ class ForecastIsUserDrivenTests(unittest.TestCase):
         body = function_body("renderSnapshot")
         self.assertIn("if (!resp) { root.innerHTML = snapshotIntroHtml(c); return; }", body)
         intro = function_body("snapshotIntroHtml")
-        self.assertIn("Run live forecast", intro)
+        # the run control is explicit about what it does: it executes the model
+        # now, on recorded data (renamed from the ambiguous "Run live forecast")
+        self.assertIn("Run model on this recorded snapshot", intro)
+        self.assertIn('data-fm="run-snapshot"', intro)
+        self.assertIn("It is not live patient monitoring", intro)
         self.assertIn("No forecast value exists on this page until you run one", intro)
         # the pre-run state may describe the request, never a returned value
         self.assertNotIn("validatedTableHtml", intro)
@@ -280,7 +284,11 @@ class ForecastRequestProvenanceTests(unittest.TestCase):
         self.assertIn("forced: force", body)
 
     def test_every_explicit_run_control_forces_a_live_request(self):
-        self.assertIn("fetchStep(c, lastStep(c), { force: true })", function_body("runSnapshot"))
+        run = function_body("runSnapshot")
+        # the snapshot run still forces one real request; it additionally wires
+        # the real request lifecycle events into the run-state display
+        self.assertIn("await fetchStep(c, lastStep(c), {", run)
+        self.assertIn("force: true", run)
         self.assertIn("'rerun-step'", SCRIPT)
         self.assertIn("gotoStep(S.step, { force: true })", SCRIPT)
         self.assertIn("data-fm=\"rerun-snapshot\"", SCRIPT)
@@ -512,6 +520,154 @@ class ReplayProgressionOverHttpTests(unittest.TestCase):
         response = self.client.post("/api/forecast", json=payload)
         self.assertEqual(response.status_code, 400)
         self.assertIn("after anchor_hour", response.get_json()["error"])
+
+
+class SnapshotInputExecutionOutputTests(unittest.TestCase):
+    """The Snapshot shows real input, a real invocation, and real output."""
+
+    def test_model_input_is_visible_before_any_run(self):
+        intro = function_body("snapshotIntroHtml")
+        self.assertIn("modelInputHtml(c)", intro)
+        manifest = function_body("modelInputHtml")
+        for marker in (
+            "Recorded patient alias",
+            "Snapshot anchor time",
+            "Trajectory rows to send",
+            "Observation time range",
+            "Last observed values in the prefix",
+            "Serialized artifact cells expected to run",
+            "Only observations at or before the anchor are sent",
+        ):
+            self.assertIn(marker, manifest)
+        for field in ("hist_fluids", "hist_vasopressor", "hist_diuretics",
+                      "hist_renal_replacement", "hist_nephrotoxin"):
+            self.assertIn(field, manifest)
+        # the pre-run manifest never reads a forecast response
+        self.assertNotIn("responseFor", manifest)
+        self.assertNotIn("forecasts", manifest)
+
+    def test_displayed_request_fields_come_from_the_real_payload_builder(self):
+        # the manifest and the exact-payload viewer derive from the same
+        # buildPrefixPayload() call that fetchStep uses to send the request
+        self.assertIn("buildPrefixPayload(c, lastStep(c))", function_body("snapshotPayload"))
+        self.assertIn("snapshotPayload(c)", function_body("modelInputHtml"))
+        self.assertIn("View exact request payload", SCRIPT)
+        self.assertIn("View exact response payload", SCRIPT)
+
+    def test_exact_response_payload_is_the_raw_body_of_this_run(self):
+        body = function_body("responsePayloadDetailsHtml")
+        self.assertIn("m.rawResponse", body)
+        post = function_body("postForecast")
+        self.assertIn("r.text()", post)
+        self.assertIn("rawText: text", post)
+
+    def test_run_states_are_bound_to_real_request_events_not_timers(self):
+        self.assertNotIn("setTimeout", function_body("runSnapshot"))
+        self.assertNotIn("setTimeout", function_body("fetchStep"))
+        self.assertNotIn("setTimeout", function_body("postForecast"))
+        post = function_body("postForecast")
+        self.assertIn("mark('sent')", post)
+        self.assertIn("mark('received')", post)
+        self.assertIn("mark('validated')", post)
+        self.assertIn("durationMs: respondedAt - requestedAt", post)
+        self.assertIn("opts.onEvent('prepared', Date.now())", function_body("fetchStep"))
+
+    def test_snapshot_click_triggers_exactly_one_post(self):
+        run = function_body("runSnapshot")
+        self.assertEqual(run.count("fetchStep("), 1)
+        self.assertNotIn("postForecast(", run)
+
+    def test_execution_record_shows_measured_timing_and_status(self):
+        line = function_body("sourceLineHtml")
+        self.assertIn("HTTP ", line)
+        self.assertIn("round-trip ", line)
+        self.assertIn("m.respondedAt", line)
+        self.assertIn("Model executed now on recorded data", SCRIPT)
+        self.assertIn("It is not live patient monitoring", SCRIPT)
+
+    def test_healthy_run_path_uses_no_oxide_progress(self):
+        self.assertIn(".run-state .m .spin { border-top-color: var(--teal); }", STYLES)
+        self.assertIn(".stage.current .t { color: var(--teal); }", STYLES)
+        self.assertNotIn(".stage.current .t { color: var(--oxide)", STYLES)
+
+    def test_api_failure_shows_error_not_result(self):
+        body = function_body("renderSnapshot")
+        self.assertIn(
+            "if (S.stepError && !resp) { root.innerHTML = "
+            "errorBlockHtml('Forecast request failed', S.stepError); return; }",
+            body,
+        )
+
+    def test_output_table_reads_all_columns_from_the_response(self):
+        table = function_body("validatedTableHtml")
+        for col in ("Current observed", "Population point", "Personalized point",
+                    "Δ vs population", "Target-calibrated research interval",
+                    "Artifact nominal target coverage", "Output source"):
+            self.assertIn(col, table)
+        self.assertIn("f.population ? num(f.population.point) : null", table)
+        self.assertIn("f.personalized && f.personalized.source", table)
+
+    def test_construction_walkthrough_is_demoted_below_output(self):
+        body = function_body("renderSnapshot")
+        self.assertLess(body.index("outputSummaryHtml"), body.index("stagesHtml"))
+        self.assertIn('<details class="stages-block"', function_body("stagesHtml"))
+        # the run no longer auto-plays the presentation walk
+        self.assertNotIn("playStages", function_body("runSnapshot"))
+
+
+class ReplayMonitorStageTests(unittest.TestCase):
+    """A monitor-like retrospective timeline, not three slides."""
+
+    def test_fixed_axes_exist_before_play(self):
+        intro = function_body("replayIntroHtml")
+        self.assertIn("replayStageHtml(c)", intro)
+        stage = function_body("replayStageHtml")
+        self.assertIn("replayTraceSvg(c, step)", stage)
+        svg = function_body("replayTraceSvg")
+        # the hour axis and the recorded anchor rules are drawn for any step,
+        # including step -1 before the first observation is revealed
+        self.assertIn("rt-axis", svg)
+        self.assertIn("rt-anchor-line", svg)
+        self.assertIn("observationsFor(c, target, Math.max(-1, step))", svg)
+
+    def test_traces_use_sample_and_hold_not_slanted_interpolation(self):
+        path = function_body("sampleHoldPath")
+        self.assertIn("' H '", path)
+        self.assertIn("' V '", path)
+        svg = function_body("replayTraceSvg")
+        self.assertIn("sampleHoldPath", svg)
+        self.assertNotIn("polyline", svg)
+        self.assertIn("Last observation carried visually — no intermediate measurement", SCRIPT)
+
+    def test_future_values_never_enter_the_svg_before_their_anchor(self):
+        svg = function_body("replayTraceSvg")
+        self.assertIn("if (p.hour > T + 1e-9) return;", svg)
+        self.assertIn("if (pts[i].hour > T + 1e-9) break;", function_body("sampleHoldPath"))
+        held = function_body("heldValueFor")
+        self.assertIn("pts[i].hour <= T + 1e-9", held)
+
+    def test_frame_updates_extend_paths_without_recreating_the_stage(self):
+        upd = function_body("updateReplayDom")
+        self.assertIn("holdPathFor(c, target, S.step, S.replayTime)", upd)
+        self.assertIn("setAttribute('transform'", upd)
+        self.assertNotIn("fetchStep", upd)
+        render = function_body("renderMonitoring")
+        self.assertIn("root.querySelector('.replay-stage')", render)
+
+    def test_play_advances_continuously_and_monotonically(self):
+        play = function_body("startPlay")
+        self.assertIn(
+            "Math.min(end, S.replayTime + delta * SPEEDS[S.speedIndex].rate * end / duration)",
+            play,
+        )
+        self.assertIn("S.replayFurthestTime = Math.max(S.replayFurthestTime, targetTime)", play)
+
+    def test_stage_header_reports_time_rows_forecast_and_speed(self):
+        stage = function_body("replayStageHtml")
+        for marker in ("data-replay-time", "data-replay-last", "data-replay-rows",
+                       "data-replay-forecast", "data-replay-speed",
+                       "Retrospective replay — not live monitoring"):
+            self.assertIn(marker, stage)
 
 
 if __name__ == "__main__":

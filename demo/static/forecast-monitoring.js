@@ -112,6 +112,9 @@
     caseOpened: false,  // the user has opened the retrospective case
     snapshotRan: false, // a real snapshot forecast has completed at least once
     snapshotBusy: false,
+    run: null,          // { phase, events: {prepared|sent|received|validated: ts} } for the snapshot run
+    lastForecastAt: null, // wall clock of the most recent completed forecast response
+    detailsOpen: {},    // persisted open/closed state of <details data-persist> blocks
     stageIndex: -1,     // explanatory presentation pointer, -1 = not started
     stageTimers: [],
     replayStarted: false,   // false = pre-observation state, nothing requested
@@ -354,9 +357,50 @@
     };
   }
 
+  /* One real POST /api/forecast. Every progress marker the page shows for a
+     run corresponds to a code event in this function actually happening —
+     fetch() dispatched, HTTP response arrived, JSON parsed and contract
+     checked. There is no timer-driven pseudo-progress anywhere in this path. */
+  function postForecast(payload, onEvent) {
+    var requestedAt = Date.now();
+    var mark = function (phase) { if (onEvent) onEvent(phase, Date.now()); };
+    mark('sent');
+    return fetch('/api/forecast', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).catch(function (e) {
+      throw new Error('Network request failed: ' + (e && e.message ? e.message : 'fetch error'));
+    }).then(function (r) {
+      mark('received');
+      return r.text().then(function (text) {
+        var body = null;
+        try { body = JSON.parse(text); } catch (e) { body = null; }
+        if (!r.ok) {
+          var msg = (body && (body.error || body.message)) || (r.status + ' ' + r.statusText);
+          var err = new Error(msg);
+          err.status = r.status;
+          err.body = body;
+          throw err;
+        }
+        if (!body || !Array.isArray(body.forecasts)) {
+          throw new Error('Response failed the forecast contract check: no forecasts array.');
+        }
+        mark('validated');
+        var respondedAt = Date.now();
+        return {
+          body: body, rawText: text, httpStatus: r.status,
+          requestedAt: requestedAt, respondedAt: respondedAt,
+          durationMs: respondedAt - requestedAt
+        };
+      });
+    });
+  }
+
   /* opts.force issues a real request even when a session result already exists.
      Every explicit "run" or "re-run" control passes it, so the user always gets
-     the API call the button promised. */
+     the API call the button promised. opts.onEvent receives the real request
+     lifecycle events (prepared / sent / received / validated). */
   async function fetchStep(c, step, opts) {
     var force = !!(opts && opts.force);
     var key = cacheKey(c, step);
@@ -364,27 +408,34 @@
     if (!healthy()) throw new Error('Forecast service unavailable');
     if (!force && S.pending[key]) return S.pending[key];
     var payload = buildPrefixPayload(c, step);
-    var p = getJSON('/api/forecast', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    }).then(function (resp) {
+    if (opts && opts.onEvent) opts.onEvent('prepared', Date.now());
+    S.meta[key] = {
+      source: 'live',
+      requestedAt: Date.now(),
+      prefixRows: payload.trajectory.length,
+      forced: force,
+      requestJson: JSON.stringify(payload, null, 2)
+    };
+    var p = postForecast(payload, opts && opts.onEvent).then(function (result) {
+      var resp = result.body;
       resp._anchor_hour = payload.anchor_hour;
       resp._step = step;
       resp._prefix_rows = payload.trajectory.length;
       S.cache[key] = resp;
-      S.meta[key] = {
-        source: 'live',
-        requestedAt: Date.now(),
-        prefixRows: payload.trajectory.length,
-        forced: force
-      };
+      var m = S.meta[key] || {};
+      m.respondedAt = result.respondedAt;
+      m.durationMs = result.durationMs;
+      m.httpStatus = result.httpStatus;
+      m.rawResponse = result.rawText;
+      S.meta[key] = m;
       S.freshKey = key;
+      S.lastForecastAt = result.respondedAt;
       delete S.pending[key];
       recordSnapshots(c, step, resp);
       return resp;
     }, function (e) {
       delete S.pending[key];
+      delete S.meta[key];
       throw e;
     });
     S.pending[key] = p;
@@ -424,6 +475,9 @@
       bits.push('committed fixture · no model call was made');
     } else {
       bits.push('requested ' + esc(fmtClock(m.requestedAt)));
+      if (m.respondedAt != null) bits.push('response ' + esc(fmtClock(m.respondedAt)));
+      if (m.httpStatus != null) bits.push('HTTP ' + esc(m.httpStatus));
+      if (m.durationMs != null) bits.push('round-trip ' + esc(m.durationMs) + ' ms');
       if (m.prefixRows != null) bits.push(m.prefixRows + ' prefix row' + (m.prefixRows === 1 ? '' : 's') + ' sent');
       if (m.forced) bits.push('forced live request');
       if (src.key === 'session') bits.push('reused from this browser session');
@@ -790,13 +844,14 @@
     s += '<text x="' + (W - PR) + '" y="' + (H - PB + 17) + '" text-anchor="end" font-size="12" ' +
       'font-family="IBM Plex Sans, sans-serif" fill="' + C.ink2 + '">' + esc(xLabel) + '</text>';
 
-    // anchor rule
+    // anchor rule — teal: it marks provenance (the causal boundary), not an
+    // error or a safety state, so it never borrows the oxide error colour
     if (anchor != null) {
       var ax = X(anchor);
       s += '<line x1="' + ax.toFixed(1) + '" y1="' + PT + '" x2="' + ax.toFixed(1) + '" y2="' + (H - PB) +
-        '" stroke="' + C.oxide + '" stroke-width="1" stroke-dasharray="3 3"/>';
+        '" stroke="' + C.teal + '" stroke-width="1" stroke-dasharray="3 3"/>';
       s += '<text x="' + (ax + 5).toFixed(1) + '" y="' + (PT + 9) + '" font-size="11" ' +
-        'font-family="IBM Plex Sans, sans-serif" fill="' + C.oxide + '">anchor</text>';
+        'font-family="IBM Plex Sans, sans-serif" fill="' + C.teal + '">anchor</text>';
     }
     // intervals
     fcs.forEach(function (f) {
@@ -819,9 +874,10 @@
       fcs.forEach(function (f) {
         var x = X(f.due), y = Y(f.personalized), r = 3.6;
         var changed = opt.changed && opt.changed[f.horizon];
+        // a changed forecast cell is still forecast data — filled blue, not oxide
         s += '<polygon points="' + x.toFixed(1) + ',' + (y - r).toFixed(1) + ' ' + (x + r).toFixed(1) + ',' + y.toFixed(1) +
           ' ' + x.toFixed(1) + ',' + (y + r).toFixed(1) + ' ' + (x - r).toFixed(1) + ',' + y.toFixed(1) +
-          '" fill="' + (changed ? C.oxide : C.surface) + '" stroke="' + (changed ? C.oxide : C.blue) +
+          '" fill="' + (changed ? C.blue : C.surface) + '" stroke="' + C.blue +
           '" stroke-width="1.5"/>';
       });
     }
@@ -834,8 +890,9 @@
         s += '<circle cx="' + X(o.hour).toFixed(1) + '" cy="' + Y(o.value).toFixed(1) + '" r="' +
           (isNew ? 4.4 : 3) + '" fill="' + C.ink + '"/>';
         if (isNew) {
+          // newest observation ring — teal (verified data arrival, not an alert)
           s += '<circle cx="' + X(o.hour).toFixed(1) + '" cy="' + Y(o.value).toFixed(1) +
-            '" r="7.5" fill="none" stroke="' + C.oxide + '" stroke-width="1.2"/>';
+            '" r="7.5" fill="none" stroke="' + C.teal + '" stroke-width="1.2"/>';
         }
       });
     }
@@ -921,8 +978,8 @@
       '<span><svg width="20" height="12" aria-hidden="true"><polygon points="10,2 14,6 10,10 6,6" fill="' + C.surface +
         '" stroke="' + C.blue + '" stroke-width="1.5"/></svg> personalized point · validated artifact</span>' +
       (withChange
-        ? '<span><svg width="20" height="12" aria-hidden="true"><polygon points="10,2 14,6 10,10 6,6" fill="' + C.oxide +
-          '" stroke="' + C.oxide + '" stroke-width="1.5"/></svg> changed since the previous replay step</span>'
+        ? '<span><svg width="20" height="12" aria-hidden="true"><polygon points="10,2 14,6 10,10 6,6" fill="' + C.blue +
+          '" stroke="' + C.blue + '" stroke-width="1.5"/></svg> changed since the previous replay step</span>'
         : '') +
       '<span><svg width="16" height="14" aria-hidden="true"><line x1="8" y1="1" x2="8" y2="13" stroke="' + C.ink2 +
         '" stroke-width="1"/><line x1="4" y1="1" x2="12" y2="1" stroke="' + C.ink2 + '" stroke-width="1"/>' +
@@ -997,11 +1054,13 @@
   }
 
   /* Validated cells only: a lower/upper pair exists solely where the serialized
-     patient-specific conformal artifact produced one. */
-  function validatedTableHtml(resp, changed) {
+     patient-specific conformal artifact produced one. Every value in a row is
+     read from the completed response (or, for the observed column, from the
+     recorded prefix the request carried). */
+  function validatedTableHtml(resp, c, changed) {
     var rows = ofTier(resp, 'validated');
-    var shown = S.showAll ? rows : onePerTarget(rows);
-    var body = shown.map(function (f) {
+    var step = resp && resp._step != null ? resp._step : lastStep(c);
+    var body = rows.map(function (f) {
       var unit = unitFor(f.target);
       var lo = num(f.lower), hi = num(f.upper);
       var cov = num(f.interval_target_coverage);
@@ -1009,24 +1068,36 @@
         ? esc(fmtVal(lo, f.target)) + ' – ' + esc(fmtVal(hi, f.target)) + ' ' + esc(unit)
         : '<span class="nullv">null</span>';
       var pers = f.personalized ? num(f.personalized.point) : null;
+      var pop = f.population ? num(f.population.point) : null;
+      var delta = (pers != null && pop != null) ? pers - pop : null;
+      var obs = c ? observationsFor(c, f.target, step) : [];
+      var cur = obs.length ? obs[obs.length - 1] : null;
+      var source = (f.personalized && f.personalized.source) ||
+        (f.population && f.population.source) || null;
       var mark = changed && changed[f.target] && changed[f.target][num(f.horizon_hours)];
       return '<tr' + (mark ? ' class="row-changed"' : '') + '>' +
         '<td class="t" data-k="Target">' + esc(labelFor(f.target)) + '</td>' +
-        '<td class="num" data-k="Horizon">' + esc(f.horizon_hours) + ' h</td>' +
-        '<td class="num" data-k="Point">' + (pers == null ? '<span class="nullv">null</span>' : esc(fmtVal(pers, f.target))) + '</td>' +
-        '<td class="num" data-k="Interval">' + interval + '</td>' +
+        '<td class="num" data-k="Horizon">+' + esc(f.horizon_hours) + ' h</td>' +
+        '<td class="num" data-k="Current observed">' + (cur == null ? '<span class="nullv">—</span>'
+          : esc(fmtVal(cur.value, f.target)) + ' <span class="cell-sub">@ ' + esc(fmtHour(cur.hour)) + '</span>') + '</td>' +
+        '<td class="num" data-k="Population point">' + (pop == null ? '<span class="nullv">null</span>' : esc(fmtVal(pop, f.target))) + '</td>' +
+        '<td class="num" data-k="Personalized point">' + (pers == null ? '<span class="nullv">null</span>' : esc(fmtVal(pers, f.target))) + '</td>' +
+        '<td class="num" data-k="Personalized delta">' + (delta == null ? '<span class="nullv">—</span>' : esc(fmtSigned(delta, f.target))) + '</td>' +
+        '<td class="num" data-k="Research interval">' + interval + '</td>' +
+        '<td data-k="Tier">' + esc(tierWord(f.tier)) + '</td>' +
         '<td data-k="Artifact nominal target coverage">' + (cov == null ? '<span class="nullv">n/a</span>'
           : '<span class="stat ok"><i></i><span class="ratio">' + esc(cov.toFixed(2)) + '</span></span>') + '</td>' +
+        '<td class="num" data-k="Output source"><span class="cell-sub">' + (source == null ? '—' : esc(source)) + '</span></td>' +
         '</tr>';
     }).join('');
     return '<div class="section-head"><h2 class="h-sec">Validated forecast</h2>' +
-        '<span class="meta">' + rows.length + ' targets · nominal target coverage recorded per artifact cell</span>' +
-        (rows.length > 4 ? '<button class="disc spacer" type="button" data-fm="toggle-all">' +
-          (S.showAll ? 'Show fewer ⌃' : 'Show all ' + rows.length + ' ⌄') + '</button>' : '') +
+        '<span class="meta">' + rows.length + ' target × horizon cells · nominal target coverage recorded per artifact cell</span>' +
       '</div>' +
-      '<div class="scroll-x"><table class="dtable"><thead><tr><th>Target</th><th>Horizon</th><th>Point</th>' +
-      '<th>Target-calibrated research interval</th><th>Artifact nominal target coverage</th></tr></thead><tbody>' +
-      (body || '<tr><td colspan="5" class="why">No validated cell in this response.</td></tr>') +
+      '<div class="scroll-x"><table class="dtable"><thead><tr><th>Target</th><th>Horizon</th>' +
+      '<th>Current observed</th><th>Population point</th><th>Personalized point</th><th>Δ vs population</th>' +
+      '<th>Target-calibrated research interval</th><th>Tier</th><th>Artifact nominal target coverage</th>' +
+      '<th>Output source</th></tr></thead><tbody>' +
+      (body || '<tr><td colspan="10" class="why">No validated cell in this response.</td></tr>') +
       '</tbody></table></div>' +
       '<p class="note" style="margin-top:12px">The interval comes from the serialized patient-specific conformal ' +
       'artifact. <span class="mono">interval_target_coverage</span> is that artifact\'s nominal target coverage, ' +
@@ -1154,14 +1225,20 @@
     return out;
   }
 
+  /* Demoted to a supporting explanation below the actual output. It renders as
+     a static, complete list; the ordered walk only plays when the reader asks
+     for it, and it never gates or precedes the real result. */
   function stagesHtml(resp) {
     var stages = stagesFor(resp);
     if (!stages.length) return '';
     var done = S.stageIndex < 0 || S.stageIndex >= stages.length - 1;
     var running = S.stageIndex >= 0 && !done;
-    return '<div class="stages-block">' +
-      '<div class="section-head"><h2 class="h-sec">How this forecast was constructed</h2>' +
-        '<span class="meta">describes the returned document · the backend answered in one request</span>' +
+    return '<details class="stages-block" data-persist="construct"' +
+      ((running || S.detailsOpen.construct) ? ' open' : '') + '>' +
+      '<summary class="stages-summary">How this forecast was constructed' +
+        '<span class="meta"> · describes the returned document · the backend answered in one request</span></summary>' +
+      '<div class="section-head" style="margin-top:12px"><span class="meta">an explanatory reading of the response ' +
+        'above — not a record of backend steps</span>' +
         '<span class="spacer">' +
           (running
             ? '<button class="btn sm" type="button" data-fm="skip-anim">Skip animation</button>'
@@ -1175,7 +1252,7 @@
           '<span class="d">' + esc(s.d) + '</span></span></li>';
       }).join('') + '</ol>' +
       '<p class="note">The model is fixed. Forecast outputs update as additional causally available observations are ' +
-      'added to the trajectory prefix.</p></div>';
+      'added to the trajectory prefix.</p></details>';
   }
 
   function clearStages() {
@@ -1436,11 +1513,6 @@
     return found;
   }
 
-  function replayPercent(c, replayTime) {
-    var end = hourAt(c, lastStep(c)) || 1;
-    return Math.max(0, Math.min(100, (replayTime / end) * 100));
-  }
-
   /* Withheld observations appear as hollow ticks. Their timestamps are public
      replay metadata; their measurements and forecast values do not enter the
      DOM until the cursor reaches the corresponding anchor. */
@@ -1497,45 +1569,123 @@
       '<div class="transport">' + transport + '</div></div>';
   }
 
+  /* ── continuous monitor stage ─────────────────────────────────────────
+     Fixed geometry: the axes, grid, anchor rules and series rows are laid out
+     once, identically before Play and at every later moment, so nothing about
+     the coordinate frame ever moves or is re-created per step.
+
+     Sample-and-hold: between one recorded anchor and the next, each trace
+     holds the last observed value and extends to the right with the cursor.
+     There is no slanted segment joining two anchors, because that would draw
+     values no one measured. A future observation appears in the SVG only once
+     the cursor reaches its recorded anchor; before that its value exists
+     nowhere in the DOM. */
+  var RX0 = 92, RX1 = 880;
+
+  function replayEndHour(c) { return hourAt(c, lastStep(c)) || 1; }
+  function replayXPos(c, h) {
+    return RX0 + (Math.max(0, Math.min(h, replayEndHour(c))) / replayEndHour(c)) * (RX1 - RX0);
+  }
+  function replayRowTop(row) { return 26 + row * 88; }
+  function replayYFor(target, row) {
+    var domain = REPLAY_DOMAINS[target];
+    var yBottom = replayRowTop(row) + 56;
+    return function (v) {
+      var ratio = Math.max(0, Math.min(1, (v - domain[0]) / (domain[1] - domain[0])));
+      return yBottom - 8 - ratio * 40;
+    };
+  }
+
+  /* Path for one series: M at the first revealed observation, H segments that
+     hold each value, V step transitions exactly at the recorded anchors. Only
+     observations already revealed (index ≤ step) AND already reached by the
+     cursor (hour ≤ T) contribute. */
+  function sampleHoldPath(pts, T, xf, yf) {
+    if (!pts.length || T + 1e-9 < pts[0].hour) return '';
+    var d = 'M ' + xf(pts[0].hour).toFixed(1) + ' ' + yf(pts[0].value).toFixed(1);
+    for (var i = 0; i < pts.length; i++) {
+      if (pts[i].hour > T + 1e-9) break;
+      if (i > 0) d += ' V ' + yf(pts[i].value).toFixed(1);
+      var until = T;
+      if (i + 1 < pts.length && pts[i + 1].hour <= T + 1e-9) until = pts[i + 1].hour;
+      d += ' H ' + xf(until).toFixed(1);
+    }
+    return d;
+  }
+
+  function holdPathFor(c, target, step, T) {
+    var row = PRIMARY_SERIES.indexOf(target);
+    if (row < 0) return '';
+    var pts = observationsFor(c, target, Math.max(-1, step));
+    return sampleHoldPath(pts, T, function (h) { return replayXPos(c, h); }, replayYFor(target, row));
+  }
+
+  function heldValueFor(c, target, step, T) {
+    var pts = observationsFor(c, target, Math.max(-1, step));
+    var held = null;
+    for (var i = 0; i < pts.length; i++) {
+      if (pts[i].hour <= T + 1e-9) held = pts[i].value;
+    }
+    return held;
+  }
+
   function replayTraceSvg(c, step) {
-    var end = hourAt(c, lastStep(c)) || 1;
-    var x = function (h) { return 92 + (Math.max(0, h) / end) * 858; };
+    var end = replayEndHour(c);
+    var T = S.replayStarted ? S.replayTime : 0;
+    var x = function (h) { return replayXPos(c, h); };
     var rows = '';
     PRIMARY_SERIES.forEach(function (target, row) {
-      var top = 28 + row * 74;
-      var domain = REPLAY_DOMAINS[target];
-      var points = [];
-      for (var i = 0; i <= step; i++) {
-        var obs = trajectoryOf(c)[i] || {};
-        var value = num(obs[target]);
-        if (value == null) continue;
-        var ratio = Math.max(0, Math.min(1, (value - domain[0]) / (domain[1] - domain[0])));
-        points.push({ x: x(hourAt(c, i)), y: top + 43 - ratio * 34, value: value, index: i });
-      }
-      rows += '<text class="rt-label" x="4" y="' + (top + 17) + '">' + esc(labelFor(target)) + '</text>' +
-        '<text class="rt-unit" x="4" y="' + (top + 34) + '">' + esc(unitFor(target)) + '</text>' +
-        '<line class="rt-grid" x1="92" y1="' + (top + 43) + '" x2="950" y2="' + (top + 43) + '"></line>';
-      if (points.length > 1) {
-        rows += '<polyline class="rt-path" points="' + points.map(function (p) {
-          return p.x.toFixed(1) + ',' + p.y.toFixed(1);
-        }).join(' ') + '"></polyline>';
-      }
-      points.forEach(function (p) {
-        var current = p.index === step ? ' current' : '';
-        rows += '<g class="rt-point' + current + '" transform="translate(' + p.x.toFixed(1) + ' ' + p.y.toFixed(1) + ')">' +
+      var top = replayRowTop(row);
+      var yBottom = top + 56;
+      var yf = replayYFor(target, row);
+      var pts = observationsFor(c, target, Math.max(-1, step));
+      rows += '<text class="rt-label" x="4" y="' + (top + 16) + '">' + esc(labelFor(target)) + '</text>' +
+        '<text class="rt-unit" x="4" y="' + (top + 33) + '">' + esc(unitFor(target)) + '</text>' +
+        '<line class="rt-grid" x1="' + RX0 + '" y1="' + yBottom + '" x2="' + RX1 + '" y2="' + yBottom + '"></line>';
+      rows += '<path class="rt-hold" data-hold="' + esc(target) + '" d="' +
+        sampleHoldPath(pts, T, x, yf) + '"></path>';
+      pts.forEach(function (p) {
+        if (p.hour > T + 1e-9) return;
+        var isCurrent = step >= 0 && isNum(hourAt(c, step)) && Math.abs(p.hour - hourAt(c, step)) < 1e-9;
+        // near the right edge the label flips to the left of the dot so it
+        // cannot collide with the held-value readout column
+        var nearEdge = p.hour > end * 0.88;
+        rows += '<g class="rt-point' + (isCurrent ? ' current' : '') + '" transform="translate(' +
+          x(p.hour).toFixed(1) + ' ' + yf(p.value).toFixed(1) + ')">' +
           '<circle class="pulse" r="10"></circle><circle r="4"></circle>' +
-          '<text x="8" y="-7">' + esc(fmtVal(p.value, target)) + '</text></g>';
+          '<text x="' + (nearEdge ? -8 : 8) + '" y="-7"' + (nearEdge ? ' text-anchor="end"' : '') + '>' +
+          esc(fmtVal(p.value, target)) + '</text></g>';
       });
+      var held = heldValueFor(c, target, step, T);
+      rows += '<text class="rt-readout" data-hold-value="' + esc(target) + '" x="' + (RX1 + 14) + '" y="' +
+        (top + 34) + '">' + (held == null ? '—' : esc(fmtVal(held, target))) + '</text>';
     });
-    var ticks = '';
-    for (var i = 0; i <= lastStep(c); i++) {
-      var tickX = x(hourAt(c, i));
-      ticks += '<line class="rt-anchor-line" x1="' + tickX.toFixed(1) + '" y1="12" x2="' +
-        tickX.toFixed(1) + '" y2="326"></line><text class="rt-hour" x="' + tickX.toFixed(1) +
-        '" y="347" text-anchor="middle">' + esc(fmtHourExact(hourAt(c, i))) + '</text>';
+    // fixed hour axis: present before Play, never re-scaled
+    var axis = '<line class="rt-axis" x1="' + RX0 + '" y1="362" x2="' + RX1 + '" y2="362"></line>';
+    for (var t = 0; t <= Math.floor(end); t += 2) {
+      var tx = x(t);
+      axis += '<line class="rt-tick" x1="' + tx.toFixed(1) + '" y1="362" x2="' + tx.toFixed(1) + '" y2="367"></line>' +
+        '<text class="rt-hour" x="' + tx.toFixed(1) + '" y="381" text-anchor="middle">' + t + '</text>';
     }
-    return '<svg viewBox="0 0 980 360" role="img" aria-label="Recorded observation anchors and visual interpolation; no intermediate measurements">' +
-      ticks + rows + '<line class="rt-cursor" data-replay-cursor x1="92" y1="8" x2="92" y2="326"></line></svg>';
+    axis += '<text class="rt-hour" x="' + (RX1 + 14) + '" y="381">h</text>';
+    // the three recorded anchor positions are public replay metadata; the
+    // measurement values at a withheld anchor are not drawn anywhere
+    var anchors = '';
+    for (var i = 0; i <= lastStep(c); i++) {
+      var ax = x(hourAt(c, i));
+      var revealed = step >= i;
+      anchors += '<line class="rt-anchor-line' + (revealed ? ' revealed' : '') + '" x1="' + ax.toFixed(1) +
+        '" y1="12" x2="' + ax.toFixed(1) + '" y2="362"></line>' +
+        '<text class="rt-anchor-hour' + (revealed ? ' revealed' : '') + '" x="' + ax.toFixed(1) +
+        '" y="399" text-anchor="middle">' + esc(fmtHourExact(hourAt(c, i))) + '</text>';
+    }
+    var cx = x(Math.max(0, Math.min(T, end)));
+    var cursor = '<g class="rt-cursor-g" data-replay-cursor transform="translate(' + cx.toFixed(1) + ' 0)">' +
+      '<rect class="rt-trail" x="-26" y="12" width="26" height="350"></rect>' +
+      '<line class="rt-cursor" x1="0" y1="12" x2="0" y2="362"></line></g>';
+    return '<svg viewBox="0 0 980 408" role="img" aria-label="Recorded observation anchors with ' +
+      'sample-and-hold traces; the last observed value is carried visually and no intermediate measurement exists">' +
+      axis + anchors + rows + cursor + '</svg>';
   }
 
   function replayRowsHtml(c) {
@@ -1563,24 +1713,50 @@
       var resp = responseFor(c, i);
       var pending = isPending(c, i);
       var count = resp ? ofTier(resp, 'validated').length : 0;
+      var m = S.meta[cacheKey(c, i)] || {};
+      var detail;
+      if (resp) {
+        detail = count + ' validated artifacts returned · ' + esc((resultSource(c, i) || {}).label || 'result');
+        if (m.httpStatus != null) detail += ' · HTTP ' + esc(m.httpStatus);
+        if (m.durationMs != null) detail += ' · ' + esc(m.durationMs) + ' ms';
+        if (m.respondedAt != null) detail += ' · ' + esc(fmtClock(m.respondedAt));
+      } else {
+        detail = (S.stepError && i === S.step ? esc(S.stepError) : 'forecast response pending');
+      }
       out += '<li><span>' + esc(fmtHourExact(hourAt(c, i))) + '</span><b>Observation ' + (i + 1) +
         ' revealed · ' + (i + 1) + '-row prefix ' + (pending ? 'sending…' : 'sent') + '</b><small>' +
-        (resp ? count + ' validated artifacts returned · ' + esc((resultSource(c, i) || {}).label || 'result') :
-          (S.stepError && i === S.step ? esc(S.stepError) : 'forecast response pending')) + '</small></li>';
+        detail + '</small></li>';
     }
     return out;
   }
 
+  /* One stage for every moment of the replay, including before Play: the same
+     coordinate frame, grid and anchor rules are on screen from the start, so
+     Play begins motion — it never swaps the page. */
   function replayStageHtml(c) {
-    var end = hourAt(c, lastStep(c)) || 1;
+    var end = replayEndHour(c);
+    var started = S.replayStarted;
+    var step = started ? S.step : -1;
+    var speed = SPEEDS[S.speedIndex] || SPEEDS[1];
     return '<div class="shell replay-shell"><section class="replay-stage" aria-label="Retrospective replay timeline">' +
-      '<div class="replay-stage-head"><div><span class="eyebrow">Current replay time</span>' +
-        '<strong class="replay-clock" data-replay-time>0.00 h</strong></div>' +
-        '<dl><div><dt>Last observation</dt><dd data-replay-last>none</dd></div>' +
-        '<div><dt>Rows sent</dt><dd data-replay-rows>0</dd></div></dl></div>' +
-      '<div class="replay-traces" data-replay-traces data-rendered-step="-1">' + replayTraceSvg(c, -1) + '</div>' +
-      '<div class="interpolation-note"><b>Retrospective replay — not live monitoring.</b> Lines between recorded ' +
-        'anchors are visual interpolation only; there is no intermediate measurement or model inference.</div>' +
+      '<div class="replay-stage-head">' +
+        '<div><span class="eyebrow">Replay time</span>' +
+          '<strong class="replay-clock" data-replay-time>' + (started ? S.replayTime.toFixed(2) : '0.00') + ' h</strong>' +
+          '<span class="clock-range">of ' + esc(fmtHourExact(end)) + ' recorded</span></div>' +
+        '<dl><div><dt>Last real observation</dt><dd data-replay-last>' +
+          (step < 0 ? 'none' : esc(fmtHourExact(hourAt(c, step)))) + '</dd></div>' +
+        '<div><dt>Rows available to model</dt><dd data-replay-rows>' + Math.max(0, step + 1) + '</dd></div>' +
+        '<div><dt>Last forecast update</dt><dd data-replay-forecast>' +
+          (S.lastForecastAt ? esc(fmtClock(S.lastForecastAt)) : 'none') + '</dd></div>' +
+        '<div><dt>Playback speed</dt><dd data-replay-speed>' + esc(speed.label) + '</dd></div></dl>' +
+        '<span class="prov-chip">Retrospective replay — not live monitoring</span></div>' +
+      '<div class="replay-traces" data-replay-traces data-rendered-step="' + step + '">' + replayTraceSvg(c, step) + '</div>' +
+      '<div class="hold-mark"><span class="hm-line" aria-hidden="true"></span>' +
+        'Last observation carried visually — no intermediate measurement</div>' +
+      '<div class="interpolation-note"><b>Retrospective replay — not live monitoring.</b> Between recorded anchors ' +
+        'each trace holds the last observed value (sample-and-hold). The flat segment is visual interpolation only; ' +
+        'there is no intermediate measurement or model inference between anchors, and an observation value appears ' +
+        'only when the cursor reaches its recorded anchor.</div>' +
       '<div class="input-provenance-note"><b>Input provenance:</b> The public demo rows do not provide ' +
         '<span class="mono">hist_fluids</span>, <span class="mono">hist_vasopressor</span>, ' +
         '<span class="mono">hist_diuretics</span>, <span class="mono">hist_renal_replacement</span>, or ' +
@@ -1588,11 +1764,13 @@
         'fields; zero is missing-input handling, not evidence that no treatment occurred.</div>' +
       '<label class="scrubber-label" for="replayScrubber"><span>Review elapsed replay time</span>' +
         '<span>future remains withheld</span></label>' +
-      '<input id="replayScrubber" class="replay-scrubber" data-fm="scrub" type="range" min="0" max="0" ' +
-        'step="any" value="0" aria-label="Seek within elapsed retrospective replay time">' +
-      '<div class="replay-stage-grid"><div><h3 class="h-sec">Observation arrivals</h3>' +
+      '<input id="replayScrubber" class="replay-scrubber" data-fm="scrub" type="range" min="0" max="' +
+        (started ? Math.max(0.001, S.replayFurthestTime) : 0.001) + '" step="any" value="' +
+        (started ? Math.min(S.replayTime, S.replayFurthestTime) : 0) +
+        '" aria-label="Seek within elapsed retrospective replay time"' + (started ? '' : ' disabled') + '>' +
+      '<div class="replay-stage-grid"><div><h3 class="h-sec">Observation arrivals · recorded input</h3>' +
         '<ol class="observation-arrivals" data-replay-observations>' + replayRowsHtml(c) + '</ol></div>' +
-        '<div><h3 class="h-sec">Replay event log</h3><ol class="replay-events" data-replay-events>' +
+        '<div><h3 class="h-sec">Replay event log · real requests</h3><ol class="replay-events" data-replay-events>' +
         replayEventsHtml(c) + '</ol></div></div>' +
       '<span class="sr-only">Replay ends at ' + esc(fmtHourExact(end)) + '.</span>' +
       '</section><div data-replay-results></div></div>';
@@ -1651,32 +1829,195 @@
   }
 
   // ── Snapshot subview ───────────────────────────────────────────────────
-  function snapshotIntroHtml(c) {
-    var total = lastStep(c) + 1;
+  /* Every fact in the model-input manifest is derived from the same
+     buildPrefixPayload() call that produces the real request body, so the page
+     cannot describe one payload and send another. */
+  var HIST_FIELDS = ['hist_fluids', 'hist_vasopressor', 'hist_diuretics',
+    'hist_renal_replacement', 'hist_nephrotoxin'];
+
+  function snapshotPayload(c) {
+    try { return buildPrefixPayload(c, lastStep(c)); } catch (e) { return null; }
+  }
+
+  function lastObservedRows(c, uptoStep) {
+    var traj = trajectoryOf(c).slice(0, uptoStep + 1);
+    return Object.keys(LABELS).map(function (t) {
+      var lastVal = null, lastHour = null;
+      for (var i = 0; i < traj.length; i++) {
+        var v = num(traj[i][t]);
+        if (v != null) { lastVal = v; lastHour = num(traj[i].hours_since_onset); }
+      }
+      return { target: t, value: lastVal, hour: lastHour };
+    });
+  }
+
+  function requestPayloadDetailsHtml(payloadJson) {
+    if (!payloadJson) return '';
+    return '<details class="payload" data-persist="req-payload"' + (S.detailsOpen['req-payload'] ? ' open' : '') +
+      '><summary>View exact request payload</summary>' +
+      '<pre class="payload-pre">' + esc(payloadJson) + '</pre>' +
+      '<p class="note">This JSON is the request body POSTed to <span class="mono">/api/forecast</span> ' +
+      '(pretty-printed). It is produced by the same code path that sends the request — there is no separate ' +
+      'display version.</p></details>';
+  }
+
+  function responsePayloadDetailsHtml(c, step) {
+    var m = S.meta[cacheKey(c, step)] || {};
+    if (!m.rawResponse) return '';
+    var pretty = m.rawResponse;
+    try { pretty = JSON.stringify(JSON.parse(m.rawResponse), null, 2); } catch (e) { /* keep raw */ }
+    return '<details class="payload" data-persist="resp-payload"' + (S.detailsOpen['resp-payload'] ? ' open' : '') +
+      '><summary>View exact response payload</summary>' +
+      '<pre class="payload-pre">' + esc(pretty) + '</pre>' +
+      '<p class="note">Body of the HTTP response received at ' + esc(fmtClock(m.respondedAt)) +
+      ' for this run (pretty-printed). Nothing is substituted or edited.</p></details>';
+  }
+
+  function modelInputHtml(c) {
+    var payload = snapshotPayload(c);
+    var total = payload ? payload.trajectory.length : lastStep(c) + 1;
     var first = hourAt(c, 0), last = hourAt(c, lastStep(c));
-    return '<div class="shell"><div class="section" style="padding-top:28px">' +
-      '<div class="section-head"><h1 class="display">Forecast snapshot</h1>' +
-        '<span class="sub">no forecast has been requested yet</span></div>' +
-      '<div class="prerun">' +
-        '<div class="prerun-main">' +
-          '<p class="note">This case carries a recorded retrospective trajectory of <b>' + total +
-          ' observations</b> between ' + esc(fmtHourExact(first)) + ' and ' + esc(fmtHourExact(last)) +
-          ' after ICU admission. A snapshot posts the full causal prefix — all ' + total +
-          ' rows, with <span class="mono">anchor_hour</span> set to ' + esc(fmtHourExact(last)) +
-          ' — and renders exactly what the model returns.</p>' +
-          '<p class="note">Nothing has been computed. No forecast value exists on this page until you run one.</p>' +
-        '</div>' +
-        '<dl class="prerun-facts">' +
-          '<dt>Final anchor</dt><dd class="mono">' + esc(fmtHourExact(last)) + '</dd>' +
-          '<dt>Prefix rows to send</dt><dd class="mono">' + total + '</dd>' +
+    var anchor = payload ? payload.anchor_hour : last;
+    var rows = lastObservedRows(c, lastStep(c));
+    var observedRows = rows.filter(function (r) { return r.value != null; });
+    var missingRows = rows.filter(function (r) { return r.value == null; });
+    var cells = (S.validation && S.validation.cells) || [];
+    var varRows = observedRows.map(function (r) {
+      return '<tr><td class="t" data-k="Variable">' + esc(labelFor(r.target)) + '</td>' +
+        '<td class="num" data-k="Last observed value">' + esc(fmtVal(r.value, r.target)) + '</td>' +
+        '<td class="num" data-k="Unit">' + esc(unitFor(r.target)) + '</td>' +
+        '<td class="num" data-k="Observed at">' + esc(fmtHourExact(r.hour)) + '</td></tr>';
+    }).join('');
+    var missingList = missingRows.length
+      ? '<p class="note"><b>Missing / unavailable in the recorded rows:</b> ' +
+        missingRows.map(function (r) { return esc(labelFor(r.target)); }).join(', ') +
+        ' — absent values are sent as absent. Nothing is imputed by this page.</p>'
+      : '';
+    var cellChips = cells.length
+      ? cells.map(function (x) { return '<span class="cell-chip">' + esc(x.cell) + '</span>'; }).join('')
+      : '<span class="meta">validation summary unavailable — the serialized artifact cell list cannot be shown</span>';
+    return '<div class="input-block">' +
+      '<div class="section-head"><h2 class="h-sec">Model input — what will be sent</h2>' +
+        '<span class="meta">read directly from the recorded case; identical to the request body</span></div>' +
+      '<div class="input-grid">' +
+        '<dl class="input-facts">' +
+          '<dt>Recorded patient alias</dt><dd>' + esc(caseAlias(c)) + '</dd>' +
+          '<dt>Snapshot anchor time</dt><dd class="mono">' + esc(fmtHourExact(anchor)) + ' after ICU admission</dd>' +
+          '<dt>Trajectory rows to send</dt><dd class="mono">' + total + '</dd>' +
+          '<dt>Observation time range</dt><dd class="mono">' + esc(fmtHourExact(first)) + ' – ' + esc(fmtHourExact(last)) + '</dd>' +
+          '<dt>Endpoint</dt><dd class="mono">POST /api/forecast</dd>' +
           '<dt>Model version</dt><dd class="mono">' + esc(modelVersion()) + '</dd>' +
           '<dt>Model health</dt><dd>' + healthStatHtml() + '</dd>' +
         '</dl>' +
+        '<div class="input-vars">' +
+          '<div class="input-vars-h">Last observed values in the prefix</div>' +
+          '<div class="scroll-x"><table class="dtable"><thead><tr><th>Variable</th><th>Last observed</th>' +
+          '<th>Unit</th><th>At</th></tr></thead><tbody>' + varRows + '</tbody></table></div>' +
+          missingList +
+        '</div>' +
       '</div>' +
-      '<div class="actions-row">' +
-        '<button class="btn primary" type="button" data-fm="run-snapshot"' + (healthy() ? '' : ' disabled') +
-          '>Run live forecast</button>' +
+      '<p class="note" style="margin-top:14px"><b>Treatment-history inputs:</b> the public demo rows do not provide ' +
+      '<span class="mono">hist_fluids</span>, <span class="mono">hist_vasopressor</span>, ' +
+      '<span class="mono">hist_diuretics</span>, <span class="mono">hist_renal_replacement</span> or ' +
+      '<span class="mono">hist_nephrotoxin</span>. The current runtime contract supplies zero for these five missing ' +
+      'model fields; zero is missing-input handling, not evidence that no treatment occurred.</p>' +
+      '<div class="input-cells"><div class="input-vars-h">Serialized artifact cells expected to run · ' +
+        (cells.length || '12') + ' target × horizon cells</div>' + cellChips + '</div>' +
+      '<p class="note" style="margin-top:12px">Only observations at or before the anchor are sent. The request ' +
+      'carries the causal prefix and nothing after ' + esc(fmtHourExact(anchor)) + '; a client-side guard refuses ' +
+      'to send any later row.</p>' +
+      requestPayloadDetailsHtml(payload ? JSON.stringify(payload, null, 2) : null) +
+      '</div>';
+  }
+
+  /* Execution states are driven by real request lifecycle events recorded in
+     S.run.events — never by timers. A state lights up when its event fired. */
+  var RUN_STATES = [
+    { key: 'prepared', t: 'Request prepared', d: 'trajectory prefix serialized into the request body' },
+    { key: 'sent', t: 'Request sent', d: 'POST /api/forecast dispatched from this browser' },
+    { key: 'received', t: 'Response received', d: 'HTTP response arrived' },
+    { key: 'validated', t: 'Response validated and rendered', d: 'JSON parsed and contract-checked' }
+  ];
+
+  function runStatesHtml() {
+    if (!S.run) return '';
+    var evs = S.run.events || {};
+    var failed = S.run.phase === 'error';
+    return '<ol class="run-states">' + RUN_STATES.map(function (st, i) {
+      var at = evs[st.key];
+      var prevDone = i === 0 || evs[RUN_STATES[i - 1].key] != null;
+      var current = at == null && prevDone && !failed && S.run.phase !== 'done';
+      var cls = at != null ? 'done' : (current ? 'current' : 'idle');
+      return '<li class="run-state ' + cls + '">' +
+        '<span class="m">' + (at != null ? '<i class="sq"></i>' : (current ? '<span class="spin"></span>' : '<i class="sq idle"></i>')) + '</span>' +
+        '<span class="b"><span class="t">' + esc(st.t) + '</span><span class="d">' + esc(st.d) + '</span></span>' +
+        '<span class="ts">' + (at != null ? esc(fmtClock(at)) : '') + '</span></li>';
+    }).join('') + '</ol>';
+  }
+
+  function execRecordHtml(c, step) {
+    var m = S.meta[cacheKey(c, step)] || {};
+    var src = resultSource(c, step);
+    return '<div class="exec-block">' +
+      '<div class="section-head"><h2 class="h-sec">Model execution</h2>' +
+        '<span class="meta">every state below was driven by a real network event in this browser</span></div>' +
+      '<div class="exec-chip">Model executed now on recorded data — retrospective input, not live patient monitoring.</div>' +
+      (S.run ? runStatesHtml() : '') +
+      sourceLineHtml(c, step) +
+      '<div class="actions-row" style="margin-top:14px">' +
+        '<button class="btn" type="button" data-fm="rerun-snapshot"' + (healthy() ? '' : ' disabled') +
+          '>Re-run model on this recorded snapshot</button>' +
         '<button class="btn" type="button" data-fm="sub" data-sub="replay">Open retrospective replay</button>' +
+      '</div>' +
+      (src && src.key === 'session'
+        ? '<p class="note" style="margin-top:10px">This result was computed earlier in this browser session at ' +
+          esc(fmtClock(m.requestedAt)) + '. Re-run to execute the model again now.</p>'
+        : '') +
+      '</div>';
+  }
+
+  function boundaryWordsFor(resp) {
+    var b = (resp && resp.safety_boundary) || {};
+    var denied = [];
+    if (b.diagnostic_claim_allowed === false) denied.push('not diagnostic');
+    if (b.treatment_recommendation_allowed === false) denied.push('no treatment recommendation');
+    if (b.causal_claim_allowed === false) denied.push('no causal claim');
+    if (b.automated_prescribing_allowed === false) denied.push('no automated prescribing');
+    return denied.length ? denied.join(' · ') : 'research only';
+  }
+
+  function outputSummaryHtml(c, step, resp) {
+    var n = tierCounts(resp);
+    var m = S.meta[cacheKey(c, step)] || {};
+    var cells = (S.validation && S.validation.cells) || [];
+    var src = resultSource(c, step);
+    return '<div class="output-summary">' +
+      '<div class="os"><div class="k">Artifact cells requested</div><div class="v mono">' + (cells.length || 12) + ' target × horizon</div></div>' +
+      '<div class="os"><div class="k">Returned</div><div class="v mono">' + n.validated + ' validated · ' +
+        n.illustrative + ' illustrative · ' + n.unsupported + ' unsupported</div></div>' +
+      '<div class="os"><div class="k">Response source</div><div class="v">' + (src ? '<span class="stat ' + src.cls + '"><i></i>' + esc(src.label) + '</span>' : '—') + '</div></div>' +
+      '<div class="os"><div class="k">Measured round-trip</div><div class="v mono">' +
+        (m.durationMs != null ? esc(m.durationMs) + ' ms · HTTP ' + esc(m.httpStatus) : 'not measured this session') + '</div></div>' +
+      '<div class="os"><div class="k">Safety boundary</div><div class="v">' + esc(boundaryWordsFor(resp)) + '</div></div>' +
+      '</div>';
+  }
+
+  function snapshotIntroHtml(c) {
+    return '<div class="shell"><div class="section" style="padding-top:28px">' +
+      '<div class="section-head"><h1 class="display">Forecast snapshot</h1>' +
+        '<span class="sub">no forecast has been requested yet · the model input below is ready to send</span></div>' +
+      '<p class="note" style="max-width:760px">A snapshot posts the full recorded causal prefix to ' +
+      '<span class="mono">/api/forecast</span> and renders exactly what the model returns. Nothing has been ' +
+      'computed. No forecast value exists on this page until you run one.</p>' +
+      modelInputHtml(c) +
+      '<div class="run-block">' +
+        '<div class="actions-row" style="margin-top:0">' +
+          '<button class="btn primary" type="button" data-fm="run-snapshot"' + (healthy() ? '' : ' disabled') +
+            '>Run model on this recorded snapshot</button>' +
+          '<button class="btn" type="button" data-fm="sub" data-sub="replay">Open retrospective replay</button>' +
+        '</div>' +
+        '<p class="note run-caption">This executes the model now using retrospective recorded data. ' +
+        'It is not live patient monitoring.</p>' +
       '</div>' +
       (healthy() ? '' : '<p class="note" style="margin-top:12px">Model health has not passed, so no request is ' +
         'issued and no value is substituted.</p>') +
@@ -1697,8 +2038,16 @@
     if (!healthy() && !S.fixture) { root.innerHTML = serviceUnavailableHtml(); return; }
     var resp = responseFor(c, step);
     if (S.snapshotBusy && !resp) {
-      root.innerHTML = '<div class="shell"><div class="loading"><span class="spin"></span> ' +
-        'Posting the full ' + (step + 1) + '-row causal prefix to the forecast model…</div></div>';
+      // The run states below advance only when the corresponding request event
+      // fires. The model input stays on screen while the request is in flight.
+      root.innerHTML = '<div class="shell"><div class="section" style="padding-top:28px">' +
+        '<div class="section-head"><h1 class="display">Forecast snapshot</h1>' +
+          '<span class="sub">executing the model now on recorded data — not live patient monitoring</span></div>' +
+        '<div class="exec-block">' +
+          '<div class="section-head"><h2 class="h-sec">Model execution</h2>' +
+          '<span class="meta">posting the full ' + (step + 1) + '-row causal prefix to /api/forecast</span></div>' +
+          runStatesHtml() + '</div>' +
+        modelInputHtml(c) + '</div></div>';
       return;
     }
     if (S.stepError && !resp) { root.innerHTML = errorBlockHtml('Forecast request failed', S.stepError); return; }
@@ -1713,33 +2062,49 @@
         '<p class="note" style="margin-top:16px">An illustrative point has no interval and no coverage record. ' +
         'It is shown for shape only and is never charted with a band.</p></div>';
     } else {
-      body = '<div class="split"><div class="main">' + validatedTableHtml(resp) + '</div>' +
+      body = '<div class="split"><div class="main">' + validatedTableHtml(resp, c) + '</div>' +
         '<aside class="side">' + illustrativeHtml(resp) + unsupportedRowHtml(resp) + '</aside></div>';
     }
+    // Output first, then charts; input recap and execution record stay visible
+    // so the reading order is observed input → model execution → forecast output.
     root.innerHTML = cachedBannerHtml() +
       '<div class="shell"><div class="section" style="padding-top:28px">' +
         '<div class="section-head"><h1 class="display">Forecast snapshot</h1>' +
-          '<span class="sub">' + charted.length + ' targets charted · anchor ' +
+          '<span class="sub">observed input → model execution → forecast output · anchor ' +
           esc(fmtHourExact(num(resp._anchor_hour))) + '</span>' +
           '<span class="spacer">' + tierBarHtml(resp) + '</span></div>' +
-        sourceLineHtml(c, step) +
-        '<div class="actions-row" style="margin-bottom:20px">' +
-          '<button class="btn" type="button" data-fm="rerun-snapshot"' + (healthy() ? '' : ' disabled') +
-            '>Re-run live forecast</button>' +
-          '<button class="btn" type="button" data-fm="sub" data-sub="replay">Open retrospective replay</button>' +
-        '</div>' +
-        stagesHtml(resp) +
-        '<div class="charts' + (S.animateData ? ' fx-in' : '') + '">' + (function () {
+        execRecordHtml(c, step) +
+        '<div class="section-head" style="margin-top:26px"><h2 class="h-sec">Model output</h2>' +
+          '<span class="meta">' + charted.length + ' targets charted · every value below is read from the ' +
+          'completed response</span></div>' +
+        outputSummaryHtml(c, step, resp) +
+      '</div>' + body + '<div class="section">' +
+        responsePayloadDetailsHtml(c, step) +
+        '<div class="charts' + (S.animateData ? ' fx-in' : '') + '" style="margin-top:20px">' + (function () {
           var xMax = chartDomain(c, resp, step, charted);
           return charted.map(function (t) {
             return chartCardHtml(c, t, resp, step, 'h', xMax);
           }).join('');
         })() + '</div>' +
         chartLegendHtml(false) + chartsNoteHtml() +
-      '</div>' + body + '</div>';
+        '<div class="input-recap">' +
+          '<div class="section-head" style="margin-top:26px"><h2 class="h-sec">Model input — what was sent</h2>' +
+            '<span class="meta">' + esc((S.meta[cacheKey(c, step)] || {}).prefixRows != null
+              ? (S.meta[cacheKey(c, step)] || {}).prefixRows + ' trajectory rows · anchor ' +
+                fmtHourExact(num(resp._anchor_hour))
+              : 'recorded prefix') + '</span></div>' +
+          requestPayloadDetailsHtml((S.meta[cacheKey(c, step)] || {}).requestJson ||
+            (snapshotPayload(c) ? JSON.stringify(snapshotPayload(c), null, 2) : null)) +
+        '</div>' +
+        stagesHtml(resp) +
+      '</div></div>';
   }
 
   // ── Replay subview ─────────────────────────────────────────────────────
+  /* The pre-observation state shows the SAME fixed stage the replay runs on:
+     complete empty axes, the recorded time span and the three anchor rules are
+     already in place before Play, so pressing Play starts motion on this page
+     rather than switching to a different one. */
   function replayIntroHtml(c) {
     var total = lastStep(c) + 1;
     var rows = '';
@@ -1749,14 +2114,16 @@
         '<td class="num" data-k="Prefix rows">' + (i + 1) + '</td>' +
         '<td class="why" data-k="State">withheld — not submitted</td></tr>';
     }
-    return '<div class="shell"><div class="section" style="padding-top:24px">' +
+    return '<div data-replay-intro>' +
+      '<div class="shell tight"><div class="section" style="padding-top:24px; margin-bottom:0">' +
       '<div class="section-head"><h1 class="display">Observation-prefix replay</h1>' +
         '<span class="sub">pre-observation state · nothing has been sent to the model</span></div>' +
       '<div class="prerun">' +
         '<div class="prerun-main">' +
-          '<p class="note">The replay begins before the first observation has been submitted. Play moves a continuous ' +
-          'retrospective clock across the fixed timeline. Only arrival at a recorded anchor reveals one observation ' +
-          'and posts or reuses that exact causal prefix. Later observation values remain withheld.</p>' +
+          '<p class="note">The coordinate stage below is already in place: a fixed time axis over the recorded ' +
+          'span with the three recorded anchor positions marked. Play moves a continuous retrospective clock ' +
+          'across it. Only arrival at a recorded anchor reveals one observation and posts or reuses that exact ' +
+          'causal prefix. Later observation values remain withheld — they are not in this page at all.</p>' +
           '<p class="note">The model is fixed. Forecast outputs update as additional causally available observations ' +
           'are added to the trajectory prefix.</p>' +
         '</div>' +
@@ -1767,12 +2134,17 @@
           '<dt>Model health</dt><dd>' + healthStatHtml() + '</dd>' +
         '</dl>' +
       '</div>' +
-      '<div class="scroll-x" style="margin-top:22px"><table class="dtable"><thead><tr><th>Step</th>' +
+      '</div></div>' +
+      replayStageHtml(c) +
+      '<div class="shell"><div class="section" style="margin-top:26px">' +
+      '<div class="section-head"><h2 class="h-sec">Recorded anchors</h2>' +
+        '<span class="meta">times are public replay metadata · values stay withheld until reached</span></div>' +
+      '<div class="scroll-x"><table class="dtable"><thead><tr><th>Step</th>' +
         '<th>Anchor</th><th>Prefix rows to send</th><th>State</th></tr></thead><tbody>' + rows +
         '</tbody></table></div>' +
       '<p class="note" style="margin-top:12px">No forecast value is present on this page. Use <b>Play retrospective ' +
       'replay</b> to move the clock; the first model request occurs only when the cursor reaches the first recorded anchor.</p>' +
-      '</div></div>';
+      '</div></div></div>';
   }
 
   function replayResultsHtml(c) {
@@ -1804,8 +2176,9 @@
         ' result remains visible while the next causal prefix is in flight.</span>' +
         '<span class="acts"><span class="meta"><span class="spin"></span> updating</span></span></div>' : '';
     return pendingNote + '<div class="section replay-forecast-update' + (S.animateData ? ' fx-in' : '') + '">' +
-      '<div class="section-head"><h2 class="h-sec">Recorded anchor ' + (showingStep + 1) + ' of ' +
-        (lastStep(c) + 1) + '</h2><span class="meta">' + esc(fmtHourExact(num(showing._anchor_hour))) + ' · ' +
+      '<div class="section-head"><h2 class="h-sec">Forecast issued at recorded anchor ' + (showingStep + 1) + ' of ' +
+        (lastStep(c) + 1) + '</h2><span class="meta">model output — not an observed patient state · anchor ' +
+        esc(fmtHourExact(num(showing._anchor_hour))) + ' · ' +
         esc(showing._prefix_rows) + ' trajectory row' + (showing._prefix_rows === 1 ? '' : 's') + ' sent · ' +
         validatedCount + ' validated artifact' + (validatedCount === 1 ? '' : 's') + '</span></div>' +
       sourceLineHtml(c, showingStep) + '</div>' +
@@ -1846,24 +2219,40 @@
     if (last) last.textContent = S.step < 0 ? 'none' : fmtHourExact(hourAt(c, S.step));
     var rows = root.querySelector('[data-replay-rows]');
     if (rows) rows.textContent = String(Math.max(0, S.step + 1));
-    var cursor = root.querySelector('[data-replay-cursor]');
-    if (cursor) {
-      var x = 92 + replayPercent(c, S.replayTime) * 8.58;
-      cursor.setAttribute('x1', x.toFixed(1)); cursor.setAttribute('x2', x.toFixed(1));
-    }
+    var fUpd = root.querySelector('[data-replay-forecast]');
+    if (fUpd) fUpd.textContent = S.lastForecastAt ? fmtClock(S.lastForecastAt) : 'none';
+    var spd = root.querySelector('[data-replay-speed]');
+    if (spd) spd.textContent = (SPEEDS[S.speedIndex] || SPEEDS[1]).label;
     var scrub = root.querySelector('[data-fm="scrub"]');
     if (scrub) {
       scrub.max = String(Math.max(0.001, S.replayFurthestTime));
       scrub.value = String(Math.min(S.replayTime, S.replayFurthestTime));
+      scrub.disabled = false;
     }
     var traces = root.querySelector('[data-replay-traces]');
     if (traces && traces.getAttribute('data-rendered-step') !== String(S.step)) {
+      // an anchor was reached (or the user sought across one): rebuild the SVG
+      // with the newly revealed observation. The coordinate frame is byte-for-
+      // byte identical, so only the new point and its step transition appear.
       traces.innerHTML = replayTraceSvg(c, S.step);
       traces.setAttribute('data-rendered-step', String(S.step));
-      cursor = traces.querySelector('[data-replay-cursor]');
-      if (cursor) {
-        var cx = 92 + replayPercent(c, S.replayTime) * 8.58;
-        cursor.setAttribute('x1', cx.toFixed(1)); cursor.setAttribute('x2', cx.toFixed(1));
+    } else if (traces) {
+      // per animation frame: extend the sample-and-hold paths, refresh the
+      // held-value readouts and move the cursor. No DOM nodes are created or
+      // destroyed here, and no request is ever issued from a frame.
+      PRIMARY_SERIES.forEach(function (target) {
+        var pathEl = traces.querySelector('[data-hold="' + target + '"]');
+        if (pathEl) pathEl.setAttribute('d', holdPathFor(c, target, S.step, S.replayTime));
+        var readout = traces.querySelector('[data-hold-value="' + target + '"]');
+        if (readout) {
+          var held = heldValueFor(c, target, S.step, S.replayTime);
+          readout.textContent = held == null ? '—' : fmtVal(held, target);
+        }
+      });
+      var cursorG = traces.querySelector('[data-replay-cursor]');
+      if (cursorG) {
+        cursorG.setAttribute('transform',
+          'translate(' + replayXPos(c, S.replayTime).toFixed(1) + ' 0)');
       }
     }
     var observations = root.querySelector('[data-replay-observations]');
@@ -1888,7 +2277,9 @@
     var head = cachedBannerHtml() + '<div data-replay-toolbar>' + replayBarHtml(c) + '</div>';
     if (!healthy() && !S.fixture) { root.innerHTML = head + serviceUnavailableHtml(); return; }
     if (!S.replayStarted) { root.innerHTML = head + replayIntroHtml(c); return; }
-    if (!root.querySelector('.replay-stage')) {
+    if (!root.querySelector('.replay-stage') || root.querySelector('[data-replay-intro]')) {
+      // mount the running stage once; its geometry is identical to the
+      // pre-observation stage, so nothing on the timeline jumps
       root.innerHTML = head + replayStageHtml(c);
     }
     updateReplayDom(c, { chrome: true, anchor: true, results: true });
@@ -2129,17 +2520,28 @@
       S.snapshotBusy = true;
       clearStages();
       S.stageIndex = -1;
+      S.run = { phase: 'starting', events: {}, startedAt: Date.now() };
       renderAll();
       try {
         // "Run" and "Re-run" both mean a real API call, never a session replay.
-        var resp = await fetchStep(c, lastStep(c), { force: true });
+        // Each display state advances only when the corresponding request event
+        // actually fires inside fetchStep/postForecast — no timers are involved.
+        await fetchStep(c, lastStep(c), {
+          force: true,
+          onEvent: function (phase, at) {
+            S.run.phase = phase;
+            S.run.events[phase] = at;
+            renderAll();
+          }
+        });
+        S.run.phase = 'done';
         S.snapshotRan = true;
         S.snapshotBusy = false;
         S.animateData = true;
         renderAll();
-        playStages(resp);
       } catch (e) {
         S.snapshotBusy = false;
+        S.run.phase = 'error';
         S.stepError = e.message || String(e);
         renderAll();
       }
@@ -2305,6 +2707,14 @@
   document.addEventListener('click', onClick);
   document.addEventListener('change', onChange);
   document.addEventListener('input', onInput);
+  // <details data-persist> open state survives re-renders (toggle does not
+  // bubble, so listen in the capture phase)
+  document.addEventListener('toggle', function (e) {
+    var t = e.target;
+    if (t && t.getAttribute && t.hasAttribute('data-persist')) {
+      S.detailsOpen[t.getAttribute('data-persist')] = !!t.open;
+    }
+  }, true);
 
   var ack = el('transitionAck'), cancel = el('transitionCancel'), close = el('transitionClose');
   if (ack) ack.addEventListener('click', commitTransition);
