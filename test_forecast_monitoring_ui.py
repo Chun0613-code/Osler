@@ -64,11 +64,14 @@ class ForecastMonitoringUiContractTests(unittest.TestCase):
         self.assertIn("Cached research demonstration", SCRIPT)
         self.assertNotIn("/static/forecast-fixtures.json", SCRIPT)
 
-    def test_null_intervals_are_not_coerced_and_coverage_is_target_specific(self):
+    def test_null_intervals_and_nominal_target_coverage_are_not_misrepresented(self):
         self.assertIn("v === null || v === undefined || v === ''", SCRIPT)
-        self.assertIn("target-specific calibrated research interval", SCRIPT)
+        self.assertIn("Artifact nominal target coverage", SCRIPT)
+        self.assertIn("nominal target coverage", SCRIPT)
+        self.assertIn("not empirical coverage or accuracy for this replay case", SCRIPT)
         self.assertIn("extend beyond physiological support", SCRIPT)
         self.assertNotIn("90% research interval", SCRIPT)
+        self.assertNotIn("Calibrated 89%", SCRIPT)
 
     def test_forecast_view_has_no_rx_ranking_call_or_accuracy_marketing(self):
         self.assertNotIn("'/api/analyze'", SCRIPT)
@@ -233,6 +236,27 @@ class ForecastIsUserDrivenTests(unittest.TestCase):
         self.assertIn('aria-label=\"Seek within elapsed retrospective replay time\"', stage)
         self.assertIn("Retrospective replay — not live monitoring", stage)
         self.assertIn("replayEventsHtml", stage)
+
+    def test_replay_discloses_five_missing_treatment_history_inputs(self):
+        stage = function_body("replayStageHtml")
+        for field in (
+            "hist_fluids",
+            "hist_vasopressor",
+            "hist_diuretics",
+            "hist_renal_replacement",
+            "hist_nephrotoxin",
+        ):
+            self.assertIn(field, stage)
+        self.assertIn("supplies zero for these five missing model", stage)
+        self.assertIn("fields; zero is missing-input handling", stage)
+        self.assertIn("not evidence that no treatment occurred", stage)
+
+    def test_replay_language_never_claims_realtime_detection(self):
+        self.assertIn("Retrospective replay — not live monitoring", SCRIPT)
+        self.assertIn("visual interpolation only", SCRIPT)
+        self.assertIn("no intermediate measurement or model inference", SCRIPT)
+        for banned in ("real-time monitoring", "real time monitoring", "deterioration detection"):
+            self.assertNotIn(banned, SCRIPT.lower())
 
     def test_reduced_motion_shortens_replay_and_removes_cursor_effects(self):
         play = function_body("startPlay")
@@ -405,14 +429,22 @@ class ExplanatoryPresentationTests(unittest.TestCase):
             "120 is 12 cells × 10 held-out runs, not 120 patients.",
             "Hospital, care-unit and late/time splits still come from the same database. "
             "This is not independent external validation.",
-            "Approximately 90% is the target coverage, and it is recorded per cell.",
-            "Coverage for creatinine@24h is 0.89.",
+            "Creatinine@24h records an artifact nominal target coverage of 0.89.",
             "The validation report was submitted together with the model. "
             "It was not independently re-run from the raw data.",
-            "The replay case comes from the deidentified eICU CRD Demo 2.0.1.",
+            "The replay case is provenance-labelled eICU CRD Demo 2.0.1. "
+            "It is not presented as a held-out accuracy example, and its training or "
+            "validation cohort membership is not established.",
         ):
             self.assertIn(statement, body)
+        self.assertIn("interval_target_coverage</span> is an artifact", body)
+        self.assertIn("nominal target coverage. It is not empirical coverage or accuracy for this replay case.", body)
         self.assertIn("Committed retrospective validation evidence", body)
+        self.assertIn("held-out empirical runs passing the 0.87–0.93 acceptance gate", body)
+        self.assertIn("minimum ", body)
+        self.assertIn("median approximately ", body)
+        self.assertIn("maximum ", body)
+        self.assertNotIn("was never in a training or validation fold", body)
         self.assertIn("it runs no inference and re-runs no validation", body)
         self.assertNotIn("fetchStep", body)
 

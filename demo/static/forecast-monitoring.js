@@ -927,7 +927,7 @@
       '<span><svg width="16" height="14" aria-hidden="true"><line x1="8" y1="1" x2="8" y2="13" stroke="' + C.ink2 +
         '" stroke-width="1"/><line x1="4" y1="1" x2="12" y2="1" stroke="' + C.ink2 + '" stroke-width="1"/>' +
         '<line x1="4" y1="13" x2="12" y2="13" stroke="' + C.ink2 + '" stroke-width="1"/></svg>' +
-        ' target-specific calibrated research interval</span>' +
+        ' target-specific research interval · artifact nominal target coverage shown in the table</span>' +
       '<span><svg width="16" height="12" aria-hidden="true"><line x1="8" y1="0" x2="8" y2="12" stroke="' + C.oxide +
         '" stroke-width="1" stroke-dasharray="3 3"/></svg> anchor</span>' +
       '</div>';
@@ -1015,21 +1015,23 @@
         '<td class="num" data-k="Horizon">' + esc(f.horizon_hours) + ' h</td>' +
         '<td class="num" data-k="Point">' + (pers == null ? '<span class="nullv">null</span>' : esc(fmtVal(pers, f.target))) + '</td>' +
         '<td class="num" data-k="Interval">' + interval + '</td>' +
-        '<td data-k="Target coverage">' + (cov == null ? '<span class="nullv">n/a</span>'
+        '<td data-k="Artifact nominal target coverage">' + (cov == null ? '<span class="nullv">n/a</span>'
           : '<span class="stat ok"><i></i><span class="ratio">' + esc(cov.toFixed(2)) + '</span></span>') + '</td>' +
         '</tr>';
     }).join('');
     return '<div class="section-head"><h2 class="h-sec">Validated forecast</h2>' +
-        '<span class="meta">' + rows.length + ' targets · coverage recorded per cell</span>' +
+        '<span class="meta">' + rows.length + ' targets · nominal target coverage recorded per artifact cell</span>' +
         (rows.length > 4 ? '<button class="disc spacer" type="button" data-fm="toggle-all">' +
           (S.showAll ? 'Show fewer ⌃' : 'Show all ' + rows.length + ' ⌄') + '</button>' : '') +
       '</div>' +
       '<div class="scroll-x"><table class="dtable"><thead><tr><th>Target</th><th>Horizon</th><th>Point</th>' +
-      '<th>Target-calibrated research interval</th><th>Target coverage</th></tr></thead><tbody>' +
+      '<th>Target-calibrated research interval</th><th>Artifact nominal target coverage</th></tr></thead><tbody>' +
       (body || '<tr><td colspan="5" class="why">No validated cell in this response.</td></tr>') +
       '</tbody></table></div>' +
       '<p class="note" style="margin-top:12px">The interval comes from the serialized patient-specific conformal ' +
-      'artifact. It is a research interval, not a clinical confidence interval, and carries no clinical guarantee.</p>';
+      'artifact. <span class="mono">interval_target_coverage</span> is that artifact\'s nominal target coverage, ' +
+      'not empirical coverage or accuracy for this replay case. This is a research interval, not a clinical ' +
+      'confidence interval, and it carries no clinical guarantee.</p>';
   }
 
   function illustrativeHtml(resp) {
@@ -1079,7 +1081,7 @@
         : '<p class="note">No target returned null at this anchor. Every cell in this response is either a ' +
           'validated artifact or an illustrative point.</p>') +
       '<dl class="defs" style="margin-top:24px">' +
-        '<dt>Validated</dt><dd>Serialized artifact with a target-calibrated interval and coverage recorded per cell.</dd>' +
+        '<dt>Validated</dt><dd>Serialized artifact with a target-calibrated interval and nominal target coverage recorded per cell.</dd>' +
         '<dt>Illustrative</dt><dd>A point with no interval and no coverage record. Shown for shape only; never charted with a band.</dd>' +
         '<dt>Unsupported</dt><dd>No value returned. Rendered as an explicit null with a reason, never as a blank or a zero.</dd>' +
       '</dl>';
@@ -1579,6 +1581,11 @@
       '<div class="replay-traces" data-replay-traces data-rendered-step="-1">' + replayTraceSvg(c, -1) + '</div>' +
       '<div class="interpolation-note"><b>Retrospective replay — not live monitoring.</b> Lines between recorded ' +
         'anchors are visual interpolation only; there is no intermediate measurement or model inference.</div>' +
+      '<div class="input-provenance-note"><b>Input provenance:</b> The public demo rows do not provide ' +
+        '<span class="mono">hist_fluids</span>, <span class="mono">hist_vasopressor</span>, ' +
+        '<span class="mono">hist_diuretics</span>, <span class="mono">hist_renal_replacement</span>, or ' +
+        '<span class="mono">hist_nephrotoxin</span>. The current runtime supplies zero for these five missing model ' +
+        'fields; zero is missing-input handling, not evidence that no treatment occurred.</div>' +
       '<label class="scrubber-label" for="replayScrubber"><span>Review elapsed replay time</span>' +
         '<span>future remains withheld</span></label>' +
       '<input id="replayScrubber" class="replay-scrubber" data-fm="scrub" type="range" min="0" max="0" ' +
@@ -1897,6 +1904,10 @@
     var v = S.validation;
     var runs = v && v.cells && v.cells.length ? (v.cells[0].validation_runs || 10) : 10;
     var cellCount = v ? v.serialized_validated_artifact_count : 12;
+    var width = (v && v.interval_width_reduction) || {};
+    var widthMin = num(width.minimum_percent);
+    var widthMedian = num(width.reported_median_percent_approx);
+    var widthMax = num(width.maximum_percent);
     var head = 'eICU-CRD 2.0 retrospective · ' + (cellCount * runs) + ' = ' + cellCount + ' cells × ' +
       runs + ' held-out runs · not independent external validation';
     var body;
@@ -1913,11 +1924,11 @@
           '<li><span class="n">01</span><span>The validation report is based on the complete eICU-CRD 2.0 retrospective dataset.</span></li>' +
           '<li><span class="n">02</span><span>120 is 12 cells × 10 held-out runs, not 120 patients.</span></li>' +
           '<li><span class="n">03</span><span>Hospital, care-unit and late/time splits still come from the same database. This is not independent external validation.</span></li>' +
-          '<li><span class="n">04</span><span>Approximately 90% is the target coverage, and it is recorded per cell.</span></li>' +
-          '<li><span class="n">05</span><span>Coverage for creatinine@24h is 0.89.</span></li>' +
+          '<li><span class="n">04</span><span><span class="mono">interval_target_coverage</span> is an artifact\'s nominal target coverage. It is not empirical coverage or accuracy for this replay case.</span></li>' +
+          '<li><span class="n">05</span><span>Creatinine@24h records an artifact nominal target coverage of 0.89.</span></li>' +
           '<li><span class="n">06</span><span>The validation report was submitted together with the model. It was not independently re-run from the raw data.</span></li>' +
-          '<li><span class="n">07</span><span>The replay case comes from the deidentified eICU CRD Demo 2.0.1.</span></li>' +
-        '</ol></div>' +
+          '<li><span class="n">07</span><span>The replay case is provenance-labelled eICU CRD Demo 2.0.1. It is not presented as a held-out accuracy example, and its training or validation cohort membership is not established.</span></li>' +
+        '</ol><p class="note">The committed report records held-out empirical runs passing the 0.87–0.93 acceptance gate. That empirical gate is separate from the API\'s nominal target-coverage field.</p></div>' +
         '<div class="vgroup' + grp(2) + '">' +
         '<h3 class="h-sec" style="margin-bottom:10px">Gates by cell</h3>' +
         '<div class="scroll-x"><table class="dtable"><thead><tr><th>Cell</th><th>Runs</th>' +
@@ -1932,6 +1943,11 @@
         '<p class="note" style="margin-top:12px">' + esc(cellCount) + ' cells × ' + esc(runs) + ' runs = ' +
         esc(cellCount * runs) + ' evaluations · model <span class="mono">' + esc(v.model_version) + '</span>. ' +
         'Interval-width reduction is a held-out cohort aggregate, never a case-level claim for this patient.</p>' +
+        (widthMin != null && widthMedian != null && widthMax != null
+          ? '<p class="note">Committed aggregate interval-width reduction across ' + esc(width.validation_runs || 120) +
+            ' held-out runs: minimum ' + esc(widthMin.toFixed(1)) + '%, median approximately ' +
+            esc(widthMedian.toFixed(1)) + '%, maximum ' + esc(widthMax.toFixed(1)) +
+            '%. Aggregate only; not a current-case shrinkage or accuracy claim.</p>' : '') +
         '<p class="note">These values were recorded when the model shipped. Opening this view reads the committed ' +
         'summary; it runs no inference and re-runs no validation.</p></div>';
     }
