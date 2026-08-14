@@ -425,7 +425,10 @@ function renderMain(){
 function renderSide(){
   const host=$('rxSide'),p=PATIENTS[CUR];
   const split=host&&host.closest('.split');
-  if(split)split.classList.toggle('graph-expanded',!!(p&&p.bundle&&SEL_DRUG<0&&ART_TAB==='graph'));
+  // one layout for the whole artifact panel: the wide right column is held for
+  // Graph, Disease, Drugs and the drug detail alike, so switching tabs never
+  // reflows the ranking column
+  if(split)split.classList.toggle('graph-expanded',!!(p&&p.bundle));
   if(!p||!p.bundle){
     host.innerHTML='<div class="panel-tabs"><span class="panel-tab active">Evidence</span></div>'+
       '<div class="panel-body"><p class="note">The reasoning artifact — mind-map graph, disease model and drug label cards — opens once a case is analyzed.</p></div>';
@@ -622,8 +625,7 @@ function renderGraph(g){
 }
 function artTab(name){
   ART_TAB=name;
-  const split=$('rxSide')&&$('rxSide').closest('.split');
-  if(split)split.classList.toggle('graph-expanded',name==='graph');
+  // the split keeps its graph-expanded width across every tab (see renderSide)
   document.querySelectorAll('#rxSide .panel-tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===name));
   document.querySelectorAll('#rxSide .panel-pane').forEach(pn=>pn.classList.toggle('active',pn.dataset.pane===name));
   if(name==='graph'&&PATIENTS[CUR]&&PATIENTS[CUR].bundle)renderGraph(PATIENTS[CUR].bundle.graph);

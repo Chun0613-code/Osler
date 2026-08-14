@@ -509,10 +509,12 @@ body[data-sub="validation"] #fx-validation { display: block; }
 .modal-opts { display: flex; flex-wrap: wrap; gap: 12px 28px; margin-top: 18px; }
 
 /* ── chat drawer ────────────────────────────────────────────────────────── */
+/* the agent drawer docks on the LEFT, next to the ranking column it explains,
+   leaving the evidence panel on the right unobscured */
 .drawer {
-  position: fixed; top: 0; right: 0; bottom: 0; z-index: 90;
+  position: fixed; top: 0; left: 0; bottom: 0; z-index: 90;
   width: 420px; max-width: 100vw; display: none; flex-direction: column;
-  background: var(--surface); border-left: 1px solid var(--divider);
+  background: var(--surface); border-right: 1px solid var(--divider);
 }
 .drawer[data-open="1"] { display: flex; }
 .drawer-head { display: flex; align-items: center; gap: 10px; padding: 14px 18px;
@@ -1085,7 +1087,7 @@ body[data-sub="validation"] #fx-validation { display: block; }
   }
 
   /* side columns and chat become full-height sheets */
-  .drawer { width: 100vw; border-left: 0; }
+  .drawer { width: 100vw; border-right: 0; }
   .scrim { padding: 0; align-items: stretch; }
   .modal { max-width: none; min-height: 100%; }
 
