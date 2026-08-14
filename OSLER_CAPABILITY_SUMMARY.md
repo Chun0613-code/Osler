@@ -1,6 +1,6 @@
 # Osler-JEPA — What This System Can Do
 
-*A one-page, plain-language summary. Last updated 2026-08-03.*
+*A plain-language capability summary. Last updated 2026-08-14.*
 
 ## In one sentence
 
@@ -63,6 +63,15 @@ and the whole system was built without ever faking a small-sample win.
   Muscle-to-kidney and muscle-to-electrolyte coupling remain candidate-only.
   A connected cardiac-injury scan was also run; it validates no target, with
   12h heart rate as a 6/7 near-miss and myocardial biomarkers still fallback.
+- **Patient-specific precision:** 20 kidney/perfusion cells were evaluated with
+  matched population intervals at the same nominal 90% coverage. Deterministic
+  CPU reproduction now authorizes exactly 12 cells: creatinine at 3h/12h/24h,
+  BUN at 3h/6h/12h/24h/48h, urine output at 6h/12h, and MAP at 3h/6h. Every
+  authorized cell passes 7/7 patient splits and all hospital, care-unit, and
+  late-stage gates while beating both the population anchor and an equal-capacity
+  patient-mismatched placebo. Temporal-Mondrian calibration keeps early,
+  middle, and late ICU residual distributions separate. Unsupported cells retain
+  their validated population source.
 - **Two care settings:** ICU **and** the pre-ICU emergency department.
 - **Three population/data axes:** multi-hospital ICU data (eICU), independent ICU data
   (MIMIC-IV), and healthy/general-population cross-sectional data (NHANES).
@@ -71,11 +80,14 @@ and the whole system was built without ever faking a small-sample win.
   kidney, liver, CBC, blood pressure, body composition, lipids, and HbA1c.
 - **Observed treatment context as factual input:** strict as-of MIMIC-IV
   `inputevents`, `emar`, `emar_detail`, and `procedureevents` features improve
-  6h forecasts for glucose, MAP, and bicarbonate across the required
-  care-unit/time checks. Potassium remains fallback because its care-unit gate
-  did not pass. This means the model can use treatment that was actually
-  observed; it still does **not** claim what a different treatment would have
-  done.
+  6h forecasts for glucose and bicarbonate across the required patient,
+  care-unit, time, placebo, and conformal checks. The unit-safe representation
+  keeps dose, route, rate, active-anchor rate, and pre-anchor delivered exposure
+  dimensionally separate. It narrows glucose's calibrated 90% interval by
+  about `2.4–2.7%` and bicarbonate's by about `0.7–0.9%` without weakening
+  coverage. MAP and potassium remain fallback for this precision increment.
+  This means the model can use treatment that was actually observed; it still
+  does **not** claim what a different treatment would have done.
 - An observed-evidence layer drawn from clinical notes (imaging findings, GCS, delirium
   status).
 
@@ -427,3 +439,101 @@ source registries. The serving adapter now preserves the actual source model
 and task type, and releases intervals only when patient, hospital, care-unit,
 and forward-time conformal evidence are all present. All nine cells passed a
 direct runtime invocation test; the complete suite passed 374/374 tests.
+
+## Regime-Calibrated Promotion And Runtime Integration (2026-08-06)
+
+Observable regime-Mondrian calibration added `chloride@12h` and
+`hematocrit@12h` without relaxing the seven patient-split or three external
+split gates. Runtime catalog v10 now contains 48 unique validated cells across
+16 targets. WBC and anion gap remain fail-closed because their patient-level
+residual behavior stayed unstable after the same calibration treatment.
+
+The runtime catalog is now materialized rather than being only an index of
+cell names. Resolution requires an exact input contract, target, horizon,
+canonical unit, and prediction-source identity. Missing contracts or units,
+ambiguous candidates, and predictions produced by the wrong candidate all
+fall back to persistence. The complete unit suite passed 381/381 tests.
+
+The catalog is a routing and authorization artifact, not a checkpoint store.
+Most target-specific research sources still need serialized inference
+artifacts before an application can generate their candidate predictions
+automatically. Until then, the current personalization demo remains a separate
+belief demonstration and must not be described as the v10 whole-body JEPA
+serving path. See `SYSTEM_INTEGRATION_AUDIT_20260806.md`.
+
+## Strict System-Organ-Body Full-Cohort Update (2026-08-10)
+
+The corrected anatomical hierarchy was rerun on 561,024 rows from 3,287 eICU
+patients. Functional systems project only to anatomical organs, and information
+reaches the whole-body latent only through the organ layer. Training remains
+system-first, organ-second, and body-third.
+
+Using the full cohort and patient-grouped cross-validated adaptive conformal
+calibration increased stable point-plus-path cells from 38 to 44 and complete
+seven-seed patient candidates from 5 to 10. Four cells passed hospital,
+care-unit, forward-time, module-balanced, conformal, and matched body-path
+gates. The final direction/delta scoring gate rejected `ast@1h` and validated:
+
+```text
+urine_output@1h
+urine_output@3h
+urine_output@6h
+```
+
+These are the first runtime-authorized cells produced by the strict
+system-organ-body architecture. They use the body-mediated path; direct organ
+coupling remains disabled. Catalog v11 contains 49 unique validated cells
+across all factual sources, while every unsupported cell still falls back.
+This is a bounded whole-body gain, not a universal checkpoint promotion or a
+causal/clinical claim. See
+`ADJACENT_THREE_LEVEL_FULL_COHORT_FINDINGS_20260810.md`.
+
+## Organ-Local Patient-State Precision (2026-08-13)
+
+The renal predict-update belief, causal neural history encoder, and online
+adaptive conformal layer are unified in one formal patient-state adapter. It is
+attached only to the kidney organ token and cannot bypass the mandatory
+system-organ-body hierarchy.
+
+A complete deterministic sweep evaluated creatinine, BUN, and urine output at
+1/3/6/12/24/48h. Each candidate had to beat the population model and an exact
+equal-capacity patient-mismatched placebo, preserve 90% coverage in seven
+patient splits plus hospital, care-unit, and late-stage splits, and produce a
+significantly narrower patient-equalized interval.
+
+The initial deterministic sweep promoted `BUN@3h`, `BUN@12h`, and `BUN@48h`.
+Two bounded retry rounds then brought the precision registry to 12/20 evaluated
+cells: creatinine at 3h/12h/24h, BUN at 3h/6h/12h/24h/48h, urine output at
+6h/12h, and MAP at 3h/6h. Their serialized artifacts contain neural weights,
+the population anchor, preprocessing, global or temporal-Mondrian conformal
+quantiles, and SHA-256 manifests, with no patient rows. The eight unsupported
+cells remain fail-closed. The retries used calibration-only nominal selection,
+fit-only matched population scaling, a causal urine level/slope predict-update
+state, and forecast-time-known temporal regimes; no validation threshold was
+relaxed.
+
+This is factual target-specific precision, not a direct renal-reserve truth
+claim, treatment-effect claim, or clinical authorization. See
+`PATIENT_STATE_ADAPTER_FINDINGS_20260813.md` and
+`PATIENT_STATE_PRECISION_RETRY_FINDINGS_20260814.md`.
+
+## Cell-First Rescue Sweep (2026-08-10)
+
+Five bounded methods were evaluated against the exact failed gate for each
+near-miss cell. Replacing conformal calibration did not rescue `o2sat@3h` or
+`urine_output@12h`. Change-weighted organ loss degraded `ast@1h`; weaker
+residual shrinkage traded respiratory coupling against expert-anchor
+stability; within-stay recency weighting did not fix alkaline phosphatase
+forward-time drift. A jointly trained respiratory bundle improved one domain
+while regressing another, so it remains rejected.
+
+The one successful method was stronger hospital/care-unit invariance for
+`glucose@1h`. It passed seven patient splits plus hospital, care-unit,
+forward-time, module-balanced, body-path, conformal, direction/delta, and SVD
+gates. The body-mediated path is enabled and direct organ coupling remains
+disabled. Catalog v12 records this strict system-organ-body source under the
+exact full-cohort eICU input contract. Unique catalog coverage remains 49
+cells because `glucose@1h` already existed under another input contract; the
+new result expands validated architecture/contract coverage rather than
+inflating the cell count. See
+`ADJACENT_THREE_LEVEL_CELL_RESCUE_FINDINGS_20260810.md`.

@@ -27,6 +27,7 @@ from eicu_demo_pretrain import (
     VITAL_PERIODIC_MAP,
     clean_feature_values,
 )
+from osler_jepa.urine_output import derive_interval_urine_rate
 
 
 ID = "patientunitstayid"
@@ -36,6 +37,15 @@ ANCHOR_STEP_H = 4.0
 LOOKBACK_H = 6.0
 TARGET_TOL_H = 2.0
 EPISODE_MAX_H = 96.0
+
+
+def target_tolerance_for_horizon(horizon_hours: float) -> float:
+    """Prevent a short-horizon label from selecting the current observation."""
+
+    horizon = float(horizon_hours)
+    if horizon <= 0.0:
+        raise ValueError("horizon_hours must be positive")
+    return float(min(TARGET_TOL_H, max(0.25, horizon / 2.0)))
 
 SEPSIS_PATTERNS = (
     "sepsis",
@@ -491,31 +501,24 @@ def read_urine_output(data_root: Path, stay_ids: set[int]) -> pd.DataFrame:
     path = data_root / "intakeOutput.csv.gz"
     if not path.exists():
         return empty_measurements()
-    columns = [ID, "intakeoutputoffset", "celllabel", "cellvaluenumeric"]
+    columns = [
+        ID,
+        "intakeoutputoffset",
+        "cellpath",
+        "celllabel",
+        "cellvaluenumeric",
+    ]
     rows = []
     for chunk in _read_csv_chunks(path, columns, chunksize=750_000):
         chunk = chunk[chunk[ID].isin(stay_ids)].copy()
         if chunk.empty:
             continue
-        labels = chunk["celllabel"].fillna("").astype(str).str.lower()
-        urine = labels.str.contains("urine|foley|urinary|void", regex=True)
-        chunk = chunk[urine].copy()
-        if chunk.empty:
-            continue
-        chunk["valuenum"] = clean_state_values("urine_output", chunk["cellvaluenumeric"])
-        chunk = chunk.dropna(subset=["valuenum"])
-        if chunk.empty:
-            continue
-        chunk["offset"] = pd.to_numeric(chunk["intakeoutputoffset"], errors="coerce")
-        chunk = chunk[np.isfinite(chunk["offset"])]
-        chunk["hour"] = np.floor(chunk["offset"] / 60.0).astype("int32")
-        grouped = chunk.groupby([ID, "hour"], sort=False)["valuenum"].sum().reset_index()
-        grouped["offset"] = grouped["hour"] * 60.0
-        grouped["var"] = "urine_output"
-        rows.append(grouped.rename(columns={ID: "stay_id"})[
-            ["stay_id", "offset", "var", "valuenum"]
-        ])
-    return pd.concat(rows, ignore_index=True) if rows else empty_measurements()
+        rows.append(chunk)
+    if not rows:
+        return empty_measurements()
+    return derive_interval_urine_rate(
+        pd.concat(rows, ignore_index=True), id_column=ID
+    )
 
 
 def read_measurements(data_root: Path, stay_ids: set[int]) -> pd.DataFrame:
@@ -853,6 +856,7 @@ def assemble_states(
     horizon_hours: float = DELTA_H,
 ) -> pd.DataFrame:
     lookup = measurement_lookup(measurements)
+    target_tolerance = target_tolerance_for_horizon(horizon_hours)
     rows = []
     for anchor in anchors.itertuples(index=False):
         row = {}
@@ -860,7 +864,7 @@ def assemble_states(
             times, values = lookup.get((int(anchor.stay_id), var), (np.asarray([]), np.asarray([])))
             if len(times):
                 current, age = backward_value(times, values, float(anchor.t_hour), LOOKBACK_H)
-                future = nearest_value(times, values, float(anchor.t_plus_hour), TARGET_TOL_H)
+                future = nearest_value(times, values, float(anchor.t_plus_hour), target_tolerance)
             else:
                 current, age, future = np.nan, np.nan, np.nan
             row[f"{var}_t"] = current
@@ -1056,7 +1060,7 @@ def cohort_report(
             "future_suffix": horizon_suffix(horizon_hours),
             "anchor_step_hours": ANCHOR_STEP_H,
             "lookback_hours": LOOKBACK_H,
-            "target_tolerance_hours": TARGET_TOL_H,
+            "target_tolerance_hours": target_tolerance_for_horizon(horizon_hours),
         },
         "safety_boundary": {
             "raw_rows_included": False,

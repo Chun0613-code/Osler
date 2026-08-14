@@ -1,6 +1,12 @@
 import unittest
 
-from personalization_demo.runtime import capabilities, forecast, make_frame, sample_payload
+from personalization_demo.runtime import (
+    capabilities,
+    forecast,
+    make_frame,
+    model_health,
+    sample_payload,
+)
 from osler_jepa.state_completion import complete_current_state
 
 
@@ -24,16 +30,72 @@ class PersonalizationDemoTests(unittest.TestCase):
             if item.get("personalized") and item["personalized"]["point"] is not None
         ]
         self.assertTrue(personalized)
-        self.assertFalse(output["contract"]["ridge_coefficients_serialized"])
+        precision = [
+            item for item in personalized
+            if item["interval_status"] == "validated_patient_specific_conformal"
+        ]
+        self.assertEqual(
+            {(item["target"], item["horizon_hours"]) for item in precision},
+            {
+                ("creatinine", 3),
+                ("creatinine", 12),
+                ("creatinine", 24),
+                ("bun", 3),
+                ("bun", 6),
+                ("bun", 12),
+                ("bun", 24),
+                ("bun", 48),
+                ("urine_output", 6),
+                ("urine_output", 12),
+                ("map", 3),
+                ("map", 6),
+            },
+        )
+        self.assertTrue(all(item["lower"] < item["personalized"]["point"] for item in precision))
+        self.assertTrue(all(item["upper"] > item["personalized"]["point"] for item in precision))
+        uncalibrated = [item for item in personalized if item not in precision]
+        self.assertTrue(all(item["lower"] is None for item in uncalibrated))
+        self.assertTrue(all(item["upper"] is None for item in uncalibrated))
+        self.assertEqual(
+            output["contract"]["serialized_precision_cells"],
+            [
+                "bun@12h",
+                "bun@24h",
+                "bun@3h",
+                "bun@48h",
+                "bun@6h",
+                "creatinine@12h",
+                "creatinine@24h",
+                "creatinine@3h",
+                "map@3h",
+                "map@6h",
+                "urine_output@12h",
+                "urine_output@6h",
+            ],
+        )
         self.assertFalse(output["safety_boundary"]["clinical_claim_allowed"])
         self.assertFalse(output["safety_boundary"]["causal_claim_allowed"])
 
     def test_capabilities_are_fail_closed(self):
         contract = capabilities()
-        self.assertFalse(contract["forecast_policy"]["ridge_coefficients_serialized"])
+        self.assertEqual(
+            len(contract["forecast_policy"]["serialized_precision_cells"]), 12
+        )
         self.assertFalse(contract["safety_boundary"]["clinical_claim_allowed"])
         self.assertFalse(contract["safety_boundary"]["counterfactual_claim_allowed"])
         self.assertFalse(contract["safety_boundary"]["treatment_recommendation_allowed"])
+
+    def test_all_serialized_artifacts_pass_strict_health_check(self):
+        health = model_health()
+        integrity = health["integrity_load"]
+        inference = health["inference_smoke"]
+        self.assertTrue(health["strict_manifest_verification"])
+        self.assertTrue(health["ready"], health)
+        self.assertEqual(integrity["expected_artifacts"], 12)
+        self.assertEqual(integrity["loaded_artifacts"], 12)
+        self.assertTrue(all(check["status"] == "loaded" for check in integrity["checks"]))
+        self.assertEqual(inference["validated_artifacts"], 12)
+        self.assertTrue(all(check["status"] == "predicted" for check in inference["checks"]))
 
     def test_make_frame_computes_map_from_sbp_dbp(self):
         frame = make_frame({

@@ -1,42 +1,60 @@
 """Runtime helpers for the Osler personalized belief demo.
 
-This module is intentionally small and explicit.  It calls the five validated
-belief modules directly, then builds a transparent demo forecast:
+This module is intentionally small and explicit. It calls illustrative belief
+feature builders and exact serialized patient-state artifacts:
 
-* population forecast = persistence baseline from the patient's latest value;
-* personalized forecast = persistence plus a belief-derived adjustment from
-  that patient's own trajectory;
-* interval = conservative demo band, not a clinical confidence interval.
-
-The belief features are the real validated predict-update feature builders.
-The demo does not claim to serve the audit ridge coefficients because those
-coefficients are not serialized as production artifacts yet.
+* precision-promoted renal cells use a serialized population ridge plus neural
+  patient-state residual and conformal interval;
+* other cells retain the transparent belief demonstration or fallback;
+* intervals are emitted only for the exact artifact-authorized target/horizon.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
+from functools import lru_cache
+import json
+from pathlib import Path
 from typing import Any
 
 import numpy as np
 import pandas as pd
 
-from aki_renal_belief import renal_belief_state_v2_features
+from aki_renal_belief import (
+    renal_belief_state_v2_features,
+    renal_belief_state_v3_features,
+)
 from cardiovascular_belief import cardiovascular_belief_state_features
 from electrolyte_belief import electrolyte_belief_state_features
 from endocrine_belief import endocrine_belief_state_features
 from respiratory_belief import respiratory_belief_state_features
 from osler_jepa.state_completion import complete_current_state
+from osler_jepa.patient_state import (
+    load_patient_state_artifact,
+    predict_patient_state_artifact,
+)
+
+
+MODEL_VERSION = "patient-state-precision-20260813"
+RAW_INTERVAL_PHYSICAL_DOMAIN_NOTE = (
+    "Raw calibrated statistical interval may extend below physiological support; "
+    "no clinical interpretation."
+)
+TARGET_PHYSICAL_DOMAINS: dict[str, dict[str, object]] = {
+    "urine_output": {
+        "minimum": 0.0,
+        "maximum": None,
+        "unit": "mL/h",
+    },
+}
 
 
 @dataclass(frozen=True)
 class TargetSpec:
     target: str
     horizon_hours: int
-    interval_half_width: float
     max_abs_delta: float
     system: str
-    status: str = "validated_demo_runtime"
 
 
 @dataclass(frozen=True)
@@ -54,8 +72,16 @@ SYSTEMS: tuple[BeliefSystemSpec, ...] = (
         display_name="Renal Reserve",
         belief_fn=renal_belief_state_v2_features,
         targets=(
-            TargetSpec("creatinine", 24, 0.45, 0.8, "renal"),
-            TargetSpec("bun", 24, 7.0, 12.0, "renal"),
+            TargetSpec("creatinine", 3, 0.8, "renal"),
+            TargetSpec("creatinine", 12, 0.8, "renal"),
+            TargetSpec("creatinine", 24, 0.8, "renal"),
+            TargetSpec("bun", 3, 12.0, "renal"),
+            TargetSpec("bun", 6, 12.0, "renal"),
+            TargetSpec("bun", 12, 12.0, "renal"),
+            TargetSpec("bun", 24, 12.0, "renal"),
+            TargetSpec("bun", 48, 12.0, "renal"),
+            TargetSpec("urine_output", 6, 200.0, "renal"),
+            TargetSpec("urine_output", 12, 200.0, "renal"),
         ),
         key_features=(
             "state2_belief_renal_reserve_mean",
@@ -69,7 +95,11 @@ SYSTEMS: tuple[BeliefSystemSpec, ...] = (
         name="cardiovascular",
         display_name="Cardiovascular Perfusion",
         belief_fn=cardiovascular_belief_state_features,
-        targets=(TargetSpec("heart_rate", 6, 12.0, 18.0, "cardiovascular"),),
+        targets=(
+            TargetSpec("heart_rate", 6, 18.0, "cardiovascular"),
+            TargetSpec("map", 3, 24.0, "cardiovascular"),
+            TargetSpec("map", 6, 24.0, "cardiovascular"),
+        ),
         key_features=(
             "cv_belief_shock_burden_mean",
             "cv_belief_shock_burden_sd",
@@ -83,10 +113,10 @@ SYSTEMS: tuple[BeliefSystemSpec, ...] = (
         display_name="Electrolyte / Acid-Base",
         belief_fn=electrolyte_belief_state_features,
         targets=(
-            TargetSpec("potassium", 6, 0.55, 1.2, "electrolyte"),
-            TargetSpec("bicarbonate", 6, 3.0, 6.0, "electrolyte"),
-            TargetSpec("anion_gap", 6, 4.0, 8.0, "electrolyte"),
-            TargetSpec("creatinine", 6, 0.5, 0.8, "electrolyte"),
+            TargetSpec("potassium", 6, 1.2, "electrolyte"),
+            TargetSpec("bicarbonate", 6, 6.0, "electrolyte"),
+            TargetSpec("anion_gap", 6, 8.0, "electrolyte"),
+            TargetSpec("creatinine", 6, 0.8, "electrolyte"),
         ),
         key_features=(
             "el_belief_potassium_slope_per_hr",
@@ -102,10 +132,10 @@ SYSTEMS: tuple[BeliefSystemSpec, ...] = (
         display_name="Respiratory / Gas Exchange",
         belief_fn=respiratory_belief_state_features,
         targets=(
-            TargetSpec("o2sat", 6, 4.0, 10.0, "respiratory"),
-            TargetSpec("respiratory_rate", 6, 6.0, 12.0, "respiratory"),
-            TargetSpec("heart_rate", 6, 12.0, 18.0, "respiratory"),
-            TargetSpec("bicarbonate", 6, 3.0, 6.0, "respiratory"),
+            TargetSpec("o2sat", 6, 10.0, "respiratory"),
+            TargetSpec("respiratory_rate", 6, 12.0, "respiratory"),
+            TargetSpec("heart_rate", 6, 18.0, "respiratory"),
+            TargetSpec("bicarbonate", 6, 6.0, "respiratory"),
         ),
         key_features=(
             "resp_belief_oxygenation_mean",
@@ -121,12 +151,11 @@ SYSTEMS: tuple[BeliefSystemSpec, ...] = (
         display_name="Endocrine / Glycemic Stress",
         belief_fn=endocrine_belief_state_features,
         targets=(
-            TargetSpec("glucose", 6, 65.0, 120.0, "endocrine"),
-            TargetSpec("anion_gap", 6, 4.0, 8.0, "endocrine"),
-            TargetSpec("bicarbonate", 6, 3.0, 6.0, "endocrine"),
-            TargetSpec("sodium", 6, 4.0, 8.0, "endocrine"),
-            TargetSpec("potassium", 6, 0.55, 1.2, "endocrine"),
-            TargetSpec("map", 6, 14.0, 24.0, "endocrine"),
+            TargetSpec("glucose", 6, 120.0, "endocrine"),
+            TargetSpec("anion_gap", 6, 8.0, "endocrine"),
+            TargetSpec("bicarbonate", 6, 6.0, "endocrine"),
+            TargetSpec("sodium", 6, 8.0, "endocrine"),
+            TargetSpec("potassium", 6, 1.2, "endocrine"),
         ),
         key_features=(
             "endo_belief_glycemic_stress_mean",
@@ -171,6 +200,7 @@ def sample_payload() -> dict[str, Any]:
                 "sodium": 134,
                 "creatinine": 1.4,
                 "bun": 28,
+                "urine_output": 70,
                 "map": 68,
                 "heart_rate": 118,
                 "o2sat": 91,
@@ -191,6 +221,7 @@ def sample_payload() -> dict[str, Any]:
                 "sodium": 136,
                 "creatinine": 1.5,
                 "bun": 30,
+                "urine_output": 55,
                 "map": 72,
                 "heart_rate": 108,
                 "o2sat": 93,
@@ -212,6 +243,7 @@ def sample_payload() -> dict[str, Any]:
                 "sodium": 137,
                 "creatinine": 1.55,
                 "bun": 31,
+                "urine_output": 45,
                 "map": 75,
                 "heart_rate": 100,
                 "o2sat": 95,
@@ -233,7 +265,8 @@ def capabilities() -> dict[str, Any]:
 
     return {
         "object": "osler_personalized_belief_demo",
-        "validated_belief_systems": [
+        "model_version": MODEL_VERSION,
+        "belief_systems": [
             {
                 "name": system.name,
                 "display_name": system.display_name,
@@ -241,7 +274,13 @@ def capabilities() -> dict[str, Any]:
                     {
                         "target": target.target,
                         "horizon_hours": target.horizon_hours,
-                        "status": target.status,
+                        "tier": (
+                            "validated_artifact"
+                            if f"{target.target}@{target.horizon_hours}h"
+                            in _precision_cell_names()
+                            else "illustrative"
+                        ),
+                        **_target_metadata(target.target),
                     }
                     for target in system.targets
                 ],
@@ -249,16 +288,29 @@ def capabilities() -> dict[str, Any]:
             for system in SYSTEMS
         ],
         "forecast_policy": {
-            "population_forecast": "persistence baseline from latest observed value",
-            "personalized_forecast": "belief-derived adjustment from the patient's own trajectory",
-            "ridge_coefficients_serialized": False,
-            "interval_policy": "conservative demo bands from validation-scale errors, not clinical intervals",
+            "population_forecast": (
+                "serialized population ridge for precision-promoted cells; "
+                "persistence otherwise"
+            ),
+            "personalized_forecast": (
+                "serialized neural patient-state residual for precision-promoted "
+                "cells; illustrative belief computation otherwise"
+            ),
+            "serialized_precision_cells": _precision_cell_names(),
+            "interval_policy": (
+                "fail closed: no lower/upper values without an exact serialized "
+                "patient-specific conformal artifact that passes patient, hospital, "
+                "care-unit, and time gates"
+            ),
         },
         "safety_boundary": {
             "clinical_claim_allowed": False,
+            "diagnostic_claim_allowed": False,
             "causal_claim_allowed": False,
             "counterfactual_claim_allowed": False,
             "treatment_recommendation_allowed": False,
+            "automated_prescribing_allowed": False,
+            "drug_ranking_changes_allowed": False,
             "patient_ids_persisted": False,
         },
     }
@@ -269,12 +321,20 @@ def make_frame(payload: dict[str, Any]) -> pd.DataFrame:
     if not isinstance(rows, list) or not rows:
         raise ValueError("payload must include a non-empty trajectory list")
     normalized = []
+    anchor_hour = _as_float(payload.get("anchor_hour"), default=None)
     for index, raw in enumerate(rows):
         if not isinstance(raw, dict):
             raise ValueError("each trajectory row must be an object")
         row: dict[str, Any] = {"stay_id": "demo", "hours_since_onset": float(index)}
         for key, value in raw.items():
             canonical = ALIASES.get(key, key)
+            lowered = canonical.lower()
+            if (
+                lowered.startswith("future_")
+                or lowered.endswith("_future")
+                or lowered.endswith("_outcome")
+            ):
+                raise ValueError(f"future/outcome field is not allowed: {key}")
             if canonical in {"stay_id", "subject_id", "patient_id"}:
                 continue
             if canonical in {"t", "hour", "hours", "hours_since_onset"}:
@@ -306,6 +366,12 @@ def make_frame(payload: dict[str, Any]) -> pd.DataFrame:
     frame = pd.DataFrame(normalized)
     frame["stay_id"] = "demo"
     frame = frame.sort_values("hours_since_onset").reset_index(drop=True)
+    if anchor_hour is not None:
+        if bool((frame["hours_since_onset"] > anchor_hour).any()):
+            raise ValueError("trajectory contains observations after anchor_hour")
+        latest_hour = float(frame["hours_since_onset"].iloc[-1])
+        if not np.isclose(latest_hour, anchor_hour, rtol=0.0, atol=1e-9):
+            raise ValueError("anchor_hour must equal the latest trajectory observation")
     return frame
 
 
@@ -332,6 +398,7 @@ def forecast(payload: dict[str, Any]) -> dict[str, Any]:
                     "target": target.target,
                     "horizon_hours": target.horizon_hours,
                     "status": "missing_current_value",
+                    "tier": "unsupported",
                     "population": None,
                     "personalized": None,
                     "lower": None,
@@ -340,15 +407,58 @@ def forecast(payload: dict[str, Any]) -> dict[str, Any]:
                     "reason": f"no {target.target}_t value in trajectory",
                 })
                 continue
+            precision = _precision_forecast(frame, target)
+            if precision is not None:
+                outputs.append({
+                    "system": system.name,
+                    "target": target.target,
+                    "horizon_hours": target.horizon_hours,
+                    "status": "ready",
+                    "tier": "validated_artifact",
+                    "population": {
+                        "point": precision.population_point,
+                        "source": "serialized_population_ridge",
+                    },
+                    "personalized": {
+                        "point": precision.personalized_point,
+                        "delta_vs_population": (
+                            precision.personalized_point
+                            - precision.population_point
+                        ),
+                        "source": "neural_patient_state_artifact",
+                    },
+                    "lower": precision.lower,
+                    "upper": precision.upper,
+                    "interval_target_coverage": precision.coverage,
+                    "interval_status": "validated_patient_specific_conformal",
+                    "can_personalize": True,
+                })
+                continue
+            cell_name = f"{target.target}@{target.horizon_hours}h"
+            if cell_name in _precision_cell_names():
+                outputs.append({
+                    "system": system.name,
+                    "target": target.target,
+                    "horizon_hours": target.horizon_hours,
+                    "status": "artifact_unavailable",
+                    "tier": "unsupported",
+                    "population": None,
+                    "personalized": None,
+                    "lower": None,
+                    "upper": None,
+                    "interval_status": "artifact_unavailable_fail_closed",
+                    "can_personalize": False,
+                    "reason": "serialized validated artifact failed to load",
+                })
+                continue
             adjustment, source = _belief_adjustment(system.name, target, latest_features, latest_row)
             personalized = float(current + adjustment)
-            lower = float(personalized - target.interval_half_width)
-            upper = float(personalized + target.interval_half_width)
             outputs.append({
                 "system": system.name,
                 "target": target.target,
                 "horizon_hours": target.horizon_hours,
-                "status": target.status,
+                "status": "illustrative_only",
+                "tier": "illustrative",
                 "population": {
                     "point": float(current),
                     "source": "persistence_population_baseline",
@@ -358,13 +468,18 @@ def forecast(payload: dict[str, Any]) -> dict[str, Any]:
                     "delta_vs_population": float(adjustment),
                     "source": source,
                 },
-                "lower": lower,
-                "upper": upper,
-                "interval_status": "demo_validation_scale_band_not_clinical_interval",
+                "lower": None,
+                "upper": None,
+                "interval_status": "needs_serialized_patient_specific_conformal_artifact",
                 "can_personalize": True,
             })
+    outputs = _select_requested_cells(payload, outputs)
+    for item in outputs:
+        item.update(_target_metadata(str(item["target"])))
     return {
         "patient_id": payload.get("patient_id"),
+        "model_version": MODEL_VERSION,
+        "case_source": str(payload.get("case_source") or "user_supplied"),
         "latest_hour": float(frame["hours_since_onset"].iloc[-1]),
         "input_rows": int(len(frame)),
         "forecasts": outputs,
@@ -372,6 +487,243 @@ def forecast(payload: dict[str, Any]) -> dict[str, Any]:
         "contract": capabilities()["forecast_policy"],
         "safety_boundary": capabilities()["safety_boundary"],
     }
+
+
+def _select_requested_cells(
+    payload: dict[str, Any], outputs: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    requested = payload.get("requested_cells")
+    if requested is None:
+        return outputs
+    if not isinstance(requested, list) or not requested:
+        raise ValueError("requested_cells must be a non-empty array")
+    keys = []
+    for item in requested:
+        if not isinstance(item, dict):
+            raise ValueError("each requested cell must be an object")
+        target = str(item.get("target") or "").strip()
+        try:
+            horizon = int(item.get("horizon_hours"))
+        except (TypeError, ValueError) as exc:
+            raise ValueError("requested cell horizon_hours must be an integer") from exc
+        if not target or horizon <= 0:
+            raise ValueError("requested cells require target and positive horizon_hours")
+        keys.append((target, horizon))
+    wanted = set(keys)
+    selected = [
+        item
+        for item in outputs
+        if (item["target"], int(item["horizon_hours"])) in wanted
+    ]
+    returned = {(item["target"], int(item["horizon_hours"])) for item in selected}
+    for target, horizon in keys:
+        if (target, horizon) in returned:
+            continue
+        selected.append({
+            "system": "unknown",
+            "target": target,
+            "horizon_hours": horizon,
+            "status": "unsupported_cell",
+            "tier": "unsupported",
+            "population": None,
+            "personalized": None,
+            "lower": None,
+            "upper": None,
+            "interval_status": "no_exact_validated_artifact",
+            "can_personalize": False,
+            "reason": "target/horizon is not available in this runtime",
+        })
+    return selected
+
+
+@lru_cache(maxsize=1)
+def _precision_registry() -> dict[str, Any]:
+    root = Path(__file__).resolve().parents[1]
+    registry_path = root / "renal_patient_state_precision_registry_20260813.json"
+    if not registry_path.exists():
+        return {"cells": {}}
+    return json.loads(registry_path.read_text(encoding="utf-8"))
+
+
+def _precision_cell_names() -> list[str]:
+    return sorted(
+        key
+        for key, cell in _precision_registry()["cells"].items()
+        if cell.get("precision_promoted") and cell.get("artifact")
+    )
+
+
+@lru_cache(maxsize=1)
+def _precision_artifact_load_state() -> tuple[
+    dict[tuple[str, int], Any], tuple[dict[str, Any], ...]
+]:
+    root = Path(__file__).resolve().parents[1]
+    loaded: dict[tuple[str, int], Any] = {}
+    checks = []
+    for cell_name, cell in sorted(_precision_registry()["cells"].items()):
+        artifact_name = cell.get("artifact")
+        if not cell.get("precision_promoted") or not artifact_name:
+            continue
+        key = (str(cell["target"]), int(cell["horizon_hours"]))
+        try:
+            artifact = load_patient_state_artifact(root / artifact_name)
+            if artifact.metadata.get("target") != key[0]:
+                raise ValueError("artifact target does not match registry")
+            if int(artifact.metadata.get("horizon_hours", -1)) != key[1]:
+                raise ValueError("artifact horizon does not match registry")
+            loaded[key] = artifact
+            checks.append({
+                "cell": cell_name,
+                "artifact": artifact_name,
+                "status": "loaded",
+            })
+        except Exception as exc:
+            checks.append({
+                "cell": cell_name,
+                "artifact": artifact_name,
+                "status": "error",
+                "error": f"{type(exc).__name__}: {exc}",
+            })
+    return loaded, tuple(checks)
+
+
+def _precision_artifacts() -> dict[tuple[str, int], Any]:
+    return _precision_artifact_load_state()[0]
+
+
+def model_health() -> dict[str, Any]:
+    """Verify artifacts and execute a deterministic end-to-end inference smoke."""
+
+    loaded, checks = _precision_artifact_load_state()
+    expected = len(_precision_cell_names())
+    loaded_count = len(loaded)
+    integrity_ready = expected == 12 and loaded_count == expected
+    integrity_load = {
+        "status": "passed" if integrity_ready else "failed",
+        "ready": integrity_ready,
+        "expected_artifacts": expected,
+        "loaded_artifacts": loaded_count,
+        "checks": list(checks),
+    }
+    inference_smoke = _inference_smoke() if integrity_ready else {
+        "status": "skipped",
+        "ready": False,
+        "input": "canonical_sample_payload",
+        "expected_validated_artifacts": 12,
+        "validated_artifacts": 0,
+        "checks": [],
+        "error": "integrity_load did not pass",
+    }
+    ready = integrity_ready and inference_smoke["ready"]
+    return {
+        "status": "healthy" if ready else "degraded",
+        "ready": ready,
+        "model_version": MODEL_VERSION,
+        "strict_manifest_verification": True,
+        "integrity_load": integrity_load,
+        "inference_smoke": inference_smoke,
+    }
+
+
+def _inference_smoke() -> dict[str, Any]:
+    """Exercise preprocessing, sklearn, torch forward, and conformal output."""
+
+    expected_cells = set(_precision_artifacts())
+    result: dict[str, Any] = {
+        "status": "failed",
+        "ready": False,
+        "input": "canonical_sample_payload",
+        "expected_validated_artifacts": 12,
+        "validated_artifacts": 0,
+        "checks": [],
+    }
+    try:
+        response = forecast(sample_payload())
+        validated = [
+            item for item in response["forecasts"]
+            if item.get("tier") == "validated_artifact"
+        ]
+        result["validated_artifacts"] = len(validated)
+        returned_cells: set[tuple[str, int]] = set()
+        cell_checks = []
+        for item in validated:
+            key = (str(item["target"]), int(item["horizon_hours"]))
+            returned_cells.add(key)
+            values = {
+                "population.point": item.get("population", {}).get("point"),
+                "personalized.point": item.get("personalized", {}).get("point"),
+                "lower": item.get("lower"),
+                "upper": item.get("upper"),
+            }
+            if not all(np.isfinite(float(value)) for value in values.values()):
+                raise ValueError(f"non-finite inference output for {key}")
+            lower = float(values["lower"])
+            point = float(values["personalized.point"])
+            upper = float(values["upper"])
+            if not lower <= point <= upper:
+                raise ValueError(f"invalid interval bounds for {key}")
+            cell_checks.append({
+                "cell": f"{key[0]}@{key[1]}h",
+                "status": "predicted",
+            })
+        if len(validated) != 12:
+            raise ValueError(
+                f"expected 12 validated_artifact predictions, got {len(validated)}"
+            )
+        if returned_cells != expected_cells:
+            raise ValueError("inference cells do not match the loaded artifact registry")
+        result.update({
+            "status": "passed",
+            "ready": True,
+            "checks": cell_checks,
+        })
+    except Exception as exc:
+        result["error"] = f"{type(exc).__name__}: {exc}"
+    return result
+
+
+def _target_metadata(target: str) -> dict[str, Any]:
+    domain = TARGET_PHYSICAL_DOMAINS.get(target)
+    return {
+        "physical_domain": dict(domain) if domain is not None else None,
+        "note": RAW_INTERVAL_PHYSICAL_DOMAIN_NOTE if domain is not None else None,
+    }
+
+
+def _precision_forecast(frame: pd.DataFrame, target: TargetSpec):
+    artifact = _precision_artifacts().get((target.target, target.horizon_hours))
+    if artifact is None:
+        return None
+    columns = list(artifact.metadata["feature_columns"])
+    physical = frame.reindex(columns=columns).apply(pd.to_numeric, errors="coerce")
+    steps = int(artifact.metadata["history_steps"])
+    history = physical.tail(steps)
+    hours = pd.to_numeric(
+        frame.loc[history.index, "hours_since_onset"], errors="coerce"
+    ).to_numpy(dtype=np.float32)
+    elapsed = hours - float(hours[-1])
+    belief_functions = {
+        "renal_belief_state_v2": renal_belief_state_v2_features,
+        "renal_belief_state_v3": renal_belief_state_v3_features,
+    }
+    belief_name = str(artifact.metadata["belief"])
+    if belief_name not in belief_functions:
+        raise ValueError(f"unsupported renal belief artifact: {belief_name}")
+    belief = belief_functions[belief_name](frame).iloc[-1].to_numpy(dtype=np.float32)
+    current = _latest_value(frame, target.target)
+    if current is None:
+        return None
+    return predict_patient_state_artifact(
+        artifact,
+        current_values=physical.iloc[-1].to_numpy(dtype=np.float32),
+        history_values=history.to_numpy(dtype=np.float32),
+        history_elapsed_hours=elapsed,
+        history_mask=np.ones(len(history), dtype=bool),
+        belief_values=belief,
+        current_target=current,
+        anchor_hours_since_onset=float(hours[-1]),
+        coverage=float(artifact.metadata.get("conformal_target_coverage", 0.90)),
+    )
 
 
 def _belief_adjustment(

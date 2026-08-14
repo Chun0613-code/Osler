@@ -1,0 +1,377 @@
+from pathlib import Path
+import re
+import unittest
+
+
+SCRIPT = (
+    Path(__file__).resolve().parent / "demo" / "static" / "forecast-monitoring.js"
+).read_text(encoding="utf-8")
+MARKUP = (
+    Path(__file__).resolve().parent / "demo" / "case_demo.html"
+).read_text(encoding="utf-8")
+
+
+def function_body(name, source=SCRIPT):
+    """Return the source of a top-level `function name(` declaration.
+
+    Brace matching rather than a regex, so an assertion about what a single
+    function does cannot be satisfied by a match somewhere else in the file.
+    """
+    match = re.search(r"\bfunction\s+" + re.escape(name) + r"\s*\(", source)
+    if match is None:
+        raise AssertionError("function %s() not found" % name)
+    start = source.index("{", match.end() - 1)
+    depth = 0
+    for index in range(start, len(source)):
+        char = source[index]
+        if char == "{":
+            depth += 1
+        elif char == "}":
+            depth -= 1
+            if depth == 0:
+                return source[start:index + 1]
+    raise AssertionError("unbalanced braces in %s()" % name)
+
+
+class ForecastMonitoringUiContractTests(unittest.TestCase):
+    def test_replay_uses_backend_events_units_and_display_name(self):
+        self.assertIn("c.observation_events.map", SCRIPT)
+        self.assertIn("c.replay_metadata.variable_units", SCRIPT)
+        self.assertIn("c.display_name", SCRIPT)
+        self.assertNotIn("forecast_payload", SCRIPT)
+
+    def test_backend_disabled_matching_has_no_ui_tolerance_fallback(self):
+        self.assertIn("configured.supported === false", SCRIPT)
+        self.assertIn("Awaiting / no configured matching", SCRIPT)
+        self.assertNotIn("DEFAULT_MATCH_TOLERANCE", SCRIPT)
+        self.assertNotIn("UI default tolerance", SCRIPT)
+
+    def test_degraded_health_gates_every_forecast_request(self):
+        self.assertIn("if (!healthy()) throw new Error('Forecast service unavailable')", SCRIPT)
+        self.assertIn("if (healthy() && c)", SCRIPT)
+        self.assertIn("if (!healthy()) return", SCRIPT)
+        self.assertIn("integrity_load", SCRIPT)
+        self.assertIn("inference_smoke", SCRIPT)
+
+    def test_fixture_is_explicit_labeled_and_uses_committed_shape(self):
+        self.assertIn("data-fm=\"fixture-load\"", SCRIPT)
+        self.assertIn("/api/forecast/fixtures", SCRIPT)
+        self.assertIn("post_forecast_", SCRIPT)
+        self.assertIn("key.slice(-7) === '_prefix'", SCRIPT)
+        self.assertIn("Cached research demonstration", SCRIPT)
+        self.assertNotIn("/static/forecast-fixtures.json", SCRIPT)
+
+    def test_null_intervals_are_not_coerced_and_coverage_is_target_specific(self):
+        self.assertIn("v === null || v === undefined || v === ''", SCRIPT)
+        self.assertIn("target-specific calibrated research interval", SCRIPT)
+        self.assertIn("extend beyond physiological support", SCRIPT)
+        self.assertNotIn("90% research interval", SCRIPT)
+
+    def test_forecast_view_has_no_rx_ranking_call_or_accuracy_marketing(self):
+        self.assertNotIn("'/api/analyze'", SCRIPT)
+        self.assertNotRegex(SCRIPT, r"\b(?:70|80)\s*%")
+        self.assertIn("never change drug ranking or dosing", SCRIPT)
+
+
+class ForecastIsUserDrivenTests(unittest.TestCase):
+    """Nothing may be forecast before the user asks for it."""
+
+    def test_bootstrap_loads_metadata_only_and_never_forecasts(self):
+        body = function_body("bootstrap")
+        self.assertIn("loadHealth()", body)
+        self.assertIn("loadCases()", body)
+        self.assertIn("loadValidation()", body)
+        self.assertNotIn("fetchStep", body)
+        self.assertNotIn("lastStep", body)
+        self.assertNotIn("/api/forecast", body)
+
+    def test_switching_global_view_never_forecasts(self):
+        body = function_body("setView")
+        self.assertIn("bootstrap()", body)
+        self.assertNotIn("fetchStep", body)
+        self.assertNotIn("gotoStep", body)
+        self.assertNotIn("runSnapshot", body)
+
+    def test_switching_subview_never_forecasts(self):
+        body = function_body("setSub")
+        self.assertNotIn("fetchStep", body)
+        self.assertNotIn("gotoStep", body)
+        self.assertNotIn("startReplay", body)
+
+    def test_snapshot_shows_no_forecast_before_an_explicit_run(self):
+        body = function_body("renderSnapshot")
+        self.assertIn("if (!resp) { root.innerHTML = snapshotIntroHtml(c); return; }", body)
+        intro = function_body("snapshotIntroHtml")
+        self.assertIn("Run live forecast", intro)
+        self.assertIn("No forecast value exists on this page until you run one", intro)
+        # the pre-run state may describe the request, never a returned value
+        self.assertNotIn("validatedTableHtml", intro)
+        self.assertNotIn("chartCardHtml", intro)
+        self.assertNotIn("responseFor", intro)
+
+    def test_replay_starts_before_the_first_observation_is_submitted(self):
+        render = function_body("renderMonitoring")
+        self.assertIn("if (!S.replayStarted) { root.innerHTML = head + replayIntroHtml(c); return; }", render)
+        intro = function_body("replayIntroHtml")
+        self.assertIn("pre-observation state", intro)
+        self.assertIn("withheld — not submitted", intro)
+        self.assertNotIn("responseFor", intro)
+        bar = function_body("replayBarHtml")
+        self.assertIn("Start live replay", bar)
+        self.assertIn("none has been submitted to the model", bar)
+
+    def test_reset_returns_to_the_pre_observation_state_without_requesting(self):
+        body = function_body("resetReplay")
+        self.assertIn("S.replayStarted = false", body)
+        self.assertNotIn("fetchStep", body)
+        self.assertNotIn("gotoStep", body)
+
+    def test_start_live_replay_forces_a_real_first_request(self):
+        body = function_body("startReplay")
+        self.assertIn("S.replayStarted = true", body)
+        self.assertIn("gotoStep(0, { force: true })", body)
+
+
+class ForecastRequestProvenanceTests(unittest.TestCase):
+    """A result is labelled by where it actually came from."""
+
+    def test_fetch_step_accepts_force_and_only_reuses_a_session_result_without_it(self):
+        body = function_body("fetchStep")
+        self.assertIn("var force = !!(opts && opts.force)", body)
+        self.assertIn("if (!force && S.cache[key]) return S.cache[key]", body)
+        self.assertIn("if (!force && S.pending[key]) return S.pending[key]", body)
+        self.assertIn("source: 'live'", body)
+        self.assertIn("requestedAt: Date.now()", body)
+        self.assertIn("prefixRows: payload.trajectory.length", body)
+        self.assertIn("forced: force", body)
+
+    def test_every_explicit_run_control_forces_a_live_request(self):
+        self.assertIn("fetchStep(c, lastStep(c), { force: true })", function_body("runSnapshot"))
+        self.assertIn("gotoStep(0, { force: true })", function_body("startReplay"))
+        self.assertIn("'rerun-step'", SCRIPT)
+        self.assertIn("gotoStep(S.step, { force: true })", SCRIPT)
+        self.assertIn("data-fm=\"rerun-snapshot\"", SCRIPT)
+        self.assertIn("data-fm=\"rerun-step\"", SCRIPT)
+
+    def test_three_source_states_are_distinct_and_session_is_never_called_cached(self):
+        body = function_body("resultSource")
+        self.assertIn("'Cached research demonstration'", body)
+        self.assertIn("'Live response'", body)
+        self.assertIn("'Previously computed live result'", body)
+        # the fixture owns the word "cached"; a session result must not borrow it
+        self.assertNotRegex(
+            body.replace("'Cached research demonstration'", ""),
+            r"[Cc]ached",
+        )
+
+    def test_fixture_is_never_loaded_automatically(self):
+        # exactly one call site, and it is the explicit click handler
+        self.assertEqual(SCRIPT.count("loadFixture();"), 1)
+        self.assertIn("else if (action === 'fixture-load') { loadFixture(); }", SCRIPT)
+        self.assertNotIn("loadFixture", function_body("bootstrap"))
+        self.assertNotIn("loadFixture", function_body("gotoStep"))
+        self.assertNotIn("loadFixture", function_body("runSnapshot"))
+
+
+class WorkflowIsolationTests(unittest.TestCase):
+    """Medication Safety and Retrospective Forecast never exchange state."""
+
+    def test_forecast_payload_is_built_from_the_eicu_case_alone(self):
+        body = function_body("buildPrefixPayload")
+        self.assertIn("patient_id: c.id", body)
+        self.assertIn("case_source: c.case_source", body)
+        self.assertIn("anchor_hour: anchor", body)
+        self.assertIn("trajectory: prefix", body)
+        for leaked in ("PATIENTS", "bundle", "candidates", "ranking", "safety", "OslerRx"):
+            self.assertNotIn(leaked, body)
+
+    def test_forecast_module_never_reads_rx_state(self):
+        self.assertNotIn("PATIENTS", SCRIPT)
+        self.assertNotIn("analyze_stream", SCRIPT)
+        self.assertNotIn("window.OslerRx.hasResult", SCRIPT)
+        # The only Rx touchpoint is the guided demo asking Rx to run its own
+        # case. Every reference lives inside startGuided(), and it asks Rx to
+        # act — it never reads a safety result back.
+        guided = function_body("startGuided")
+        self.assertEqual(SCRIPT.count("window.OslerRx"), guided.count("window.OslerRx"))
+        self.assertIn("window.OslerRx.runDefaultScenario()", guided)
+        self.assertNotIn("=", guided.split("window.OslerRx.runDefaultScenario()")[1].split(";")[0])
+
+    def test_transition_disclosure_is_acknowledged_before_the_workflow_changes(self):
+        self.assertIn(
+            "The next chapter uses a different deidentified retrospective eICU case and an\n"
+            "        independent factual forecast model. No medication-safety result is carried into the forecast.",
+            MARKUP,
+        )
+        self.assertIn('id="transitionAck"', MARKUP)
+        commit = function_body("commitTransition")
+        self.assertIn("setView('forecast')", commit)
+        request = function_body("requestForecastTransition")
+        self.assertNotIn("setView(", request)
+
+    def test_global_navigation_names_the_two_independent_workflows(self):
+        self.assertIn('data-view="home"', MARKUP)
+        self.assertIn(">Medication Safety<", MARKUP)
+        self.assertIn(">Retrospective Forecast<", MARKUP)
+        self.assertNotIn("Rx &amp; Safety", MARKUP)
+        self.assertNotIn("Patient Forecast", MARKUP)
+        self.assertNotIn('data-view="monitoring"', MARKUP)
+        self.assertIn("Illustrative case scenarios", MARKUP)
+
+    def test_home_view_runs_no_engine(self):
+        body = function_body("renderHome")
+        self.assertIn("Explore medication safety", body)
+        self.assertIn("Explore retrospective forecast", body)
+        self.assertIn("Start guided demo", body)
+        self.assertNotIn("/api/", body)
+        self.assertNotIn("fetchStep", body)
+
+
+class KeyboardFocusContractTests(unittest.TestCase):
+    """Closing overlays never leaves keyboard focus inside hidden content."""
+
+    def test_transition_cancel_restores_focus_and_commit_moves_it_forward(self):
+        request = function_body("requestForecastTransition")
+        close = function_body("closeTransition")
+        commit = function_body("commitTransition")
+        self.assertIn("transitionReturnFocus = document.activeElement", request)
+        self.assertIn("transitionReturnFocus.focus()", close)
+        self.assertIn("closeTransition({ restoreFocus: false })", commit)
+        self.assertIn("replayTab.focus()", commit)
+
+    def test_chat_drawer_restores_the_opening_control(self):
+        self.assertIn("_drawerFocus=document.activeElement", function_body("openDrawer", MARKUP))
+        self.assertIn("_drawerFocus.focus()", function_body("closeDrawer", MARKUP))
+
+
+class ExplanatoryPresentationTests(unittest.TestCase):
+    """The presentation describes the returned document and nothing else."""
+
+    def test_stages_are_conditioned_on_the_actual_response(self):
+        body = function_body("stagesFor")
+        self.assertIn("if (withPopulation.length)", body)
+        self.assertIn("if (withPersonal.length)", body)
+        self.assertIn("if (withInterval.length)", body)
+        self.assertIn("if (unsupported.length)", body)
+        self.assertIn("Target-specific intervals returned where authorized", body)
+        self.assertIn("Unsupported cells withheld", body)
+
+    def test_presentation_can_be_skipped_and_replayed_and_respects_reduced_motion(self):
+        self.assertIn("prefers-reduced-motion: reduce", SCRIPT)
+        self.assertIn("if (REDUCED)", function_body("playStages"))
+        self.assertIn("data-fm=\"skip-anim\"", SCRIPT)
+        self.assertIn("data-fm=\"replay-presentation\"", SCRIPT)
+        self.assertIn("How this forecast was constructed", SCRIPT)
+
+    def test_no_learning_training_or_clinical_language(self):
+        self.assertIn(
+            "The model is fixed. Forecast outputs update as additional causally available observations are",
+            SCRIPT,
+        )
+        self.assertIn("This is a model-output change, not a treatment effect.", SCRIPT)
+        for banned in (
+            "algorithm is learning",
+            "training live",
+            "is training",
+            "true hidden physiology",
+            "clinical alert",
+            "treatment effect of",
+        ):
+            self.assertNotIn(banned, SCRIPT)
+
+    def test_change_report_is_computed_from_two_real_responses(self):
+        body = function_body("diffResponses")
+        self.assertIn("if (!prev || !next) return null", body)
+        self.assertIn("becameSupported", body)
+        self.assertIn("prevTier", body)
+        self.assertIn("newTier", body)
+        self.assertIn("This cell is now supported at this anchor.", SCRIPT)
+        self.assertIn("The trajectory prefix now contains", SCRIPT)
+        self.assertIn("relative to the previous replay step.", SCRIPT)
+
+    def test_validation_evidence_keeps_all_seven_statements_verbatim(self):
+        body = function_body("renderValidation")
+        for statement in (
+            "The validation report is based on the complete eICU-CRD 2.0 retrospective dataset.",
+            "120 is 12 cells × 10 held-out runs, not 120 patients.",
+            "Hospital, care-unit and late/time splits still come from the same database. "
+            "This is not independent external validation.",
+            "Approximately 90% is the target coverage, and it is recorded per cell.",
+            "Coverage for creatinine@24h is 0.89.",
+            "The validation report was submitted together with the model. "
+            "It was not independently re-run from the raw data.",
+            "The replay case comes from the deidentified eICU CRD Demo 2.0.1.",
+        ):
+            self.assertIn(statement, body)
+        self.assertIn("Committed retrospective validation evidence", body)
+        self.assertIn("it runs no inference and re-runs no validation", body)
+        self.assertNotIn("fetchStep", body)
+
+
+class ReplayProgressionOverHttpTests(unittest.TestCase):
+    """The prefix progression the Replay subview drives, checked end to end."""
+
+    @classmethod
+    def setUpClass(cls):
+        from demo.demo_app import app
+
+        cls.client = app.test_client()
+        cls.case = cls.client.get("/api/monitoring/cases").get_json()["cases"][0]
+
+    def _post_prefix(self, step):
+        rows = [
+            event["observation"]
+            for event in self.case["observation_events"][: step + 1]
+        ]
+        payload = {
+            "patient_id": self.case["id"],
+            "case_source": self.case["case_source"],
+            "anchor_hour": rows[-1]["hours_since_onset"],
+            "trajectory": rows,
+        }
+        response = self.client.post("/api/forecast", json=payload)
+        self.assertEqual(response.status_code, 200)
+        return response.get_json()
+
+    def test_validated_progression_is_ten_twelve_twelve(self):
+        counts = []
+        for step in range(3):
+            body = self._post_prefix(step)
+            self.assertEqual(body["forecasts"][0].get("causal_claim_allowed", False), False)
+            counts.append(
+                len([f for f in body["forecasts"] if f["tier"] == "validated_artifact"])
+            )
+        self.assertEqual(counts, [10, 12, 12])
+
+    def test_unsupported_cells_are_fully_null(self):
+        body = self._post_prefix(0)
+        unsupported = [f for f in body["forecasts"] if f["tier"] == "unsupported"]
+        self.assertTrue(unsupported)
+        for cell in unsupported:
+            self.assertIsNone(cell.get("lower"))
+            self.assertIsNone(cell.get("upper"))
+            personalized = cell.get("personalized") or {}
+            self.assertIsNone(personalized.get("point"))
+
+    def test_intervals_exist_only_on_the_validated_tier(self):
+        body = self._post_prefix(2)
+        for cell in body["forecasts"]:
+            if cell["tier"] != "validated_artifact":
+                self.assertIsNone(cell.get("lower"))
+                self.assertIsNone(cell.get("upper"))
+
+    def test_an_observation_after_the_anchor_is_still_rejected(self):
+        rows = [event["observation"] for event in self.case["observation_events"][:2]]
+        payload = {
+            "patient_id": self.case["id"],
+            "case_source": self.case["case_source"],
+            "anchor_hour": rows[0]["hours_since_onset"],
+            "trajectory": rows,
+        }
+        response = self.client.post("/api/forecast", json=payload)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("after anchor_hour", response.get_json()["error"])
+
+
+if __name__ == "__main__":
+    unittest.main()
