@@ -27,6 +27,13 @@ order or score.
   hidden physiology and must not be shown as diagnosis.
 - Allowed replay signals are only `stable`, `watch`, and `research_signal`.
   They are demo presentation states, not clinical alerts or thresholds.
+- Calibrated coverage is target-specific artifact metadata, not a global 90%
+  constant. In particular, `creatinine@24h` retains its exact target coverage
+  of `0.89`; clients must display the returned value without coercing it to 90%.
+- `physical_domain` and `note` are machine-readable target metadata. For urine
+  output the physiological support begins at zero, but the raw calibrated
+  statistical interval is returned unchanged and may extend below that support.
+  It must not be clamped or clinically interpreted.
 
 ### Tier semantics
 
@@ -164,12 +171,16 @@ shrinkage measurement. The UI must never attach it to an individual forecast.
 ## `GET /api/health/models`
 
 Strictly verifies and loads all 12 serialized artifacts against the release
-manifest. The response contains `status`, `ready`, `model_version`,
-`strict_manifest_verification`, `expected_artifacts`, `loaded_artifacts`,
-per-artifact `checks`, and `schema_version`.
+manifest, then runs a deterministic canonical-sample prediction through
+preprocessing, each sklearn population anchor, each neural model forward, and
+the conformal interval calculation. The response separates `integrity_load`
+from `inference_smoke`; each has its own `status`, `ready`, counts, and checks.
 
-- `200`: `ready: true`, all 12 artifacts loaded.
-- `503`: `ready: false`, at least one strict check failed. The frontend must show
+- `200`: `ready: true`, all 12 artifacts loaded and all 12 validated cells
+  produced finite points with ordered finite interval bounds.
+- `503`: `ready: false`, at least one integrity or inference check failed. This
+  includes preprocessing, sklearn/joblib prediction, or model-forward failure.
+  The frontend must show
   an unavailable/degraded state and must not present stale forecast values as a
   successful model response.
 
@@ -181,7 +192,7 @@ does not mutate or corrupt a real artifact.
 Returns `schema_version`, `model_version`, top-level `safety_boundary`, and
 `cases`. The included eICU CRD Demo 2.0.1 stay is `eicu-demo-2677807`.
 
-Each case contains provenance, non-diagnostic context, `replay_metadata`, and
+Each case contains backend-supplied `display_name`, provenance, non-diagnostic context, `replay_metadata`, and
 the full ordered `observation_events` timeline. `replay_metadata` fixes:
 
 - `retrospective: true` and `not_live: true`;
@@ -211,7 +222,7 @@ accuracy claim is made.
 `demo/forecast_api_fixtures.json` contains:
 
 - the monitoring case response;
-- first-prefix and second-prefix forecast request/response pairs;
+- first-prefix, second-prefix, and third-prefix forecast request/response pairs;
 - the validation summary;
 - a deterministic fixture-only unhealthy model response; and
 - an unsupported-cell request/response pair.
@@ -221,6 +232,10 @@ Regenerate it with:
 ```powershell
 python -m demo.build_forecast_api_fixtures --write
 ```
+
+The browser loads this exact document from `GET /api/forecast/fixtures` only
+after an explicit user action. It is always labelled “Cached research
+demonstration” and is never substituted automatically.
 
 `test_forecast_api_fixtures.py` rebuilds the document through the live Python
 contract and requires exact equality, preventing fixture/API drift.

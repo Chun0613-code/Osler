@@ -1,7 +1,9 @@
 import unittest
+from unittest.mock import patch
 
 from demo.demo_app import SAMPLE_CASES, app
 from demo.forecast_api import replay_forecast_request
+from personalization_demo import runtime
 
 
 class DemoForecastFlaskTests(unittest.TestCase):
@@ -17,6 +19,22 @@ class DemoForecastFlaskTests(unittest.TestCase):
         self.assertEqual(validation.status_code, 200)
         self.assertEqual(health.status_code, 200)
         self.assertTrue(health.get_json()["ready"])
+        self.assertEqual(health.get_json()["integrity_load"]["loaded_artifacts"], 12)
+        self.assertEqual(health.get_json()["inference_smoke"]["validated_artifacts"], 12)
+
+    def test_health_returns_503_when_loaded_anchor_predict_fails(self):
+        artifact = next(iter(runtime._precision_artifacts().values()))
+        with patch.object(
+            artifact.population_anchor,
+            "predict",
+            side_effect=RuntimeError("population anchor unavailable"),
+        ):
+            health = self.client.get("/api/health/models")
+        self.assertEqual(health.status_code, 503)
+        body = health.get_json()
+        self.assertFalse(body["ready"])
+        self.assertEqual(body["integrity_load"]["status"], "passed")
+        self.assertEqual(body["inference_smoke"]["status"], "failed")
 
     def test_public_monitoring_case_returns_twelve_validated_cells(self):
         cases_response = self.client.get("/api/monitoring/cases")
@@ -33,6 +51,13 @@ class DemoForecastFlaskTests(unittest.TestCase):
         ]
         self.assertEqual(len(validated), 12)
         self.assertEqual(body["case_source"], "eicu_crd_demo_2.0.1")
+
+    def test_committed_fixture_is_available_only_through_explicit_endpoint(self):
+        response = self.client.get("/api/forecast/fixtures")
+        self.assertEqual(response.status_code, 200)
+        body = response.get_json()
+        self.assertTrue(body["generated_from_live_contract"])
+        self.assertIn("post_forecast_third_prefix", body)
 
     def test_future_data_is_rejected_over_http(self):
         case = self.client.get("/api/monitoring/cases").get_json()["cases"][0]

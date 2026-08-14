@@ -45,13 +45,19 @@ The backend exposes:
 Every forecast item has one tier:
 
 - `validated_artifact`: one of 12 exact serialized target×horizon artifacts;
-  only these cells can return calibrated `lower` and `upper` values.
+  only these cells can return calibrated `lower` and `upper` values. Coverage
+  is target-specific artifact metadata (`creatinine@24h` is exactly 0.89), not
+  a global 90% constant.
 - `illustrative`: belief-derived research illustration with no interval.
 - `unsupported`: fail-closed abstention with no point or interval.
 
 The interval-width summary is held-out cohort aggregate evidence (120 runs,
 approximately 1.1%–34.5%, median approximately 11.8%). It is never presented as
 real-time shrinkage for an individual case.
+
+Urine-output intervals are raw calibrated statistical intervals. They are not
+clamped to physiological support, may extend below zero, and have no clinical
+interpretation; the API carries this as `physical_domain` and `note` metadata.
 
 ---
 

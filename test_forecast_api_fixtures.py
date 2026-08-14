@@ -18,8 +18,10 @@ class ForecastApiFixtureTests(unittest.TestCase):
         events = cases[0]["observation_events"]
         first = fixtures["post_forecast_first_prefix"]["request"]
         second = fixtures["post_forecast_second_prefix"]["request"]
+        third = fixtures["post_forecast_third_prefix"]["request"]
         self.assertEqual(len(first["trajectory"]), 1)
         self.assertEqual(len(second["trajectory"]), 2)
+        self.assertEqual(len(third["trajectory"]), 3)
         self.assertEqual(first["trajectory"], [events[0]["observation"]])
         self.assertEqual(
             second["trajectory"],
@@ -28,6 +30,7 @@ class ForecastApiFixtureTests(unittest.TestCase):
         self.assertEqual(first["anchor_hour"], events[0]["available_at_hour"])
         self.assertEqual(second["anchor_hour"], events[1]["available_at_hour"])
         self.assertNotIn(events[2]["observation"], second["trajectory"])
+        self.assertEqual(third["trajectory"], [event["observation"] for event in events])
 
     def test_fixture_covers_validated_unsupported_and_unhealthy_states(self):
         fixtures = build_forecast_api_fixtures()
@@ -53,6 +56,8 @@ class ForecastApiFixtureTests(unittest.TestCase):
         self.assertIsNone(unsupported[0]["upper"])
         self.assertEqual(unhealthy["status"], 503)
         self.assertFalse(unhealthy["response"]["ready"])
+        self.assertEqual(unhealthy["response"]["integrity_load"]["status"], "passed")
+        self.assertEqual(unhealthy["response"]["inference_smoke"]["status"], "failed")
 
 
 if __name__ == "__main__":

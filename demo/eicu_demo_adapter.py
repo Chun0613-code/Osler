@@ -162,6 +162,7 @@ def build_monitoring_case(
     row = patient.iloc[0]
     return {
         "id": f"eicu-demo-{stay_id}",
+        "display_name": "Demo ICU Patient 01",
         "title": "Deidentified post-operative ICU monitoring trajectory",
         "case_source": "eicu_crd_demo_2.0.1",
         "source_metadata": {

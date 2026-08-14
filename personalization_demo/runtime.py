@@ -36,6 +36,17 @@ from osler_jepa.patient_state import (
 
 
 MODEL_VERSION = "patient-state-precision-20260813"
+RAW_INTERVAL_PHYSICAL_DOMAIN_NOTE = (
+    "Raw calibrated statistical interval may extend below physiological support; "
+    "no clinical interpretation."
+)
+TARGET_PHYSICAL_DOMAINS: dict[str, dict[str, object]] = {
+    "urine_output": {
+        "minimum": 0.0,
+        "maximum": None,
+        "unit": "mL/h",
+    },
+}
 
 
 @dataclass(frozen=True)
@@ -269,6 +280,7 @@ def capabilities() -> dict[str, Any]:
                             in _precision_cell_names()
                             else "illustrative"
                         ),
+                        **_target_metadata(target.target),
                     }
                     for target in system.targets
                 ],
@@ -462,6 +474,8 @@ def forecast(payload: dict[str, Any]) -> dict[str, Any]:
                 "can_personalize": True,
             })
     outputs = _select_requested_cells(payload, outputs)
+    for item in outputs:
+        item.update(_target_metadata(str(item["target"])))
     return {
         "patient_id": payload.get("patient_id"),
         "model_version": MODEL_VERSION,
@@ -578,20 +592,101 @@ def _precision_artifacts() -> dict[tuple[str, int], Any]:
 
 
 def model_health() -> dict[str, Any]:
-    """Strictly verify and load every serialized precision artifact."""
+    """Verify artifacts and execute a deterministic end-to-end inference smoke."""
 
     loaded, checks = _precision_artifact_load_state()
     expected = len(_precision_cell_names())
     loaded_count = len(loaded)
-    ready = expected == 12 and loaded_count == expected
+    integrity_ready = expected == 12 and loaded_count == expected
+    integrity_load = {
+        "status": "passed" if integrity_ready else "failed",
+        "ready": integrity_ready,
+        "expected_artifacts": expected,
+        "loaded_artifacts": loaded_count,
+        "checks": list(checks),
+    }
+    inference_smoke = _inference_smoke() if integrity_ready else {
+        "status": "skipped",
+        "ready": False,
+        "input": "canonical_sample_payload",
+        "expected_validated_artifacts": 12,
+        "validated_artifacts": 0,
+        "checks": [],
+        "error": "integrity_load did not pass",
+    }
+    ready = integrity_ready and inference_smoke["ready"]
     return {
         "status": "healthy" if ready else "degraded",
         "ready": ready,
         "model_version": MODEL_VERSION,
         "strict_manifest_verification": True,
-        "expected_artifacts": expected,
-        "loaded_artifacts": loaded_count,
-        "checks": list(checks),
+        "integrity_load": integrity_load,
+        "inference_smoke": inference_smoke,
+    }
+
+
+def _inference_smoke() -> dict[str, Any]:
+    """Exercise preprocessing, sklearn, torch forward, and conformal output."""
+
+    expected_cells = set(_precision_artifacts())
+    result: dict[str, Any] = {
+        "status": "failed",
+        "ready": False,
+        "input": "canonical_sample_payload",
+        "expected_validated_artifacts": 12,
+        "validated_artifacts": 0,
+        "checks": [],
+    }
+    try:
+        response = forecast(sample_payload())
+        validated = [
+            item for item in response["forecasts"]
+            if item.get("tier") == "validated_artifact"
+        ]
+        result["validated_artifacts"] = len(validated)
+        returned_cells: set[tuple[str, int]] = set()
+        cell_checks = []
+        for item in validated:
+            key = (str(item["target"]), int(item["horizon_hours"]))
+            returned_cells.add(key)
+            values = {
+                "population.point": item.get("population", {}).get("point"),
+                "personalized.point": item.get("personalized", {}).get("point"),
+                "lower": item.get("lower"),
+                "upper": item.get("upper"),
+            }
+            if not all(np.isfinite(float(value)) for value in values.values()):
+                raise ValueError(f"non-finite inference output for {key}")
+            lower = float(values["lower"])
+            point = float(values["personalized.point"])
+            upper = float(values["upper"])
+            if not lower <= point <= upper:
+                raise ValueError(f"invalid interval bounds for {key}")
+            cell_checks.append({
+                "cell": f"{key[0]}@{key[1]}h",
+                "status": "predicted",
+            })
+        if len(validated) != 12:
+            raise ValueError(
+                f"expected 12 validated_artifact predictions, got {len(validated)}"
+            )
+        if returned_cells != expected_cells:
+            raise ValueError("inference cells do not match the loaded artifact registry")
+        result.update({
+            "status": "passed",
+            "ready": True,
+            "checks": cell_checks,
+        })
+    except Exception as exc:
+        result["error"] = f"{type(exc).__name__}: {exc}"
+    return result
+
+
+def _target_metadata(target: str) -> dict[str, Any]:
+    domain = TARGET_PHYSICAL_DOMAINS.get(target)
+    return {
+        "physical_domain": dict(domain) if domain is not None else None,
+        "note": RAW_INTERVAL_PHYSICAL_DOMAIN_NOTE if domain is not None else None,
     }
 
 

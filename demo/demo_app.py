@@ -97,6 +97,12 @@ def api_forecast_validation_summary():
     return jsonify(validation_summary_response())
 
 
+@app.route("/api/forecast/fixtures")
+def api_forecast_fixtures():
+    path = _HERE / "forecast_api_fixtures.json"
+    return jsonify(json.loads(path.read_text(encoding="utf-8")))
+
+
 @app.route("/api/health/models")
 def api_model_health():
     health = model_health_response()

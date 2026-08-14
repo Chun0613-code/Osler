@@ -26,6 +26,7 @@ def build_forecast_api_fixtures() -> dict[str, Any]:
     case = cases_response["cases"][0]
     first_request = replay_forecast_request(case, 1)
     second_request = replay_forecast_request(case, 2)
+    third_request = replay_forecast_request(case, 3)
     unsupported_request = replay_forecast_request(case, 2)
     unsupported_request["requested_cells"] = [
         {"target": "lactate", "horizon_hours": 24}
@@ -52,6 +53,13 @@ def build_forecast_api_fixtures() -> dict[str, Any]:
             "status": 200,
             "request": second_request,
             "response": forecast_response(second_request),
+        },
+        "post_forecast_third_prefix": {
+            "method": "POST",
+            "path": "/api/forecast",
+            "status": 200,
+            "request": third_request,
+            "response": forecast_response(third_request),
         },
         "get_validation_summary": {
             "method": "GET",
@@ -80,13 +88,14 @@ def _unhealthy_health_example() -> dict[str, Any]:
     health = deepcopy(model_health_response())
     health["status"] = "degraded"
     health["ready"] = False
-    health["loaded_artifacts"] = max(0, health["expected_artifacts"] - 1)
-    if health["checks"]:
-        health["checks"][-1] = {
-            **health["checks"][-1],
-            "status": "error",
-            "error": "FixtureOnlyError: strict artifact verification failed",
-        }
+    health["inference_smoke"] = {
+        **health["inference_smoke"],
+        "status": "failed",
+        "ready": False,
+        "validated_artifacts": 0,
+        "checks": [],
+        "error": "FixtureOnlyError: deterministic inference smoke failed",
+    }
     return health
 
 
