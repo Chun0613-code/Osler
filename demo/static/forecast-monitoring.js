@@ -779,11 +779,21 @@
     return 48;
   }
 
+  // one geometry for every chart, shared with the replay frame updater so a
+  // per-frame path recomputation lands on exactly the same pixels
+  var CG = { W: 560, H: 186, PL: 46, PR: 14, PT: 14, PB: 30 };
+
   /* Observed = solid ink line with filled dots. Forecast = dashed blue with a
      hollow diamond at each due hour. Interval = a thin capped whisker, drawn
-     only where the artifact returned one. Anchor = a dashed oxide rule. */
+     only where the artifact returned one. Anchor = a dashed teal rule.
+
+     Replay mode (opt.sampleHold): the observed series renders as a
+     sample-and-hold step path clipped to the replay time opt.holdT, a cursor
+     line rides at opt.holdT, and the svg carries its geometry as data
+     attributes so updateReplayDom() can extend the path each animation frame
+     without rebuilding the chart. */
   function chartSvg(opt) {
-    var W = 560, H = 186, PL = 46, PR = 14, PT = 14, PB = 30;
+    var W = CG.W, H = CG.H, PL = CG.PL, PR = CG.PR, PT = CG.PT, PB = CG.PB;
     var obs = opt.obs, fcs = opt.forecasts, anchor = opt.anchor;
     var xs = [0], ys = [];
     obs.forEach(function (o) { xs.push(o.hour); ys.push(o.value); });
@@ -795,7 +805,9 @@
     });
     if (anchor != null) xs.push(anchor);
     ys = ys.filter(isNum);
-    if (!ys.length) return null;
+    // an empty chart is renderable when the caller supplies a fixed domain:
+    // the replay needs complete axes on screen before any value exists
+    if (!ys.length && !(opt.yDomain && isNum(opt.yDomain[0]) && isNum(opt.yDomain[1]))) return null;
     // Small multiples share one time axis, so the four panels stay comparable.
     var xMin = 0, xMax = isNum(opt.xMax) ? opt.xMax : Math.max.apply(null, xs);
     if (xMax - xMin < 1) xMax = xMin + 1;
@@ -818,7 +830,11 @@
     var X = function (h) { return PL + (h - xMin) / (xMax - xMin) * (W - PL - PR); };
     var Y = function (v) { return PT + (1 - (v - yMin) / (yMax - yMin)) * (H - PT - PB); };
 
-    var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" preserveAspectRatio="xMidYMid meet">';
+    var liveAttrs = opt.liveTarget
+      ? ' data-live-target="' + esc(opt.liveTarget) + '" data-ymin="' + yMin + '" data-ymax="' + yMax +
+        '" data-xmax="' + xMax + '" data-end="' + (isNum(opt.endHour) ? opt.endHour : xMax) + '"'
+      : '';
+    var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" preserveAspectRatio="xMidYMid meet"' + liveAttrs + '>';
     // y axis: three labelled gridlines only
     [yMax, (yMax + yMin) / 2, yMin].forEach(function (v) {
       var y = Y(v);
@@ -844,6 +860,16 @@
     s += '<text x="' + (W - PR) + '" y="' + (H - PB + 17) + '" text-anchor="end" font-size="12" ' +
       'font-family="IBM Plex Sans, sans-serif" fill="' + C.ink2 + '">' + esc(xLabel) + '</text>';
 
+    // recorded anchor positions — public replay metadata, drawn as faint
+    // rules from the very first (empty) render so the frame never changes
+    if (opt.anchorTimes) {
+      opt.anchorTimes.forEach(function (h) {
+        if (!isNum(h)) return;
+        var axp = X(h);
+        s += '<line class="chart-anchor" x1="' + axp.toFixed(1) + '" y1="' + PT + '" x2="' + axp.toFixed(1) +
+          '" y2="' + (H - PB) + '" stroke="' + C.dividerSoft + '" stroke-width="1" stroke-dasharray="2 4"/>';
+      });
+    }
     // anchor rule — teal: it marks provenance (the causal boundary), not an
     // error or a safety state, so it never borrows the oxide error colour
     if (anchor != null) {
@@ -882,7 +908,20 @@
       });
     }
     // observed
-    if (obs.length) {
+    if (opt.sampleHold) {
+      // replay: sample-and-hold step path clipped to the replay time, dots
+      // only for observations the cursor has actually reached
+      s += '<path fill="none" stroke="' + C.ink + '" stroke-width="1.6" data-obs-hold="1" d="' +
+        sampleHoldPath(obs, opt.holdT, X, Y) + '"/>';
+      obs.forEach(function (o) {
+        if (o.hour > opt.holdT + 1e-9) return;
+        var isNew = opt.newestHour != null && Math.abs(o.hour - opt.newestHour) < 1e-9;
+        s += '<g class="rt-point' + (isNew ? ' current' : '') + '" transform="translate(' +
+          X(o.hour).toFixed(1) + ' ' + Y(o.value).toFixed(1) + ')">' +
+          '<circle class="pulse" r="8"></circle>' +
+          '<circle r="' + (isNew ? 4.2 : 3) + '" fill="' + C.ink + '"></circle></g>';
+      });
+    } else if (obs.length) {
       s += '<polyline fill="none" stroke="' + C.ink + '" stroke-width="1.6" points="' +
         obs.map(function (o) { return X(o.hour).toFixed(1) + ',' + Y(o.value).toFixed(1); }).join(' ') + '"/>';
       obs.forEach(function (o, i) {
@@ -895,6 +934,12 @@
             '" r="7.5" fill="none" stroke="' + C.teal + '" stroke-width="1.2"/>';
         }
       });
+    }
+    // replay cursor: a thin teal time line riding at the current replay time
+    if (opt.cursor) {
+      var cxp = X(Math.max(0, Math.min(opt.holdT || 0, isNum(opt.endHour) ? opt.endHour : xMax)));
+      s += '<g data-chart-cursor transform="translate(' + cxp.toFixed(1) + ' 0)">' +
+        '<line class="rt-cursor" x1="0" y1="' + PT + '" x2="0" y2="' + (H - PB) + '"/></g>';
     }
     return s + '</svg>';
   }
@@ -946,24 +991,34 @@
 
   function chartCardHtml(c, target, resp, uptoStep, xLabel, xMax, opts) {
     opts = opts || {};
-    var obs = observationsFor(c, target, uptoStep);
+    var live = !!opts.live;
+    var obs = observationsFor(c, target, Math.max(-1, uptoStep));
     var fcs = resp ? forecastPointsFor(resp, target) : [];
     var unit = unitFor(target);
-    var anchor = resp ? num(resp._anchor_hour) : hourAt(c, uptoStep);
+    var anchor = resp ? num(resp._anchor_hour) : (uptoStep >= 0 ? hourAt(c, uptoStep) : null);
     var head = '<div class="chart-h"><b>' + esc(labelFor(target)) + '</b><span class="u">' + esc(unit) + '</span>';
-    if (obs.length) {
+    if (live) {
+      var held = heldValueFor(c, target, uptoStep, opts.holdT || 0);
+      head += '<span class="latest" data-chart-held="' + esc(target) + '">' +
+        (held == null ? '—' : esc(fmtVal(held, target))) + '</span>';
+    } else if (obs.length) {
       var last = obs[obs.length - 1];
       head += '<span class="latest">' + esc(fmtVal(last.value, target)) + ' @ ' + esc(fmtHour(last.hour)) + '</span>';
     } else {
       head += '<span class="latest">Not observed</span>';
     }
     head += '</div>';
-    var svg = (obs.length || fcs.length)
+    var svg = (obs.length || fcs.length || live)
       ? chartSvg({
           target: target, obs: obs, forecasts: fcs, anchor: anchor, xLabel: xLabel, xMax: xMax,
-          yDomain: opts.stable ? stableYDomain(c, target, uptoStep) : null,
+          yDomain: live ? replayYDomain(c, target, uptoStep)
+            : (opts.stable ? stableYDomain(c, target, uptoStep) : null),
           changed: opts.changed && opts.changed[target] ? opts.changed[target] : null,
-          newestHour: opts.newestHour
+          newestHour: opts.newestHour,
+          sampleHold: live, holdT: live ? (opts.holdT || 0) : null,
+          cursor: live, endHour: live ? replayEndHour(c) : null,
+          liveTarget: live ? target : null,
+          anchorTimes: live ? opts.anchorTimes : null
         })
       : null;
     var body = svg || '<div class="chart-none"><b>Not observed</b>No value up to ' + esc(fmtHour(anchor)) +
@@ -1569,31 +1624,43 @@
       '<div class="transport">' + transport + '</div></div>';
   }
 
-  /* ── continuous monitor stage ─────────────────────────────────────────
-     Fixed geometry: the axes, grid, anchor rules and series rows are laid out
-     once, identically before Play and at every later moment, so nothing about
-     the coordinate frame ever moves or is re-created per step.
+  /* ── continuous replay over the analytic charts ───────────────────────
+     There is no separate dark stage: the four white charts ARE the replay
+     surface. Their coordinate frame exists before Play — a fixed time axis
+     covering the recorded span plus every authorized horizon — and Play moves
+     a cursor across them while the observed traces grow.
 
-     Sample-and-hold: between one recorded anchor and the next, each trace
-     holds the last observed value and extends to the right with the cursor.
-     There is no slanted segment joining two anchors, because that would draw
-     values no one measured. A future observation appears in the SVG only once
-     the cursor reaches its recorded anchor; before that its value exists
-     nowhere in the DOM. */
-  var RX0 = 92, RX1 = 880;
-
+     Sample-and-hold: between one recorded anchor and the next, each observed
+     trace holds the last observed value and extends to the right with the
+     cursor. There is no slanted segment joining two anchors, because that
+     would draw values no one measured. A future observation appears in the
+     SVG only once the cursor reaches its recorded anchor; before that its
+     value exists nowhere in the DOM. */
   function replayEndHour(c) { return hourAt(c, lastStep(c)) || 1; }
-  function replayXPos(c, h) {
-    return RX0 + (Math.max(0, Math.min(h, replayEndHour(c))) / replayEndHour(c)) * (RX1 - RX0);
+
+  /* Structural x-domain, fixed from the very first render: recorded span plus
+     the longest authorized horizon (from the committed validation cell list,
+     not from any response), so the axis never rescales when a forecast
+     arrives. */
+  function replayMaxHorizon() {
+    var cells = (S.validation && S.validation.cells) || [];
+    var maxH = 0;
+    cells.forEach(function (x) {
+      var m = /@(\d+)h$/.exec(String(x.cell || ''));
+      if (m) maxH = Math.max(maxH, Number(m[1]));
+    });
+    return maxH || 48;
   }
-  function replayRowTop(row) { return 26 + row * 88; }
-  function replayYFor(target, row) {
-    var domain = REPLAY_DOMAINS[target];
-    var yBottom = replayRowTop(row) + 56;
-    return function (v) {
-      var ratio = Math.max(0, Math.min(1, (v - domain[0]) / (domain[1] - domain[0])));
-      return yBottom - 8 - ratio * 40;
-    };
+  function replayXMax(c) { return replayEndHour(c) + replayMaxHorizon(); }
+
+  /* Grow-only y-domain: the fixed per-series display window, widened by any
+     value a completed response has already returned. It can only grow at an
+     anchor, never per frame, so the frame never rescales under the cursor. */
+  function replayYDomain(c, target, uptoStep) {
+    var base = REPLAY_DOMAINS[target] || [0, 1];
+    var stable = stableYDomain(c, target, Math.max(0, uptoStep));
+    if (!stable) return base.slice();
+    return [Math.min(base[0], stable[0]), Math.max(base[1], stable[1])];
   }
 
   /* Path for one series: M at the first revealed observation, H segments that
@@ -1613,13 +1680,6 @@
     return d;
   }
 
-  function holdPathFor(c, target, step, T) {
-    var row = PRIMARY_SERIES.indexOf(target);
-    if (row < 0) return '';
-    var pts = observationsFor(c, target, Math.max(-1, step));
-    return sampleHoldPath(pts, T, function (h) { return replayXPos(c, h); }, replayYFor(target, row));
-  }
-
   function heldValueFor(c, target, step, T) {
     var pts = observationsFor(c, target, Math.max(-1, step));
     var held = null;
@@ -1629,63 +1689,17 @@
     return held;
   }
 
-  function replayTraceSvg(c, step) {
-    var end = replayEndHour(c);
-    var T = S.replayStarted ? S.replayTime : 0;
-    var x = function (h) { return replayXPos(c, h); };
-    var rows = '';
-    PRIMARY_SERIES.forEach(function (target, row) {
-      var top = replayRowTop(row);
-      var yBottom = top + 56;
-      var yf = replayYFor(target, row);
-      var pts = observationsFor(c, target, Math.max(-1, step));
-      rows += '<text class="rt-label" x="4" y="' + (top + 16) + '">' + esc(labelFor(target)) + '</text>' +
-        '<text class="rt-unit" x="4" y="' + (top + 33) + '">' + esc(unitFor(target)) + '</text>' +
-        '<line class="rt-grid" x1="' + RX0 + '" y1="' + yBottom + '" x2="' + RX1 + '" y2="' + yBottom + '"></line>';
-      rows += '<path class="rt-hold" data-hold="' + esc(target) + '" d="' +
-        sampleHoldPath(pts, T, x, yf) + '"></path>';
-      pts.forEach(function (p) {
-        if (p.hour > T + 1e-9) return;
-        var isCurrent = step >= 0 && isNum(hourAt(c, step)) && Math.abs(p.hour - hourAt(c, step)) < 1e-9;
-        // near the right edge the label flips to the left of the dot so it
-        // cannot collide with the held-value readout column
-        var nearEdge = p.hour > end * 0.88;
-        rows += '<g class="rt-point' + (isCurrent ? ' current' : '') + '" transform="translate(' +
-          x(p.hour).toFixed(1) + ' ' + yf(p.value).toFixed(1) + ')">' +
-          '<circle class="pulse" r="10"></circle><circle r="4"></circle>' +
-          '<text x="' + (nearEdge ? -8 : 8) + '" y="-7"' + (nearEdge ? ' text-anchor="end"' : '') + '>' +
-          esc(fmtVal(p.value, target)) + '</text></g>';
-      });
-      var held = heldValueFor(c, target, step, T);
-      rows += '<text class="rt-readout" data-hold-value="' + esc(target) + '" x="' + (RX1 + 14) + '" y="' +
-        (top + 34) + '">' + (held == null ? '—' : esc(fmtVal(held, target))) + '</text>';
-    });
-    // fixed hour axis: present before Play, never re-scaled
-    var axis = '<line class="rt-axis" x1="' + RX0 + '" y1="362" x2="' + RX1 + '" y2="362"></line>';
-    for (var t = 0; t <= Math.floor(end); t += 2) {
-      var tx = x(t);
-      axis += '<line class="rt-tick" x1="' + tx.toFixed(1) + '" y1="362" x2="' + tx.toFixed(1) + '" y2="367"></line>' +
-        '<text class="rt-hour" x="' + tx.toFixed(1) + '" y="381" text-anchor="middle">' + t + '</text>';
+  /* Which response the replay surface shows right now: the current anchor's,
+     or — while the current anchor's request is still in flight — the previous
+     completed one, explicitly marked as held. */
+  function replayShowingResponse(c) {
+    if (S.step < 0) return { resp: null, step: -1, holding: false };
+    var resp = responseFor(c, S.step);
+    if (resp) return { resp: resp, step: S.step, holding: false };
+    if (isPending(c, S.step) && S.step > 0 && responseFor(c, S.step - 1)) {
+      return { resp: responseFor(c, S.step - 1), step: S.step - 1, holding: true };
     }
-    axis += '<text class="rt-hour" x="' + (RX1 + 14) + '" y="381">h</text>';
-    // the three recorded anchor positions are public replay metadata; the
-    // measurement values at a withheld anchor are not drawn anywhere
-    var anchors = '';
-    for (var i = 0; i <= lastStep(c); i++) {
-      var ax = x(hourAt(c, i));
-      var revealed = step >= i;
-      anchors += '<line class="rt-anchor-line' + (revealed ? ' revealed' : '') + '" x1="' + ax.toFixed(1) +
-        '" y1="12" x2="' + ax.toFixed(1) + '" y2="362"></line>' +
-        '<text class="rt-anchor-hour' + (revealed ? ' revealed' : '') + '" x="' + ax.toFixed(1) +
-        '" y="399" text-anchor="middle">' + esc(fmtHourExact(hourAt(c, i))) + '</text>';
-    }
-    var cx = x(Math.max(0, Math.min(T, end)));
-    var cursor = '<g class="rt-cursor-g" data-replay-cursor transform="translate(' + cx.toFixed(1) + ' 0)">' +
-      '<rect class="rt-trail" x="-26" y="12" width="26" height="350"></rect>' +
-      '<line class="rt-cursor" x1="0" y1="12" x2="0" y2="362"></line></g>';
-    return '<svg viewBox="0 0 980 408" role="img" aria-label="Recorded observation anchors with ' +
-      'sample-and-hold traces; the last observed value is carried visually and no intermediate measurement exists">' +
-      axis + anchors + rows + cursor + '</svg>';
+    return { resp: null, step: S.step, holding: false };
   }
 
   function replayRowsHtml(c) {
@@ -1730,17 +1744,39 @@
     return out;
   }
 
+  /* The four analytic charts are the replay surface. They render with their
+     complete, fixed coordinate frame from the very first (pre-observation)
+     moment; each animation frame only extends the sample-and-hold paths and
+     moves the cursor, and only an anchor arrival adds real content. */
+  function replayChartsHtml(c) {
+    var show = replayShowingResponse(c);
+    var uptoStep = S.replayStarted ? S.step : -1;
+    var prev = (!show.holding && show.step > 0) ? responseFor(c, show.step - 1) : null;
+    var changed = changedMap(prev ? diffResponses(prev, show.resp) : null);
+    var anchorTimes = [];
+    for (var i = 0; i <= lastStep(c); i++) anchorTimes.push(hourAt(c, i));
+    var T = S.replayStarted ? S.replayTime : 0;
+    return '<div class="charts two">' + PRIMARY_SERIES.map(function (t) {
+      return chartCardHtml(c, t, show.resp, uptoStep, 'h after ICU admission', replayXMax(c), {
+        live: true, holdT: T, anchorTimes: anchorTimes, changed: changed,
+        newestHour: uptoStep >= 0 ? hourAt(c, uptoStep) : null
+      });
+    }).join('') + '</div>';
+  }
+
   /* One stage for every moment of the replay, including before Play: the same
-     coordinate frame, grid and anchor rules are on screen from the start, so
-     Play begins motion — it never swaps the page. */
+     coordinate frame and anchor rules are on screen from the start, so Play
+     begins motion — it never swaps the page. Light surfaces throughout; the
+     graphite tone stays reserved for the global header. */
   function replayStageHtml(c) {
     var end = replayEndHour(c);
     var started = S.replayStarted;
     var step = started ? S.step : -1;
     var speed = SPEEDS[S.speedIndex] || SPEEDS[1];
+    var chartsKey = (started ? step : -1) + '|' + (responseFor(c, Math.max(0, step)) && step >= 0 ? '1' : '0');
     return '<div class="shell replay-shell"><section class="replay-stage" aria-label="Retrospective replay timeline">' +
       '<div class="replay-stage-head">' +
-        '<div><span class="eyebrow">Replay time</span>' +
+        '<div class="replay-clock-wrap"><span class="eyebrow">Replay time</span>' +
           '<strong class="replay-clock" data-replay-time>' + (started ? S.replayTime.toFixed(2) : '0.00') + ' h</strong>' +
           '<span class="clock-range">of ' + esc(fmtHourExact(end)) + ' recorded</span></div>' +
         '<dl><div><dt>Last real observation</dt><dd data-replay-last>' +
@@ -1750,13 +1786,16 @@
           (S.lastForecastAt ? esc(fmtClock(S.lastForecastAt)) : 'none') + '</dd></div>' +
         '<div><dt>Playback speed</dt><dd data-replay-speed>' + esc(speed.label) + '</dd></div></dl>' +
         '<span class="prov-chip">Retrospective replay — not live monitoring</span></div>' +
-      '<div class="replay-traces" data-replay-traces data-rendered-step="' + step + '">' + replayTraceSvg(c, step) + '</div>' +
+      '<div class="replay-charts" data-replay-charts data-rendered-step="' + esc(chartsKey) + '">' +
+        replayChartsHtml(c) + '</div>' +
+      chartLegendHtml(started && step > 0) +
       '<div class="hold-mark"><span class="hm-line" aria-hidden="true"></span>' +
         'Last observation carried visually — no intermediate measurement</div>' +
       '<div class="interpolation-note"><b>Retrospective replay — not live monitoring.</b> Between recorded anchors ' +
-        'each trace holds the last observed value (sample-and-hold). The flat segment is visual interpolation only; ' +
-        'there is no intermediate measurement or model inference between anchors, and an observation value appears ' +
-        'only when the cursor reaches its recorded anchor.</div>' +
+        'each observed trace holds the last observed value (sample-and-hold). The flat segment is ' +
+        'visual interpolation only; there is no intermediate measurement or model inference between anchors, and an ' +
+        'observation value appears only when the cursor reaches its recorded anchor. Dashed blue markers are ' +
+        'forecast outputs issued at the current anchor — model output, not an observed patient state.</div>' +
       '<div class="input-provenance-note"><b>Input provenance:</b> The public demo rows do not provide ' +
         '<span class="mono">hist_fluids</span>, <span class="mono">hist_vasopressor</span>, ' +
         '<span class="mono">hist_diuretics</span>, <span class="mono">hist_renal_replacement</span>, or ' +
@@ -2182,17 +2221,12 @@
         esc(showing._prefix_rows) + ' trajectory row' + (showing._prefix_rows === 1 ? '' : 's') + ' sent · ' +
         validatedCount + ' validated artifact' + (validatedCount === 1 ? '' : 's') + '</span></div>' +
       sourceLineHtml(c, showingStep) + '</div>' +
-      '<div class="split wide replay-result-grid"><div class="main"><div class="charts two' +
-        (S.animateData ? ' fx-in' : '') + '">' + (function () {
-          var xMax = chartDomain(c, showing, showingStep, PRIMARY_SERIES, true);
-          return PRIMARY_SERIES.map(function (t) {
-            return chartCardHtml(c, t, showing, showingStep, 'h after ICU admission', xMax,
-              { stable: true, changed: changed, newestHour: hourAt(c, showingStep) });
-          }).join('');
-        })() + '</div>' + chartLegendHtml(!!(diff && diff.length)) +
-        '<p class="note" style="margin-top:12px">Forecast inference occurs only at the three recorded anchors. ' +
-        'The request contains the causal prefix through this anchor and no later observation. Prefix rows sent: <b>' +
-        esc(showing._prefix_rows) + '</b>.</p>' + chartsNoteHtml() + matchingNoteHtml(c) + '</div>' +
+      '<div class="split wide replay-result-grid"><div class="main">' +
+        '<p class="note">The four charts above are the replay surface: observed traces grow with the cursor and ' +
+        'the dashed blue markers show the forecast issued at this anchor. Forecast inference occurs only at the ' +
+        'three recorded anchors. The request contains the causal prefix through this anchor and no later ' +
+        'observation. Prefix rows sent: <b>' + esc(showing._prefix_rows) + '</b>.</p>' +
+        chartsNoteHtml() + matchingNoteHtml(c) + '</div>' +
         '<aside class="side">' + signalsHtml(c, showing, showingStep) + '</aside></div>' +
       (diff ? changeHtml(c, diff, showingStep - 1, showingStep) : '') +
       (S.step >= lastStep(c) && !holding
@@ -2202,6 +2236,38 @@
           '<div class="actions-row"><button class="btn" type="button" data-fm="sub" data-sub="validation">' +
           'Open validation evidence</button><button class="btn" type="button" data-fm="reset">' +
           'Reset to pre-observation state</button></div></div>' : '');
+  }
+
+  /* Per animation frame: extend the sample-and-hold paths, move the cursors
+     and refresh the held-value labels on the four live charts. No DOM nodes
+     are created or destroyed here, and no request is ever issued from a
+     frame. Geometry is read back from the svg's data attributes, so the
+     recomputed path lands on exactly the pixels the chart was built with. */
+  function replayChartFrameUpdate(c, root) {
+    var svgs = root.querySelectorAll('svg[data-live-target]');
+    Array.prototype.forEach.call(svgs, function (svg) {
+      var target = svg.getAttribute('data-live-target');
+      var yMin = Number(svg.getAttribute('data-ymin'));
+      var yMax = Number(svg.getAttribute('data-ymax'));
+      var xMax = Number(svg.getAttribute('data-xmax'));
+      var end = Number(svg.getAttribute('data-end'));
+      if (!isFinite(yMin) || !isFinite(yMax) || !isFinite(xMax) || yMax <= yMin) return;
+      var X = function (h) { return CG.PL + (h / xMax) * (CG.W - CG.PL - CG.PR); };
+      var Y = function (v) { return CG.PT + (1 - (v - yMin) / (yMax - yMin)) * (CG.H - CG.PT - CG.PB); };
+      var pts = observationsFor(c, target, Math.max(-1, S.step));
+      var hold = svg.querySelector('[data-obs-hold]');
+      if (hold) hold.setAttribute('d', sampleHoldPath(pts, S.replayTime, X, Y));
+      var cur = svg.querySelector('[data-chart-cursor]');
+      if (cur) {
+        cur.setAttribute('transform',
+          'translate(' + X(Math.max(0, Math.min(S.replayTime, isFinite(end) ? end : xMax))).toFixed(1) + ' 0)');
+      }
+      var heldEl = root.querySelector('[data-chart-held="' + target + '"]');
+      if (heldEl) {
+        var held = heldValueFor(c, target, S.step, S.replayTime);
+        heldEl.textContent = held == null ? '—' : fmtVal(held, target);
+      }
+    });
   }
 
   function updateReplayDom(c, opts) {
@@ -2229,30 +2295,17 @@
       scrub.value = String(Math.min(S.replayTime, S.replayFurthestTime));
       scrub.disabled = false;
     }
-    var traces = root.querySelector('[data-replay-traces]');
-    if (traces && traces.getAttribute('data-rendered-step') !== String(S.step)) {
-      // an anchor was reached (or the user sought across one): rebuild the SVG
-      // with the newly revealed observation. The coordinate frame is byte-for-
-      // byte identical, so only the new point and its step transition appear.
-      traces.innerHTML = replayTraceSvg(c, S.step);
-      traces.setAttribute('data-rendered-step', String(S.step));
-    } else if (traces) {
-      // per animation frame: extend the sample-and-hold paths, refresh the
-      // held-value readouts and move the cursor. No DOM nodes are created or
-      // destroyed here, and no request is ever issued from a frame.
-      PRIMARY_SERIES.forEach(function (target) {
-        var pathEl = traces.querySelector('[data-hold="' + target + '"]');
-        if (pathEl) pathEl.setAttribute('d', holdPathFor(c, target, S.step, S.replayTime));
-        var readout = traces.querySelector('[data-hold-value="' + target + '"]');
-        if (readout) {
-          var held = heldValueFor(c, target, S.step, S.replayTime);
-          readout.textContent = held == null ? '—' : fmtVal(held, target);
-        }
-      });
-      var cursorG = traces.querySelector('[data-replay-cursor]');
-      if (cursorG) {
-        cursorG.setAttribute('transform',
-          'translate(' + replayXPos(c, S.replayTime).toFixed(1) + ' 0)');
+    var charts = root.querySelector('[data-replay-charts]');
+    if (charts) {
+      var key = S.step + '|' + (responseFor(c, S.step) ? '1' : '0');
+      if (charts.getAttribute('data-rendered-step') !== key) {
+        // an anchor was reached, a response arrived, or the user sought across
+        // an anchor: rebuild the four charts with the newly available real
+        // content. The coordinate frame is identical, so nothing jumps.
+        charts.innerHTML = replayChartsHtml(c);
+        charts.setAttribute('data-rendered-step', key);
+      } else {
+        replayChartFrameUpdate(c, root);
       }
     }
     var observations = root.querySelector('[data-replay-observations]');

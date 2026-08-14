@@ -622,34 +622,40 @@ class ReplayMonitorStageTests(unittest.TestCase):
         intro = function_body("replayIntroHtml")
         self.assertIn("replayStageHtml(c)", intro)
         stage = function_body("replayStageHtml")
-        self.assertIn("replayTraceSvg(c, step)", stage)
-        svg = function_body("replayTraceSvg")
-        # the hour axis and the recorded anchor rules are drawn for any step,
-        # including step -1 before the first observation is revealed
-        self.assertIn("rt-axis", svg)
-        self.assertIn("rt-anchor-line", svg)
-        self.assertIn("observationsFor(c, target, Math.max(-1, step))", svg)
+        self.assertIn("replayChartsHtml(c)", stage)
+        # an empty chart is renderable when a fixed domain is supplied, so the
+        # complete axes exist before any observation or forecast does
+        svg = function_body("chartSvg")
+        self.assertIn("if (!ys.length && !(opt.yDomain", svg)
+        charts = function_body("replayChartsHtml")
+        # the x-domain is structural (recorded span + committed horizons) and
+        # never rescales when a response arrives
+        self.assertIn("replayXMax(c)", charts)
+        self.assertIn("anchorTimes", charts)
 
     def test_traces_use_sample_and_hold_not_slanted_interpolation(self):
         path = function_body("sampleHoldPath")
         self.assertIn("' H '", path)
         self.assertIn("' V '", path)
-        svg = function_body("replayTraceSvg")
-        self.assertIn("sampleHoldPath", svg)
-        self.assertNotIn("polyline", svg)
+        svg = function_body("chartSvg")
+        self.assertIn("sampleHoldPath(obs, opt.holdT, X, Y)", svg)
+        self.assertIn("data-obs-hold", svg)
         self.assertIn("Last observation carried visually — no intermediate measurement", SCRIPT)
 
     def test_future_values_never_enter_the_svg_before_their_anchor(self):
-        svg = function_body("replayTraceSvg")
-        self.assertIn("if (p.hour > T + 1e-9) return;", svg)
+        svg = function_body("chartSvg")
+        self.assertIn("if (o.hour > opt.holdT + 1e-9) return;", svg)
         self.assertIn("if (pts[i].hour > T + 1e-9) break;", function_body("sampleHoldPath"))
         held = function_body("heldValueFor")
         self.assertIn("pts[i].hour <= T + 1e-9", held)
 
     def test_frame_updates_extend_paths_without_recreating_the_stage(self):
         upd = function_body("updateReplayDom")
-        self.assertIn("holdPathFor(c, target, S.step, S.replayTime)", upd)
-        self.assertIn("setAttribute('transform'", upd)
+        self.assertIn("replayChartFrameUpdate(c, root)", upd)
+        frame = function_body("replayChartFrameUpdate")
+        self.assertIn("sampleHoldPath(pts, S.replayTime, X, Y)", frame)
+        self.assertIn("setAttribute('transform'", frame)
+        self.assertNotIn("fetchStep", frame)
         self.assertNotIn("fetchStep", upd)
         render = function_body("renderMonitoring")
         self.assertIn("root.querySelector('.replay-stage')", render)
