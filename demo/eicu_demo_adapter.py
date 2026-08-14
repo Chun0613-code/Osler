@@ -48,6 +48,36 @@ VITAL_MAP = {
     "temperature": "temperature",
 }
 
+VARIABLE_UNITS = {
+    "hours_since_onset": "h",
+    "bun": "mg/dL",
+    "bicarbonate": "mmol/L",
+    "anion_gap": "mmol/L",
+    "creatinine": "mg/dL",
+    "glucose": "mg/dL",
+    "potassium": "mmol/L",
+    "sodium": "mmol/L",
+    "heart_rate": "beats/min",
+    "respiratory_rate": "breaths/min",
+    "o2sat": "%",
+    "map": "mmHg",
+    "temperature": "degC",
+    "urine_output": "mL/h",
+    "bun_age_hr": "h",
+    "bicarbonate_age_hr": "h",
+    "anion_gap_age_hr": "h",
+    "creatinine_age_hr": "h",
+    "glucose_age_hr": "h",
+    "potassium_age_hr": "h",
+    "sodium_age_hr": "h",
+    "heart_rate_age_hr": "h",
+    "respiratory_rate_age_hr": "h",
+    "o2sat_age_hr": "h",
+    "map_age_hr": "h",
+    "temperature_age_hr": "h",
+    "urine_output_age_hr": "h",
+}
+
 
 def build_monitoring_case(
     data_dir: str | Path,
@@ -120,6 +150,15 @@ def build_monitoring_case(
         _snapshot(offset, labs=labs, vitals=vitals, urine=urine)
         for offset in offsets
     ]
+    observation_events = [
+        {
+            "event_id": f"observation-{index + 1}",
+            "available_at_hour": observation["hours_since_onset"],
+            "signal": "research_signal",
+            "observation": observation,
+        }
+        for index, observation in enumerate(trajectory)
+    ]
     row = patient.iloc[0]
     return {
         "id": f"eicu-demo-{stay_id}",
@@ -137,12 +176,23 @@ def build_monitoring_case(
             "source_admission_label": _json_scalar(row.get("apacheadmissiondx")),
             "diagnostic_claim_allowed": False,
         },
-        "forecast_payload": {
-            "patient_id": f"eicu-demo-{stay_id}",
-            "case_source": "eicu_crd_demo_2.0.1",
-            "anchor_hour": anchor / 60.0,
-            "trajectory": trajectory,
+        "replay_metadata": {
+            "retrospective": True,
+            "not_live": True,
+            "initial_visible_count": 1,
+            "recommended_step": "next_observation",
+            "recommended_step_count": 1,
+            "forecast_request_policy": "trajectory_prefix_only",
+            "variable_units": VARIABLE_UNITS,
+            "forecast_observation_matching": {
+                "supported": False,
+                "clinical_accuracy_claim_allowed": False,
+                "reason": (
+                    "No exact due-hour matching contract is enabled for this demo."
+                ),
+            },
         },
+        "observation_events": observation_events,
         "safety_boundary": {
             "factual_research_only": True,
             "diagnostic_claim_allowed": False,

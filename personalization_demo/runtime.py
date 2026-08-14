@@ -354,8 +354,12 @@ def make_frame(payload: dict[str, Any]) -> pd.DataFrame:
     frame = pd.DataFrame(normalized)
     frame["stay_id"] = "demo"
     frame = frame.sort_values("hours_since_onset").reset_index(drop=True)
-    if anchor_hour is not None and bool((frame["hours_since_onset"] > anchor_hour).any()):
-        raise ValueError("trajectory contains observations after anchor_hour")
+    if anchor_hour is not None:
+        if bool((frame["hours_since_onset"] > anchor_hour).any()):
+            raise ValueError("trajectory contains observations after anchor_hour")
+        latest_hour = float(frame["hours_since_onset"].iloc[-1])
+        if not np.isclose(latest_hour, anchor_hour, rtol=0.0, atol=1e-9):
+            raise ValueError("anchor_hour must equal the latest trajectory observation")
     return frame
 
 

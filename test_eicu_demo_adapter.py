@@ -49,12 +49,21 @@ class EicuDemoAdapterTests(unittest.TestCase):
             ]).to_csv(root / "intakeOutput.csv", index=False)
 
             case = build_monitoring_case(root, 7, anchor_offset_minutes=120)
-            trajectory = case["forecast_payload"]["trajectory"]
+            events = case["observation_events"]
+            trajectory = [event["observation"] for event in events]
             self.assertEqual([row["hours_since_onset"] for row in trajectory], [1.0, 2.0])
             self.assertEqual(trajectory[-1]["creatinine"], 1.2)
             self.assertEqual(trajectory[-1]["heart_rate"], 82.0)
             self.assertNotIn(9.9, [row.get("creatinine") for row in trajectory])
             self.assertEqual(case["case_source"], "eicu_crd_demo_2.0.1")
+            self.assertTrue(case["replay_metadata"]["retrospective"])
+            self.assertTrue(case["replay_metadata"]["not_live"])
+            self.assertEqual(
+                [event["available_at_hour"] for event in events],
+                [1.0, 2.0],
+            )
+            units = case["replay_metadata"]["variable_units"]
+            self.assertTrue(all(set(row).issubset(units) for row in trajectory))
 
 
 if __name__ == "__main__":

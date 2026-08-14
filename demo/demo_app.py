@@ -38,6 +38,7 @@ from demo.forecast_api import (
     capabilities_response,
     forecast_response,
     model_health_response,
+    monitoring_cases_response,
     validation_summary_response,
 )
 
@@ -58,10 +59,6 @@ def _load_optional(name: str) -> dict:
 
 CLINICAL = _load_optional("demo_clinical_data.json")
 SAMPLE_CASES = json.loads((_HERE / "sample_cases.json").read_text(encoding="utf-8"))["cases"]
-MONITORING_CASES = json.loads(
-    (_HERE / "monitoring_cases.json").read_text(encoding="utf-8")
-)
-
 # patient_id -> last analyze bundle, used to ground chat.
 _CACHE: dict[str, dict] = {}
 
@@ -79,12 +76,7 @@ def api_cases():
 
 @app.route("/api/monitoring/cases")
 def api_monitoring_cases():
-    contract = capabilities_response()
-    return jsonify({
-        **MONITORING_CASES,
-        "model_version": contract["model_version"],
-        "safety_boundary": contract["safety_boundary"],
-    })
+    return jsonify(monitoring_cases_response())
 
 
 @app.route("/api/forecast", methods=["POST"])

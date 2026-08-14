@@ -1,6 +1,7 @@
 import unittest
 
 from demo.demo_app import SAMPLE_CASES, app
+from demo.forecast_api import replay_forecast_request
 
 
 class DemoForecastFlaskTests(unittest.TestCase):
@@ -22,7 +23,8 @@ class DemoForecastFlaskTests(unittest.TestCase):
         self.assertEqual(cases_response.status_code, 200)
         case = cases_response.get_json()["cases"][0]
         self.assertEqual(case["case_source"], "eicu_crd_demo_2.0.1")
-        response = self.client.post("/api/forecast", json=case["forecast_payload"])
+        payload = replay_forecast_request(case, 2)
+        response = self.client.post("/api/forecast", json=payload)
         self.assertEqual(response.status_code, 200)
         body = response.get_json()
         validated = [
@@ -34,8 +36,8 @@ class DemoForecastFlaskTests(unittest.TestCase):
 
     def test_future_data_is_rejected_over_http(self):
         case = self.client.get("/api/monitoring/cases").get_json()["cases"][0]
-        payload = case["forecast_payload"]
-        payload["anchor_hour"] = 6
+        payload = replay_forecast_request(case, 2)
+        payload["trajectory"].append(case["observation_events"][2]["observation"])
         response = self.client.post("/api/forecast", json=payload)
         self.assertEqual(response.status_code, 400)
         self.assertIn("after anchor_hour", response.get_json()["error"])
@@ -45,7 +47,8 @@ class DemoForecastFlaskTests(unittest.TestCase):
         before = self.client.post("/api/analyze", json=analyze_payload)
         self.assertEqual(before.status_code, 200)
         case = self.client.get("/api/monitoring/cases").get_json()["cases"][0]
-        forecast = self.client.post("/api/forecast", json=case["forecast_payload"])
+        payload = replay_forecast_request(case, 2)
+        forecast = self.client.post("/api/forecast", json=payload)
         self.assertEqual(forecast.status_code, 200)
         after = self.client.post("/api/analyze", json=analyze_payload)
         self.assertEqual(after.status_code, 200)
@@ -56,6 +59,17 @@ class DemoForecastFlaskTests(unittest.TestCase):
             item["drug"] for item in after.get_json()["result"]["candidates"]
         ]
         self.assertEqual(after_drugs, before_drugs)
+
+    def test_flask_serializes_full_replay_contract(self):
+        response = self.client.get("/api/monitoring/cases")
+        self.assertEqual(response.status_code, 200)
+        body = response.get_json()
+        case = body["cases"][0]
+        self.assertTrue(case["replay_metadata"]["retrospective"])
+        self.assertTrue(case["replay_metadata"]["not_live"])
+        self.assertEqual(len(case["observation_events"]), 3)
+        self.assertIn("source_metadata", case)
+        self.assertIn("safety_boundary", case)
 
 
 if __name__ == "__main__":
