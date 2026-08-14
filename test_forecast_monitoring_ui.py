@@ -189,7 +189,7 @@ class ForecastIsUserDrivenTests(unittest.TestCase):
         self.assertIn("withheld — not submitted", intro)
         self.assertNotIn("responseFor", intro)
         bar = function_body("replayBarHtml")
-        self.assertIn("Start live replay", bar)
+        self.assertIn("Play retrospective replay", bar)
         self.assertIn("none has been submitted to the model", bar)
 
     def test_reset_returns_to_the_pre_observation_state_without_requesting(self):
@@ -198,10 +198,48 @@ class ForecastIsUserDrivenTests(unittest.TestCase):
         self.assertNotIn("fetchStep", body)
         self.assertNotIn("gotoStep", body)
 
-    def test_start_live_replay_forces_a_real_first_request(self):
+    def test_play_starts_the_clock_without_immediately_jumping_or_requesting(self):
         body = function_body("startReplay")
         self.assertIn("S.replayStarted = true", body)
-        self.assertIn("gotoStep(0, { force: true })", body)
+        self.assertIn("S.step = -1", body)
+        self.assertIn("S.replayTime = 0", body)
+        self.assertIn("return startPlay()", body)
+        self.assertNotIn("gotoStep", body)
+
+    def test_continuous_replay_uses_fixed_anchors_and_no_frame_requests(self):
+        play = function_body("startPlay")
+        self.assertIn("window.requestAnimationFrame(frame)", play)
+        self.assertIn("SPEEDS[S.speedIndex].rate", play)
+        self.assertIn("gotoStep(next)", play)
+        self.assertNotIn("fetchStep", play)
+        self.assertIn("REPLAY_DURATION_MS = 16000", SCRIPT)
+        self.assertIn("visual interpolation only", SCRIPT)
+        self.assertIn("no intermediate measurement or model inference", SCRIPT)
+
+    def test_pause_seek_and_reset_do_not_request_or_reveal_future(self):
+        self.assertNotIn("fetchStep", function_body("stopPlay"))
+        seek = function_body("seekReplay")
+        self.assertIn("Math.min(replayTime, S.replayFurthestTime)", seek)
+        self.assertIn("replayStepAtTime", seek)
+        self.assertNotIn("fetchStep", seek)
+        rows = function_body("replayRowsHtml")
+        self.assertIn("measurement values not in DOM or model prefix", rows)
+        self.assertIn("if (i > S.step)", rows)
+
+    def test_replay_stage_has_accessible_transport_and_scrubber(self):
+        stage = function_body("replayStageHtml")
+        self.assertIn('data-replay-time', stage)
+        self.assertIn('data-fm=\"scrub\"', stage)
+        self.assertIn('aria-label=\"Seek within elapsed retrospective replay time\"', stage)
+        self.assertIn("Retrospective replay — not live monitoring", stage)
+        self.assertIn("replayEventsHtml", stage)
+
+    def test_reduced_motion_shortens_replay_and_removes_cursor_effects(self):
+        play = function_body("startPlay")
+        self.assertIn("var duration = REDUCED ? 2400 : REPLAY_DURATION_MS", play)
+        self.assertIn(".rt-point.current .pulse", STYLES)
+        self.assertIn("animation: none", STYLES)
+        self.assertIn(".rt-cursor", STYLES)
 
 
 class ForecastRequestProvenanceTests(unittest.TestCase):
@@ -219,7 +257,6 @@ class ForecastRequestProvenanceTests(unittest.TestCase):
 
     def test_every_explicit_run_control_forces_a_live_request(self):
         self.assertIn("fetchStep(c, lastStep(c), { force: true })", function_body("runSnapshot"))
-        self.assertIn("gotoStep(0, { force: true })", function_body("startReplay"))
         self.assertIn("'rerun-step'", SCRIPT)
         self.assertIn("gotoStep(S.step, { force: true })", SCRIPT)
         self.assertIn("data-fm=\"rerun-snapshot\"", SCRIPT)

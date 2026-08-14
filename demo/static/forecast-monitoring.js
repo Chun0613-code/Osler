@@ -69,10 +69,14 @@
   var PRIMARY_SERIES = ['creatinine', 'bun', 'urine_output', 'map'];
   var EXTRA_SERIES = ['glucose', 'potassium', 'heart_rate'];
   var SPEEDS = [
-    { label: '0.5×', ms: 5200 },
-    { label: '1×', ms: 2600 },
-    { label: '2×', ms: 1300 }
+    { label: '0.5×', rate: 0.5 },
+    { label: '1×', rate: 1 },
+    { label: '2×', rate: 2 }
   ];
+  var REPLAY_DURATION_MS = 16000;
+  var REPLAY_DOMAINS = {
+    creatinine: [0, 3], bun: [0, 60], urine_output: [0, 50], map: [40, 110]
+  };
   // one ordered explanatory stage every 220 ms — a walk over information that is
   // already on screen, never a wait for it
   var STAGE_MS = 220;
@@ -111,10 +115,13 @@
     stageIndex: -1,     // explanatory presentation pointer, -1 = not started
     stageTimers: [],
     replayStarted: false,   // false = pre-observation state, nothing requested
-    step: 0,
+    step: -1,
     playing: false,
     speedIndex: 1,
     playToken: 0,
+    replayTime: 0,
+    replayFurthestTime: 0,
+    replayMaxStep: -1,
     animateData: false, // set for exactly one render after a data change
     fixture: null,      // loaded cached demonstration payloads (explicit click only)
     fixtureNotice: null,
@@ -1419,51 +1426,66 @@
   }
 
   // ── replay toolbar ─────────────────────────────────────────────────────
-  /* Withheld observations appear on the timeline as hollow ticks, so exclusion
-     is shown rather than explained in prose. Before the replay starts every
-     tick is hollow: no observation has been submitted yet. */
+  function replayStepAtTime(c, replayTime) {
+    var found = -1;
+    for (var i = 0; i <= lastStep(c); i++) {
+      if (hourAt(c, i) <= replayTime + 1e-7) found = i;
+    }
+    return found;
+  }
+
+  function replayPercent(c, replayTime) {
+    var end = hourAt(c, lastStep(c)) || 1;
+    return Math.max(0, Math.min(100, (replayTime / end) * 100));
+  }
+
+  /* Withheld observations appear as hollow ticks. Their timestamps are public
+     replay metadata; their measurements and forecast values do not enter the
+     DOM until the cursor reaches the corresponding anchor. */
   function replayBarHtml(c) {
     var total = lastStep(c) + 1;
     var started = S.replayStarted;
-    var busy = isPending(c, S.step);
+    var busy = S.step >= 0 && isPending(c, S.step);
     var lastH = hourAt(c, lastStep(c)) || 1;
     var ticks = '';
     for (var i = 0; i < total; i++) {
       var h = hourAt(c, i) || 0;
       var pct = lastH > 0 ? (h / lastH) * 100 : 0;
-      var cls = !started ? 'tick withheld'
-        : (i === S.step ? 'tick current' : (i > S.step ? 'tick withheld' : 'tick'));
+      var cls = !started || i > S.step ? 'tick withheld'
+        : (i === S.step ? 'tick current' : 'tick');
       ticks += '<span class="' + cls + '" style="left:' + pct.toFixed(1) + '%"></span>';
     }
-    var withheld = started ? total - 1 - S.step : total;
+    var withheld = started ? total - 1 - Math.max(-1, S.step) : total;
     var caption = !started
       ? total + ' recorded observations withheld — none has been submitted to the model'
       : (withheld > 0
         ? withheld + ' later observation' + (withheld === 1 ? '' : 's') + ' withheld — not yet in model'
         : 'full prefix posted — no observation withheld');
     var anchorBlock = started
-      ? '<div class="replay-anchor"><span class="big">' + esc(fmtHourExact(hourAt(c, S.step))) + '</span>' +
-        '<span class="d">anchor · step ' + (S.step + 1) + ' of ' + total + ' · ' + (S.step + 1) +
-        ' observation' + (S.step === 0 ? '' : 's') + ' visible · ' + (S.step + 1) +
-        ' prefix row' + (S.step === 0 ? '' : 's') + ' sent</span></div>'
+      ? '<div class="replay-anchor"><span class="big">Retrospective replay</span>' +
+        '<span class="d">' + (S.step < 0 ? 'before first observation · nothing sent' :
+          'last anchor ' + esc(fmtHourExact(hourAt(c, S.step))) + ' · ' + (S.step + 1) +
+          ' observation' + (S.step === 0 ? '' : 's') + ' visible · ' + (S.step + 1) +
+          ' prefix row' + (S.step === 0 ? '' : 's') + ' sent') + '</span></div>'
       : '<div class="replay-anchor"><span class="big idle">—</span>' +
         '<span class="d">no anchor · 0 of ' + total + ' observations visible · nothing sent to the model</span></div>';
     var transport = started
-      ? '<button class="btn sm" type="button" data-fm="prev"' + (S.step <= 0 ? ' disabled' : '') + '>◀ Previous</button>' +
+      ? '<button class="btn sm" type="button" data-fm="prev"' + (S.step < 0 ? ' disabled' : '') + '>◀ Previous</button>' +
         (S.playing
           ? '<button class="btn sm primary" type="button" data-fm="pause">❚❚ Pause</button>'
           : '<button class="btn sm primary" type="button" data-fm="play"' +
-            (S.step >= lastStep(c) ? ' disabled' : '') + '>▶ Play</button>') +
+            (S.replayTime >= lastH - 1e-7 ? ' disabled' : '') + '>▶ Continue</button>') +
         '<button class="btn sm" type="button" data-fm="next"' + (S.step >= lastStep(c) ? ' disabled' : '') + '>Next ▶</button>' +
         '<span class="speed-wrap">Speed <select class="select" data-fm="speed" aria-label="Replay speed">' +
           SPEEDS.map(function (s, i) {
             return '<option value="' + i + '"' + (i === S.speedIndex ? ' selected' : '') + '>' + esc(s.label) + '</option>';
           }).join('') + '</select></span>' +
         '<button class="btn sm" type="button" data-fm="reset">Reset</button>' +
-        '<button class="btn sm" type="button" data-fm="rerun-step">Re-run this step live</button>' +
+        '<button class="btn sm" type="button" data-fm="rerun-step"' + (S.step < 0 ? ' disabled' : '') +
+          '>Re-run this anchor live</button>' +
         (busy ? '<span class="meta"><span class="spin"></span> requesting…</span>' : '')
       : '<button class="btn sm primary" type="button" data-fm="start-replay"' +
-        (healthy() ? '' : ' disabled') + '>▶ Start live replay</button>' +
+        (healthy() ? '' : ' disabled') + '>▶ Play retrospective replay</button>' +
         (busy ? '<span class="meta"><span class="spin"></span> requesting…</span>' : '');
     return '<div class="replay-bar">' + anchorBlock +
       '<div class="track-wrap"><div class="track">' +
@@ -1471,6 +1493,102 @@
         '<div class="track-labels"><span>0 h</span><span class="cap">' + esc(caption) + '</span>' +
         '<span>' + esc(fmtHour(lastH)) + '</span></div></div>' +
       '<div class="transport">' + transport + '</div></div>';
+  }
+
+  function replayTraceSvg(c, step) {
+    var end = hourAt(c, lastStep(c)) || 1;
+    var x = function (h) { return 92 + (Math.max(0, h) / end) * 858; };
+    var rows = '';
+    PRIMARY_SERIES.forEach(function (target, row) {
+      var top = 28 + row * 74;
+      var domain = REPLAY_DOMAINS[target];
+      var points = [];
+      for (var i = 0; i <= step; i++) {
+        var obs = trajectoryOf(c)[i] || {};
+        var value = num(obs[target]);
+        if (value == null) continue;
+        var ratio = Math.max(0, Math.min(1, (value - domain[0]) / (domain[1] - domain[0])));
+        points.push({ x: x(hourAt(c, i)), y: top + 43 - ratio * 34, value: value, index: i });
+      }
+      rows += '<text class="rt-label" x="4" y="' + (top + 17) + '">' + esc(labelFor(target)) + '</text>' +
+        '<text class="rt-unit" x="4" y="' + (top + 34) + '">' + esc(unitFor(target)) + '</text>' +
+        '<line class="rt-grid" x1="92" y1="' + (top + 43) + '" x2="950" y2="' + (top + 43) + '"></line>';
+      if (points.length > 1) {
+        rows += '<polyline class="rt-path" points="' + points.map(function (p) {
+          return p.x.toFixed(1) + ',' + p.y.toFixed(1);
+        }).join(' ') + '"></polyline>';
+      }
+      points.forEach(function (p) {
+        var current = p.index === step ? ' current' : '';
+        rows += '<g class="rt-point' + current + '" transform="translate(' + p.x.toFixed(1) + ' ' + p.y.toFixed(1) + ')">' +
+          '<circle class="pulse" r="10"></circle><circle r="4"></circle>' +
+          '<text x="8" y="-7">' + esc(fmtVal(p.value, target)) + '</text></g>';
+      });
+    });
+    var ticks = '';
+    for (var i = 0; i <= lastStep(c); i++) {
+      var tickX = x(hourAt(c, i));
+      ticks += '<line class="rt-anchor-line" x1="' + tickX.toFixed(1) + '" y1="12" x2="' +
+        tickX.toFixed(1) + '" y2="326"></line><text class="rt-hour" x="' + tickX.toFixed(1) +
+        '" y="347" text-anchor="middle">' + esc(fmtHourExact(hourAt(c, i))) + '</text>';
+    }
+    return '<svg viewBox="0 0 980 360" role="img" aria-label="Recorded observation anchors and visual interpolation; no intermediate measurements">' +
+      ticks + rows + '<line class="rt-cursor" data-replay-cursor x1="92" y1="8" x2="92" y2="326"></line></svg>';
+  }
+
+  function replayRowsHtml(c) {
+    var rows = '';
+    for (var i = 0; i <= lastStep(c); i++) {
+      if (i > S.step) {
+        rows += '<li class="future"><span>' + esc(fmtHourExact(hourAt(c, i))) + '</span>' +
+          '<b>Withheld</b><small>measurement values not in DOM or model prefix</small></li>';
+        continue;
+      }
+      var o = trajectoryOf(c)[i] || {};
+      rows += '<li class="observed' + (i === S.step ? ' current' : '') + '"><span>' +
+        esc(fmtHourExact(hourAt(c, i))) + '</span><b>Observation ' + (i + 1) + '</b><small>' +
+        'Cr ' + esc(fmtVal(num(o.creatinine), 'creatinine')) + ' · BUN ' + esc(fmtVal(num(o.bun), 'bun')) +
+        ' · UO ' + (num(o.urine_output) == null ? 'unavailable' : esc(fmtVal(num(o.urine_output), 'urine_output'))) +
+        ' · MAP ' + esc(fmtVal(num(o.map), 'map')) + '</small></li>';
+    }
+    return rows;
+  }
+
+  function replayEventsHtml(c) {
+    if (S.step < 0) return '<li><span>Waiting</span><b>No observation or forecast has been revealed.</b></li>';
+    var out = '';
+    for (var i = 0; i <= S.step; i++) {
+      var resp = responseFor(c, i);
+      var pending = isPending(c, i);
+      var count = resp ? ofTier(resp, 'validated').length : 0;
+      out += '<li><span>' + esc(fmtHourExact(hourAt(c, i))) + '</span><b>Observation ' + (i + 1) +
+        ' revealed · ' + (i + 1) + '-row prefix ' + (pending ? 'sending…' : 'sent') + '</b><small>' +
+        (resp ? count + ' validated artifacts returned · ' + esc((resultSource(c, i) || {}).label || 'result') :
+          (S.stepError && i === S.step ? esc(S.stepError) : 'forecast response pending')) + '</small></li>';
+    }
+    return out;
+  }
+
+  function replayStageHtml(c) {
+    var end = hourAt(c, lastStep(c)) || 1;
+    return '<div class="shell replay-shell"><section class="replay-stage" aria-label="Retrospective replay timeline">' +
+      '<div class="replay-stage-head"><div><span class="eyebrow">Current replay time</span>' +
+        '<strong class="replay-clock" data-replay-time>0.00 h</strong></div>' +
+        '<dl><div><dt>Last observation</dt><dd data-replay-last>none</dd></div>' +
+        '<div><dt>Rows sent</dt><dd data-replay-rows>0</dd></div></dl></div>' +
+      '<div class="replay-traces" data-replay-traces data-rendered-step="-1">' + replayTraceSvg(c, -1) + '</div>' +
+      '<div class="interpolation-note"><b>Retrospective replay — not live monitoring.</b> Lines between recorded ' +
+        'anchors are visual interpolation only; there is no intermediate measurement or model inference.</div>' +
+      '<label class="scrubber-label" for="replayScrubber"><span>Review elapsed replay time</span>' +
+        '<span>future remains withheld</span></label>' +
+      '<input id="replayScrubber" class="replay-scrubber" data-fm="scrub" type="range" min="0" max="0" ' +
+        'step="any" value="0" aria-label="Seek within elapsed retrospective replay time">' +
+      '<div class="replay-stage-grid"><div><h3 class="h-sec">Observation arrivals</h3>' +
+        '<ol class="observation-arrivals" data-replay-observations>' + replayRowsHtml(c) + '</ol></div>' +
+        '<div><h3 class="h-sec">Replay event log</h3><ol class="replay-events" data-replay-events>' +
+        replayEventsHtml(c) + '</ol></div></div>' +
+      '<span class="sr-only">Replay ends at ' + esc(fmtHourExact(end)) + '.</span>' +
+      '</section><div data-replay-results></div></div>';
   }
 
   // ── Home ───────────────────────────────────────────────────────────────
@@ -1629,9 +1747,9 @@
         '<span class="sub">pre-observation state · nothing has been sent to the model</span></div>' +
       '<div class="prerun">' +
         '<div class="prerun-main">' +
-          '<p class="note">The replay begins before the first observation has been submitted. Each step reveals one ' +
-          'more recorded observation, moves the anchor to that observation\'s time, and posts the causal prefix up to ' +
-          'and including it as a real request. Later observations stay in the browser and are never sent.</p>' +
+          '<p class="note">The replay begins before the first observation has been submitted. Play moves a continuous ' +
+          'retrospective clock across the fixed timeline. Only arrival at a recorded anchor reveals one observation ' +
+          'and posts or reuses that exact causal prefix. Later observation values remain withheld.</p>' +
           '<p class="note">The model is fixed. Forecast outputs update as additional causally available observations ' +
           'are added to the trajectory prefix.</p>' +
         '</div>' +
@@ -1645,9 +1763,109 @@
       '<div class="scroll-x" style="margin-top:22px"><table class="dtable"><thead><tr><th>Step</th>' +
         '<th>Anchor</th><th>Prefix rows to send</th><th>State</th></tr></thead><tbody>' + rows +
         '</tbody></table></div>' +
-      '<p class="note" style="margin-top:12px">No forecast value is present on this page. Use <b>Start live replay</b> ' +
-      'in the toolbar above to issue the first real request.</p>' +
+      '<p class="note" style="margin-top:12px">No forecast value is present on this page. Use <b>Play retrospective ' +
+      'replay</b> to move the clock; the first model request occurs only when the cursor reaches the first recorded anchor.</p>' +
       '</div></div>';
+  }
+
+  function replayResultsHtml(c) {
+    if (S.step < 0) {
+      return '<div class="replay-awaiting"><span class="eyebrow">Forecast state</span>' +
+        '<h2 class="h-sec">Awaiting the first recorded observation</h2>' +
+        '<p class="note">The cursor is replaying elapsed time. No observation or forecast has been revealed yet.</p></div>';
+    }
+    var resp = responseFor(c, S.step);
+    var busy = isPending(c, S.step);
+    var showing = resp, showingStep = S.step, holding = false;
+    if (!resp && busy && S.step > 0 && responseFor(c, S.step - 1)) {
+      showing = responseFor(c, S.step - 1); showingStep = S.step - 1; holding = true;
+    }
+    if (!showing && S.stepError) {
+      return errorBlockHtml('Forecast request failed at anchor ' + (S.step + 1), S.stepError);
+    }
+    if (!showing) {
+      return '<div class="replay-awaiting"><span class="spin"></span> Posting only the ' + (S.step + 1) +
+        '-row causal prefix at the recorded anchor…</div>';
+    }
+    var prev = (!holding && S.step > 0) ? responseFor(c, S.step - 1) : null;
+    var diff = prev ? diffResponses(prev, showing) : null;
+    var changed = changedMap(diff);
+    var validatedCount = ofTier(showing, 'validated').length;
+    var pendingNote = holding
+      ? '<div class="notice replay-pending"><span class="n">New recorded observation arrived</span>' +
+        '<span class="d">The completed anchor ' + (showingStep + 1) +
+        ' result remains visible while the next causal prefix is in flight.</span>' +
+        '<span class="acts"><span class="meta"><span class="spin"></span> updating</span></span></div>' : '';
+    return pendingNote + '<div class="section replay-forecast-update' + (S.animateData ? ' fx-in' : '') + '">' +
+      '<div class="section-head"><h2 class="h-sec">Recorded anchor ' + (showingStep + 1) + ' of ' +
+        (lastStep(c) + 1) + '</h2><span class="meta">' + esc(fmtHourExact(num(showing._anchor_hour))) + ' · ' +
+        esc(showing._prefix_rows) + ' trajectory row' + (showing._prefix_rows === 1 ? '' : 's') + ' sent · ' +
+        validatedCount + ' validated artifact' + (validatedCount === 1 ? '' : 's') + '</span></div>' +
+      sourceLineHtml(c, showingStep) + '</div>' +
+      '<div class="split wide replay-result-grid"><div class="main"><div class="charts two' +
+        (S.animateData ? ' fx-in' : '') + '">' + (function () {
+          var xMax = chartDomain(c, showing, showingStep, PRIMARY_SERIES, true);
+          return PRIMARY_SERIES.map(function (t) {
+            return chartCardHtml(c, t, showing, showingStep, 'h after ICU admission', xMax,
+              { stable: true, changed: changed, newestHour: hourAt(c, showingStep) });
+          }).join('');
+        })() + '</div>' + chartLegendHtml(!!(diff && diff.length)) +
+        '<p class="note" style="margin-top:12px">Forecast inference occurs only at the three recorded anchors. ' +
+        'The request contains the causal prefix through this anchor and no later observation. Prefix rows sent: <b>' +
+        esc(showing._prefix_rows) + '</b>.</p>' + chartsNoteHtml() + matchingNoteHtml(c) + '</div>' +
+        '<aside class="side">' + signalsHtml(c, showing, showingStep) + '</aside></div>' +
+      (diff ? changeHtml(c, diff, showingStep - 1, showingStep) : '') +
+      (S.step >= lastStep(c) && !holding
+        ? '<div class="section final-note"><div class="section-head"><h2 class="h-sec">Final retrospective snapshot</h2>' +
+          '<span class="meta">full recorded prefix posted</span></div><p class="note">Every recorded observation is ' +
+          'now in the causal prefix. This remains a retrospective research replay, not live monitoring, a diagnostic output, or an automated alarm.</p>' +
+          '<div class="actions-row"><button class="btn" type="button" data-fm="sub" data-sub="validation">' +
+          'Open validation evidence</button><button class="btn" type="button" data-fm="reset">' +
+          'Reset to pre-observation state</button></div></div>' : '');
+  }
+
+  function updateReplayDom(c, opts) {
+    var root = el('view-monitoring');
+    if (!root || !S.replayStarted) return;
+    opts = opts || {};
+    if (opts.anchor) renderForecastContext();
+    if (opts.chrome) {
+      var toolbar = root.querySelector('[data-replay-toolbar]');
+      if (toolbar) toolbar.innerHTML = replayBarHtml(c);
+    }
+    var time = root.querySelector('[data-replay-time]');
+    if (time) time.textContent = S.replayTime.toFixed(2) + ' h';
+    var last = root.querySelector('[data-replay-last]');
+    if (last) last.textContent = S.step < 0 ? 'none' : fmtHourExact(hourAt(c, S.step));
+    var rows = root.querySelector('[data-replay-rows]');
+    if (rows) rows.textContent = String(Math.max(0, S.step + 1));
+    var cursor = root.querySelector('[data-replay-cursor]');
+    if (cursor) {
+      var x = 92 + replayPercent(c, S.replayTime) * 8.58;
+      cursor.setAttribute('x1', x.toFixed(1)); cursor.setAttribute('x2', x.toFixed(1));
+    }
+    var scrub = root.querySelector('[data-fm="scrub"]');
+    if (scrub) {
+      scrub.max = String(Math.max(0.001, S.replayFurthestTime));
+      scrub.value = String(Math.min(S.replayTime, S.replayFurthestTime));
+    }
+    var traces = root.querySelector('[data-replay-traces]');
+    if (traces && traces.getAttribute('data-rendered-step') !== String(S.step)) {
+      traces.innerHTML = replayTraceSvg(c, S.step);
+      traces.setAttribute('data-rendered-step', String(S.step));
+      cursor = traces.querySelector('[data-replay-cursor]');
+      if (cursor) {
+        var cx = 92 + replayPercent(c, S.replayTime) * 8.58;
+        cursor.setAttribute('x1', cx.toFixed(1)); cursor.setAttribute('x2', cx.toFixed(1));
+      }
+    }
+    var observations = root.querySelector('[data-replay-observations]');
+    if (observations && opts.anchor) observations.innerHTML = replayRowsHtml(c);
+    var events = root.querySelector('[data-replay-events]');
+    if (events && opts.anchor) events.innerHTML = replayEventsHtml(c);
+    var results = root.querySelector('[data-replay-results]');
+    if (results && opts.results) results.innerHTML = replayResultsHtml(c);
+    S.animateData = false;
   }
 
   function renderMonitoring() {
@@ -1660,75 +1878,13 @@
         S.casesError || 'No case returned by /api/monitoring/cases');
       return;
     }
-    var head = cachedBannerHtml() + replayBarHtml(c);
+    var head = cachedBannerHtml() + '<div data-replay-toolbar>' + replayBarHtml(c) + '</div>';
     if (!healthy() && !S.fixture) { root.innerHTML = head + serviceUnavailableHtml(); return; }
     if (!S.replayStarted) { root.innerHTML = head + replayIntroHtml(c); return; }
-
-    var resp = responseFor(c, S.step);
-    var busy = isPending(c, S.step);
-    // Keep the previous step's result on screen while the new request is in
-    // flight, rather than blanking the page and re-drawing it.
-    var showing = resp, showingStep = S.step, holding = false;
-    if (!resp && busy && S.step > 0 && responseFor(c, S.step - 1)) {
-      showing = responseFor(c, S.step - 1); showingStep = S.step - 1; holding = true;
+    if (!root.querySelector('.replay-stage')) {
+      root.innerHTML = head + replayStageHtml(c);
     }
-    if (!showing && S.stepError) {
-      root.innerHTML = head + errorBlockHtml('Forecast request failed at step ' + (S.step + 1), S.stepError);
-      return;
-    }
-    if (!showing) {
-      root.innerHTML = head + '<div class="shell"><div class="loading"><span class="spin"></span> ' +
-        'Posting the ' + (S.step + 1) + '-row causal prefix to the forecast model…</div></div>';
-      return;
-    }
-
-    var prev = (!holding && S.step > 0) ? responseFor(c, S.step - 1) : null;
-    var diff = prev ? diffResponses(prev, showing) : null;
-    var changed = changedMap(diff);
-    var validatedCount = ofTier(showing, 'validated').length;
-    var pendingNote = holding
-      ? '<div class="notice" style="margin:20px 0 0"><span class="n">Requesting step ' + (S.step + 1) + '</span>' +
-        '<span class="d">The values below are still the completed step ' + (showingStep + 1) +
-        ' response. They stay on screen until the new response returns.</span>' +
-        '<span class="acts"><span class="meta"><span class="spin"></span> in flight</span></span></div>'
-      : '';
-
-    root.innerHTML = head +
-      (pendingNote ? '<div class="shell tight">' + pendingNote + '</div>' : '') +
-      '<div class="shell"><div class="section" style="padding-top:24px">' +
-        '<div class="section-head"><h2 class="h-sec">Step ' + (showingStep + 1) + ' of ' + (lastStep(c) + 1) +
-          '</h2><span class="meta">anchor ' + esc(fmtHourExact(num(showing._anchor_hour))) + ' · ' +
-          esc(showing._prefix_rows) + ' trajectory row' + (showing._prefix_rows === 1 ? '' : 's') + ' sent · ' +
-          validatedCount + ' validated artifact' + (validatedCount === 1 ? '' : 's') + '</span></div>' +
-        sourceLineHtml(c, showingStep) +
-      '</div>' +
-      '<div class="split wide">' +
-        '<div class="main"><div class="charts two' + (S.animateData ? ' fx-in' : '') + '">' + (function () {
-          var xMax = chartDomain(c, showing, showingStep, PRIMARY_SERIES, true);
-          return PRIMARY_SERIES.map(function (t) {
-            return chartCardHtml(c, t, showing, showingStep, 'h after ICU admission', xMax,
-              { stable: true, changed: changed, newestHour: hourAt(c, showingStep) });
-          }).join('');
-        })() + '</div>' +
-          chartLegendHtml(!!(diff && diff.length)) +
-          '<p class="note" style="margin-top:12px">Each step posts the trajectory prefix up to and including the ' +
-          'current observation, with <span class="mono">anchor_hour</span> set to that observation\'s time. Later ' +
-          'observations stay in the browser and are never sent to the model. Prefix rows sent at this step: <b>' +
-          esc(showing._prefix_rows) + '</b>.</p>' + chartsNoteHtml() + matchingNoteHtml(c) +
-        '</div>' +
-        '<aside class="side">' + signalsHtml(c, showing, showingStep) + '</aside>' +
-      '</div>' +
-      (diff ? changeHtml(c, diff, showingStep - 1, showingStep) : '') +
-      (S.step >= lastStep(c) && !holding
-        ? '<div class="section final-note"><div class="section-head"><h2 class="h-sec">Final retrospective snapshot</h2>' +
-          '<span class="meta">the full recorded prefix has been posted</span></div>' +
-          '<p class="note">Every recorded observation for this case is now in the trajectory prefix and no ' +
-          'observation is withheld. The forecasts above are the model\'s output at the last recorded anchor.</p>' +
-          '<div class="actions-row"><button class="btn" type="button" data-fm="sub" data-sub="validation">' +
-          'Open validation evidence</button>' +
-          '<button class="btn" type="button" data-fm="reset">Reset to pre-observation state</button></div></div>'
-        : '') +
-      '</div>';
+    updateReplayDom(c, { chrome: true, anchor: true, results: true });
   }
 
   // ── Validation evidence subview ────────────────────────────────────────
@@ -1839,10 +1995,17 @@
     if (!c) return;
     var target = Math.max(0, Math.min(step, lastStep(c)));
     S.step = target;
+    S.replayMaxStep = Math.max(S.replayMaxStep, target);
+    S.replayTime = hourAt(c, target);
+    S.replayFurthestTime = Math.max(S.replayFurthestTime, S.replayTime);
     S.stepError = null;
-    renderAll();
+    updateReplayDom(c, { chrome: true, anchor: true, results: true });
     if (!healthy()) return;
-    if (S.fixture && responseFor(c, target)) { S.animateData = true; renderAll(); return; }
+    if (S.fixture && responseFor(c, target)) {
+      S.animateData = true;
+      updateReplayDom(c, { chrome: true, anchor: true, results: true });
+      return;
+    }
     try {
       await fetchStep(c, target, opts);
       S.stepError = null;
@@ -1850,23 +2013,32 @@
       S.stepError = e.message || String(e);
       stopPlay();
     }
-    if (S.step === target || (opts && opts.force)) { S.animateData = true; renderAll(); }
+    if (S.step === target || (opts && opts.force)) {
+      S.animateData = true;
+      updateReplayDom(c, { chrome: true, anchor: true, results: true });
+    }
   }
 
   function startReplay() {
     var c = activeCase();
     if (!c) return Promise.resolve();
     S.replayStarted = true;
-    S.step = 0;
+    S.step = -1;
+    S.replayMaxStep = -1;
+    S.replayTime = 0;
+    S.replayFurthestTime = 0;
     S.stepError = null;
-    // The first step of a live replay is always a real request.
-    return gotoStep(0, { force: true });
+    renderAll();
+    return startPlay();
   }
 
   function resetReplay() {
     stopPlay();
     S.replayStarted = false;
-    S.step = 0;
+    S.step = -1;
+    S.replayMaxStep = -1;
+    S.replayTime = 0;
+    S.replayFurthestTime = 0;
     S.stepError = null;
     S.freshKey = null;
     renderAll();
@@ -1877,19 +2049,60 @@
     S.playToken++;
   }
 
-  async function startPlay() {
+  function nextAnchorAfter(c, replayTime) {
+    for (var i = 0; i <= lastStep(c); i++) {
+      if (hourAt(c, i) > replayTime + 1e-7) return i;
+    }
+    return -1;
+  }
+
+  function seekReplay(c, replayTime) {
+    stopPlay();
+    S.replayTime = Math.max(0, Math.min(replayTime, S.replayFurthestTime));
+    S.step = replayStepAtTime(c, S.replayTime);
+    updateReplayDom(c, { chrome: true, anchor: true, results: true });
+  }
+
+  function startPlay() {
     var c = activeCase();
     if (!c || S.playing || !healthy() || !S.replayStarted) return;
+    var end = hourAt(c, lastStep(c)) || 0;
+    if (S.replayTime >= end - 1e-7) return;
     S.playing = true;
     var token = ++S.playToken;
-    renderAll();
-    while (S.playing && token === S.playToken) {
-      if (S.step >= lastStep(c)) break;
-      await gotoStep(S.step + 1);
-      if (!S.playing || token !== S.playToken || S.stepError) break;
-      await sleep(SPEEDS[S.speedIndex].ms);
+    var previousStamp = null;
+    var duration = REDUCED ? 2400 : REPLAY_DURATION_MS;
+    updateReplayDom(c, { chrome: true });
+
+    function frame(stamp) {
+      if (!S.playing || token !== S.playToken) return;
+      if (previousStamp == null) previousStamp = stamp;
+      var delta = Math.max(0, Math.min(100, stamp - previousStamp));
+      previousStamp = stamp;
+      var targetTime = Math.min(end, S.replayTime + delta * SPEEDS[S.speedIndex].rate * end / duration);
+      var next = nextAnchorAfter(c, S.replayTime);
+      if (next >= 0 && targetTime >= hourAt(c, next) - 1e-7) {
+        S.replayTime = hourAt(c, next);
+        S.replayFurthestTime = Math.max(S.replayFurthestTime, S.replayTime);
+        updateReplayDom(c);
+        gotoStep(next).then(function () {
+          if (!S.playing || token !== S.playToken || S.stepError) return;
+          previousStamp = null;
+          window.requestAnimationFrame(frame);
+        });
+        return;
+      }
+      S.replayTime = targetTime;
+      S.replayFurthestTime = Math.max(S.replayFurthestTime, targetTime);
+      updateReplayDom(c);
+      if (targetTime >= end - 1e-7) {
+        S.playing = false;
+        updateReplayDom(c, { chrome: true });
+        return;
+      }
+      window.requestAnimationFrame(frame);
     }
-    if (token === S.playToken) { S.playing = false; renderAll(); }
+    window.requestAnimationFrame(frame);
   }
 
   // ── snapshot run ───────────────────────────────────────────────────────
@@ -2039,11 +2252,14 @@
     else if (action === 'replay-presentation') { playStages(responseFor(activeCase(), lastStep(activeCase()))); }
     else if (action === 'skip-anim') { skipStages(); }
     else if (action === 'start-replay') { startReplay(); }
-    else if (action === 'rerun-step') { stopPlay(); gotoStep(S.step, { force: true }); }
+    else if (action === 'rerun-step' && S.step >= 0) { stopPlay(); gotoStep(S.step, { force: true }); }
     else if (action === 'play') { startPlay(); }
-    else if (action === 'pause') { stopPlay(); renderAll(); }
+    else if (action === 'pause') { stopPlay(); updateReplayDom(activeCase(), { chrome: true }); }
     else if (action === 'next') { stopPlay(); gotoStep(S.step + 1); }
-    else if (action === 'prev') { stopPlay(); gotoStep(S.step - 1); }
+    else if (action === 'prev') {
+      var c = activeCase();
+      if (c) seekReplay(c, S.step <= 0 ? 0 : hourAt(c, S.step - 1));
+    }
     else if (action === 'reset') { resetReplay(); }
     else if (action === 'tier') { S.tier = t.getAttribute('data-tier') || 'validated'; S.showAll = false; renderAll(); }
     else if (action === 'toggle-all') { S.showAll = !S.showAll; renderAll(); }
@@ -2056,12 +2272,23 @@
     var t = e.target.closest ? e.target.closest('[data-fm]') : null;
     if (!t) return;
     var action = t.getAttribute('data-fm');
-    if (action === 'speed') { S.speedIndex = Number(t.value) || 0; renderAll(); }
+    if (action === 'speed') {
+      S.speedIndex = Number(t.value) || 0;
+      updateReplayDom(activeCase(), { chrome: true });
+    }
+    else if (action === 'scrub') { seekReplay(activeCase(), Number(t.value) || 0); }
     else if (action === 'toggle-extra') { S.showExtraSeries = !!t.checked; renderAll(); }
+  }
+
+  function onInput(e) {
+    var t = e.target.closest ? e.target.closest('[data-fm="scrub"]') : null;
+    if (!t) return;
+    seekReplay(activeCase(), Number(t.value) || 0);
   }
 
   document.addEventListener('click', onClick);
   document.addEventListener('change', onChange);
+  document.addEventListener('input', onInput);
 
   var ack = el('transitionAck'), cancel = el('transitionCancel'), close = el('transitionClose');
   if (ack) ack.addEventListener('click', commitTransition);
