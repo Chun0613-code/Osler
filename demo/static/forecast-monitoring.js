@@ -1,21 +1,45 @@
-/* Osler research forecast + remote monitoring replay.
+/* Osler research forecast workflow.
  *
- * Two research-only views on top of the existing Rx demo:
- *   #view-forecast    factual patient-state forecast for the case anchor
- *   #view-monitoring  step-by-step replay of a retrospective observation trajectory
+ * Two independent research demonstrations live in this product. This file owns
+ * the shell and the second of them:
+ *   #view-home        workflow selection · static copy, no model call
+ *   #view-forecast    Retrospective Forecast, with three local subviews
+ *                       #fx-snapshot     user-requested forecast at an anchor
+ *                       #view-monitoring observation-prefix replay
+ *                       #fx-validation   committed retrospective evidence
+ *
+ * Medication Safety (#view-rx) is a different case and a different engine. It
+ * is rendered by the inline script in case_demo.html and nothing crosses
+ * between them: no case text, patient id, ranking, safety decision or graph
+ * state ever enters a forecast request.
  *
  * Hard rules encoded here:
- *   - every /api/forecast request carries a causal PREFIX of the trajectory only;
- *     anchor_hour is the last prefix observation, and a client-side guard refuses
- *     to send a payload that contains anything after it;
- *   - forecasts are never invented: unsupported cells show no point and no interval,
- *     illustrative cells show no interval, only validated artifacts show lower/upper;
+ *   - nothing is forecast until the user asks. bootstrap() loads model health,
+ *     the case list and the validation summary, and stops there. Switching a
+ *     global view or a subview never issues a forecast;
+ *   - every /api/forecast request carries a causal PREFIX of the trajectory
+ *     only; anchor_hour is the last prefix observation, and a client-side guard
+ *     refuses to send a payload that contains anything after it;
+ *   - forecasts are never invented: unsupported cells show no point and no
+ *     interval, illustrative cells show no interval, only validated artifacts
+ *     show lower/upper;
+ *   - a result is labelled by where it came from. A response that just arrived
+ *     is a live response; one produced earlier in this browser session is a
+ *     previously computed live result; a committed fixture is a cached research
+ *     demonstration. The three are never conflated;
  *   - interval-width evidence is labelled as held-out cohort aggregate, never as
  *     shrinkage for this patient;
- *   - a model-health failure or an API error stops forecasting and is shown as an
- *     error; cached fixtures are only ever loaded on an explicit click and are
- *     labelled "Cached research demonstration";
- *   - no diagnosis, causal claim, treatment recommendation or drug-ranking change.
+ *   - a model-health failure or an API error stops forecasting and is shown as
+ *     an error; cached fixtures are only ever loaded on an explicit click;
+ *   - no diagnosis, causal claim, treatment recommendation or drug-ranking
+ *     change.
+ *
+ * The model is fixed. Forecast outputs update as additional causally available
+ * observations are added to the trajectory prefix.
+ *
+ * Presentation follows the approved design direction: warm ivory surfaces,
+ * graphite structure, oxide for action and selected state, teal for research
+ * provenance, blue reserved for forecast data. Tier is a filter, not a badge.
  *
  * No external assets: pure DOM + inline SVG so the demo runs with no internet.
  */
@@ -44,13 +68,23 @@
   };
   var PRIMARY_SERIES = ['creatinine', 'bun', 'urine_output', 'map'];
   var EXTRA_SERIES = ['glucose', 'potassium', 'heart_rate'];
-  var MATRIX_TARGETS = ['creatinine', 'bun', 'urine_output', 'map'];
-  var MATRIX_HORIZONS = [3, 6, 12, 24, 48];
   var SPEEDS = [
     { label: '0.5×', ms: 5200 },
     { label: '1×', ms: 2600 },
     { label: '2×', ms: 1300 }
   ];
+  // one ordered explanatory stage every 220 ms — a walk over information that is
+  // already on screen, never a wait for it
+  var STAGE_MS = 220;
+
+  // design tokens used by the inline SVG charts
+  var C = {
+    ink: '#171A1C', ink2: '#626762', oxide: '#B64A32', teal: '#27645E',
+    blue: '#344F69', divider: '#D1CCC2', dividerSoft: '#E7E3DA',
+    surface: '#FCFAF5', nul: '#8B8F89'
+  };
+
+  var REDUCED = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 
   // ── state ──────────────────────────────────────────────────────────────
   var S = {
@@ -65,22 +99,33 @@
     validation: null,
     validationError: null,
     cache: {},          // "<caseId>#<step>" -> forecast response
-    pending: {},        // "<caseId>#<step>" -> true while in flight
+    meta: {},           // "<caseId>#<step>" -> { source, requestedAt, prefixRows, forced }
+    pending: {},        // "<caseId>#<step>" -> promise while in flight
+    freshKey: null,     // the one key whose response arrived from the request that just completed
     stepError: null,
     history: [],        // one snapshot row per (step, cell) actually forecast
+    sub: 'snapshot',    // snapshot | replay | validation
+    caseOpened: false,  // the user has opened the retrospective case
+    snapshotRan: false, // a real snapshot forecast has completed at least once
+    snapshotBusy: false,
+    stageIndex: -1,     // explanatory presentation pointer, -1 = not started
+    stageTimers: [],
+    replayStarted: false,   // false = pre-observation state, nothing requested
     step: 0,
     playing: false,
     speedIndex: 1,
     playToken: 0,
+    animateData: false, // set for exactly one render after a data change
     fixture: null,      // loaded cached demonstration payloads (explicit click only)
     fixtureNotice: null,
-    showAllTiers: false,
-    targetFilter: 'all',
-    horizonFilter: 'all',
+    tier: 'validated',  // which tier the Snapshot grid is filtered to
+    showAll: false,     // "Show all 12" on the validated table
     showExtraSeries: false,
-    fcTargetFilter: 'all',
-    fcHorizonFilter: 'all',
-    fcShowAllTiers: false
+    provOpen: false,
+    validationRevealed: 0,  // how many evidence groups have been revealed
+    validationTimers: [],
+    guided: null,       // { chapter: 1 | 2 } while the guided demo is running
+    transition: null    // pending workflow change awaiting acknowledgement
   };
 
   // ── small helpers ──────────────────────────────────────────────────────
@@ -106,6 +151,23 @@
   function fmtHour(h) {
     if (!isNum(h)) return '—';
     return (Math.round(h * 10) / 10).toFixed(1) + ' h';
+  }
+  /* The replay anchors are 0.25 h, 6.08 h and 16.33 h. One decimal would round
+     the first to 0.3 h and lose the distinction, so the anchor readout keeps the
+     precision the source data actually carries. */
+  function fmtHourExact(h) {
+    if (!isNum(h)) return '—';
+    return (Math.round(h * 100) / 100).toFixed(2) + ' h';
+  }
+  function fmtSigned(v, target) {
+    if (!isNum(v)) return '—';
+    return (v > 0 ? '+' : '') + v.toFixed(decimalsFor(target));
+  }
+  function fmtClock(ms) {
+    if (!isNum(ms)) return '—';
+    var d = new Date(ms);
+    var p = function (n) { return String(n).padStart(2, '0'); };
+    return p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
   }
   function el(id) { return document.getElementById(id); }
   function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
@@ -169,6 +231,9 @@
     return 'Demo ICU Patient ' + String((i == null ? S.caseIndex : i) + 1).padStart(2, '0');
   }
   function cacheKey(c, step) { return (c && c.id ? c.id : 'case') + '#' + step; }
+  function modelVersion() {
+    return (S.casesMeta && S.casesMeta.model_version) || (S.health && S.health.model_version) || '—';
+  }
 
   function matchPolicy(c) {
     var meta = (c && c.replay_metadata) || {};
@@ -204,21 +269,13 @@
   }
 
   // ── bootstrap ──────────────────────────────────────────────────────────
+  /* Metadata only. No forecast is requested here, so opening the app — or any
+     view inside it — never produces a model output the user did not ask for. */
   function bootstrap() {
     if (S.booting) return S.booting;
     S.booting = (async function () {
       await Promise.all([loadHealth(), loadCases(), loadValidation()]);
       S.booted = true;
-      var c = activeCase();
-      if (healthy() && c) {
-        // A prefetch failure must surface as an error state, never leave the
-        // views stuck on a loading placeholder or poison the boot promise.
-        await Promise.all([lastStep(c), 0].map(function (step) {
-          return fetchStep(c, step).catch(function (e) {
-            S.stepError = e.message || String(e);
-          });
-        }));
-      }
       renderAll();
     })();
     return S.booting;
@@ -290,11 +347,15 @@
     };
   }
 
-  async function fetchStep(c, step) {
+  /* opts.force issues a real request even when a session result already exists.
+     Every explicit "run" or "re-run" control passes it, so the user always gets
+     the API call the button promised. */
+  async function fetchStep(c, step, opts) {
+    var force = !!(opts && opts.force);
     var key = cacheKey(c, step);
-    if (S.cache[key]) return S.cache[key];
+    if (!force && S.cache[key]) return S.cache[key];
     if (!healthy()) throw new Error('Forecast service unavailable');
-    if (S.pending[key]) return S.pending[key];
+    if (!force && S.pending[key]) return S.pending[key];
     var payload = buildPrefixPayload(c, step);
     var p = getJSON('/api/forecast', {
       method: 'POST',
@@ -305,6 +366,13 @@
       resp._step = step;
       resp._prefix_rows = payload.trajectory.length;
       S.cache[key] = resp;
+      S.meta[key] = {
+        source: 'live',
+        requestedAt: Date.now(),
+        prefixRows: payload.trajectory.length,
+        forced: force
+      };
+      S.freshKey = key;
       delete S.pending[key];
       recordSnapshots(c, step, resp);
       return resp;
@@ -322,6 +390,39 @@
       if (f) return f;
     }
     return S.cache[cacheKey(c, step)] || null;
+  }
+  function isPending(c, step) { return !!S.pending[cacheKey(c, step)]; }
+
+  /* Three distinct provenance states. A session result is never called merely
+     "cached" — that word belongs to the committed fixture alone. */
+  function resultSource(c, step) {
+    if (S.fixture && responseFor(c, step)) {
+      return { key: 'fixture', label: 'Cached research demonstration', cls: 'na' };
+    }
+    var key = cacheKey(c, step);
+    if (!S.cache[key]) return null;
+    var m = S.meta[key] || {};
+    if (S.freshKey === key) {
+      return { key: 'live', label: 'Live response', cls: 'ok', meta: m };
+    }
+    return { key: 'session', label: 'Previously computed live result', cls: 'ok', meta: m };
+  }
+
+  function sourceLineHtml(c, step) {
+    var src = resultSource(c, step);
+    if (!src) return '';
+    var m = src.meta || {};
+    var bits = [];
+    if (src.key === 'fixture') {
+      bits.push('committed fixture · no model call was made');
+    } else {
+      bits.push('requested ' + esc(fmtClock(m.requestedAt)));
+      if (m.prefixRows != null) bits.push(m.prefixRows + ' prefix row' + (m.prefixRows === 1 ? '' : 's') + ' sent');
+      if (m.forced) bits.push('forced live request');
+      if (src.key === 'session') bits.push('reused from this browser session');
+    }
+    return '<div class="source-line"><span class="stat ' + src.cls + '"><i></i>' + esc(src.label) + '</span>' +
+      '<span class="d">' + bits.join(' · ') + '</span></div>';
   }
 
   // ── snapshot history ───────────────────────────────────────────────────
@@ -399,76 +500,113 @@
     });
   }
 
-  // ── shared render blocks ───────────────────────────────────────────────
-  function provenanceHtml(c, step) {
+  // ── persistent case context ────────────────────────────────────────────
+  function healthStatHtml() {
+    if (S.fixture) return '<span class="stat na"><i></i>Not evaluated</span>';
+    if (S.healthError) return '<span class="stat bad"><i></i>Health unknown</span>';
+    if (!S.health) return '<span class="stat na"><i></i>Checking…</span>';
+    var integrity = integrityHealth() || {};
+    var inference = S.health.inference_smoke || {};
+    var loaded = integrity.loaded_artifacts, expect = integrity.expected_artifacts;
+    var ratio = (loaded != null && expect != null) ? loaded + '/' + expect : '';
+    if (healthy()) {
+      return '<span class="stat ok"><i></i>Healthy <span class="ratio">' + esc(ratio) + '</span></span>' +
+        '<button class="disc" type="button" data-fm="toggle-prov">Health detail ⌄</button>';
+    }
+    return '<span class="stat warn"><i></i>Degraded <span class="ratio">' + esc(ratio) + '</span></span>' +
+      '<button class="disc" type="button" data-fm="toggle-prov">Health detail ⌄</button>' +
+      '<span class="visually-hidden">integrity ' + esc(integrity.status || 'unknown') +
+      ' · inference smoke ' + esc(inference.status || 'unknown') + '</span>';
+  }
+
+  /* The result-source fact is a state, not a promise: before any request has
+     completed it says so rather than implying a live connection. */
+  function sourceStatHtml() {
+    if (S.fixture) return '<span class="stat na"><i></i>Cached demonstration</span>';
+    var c = activeCase();
+    var step = contextStep(c);
+    var src = c ? resultSource(c, step) : null;
+    if (src) return '<span class="stat ' + src.cls + '"><i></i>' + esc(src.label) + '</span>';
+    return '<span class="stat na"><i></i>No forecast requested</span>';
+  }
+
+  /* Which anchor the context strip describes: the replay position while the
+     replay is running, otherwise the final anchor the Snapshot uses. */
+  function contextStep(c) {
+    if (!c) return 0;
+    if (S.sub === 'replay') return S.replayStarted ? S.step : -1;
+    return lastStep(c);
+  }
+
+  function caseContextHtml(c) {
     if (!c) return '';
     var meta = c.source_metadata || {};
     var ctx = c.case_context || {};
-    var anchorNow = hourAt(c, step);
-    var alias = caseAlias(c);
-    var admission = ctx.source_admission_label;
-    return '' +
-      '<section class="fm-card fm-prov">' +
-        '<div>' +
-          '<h2 class="fm-h2">' + esc(alias) + ' · ' + esc(c.title || 'Monitoring trajectory') + '</h2>' +
-          '<div class="fm-sub">Deidentified retrospective eICU Demo case · Research replay — not live monitoring.</div>' +
-          '<div class="fm-badges fm-row">' +
-            '<span class="fm-tag research">Research use only</span>' +
-            '<span class="fm-tag research">Deidentified retrospective eICU Demo case</span>' +
-            '<span class="fm-tag research">Research replay — not live monitoring</span>' +
-            '<span class="fm-tag boundary">No diagnosis / no treatment recommendation</span>' +
-            '<span class="fm-tag boundary">No causal or counterfactual claim</span>' +
-          '</div>' +
-          '<dl class="fm-kv">' +
-            '<dt>Dataset</dt><dd>' + esc(meta.dataset || c.case_source || 'unknown') +
-              (meta.version ? ' v' + esc(meta.version) : '') + '</dd>' +
-            '<dt>Source</dt><dd>' + (meta.url
-                ? '<span class="fm-mono">' + esc(meta.url) + '</span>' : 'not supplied') + '</dd>' +
-            '<dt>Licence</dt><dd>' + esc(meta.license || 'not supplied') + '</dd>' +
-            '<dt>Deidentification</dt><dd>' + esc(meta.deidentification || 'not supplied') + '</dd>' +
-            '<dt>Model version</dt><dd class="fm-mono">' +
-              esc((S.casesMeta && S.casesMeta.model_version) || (S.health && S.health.model_version) || '—') + '</dd>' +
-            '<dt>Case context</dt><dd>' +
-              esc([ctx.age ? ctx.age + ' y' : null, ctx.gender, ctx.unit_type]
-                .filter(Boolean).join(' · ') || 'not supplied') + '</dd>' +
-            '<dt>Current time point</dt><dd><b>' + esc(fmtHour(anchorNow)) +
-              '</b> after ICU admission · observation ' + (step + 1) + ' of ' +
-              (lastStep(c) + 1) + '</dd>' +
-          '</dl>' +
-          (admission
-            ? '<div class="fm-src-label" style="margin-top:9px"><b>Historical admission label recorded in the source data:</b> ' +
-              esc(admission) +
-              '<span class="fm-cav">This is a label carried in the source dataset, not a model output and not a diagnosis produced by this system.</span></div>'
-            : '') +
-          '<div class="fm-note">Patient identifiers are not displayed. The source stay key is retained only inside the dataset provenance record. ' +
-            'Observation units follow the eICU demo adapter; urine output is an interval-normalised mL/hour rate.</div>' +
+    var step = contextStep(c);
+    var ident = [
+      ctx.age ? ctx.age + ' y' : null,
+      ctx.gender,
+      ctx.unit_type,
+      'deidentified retrospective case'
+    ].filter(Boolean).join(' · ');
+    var visible = (S.sub === 'replay' && !S.replayStarted)
+      ? '0 of ' + (lastStep(c) + 1)
+      : (step + 1) + ' of ' + (lastStep(c) + 1);
+    var anchorFact = (S.sub === 'replay' && !S.replayStarted)
+      ? '<div class="fact"><div class="k">Anchor</div><div class="v">not set</div></div>'
+      : '<div class="fact"><div class="k">Anchor</div><div class="v">' + esc(fmtHourExact(hourAt(c, step))) + '</div></div>';
+    return '<div class="case-head">' +
+        '<div class="case-id">' +
+          '<div class="case-title">' + esc(caseAlias(c)) + ' · ' + esc(c.title || 'Retrospective trajectory') + '</div>' +
+          '<div class="case-meta">' + esc(ident) + ' · ' +
+            esc((meta.dataset ? 'eICU CRD Demo' : c.case_source || '') + (meta.version ? ' ' + meta.version : '')) +
+            ' · <button class="disc" type="button" data-fm="toggle-prov">Dataset provenance ⌄</button></div>' +
         '</div>' +
-        '<div class="fm-health">' + healthBlockHtml() + '</div>' +
-      '</section>';
+        '<div class="case-facts">' +
+          '<div class="fact"><div class="k">Model version</div><div class="v mono">' + esc(modelVersion()) + '</div></div>' +
+          anchorFact +
+          '<div class="fact"><div class="k">Observations visible</div><div class="v">' + esc(visible) + '</div></div>' +
+          '<div class="fact sep"><div class="k">Result source</div><div class="v">' + sourceStatHtml() + '</div></div>' +
+          '<div class="fact sep"><div class="k">Model health</div><div class="v">' + healthStatHtml() + '</div></div>' +
+        '</div>' +
+      '</div>' + provenanceHtml(c, Math.max(0, step));
   }
 
-  function healthBlockHtml() {
-    if (S.healthError) {
-      return '<span class="fm-tag bad">Model health unknown</span>' +
-        '<div class="fm-note">' + esc(S.healthError) + '</div>';
-    }
-    if (!S.health) return '<span class="fm-tag boundary">Checking model health…</span>';
-    var failed = failedArtifacts();
-    var integrity = integrityHealth();
-    var inference = S.health.inference_smoke || {};
-    if (healthy()) {
-      return '<b>Model health</b><span class="fm-tag ok">Healthy</span>' +
-        '<div class="fm-note">' + esc(integrity.loaded_artifacts) + ' / ' + esc(integrity.expected_artifacts) +
-        ' serialized artifacts loaded · ' + esc(inference.validated_artifacts) + ' / ' +
-        esc(inference.expected_validated_artifacts) + ' inference smoke predictions passed' +
-        (S.health.strict_manifest_verification ? ' · strict manifest verification' : '') +
-        '</div>';
-    }
-    return '<b>Model health</b><span class="fm-tag bad">Degraded</span>' +
-      '<div class="fm-note">integrity ' + esc(integrity ? integrity.status : 'unknown') + ' · inference smoke ' +
-      esc(inference.status || 'unknown') + ' · ' + failed.length + ' artifact load failures</div>';
+  /* Dataset provenance and artifact verification — collapsed into the case
+     header, shown once, never repeated inside a section. */
+  function provenanceHtml(c, step) {
+    var meta = c.source_metadata || {};
+    var ctx = c.case_context || {};
+    var admission = ctx.source_admission_label;
+    var integrity = integrityHealth() || {};
+    var inference = S.health && S.health.inference_smoke ? S.health.inference_smoke : {};
+    return '<div class="disc-body" id="provBody" data-open="' + (S.provOpen ? '1' : '0') + '">' +
+      '<dl class="kv">' +
+        '<dt>Dataset</dt><dd>' + esc(meta.dataset || c.case_source || 'unknown') +
+          (meta.version ? ' v' + esc(meta.version) : '') + '</dd>' +
+        '<dt>Source</dt><dd class="mono">' + esc(meta.url || 'not supplied') + '</dd>' +
+        '<dt>Licence</dt><dd>' + esc(meta.license || 'not supplied') + '</dd>' +
+        '<dt>Deidentification</dt><dd>' + esc(meta.deidentification || 'not supplied') + '</dd>' +
+        '<dt>Model version</dt><dd class="mono">' + esc(modelVersion()) + '</dd>' +
+        '<dt>Current time point</dt><dd>' + esc(fmtHourExact(hourAt(c, step))) +
+          ' after ICU admission · observation ' + (step + 1) + ' of ' + (lastStep(c) + 1) + '</dd>' +
+        (admission ? '<dt>Source label</dt><dd>' + esc(admission) +
+          ' — carried in the source dataset, not a model output</dd>' : '') +
+        '<dt>Serialized artifacts loaded</dt><dd class="mono">' +
+          esc(integrity.loaded_artifacts != null ? integrity.loaded_artifacts + ' / ' + integrity.expected_artifacts : '—') + '</dd>' +
+        '<dt>Inference smoke predictions passed</dt><dd class="mono">' +
+          esc(inference.validated_artifacts != null
+            ? inference.validated_artifacts + ' / ' + inference.expected_validated_artifacts : '—') + '</dd>' +
+        '<dt>Manifest verification</dt><dd>' +
+          (S.health && S.health.strict_manifest_verification ? 'strict' : 'not reported') + '</dd>' +
+      '</dl>' +
+      '<p class="note" style="margin-top:14px">Patient identifiers are not displayed. The source stay key is retained ' +
+      'only inside the dataset provenance record. Observation units follow the eICU demo adapter; urine output is an ' +
+      'interval-normalised mL/hour rate.</p>' +
+      '</div>';
   }
 
+  // ── degraded / error / cached blocks ───────────────────────────────────
   function serviceUnavailableHtml() {
     var failed = failedArtifacts();
     var detail = '';
@@ -488,40 +626,47 @@
         (inference.error ? '\n' + inference.error : '')
       ) + '</pre>';
     }
-    return '<section class="fm-card fm-error">' +
-      '<h2 class="fm-h2">Forecast service unavailable</h2>' +
-      '<div class="fm-sub">Artifact integrity or deterministic inference smoke did not pass, so no forecast is requested. ' +
-      'No substitute, estimated or mock values are shown.</div>' +
-      (S.health ? '<div class="fm-note">Health status: <b>' + esc(S.health.status) + '</b></div>' : '') +
-      detail + fixtureControlsHtml() + '</section>';
+    return '<div class="shell"><div class="block">' +
+      '<h2>Model degraded — forecasts are withheld</h2>' +
+      '<p class="note">Artifact integrity or deterministic inference smoke did not pass, so no forecast is requested. ' +
+      'Targets served by the failed artifacts are withheld — they are not shown with wider intervals, and they are not ' +
+      'filled from a fallback model. Degraded health never widens an interval. A target is either served by a verified ' +
+      'artifact or withheld.</p>' +
+      detail + fixtureControlsHtml() + '</div></div>';
   }
 
-  function errorCardHtml(title, message) {
-    return '<section class="fm-card fm-error">' +
-      '<h2 class="fm-h2">' + esc(title) + '</h2>' +
-      '<div class="fm-sub">No forecast values are shown for this step. Nothing is substituted.</div>' +
-      '<pre>' + esc(message) + '</pre>' + fixtureControlsHtml() + '</section>';
+  function errorBlockHtml(title, message) {
+    return '<div class="shell"><div class="block">' +
+      '<h2>' + esc(title) + '</h2>' +
+      '<p class="note">No forecast values are shown for this step. Nothing is substituted.</p>' +
+      '<pre>' + esc(message) + '</pre>' + fixtureControlsHtml() + '</div></div>';
   }
 
+  /* Cached fixtures are only ever loaded by an explicit click, after a live
+     failure. They are never substituted automatically and never blended. */
   function fixtureControlsHtml() {
     if (S.fixture) {
-      return '<div class="fm-row" style="margin-top:10px">' +
-        '<span class="fm-tag cached">Cached research demonstration</span>' +
-        '<button class="fm-btn" data-fm="fixture-clear">Clear cached demonstration</button></div>';
+      return '<div class="actions-row">' +
+        '<button class="btn" type="button" data-fm="fixture-clear">Run live instead</button></div>';
     }
-    return '<div class="fm-row" style="margin-top:10px">' +
-      '<button class="fm-btn" data-fm="fixture-load">Load cached research demonstration</button>' +
-      '<span class="fm-note" style="margin:0">Loads recorded fixture responses if the backend ships them. ' +
-      'They are always labelled <b>Cached research demonstration</b> and are never substituted automatically.</span>' +
-      (S.fixtureNotice ? '<div class="fm-note">' + esc(S.fixtureNotice) + '</div>' : '') + '</div>';
+    return '<div class="actions-row">' +
+      '<button class="btn" type="button" data-fm="fixture-load">Load cached research demonstration</button>' +
+      '</div><p class="note" style="margin-top:10px">Loads recorded fixture responses if the backend ships them. ' +
+      'They are always labelled <b>Cached research demonstration</b> and are never substituted automatically.</p>' +
+      (S.fixtureNotice ? '<p class="note">' + esc(S.fixtureNotice) + '</p>' : '');
   }
 
   function cachedBannerHtml() {
     if (!S.fixture) return '';
-    return '<section class="fm-card fm-cached-banner">' +
-      '<span class="fm-tag cached">Cached research demonstration</span>' +
-      '<div class="fm-note" style="margin-top:6px">These values come from recorded fixture responses, ' +
-      'not from a live model call in this session.</div></section>';
+    var version = modelVersion();
+    return '<div class="shell tight"><div class="notice cached" style="margin:20px 0 0">' +
+      '<span class="n">Cached research demonstration</span>' +
+      '<span class="d">No model call was made. Every value on this page was captured from a previous run with model ' +
+      'version <span class="mono">' + esc(version) + '</span> and is replayed verbatim. Model health is not evaluated ' +
+      'in this mode, and the replay controls step through the captured responses rather than requesting new ones. ' +
+      'This is not a result computed in this browser session. Refreshing the page leaves this mode.</span>' +
+      '<span class="acts"><button class="btn sm" type="button" data-fm="fixture-clear">Run live instead</button></span>' +
+      '</div></div>';
   }
 
   // ── chart ──────────────────────────────────────────────────────────────
@@ -568,391 +713,604 @@
   function niceTickStep(span) {
     var candidates = [1, 2, 3, 6, 12, 24, 48];
     for (var i = 0; i < candidates.length; i++) {
-      if (span / candidates[i] <= 6) return candidates[i];
+      if (span / candidates[i] <= 4) return candidates[i];
     }
     return 48;
   }
 
+  /* Observed = solid ink line with filled dots. Forecast = dashed blue with a
+     hollow diamond at each due hour. Interval = a thin capped whisker, drawn
+     only where the artifact returned one. Anchor = a dashed oxide rule. */
   function chartSvg(opt) {
-    var W = 640, H = 178, PL = 50, PR = 18, PT = 12, PB = 28;
+    var W = 560, H = 186, PL = 46, PR = 14, PT = 14, PB = 30;
     var obs = opt.obs, fcs = opt.forecasts, anchor = opt.anchor;
     var xs = [0], ys = [];
     obs.forEach(function (o) { xs.push(o.hour); ys.push(o.value); });
     fcs.forEach(function (f) {
       xs.push(f.due);
       ys.push(f.personalized);
-      if (isNum(f.population)) ys.push(f.population);
       if (isNum(f.lower)) ys.push(f.lower);
       if (isNum(f.upper)) ys.push(f.upper);
     });
     if (anchor != null) xs.push(anchor);
     ys = ys.filter(isNum);
     if (!ys.length) return null;
-    var xMin = 0, xMax = Math.max.apply(null, xs);
+    // Small multiples share one time axis, so the four panels stay comparable.
+    var xMin = 0, xMax = isNum(opt.xMax) ? opt.xMax : Math.max.apply(null, xs);
     if (xMax - xMin < 1) xMax = xMin + 1;
-    var yMin = Math.min.apply(null, ys), yMax = Math.max.apply(null, ys);
+    var yMin, yMax;
+    if (opt.yDomain && isNum(opt.yDomain[0]) && isNum(opt.yDomain[1])) {
+      // A replay step must be comparable with the one before it, so the vertical
+      // domain is supplied by the caller and held stable across steps.
+      yMin = opt.yDomain[0]; yMax = opt.yDomain[1];
+    } else {
+      yMin = Math.min.apply(null, ys); yMax = Math.max.apply(null, ys);
+    }
     if (yMax - yMin < 1e-6) { yMax = yMin + Math.max(1, Math.abs(yMin) * 0.1); }
-    var pad = (yMax - yMin) * 0.14;
+    var pad = (yMax - yMin) * 0.16;
     var rawMin = yMin;
     yMin -= pad; yMax += pad;
     // Padding alone must not invent a negative range. If every plotted value is
     // non-negative the axis stops at 0; if the model itself returned a negative
     // bound (it does for urine output) that value is still shown as returned.
     if (rawMin >= 0 && yMin < 0) yMin = 0;
-    var sx = function (h) { return PL + (h - xMin) / (xMax - xMin) * (W - PL - PR); };
-    var sy = function (v) { return PT + (yMax - v) / (yMax - yMin) * (H - PT - PB); };
-    var d = decimalsFor(opt.target);
-    var g = [];
+    var X = function (h) { return PL + (h - xMin) / (xMax - xMin) * (W - PL - PR); };
+    var Y = function (v) { return PT + (1 - (v - yMin) / (yMax - yMin)) * (H - PT - PB); };
 
-    // y grid
-    [0, 0.5, 1].forEach(function (t) {
-      var v = yMin + (yMax - yMin) * t, y = sy(v);
-      g.push('<line x1="' + PL + '" y1="' + y.toFixed(1) + '" x2="' + (W - PR) + '" y2="' + y.toFixed(1) +
-        '" stroke="#E2E7F0" stroke-width="1"/>');
-      g.push('<text x="' + (PL - 6) + '" y="' + (y + 3.5).toFixed(1) + '" text-anchor="end" font-size="10" fill="#8C9BB5">' +
-        esc(v.toFixed(d)) + '</text>');
+    var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" preserveAspectRatio="xMidYMid meet">';
+    // y axis: three labelled gridlines only
+    [yMax, (yMax + yMin) / 2, yMin].forEach(function (v) {
+      var y = Y(v);
+      s += '<line x1="' + PL + '" y1="' + y.toFixed(1) + '" x2="' + (W - PR) + '" y2="' + y.toFixed(1) +
+        '" stroke="' + C.dividerSoft + '" stroke-width="1"/>';
+      s += '<text x="' + (PL - 8) + '" y="' + (y + 4).toFixed(1) + '" text-anchor="end" font-size="12" ' +
+        'font-family="IBM Plex Mono, monospace" fill="' + C.ink2 + '">' +
+        esc(fmtVal(v, opt.target)) + '</text>';
     });
-    // x axis
-    var step = niceTickStep(xMax - xMin);
-    g.push('<line x1="' + PL + '" y1="' + (H - PB) + '" x2="' + (W - PR) + '" y2="' + (H - PB) +
-      '" stroke="#C5CEDB" stroke-width="1"/>');
-    for (var t = 0; t <= xMax + 1e-9; t += step) {
-      var x = sx(t);
-      g.push('<line x1="' + x.toFixed(1) + '" y1="' + (H - PB) + '" x2="' + x.toFixed(1) + '" y2="' + (H - PB + 4) +
-        '" stroke="#C5CEDB" stroke-width="1"/>');
-      g.push('<text x="' + x.toFixed(1) + '" y="' + (H - PB + 16) + '" text-anchor="middle" font-size="10" fill="#8C9BB5">' +
-        t + '</text>');
+    // x axis ticks — density halves rather than letting labels drop below 11px,
+    // and a tick is dropped rather than allowed to collide with the unit label.
+    var stepH = niceTickStep(xMax - xMin);
+    var xLabel = opt.xLabel || 'h';
+    var labelW = xLabel.length * 6.2 + 10;
+    s += '<line x1="' + PL + '" y1="' + (H - PB) + '" x2="' + (W - PR) + '" y2="' + (H - PB) +
+      '" stroke="' + C.divider + '" stroke-width="1"/>';
+    for (var t = 0; t <= xMax + 1e-9; t += stepH) {
+      var x = X(t);
+      if (x > W - PR - labelW) break;
+      s += '<text x="' + x.toFixed(1) + '" y="' + (H - PB + 17) + '" text-anchor="middle" font-size="12" ' +
+        'font-family="IBM Plex Mono, monospace" fill="' + C.ink2 + '">' + Math.round(t) + '</text>';
     }
-    g.push('<text x="' + (W - PR) + '" y="' + (H - 3) + '" text-anchor="end" font-size="9.5" fill="#8C9BB5">' +
-      'hours after ICU admission</text>');
+    s += '<text x="' + (W - PR) + '" y="' + (H - PB + 17) + '" text-anchor="end" font-size="12" ' +
+      'font-family="IBM Plex Sans, sans-serif" fill="' + C.ink2 + '">' + esc(xLabel) + '</text>';
 
-    // anchor marker
+    // anchor rule
     if (anchor != null) {
-      var ax = sx(anchor);
-      g.push('<line x1="' + ax.toFixed(1) + '" y1="' + PT + '" x2="' + ax.toFixed(1) + '" y2="' + (H - PB) +
-        '" stroke="#E8724A" stroke-width="1.2" stroke-dasharray="3 3"/>');
-      g.push('<text x="' + (ax + 4).toFixed(1) + '" y="' + (PT + 9) + '" font-size="9.5" fill="#E8724A" font-weight="600">anchor</text>');
+      var ax = X(anchor);
+      s += '<line x1="' + ax.toFixed(1) + '" y1="' + PT + '" x2="' + ax.toFixed(1) + '" y2="' + (H - PB) +
+        '" stroke="' + C.oxide + '" stroke-width="1" stroke-dasharray="3 3"/>';
+      s += '<text x="' + (ax + 5).toFixed(1) + '" y="' + (PT + 9) + '" font-size="11" ' +
+        'font-family="IBM Plex Sans, sans-serif" fill="' + C.oxide + '">anchor</text>';
     }
-
-    // observed (solid)
-    if (obs.length) {
-      var pts = obs.map(function (o) { return sx(o.hour).toFixed(1) + ',' + sy(o.value).toFixed(1); }).join(' ');
-      if (obs.length > 1) {
-        g.push('<polyline points="' + pts + '" fill="none" stroke="#0F2B5B" stroke-width="2.1" ' +
-          'stroke-linejoin="round" stroke-linecap="round"/>');
-      }
-      obs.forEach(function (o) {
-        g.push('<circle cx="' + sx(o.hour).toFixed(1) + '" cy="' + sy(o.value).toFixed(1) +
-          '" r="3.4" fill="#0F2B5B"/>');
-      });
-      var last = obs[obs.length - 1];
-      // dashed link from the last observed value into the forecast points
-      var persPts = fcs.filter(function (f) { return isNum(f.personalized); })
-        .map(function (f) { return sx(f.due).toFixed(1) + ',' + sy(f.personalized).toFixed(1); });
-      if (persPts.length) {
-        g.push('<polyline points="' + sx(last.hour).toFixed(1) + ',' + sy(last.value).toFixed(1) + ' ' +
-          persPts.join(' ') + '" fill="none" stroke="#0F2B5B" stroke-width="1.3" ' +
-          'stroke-dasharray="4 4" opacity="0.55"/>');
-      }
-    }
-
-    // forecasts
+    // intervals
     fcs.forEach(function (f) {
-      var x = sx(f.due);
-      if (isNum(f.lower) && isNum(f.upper)) {
-        var yl = sy(f.lower), yu = sy(f.upper);
-        g.push('<line x1="' + x.toFixed(1) + '" y1="' + yu.toFixed(1) + '" x2="' + x.toFixed(1) + '" y2="' + yl.toFixed(1) +
-          '" stroke="#0F2B5B" stroke-width="1.6" opacity="0.42"/>');
-        g.push('<line x1="' + (x - 4).toFixed(1) + '" y1="' + yu.toFixed(1) + '" x2="' + (x + 4).toFixed(1) + '" y2="' + yu.toFixed(1) +
-          '" stroke="#0F2B5B" stroke-width="1.6" opacity="0.42"/>');
-        g.push('<line x1="' + (x - 4).toFixed(1) + '" y1="' + yl.toFixed(1) + '" x2="' + (x + 4).toFixed(1) + '" y2="' + yl.toFixed(1) +
-          '" stroke="#0F2B5B" stroke-width="1.6" opacity="0.42"/>');
-      }
-      if (isNum(f.population)) {
-        // population POINT only: never drawn as a band, because it has no interval
-        var yp = sy(f.population);
-        g.push('<line x1="' + (x - 5).toFixed(1) + '" y1="' + yp.toFixed(1) + '" x2="' + (x + 5).toFixed(1) + '" y2="' + yp.toFixed(1) +
-          '" stroke="#0D9488" stroke-width="2"/>');
-      }
-      var y = sy(f.personalized), r = 4.2;
-      if (f.tier === 'validated_artifact') {
-        g.push('<polygon points="' + [
-          x.toFixed(1) + ',' + (y - r).toFixed(1), (x + r).toFixed(1) + ',' + y.toFixed(1),
-          x.toFixed(1) + ',' + (y + r).toFixed(1), (x - r).toFixed(1) + ',' + y.toFixed(1)
-        ].join(' ') + '" fill="#FFFFFF" stroke="#0F2B5B" stroke-width="2"/>');
-      } else {
-        g.push('<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="3.6" fill="#FFFFFF" ' +
-          'stroke="#8C9BB5" stroke-width="1.6" stroke-dasharray="2 1.6"/>');
-      }
+      if (!isNum(f.lower) || !isNum(f.upper)) return;
+      var x = X(f.due), y1 = Y(f.upper), y2 = Y(f.lower);
+      s += '<line x1="' + x.toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + x.toFixed(1) + '" y2="' + y2.toFixed(1) +
+        '" stroke="' + C.ink2 + '" stroke-width="1"/>' +
+        '<line x1="' + (x - 4).toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + (x + 4).toFixed(1) + '" y2="' + y1.toFixed(1) +
+        '" stroke="' + C.ink2 + '" stroke-width="1"/>' +
+        '<line x1="' + (x - 4).toFixed(1) + '" y1="' + y2.toFixed(1) + '" x2="' + (x + 4).toFixed(1) + '" y2="' + y2.toFixed(1) +
+        '" stroke="' + C.ink2 + '" stroke-width="1"/>';
     });
-
-    return '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' +
-      esc(labelFor(opt.target) + ' trajectory and forecasts') + '">' + g.join('') + '</svg>';
+    // forecast line: from the last observation through the forecast points
+    if (fcs.length) {
+      var pts = [];
+      if (obs.length) pts.push([X(obs[obs.length - 1].hour), Y(obs[obs.length - 1].value)]);
+      fcs.forEach(function (f) { pts.push([X(f.due), Y(f.personalized)]); });
+      s += '<polyline fill="none" stroke="' + C.blue + '" stroke-width="1.4" stroke-dasharray="4 3" points="' +
+        pts.map(function (p) { return p[0].toFixed(1) + ',' + p[1].toFixed(1); }).join(' ') + '"/>';
+      fcs.forEach(function (f) {
+        var x = X(f.due), y = Y(f.personalized), r = 3.6;
+        var changed = opt.changed && opt.changed[f.horizon];
+        s += '<polygon points="' + x.toFixed(1) + ',' + (y - r).toFixed(1) + ' ' + (x + r).toFixed(1) + ',' + y.toFixed(1) +
+          ' ' + x.toFixed(1) + ',' + (y + r).toFixed(1) + ' ' + (x - r).toFixed(1) + ',' + y.toFixed(1) +
+          '" fill="' + (changed ? C.oxide : C.surface) + '" stroke="' + (changed ? C.oxide : C.blue) +
+          '" stroke-width="1.5"/>';
+      });
+    }
+    // observed
+    if (obs.length) {
+      s += '<polyline fill="none" stroke="' + C.ink + '" stroke-width="1.6" points="' +
+        obs.map(function (o) { return X(o.hour).toFixed(1) + ',' + Y(o.value).toFixed(1); }).join(' ') + '"/>';
+      obs.forEach(function (o, i) {
+        var isNew = opt.newestHour != null && Math.abs(o.hour - opt.newestHour) < 1e-9;
+        s += '<circle cx="' + X(o.hour).toFixed(1) + '" cy="' + Y(o.value).toFixed(1) + '" r="' +
+          (isNew ? 4.4 : 3) + '" fill="' + C.ink + '"/>';
+        if (isNew) {
+          s += '<circle cx="' + X(o.hour).toFixed(1) + '" cy="' + Y(o.value).toFixed(1) +
+            '" r="7.5" fill="none" stroke="' + C.oxide + '" stroke-width="1.2"/>';
+        }
+      });
+    }
+    return s + '</svg>';
   }
 
-  function chartCardHtml(c, target, resp, uptoStep) {
+  /* One shared time domain for the whole grid. In the replay it is the whole
+     recorded span plus the longest horizon, so the x axis does not move as
+     steps are added. The domain is structural — it uses observation times the
+     timeline already shows, never a future observation value. */
+  function chartDomain(c, resp, uptoStep, series, stable) {
+    var xs = [hourAt(c, uptoStep) || 0];
+    if (stable) {
+      xs.push(hourAt(c, lastStep(c)) || 0);
+      var maxH = 0;
+      Object.keys(S.cache).forEach(function (k) {
+        ((S.cache[k] || {}).forecasts || []).forEach(function (f) {
+          var h = num(f.horizon_hours);
+          if (h != null && h > maxH) maxH = h;
+        });
+      });
+      xs.push((hourAt(c, lastStep(c)) || 0) + maxH);
+    }
+    series.forEach(function (t) {
+      observationsFor(c, t, uptoStep).forEach(function (o) { xs.push(o.hour); });
+      forecastPointsFor(resp, t).forEach(function (f) { xs.push(f.due); });
+    });
+    var m = Math.max.apply(null, xs.filter(isNum));
+    return isNum(m) && m > 0 ? m : null;
+  }
+
+  /* Stable vertical domain: the union of the observations the replay has
+     reached and every response computed so far for this case. It only grows,
+     so a value can never appear to move because the axis moved under it. */
+  function stableYDomain(c, target, uptoStep) {
+    var caseId = c && c.id ? c.id : 'case';
+    var vals = [];
+    observationsFor(c, target, uptoStep).forEach(function (o) { vals.push(o.value); });
+    Object.keys(S.cache).forEach(function (k) {
+      if (k.indexOf(caseId + '#') !== 0) return;
+      forecastPointsFor(S.cache[k], target).forEach(function (f) {
+        vals.push(f.personalized);
+        if (isNum(f.lower)) vals.push(f.lower);
+        if (isNum(f.upper)) vals.push(f.upper);
+      });
+    });
+    vals = vals.filter(isNum);
+    if (vals.length < 2) return null;
+    return [Math.min.apply(null, vals), Math.max.apply(null, vals)];
+  }
+
+  function chartCardHtml(c, target, resp, uptoStep, xLabel, xMax, opts) {
+    opts = opts || {};
     var obs = observationsFor(c, target, uptoStep);
     var fcs = resp ? forecastPointsFor(resp, target) : [];
     var unit = unitFor(target);
     var anchor = resp ? num(resp._anchor_hour) : hourAt(c, uptoStep);
-    var head = '<div class="fm-chart-h"><b>' + esc(labelFor(target)) + '</b><span>' + esc(unit) + '</span>';
+    var head = '<div class="chart-h"><b>' + esc(labelFor(target)) + '</b><span class="u">' + esc(unit) + '</span>';
     if (obs.length) {
       var last = obs[obs.length - 1];
-      head += '<span class="fm-latest">latest ' + esc(fmtVal(last.value, target)) + ' ' + esc(unit) +
-        ' @ ' + esc(fmtHour(last.hour)) + '</span>';
+      head += '<span class="latest">' + esc(fmtVal(last.value, target)) + ' @ ' + esc(fmtHour(last.hour)) + '</span>';
     } else {
-      head += '<span class="fm-latest">Not observed</span>';
+      head += '<span class="latest">Not observed</span>';
     }
     head += '</div>';
-    var svg = (obs.length || fcs.length) ? chartSvg({
-      target: target, obs: obs, forecasts: fcs, anchor: anchor
-    }) : null;
-    var body = svg || '<div class="fm-nodata">Not observed — no value for this variable up to ' +
-      esc(fmtHour(anchor)) + '. Nothing is imputed or interpolated.</div>';
-    return '<div class="fm-chart">' + head + body + '</div>';
+    var svg = (obs.length || fcs.length)
+      ? chartSvg({
+          target: target, obs: obs, forecasts: fcs, anchor: anchor, xLabel: xLabel, xMax: xMax,
+          yDomain: opts.stable ? stableYDomain(c, target, uptoStep) : null,
+          changed: opts.changed && opts.changed[target] ? opts.changed[target] : null,
+          newestHour: opts.newestHour
+        })
+      : null;
+    var body = svg || '<div class="chart-none"><b>Not observed</b>No value up to ' + esc(fmtHour(anchor)) +
+      '. Nothing is imputed or interpolated. The variable enters the chart at the step where it is first observed.</div>';
+    return '<div class="chart">' + head + body + '</div>';
   }
 
-  function chartsHtml(c, resp, uptoStep) {
-    var series = PRIMARY_SERIES.concat(S.showExtraSeries ? EXTRA_SERIES : []);
-    return '<section class="fm-card">' +
-      '<div class="fm-row"><h3 class="fm-h" style="margin:0">Patient trajectory · observed and forecast</h3>' +
-      '<label class="fm-note" style="margin:0 0 0 auto"><input type="checkbox" data-fm="toggle-extra"' +
-        (S.showExtraSeries ? ' checked' : '') + '> show glucose · potassium · heart rate</label></div>' +
-      '<div class="fm-charts">' +
-        series.map(function (t) { return chartCardHtml(c, t, resp, uptoStep); }).join('') +
-      '</div>' +
-      '<div class="fm-legend">' +
-        '<span><svg width="26" height="10"><line x1="1" y1="5" x2="25" y2="5" stroke="#0F2B5B" stroke-width="2.1"/>' +
-          '<circle cx="13" cy="5" r="3.2" fill="#0F2B5B"/></svg> observed value</span>' +
-        '<span><svg width="18" height="12"><polygon points="9,2 15,6 9,10 3,6" fill="#fff" stroke="#0F2B5B" stroke-width="2"/></svg>' +
-          ' personalized point (validated artifact)</span>' +
-        '<span><svg width="18" height="14"><line x1="9" y1="1" x2="9" y2="13" stroke="#0F2B5B" stroke-width="1.6" opacity=".42"/>' +
-          '<line x1="5" y1="1" x2="13" y2="1" stroke="#0F2B5B" stroke-width="1.6" opacity=".42"/>' +
-          '<line x1="5" y1="13" x2="13" y2="13" stroke="#0F2B5B" stroke-width="1.6" opacity=".42"/></svg>' +
-          ' target-specific calibrated research interval</span>' +
-        '<span><svg width="18" height="10"><circle cx="9" cy="5" r="3.6" fill="#fff" stroke="#8C9BB5" stroke-width="1.6" stroke-dasharray="2 1.6"/></svg>' +
-          ' illustrative point (no interval)</span>' +
-        '<span><svg width="18" height="10"><line x1="3" y1="5" x2="15" y2="5" stroke="#0D9488" stroke-width="2"/></svg>' +
-          ' population point (no interval)</span>' +
-      '</div>' +
-      '<div class="fm-note">Solid line = observations available up to the anchor. Forecast markers are drawn only at their due hour. ' +
-      'A population point is drawn as a point, never as a band, because it carries no interval. Missing values are shown as ' +
-      '<i>Not observed</i> and are never interpolated. Raw calibrated statistical intervals are displayed unchanged and may ' +
-      'extend beyond physiological support, including below zero; they have no clinical interpretation.</div>' +
-      '</section>';
-  }
-
-  // ── forecast cards ─────────────────────────────────────────────────────
-  function tierMeta(tier) {
-    if (tier === 'validated_artifact') {
-      return { cls: 'validated', label: 'Validated serialized artifact' };
-    }
-    if (tier === 'illustrative') {
-      return { cls: 'illustrative', label: 'Illustrative belief output' };
-    }
-    return { cls: 'unsupported', label: 'Model abstained' };
-  }
-
-  function forecastCardHtml(f, c, resp, uptoStep) {
-    var meta = tierMeta(f.tier);
-    var unit = unitFor(f.target);
-    var anchor = num(resp._anchor_hour);
-    var due = anchor != null ? anchor + num(f.horizon_hours) : null;
-    var h = '<article class="fm-fc ' + meta.cls + '">' +
-      '<div class="fm-fc-top">' +
-        '<span class="fm-fc-name">' + esc(labelFor(f.target)) + '</span>' +
-        '<span class="fm-fc-h">+' + esc(f.horizon_hours) + ' h</span>' +
-        '<span class="fm-fc-tier">' + esc(meta.label) + '</span>' +
-      '</div>' +
-      '<div class="fm-note" style="margin-top:4px">' + esc(f.system) + ' system · due at ' +
-        esc(fmtHour(due)) + ' after ICU admission</div>';
-
-    if (f.tier === 'unsupported') {
-      h += '<div class="fm-fc-msg">No point forecast and no interval are produced for this cell. ' +
-        'The model abstained rather than emitting a value.' +
-        (f.reason ? '<br>Reason: ' + esc(f.reason) : '') +
-        (f.status ? '<br>Status: <span class="fm-mono">' + esc(f.status) + '</span>' : '') +
-        (f.interval_status ? '<br>Interval status: <span class="fm-mono">' + esc(f.interval_status) + '</span>' : '') +
-        '</div></article>';
-      return h;
-    }
-
-    var pop = f.population ? num(f.population.point) : null;
-    var pers = f.personalized ? num(f.personalized.point) : null;
-    h += '<div class="fm-fc-nums">' +
-      '<div class="fm-fc-num pop"><div class="k">Population point</div><div class="v">' +
-        (pop == null ? '<small>not produced</small>' : esc(fmtVal(pop, f.target)) + '<small>' + esc(unit) + '</small>') +
-      '</div></div>' +
-      '<div class="fm-fc-num"><div class="k">Personalized point</div><div class="v">' +
-        (pers == null ? '<small>not produced</small>' : esc(fmtVal(pers, f.target)) + '<small>' + esc(unit) + '</small>') +
-      '</div></div>';
-    if (f.personalized && isNum(num(f.personalized.delta_vs_population))) {
-      var dv = num(f.personalized.delta_vs_population);
-      h += '<div class="fm-fc-num"><div class="k">Δ vs population</div><div class="v">' +
-        (dv >= 0 ? '+' : '') + esc(fmtVal(dv, f.target)) + '<small>' + esc(unit) + '</small></div></div>';
-    }
-    h += '</div>';
-
-    if (f.tier === 'validated_artifact') {
-      if (isNum(num(f.lower)) && isNum(num(f.upper))) {
-        var cov = num(f.interval_target_coverage);
-        h += '<div class="fm-fc-int"><b>' + esc(fmtVal(num(f.lower), f.target)) + ' – ' +
-          esc(fmtVal(num(f.upper), f.target)) + ' ' + esc(unit) + '</b><br>' +
-          (cov != null ? 'Calibrated ' + esc((cov * 100).toFixed(0)) + '% ' : 'Target-specific calibrated ') +
-          '<b>research</b> interval from the serialized patient-specific conformal artifact. ' +
-          'This is not a clinical confidence interval and carries no clinical guarantee.' +
-          (cov != null ? '<br><span class="fm-note" style="margin:0">Target coverage reported by the artifact: ' +
-            esc(cov.toFixed(4)) + '</span>' : '') +
-          (f.note ? '<br><span class="fm-note" style="margin:0">' + esc(f.note) + '</span>' : '') +
-          '</div>';
-      } else {
-        h += '<div class="fm-fc-msg">This validated cell returned no lower/upper bound in this response. ' +
-          'No interval is displayed and none is inferred.</div>';
-      }
-    } else {
-      h += '<div class="fm-fc-msg"><b>No calibrated interval.</b> This is a belief-derived research illustration; ' +
-        'lower and upper bounds are not produced for this cell and are not estimated here.' +
-        (f.interval_status ? '<br>Interval status: <span class="fm-mono">' + esc(f.interval_status) + '</span>' : '') +
-        '</div>';
-    }
-
-    h += '<div class="fm-fc-src">Status <span class="fm-mono">' + esc(f.status || '—') + '</span>' +
-      (f.population && f.population.source ? ' · population <span class="fm-mono">' + esc(f.population.source) + '</span>' : '') +
-      (f.personalized && f.personalized.source ? ' · personalized <span class="fm-mono">' + esc(f.personalized.source) + '</span>' : '') +
+  function chartLegendHtml(withChange) {
+    return '<div class="chart-legend">' +
+      '<span><svg width="26" height="10" aria-hidden="true"><line x1="1" y1="5" x2="25" y2="5" stroke="' + C.ink +
+        '" stroke-width="1.6"/><circle cx="13" cy="5" r="3" fill="' + C.ink + '"/></svg> observed value</span>' +
+      '<span><svg width="20" height="12" aria-hidden="true"><polygon points="10,2 14,6 10,10 6,6" fill="' + C.surface +
+        '" stroke="' + C.blue + '" stroke-width="1.5"/></svg> personalized point · validated artifact</span>' +
+      (withChange
+        ? '<span><svg width="20" height="12" aria-hidden="true"><polygon points="10,2 14,6 10,10 6,6" fill="' + C.oxide +
+          '" stroke="' + C.oxide + '" stroke-width="1.5"/></svg> changed since the previous replay step</span>'
+        : '') +
+      '<span><svg width="16" height="14" aria-hidden="true"><line x1="8" y1="1" x2="8" y2="13" stroke="' + C.ink2 +
+        '" stroke-width="1"/><line x1="4" y1="1" x2="12" y2="1" stroke="' + C.ink2 + '" stroke-width="1"/>' +
+        '<line x1="4" y1="13" x2="12" y2="13" stroke="' + C.ink2 + '" stroke-width="1"/></svg>' +
+        ' target-specific calibrated research interval</span>' +
+      '<span><svg width="16" height="12" aria-hidden="true"><line x1="8" y1="0" x2="8" y2="12" stroke="' + C.oxide +
+        '" stroke-width="1" stroke-dasharray="3 3"/></svg> anchor</span>' +
       '</div>';
-
-    h += outcomeHtml(f, c, resp, uptoStep, due, unit);
-    return h + '</article>';
   }
 
-  function outcomeHtml(f, c, resp, uptoStep, due, unit) {
-    var row = {
-      target: f.target, anchorHour: num(resp._anchor_hour), dueHour: due,
-      lower: num(f.lower), upper: num(f.upper)
+  function chartsNoteHtml() {
+    return '<p class="note" style="margin-top:12px">Forecast markers are drawn only at their due hour. A point with no ' +
+      'interval is drawn as a point, never as a band. Missing values are shown as <i>Not observed</i> and are never ' +
+      'interpolated. Raw calibrated statistical intervals are displayed unchanged and may ' +
+      'extend beyond physiological support, including below zero; they have no clinical interpretation.</p>';
+  }
+
+  // ── forecast tiers ─────────────────────────────────────────────────────
+  // counts come from the same deduped lists the panels render, so the tier
+  // control and the section headers can never disagree
+  function tierCounts(resp) {
+    return {
+      validated: ofTier(resp, 'validated').length,
+      illustrative: ofTier(resp, 'illustrative').length,
+      unsupported: ofTier(resp, 'unsupported').length
     };
-    var res = resolveSnapshot(row, c, uptoStep);
-    if (res.state === 'awaiting') {
-      return '<div class="fm-fc-outcome awaiting">' +
-        (res.policy && res.policy.enabled
-          ? 'Awaiting a matching future observation (±' + esc(res.policy.tolerance) + ' h of the due hour · ' + esc(res.policy.source) + ').'
-          : 'Awaiting / no configured matching. The backend replay contract disables observation matching.') +
-        ' No accuracy verdict is made.</div>';
-    }
-    var stamp = 'Observed ' + esc(fmtVal(res.value, f.target)) + ' ' + esc(unit) + ' at ' + esc(fmtHour(res.hour)) +
-      ' (Δ ' + esc((Math.round(res.delta * 100) / 100).toFixed(2)) + ' h from the due hour, matched within ±' +
-      esc(res.policy.tolerance) + ' h · ' + esc(res.policy.source) + ').';
-    if (res.state === 'inside') {
-      return '<div class="fm-fc-outcome inside">Observed value was inside the research interval.<br>' + stamp + '</div>';
-    }
-    if (res.state === 'outside') {
-      return '<div class="fm-fc-outcome outside">Observed value was outside the research interval.<br>' + stamp + '</div>';
-    }
-    return '<div class="fm-fc-outcome plain">' + stamp +
-      '<br>No calibrated interval exists for this cell, so no interval comparison is made.</div>';
   }
 
-  function filterForecasts(resp, targetFilter, horizonFilter, showAll) {
-    var list = (resp.forecasts || []).slice();
-    if (!showAll) list = list.filter(function (f) { return f.tier === 'validated_artifact'; });
-    if (targetFilter !== 'all') list = list.filter(function (f) { return f.target === targetFilter; });
-    if (horizonFilter !== 'all') {
-      list = list.filter(function (f) { return String(f.horizon_hours) === String(horizonFilter); });
-    }
-    var order = { validated_artifact: 0, illustrative: 1, unsupported: 2 };
-    list.sort(function (a, b) {
-      return (order[a.tier] - order[b.tier]) ||
-        a.target.localeCompare(b.target) || (a.horizon_hours - b.horizon_hours);
+  function tierBarHtml(resp) {
+    var n = tierCounts(resp);
+    var mk = function (key, label, count) {
+      return '<button class="tier-btn' + (S.tier === key ? ' active' : '') + '" type="button" data-fm="tier" ' +
+        'data-tier="' + key + '" aria-pressed="' + (S.tier === key) + '">' + label +
+        '<span class="n">' + count + '</span></button>';
+    };
+    return '<div class="tiers" role="group" aria-label="Forecast tier">' +
+      mk('validated', 'Validated', n.validated) +
+      mk('illustrative', 'Illustrative', n.illustrative) +
+      mk('unsupported', 'Unsupported', n.unsupported) + '</div>';
+  }
+
+  function ofTier(resp, tier) {
+    var seen = {};
+    return ((resp && resp.forecasts) || []).filter(function (f) {
+      if (tier === 'validated') return f.tier === 'validated_artifact';
+      if (tier === 'illustrative') return f.tier === 'illustrative';
+      return f.tier !== 'validated_artifact' && f.tier !== 'illustrative';
+    }).filter(function (f) {
+      // the same target × horizon can arrive from more than one system; list it once
+      var k = f.target + '@' + f.horizon_hours;
+      if (seen[k]) return false;
+      seen[k] = 1;
+      return true;
+    }).sort(function (a, b) {
+      return a.target.localeCompare(b.target) || (a.horizon_hours - b.horizon_hours);
     });
-    return list;
   }
 
-  function filterBarHtml(resp, prefix, targetFilter, horizonFilter, showAll, shown) {
-    var targets = {}, horizons = {};
-    (resp.forecasts || []).forEach(function (f) {
-      targets[f.target] = true; horizons[f.horizon_hours] = true;
+  /* Collapsed, the grid shows one row per target rather than every horizon of
+     whichever target sorts first. Prefer 24 h, else the longest horizon. */
+  function onePerTarget(rows) {
+    var best = {};
+    rows.forEach(function (f) {
+      var cur = best[f.target];
+      if (!cur) { best[f.target] = f; return; }
+      var h = num(f.horizon_hours), ch = num(cur.horizon_hours);
+      if (ch === 24) return;
+      if (h === 24 || h > ch) best[f.target] = f;
     });
-    var tOpts = ['<option value="all">All targets</option>'].concat(
-      Object.keys(targets).sort().map(function (t) {
-        return '<option value="' + esc(t) + '"' + (t === targetFilter ? ' selected' : '') + '>' + esc(labelFor(t)) + '</option>';
-      })).join('');
-    var hOpts = ['<option value="all">All horizons</option>'].concat(
-      Object.keys(horizons).map(Number).sort(function (a, b) { return a - b; }).map(function (h) {
-        return '<option value="' + h + '"' + (String(h) === String(horizonFilter) ? ' selected' : '') + '>+' + h + ' h</option>';
-      })).join('');
-    return '<div class="fm-filters">' +
-      '<select class="fm-select" data-fm="' + prefix + '-target">' + tOpts + '</select>' +
-      '<select class="fm-select" data-fm="' + prefix + '-horizon">' + hOpts + '</select>' +
-      '<label><input type="checkbox" data-fm="' + prefix + '-alltiers"' + (showAll ? ' checked' : '') +
-        '> include illustrative and abstained cells</label>' +
-      '<span class="fm-count">' + shown + ' shown</span></div>';
+    return Object.keys(best).map(function (k) { return best[k]; })
+      .sort(function (a, b) { return a.target.localeCompare(b.target); });
   }
 
-  // ── evidence matrix + validation summary ───────────────────────────────
-  function validationHtml(resp) {
-    if (S.validationError) {
-      return errorCardHtml('Validation evidence unavailable', S.validationError);
-    }
-    var v = S.validation;
-    if (!v) return '<section class="fm-card"><h3 class="fm-h">Validation evidence</h3>' +
-      '<div class="fm-empty">Loading…</div></section>';
-    var r = v.interval_width_reduction || {};
-    var gates = {};
-    (v.cells || []).forEach(function (cell) { gates[cell.cell] = cell; });
-    var liveStatus = {};
-    if (resp) {
-      (resp.forecasts || []).forEach(function (f) {
-        var k = f.target + '@' + f.horizon_hours + 'h';
-        if (f.tier === 'validated_artifact' || !liveStatus[k]) liveStatus[k] = f;
+  /* Validated cells only: a lower/upper pair exists solely where the serialized
+     patient-specific conformal artifact produced one. */
+  function validatedTableHtml(resp, changed) {
+    var rows = ofTier(resp, 'validated');
+    var shown = S.showAll ? rows : onePerTarget(rows);
+    var body = shown.map(function (f) {
+      var unit = unitFor(f.target);
+      var lo = num(f.lower), hi = num(f.upper);
+      var cov = num(f.interval_target_coverage);
+      var interval = (isNum(lo) && isNum(hi))
+        ? esc(fmtVal(lo, f.target)) + ' – ' + esc(fmtVal(hi, f.target)) + ' ' + esc(unit)
+        : '<span class="nullv">null</span>';
+      var pers = f.personalized ? num(f.personalized.point) : null;
+      var mark = changed && changed[f.target] && changed[f.target][num(f.horizon_hours)];
+      return '<tr' + (mark ? ' class="row-changed"' : '') + '>' +
+        '<td class="t" data-k="Target">' + esc(labelFor(f.target)) + '</td>' +
+        '<td class="num" data-k="Horizon">' + esc(f.horizon_hours) + ' h</td>' +
+        '<td class="num" data-k="Point">' + (pers == null ? '<span class="nullv">null</span>' : esc(fmtVal(pers, f.target))) + '</td>' +
+        '<td class="num" data-k="Interval">' + interval + '</td>' +
+        '<td data-k="Target coverage">' + (cov == null ? '<span class="nullv">n/a</span>'
+          : '<span class="stat ok"><i></i><span class="ratio">' + esc(cov.toFixed(2)) + '</span></span>') + '</td>' +
+        '</tr>';
+    }).join('');
+    return '<div class="section-head"><h2 class="h-sec">Validated forecast</h2>' +
+        '<span class="meta">' + rows.length + ' targets · coverage recorded per cell</span>' +
+        (rows.length > 4 ? '<button class="disc spacer" type="button" data-fm="toggle-all">' +
+          (S.showAll ? 'Show fewer ⌃' : 'Show all ' + rows.length + ' ⌄') + '</button>' : '') +
+      '</div>' +
+      '<div class="scroll-x"><table class="dtable"><thead><tr><th>Target</th><th>Horizon</th><th>Point</th>' +
+      '<th>Target-calibrated research interval</th><th>Target coverage</th></tr></thead><tbody>' +
+      (body || '<tr><td colspan="5" class="why">No validated cell in this response.</td></tr>') +
+      '</tbody></table></div>' +
+      '<p class="note" style="margin-top:12px">The interval comes from the serialized patient-specific conformal ' +
+      'artifact. It is a research interval, not a clinical confidence interval, and carries no clinical guarantee.</p>';
+  }
+
+  function illustrativeHtml(resp) {
+    var rows = ofTier(resp, 'illustrative');
+    var shown = S.showAll ? rows : onePerTarget(rows).slice(0, 3);
+    return '<div class="section-head"><h2 class="h-sec">Illustrative</h2>' +
+        '<span class="meta">' + rows.length + ' · no interval, not validated</span></div>' +
+      '<ul class="tier-list">' + shown.map(function (f) {
+        var pers = f.personalized ? num(f.personalized.point) : null;
+        return '<li><span class="t">' + esc(labelFor(f.target)) + ' · ' + esc(f.horizon_hours) + ' h</span>' +
+          '<span class="v">' + (pers == null ? 'null' : esc(fmtVal(pers, f.target))) +
+          ' <span class="u">' + esc(unitFor(f.target)) + '</span></span></li>';
+      }).join('') + '</ul>' +
+      (rows.length > shown.length
+        ? '<button class="disc" type="button" data-fm="toggle-all">Show ' + (rows.length - shown.length) + ' more ⌄</button>'
+        : '');
+  }
+
+  function unsupportedRowHtml(resp) {
+    var rows = ofTier(resp, 'unsupported');
+    return '<div class="count-row"><span class="stat na"><i></i>Unsupported</span>' +
+      '<span class="d">' + rows.length + ' targets returned null</span>' +
+      '<button class="disc" type="button" data-fm="tier" data-tier="unsupported">Review ⌄</button></div>';
+  }
+
+  /* Null is a result: an unsupported cell is rendered as an explicit null with
+     a reason, never as a blank or a zero. */
+  function unsupportedTableHtml(resp) {
+    var rows = ofTier(resp, 'unsupported');
+    return '<div class="section-head"><h2 class="h-sec">Unsupported targets</h2>' +
+        '<span class="meta">' + rows.length + ' of ' + ((resp && resp.forecasts) || []).length +
+        ' · the model returned no value</span></div>' +
+      '<p class="note" style="margin-bottom:16px">These targets have no validated artifact and no illustrative ' +
+      'fallback, so the model returns nothing. Nothing here is imputed, interpolated or carried forward from a ' +
+      'neighbouring target. An empty cell means the question was not answerable with this model on this case.</p>' +
+      (rows.length
+        ? '<div class="scroll-x"><table class="dtable"><thead><tr><th>Target</th><th>Horizon</th><th>Value</th>' +
+          '<th>Why no value</th></tr></thead><tbody>' +
+          rows.map(function (f) {
+            return '<tr><td class="t" data-k="Target">' + esc(labelFor(f.target)) + '</td>' +
+              '<td class="num" data-k="Horizon">' + esc(f.horizon_hours) + ' h</td>' +
+              '<td class="nullv" data-k="Value">null</td>' +
+              '<td class="why" data-k="Why">' +
+              esc(f.note || f.reason || f.status || 'No value was produced for this cell.') +
+              '</td></tr>';
+          }).join('') + '</tbody></table></div>'
+        : '<p class="note">No target returned null at this anchor. Every cell in this response is either a ' +
+          'validated artifact or an illustrative point.</p>') +
+      '<dl class="defs" style="margin-top:24px">' +
+        '<dt>Validated</dt><dd>Serialized artifact with a target-calibrated interval and coverage recorded per cell.</dd>' +
+        '<dt>Illustrative</dt><dd>A point with no interval and no coverage record. Shown for shape only; never charted with a band.</dd>' +
+        '<dt>Unsupported</dt><dd>No value returned. Rendered as an explicit null with a reason, never as a blank or a zero.</dd>' +
+      '</dl>';
+  }
+
+  // ── explanatory stages · "How this forecast was constructed" ───────────
+  /* Every stage is conditioned on what the response actually contains. Nothing
+     here claims the backend streamed these steps: they describe the returned
+     document, in the order the contract resolves it. */
+  function stagesFor(resp) {
+    if (!resp) return [];
+    var validated = ofTier(resp, 'validated');
+    var illustrative = ofTier(resp, 'illustrative');
+    var unsupported = ofTier(resp, 'unsupported');
+    // Every count on this list uses the same deduped target × horizon basis the
+    // tier filter and the tables use, so no two numbers on screen can disagree.
+    var all = validated.concat(illustrative, unsupported);
+    var withPopulation = all.filter(function (f) {
+      return f.population && num(f.population.point) != null;
+    });
+    var withPersonal = all.filter(function (f) {
+      var pers = f.personalized ? num(f.personalized.point) : null;
+      var pop = f.population ? num(f.population.point) : null;
+      return pers != null && pop != null && Math.abs(pers - pop) > 1e-9;
+    });
+    var withInterval = all.filter(function (f) {
+      return isNum(num(f.lower)) && isNum(num(f.upper));
+    });
+    var rows = resp._prefix_rows;
+    var out = [];
+    out.push({
+      t: 'Causal trajectory prefix accepted',
+      d: rows + ' observation row' + (rows === 1 ? '' : 's') + ' up to and including ' +
+        fmtHourExact(num(resp._anchor_hour)) + '. Nothing after the anchor was sent.'
+    });
+    out.push({
+      t: 'Authorized target × horizon cells resolved',
+      d: (validated.length + illustrative.length + unsupported.length) + ' cells resolved · ' +
+        validated.length + ' validated, ' + illustrative.length + ' illustrative, ' +
+        unsupported.length + ' unsupported.'
+    });
+    if (withPopulation.length) {
+      out.push({
+        t: 'Population points evaluated',
+        d: withPopulation.length + ' cell' + (withPopulation.length === 1 ? '' : 's') +
+          ' returned a population point.'
       });
     }
-    var rows = MATRIX_TARGETS.map(function (t) {
-      return '<tr><td class="rowh">' + esc(labelFor(t)) + '</td>' +
-        MATRIX_HORIZONS.map(function (h) {
-          var k = t + '@' + h + 'h';
-          var g = gates[k];
-          if (!g) return '<td><span class="fm-cell n">—</span></td>';
-          var live = liveStatus[k];
-          var sub = 'patient ' + esc(g.patient_heldout_gates) + ' · external ' + esc(g.external_heldout_gates);
-          if (live && live.tier !== 'validated_artifact') {
-            return '<td><span class="fm-cell abstain">abstained<small>' +
-              esc(live.status || live.tier) + '</small></span></td>';
-          }
-          return '<td><span class="fm-cell v">validated<small>' + sub + '</small></span></td>';
-        }).join('') + '</tr>';
-    }).join('');
+    if (withPersonal.length) {
+      out.push({
+        t: 'Patient-state adjustments applied where available',
+        d: withPersonal.length + ' cell' + (withPersonal.length === 1 ? '' : 's') +
+          ' returned a personalized point that differs from its population point.'
+      });
+    }
+    if (withInterval.length) {
+      out.push({
+        t: 'Target-specific intervals returned where authorized',
+        d: withInterval.length + ' cell' + (withInterval.length === 1 ? '' : 's') +
+          ' carried a lower and upper bound from a serialized conformal artifact.'
+      });
+    }
+    if (unsupported.length) {
+      out.push({
+        t: 'Unsupported cells withheld',
+        d: unsupported.length + ' cell' + (unsupported.length === 1 ? '' : 's') +
+          ' returned null. No value was substituted for them.'
+      });
+    }
+    return out;
+  }
 
-    return '<section class="fm-card">' +
-      '<h3 class="fm-h">Validation evidence · held-out cohort aggregate</h3>' +
-      '<div class="fm-sub"><b>' + esc(v.serialized_validated_artifact_count) +
-        '</b> serialized validated target × horizon cells · <b>' + esc(r.validation_runs) +
-        '</b> held-out validation runs · model <span class="fm-mono">' + esc(v.model_version) + '</span></div>' +
-      '<div class="fm-stats">' +
-        '<div class="fm-stat"><div class="k">Minimum</div><div class="v">≈' + esc(r.minimum_percent) +
-          '%</div><div class="c">interval-width reduction · held-out cohort aggregate</div></div>' +
-        '<div class="fm-stat"><div class="k">Median</div><div class="v">≈' +
-          esc(r.reported_median_percent_approx != null ? r.reported_median_percent_approx : r.median_percent) +
-          '%</div><div class="c">interval-width reduction · held-out cohort aggregate</div></div>' +
-        '<div class="fm-stat"><div class="k">Maximum</div><div class="v">≈' + esc(r.maximum_percent) +
-          '%</div><div class="c">interval-width reduction · held-out cohort aggregate</div></div>' +
-      '</div>' +
-      '<div class="fm-note" style="font-size:.79rem;color:var(--text-secondary)">' +
-        '<b>These are held-out cohort aggregate results, not real-time interval shrinkage for this individual case.</b> ' +
-        'Every number above summarises ' + esc(r.validation_runs) + ' held-out validation runs across the ' +
-        esc(v.serialized_validated_artifact_count) + ' serialized cells. They say nothing about how much any interval ' +
-        'narrowed for the patient currently on screen. They are not a measure of predictive accuracy, ' +
-        'of diagnostic performance, or of clinical performance.' +
-        (r.scope ? ' Backend scope flag: <span class="fm-mono">' + esc(r.scope) + '</span>.' : '') +
-        (r.case_level_claim_allowed === false ? ' Case-level claims are explicitly disallowed by the backend contract.' : '') +
-      '</div>' +
-      '<hr class="fm-hr">' +
-      '<h3 class="fm-h">12-cell evidence matrix</h3>' +
-      '<div class="fm-matrix-wrap"><table class="fm-matrix"><thead><tr><th class="rowh">Target</th>' +
-        MATRIX_HORIZONS.map(function (h) { return '<th>+' + h + ' h</th>'; }).join('') +
-      '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
-      '<div class="fm-note">“validated” = an exact serialized target × horizon artifact exists and passed its patient / external held-out gates. ' +
-      '“abstained” = the artifact exists but this specific request has no usable current value, so the runtime failed closed for this step. ' +
-      '“—” = no serialized artifact; the cell is outside the validated set.</div>' +
-      '</section>';
+  function stagesHtml(resp) {
+    var stages = stagesFor(resp);
+    if (!stages.length) return '';
+    var done = S.stageIndex < 0 || S.stageIndex >= stages.length - 1;
+    var running = S.stageIndex >= 0 && !done;
+    return '<div class="stages-block">' +
+      '<div class="section-head"><h2 class="h-sec">How this forecast was constructed</h2>' +
+        '<span class="meta">describes the returned document · the backend answered in one request</span>' +
+        '<span class="spacer">' +
+          (running
+            ? '<button class="btn sm" type="button" data-fm="skip-anim">Skip animation</button>'
+            : '<button class="btn sm" type="button" data-fm="replay-presentation">Replay presentation</button>') +
+        '</span></div>' +
+      '<ol class="stages">' + stages.map(function (s, i) {
+        var on = S.stageIndex < 0 || i <= S.stageIndex;
+        return '<li class="stage' + (on ? ' on' : '') + (i === S.stageIndex ? ' current' : '') + '">' +
+          '<span class="n">' + String(i + 1).padStart(2, '0') + '</span>' +
+          '<span class="b"><span class="t">' + esc(s.t) + '</span>' +
+          '<span class="d">' + esc(s.d) + '</span></span></li>';
+      }).join('') + '</ol>' +
+      '<p class="note">The model is fixed. Forecast outputs update as additional causally available observations are ' +
+      'added to the trajectory prefix.</p></div>';
+  }
+
+  function clearStages() {
+    S.stageTimers.forEach(clearTimeout);
+    S.stageTimers = [];
+  }
+  function playStages(resp) {
+    clearStages();
+    var stages = stagesFor(resp);
+    if (!stages.length) return;
+    if (REDUCED) { S.stageIndex = -1; renderAll(); return; }
+    S.stageIndex = 0;
+    renderAll();
+    for (var i = 1; i < stages.length; i++) {
+      (function (idx) {
+        S.stageTimers.push(setTimeout(function () {
+          S.stageIndex = idx;
+          renderAll();
+          if (idx === stages.length - 1) {
+            S.stageTimers.push(setTimeout(function () { S.stageIndex = -1; renderAll(); }, STAGE_MS));
+          }
+        }, idx * STAGE_MS));
+      })(i);
+    }
+  }
+  function skipStages() { clearStages(); S.stageIndex = -1; renderAll(); }
+
+  // ── what changed between two real responses ────────────────────────────
+  /* Both sides come from a completed /api/forecast response. Nothing is
+     inferred, and no clinical meaning is attached to a difference. */
+  function cellsOf(resp) {
+    var map = {};
+    ((resp && resp.forecasts) || []).forEach(function (f) {
+      var k = f.target + '@' + f.horizon_hours;
+      var rank = f.tier === 'validated_artifact' ? 2 : (f.tier === 'illustrative' ? 1 : 0);
+      if (map[k] && map[k].rank >= rank) return;
+      map[k] = {
+        rank: rank, target: f.target, horizon: num(f.horizon_hours), tier: f.tier,
+        point: f.personalized ? num(f.personalized.point) : null,
+        lower: num(f.lower), upper: num(f.upper)
+      };
+    });
+    return map;
+  }
+
+  function diffResponses(prev, next) {
+    if (!prev || !next) return null;
+    var a = cellsOf(prev), b = cellsOf(next);
+    var rows = [];
+    Object.keys(b).forEach(function (k) {
+      var n = b[k], p = a[k];
+      var wasUnsupported = !p || p.tier === 'unsupported' || p.point == null;
+      var isSupported = n.tier !== 'unsupported' && n.point != null;
+      var pointChanged = p && isNum(p.point) && isNum(n.point) && Math.abs(n.point - p.point) > 1e-9;
+      var tierChanged = p && p.tier !== n.tier;
+      if (!pointChanged && !tierChanged && !(wasUnsupported && isSupported)) return;
+      rows.push({
+        target: n.target, horizon: n.horizon,
+        prevPoint: p ? p.point : null, newPoint: n.point,
+        delta: (p && isNum(p.point) && isNum(n.point)) ? n.point - p.point : null,
+        prevTier: p ? p.tier : null, newTier: n.tier,
+        becameSupported: !!(wasUnsupported && isSupported),
+        prevLower: p ? p.lower : null, prevUpper: p ? p.upper : null,
+        newLower: n.lower, newUpper: n.upper
+      });
+    });
+    rows.sort(function (x, y) {
+      return (y.becameSupported - x.becameSupported) ||
+        x.target.localeCompare(y.target) || (x.horizon - y.horizon);
+    });
+    return rows;
+  }
+
+  /* target -> horizon -> true, for the chart and table highlight */
+  function changedMap(rows) {
+    var m = {};
+    (rows || []).forEach(function (r) {
+      if (!m[r.target]) m[r.target] = {};
+      m[r.target][r.horizon] = true;
+    });
+    return m;
+  }
+
+  function tierWord(t) {
+    if (t === 'validated_artifact') return 'validated';
+    if (t === 'illustrative') return 'illustrative';
+    if (t === 'unsupported') return 'unsupported';
+    return t || 'absent';
+  }
+
+  function changeHtml(c, rows, prevStep, step) {
+    if (!rows) return '';
+    var newlySupported = rows.filter(function (r) { return r.becameSupported; });
+    var head = '<div class="section-head"><h2 class="h-sec">What changed</h2>' +
+      '<span class="meta">step ' + (prevStep + 1) + ' → step ' + (step + 1) + ' · ' + rows.length +
+      ' cell' + (rows.length === 1 ? '' : 's') + '</span></div>';
+    var lead = '<ul class="fact-list">' +
+      '<li>One new observation became available.</li>' +
+      '<li>The trajectory prefix now contains ' + (step + 1) + ' row' + (step === 0 ? '' : 's') + '.</li>' +
+      (newlySupported.length
+        ? '<li>' + newlySupported.length + ' cell' + (newlySupported.length === 1 ? ' is' : 's are') +
+          ' now supported at this anchor.</li>'
+        : '') +
+      '<li>This is a model-output change, not a treatment effect.</li>' +
+      '</ul>';
+    if (!rows.length) {
+      return '<div class="section change-block">' + head + lead +
+        '<p class="note">No forecast cell changed between these two responses.</p></div>';
+    }
+    var body = rows.map(function (r) {
+      var unit = unitFor(r.target);
+      var lines = [];
+      if (r.becameSupported) {
+        lines.push('<span class="chg new">This cell is now supported at this anchor.</span>');
+      }
+      if (isNum(r.delta)) {
+        lines.push('<span class="chg">The personalized point changed by ' +
+          esc(fmtSigned(r.delta, r.target)) + ' ' + esc(unit) + ' relative to the previous replay step.</span>');
+      }
+      var prevInt = (isNum(r.prevLower) && isNum(r.prevUpper))
+        ? fmtVal(r.prevLower, r.target) + ' – ' + fmtVal(r.prevUpper, r.target) : null;
+      var newInt = (isNum(r.newLower) && isNum(r.newUpper))
+        ? fmtVal(r.newLower, r.target) + ' – ' + fmtVal(r.newUpper, r.target) : null;
+      return '<tr' + (r.becameSupported ? ' class="row-changed"' : '') + '>' +
+        '<td class="t" data-k="Cell">' + esc(labelFor(r.target)) + ' · ' + esc(r.horizon) + ' h</td>' +
+        '<td class="num" data-k="Previous point">' +
+          (isNum(r.prevPoint) ? esc(fmtVal(r.prevPoint, r.target)) : '<span class="nullv">null</span>') + '</td>' +
+        '<td class="num" data-k="New point">' +
+          (isNum(r.newPoint) ? esc(fmtVal(r.newPoint, r.target)) : '<span class="nullv">null</span>') + '</td>' +
+        '<td class="num" data-k="Delta">' + (isNum(r.delta) ? esc(fmtSigned(r.delta, r.target)) : '—') + '</td>' +
+        '<td data-k="Tier">' + esc(tierWord(r.prevTier)) + ' → ' + esc(tierWord(r.newTier)) + '</td>' +
+        '<td class="num" data-k="Interval">' +
+          (prevInt && newInt ? esc(prevInt) + ' → ' + esc(newInt) : '<span class="nullv">—</span>') + '</td>' +
+        '<td class="why" data-k="Statement">' + lines.join(' ') + '</td>' +
+        '</tr>';
+    }).join('');
+    return '<div class="section change-block">' + head + lead +
+      '<div class="scroll-x"><table class="dtable"><thead><tr><th>Cell</th><th>Previous point</th>' +
+      '<th>New point</th><th>Delta</th><th>Tier</th><th>Interval</th><th>Statement</th></tr></thead>' +
+      '<tbody>' + body + '</tbody></table></div>' +
+      '<p class="note" style="margin-top:12px">Differences are computed from the two completed API responses only. ' +
+      'The model is fixed. Forecast outputs update as additional causally available observations are added to the ' +
+      'trajectory prefix. No clinical interpretation is offered and this never changes drug ranking or dosing.</p>' +
+      '</div>';
   }
 
   // ── research signals ───────────────────────────────────────────────────
@@ -1027,220 +1385,452 @@
     return out;
   }
 
+  function signalStat(state) {
+    if (state === 'signal') return 'bad';
+    if (state === 'watch') return 'warn';
+    if (state === 'unavailable') return 'na';
+    return 'ok';
+  }
+
   function signalsHtml(c, resp, uptoStep) {
     var sigs = computeSignals(c, resp, uptoStep);
-    return '<section class="fm-card tight">' +
-      '<h3 class="fm-h">Research signals</h3>' +
+    var active = sigs.filter(function (s) { return s.state === 'watch' || s.state === 'signal'; });
+    return '<div class="section-head"><h2 class="h-sec">Research signals</h2>' +
+        '<span class="meta">' + active.length + ' at this step</span></div>' +
       sigs.map(function (s) {
-        return '<div class="fm-sig"><span class="nm">' + esc(labelFor(s.target)) + '</span>' +
-          '<span class="fm-state ' + esc(s.state) + '">' + esc(s.label) + '</span>' +
-          '<span class="why">' + esc(s.why) + '</span></div>';
+        return '<div class="signal"><div class="signal-h"><span class="t">' + esc(labelFor(s.target)) + '</span>' +
+          '<span class="stat ' + signalStat(s.state) + '"><i></i>' + esc(s.label) + '</span></div>' +
+          '<div class="d">' + esc(s.why) + '</div></div>';
       }).join('') +
-      '<div class="fm-note">These four states are descriptive display labels derived from the observations and model outputs on screen. ' +
-      'They are not clinical thresholds, not alerts, and not a severity score. They do not indicate deterioration, ' +
-      'name a condition, or suggest any action, and they never change drug ranking or dosing.</div>' +
-      '</section>';
+      '<p class="note" style="margin-top:14px">Signals are recomputed from scratch at every step. They do not ' +
+      'accumulate across the replay. These states are descriptive display labels derived from the observations and ' +
+      'model outputs on screen. They are not clinical thresholds, not alerts, and not a severity score. They do not ' +
+      'indicate deterioration, name a condition, or suggest any action, and they never change drug ranking or dosing.</p>';
   }
 
-  // ── history table ──────────────────────────────────────────────────────
-  function historyHtml(c, uptoStep) {
-    var rows = historyFor(c, uptoStep);
-    if (!rows.length) {
-      return '<section class="fm-card"><h3 class="fm-h">Forecast history · issued snapshots</h3>' +
-        '<div class="fm-empty">No forecast snapshots yet.</div></section>';
+  function matchingNoteHtml(c) {
+    var policy = matchPolicy(c);
+    if (policy.enabled) {
+      return '<p class="note">Outcome matching uses the backend replay contract (±' + esc(policy.tolerance) +
+        ' h of the due hour · ' + esc(policy.source) + '). No accuracy verdict is made beyond it.</p>';
     }
-    var body = rows.slice().reverse().map(function (r) {
-      var row = r.row, res = r.res, unit = unitFor(row.target);
-      var outcome, cls;
-      if (res.state === 'inside') { outcome = 'Inside research interval'; cls = 'inside'; }
-      else if (res.state === 'outside') { outcome = 'Outside research interval'; cls = 'outside'; }
-      else if (res.state === 'observed') { outcome = 'Observed ' + fmtVal(res.value, row.target) + ' ' + unit + ' · no interval to compare'; cls = 'awaiting'; }
-      else { outcome = 'Awaiting / no configured matching'; cls = 'awaiting'; }
-      return '<tr class="tier-' + esc(row.tier) + '">' +
-        '<td class="num">' + esc(row.step + 1) + '</td>' +
-        '<td class="num">' + esc(fmtHour(row.anchorHour)) + '</td>' +
-        '<td>' + esc(labelFor(row.target)) + '</td>' +
-        '<td class="num">+' + esc(row.horizon) + ' h</td>' +
-        '<td class="num">' + esc(fmtHour(row.dueHour)) + '</td>' +
-        '<td class="num">' + esc(fmtVal(row.personalized, row.target) || '—') + ' ' + esc(unit) + '</td>' +
-        '<td class="num">' + (isNum(row.lower) && isNum(row.upper)
-          ? esc(fmtVal(row.lower, row.target)) + ' – ' + esc(fmtVal(row.upper, row.target))
-          : '<span style="color:var(--text-muted)">no calibrated interval</span>') + '</td>' +
-        '<td><span class="fm-pillmini ' + (row.tier === 'validated_artifact' ? 'validated' : 'illustrative') + '">' +
-          esc(row.tier === 'validated_artifact' ? 'validated' : 'illustrative') + '</span></td>' +
-        '<td><span class="fm-pillmini ' + cls + '">' + esc(outcome) + '</span></td>' +
-        '</tr>';
-    }).join('');
-    var pol = matchPolicy(c);
-    return '<section class="fm-card">' +
-      '<h3 class="fm-h">Forecast history · issued snapshots</h3>' +
-      '<div class="fm-hist-wrap"><table class="fm-hist"><thead><tr>' +
-        '<th>Step</th><th>Anchor</th><th>Target</th><th>Horizon</th><th>Due hour</th>' +
-        '<th>Personalized</th><th>Research interval</th><th>Tier</th><th>Later observation</th>' +
-      '</tr></thead><tbody>' + body + '</tbody></table></div>' +
-      '<div class="fm-note">Each row is the snapshot issued at that replay step, from the prefix available at that time. ' +
-      (pol.enabled
-        ? 'A later observation is only paired with a snapshot when it falls within ±' + esc(pol.tolerance) +
-          ' h of the due hour (' + esc(pol.source) + '); otherwise the row stays unresolved. '
-        : 'The backend replay contract has no configured observation matching, so rows stay unresolved. ') +
-      'No row is scored as correct or incorrect, and the nearest available observation is never treated as ground truth.</div>' +
-      '</section>';
+    return '<p class="note">Awaiting / no configured matching. The backend replay contract disables observation ' +
+      'matching, so no observed value is compared against an issued interval and no accuracy verdict is made.</p>';
   }
 
-  // ── Rx handoff ─────────────────────────────────────────────────────────
-  function handoffHtml() {
-    return '<section class="fm-card fm-handoff">' +
-      '<h3 class="fm-h">Independent medication-safety view</h3>' +
-      '<div class="fm-notice">Forecasts provide factual patient-state context only. They do not estimate treatment effects ' +
-      'and do not automatically change drug ranking or dosing.</div>' +
-      '<button class="fm-btn solid" data-fm="open-rx">Open independent Rx &amp; Safety view</button>' +
-      '<div class="fm-note">The Rx view runs the symbolic pharmacology engine on its own case input. ' +
-      'Nothing from this forecast is written into it, no drug is preselected, and no ranking is altered.</div>' +
-      '</section>';
-  }
-
-  // ── replay controls ────────────────────────────────────────────────────
-  function replayHtml(c) {
+  // ── replay toolbar ─────────────────────────────────────────────────────
+  /* Withheld observations appear on the timeline as hollow ticks, so exclusion
+     is shown rather than explained in prose. Before the replay starts every
+     tick is hollow: no observation has been submitted yet. */
+  function replayBarHtml(c) {
     var total = lastStep(c) + 1;
-    var busy = !!S.pending[cacheKey(c, S.step)];
-    var pct = total > 1 ? (S.step / (total - 1)) * 100 : 100;
-    var anchor = hourAt(c, S.step);
-    return '<section class="fm-card tight">' +
-      '<h3 class="fm-h">Replay control · <span class="fm-step-no">step ' + (S.step + 1) + ' / ' + total + '</span></h3>' +
-      '<div class="fm-clock">' + esc(fmtHour(anchor)) + '<small>anchor — hours after ICU admission</small></div>' +
-      '<div class="fm-track"><i style="width:' + pct.toFixed(1) + '%"></i></div>' +
-      '<div class="fm-ticks"><span>0 h</span><span>' + esc(fmtHour(hourAt(c, lastStep(c)))) + '</span></div>' +
-      '<div class="fm-transport" style="margin-top:11px">' +
-        '<button class="fm-btn" data-fm="reset" title="Reset">⏮ Reset</button>' +
-        '<button class="fm-btn" data-fm="prev"' + (S.step <= 0 ? ' disabled' : '') + ' title="Previous observation">◀ Prev</button>' +
+    var started = S.replayStarted;
+    var busy = isPending(c, S.step);
+    var lastH = hourAt(c, lastStep(c)) || 1;
+    var ticks = '';
+    for (var i = 0; i < total; i++) {
+      var h = hourAt(c, i) || 0;
+      var pct = lastH > 0 ? (h / lastH) * 100 : 0;
+      var cls = !started ? 'tick withheld'
+        : (i === S.step ? 'tick current' : (i > S.step ? 'tick withheld' : 'tick'));
+      ticks += '<span class="' + cls + '" style="left:' + pct.toFixed(1) + '%"></span>';
+    }
+    var withheld = started ? total - 1 - S.step : total;
+    var caption = !started
+      ? total + ' recorded observations withheld — none has been submitted to the model'
+      : (withheld > 0
+        ? withheld + ' later observation' + (withheld === 1 ? '' : 's') + ' withheld — not yet in model'
+        : 'full prefix posted — no observation withheld');
+    var anchorBlock = started
+      ? '<div class="replay-anchor"><span class="big">' + esc(fmtHourExact(hourAt(c, S.step))) + '</span>' +
+        '<span class="d">anchor · step ' + (S.step + 1) + ' of ' + total + ' · ' + (S.step + 1) +
+        ' observation' + (S.step === 0 ? '' : 's') + ' visible · ' + (S.step + 1) +
+        ' prefix row' + (S.step === 0 ? '' : 's') + ' sent</span></div>'
+      : '<div class="replay-anchor"><span class="big idle">—</span>' +
+        '<span class="d">no anchor · 0 of ' + total + ' observations visible · nothing sent to the model</span></div>';
+    var transport = started
+      ? '<button class="btn sm" type="button" data-fm="prev"' + (S.step <= 0 ? ' disabled' : '') + '>◀ Previous</button>' +
         (S.playing
-          ? '<button class="fm-btn solid" data-fm="pause">⏸ Pause</button>'
-          : '<button class="fm-btn solid" data-fm="play"' + (S.step >= lastStep(c) ? ' disabled' : '') + '>▶ Play</button>') +
-        '<button class="fm-btn" data-fm="next"' + (S.step >= lastStep(c) ? ' disabled' : '') + ' title="Next observation">Next ▶</button>' +
-      '</div>' +
-      '<div class="fm-row" style="margin-top:9px">' +
-        '<label class="fm-note" style="margin:0">Speed</label>' +
-        '<select class="fm-select" data-fm="speed">' + SPEEDS.map(function (s, i) {
-          return '<option value="' + i + '"' + (i === S.speedIndex ? ' selected' : '') + '>' + esc(s.label) + '</option>';
-        }).join('') + '</select>' +
-        (busy ? '<span class="fm-note" style="margin:0"><span class="fm-loading"></span> requesting forecast…</span>' : '') +
-      '</div>' +
-      '<div class="fm-note">Each step posts only the trajectory prefix up to and including the current observation, ' +
-      'with <span class="fm-mono">anchor_hour</span> set to that observation’s time. Later observations are held in the browser ' +
-      'for playback and are never sent to the model.</div>' +
-      '</section>';
+          ? '<button class="btn sm primary" type="button" data-fm="pause">❚❚ Pause</button>'
+          : '<button class="btn sm primary" type="button" data-fm="play"' +
+            (S.step >= lastStep(c) ? ' disabled' : '') + '>▶ Play</button>') +
+        '<button class="btn sm" type="button" data-fm="next"' + (S.step >= lastStep(c) ? ' disabled' : '') + '>Next ▶</button>' +
+        '<span class="speed-wrap">Speed <select class="select" data-fm="speed" aria-label="Replay speed">' +
+          SPEEDS.map(function (s, i) {
+            return '<option value="' + i + '"' + (i === S.speedIndex ? ' selected' : '') + '>' + esc(s.label) + '</option>';
+          }).join('') + '</select></span>' +
+        '<button class="btn sm" type="button" data-fm="reset">Reset</button>' +
+        '<button class="btn sm" type="button" data-fm="rerun-step">Re-run this step live</button>' +
+        (busy ? '<span class="meta"><span class="spin"></span> requesting…</span>' : '')
+      : '<button class="btn sm primary" type="button" data-fm="start-replay"' +
+        (healthy() ? '' : ' disabled') + '>▶ Start live replay</button>' +
+        (busy ? '<span class="meta"><span class="spin"></span> requesting…</span>' : '');
+    return '<div class="replay-bar">' + anchorBlock +
+      '<div class="track-wrap"><div class="track">' +
+        '<span class="line"></span>' + ticks + '</div>' +
+        '<div class="track-labels"><span>0 h</span><span class="cap">' + esc(caption) + '</span>' +
+        '<span>' + esc(fmtHour(lastH)) + '</span></div></div>' +
+      '<div class="transport">' + transport + '</div></div>';
   }
 
-  function currentObservationsHtml(c, resp) {
-    var row = trajectoryOf(c)[S.step] || {};
-    var series = PRIMARY_SERIES.concat(EXTRA_SERIES);
-    var items = series.map(function (t) {
-      var v = num(row[t]);
-      var age = num(row[t + '_age_hr']);
-      if (v == null) {
-        return '<div class="fm-obs-item na"><div class="n">' + esc(labelFor(t)) + '</div>' +
-          '<div class="v">Not observed</div></div>';
-      }
-      return '<div class="fm-obs-item"><div class="n">' + esc(labelFor(t)) + '</div>' +
-        '<div class="v">' + esc(fmtVal(v, t)) + '<span class="u">' + esc(unitFor(t)) + '</span></div>' +
-        (age != null ? '<div class="age">carried forward ' + esc(fmtHour(age)) + '</div>' : '') + '</div>';
-    }).join('');
-    return '<section class="fm-card tight">' +
-      '<h3 class="fm-h">Current observation · ' + esc(fmtHour(hourAt(c, S.step))) + '</h3>' +
-      '<div class="fm-obs">' + items + '</div>' +
-      '<div class="fm-note">Values marked <i>Not observed</i> have no measurement in the source data at or before this time point. ' +
-      'Nothing is imputed. “Carried forward” is the age of the most recent backward-looking measurement, as recorded by the eICU adapter.' +
-      (resp ? ' Prefix rows sent to the model at this step: <b>' + esc(resp._prefix_rows) + '</b>.' : '') +
-      '</div></section>';
+  // ── Home ───────────────────────────────────────────────────────────────
+  function renderHome() {
+    var root = el('view-home');
+    if (!root) return;
+    root.innerHTML =
+      '<div class="shell"><div class="home">' +
+        '<div class="home-lead">' +
+          '<h1 class="display">Two independent research demonstrations</h1>' +
+          '<p class="note">Osler contains two separate research demonstrations. They use different cases, different ' +
+          'engines and different evidence. They are not two stages of one patient, and neither reads the other\'s ' +
+          'output. Pick the one you want to look at.</p>' +
+        '</div>' +
+        '<div class="workflow-cards">' +
+          '<div class="wcard">' +
+            '<div class="wcard-h"><span class="k">01</span><h2>Medication Safety</h2></div>' +
+            '<ul class="wcard-list">' +
+              '<li>Illustrative case scenarios</li>' +
+              '<li>Symbolic medication-safety engine</li>' +
+              '<li>Optional live openFDA labels</li>' +
+              '<li>Independent of the factual forecast models</li>' +
+              '<li>No automated prescribing</li>' +
+            '</ul>' +
+            '<div class="wcard-foot">' +
+              '<button class="btn primary" type="button" data-fm="go-rx">Explore medication safety</button>' +
+            '</div>' +
+          '</div>' +
+          '<div class="wcard">' +
+            '<div class="wcard-h"><span class="k">02</span><h2>Retrospective Forecast</h2></div>' +
+            '<ul class="wcard-list">' +
+              '<li>Deidentified eICU CRD Demo 2.0.1 case</li>' +
+              '<li>Real serialized forecast artifacts</li>' +
+              '<li>Observation-prefix replay</li>' +
+              '<li>Target-specific calibrated intervals</li>' +
+              '<li>Not live monitoring</li>' +
+            '</ul>' +
+            '<div class="wcard-foot">' +
+              '<button class="btn primary" type="button" data-fm="go-forecast">Explore retrospective forecast</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="home-foot">' +
+          '<div><div class="h-sec">Guided demo</div>' +
+          '<p class="note">Walks both chapters in order: the medication-safety method first, then the retrospective ' +
+          'factual forecast. The change of case and model pathway between them is disclosed and has to be ' +
+          'acknowledged.</p></div>' +
+          '<button class="btn" type="button" data-fm="start-guided">Start guided demo</button>' +
+        '</div>' +
+        '<p class="note home-note">This page loads no model. Neither engine is called until you choose a workflow ' +
+        'and ask for a result.</p>' +
+      '</div></div>';
   }
 
-  // ── view renderers ─────────────────────────────────────────────────────
+  // ── Snapshot subview ───────────────────────────────────────────────────
+  function snapshotIntroHtml(c) {
+    var total = lastStep(c) + 1;
+    var first = hourAt(c, 0), last = hourAt(c, lastStep(c));
+    return '<div class="shell"><div class="section" style="padding-top:28px">' +
+      '<div class="section-head"><h1 class="display">Forecast snapshot</h1>' +
+        '<span class="sub">no forecast has been requested yet</span></div>' +
+      '<div class="prerun">' +
+        '<div class="prerun-main">' +
+          '<p class="note">This case carries a recorded retrospective trajectory of <b>' + total +
+          ' observations</b> between ' + esc(fmtHourExact(first)) + ' and ' + esc(fmtHourExact(last)) +
+          ' after ICU admission. A snapshot posts the full causal prefix — all ' + total +
+          ' rows, with <span class="mono">anchor_hour</span> set to ' + esc(fmtHourExact(last)) +
+          ' — and renders exactly what the model returns.</p>' +
+          '<p class="note">Nothing has been computed. No forecast value exists on this page until you run one.</p>' +
+        '</div>' +
+        '<dl class="prerun-facts">' +
+          '<dt>Final anchor</dt><dd class="mono">' + esc(fmtHourExact(last)) + '</dd>' +
+          '<dt>Prefix rows to send</dt><dd class="mono">' + total + '</dd>' +
+          '<dt>Model version</dt><dd class="mono">' + esc(modelVersion()) + '</dd>' +
+          '<dt>Model health</dt><dd>' + healthStatHtml() + '</dd>' +
+        '</dl>' +
+      '</div>' +
+      '<div class="actions-row">' +
+        '<button class="btn primary" type="button" data-fm="run-snapshot"' + (healthy() ? '' : ' disabled') +
+          '>Run live forecast</button>' +
+        '<button class="btn" type="button" data-fm="sub" data-sub="replay">Open retrospective replay</button>' +
+      '</div>' +
+      (healthy() ? '' : '<p class="note" style="margin-top:12px">Model health has not passed, so no request is ' +
+        'issued and no value is substituted.</p>') +
+      '</div></div>';
+  }
+
+  function renderSnapshot() {
+    var root = el('fx-snapshot');
+    if (!root) return;
+    var c = activeCase();
+    if (!S.booted && !S.casesError) { root.innerHTML = loadingHtml(); return; }
+    if (S.casesError || !c) {
+      root.innerHTML = errorBlockHtml('Case source unavailable',
+        S.casesError || 'No case returned by /api/monitoring/cases');
+      return;
+    }
+    var step = lastStep(c);
+    if (!healthy() && !S.fixture) { root.innerHTML = serviceUnavailableHtml(); return; }
+    var resp = responseFor(c, step);
+    if (S.snapshotBusy && !resp) {
+      root.innerHTML = '<div class="shell"><div class="loading"><span class="spin"></span> ' +
+        'Posting the full ' + (step + 1) + '-row causal prefix to the forecast model…</div></div>';
+      return;
+    }
+    if (S.stepError && !resp) { root.innerHTML = errorBlockHtml('Forecast request failed', S.stepError); return; }
+    if (!resp) { root.innerHTML = snapshotIntroHtml(c); return; }
+
+    var charted = PRIMARY_SERIES.concat(S.showExtraSeries ? EXTRA_SERIES : []);
+    var body;
+    if (S.tier === 'unsupported') {
+      body = '<div class="section">' + unsupportedTableHtml(resp) + '</div>';
+    } else if (S.tier === 'illustrative') {
+      body = '<div class="section">' + illustrativeHtml(resp) +
+        '<p class="note" style="margin-top:16px">An illustrative point has no interval and no coverage record. ' +
+        'It is shown for shape only and is never charted with a band.</p></div>';
+    } else {
+      body = '<div class="split"><div class="main">' + validatedTableHtml(resp) + '</div>' +
+        '<aside class="side">' + illustrativeHtml(resp) + unsupportedRowHtml(resp) + '</aside></div>';
+    }
+    root.innerHTML = cachedBannerHtml() +
+      '<div class="shell"><div class="section" style="padding-top:28px">' +
+        '<div class="section-head"><h1 class="display">Forecast snapshot</h1>' +
+          '<span class="sub">' + charted.length + ' targets charted · anchor ' +
+          esc(fmtHourExact(num(resp._anchor_hour))) + '</span>' +
+          '<span class="spacer">' + tierBarHtml(resp) + '</span></div>' +
+        sourceLineHtml(c, step) +
+        '<div class="actions-row" style="margin-bottom:20px">' +
+          '<button class="btn" type="button" data-fm="rerun-snapshot"' + (healthy() ? '' : ' disabled') +
+            '>Re-run live forecast</button>' +
+          '<button class="btn" type="button" data-fm="sub" data-sub="replay">Open retrospective replay</button>' +
+        '</div>' +
+        stagesHtml(resp) +
+        '<div class="charts' + (S.animateData ? ' fx-in' : '') + '">' + (function () {
+          var xMax = chartDomain(c, resp, step, charted);
+          return charted.map(function (t) {
+            return chartCardHtml(c, t, resp, step, 'h', xMax);
+          }).join('');
+        })() + '</div>' +
+        chartLegendHtml(false) + chartsNoteHtml() +
+      '</div>' + body + '</div>';
+  }
+
+  // ── Replay subview ─────────────────────────────────────────────────────
+  function replayIntroHtml(c) {
+    var total = lastStep(c) + 1;
+    var rows = '';
+    for (var i = 0; i < total; i++) {
+      rows += '<tr><td class="num" data-k="Step">' + (i + 1) + '</td>' +
+        '<td class="num" data-k="Anchor">' + esc(fmtHourExact(hourAt(c, i))) + '</td>' +
+        '<td class="num" data-k="Prefix rows">' + (i + 1) + '</td>' +
+        '<td class="why" data-k="State">withheld — not submitted</td></tr>';
+    }
+    return '<div class="shell"><div class="section" style="padding-top:24px">' +
+      '<div class="section-head"><h1 class="display">Observation-prefix replay</h1>' +
+        '<span class="sub">pre-observation state · nothing has been sent to the model</span></div>' +
+      '<div class="prerun">' +
+        '<div class="prerun-main">' +
+          '<p class="note">The replay begins before the first observation has been submitted. Each step reveals one ' +
+          'more recorded observation, moves the anchor to that observation\'s time, and posts the causal prefix up to ' +
+          'and including it as a real request. Later observations stay in the browser and are never sent.</p>' +
+          '<p class="note">The model is fixed. Forecast outputs update as additional causally available observations ' +
+          'are added to the trajectory prefix.</p>' +
+        '</div>' +
+        '<dl class="prerun-facts">' +
+          '<dt>Recorded observations</dt><dd class="mono">' + total + '</dd>' +
+          '<dt>Observations visible</dt><dd class="mono">0</dd>' +
+          '<dt>Requests issued</dt><dd class="mono">0</dd>' +
+          '<dt>Model health</dt><dd>' + healthStatHtml() + '</dd>' +
+        '</dl>' +
+      '</div>' +
+      '<div class="scroll-x" style="margin-top:22px"><table class="dtable"><thead><tr><th>Step</th>' +
+        '<th>Anchor</th><th>Prefix rows to send</th><th>State</th></tr></thead><tbody>' + rows +
+        '</tbody></table></div>' +
+      '<p class="note" style="margin-top:12px">No forecast value is present on this page. Use <b>Start live replay</b> ' +
+      'in the toolbar above to issue the first real request.</p>' +
+      '</div></div>';
+  }
+
   function renderMonitoring() {
     var root = el('view-monitoring');
     if (!root) return;
     if (!S.booted && !S.casesError) { root.innerHTML = loadingHtml(); return; }
     var c = activeCase();
     if (S.casesError || !c) {
-      root.innerHTML = errorCardHtml('Monitoring cases unavailable', S.casesError || 'No case returned by /api/monitoring/cases');
+      root.innerHTML = errorBlockHtml('Retrospective case unavailable',
+        S.casesError || 'No case returned by /api/monitoring/cases');
       return;
     }
-    var head = provenanceHtml(c, S.step) + cachedBannerHtml();
+    var head = cachedBannerHtml() + replayBarHtml(c);
     if (!healthy() && !S.fixture) { root.innerHTML = head + serviceUnavailableHtml(); return; }
+    if (!S.replayStarted) { root.innerHTML = head + replayIntroHtml(c); return; }
+
     var resp = responseFor(c, S.step);
-    var body;
-    if (!resp && S.stepError) {
-      body = errorCardHtml('Forecast request failed at step ' + (S.step + 1), S.stepError);
-    } else if (!resp) {
-      body = '<section class="fm-card"><div class="fm-empty"><span class="fm-loading"></span> ' +
-        'Requesting the forecast for the trajectory prefix…</div></section>';
-    } else {
-      body = '';
+    var busy = isPending(c, S.step);
+    // Keep the previous step's result on screen while the new request is in
+    // flight, rather than blanking the page and re-drawing it.
+    var showing = resp, showingStep = S.step, holding = false;
+    if (!resp && busy && S.step > 0 && responseFor(c, S.step - 1)) {
+      showing = responseFor(c, S.step - 1); showingStep = S.step - 1; holding = true;
     }
-    var shown = resp ? filterForecasts(resp, S.targetFilter, S.horizonFilter, S.showAllTiers) : [];
+    if (!showing && S.stepError) {
+      root.innerHTML = head + errorBlockHtml('Forecast request failed at step ' + (S.step + 1), S.stepError);
+      return;
+    }
+    if (!showing) {
+      root.innerHTML = head + '<div class="shell"><div class="loading"><span class="spin"></span> ' +
+        'Posting the ' + (S.step + 1) + '-row causal prefix to the forecast model…</div></div>';
+      return;
+    }
+
+    var prev = (!holding && S.step > 0) ? responseFor(c, S.step - 1) : null;
+    var diff = prev ? diffResponses(prev, showing) : null;
+    var changed = changedMap(diff);
+    var validatedCount = ofTier(showing, 'validated').length;
+    var pendingNote = holding
+      ? '<div class="notice" style="margin:20px 0 0"><span class="n">Requesting step ' + (S.step + 1) + '</span>' +
+        '<span class="d">The values below are still the completed step ' + (showingStep + 1) +
+        ' response. They stay on screen until the new response returns.</span>' +
+        '<span class="acts"><span class="meta"><span class="spin"></span> in flight</span></span></div>'
+      : '';
+
     root.innerHTML = head +
-      '<div class="fm-dash">' +
-        '<div class="fm-col">' + replayHtml(c) + currentObservationsHtml(c, resp) + '</div>' +
-        '<div class="fm-col">' + body + (resp ? chartsHtml(c, resp, S.step) : '') + '</div>' +
-        '<div class="fm-col fm-col-right">' +
-          (resp ? signalsHtml(c, resp, S.step) : '') +
-          (resp ? '<section class="fm-card tight"><h3 class="fm-h">Forecast at this anchor</h3>' +
-            filterBarHtml(resp, 'mon', S.targetFilter, S.horizonFilter, S.showAllTiers, shown.length) +
-            (shown.length ? shown.map(function (f) { return forecastCardHtml(f, c, resp, S.step); }).join('')
-              : '<div class="fm-empty">No cell matches this filter.</div>') +
-            '</section>' : '') +
-        '</div>' +
+      (pendingNote ? '<div class="shell tight">' + pendingNote + '</div>' : '') +
+      '<div class="shell"><div class="section" style="padding-top:24px">' +
+        '<div class="section-head"><h2 class="h-sec">Step ' + (showingStep + 1) + ' of ' + (lastStep(c) + 1) +
+          '</h2><span class="meta">anchor ' + esc(fmtHourExact(num(showing._anchor_hour))) + ' · ' +
+          esc(showing._prefix_rows) + ' trajectory row' + (showing._prefix_rows === 1 ? '' : 's') + ' sent · ' +
+          validatedCount + ' validated artifact' + (validatedCount === 1 ? '' : 's') + '</span></div>' +
+        sourceLineHtml(c, showingStep) +
       '</div>' +
-      validationHtml(resp) + historyHtml(c, S.step) + handoffHtml();
-  }
-
-  function renderForecast() {
-    var root = el('view-forecast');
-    if (!root) return;
-    if (!S.booted && !S.casesError) { root.innerHTML = loadingHtml(); return; }
-    var c = activeCase();
-    if (S.casesError || !c) {
-      root.innerHTML = errorCardHtml('Case source unavailable', S.casesError || 'No case returned by /api/monitoring/cases');
-      return;
-    }
-    var step = lastStep(c);
-    var head = provenanceHtml(c, step) + cachedBannerHtml();
-    if (!healthy() && !S.fixture) { root.innerHTML = head + serviceUnavailableHtml(); return; }
-    var resp = responseFor(c, step);
-    if (S.stepError && !resp) {
-      root.innerHTML = head + errorCardHtml('Forecast request failed', S.stepError);
-      return;
-    }
-    if (!resp) {
-      root.innerHTML = head + '<section class="fm-card"><div class="fm-empty"><span class="fm-loading"></span> ' +
-        'Requesting the forecast for the full case trajectory…</div></section>';
-      return;
-    }
-    var shown = filterForecasts(resp, S.fcTargetFilter, S.fcHorizonFilter, S.fcShowAllTiers);
-    root.innerHTML = head +
-      chartsHtml(c, resp, step) +
-      '<section class="fm-card">' +
-        '<h3 class="fm-h">Patient-individualised forecast at ' + esc(fmtHour(num(resp._anchor_hour))) + '</h3>' +
-        '<div class="fm-sub">Population point, personalized point and — for serialized validated cells only — a ' +
-        'target-specific calibrated research interval. Factual patient-state output: no diagnosis, no treatment effect, no recommendation.</div>' +
-        filterBarHtml(resp, 'fc', S.fcTargetFilter, S.fcHorizonFilter, S.fcShowAllTiers, shown.length) +
-        '<div class="fm-charts" style="grid-template-columns:1fr 1fr">' +
-          (shown.length
-            ? shown.map(function (f) { return forecastCardHtml(f, c, resp, step); }).join('')
-            : '<div class="fm-empty">No cell matches this filter.</div>') +
+      '<div class="split wide">' +
+        '<div class="main"><div class="charts two' + (S.animateData ? ' fx-in' : '') + '">' + (function () {
+          var xMax = chartDomain(c, showing, showingStep, PRIMARY_SERIES, true);
+          return PRIMARY_SERIES.map(function (t) {
+            return chartCardHtml(c, t, showing, showingStep, 'h after ICU admission', xMax,
+              { stable: true, changed: changed, newestHour: hourAt(c, showingStep) });
+          }).join('');
+        })() + '</div>' +
+          chartLegendHtml(!!(diff && diff.length)) +
+          '<p class="note" style="margin-top:12px">Each step posts the trajectory prefix up to and including the ' +
+          'current observation, with <span class="mono">anchor_hour</span> set to that observation\'s time. Later ' +
+          'observations stay in the browser and are never sent to the model. Prefix rows sent at this step: <b>' +
+          esc(showing._prefix_rows) + '</b>.</p>' + chartsNoteHtml() + matchingNoteHtml(c) +
         '</div>' +
-      '</section>' +
-      validationHtml(resp) + handoffHtml();
+        '<aside class="side">' + signalsHtml(c, showing, showingStep) + '</aside>' +
+      '</div>' +
+      (diff ? changeHtml(c, diff, showingStep - 1, showingStep) : '') +
+      (S.step >= lastStep(c) && !holding
+        ? '<div class="section final-note"><div class="section-head"><h2 class="h-sec">Final retrospective snapshot</h2>' +
+          '<span class="meta">the full recorded prefix has been posted</span></div>' +
+          '<p class="note">Every recorded observation for this case is now in the trajectory prefix and no ' +
+          'observation is withheld. The forecasts above are the model\'s output at the last recorded anchor.</p>' +
+          '<div class="actions-row"><button class="btn" type="button" data-fm="sub" data-sub="validation">' +
+          'Open validation evidence</button>' +
+          '<button class="btn" type="button" data-fm="reset">Reset to pre-observation state</button></div></div>'
+        : '') +
+      '</div>';
   }
 
+  // ── Validation evidence subview ────────────────────────────────────────
+  /* Wording is fixed and ships verbatim: these seven statements describe what
+     the coverage numbers do and do not establish. Groups reveal in order when
+     the view is opened; no number counts up and nothing is re-run. */
+  function renderValidation() {
+    var root = el('fx-validation');
+    if (!root) return;
+    var v = S.validation;
+    var runs = v && v.cells && v.cells.length ? (v.cells[0].validation_runs || 10) : 10;
+    var cellCount = v ? v.serialized_validated_artifact_count : 12;
+    var head = 'eICU-CRD 2.0 retrospective · ' + (cellCount * runs) + ' = ' + cellCount + ' cells × ' +
+      runs + ' held-out runs · not independent external validation';
+    var body;
+    if (S.validationError) {
+      body = '<pre>' + esc(S.validationError) + '</pre>';
+    } else if (!v) {
+      body = '<p class="note">Loading validation evidence…</p>';
+    } else {
+      var grp = function (i) { return S.validationRevealed >= i ? ' shown' : ''; };
+      body =
+        '<div class="vgroup' + grp(1) + '">' +
+        '<h3 class="h-sec" style="margin-bottom:10px">What the coverage numbers do and do not establish</h3>' +
+        '<ol class="validation-list">' +
+          '<li><span class="n">01</span><span>The validation report is based on the complete eICU-CRD 2.0 retrospective dataset.</span></li>' +
+          '<li><span class="n">02</span><span>120 is 12 cells × 10 held-out runs, not 120 patients.</span></li>' +
+          '<li><span class="n">03</span><span>Hospital, care-unit and late/time splits still come from the same database. This is not independent external validation.</span></li>' +
+          '<li><span class="n">04</span><span>Approximately 90% is the target coverage, and it is recorded per cell.</span></li>' +
+          '<li><span class="n">05</span><span>Coverage for creatinine@24h is 0.89.</span></li>' +
+          '<li><span class="n">06</span><span>The validation report was submitted together with the model. It was not independently re-run from the raw data.</span></li>' +
+          '<li><span class="n">07</span><span>The replay case comes from the deidentified eICU CRD Demo 2.0.1.</span></li>' +
+        '</ol></div>' +
+        '<div class="vgroup' + grp(2) + '">' +
+        '<h3 class="h-sec" style="margin-bottom:10px">Gates by cell</h3>' +
+        '<div class="scroll-x"><table class="dtable"><thead><tr><th>Cell</th><th>Runs</th>' +
+        '<th>Patient held-out gates</th><th>External held-out gates</th></tr></thead><tbody>' +
+        (v.cells || []).map(function (cell) {
+          return '<tr><td class="mono" data-k="Cell">' + esc(cell.cell) + '</td>' +
+            '<td class="num" data-k="Runs">' + esc(cell.validation_runs) + '</td>' +
+            '<td class="num" data-k="Patient gates">' + esc(cell.patient_heldout_gates) + '</td>' +
+            '<td class="num" data-k="External gates">' + esc(cell.external_heldout_gates) + '</td></tr>';
+        }).join('') + '</tbody></table></div></div>' +
+        '<div class="vgroup' + grp(3) + '">' +
+        '<p class="note" style="margin-top:12px">' + esc(cellCount) + ' cells × ' + esc(runs) + ' runs = ' +
+        esc(cellCount * runs) + ' evaluations · model <span class="mono">' + esc(v.model_version) + '</span>. ' +
+        'Interval-width reduction is a held-out cohort aggregate, never a case-level claim for this patient.</p>' +
+        '<p class="note">These values were recorded when the model shipped. Opening this view reads the committed ' +
+        'summary; it runs no inference and re-runs no validation.</p></div>';
+    }
+    root.innerHTML = '<div class="shell"><div class="section" style="padding-top:24px">' +
+      '<div class="section-head"><h1 class="display">Committed retrospective validation evidence</h1>' +
+        '<span class="sub">' + esc(head) + '</span></div>' +
+      '<div class="validation-static">' + body + '</div>' +
+      '</div></div>';
+  }
+
+  function clearValidationTimers() {
+    S.validationTimers.forEach(clearTimeout);
+    S.validationTimers = [];
+  }
+  function revealValidation() {
+    clearValidationTimers();
+    if (REDUCED) { S.validationRevealed = 3; renderAll(); return; }
+    S.validationRevealed = 1;
+    renderAll();
+    [2, 3].forEach(function (n, i) {
+      S.validationTimers.push(setTimeout(function () {
+        S.validationRevealed = n; renderAll();
+      }, (i + 1) * 180));
+    });
+  }
+
+  // ── view renderers ─────────────────────────────────────────────────────
   function loadingHtml() {
-    return '<section class="fm-card"><div class="fm-empty"><span class="fm-loading"></span> ' +
-      'Loading case source, model health and validation evidence…</div></section>';
+    return '<div class="shell"><div class="loading"><span class="spin"></span> ' +
+      'Loading case source, model health and validation evidence…</div></div>';
+  }
+
+  function renderForecastContext() {
+    var host = el('fxContext');
+    if (!host) return;
+    var c = activeCase();
+    if (!c) { host.innerHTML = ''; return; }
+    host.innerHTML = caseContextHtml(c);
+    Array.prototype.forEach.call(document.querySelectorAll('#fxSubnav .subnav-btn'), function (b) {
+      var on = b.getAttribute('data-sub') === S.sub;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-current', on ? 'true' : 'false');
+    });
   }
 
   function renderAll() {
     var v = document.body.getAttribute('data-view');
-    if (v === 'monitoring') renderMonitoring();
-    else if (v === 'forecast') renderForecast();
+    if (v === 'home') { renderHome(); }
+    else if (v === 'forecast') {
+      renderForecastContext();
+      if (S.sub === 'replay') renderMonitoring();
+      else if (S.sub === 'validation') renderValidation();
+      else renderSnapshot();
+    }
+    S.animateData = false;
   }
 
   // ── replay engine ──────────────────────────────────────────────────────
@@ -1252,15 +1842,34 @@
     S.stepError = null;
     renderAll();
     if (!healthy()) return;
-    if (S.fixture && responseFor(c, target)) { renderAll(); return; }
+    if (S.fixture && responseFor(c, target)) { S.animateData = true; renderAll(); return; }
     try {
-      await fetchStep(c, target);
+      await fetchStep(c, target, opts);
       S.stepError = null;
     } catch (e) {
       S.stepError = e.message || String(e);
       stopPlay();
     }
-    if (S.step === target || (opts && opts.force)) renderAll();
+    if (S.step === target || (opts && opts.force)) { S.animateData = true; renderAll(); }
+  }
+
+  function startReplay() {
+    var c = activeCase();
+    if (!c) return Promise.resolve();
+    S.replayStarted = true;
+    S.step = 0;
+    S.stepError = null;
+    // The first step of a live replay is always a real request.
+    return gotoStep(0, { force: true });
+  }
+
+  function resetReplay() {
+    stopPlay();
+    S.replayStarted = false;
+    S.step = 0;
+    S.stepError = null;
+    S.freshKey = null;
+    renderAll();
   }
 
   function stopPlay() {
@@ -1270,7 +1879,7 @@
 
   async function startPlay() {
     var c = activeCase();
-    if (!c || S.playing || !healthy()) return;
+    if (!c || S.playing || !healthy() || !S.replayStarted) return;
     S.playing = true;
     var token = ++S.playToken;
     renderAll();
@@ -1281,6 +1890,33 @@
       await sleep(SPEEDS[S.speedIndex].ms);
     }
     if (token === S.playToken) { S.playing = false; renderAll(); }
+  }
+
+  // ── snapshot run ───────────────────────────────────────────────────────
+  async function runSnapshot() {
+    var c = activeCase();
+    S.stepError = null;
+    if (healthy() && c) {
+      S.snapshotBusy = true;
+      clearStages();
+      S.stageIndex = -1;
+      renderAll();
+      try {
+        // "Run" and "Re-run" both mean a real API call, never a session replay.
+        var resp = await fetchStep(c, lastStep(c), { force: true });
+        S.snapshotRan = true;
+        S.snapshotBusy = false;
+        S.animateData = true;
+        renderAll();
+        playStages(resp);
+      } catch (e) {
+        S.snapshotBusy = false;
+        S.stepError = e.message || String(e);
+        renderAll();
+      }
+      return;
+    }
+    renderAll();
   }
 
   // ── cached fixtures (explicit action only) ─────────────────────────────
@@ -1306,6 +1942,7 @@
       if (Object.keys(map).length) {
         S.fixture = map;
         S.fixtureNotice = null;
+        S.replayStarted = true;
         renderAll();
         return;
       }
@@ -1317,28 +1954,75 @@
     }
   }
 
+  // ── guided demo ────────────────────────────────────────────────────────
+  /* Two chapters over two independent workflows. The external openFDA and LLM
+     options are whatever the user left them as — the guided demo never enables
+     a network dependency on the user's behalf. */
+  function startGuided() {
+    S.guided = { chapter: 1 };
+    setView('rx');
+    if (window.OslerRx && window.OslerRx.runDefaultScenario) {
+      window.OslerRx.runDefaultScenario();
+    } else if (window.OslerRx && window.OslerRx.openCasePicker) {
+      window.OslerRx.openCasePicker();
+    }
+  }
+
+  var transitionReturnFocus = null;
+  function requestForecastTransition() {
+    transitionReturnFocus = document.activeElement;
+    S.transition = { to: 'forecast' };
+    var scrim = el('transitionScrim');
+    if (!scrim) { commitTransition(); return; }
+    scrim.setAttribute('data-open', '1');
+    var ack = el('transitionAck');
+    if (ack) ack.focus();
+  }
+  function closeTransition(opts) {
+    var scrim = el('transitionScrim');
+    if (scrim) scrim.setAttribute('data-open', '0');
+    S.transition = null;
+    if (!(opts && opts.restoreFocus === false) && transitionReturnFocus && transitionReturnFocus.focus) {
+      transitionReturnFocus.focus();
+    }
+    transitionReturnFocus = null;
+  }
+  function commitTransition() {
+    closeTransition({ restoreFocus: false });
+    if (S.guided) S.guided.chapter = 2;
+    setView('forecast');
+    setSub('replay');
+    var replayTab = document.querySelector('#fxSubnav [data-sub="replay"]');
+    if (replayTab) replayTab.focus();
+  }
+
   // ── view switching + events ────────────────────────────────────────────
+  /* Switching a view or a subview never issues a forecast. Metadata loads,
+     nothing is computed. */
   function setView(name) {
     document.body.setAttribute('data-view', name);
     Array.prototype.forEach.call(document.querySelectorAll('.nav-view'), function (b) {
-      b.classList.toggle('active', b.getAttribute('data-view') === name);
+      var on = b.getAttribute('data-view') === name;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-current', on ? 'true' : 'false');
     });
     if (name === 'rx') { stopPlay(); return; }
+    if (name === 'home') { stopPlay(); renderAll(); return; }
+    S.caseOpened = true;
     renderAll();
-    bootstrap().then(function () {
-      var c = activeCase();
-      if (!c || !healthy()) { renderAll(); return; }
-      if (name === 'monitoring') return gotoStep(S.step, { force: true });
-      if (!responseFor(c, lastStep(c))) {
-        return fetchStep(c, lastStep(c)).then(function () { S.stepError = null; renderAll(); },
-          function (e) { S.stepError = e.message || String(e); renderAll(); });
-      }
-      renderAll();
-    }, function (e) {
+    bootstrap().then(renderAll, function (e) {
       S.booted = true;
       S.stepError = e && e.message ? e.message : String(e);
       renderAll();
     });
+  }
+
+  function setSub(name) {
+    S.sub = name;
+    document.body.setAttribute('data-sub', name);
+    if (name !== 'replay') stopPlay();
+    renderAll();
+    if (name === 'validation') revealValidation();
   }
 
   function onClick(e) {
@@ -1347,14 +2031,25 @@
     var t = e.target.closest ? e.target.closest('[data-fm]') : null;
     if (!t) return;
     var action = t.getAttribute('data-fm');
-    if (action === 'play') { startPlay(); }
+    if (action === 'sub') { setSub(t.getAttribute('data-sub') || 'snapshot'); }
+    else if (action === 'go-rx') { setView('rx'); }
+    else if (action === 'go-forecast') { setView('forecast'); setSub('snapshot'); }
+    else if (action === 'start-guided') { startGuided(); }
+    else if (action === 'run-snapshot' || action === 'rerun-snapshot') { runSnapshot(); }
+    else if (action === 'replay-presentation') { playStages(responseFor(activeCase(), lastStep(activeCase()))); }
+    else if (action === 'skip-anim') { skipStages(); }
+    else if (action === 'start-replay') { startReplay(); }
+    else if (action === 'rerun-step') { stopPlay(); gotoStep(S.step, { force: true }); }
+    else if (action === 'play') { startPlay(); }
     else if (action === 'pause') { stopPlay(); renderAll(); }
     else if (action === 'next') { stopPlay(); gotoStep(S.step + 1); }
     else if (action === 'prev') { stopPlay(); gotoStep(S.step - 1); }
-    else if (action === 'reset') { stopPlay(); gotoStep(0); }
-    else if (action === 'open-rx') { setView('rx'); }
+    else if (action === 'reset') { resetReplay(); }
+    else if (action === 'tier') { S.tier = t.getAttribute('data-tier') || 'validated'; S.showAll = false; renderAll(); }
+    else if (action === 'toggle-all') { S.showAll = !S.showAll; renderAll(); }
+    else if (action === 'toggle-prov') { S.provOpen = !S.provOpen; renderAll(); }
     else if (action === 'fixture-load') { loadFixture(); }
-    else if (action === 'fixture-clear') { S.fixture = null; renderAll(); }
+    else if (action === 'fixture-clear') { S.fixture = null; S.replayStarted = false; renderAll(); }
   }
 
   function onChange(e) {
@@ -1363,17 +2058,28 @@
     var action = t.getAttribute('data-fm');
     if (action === 'speed') { S.speedIndex = Number(t.value) || 0; renderAll(); }
     else if (action === 'toggle-extra') { S.showExtraSeries = !!t.checked; renderAll(); }
-    else if (action === 'mon-target') { S.targetFilter = t.value; renderAll(); }
-    else if (action === 'mon-horizon') { S.horizonFilter = t.value; renderAll(); }
-    else if (action === 'mon-alltiers') { S.showAllTiers = !!t.checked; renderAll(); }
-    else if (action === 'fc-target') { S.fcTargetFilter = t.value; renderAll(); }
-    else if (action === 'fc-horizon') { S.fcHorizonFilter = t.value; renderAll(); }
-    else if (action === 'fc-alltiers') { S.fcShowAllTiers = !!t.checked; renderAll(); }
   }
 
   document.addEventListener('click', onClick);
   document.addEventListener('change', onChange);
-  if (!document.body.getAttribute('data-view')) document.body.setAttribute('data-view', 'rx');
 
-  window.OslerForecastViews = { setView: setView, state: S };
+  var ack = el('transitionAck'), cancel = el('transitionCancel'), close = el('transitionClose');
+  if (ack) ack.addEventListener('click', commitTransition);
+  if (cancel) cancel.addEventListener('click', closeTransition);
+  if (close) close.addEventListener('click', closeTransition);
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && S.transition) closeTransition();
+  });
+
+  if (!document.body.getAttribute('data-view')) document.body.setAttribute('data-view', 'home');
+  document.body.setAttribute('data-sub', S.sub);
+  renderHome();
+
+  window.OslerForecastViews = {
+    setView: setView,
+    setSub: setSub,
+    startGuided: startGuided,
+    requestForecastTransition: requestForecastTransition,
+    state: S
+  };
 })();
