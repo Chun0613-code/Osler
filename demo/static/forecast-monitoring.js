@@ -46,7 +46,6 @@
   var EXTRA_SERIES = ['glucose', 'potassium', 'heart_rate'];
   var MATRIX_TARGETS = ['creatinine', 'bun', 'urine_output', 'map'];
   var MATRIX_HORIZONS = [3, 6, 12, 24, 48];
-  var DEFAULT_MATCH_TOLERANCE_H = 0.5;
   var SPEEDS = [
     { label: '0.5×', ms: 5200 },
     { label: '1×', ms: 2600 },
@@ -114,8 +113,7 @@
   function unitFor(target) {
     var c = activeCase();
     var maps = [
-      c && c.units, c && c.observation_units,
-      c && c.forecast_payload && c.forecast_payload.units,
+      c && c.replay_metadata && c.replay_metadata.variable_units,
       S.casesMeta && S.casesMeta.units
     ];
     for (var i = 0; i < maps.length; i++) {
@@ -155,8 +153,10 @@
   // ── case / trajectory accessors ────────────────────────────────────────
   function activeCase() { return S.cases[S.caseIndex] || null; }
   function trajectoryOf(c) {
-    return (c && c.forecast_payload && Array.isArray(c.forecast_payload.trajectory))
-      ? c.forecast_payload.trajectory : [];
+    if (!c || !Array.isArray(c.observation_events)) return [];
+    return c.observation_events.map(function (event) {
+      return event && event.observation ? event.observation : {};
+    });
   }
   function lastStep(c) { return Math.max(0, trajectoryOf(c).length - 1); }
   function hourAt(c, i) {
@@ -172,27 +172,35 @@
 
   function matchPolicy(c) {
     var meta = (c && c.replay_metadata) || {};
-    if (meta.forecast_observation_matching === 'none' ||
-        meta.forecast_observation_matching === false) {
-      return { enabled: false, source: 'backend replay contract disables matching' };
+    var configured = meta.forecast_observation_matching;
+    if (configured === 'none' || configured === false ||
+        (configured && typeof configured === 'object' && configured.supported === false)) {
+      return {
+        enabled: false,
+        source: 'backend replay contract: no configured matching',
+        reason: configured && configured.reason ? configured.reason : null
+      };
     }
-    var tol = num(meta.forecast_match_tolerance_hours);
-    if (tol == null) tol = num(meta.match_tolerance_hours);
-    if (tol != null && tol > 0) {
+    var tol = configured && typeof configured === 'object'
+      ? num(configured.tolerance_hours) : null;
+    if (configured && configured.supported === true && tol != null && tol > 0) {
       return { enabled: true, tolerance: tol, source: 'backend replay contract' };
     }
     return {
-      enabled: true,
-      tolerance: DEFAULT_MATCH_TOLERANCE_H,
-      source: 'UI default tolerance (no replay contract supplied yet)'
+      enabled: false,
+      source: 'backend replay contract: no configured matching'
     };
   }
 
   // ── health gate ────────────────────────────────────────────────────────
   function healthy() { return !!(S.health && S.health.ready); }
+  function integrityHealth() {
+    return S.health && S.health.integrity_load ? S.health.integrity_load : null;
+  }
   function failedArtifacts() {
-    if (!S.health) return [];
-    return (S.health.checks || []).filter(function (c) { return c.status !== 'loaded'; });
+    var integrity = integrityHealth();
+    if (!integrity) return [];
+    return (integrity.checks || []).filter(function (c) { return c.status !== 'loaded'; });
   }
 
   // ── bootstrap ──────────────────────────────────────────────────────────
@@ -274,10 +282,9 @@
     if (prefix.length !== idx + 1 || prefix.length > traj.length) {
       throw new Error('Internal guard: prefix length mismatch.');
     }
-    var base = (c && c.forecast_payload) || {};
     return {
-      patient_id: base.patient_id || c.id,
-      case_source: base.case_source || c.case_source || 'eicu_crd_demo',
+      patient_id: c.id,
+      case_source: c.case_source,
       anchor_hour: anchor,
       trajectory: prefix
     };
@@ -447,15 +454,19 @@
     }
     if (!S.health) return '<span class="fm-tag boundary">Checking model health…</span>';
     var failed = failedArtifacts();
+    var integrity = integrityHealth();
+    var inference = S.health.inference_smoke || {};
     if (healthy()) {
       return '<b>Model health</b><span class="fm-tag ok">Healthy</span>' +
-        '<div class="fm-note">' + esc(S.health.loaded_artifacts) + ' / ' + esc(S.health.expected_artifacts) +
-        ' serialized artifacts loaded' + (S.health.strict_manifest_verification ? ' · strict manifest verification' : '') +
+        '<div class="fm-note">' + esc(integrity.loaded_artifacts) + ' / ' + esc(integrity.expected_artifacts) +
+        ' serialized artifacts loaded · ' + esc(inference.validated_artifacts) + ' / ' +
+        esc(inference.expected_validated_artifacts) + ' inference smoke predictions passed' +
+        (S.health.strict_manifest_verification ? ' · strict manifest verification' : '') +
         '</div>';
     }
     return '<b>Model health</b><span class="fm-tag bad">Degraded</span>' +
-      '<div class="fm-note">' + esc(S.health.loaded_artifacts) + ' / ' + esc(S.health.expected_artifacts) +
-      ' artifacts loaded · ' + failed.length + ' failed</div>';
+      '<div class="fm-note">integrity ' + esc(integrity ? integrity.status : 'unknown') + ' · inference smoke ' +
+      esc(inference.status || 'unknown') + ' · ' + failed.length + ' artifact load failures</div>';
   }
 
   function serviceUnavailableHtml() {
@@ -468,16 +479,20 @@
         return f.cell + ' → ' + (f.artifact || '?') + ': ' + (f.error || f.status);
       }).join('\n')) + '</pre>';
     } else if (S.health) {
-      detail = '<pre>' + esc(S.health.loaded_artifacts + ' of ' + S.health.expected_artifacts +
-        ' expected artifacts loaded (status: ' + S.health.status + ')') + '</pre>';
+      var integrity = integrityHealth() || {};
+      var inference = S.health.inference_smoke || {};
+      detail = '<pre>' + esc(
+        'integrity_load: ' + (integrity.status || 'unknown') +
+        ' (' + (integrity.loaded_artifacts || 0) + '/' + (integrity.expected_artifacts || 0) + ' loaded)\n' +
+        'inference_smoke: ' + (inference.status || 'unknown') +
+        (inference.error ? '\n' + inference.error : '')
+      ) + '</pre>';
     }
     return '<section class="fm-card fm-error">' +
       '<h2 class="fm-h2">Forecast service unavailable</h2>' +
-      '<div class="fm-sub">The serialized patient-state artifacts did not verify, so no forecast is requested. ' +
+      '<div class="fm-sub">Artifact integrity or deterministic inference smoke did not pass, so no forecast is requested. ' +
       'No substitute, estimated or mock values are shown.</div>' +
-      (S.health ? '<div class="fm-note">Failed artifacts: <b>' +
-        esc(Math.max(0, (num(S.health.expected_artifacts) || 0) - (num(S.health.loaded_artifacts) || 0))) +
-        '</b> of ' + esc(S.health.expected_artifacts) + '</div>' : '') +
+      (S.health ? '<div class="fm-note">Health status: <b>' + esc(S.health.status) + '</b></div>' : '') +
       detail + fixtureControlsHtml() + '</section>';
   }
 
@@ -714,7 +729,7 @@
         '<span><svg width="18" height="14"><line x1="9" y1="1" x2="9" y2="13" stroke="#0F2B5B" stroke-width="1.6" opacity=".42"/>' +
           '<line x1="5" y1="1" x2="13" y2="1" stroke="#0F2B5B" stroke-width="1.6" opacity=".42"/>' +
           '<line x1="5" y1="13" x2="13" y2="13" stroke="#0F2B5B" stroke-width="1.6" opacity=".42"/></svg>' +
-          ' calibrated 90% research interval</span>' +
+          ' target-specific calibrated research interval</span>' +
         '<span><svg width="18" height="10"><circle cx="9" cy="5" r="3.6" fill="#fff" stroke="#8C9BB5" stroke-width="1.6" stroke-dasharray="2 1.6"/></svg>' +
           ' illustrative point (no interval)</span>' +
         '<span><svg width="18" height="10"><line x1="3" y1="5" x2="15" y2="5" stroke="#0D9488" stroke-width="2"/></svg>' +
@@ -722,7 +737,8 @@
       '</div>' +
       '<div class="fm-note">Solid line = observations available up to the anchor. Forecast markers are drawn only at their due hour. ' +
       'A population point is drawn as a point, never as a band, because it carries no interval. Missing values are shown as ' +
-      '<i>Not observed</i> and are never interpolated.</div>' +
+      '<i>Not observed</i> and are never interpolated. Raw calibrated statistical intervals are displayed unchanged and may ' +
+      'extend beyond physiological support, including below zero; they have no clinical interpretation.</div>' +
       '</section>';
   }
 
@@ -782,11 +798,12 @@
         var cov = num(f.interval_target_coverage);
         h += '<div class="fm-fc-int"><b>' + esc(fmtVal(num(f.lower), f.target)) + ' – ' +
           esc(fmtVal(num(f.upper), f.target)) + ' ' + esc(unit) + '</b><br>' +
-          'Calibrated ' + (cov != null ? esc((cov * 100).toFixed(0)) : '90') +
-          '% <b>research</b> interval from the serialized patient-specific conformal artifact. ' +
+          (cov != null ? 'Calibrated ' + esc((cov * 100).toFixed(0)) + '% ' : 'Target-specific calibrated ') +
+          '<b>research</b> interval from the serialized patient-specific conformal artifact. ' +
           'This is not a clinical confidence interval and carries no clinical guarantee.' +
           (cov != null ? '<br><span class="fm-note" style="margin:0">Target coverage reported by the artifact: ' +
             esc(cov.toFixed(4)) + '</span>' : '') +
+          (f.note ? '<br><span class="fm-note" style="margin:0">' + esc(f.note) + '</span>' : '') +
           '</div>';
       } else {
         h += '<div class="fm-fc-msg">This validated cell returned no lower/upper bound in this response. ' +
@@ -815,11 +832,11 @@
     };
     var res = resolveSnapshot(row, c, uptoStep);
     if (res.state === 'awaiting') {
-      return '<div class="fm-fc-outcome awaiting">Awaiting a matching future observation' +
+      return '<div class="fm-fc-outcome awaiting">' +
         (res.policy && res.policy.enabled
-          ? ' (±' + esc(res.policy.tolerance) + ' h of the due hour · ' + esc(res.policy.source) + ')'
-          : ' (matching disabled by the backend replay contract)') +
-        '. No accuracy verdict is made.</div>';
+          ? 'Awaiting a matching future observation (±' + esc(res.policy.tolerance) + ' h of the due hour · ' + esc(res.policy.source) + ').'
+          : 'Awaiting / no configured matching. The backend replay contract disables observation matching.') +
+        ' No accuracy verdict is made.</div>';
     }
     var stamp = 'Observed ' + esc(fmtVal(res.value, f.target)) + ' ' + esc(unit) + ' at ' + esc(fmtHour(res.hour)) +
       ' (Δ ' + esc((Math.round(res.delta * 100) / 100).toFixed(2)) + ' h from the due hour, matched within ±' +
@@ -1038,7 +1055,7 @@
       if (res.state === 'inside') { outcome = 'Inside research interval'; cls = 'inside'; }
       else if (res.state === 'outside') { outcome = 'Outside research interval'; cls = 'outside'; }
       else if (res.state === 'observed') { outcome = 'Observed ' + fmtVal(res.value, row.target) + ' ' + unit + ' · no interval to compare'; cls = 'awaiting'; }
-      else { outcome = 'Awaiting a matching future observation'; cls = 'awaiting'; }
+      else { outcome = 'Awaiting / no configured matching'; cls = 'awaiting'; }
       return '<tr class="tier-' + esc(row.tier) + '">' +
         '<td class="num">' + esc(row.step + 1) + '</td>' +
         '<td class="num">' + esc(fmtHour(row.anchorHour)) + '</td>' +
@@ -1065,7 +1082,7 @@
       (pol.enabled
         ? 'A later observation is only paired with a snapshot when it falls within ±' + esc(pol.tolerance) +
           ' h of the due hour (' + esc(pol.source) + '); otherwise the row stays unresolved. '
-        : 'The backend replay contract disables observation matching, so rows stay unresolved. ') +
+        : 'The backend replay contract has no configured observation matching, so rows stay unresolved. ') +
       'No row is scored as correct or incorrect, and the nearest available observation is never treated as ground truth.</div>' +
       '</section>';
   }
@@ -1203,8 +1220,8 @@
       chartsHtml(c, resp, step) +
       '<section class="fm-card">' +
         '<h3 class="fm-h">Patient-individualised forecast at ' + esc(fmtHour(num(resp._anchor_hour))) + '</h3>' +
-        '<div class="fm-sub">Population point, personalized point and — for serialized validated cells only — a calibrated ' +
-        '90% research interval. Factual patient-state output: no diagnosis, no treatment effect, no recommendation.</div>' +
+        '<div class="fm-sub">Population point, personalized point and — for serialized validated cells only — a ' +
+        'target-specific calibrated research interval. Factual patient-state output: no diagnosis, no treatment effect, no recommendation.</div>' +
         filterBarHtml(resp, 'fc', S.fcTargetFilter, S.fcHorizonFilter, S.fcShowAllTiers, shown.length) +
         '<div class="fm-charts" style="grid-template-columns:1fr 1fr">' +
           (shown.length
@@ -1269,23 +1286,35 @@
   // ── cached fixtures (explicit action only) ─────────────────────────────
   async function loadFixture() {
     S.fixtureNotice = null;
-    var sources = ['/static/forecast-fixtures.json', '/api/forecast/fixtures'];
-    for (var i = 0; i < sources.length; i++) {
-      try {
-        var j = await getJSON(sources[i]);
-        var map = j.snapshots || j.fixtures || j;
-        if (map && typeof map === 'object' && Object.keys(map).length) {
-          S.fixture = map;
-          S.fixtureNotice = null;
-          renderAll();
-          return;
-        }
-      } catch (e) { /* try the next source */ }
+    try {
+      var j = await getJSON('/api/forecast/fixtures');
+      var map = {};
+      Object.keys(j).filter(function (key) {
+        return key.indexOf('post_forecast_') === 0;
+      }).forEach(function (key) {
+        var entry = j[key] || {};
+        var request = entry.request || {};
+        var response = entry.response;
+        var trajectory = request.trajectory;
+        if (!response || !Array.isArray(trajectory) || !trajectory.length || !request.patient_id) return;
+        var step = trajectory.length - 1;
+        response._anchor_hour = request.anchor_hour;
+        response._step = step;
+        response._prefix_rows = trajectory.length;
+        map[request.patient_id + '#' + step] = response;
+      });
+      if (Object.keys(map).length) {
+        S.fixture = map;
+        S.fixtureNotice = null;
+        renderAll();
+        return;
+      }
+      throw new Error('fixture document has no forecast prefix responses');
+    } catch (e) {
+      S.fixtureNotice = 'No cached research demonstration is available from /api/forecast/fixtures. ' +
+        (e && e.message ? e.message + '. ' : '') + 'Nothing was substituted.';
+      renderAll();
     }
-    S.fixtureNotice = 'No cached research demonstration is available yet ' +
-      '(looked for /static/forecast-fixtures.json and /api/forecast/fixtures). ' +
-      'Nothing was substituted.';
-    renderAll();
   }
 
   // ── view switching + events ────────────────────────────────────────────
