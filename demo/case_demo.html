@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+<link rel="stylesheet" href="/static/forecast-monitoring.css">
 <style>
 :root{
 --bg:#F8F9FC;--bg-warm:#EEF1F7;--bg-card:#FFFFFF;--accent:#0F2B5B;--accent-light:#E8EDF5;
@@ -144,10 +145,15 @@ a.cite{color:var(--accent)}a.cite:hover{text-decoration:underline}
 .placeholder{color:var(--text-muted);text-align:center;padding:30px 20px;font-size:.85rem;line-height:1.6}
 </style>
 </head>
-<body>
+<body data-view="rx">
 <div class="app-header">
   <div class="logo-name">osler<span>·</span>rx</div>
   <div class="tagline">case → drug recommendation agent · explainable</div>
+  <nav class="nav-views" id="navViews" aria-label="Research views">
+    <button class="nav-view active" data-view="rx">Rx &amp; Safety</button>
+    <button class="nav-view" data-view="forecast">Patient Forecast</button>
+    <button class="nav-view" data-view="monitoring">Monitoring Replay</button>
+  </nav>
   <button class="reopen" onclick="document.body.classList.remove('art-hidden')">▸ Reasoning</button>
   <div class="keybox">
     <select id="provider"><option value="openai">OpenAI</option><option value="gemini">Gemini</option></select>
@@ -191,6 +197,9 @@ a.cite{color:var(--accent)}a.cite:hover{text-decoration:underline}
     <div class="art-body" id="artBody"><div class="placeholder">Analyze a case to open the reasoning artifact:<br>mind-map graph · disease model · drug cards.</div></div>
   </div>
 </div>
+<!-- Research-only views. Content is built by /static/forecast-monitoring.js. -->
+<main class="fm-view" id="view-forecast" aria-label="Patient forecast"></main>
+<main class="fm-view" id="view-monitoring" aria-label="Remote monitoring replay"></main>
 <script>
 const GROUPS={
   patient:{color:'#0F2B5B',label:'patient'}, indication:{color:'#E8724A',label:'indication'},
@@ -602,5 +611,6 @@ async function send(){
 })();
 init();
 </script>
+<script src="/static/forecast-monitoring.js"></script>
 </body>
 </html>
