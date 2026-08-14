@@ -87,11 +87,15 @@ class PersonalizationDemoTests(unittest.TestCase):
 
     def test_all_serialized_artifacts_pass_strict_health_check(self):
         health = model_health()
+        integrity = health["integrity_load"]
+        inference = health["inference_smoke"]
         self.assertTrue(health["strict_manifest_verification"])
-        self.assertTrue(health["ready"], health["checks"])
-        self.assertEqual(health["expected_artifacts"], 12)
-        self.assertEqual(health["loaded_artifacts"], 12)
-        self.assertTrue(all(check["status"] == "loaded" for check in health["checks"]))
+        self.assertTrue(health["ready"], health)
+        self.assertEqual(integrity["expected_artifacts"], 12)
+        self.assertEqual(integrity["loaded_artifacts"], 12)
+        self.assertTrue(all(check["status"] == "loaded" for check in integrity["checks"]))
+        self.assertEqual(inference["validated_artifacts"], 12)
+        self.assertTrue(all(check["status"] == "predicted" for check in inference["checks"]))
 
     def test_make_frame_computes_map_from_sbp_dbp(self):
         frame = make_frame({
