@@ -9,6 +9,9 @@ SCRIPT = (
 MARKUP = (
     Path(__file__).resolve().parent / "demo" / "case_demo.html"
 ).read_text(encoding="utf-8")
+STYLES = (
+    Path(__file__).resolve().parent / "demo" / "static" / "forecast-monitoring.css"
+).read_text(encoding="utf-8")
 
 
 def function_body(name, source=SCRIPT):
@@ -71,6 +74,75 @@ class ForecastMonitoringUiContractTests(unittest.TestCase):
         self.assertNotIn("'/api/analyze'", SCRIPT)
         self.assertNotRegex(SCRIPT, r"\b(?:70|80)\s*%")
         self.assertIn("never change drug ranking or dosing", SCRIPT)
+
+
+class ReasoningGraphLayoutTests(unittest.TestCase):
+    def test_reasoning_levels_are_explicit_and_shared_by_layout_and_replay(self):
+        levels = function_body("_reasoningLevel", MARKUP)
+        self.assertIn("group==='patient')return 0", levels)
+        self.assertIn("group==='indication'||group==='flag')return 1", levels)
+        self.assertIn("group==='disease')return 2", levels)
+        self.assertIn("group==='pathology'||group==='symptom')return 3", levels)
+        self.assertIn("group==='target')return 4", levels)
+        self.assertIn("return 5", levels)
+        self.assertIn("_reasoningLevel(n.group)", function_body("reasoningLayout", MARKUP))
+        self.assertIn("_reasoningLevel(n.group)", function_body("buildStages", MARKUP))
+
+    def test_layout_is_deterministic_fixed_and_precomputed_before_replay(self):
+        layout = function_body("reasoningLayout", MARKUP)
+        render = function_body("renderGraph", MARKUP)
+        stage = function_body("_runStage", MARKUP)
+        self.assertIn("localeCompare", layout)
+        self.assertIn("levelGap=156,rowGap=64", layout)
+        self.assertIn("laneGap=160,rowGap=58,blockGap=62", layout)
+        self.assertIn("_layout=reasoningLayout(nodes,el.clientWidth<620)", render)
+        self.assertIn("fixed:{x:true,y:true},physics:false", render)
+        self.assertIn("layout:{improvedLayout:false},physics:false", render)
+        self.assertIn("const p=_layout[n.id]", stage)
+        self.assertNotIn("barnesHut", render)
+        self.assertNotIn("storePositions", render)
+        self.assertNotIn("stabilization", render)
+
+    def test_graph_view_expands_and_phone_canvas_has_room_for_two_lanes(self):
+        self.assertIn(".split.graph-expanded", STYLES)
+        self.assertIn("minmax(300px, .65fr) minmax(0, 1.35fr)", STYLES)
+        self.assertRegex(STYLES, r"\.graph-host\s*\{[^}]*height:\s*560px")
+        self.assertRegex(
+            STYLES,
+            r"@media \(max-width: 767px\)[\s\S]*?\.graph-host\s*\{\s*height:\s*780px",
+        )
+
+
+class MedicationEvidenceAccessTests(unittest.TestCase):
+    def test_drug_cards_restore_visible_sources_and_live_openfda_state(self):
+        cards = function_body("drugCardsHtml", MARKUP)
+        evidence = function_body("drugEvidenceHtml", MARKUP)
+        self.assertIn("drugEvidenceHtml(c,dm,p)", cards)
+        self.assertIn("Sources &amp; evidence", evidence)
+        self.assertIn("Live openFDA label loaded", evidence)
+        self.assertIn("Live openFDA label unavailable", evidence)
+        self.assertIn("Live openFDA not requested", evidence)
+        self.assertIn("FDA label · DailyMed SPL", evidence)
+        self.assertIn("Mechanism · DrugBank", evidence)
+        self.assertIn("Adverse events · Drugs.com", evidence)
+        self.assertIn("openfdaRequested", MARKUP)
+
+    def test_pharmacy_links_are_encoded_external_searches_not_live_quotes(self):
+        body = function_body("pharmacyLinksHtml", MARKUP)
+        self.assertIn("encodeURIComponent(name)", body)
+        for vendor in ("CVS", "Walgreens", "Walmart", "GoodRx"):
+            self.assertIn("name:'%s'" % vendor, body)
+        self.assertIn('target="_blank" rel="noopener noreferrer"', body)
+        self.assertIn("illustrative prices", body)
+        self.assertIn("not a live quote", body)
+        self.assertIn("not a purchase recommendation", body)
+        self.assertIn("Access links do not override the Hold safety gate", body)
+
+    def test_rendering_does_not_reorder_or_rescore_candidates(self):
+        cards = function_body("drugCardsHtml", MARKUP)
+        self.assertIn("res.candidates.map", cards)
+        self.assertNotIn(".sort(", cards)
+        self.assertNotIn("mechanism_score=", cards)
 
 
 class ForecastIsUserDrivenTests(unittest.TestCase):

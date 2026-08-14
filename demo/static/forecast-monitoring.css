@@ -248,6 +248,7 @@ body[data-sub="validation"] #fx-validation { display: block; }
 
 .split { display: grid; grid-template-columns: 2fr 1fr; gap: 0 var(--gutter); align-items: start; }
 .split.wide { grid-template-columns: 3fr 1fr; }
+.split.graph-expanded { grid-template-columns: minmax(300px, .65fr) minmax(0, 1.35fr); }
 .split > .main { min-width: 0; padding: 28px 0 0; }
 .split > .side {
   min-width: 0; padding: 24px 0 0 var(--gutter);
@@ -401,7 +402,7 @@ body[data-sub="validation"] #fx-validation { display: block; }
 .panel-pane.active { display: block; }
 
 .graph-host {
-  position: relative; height: 420px; min-height: 260px;
+  position: relative; height: 560px; min-height: 260px;
   background: var(--surface); border: 1px solid var(--divider);
 }
 .graph-host > #art-graph { position: absolute; inset: 0; }
@@ -433,6 +434,33 @@ body[data-sub="validation"] #fx-validation { display: block; }
 .cites { display: flex; flex-direction: column; gap: 5px; margin-top: 4px; }
 .cite { font-size: 12.5px; color: var(--ink-2); line-height: 1.5; }
 .cite b { color: var(--ink); font-weight: 600; }
+
+.drug-evidence, .drug-access { margin-top: 14px; padding-top: 2px; border-top: 1px solid var(--divider-soft); }
+.source-state { display: flex; flex-direction: column; gap: 2px; padding: 8px 10px; margin-bottom: 7px;
+  font-size: 11.5px; line-height: 1.45; border-left: 2px solid var(--null); background: var(--app-bg); }
+.source-state b { font-size: 12px; color: var(--ink); }
+.source-state span { color: var(--ink-2); }
+.source-state.live { border-left-color: var(--teal); }
+.source-state.unavailable { border-left-color: var(--caution); }
+.source-links { display: grid; gap: 6px; }
+.source-link { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding: 8px 10px;
+  color: var(--ink-2); text-decoration: none; border: 1px solid var(--divider); background: var(--surface);
+  font-size: 11.5px; line-height: 1.45; overflow-wrap: anywhere; }
+.source-link b { color: var(--ink); font-size: 12px; font-weight: 600; }
+.source-link:hover { border-color: var(--ink-2); background: var(--app-bg); }
+.source-link:focus-visible, .pharmacy-link:focus-visible { outline: 2px solid var(--oxide); outline-offset: 2px; }
+.access-note, .price-truth { margin: 0 0 6px; color: var(--ink-2); font-size: 11.5px; line-height: 1.45; }
+.safety-access { color: var(--danger); font-weight: 600; }
+.price-truth { font-family: var(--mono); font-size: 10.5px; }
+.pharmacy-links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.pharmacy-link { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0;
+  padding: 8px 9px; color: var(--ink); text-decoration: none; border: 1px solid var(--divider); background: var(--surface);
+  font-size: 11.5px; }
+.pharmacy-link span { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
+.pharmacy-link i { width: 7px; height: 7px; flex: 0 0 auto; border-radius: 50%; }
+.pharmacy-link b { font-family: var(--mono); font-size: 10.5px; white-space: nowrap; }
+.pharmacy-link:hover { border-color: var(--ink-2); background: var(--app-bg); }
+.pharmacy-link.held { color: var(--ink-2); background: var(--app-bg); }
 
 /* drug detail slides over the evidence panel */
 .detail-head { display: flex; align-items: flex-start; gap: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--ink); }
@@ -803,7 +831,7 @@ body[data-sub="validation"] #fx-validation { display: block; }
 }
 
 @media (max-width: 1180px) {
-  .split, .split.wide { grid-template-columns: 1fr; }
+  .split, .split.wide, .split.graph-expanded { grid-template-columns: 1fr; }
   .prerun { grid-template-columns: 1fr; gap: 20px; }
   .prerun-facts { max-width: 420px; }
   .split > .side {
@@ -832,6 +860,7 @@ body[data-sub="validation"] #fx-validation { display: block; }
 
 @media (max-width: 767px) {
   :root { --gutter: 16px; --bar-h: 52px; }
+  .graph-host { height: 780px; }
 
   /* The bar keeps the wordmark on row one and drops the nav to row two as a
      segmented control — in flow, so nothing overlays anything. */

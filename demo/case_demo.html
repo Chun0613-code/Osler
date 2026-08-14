@@ -278,7 +278,7 @@ async function analyze(structured){
   if(!text && !structured){openModal();return;}
   const btn=$('analyzeBtn');btn.disabled=true;
   const pid='p'+Date.now();
-  const p={id:pid,label:'Analyzing…',text:text,bundle:null,chat:[],steps:[]};
+  const p={id:pid,label:'Analyzing…',text:text,bundle:null,chat:[],steps:[],openfdaRequested:$('useFda').checked};
   PATIENTS.push(p);CUR=PATIENTS.length-1;SEL_DRUG=-1;
   renderRx();
   const addStep=ev=>{
@@ -287,7 +287,7 @@ async function analyze(structured){
     if(document.body.getAttribute('data-view')==='rx')renderMain();
   };
   const body={patient_id:pid,text:text,fields:(structured?sampleToFields(structured):{}),
-    api_key:KEY,provider:PROVIDER,use_openfda:$('useFda').checked,
+    api_key:KEY,provider:PROVIDER,use_openfda:p.openfdaRequested,
     orchestrator:$('useLlmOrch').checked?'llm':'deterministic'};
   try{
     const r=await fetch('/api/analyze_stream',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
@@ -423,6 +423,8 @@ function renderMain(){
 }
 function renderSide(){
   const host=$('rxSide'),p=PATIENTS[CUR];
+  const split=host&&host.closest('.split');
+  if(split)split.classList.toggle('graph-expanded',!!(p&&p.bundle&&SEL_DRUG<0&&ART_TAB==='graph'));
   if(!p||!p.bundle){
     host.innerHTML='<div class="panel-tabs"><span class="panel-tab active">Evidence</span></div>'+
       '<div class="panel-body"><p class="note">The reasoning artifact — mind-map graph, disease model and drug label cards — opens once a case is analyzed.</p></div>';
@@ -445,7 +447,7 @@ function renderSide(){
       '<div class="graph-host"><div id="art-graph"></div><div class="graph-cap" id="gpCap"></div></div>'+
       `<div class="legend">${legend}</div></div>`+
     `<div class="panel-pane${ART_TAB==='disease'?' active':''}" data-pane="disease">${diseaseCardHtml(dm,b.openfda_loaded)}</div>`+
-    `<div class="panel-pane${ART_TAB==='drugs'?' active':''}" data-pane="drugs">${drugCardsHtml(res,dm)}</div>`+
+    `<div class="panel-pane${ART_TAB==='drugs'?' active':''}" data-pane="drugs">${drugCardsHtml(res,dm,p)}</div>`+
     '</div>';
   if(ART_TAB==='graph')renderGraph(b.graph);
 }
@@ -489,7 +491,49 @@ function diseaseCardHtml(dm,openfda){
     (openfda&&openfda.length?'<div class="ev-lab">live openFDA</div><div class="tag-list"><span class="tag">'+esc(openfda.join(', '))+'</span></div>':'')+
     '</div>';
 }
-function drugCardsHtml(res,dm){
+function hashStr(s){let h=0;for(let i=0;i<String(s).length;i++)h=(h*31+String(s).charCodeAt(i))>>>0;return h;}
+function pharmacyLinksHtml(c,m){
+  const name=String(c.drug||''),q=encodeURIComponent(name),base=6+(hashStr(name)%34);
+  const vendors=[
+    {name:'CVS',color:'#CC0000',price:base+2,url:'https://www.cvs.com/search?searchTerm='+q},
+    {name:'Walgreens',color:'#E31837',price:base+4,url:'https://www.walgreens.com/search/results.jsp?Ntt='+q},
+    {name:'Walmart',color:'#0071CE',price:Math.max(4,base-1),url:'https://www.walmart.com/search?q='+q},
+    {name:'GoodRx',color:'#B78300',price:Math.max(3,base-3),url:'https://www.goodrx.com/'+q}
+  ];
+  const gate=m.cls==='bad'
+    ? '<p class="access-note safety-access">Access links do not override the Hold safety gate and are not a recommendation.</p>'
+    : '<p class="access-note">External searches only — not a purchase recommendation.</p>';
+  return '<div class="drug-access"><div class="ev-lab">Pharmacy price links · illustrative prices</div>'+gate+
+    '<p class="price-truth">Deterministic illustrative estimates only · not a live quote.</p><div class="pharmacy-links">'+
+    vendors.map(v=>'<a class="pharmacy-link'+(m.cls==='bad'?' held':'')+'" href="'+esc(v.url)+'" target="_blank" rel="noopener noreferrer">'+
+      '<span><i style="background:'+v.color+'"></i>'+v.name+'</span><b>$'+v.price+'.'+String(hashStr(name+v.name)%90+10)+' est.</b></a>').join('')+
+    '</div></div>';
+}
+function drugEvidenceHtml(c,dm,p){
+  const ev=(c.evidence&&c.evidence[0])||null,setid=ev&&ev.set_id;
+  const realLabel=!!(ev&&/openfda|dailymed|spl/i.test(ev.source||''));
+  const loaded=((p.bundle&&p.bundle.openfda_loaded)||[]).some(name=>String(name).toLowerCase()===String(c.drug).toLowerCase());
+  const labelUrl=realLabel&&setid
+    ? 'https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid='+encodeURIComponent(String(setid))
+    : 'https://dailymed.nlm.nih.gov/dailymed/search.cfm?query='+encodeURIComponent(c.drug);
+  const status=loaded
+    ? '<div class="source-state live"><b>Live openFDA label loaded</b><span>'+esc(ev.source||'openFDA / DailyMed')+
+      (ev.retrieved_at?' · retrieved '+esc(ev.retrieved_at):'')+'</span></div>'
+    : (p.openfdaRequested
+      ? '<div class="source-state unavailable"><b>Live openFDA label unavailable</b><span>No live label was loaded; local modeled evidence and external lookup links are shown.</span></div>'
+      : '<div class="source-state local"><b>Live openFDA not requested</b><span>Local modeled evidence and external lookup links only.</span></div>');
+  const mechUrl='https://go.drugbank.com/unearth/q?searcher=drugs&query='+encodeURIComponent(c.drug);
+  const diseaseUrl='https://en.wikipedia.org/w/index.php?search='+encodeURIComponent(String((dm&&dm.disease)||'').replace(/\//g,' '));
+  const adverseUrl='https://www.drugs.com/sfx/'+encodeURIComponent(String(c.drug).toLowerCase().replace(/\s+/g,'-'))+'-side-effects.html';
+  let links='<a class="source-link" href="'+esc(mechUrl)+'" target="_blank" rel="noopener noreferrer"><b>Mechanism · DrugBank</b><span>'+esc(c.rationale||c.mechanism_chain||'—')+' · modeled effect; external pharmacology lookup ↗</span></a>';
+  if(dm)links+='<a class="source-link" href="'+esc(diseaseUrl)+'" target="_blank" rel="noopener noreferrer"><b>Disease model source</b><span>'+esc((dm.description||dm.disease||'').slice(0,150))+' · local unreviewed model; external reference ↗</span></a>';
+  links+='<a class="source-link" href="'+esc(labelUrl)+'" target="_blank" rel="noopener noreferrer"><b>FDA label · DailyMed SPL</b><span>'+
+    (loaded?'Live openFDA evidence for this result':'External label lookup; not fetched into this result')+
+    (setid?' · '+esc(String(setid).slice(0,8)):'')+' ↗</span></a>';
+  if(c.faers_signals&&c.faers_signals.length)links+='<a class="source-link" href="'+esc(adverseUrl)+'" target="_blank" rel="noopener noreferrer"><b>Adverse events · Drugs.com</b><span>External side-effect reference; FAERS signals are not causation ↗</span></a>';
+  return '<div class="drug-evidence"><div class="ev-lab">Sources &amp; evidence</div>'+status+'<div class="source-links">'+links+'</div></div>';
+}
+function drugCardsHtml(res,dm,p){
   return res.candidates.map((c,i)=>{
     const m=safetyMeta(c),dose=c.dose||{};
     return '<div class="ev-card"><div class="h">'+(i+1)+' · '+esc(c.drug)+'</div>'+
@@ -502,43 +546,83 @@ function drugCardsHtml(res,dm){
         (dose.patient_specific_allowed&&dose.verbatim?esc(dose.verbatim)
           :'not shown — '+(res.mechanism_only?'no label loaded':'blocked by the safety gate'))+'</div>'+
       (c.final_answer?'<div class="ev-lab">summary</div><div class="cite">'+esc(c.final_answer)+'</div>':'')+
+      drugEvidenceHtml(c,dm,p)+pharmacyLinksHtml(c,m)+
       '</div>';
   }).join('')+'<p class="note" style="margin-top:12px">'+esc(res._disclaimer||'')+'</p>';
 }
 
 /* ── reasoning graph ─────────────────────────────────────────────────────── */
+function _reasoningLevel(group){
+  if(group==='patient')return 0;
+  if(group==='indication'||group==='flag')return 1;
+  if(group==='disease')return 2;
+  if(group==='pathology'||group==='symptom')return 3;
+  if(group==='target')return 4;
+  return 5; // ranked drug candidates share the final visual level
+}
+function reasoningLayout(nodes,compact){
+  const levels=[[],[],[],[],[],[]],layout={};
+  nodes.forEach(n=>levels[_reasoningLevel(n.group)].push(n));
+  levels.forEach(items=>items.sort((a,b)=>String(a.id).localeCompare(String(b.id))));
+  if(!compact){
+    const levelGap=156,rowGap=64;
+    levels.forEach((items,level)=>items.forEach((n,index)=>{
+      layout[n.id]={x:(level-2.5)*levelGap,y:(index-(items.length-1)/2)*rowGap};
+    }));
+    return layout;
+  }
+  // A narrow canvas uses two stable lanes. Each reasoning level owns a block,
+  // so even the nine pathology/symptom nodes remain separated at phone width.
+  const laneGap=160,rowGap=58,blockGap=62;
+  let cursor=0;
+  levels.forEach(items=>{
+    const columns=items.length>1?2:1,rows=Math.ceil(items.length/columns);
+    items.forEach((n,index)=>{
+      const row=Math.floor(index/columns),column=index%columns;
+      const rowItems=Math.min(columns,items.length-row*columns);
+      layout[n.id]={x:(column-(rowItems-1)/2)*laneGap,y:cursor+row*rowGap};
+    });
+    cursor+=(Math.max(1,rows)-1)*rowGap+blockGap;
+  });
+  const ys=Object.values(layout).map(p=>p.y),mid=(Math.min(...ys)+Math.max(...ys))/2;
+  Object.values(layout).forEach(p=>{p.y-=mid;});
+  return layout;
+}
 function renderGraph(g){
   const el=$('art-graph');if(!el||!g)return;
   _clearAnim();
   if(typeof vis==='undefined'){el.innerHTML='<p class="note" style="padding:16px">Graph library blocked (offline). See the Disease and Drugs tabs.</p>';return;}
   const nodes=g.nodes.map(n=>({id:n.id,label:n.label,group:n.group,title:n.title||undefined}));
   const edges=g.edges.map(e=>({from:e.from,to:e.to,label:e.label||undefined,dashes:e.dashes||false,color:e.color?{color:e.color}:undefined}));
-  _stages=buildStages(nodes,edges);
-  _nodesDS=new vis.DataSet(nodes);_edgesDS=new vis.DataSet(edges);
+  _layout=reasoningLayout(nodes,el.clientWidth<620);
+  const positioned=nodes.map(n=>Object.assign({},n,{x:_layout[n.id].x,y:_layout[n.id].y,
+    fixed:{x:true,y:true},physics:false}));
+  _stages=buildStages(positioned,edges);
+  _nodesDS=new vis.DataSet(positioned);_edgesDS=new vis.DataSet(edges);
   const groupOpts={};for(const k in GROUPS)groupOpts[k]={color:{background:GROUPS[k].color,border:GROUPS[k].color},font:{color:'#FCFAF5'}};
   _net=new vis.Network(el,{nodes:_nodesDS,edges:_edgesDS},{
     nodes:{shape:'box',margin:7,font:{size:12,color:'#FCFAF5',face:'IBM Plex Sans'},borderWidth:0,widthConstraint:{maximum:125}},
     edges:{font:{size:9,color:'#626762',strokeWidth:3,strokeColor:'#FCFAF5'},color:{color:'#D1CCC2'},
-      arrows:{to:{enabled:true,scaleFactor:.5}},smooth:{type:'cubicBezier'}},
-    groups:groupOpts,physics:{barnesHut:{gravitationalConstant:-6500,springLength:115,springConstant:.05},stabilization:{iterations:200}},
+      arrows:{to:{enabled:true,scaleFactor:.5}},smooth:{enabled:true,type:'cubicBezier',roundness:.12}},
+    groups:groupOpts,layout:{improvedLayout:false},physics:false,
     interaction:{hover:true,tooltipDelay:120}});
   _net.on('click',pr=>{if(pr.nodes.length&&String(pr.nodes[0]).startsWith('drug:'))artTab('drugs');});
   if(_gpRO)_gpRO.disconnect();
   _gpRO=new ResizeObserver(()=>{try{_net.setSize('100%','100%');_net.redraw();}catch(_){}});
   _gpRO.observe(el);
   let started=false;
-  const freezeAndPlay=()=>{
+  const fitAndPlay=()=>{
     if(started)return;started=true;
-    try{_net.storePositions();}catch(_){}
-    _layout={};_nodesDS.get().forEach(n=>{if(n.x!=null)_layout[n.id]={x:n.x,y:n.y};});
-    try{_net.setOptions({physics:false});}catch(_){}
+    try{_net.fit({animation:false});}catch(_){}
     playReasoning();
   };
-  _net.once('stabilizationIterationsDone',freezeAndPlay);
-  _animTimers.push(setTimeout(freezeAndPlay,1800));
+  _net.once('afterDrawing',()=>requestAnimationFrame(fitAndPlay));
+  _animTimers.push(setTimeout(fitAndPlay,120));
 }
 function artTab(name){
   ART_TAB=name;
+  const split=$('rxSide')&&$('rxSide').closest('.split');
+  if(split)split.classList.toggle('graph-expanded',name==='graph');
   document.querySelectorAll('#rxSide .panel-tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===name));
   document.querySelectorAll('#rxSide .panel-pane').forEach(pn=>pn.classList.toggle('active',pn.dataset.pane===name));
   if(name==='graph'&&PATIENTS[CUR]&&PATIENTS[CUR].bundle)renderGraph(PATIENTS[CUR].bundle.graph);
@@ -576,19 +660,11 @@ function _finishReplay(){
   if(btn)btn.disabled=false;if(capEl)capEl.innerHTML='';
   try{_net.fit(REDUCED?undefined:{animation:{duration:700,easingFunction:'easeInOutQuad'}});}catch(_){}
 }
-function _baseStage(group){
-  if(group==='patient')return 0;
-  if(group==='indication'||group==='flag')return 1;
-  if(group==='disease')return 2;
-  if(group==='pathology'||group==='symptom')return 3;
-  if(group==='target')return 4;
-  return 5;
-}
 function buildStages(nodes,edges){
   const drugNodes=nodes.filter(n=>n.group&&n.group.indexOf('drug-')===0);
   const ns={};
   drugNodes.forEach((n,i)=>{ns[n.id]=5+i;});
-  nodes.forEach(n=>{if(!(n.id in ns))ns[n.id]=_baseStage(n.group);});
+  nodes.forEach(n=>{if(!(n.id in ns))ns[n.id]=_reasoningLevel(n.group);});
   const last=5+Math.max(0,drugNodes.length-1);
   const stages=[];for(let s=0;s<=last;s++)stages.push({nodes:[],edges:[],cap:'',drug:null});
   nodes.forEach(n=>stages[ns[n.id]].nodes.push(n));
