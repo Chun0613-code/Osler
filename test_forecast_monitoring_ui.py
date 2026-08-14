@@ -31,6 +31,7 @@ class ForecastMonitoringUiContractTests(unittest.TestCase):
         self.assertIn("data-fm=\"fixture-load\"", SCRIPT)
         self.assertIn("/api/forecast/fixtures", SCRIPT)
         self.assertIn("post_forecast_", SCRIPT)
+        self.assertIn("key.slice(-7) === '_prefix'", SCRIPT)
         self.assertIn("Cached research demonstration", SCRIPT)
         self.assertNotIn("/static/forecast-fixtures.json", SCRIPT)
 
@@ -39,6 +40,11 @@ class ForecastMonitoringUiContractTests(unittest.TestCase):
         self.assertIn("target-specific calibrated research interval", SCRIPT)
         self.assertIn("extend beyond physiological support", SCRIPT)
         self.assertNotIn("90% research interval", SCRIPT)
+
+    def test_forecast_view_has_no_rx_ranking_call_or_accuracy_marketing(self):
+        self.assertNotIn("'/api/analyze'", SCRIPT)
+        self.assertNotRegex(SCRIPT, r"\b(?:70|80)\s*%")
+        self.assertIn("never change drug ranking or dosing", SCRIPT)
 
 
 if __name__ == "__main__":

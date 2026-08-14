@@ -1290,7 +1290,7 @@
       var j = await getJSON('/api/forecast/fixtures');
       var map = {};
       Object.keys(j).filter(function (key) {
-        return key.indexOf('post_forecast_') === 0;
+        return key.indexOf('post_forecast_') === 0 && key.slice(-7) === '_prefix';
       }).forEach(function (key) {
         var entry = j[key] || {};
         var request = entry.request || {};
