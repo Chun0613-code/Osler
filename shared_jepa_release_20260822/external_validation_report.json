@@ -1,18 +1,20 @@
 {
   "schema": "unified_shared_jepa_head_audit.v1",
   "attempted_heads": 19,
-  "externally_validated_heads": 9,
-  "combined_with_existing_base_cells": 25,
+  "externally_validated_heads": 11,
+  "combined_with_existing_base_cells": 27,
   "passed_cells": [
     "urine_output@1h",
     "glucose@3h",
     "urine_output@3h",
     "glucose@6h",
+    "chloride@12h",
     "glucose@12h",
     "hematocrit@12h",
     "hemoglobin@12h",
     "heart_rate@24h",
-    "map@24h"
+    "map@24h",
+    "sodium@24h"
   ],
   "cells": [
     {
@@ -185,14 +187,15 @@
         "alpha": 100.0,
         "shrinkage": 0.5,
         "abstention_quantile": 0.25,
-        "normalized_abstention_threshold": 0.05970448563755893,
+        "normalized_abstention_threshold": 0.06546460092067719,
         "eicu_move_fraction": 0.74998334998335,
-        "candidate_patient_equal_mae": 6.986270225490652,
+        "candidate_patient_equal_mae": 7.005901391707082,
         "persistence_patient_equal_mae": 7.270293637861508,
-        "delta": -0.28402341237085604,
-        "hospital_equal_delta": -0.36179885435537695,
-        "careunit_equal_delta": -0.25815096352009226,
-        "robust_objective": -0.25815096352009226,
+        "delta": -0.2643922461544266,
+        "hospital_equal_delta": -0.34033723492852447,
+        "careunit_equal_delta": -0.23792078036105538,
+        "robust_objective": -0.23792078036105538,
+        "feature_normalization": "quantile",
         "selection_fold_group": "hospitalid",
         "eicu_selection_pass": true
       },
@@ -201,37 +204,37 @@
         "rows": 40666,
         "subjects": 2871,
         "careunits": 13,
-        "candidate_mae": 8.243815410339005,
+        "candidate_mae": 7.969533524289343,
         "persistence_mae": 7.727438154723848,
         "patient_gate": {
           "groups": 2871,
-          "delta_mae_candidate_minus_persistence": 0.5002517973373377,
+          "delta_mae_candidate_minus_persistence": 0.21280057437953667,
           "ci95": [
-            0.4248256076877651,
-            0.5762611394887033
+            0.16768566900884183,
+            0.2581945068692519
           ],
           "pass": false
         },
         "careunit_gate": {
           "groups": 13,
-          "delta_mae_candidate_minus_persistence": 0.2773921744174138,
+          "delta_mae_candidate_minus_persistence": 0.17361963459854882,
           "ci95": [
-            0.031223149964412535,
-            0.5583171532160063
+            -0.026921400014229536,
+            0.4301314979322434
           ],
           "pass": false
         },
         "forward_time_gate": {
           "groups": 574,
-          "delta_mae_candidate_minus_persistence": 0.6208449367560447,
+          "delta_mae_candidate_minus_persistence": 0.24481943704826367,
           "ci95": [
-            0.45578112802127796,
-            0.7995914412679119
+            0.14829898051209728,
+            0.34277728967037824
           ],
           "pass": false
         },
-        "direction_accuracy": 0.4927001528487851,
-        "delta_correlation": 0.13723797898939302,
+        "direction_accuracy": 0.48845728139988404,
+        "delta_correlation": 0.18289917535277048,
         "point_transfer_pass": false,
         "failure_reasons": [
           "does_not_beat_persistence_patient",
@@ -246,7 +249,7 @@
       "target": "hematocrit",
       "horizon_hours": 3,
       "uniform_head_format": "shared_context+belief+target_future+organ+base_point+measurement_pure_state",
-      "selected_head_family": "hurdle",
+      "selected_head_family": "robust_tree",
       "eicu_support": {
         "original_rows": 3104,
         "sampled_rows": 3104,
@@ -262,18 +265,18 @@
         "quality_filter": "exact_or_near_when_available"
       },
       "selection": {
-        "family": "hurdle",
-        "change_threshold": 1.5,
+        "family": "robust_tree",
         "shrinkage": 0.75,
-        "abstention_quantile": 0.5,
-        "normalized_abstention_threshold": 0.15298843675623475,
-        "eicu_move_fraction": 0.5,
-        "candidate_patient_equal_mae": 2.178623161778644,
+        "abstention_quantile": 0.25,
+        "normalized_abstention_threshold": 0.04480865629672159,
+        "eicu_move_fraction": 0.75,
+        "candidate_patient_equal_mae": 2.164969633277646,
         "persistence_patient_equal_mae": 2.555111209205062,
-        "delta": -0.37648804742641806,
-        "hospital_equal_delta": -0.26351840128360193,
-        "careunit_equal_delta": -0.3187074392308124,
-        "robust_objective": -0.26351840128360193,
+        "delta": -0.39014157592741583,
+        "hospital_equal_delta": -0.26118449263720656,
+        "careunit_equal_delta": -0.3671445237693905,
+        "robust_objective": -0.26118449263720656,
+        "feature_normalization": "quantile",
         "selection_fold_group": "hospitalid",
         "eicu_selection_pass": true
       },
@@ -282,41 +285,40 @@
         "rows": 4433,
         "subjects": 1356,
         "careunits": 12,
-        "candidate_mae": 2.048415450222232,
+        "candidate_mae": 1.9888577172613122,
         "persistence_mae": 2.1031806902774646,
         "patient_gate": {
           "groups": 1356,
-          "delta_mae_candidate_minus_persistence": -0.06550385685758979,
+          "delta_mae_candidate_minus_persistence": -0.1190608514053386,
           "ci95": [
-            -0.10428853413396426,
-            -0.026282998573709356
+            -0.1554482906550035,
+            -0.08175333697736686
           ],
           "pass": true
         },
         "careunit_gate": {
           "groups": 12,
-          "delta_mae_candidate_minus_persistence": -0.011301941872777716,
+          "delta_mae_candidate_minus_persistence": -0.13283245905301128,
           "ci95": [
-            -0.2551445075821537,
-            0.2985006325209476
+            -0.3268571506997135,
+            0.11438103029010777
           ],
           "pass": false
         },
         "forward_time_gate": {
           "groups": 276,
-          "delta_mae_candidate_minus_persistence": -0.06398429034431061,
+          "delta_mae_candidate_minus_persistence": -0.13421499676372955,
           "ci95": [
-            -0.15375112268755264,
-            0.02212549757081662
+            -0.21645741716402503,
+            -0.05339765290036973
           ],
-          "pass": false
+          "pass": true
         },
-        "direction_accuracy": 0.3453917050691244,
-        "delta_correlation": 0.3388700013963263,
+        "direction_accuracy": 0.5085253456221198,
+        "delta_correlation": 0.3556508880975626,
         "point_transfer_pass": false,
         "failure_reasons": [
-          "does_not_beat_persistence_careunit",
-          "does_not_beat_persistence_forward_time"
+          "does_not_beat_persistence_careunit"
         ]
       },
       "external_pass": false
@@ -326,7 +328,7 @@
       "target": "hemoglobin",
       "horizon_hours": 3,
       "uniform_head_format": "shared_context+belief+target_future+organ+base_point+measurement_pure_state",
-      "selected_head_family": "robust_tree",
+      "selected_head_family": "hurdle",
       "eicu_support": {
         "original_rows": 3439,
         "sampled_rows": 3439,
@@ -342,17 +344,19 @@
         "quality_filter": "exact_or_near_when_available"
       },
       "selection": {
-        "family": "robust_tree",
+        "family": "hurdle",
+        "change_threshold": 0.5,
         "shrinkage": 1.0,
         "abstention_quantile": 0.5,
-        "normalized_abstention_threshold": 0.0952722771216214,
+        "normalized_abstention_threshold": 0.15038837261272556,
         "eicu_move_fraction": 0.5001453911020646,
-        "candidate_patient_equal_mae": 0.7324761735372999,
+        "candidate_patient_equal_mae": 0.7389856322713022,
         "persistence_patient_equal_mae": 0.8819901634241314,
-        "delta": -0.1495139898868315,
-        "hospital_equal_delta": -0.10535836696338585,
-        "careunit_equal_delta": -0.14359704110172167,
-        "robust_objective": -0.10535836696338585,
+        "delta": -0.14300453115282918,
+        "hospital_equal_delta": -0.12026167396255714,
+        "careunit_equal_delta": -0.1153407585527496,
+        "robust_objective": -0.1153407585527496,
+        "feature_normalization": "quantile",
         "selection_fold_group": "hospitalid",
         "eicu_selection_pass": true
       },
@@ -361,40 +365,40 @@
         "rows": 3074,
         "subjects": 1095,
         "careunits": 12,
-        "candidate_mae": 0.704080638802789,
+        "candidate_mae": 0.6846401458104688,
         "persistence_mae": 0.7151594014313599,
         "patient_gate": {
           "groups": 1095,
-          "delta_mae_candidate_minus_persistence": -0.020162677918085976,
+          "delta_mae_candidate_minus_persistence": -0.04202301409170626,
           "ci95": [
-            -0.040764481664592185,
-            -0.00043943828758392125
+            -0.0613694292822218,
+            -0.02334794244335878
           ],
           "pass": true
         },
         "careunit_gate": {
           "groups": 12,
-          "delta_mae_candidate_minus_persistence": -0.07559296472634085,
+          "delta_mae_candidate_minus_persistence": -0.018376298220832872,
           "ci95": [
-            -0.13788704075775826,
-            -0.020098483968276407
-          ],
-          "pass": true
-        },
-        "forward_time_gate": {
-          "groups": 226,
-          "delta_mae_candidate_minus_persistence": -0.0277934531298982,
-          "ci95": [
-            -0.06921189293537428,
-            0.014338297224615893
+            -0.06875856132592001,
+            0.041002023642858876
           ],
           "pass": false
         },
-        "direction_accuracy": 0.3724137931034483,
-        "delta_correlation": 0.3782371457524816,
+        "forward_time_gate": {
+          "groups": 226,
+          "delta_mae_candidate_minus_persistence": -0.0483556828338259,
+          "ci95": [
+            -0.086782338626228,
+            -0.00713691906916278
+          ],
+          "pass": true
+        },
+        "direction_accuracy": 0.3182758620689655,
+        "delta_correlation": 0.3974695957726371,
         "point_transfer_pass": false,
         "failure_reasons": [
-          "does_not_beat_persistence_forward_time"
+          "does_not_beat_persistence_careunit"
         ]
       },
       "external_pass": false
@@ -424,14 +428,15 @@
         "alpha": 100.0,
         "shrinkage": 0.75,
         "abstention_quantile": 0.25,
-        "normalized_abstention_threshold": 0.10814118444884918,
+        "normalized_abstention_threshold": 0.11528856866061687,
         "eicu_move_fraction": 0.7499666799946688,
-        "candidate_patient_equal_mae": 3.6081645045107527,
+        "candidate_patient_equal_mae": 3.627373839842027,
         "persistence_patient_equal_mae": 3.8880337071881192,
-        "delta": -0.2798692026773666,
-        "hospital_equal_delta": -0.3021800265330414,
-        "careunit_equal_delta": -0.21698610824015424,
-        "robust_objective": -0.21698610824015424,
+        "delta": -0.26065986734609226,
+        "hospital_equal_delta": -0.27991398196804096,
+        "careunit_equal_delta": -0.22310986146682849,
+        "robust_objective": -0.22310986146682849,
+        "feature_normalization": "quantile",
         "selection_fold_group": "hospitalid",
         "eicu_selection_pass": true
       },
@@ -440,39 +445,40 @@
         "rows": 40239,
         "subjects": 2869,
         "careunits": 13,
-        "candidate_mae": 3.8528102487492313,
+        "candidate_mae": 4.0132968932639805,
         "persistence_mae": 3.902134744899227,
         "patient_gate": {
           "groups": 2869,
-          "delta_mae_candidate_minus_persistence": -0.04728460867326207,
+          "delta_mae_candidate_minus_persistence": 0.10997958836232691,
           "ci95": [
-            -0.09460774598796752,
-            -8.508496828608925e-05
+            0.06437554509264783,
+            0.15447122720210615
           ],
-          "pass": true
+          "pass": false
         },
         "careunit_gate": {
           "groups": 13,
-          "delta_mae_candidate_minus_persistence": 0.12955623789627754,
+          "delta_mae_candidate_minus_persistence": 0.37773702188526437,
           "ci95": [
-            -0.15747967551567088,
-            0.4799870439819651
+            -0.030496364493367265,
+            1.0156034637395877
           ],
           "pass": false
         },
         "forward_time_gate": {
           "groups": 574,
-          "delta_mae_candidate_minus_persistence": 0.05334137619827888,
+          "delta_mae_candidate_minus_persistence": 0.148588529626338,
           "ci95": [
-            -0.058589951130972207,
-            0.1762126195601035
+            0.057120366480421146,
+            0.2505529657190959
           ],
           "pass": false
         },
-        "direction_accuracy": 0.5527087020862954,
-        "delta_correlation": 0.43279620732488755,
+        "direction_accuracy": 0.5366625076168645,
+        "delta_correlation": 0.3550188608307109,
         "point_transfer_pass": false,
         "failure_reasons": [
+          "does_not_beat_persistence_patient",
           "does_not_beat_persistence_careunit",
           "does_not_beat_persistence_forward_time"
         ]
@@ -650,15 +656,16 @@
       "selection": {
         "family": "robust_tree",
         "shrinkage": 1.0,
-        "abstention_quantile": 0.0,
-        "normalized_abstention_threshold": 6.433060823795135e-06,
-        "eicu_move_fraction": 1.0,
-        "candidate_patient_equal_mae": 0.7588676085464753,
+        "abstention_quantile": 0.25,
+        "normalized_abstention_threshold": 0.06154641914500882,
+        "eicu_move_fraction": 0.7499317499317499,
+        "candidate_patient_equal_mae": 0.7590158534478103,
         "persistence_patient_equal_mae": 0.9648367428187646,
-        "delta": -0.20596913427228936,
-        "hospital_equal_delta": -0.22008409137301724,
-        "careunit_equal_delta": -0.1923506285805164,
-        "robust_objective": -0.1923506285805164,
+        "delta": -0.20582088937095433,
+        "hospital_equal_delta": -0.22011621550260893,
+        "careunit_equal_delta": -0.19279685350812845,
+        "robust_objective": -0.19279685350812845,
+        "feature_normalization": "quantile",
         "selection_fold_group": "hospitalid",
         "eicu_selection_pass": true
       },
@@ -667,37 +674,37 @@
         "rows": 50000,
         "subjects": 18718,
         "careunits": 13,
-        "candidate_mae": 0.7539789068313661,
+        "candidate_mae": 0.7337701001757883,
         "persistence_mae": 0.788456,
         "patient_gate": {
           "groups": 18718,
-          "delta_mae_candidate_minus_persistence": -0.06300486973361677,
+          "delta_mae_candidate_minus_persistence": -0.07778765993941532,
           "ci95": [
-            -0.0688146265603517,
-            -0.05736926210359919
+            -0.08351804856810728,
+            -0.07206085399292708
           ],
           "pass": true
         },
         "careunit_gate": {
           "groups": 13,
-          "delta_mae_candidate_minus_persistence": -0.011223415136926528,
+          "delta_mae_candidate_minus_persistence": -0.02088589321073238,
           "ci95": [
-            -0.05934084250793731,
-            0.04197420283054941
+            -0.06832391230296088,
+            0.044534631908671164
           ],
           "pass": false
         },
         "forward_time_gate": {
           "groups": 3670,
-          "delta_mae_candidate_minus_persistence": -0.0658757471957259,
+          "delta_mae_candidate_minus_persistence": -0.07996903870160862,
           "ci95": [
-            -0.07894516421204689,
-            -0.05330345998450008
+            -0.0928861630268059,
+            -0.06753138582778156
           ],
           "pass": true
         },
-        "direction_accuracy": 0.6435097469580228,
-        "delta_correlation": 0.45582718454994037,
+        "direction_accuracy": 0.5055787124752642,
+        "delta_correlation": 0.4596489707324726,
         "point_transfer_pass": false,
         "failure_reasons": [
           "does_not_beat_persistence_careunit"
@@ -730,14 +737,15 @@
         "alpha": 100.0,
         "shrinkage": 0.75,
         "abstention_quantile": 0.5,
-        "normalized_abstention_threshold": 0.24962418511563697,
+        "normalized_abstention_threshold": 0.27775469422340393,
         "eicu_move_fraction": 0.5,
-        "candidate_patient_equal_mae": 2.622525608400897,
+        "candidate_patient_equal_mae": 2.6441475251174404,
         "persistence_patient_equal_mae": 2.9598603551669656,
-        "delta": -0.33733474676606834,
-        "hospital_equal_delta": -0.4626931212664053,
-        "careunit_equal_delta": -0.26418551090524856,
-        "robust_objective": -0.26418551090524856,
+        "delta": -0.3157128300495251,
+        "hospital_equal_delta": -0.45484288834116765,
+        "careunit_equal_delta": -0.2446940016310772,
+        "robust_objective": -0.2446940016310772,
+        "feature_normalization": "quantile",
         "selection_fold_group": "hospitalid",
         "eicu_selection_pass": true
       },
@@ -746,37 +754,37 @@
         "rows": 1356,
         "subjects": 825,
         "careunits": 12,
-        "candidate_mae": 2.172794148967681,
+        "candidate_mae": 2.3858797024660756,
         "persistence_mae": 2.1896017699115045,
         "patient_gate": {
           "groups": 825,
-          "delta_mae_candidate_minus_persistence": -0.015168994919218193,
+          "delta_mae_candidate_minus_persistence": 0.1504832763105932,
           "ci95": [
-            -0.10342981900614921,
-            0.07179530770095308
+            0.028893786309674537,
+            0.2670255308792447
           ],
           "pass": false
         },
         "careunit_gate": {
           "groups": 12,
-          "delta_mae_candidate_minus_persistence": -0.21163040798594382,
+          "delta_mae_candidate_minus_persistence": 0.6003052538274566,
           "ci95": [
-            -0.4643103540141008,
-            0.024506115996839432
+            -0.2985778097312738,
+            1.7244492040881965
           ],
           "pass": false
         },
         "forward_time_gate": {
           "groups": 163,
-          "delta_mae_candidate_minus_persistence": -0.0904318956022126,
+          "delta_mae_candidate_minus_persistence": 0.02705897896080173,
           "ci95": [
-            -0.30504210427464395,
-            0.11537322947279272
+            -0.24457699401673608,
+            0.29179995925300917
           ],
           "pass": false
         },
-        "direction_accuracy": 0.36818980667838314,
-        "delta_correlation": 0.3560877831300785,
+        "direction_accuracy": 0.4305799648506151,
+        "delta_correlation": 0.31928067036741864,
         "point_transfer_pass": false,
         "failure_reasons": [
           "does_not_beat_persistence_patient",
@@ -791,7 +799,7 @@
       "target": "chloride",
       "horizon_hours": 12,
       "uniform_head_format": "shared_context+belief+target_future+organ+base_point+measurement_pure_state",
-      "selected_head_family": "ridge",
+      "selected_head_family": "hurdle",
       "eicu_support": {
         "original_rows": 4707,
         "sampled_rows": 4707,
@@ -807,18 +815,19 @@
         "quality_filter": "exact_or_near_when_available"
       },
       "selection": {
-        "family": "ridge",
-        "alpha": 100.0,
+        "family": "hurdle",
+        "change_threshold": 1.0,
         "shrinkage": 0.75,
         "abstention_quantile": 0.25,
-        "normalized_abstention_threshold": 0.1429972780513807,
+        "normalized_abstention_threshold": 0.13270641694232121,
         "eicu_move_fraction": 0.7499468876141916,
-        "candidate_patient_equal_mae": 2.935951128514318,
+        "candidate_patient_equal_mae": 2.9855568921237077,
         "persistence_patient_equal_mae": 3.468541883006427,
-        "delta": -0.5325907544921091,
-        "hospital_equal_delta": -0.6925805846659838,
-        "careunit_equal_delta": -0.370558748929735,
-        "robust_objective": -0.370558748929735,
+        "delta": -0.4829849908827195,
+        "hospital_equal_delta": -0.6940440073520516,
+        "careunit_equal_delta": -0.33525785386095625,
+        "robust_objective": -0.33525785386095625,
+        "feature_normalization": "quantile",
         "selection_fold_group": "hospitalid",
         "eicu_selection_pass": true
       },
@@ -827,45 +836,41 @@
         "rows": 1528,
         "subjects": 891,
         "careunits": 12,
-        "candidate_mae": 3.0273782141233614,
+        "candidate_mae": 2.776822314616639,
         "persistence_mae": 2.8272251308900525,
         "patient_gate": {
           "groups": 891,
-          "delta_mae_candidate_minus_persistence": 0.16759921428954783,
+          "delta_mae_candidate_minus_persistence": -0.05474767192972493,
           "ci95": [
-            0.06562634943594568,
-            0.26763568648387664
+            -0.09956047453474218,
+            -0.011239473320030923
           ],
-          "pass": false
+          "pass": true
         },
         "careunit_gate": {
           "groups": 12,
-          "delta_mae_candidate_minus_persistence": -0.15893474529420493,
+          "delta_mae_candidate_minus_persistence": -0.2202209155245969,
           "ci95": [
-            -0.47390474007424943,
-            0.12426657044876817
+            -0.4482553476475233,
+            -0.05970283670931739
           ],
-          "pass": false
+          "pass": true
         },
         "forward_time_gate": {
           "groups": 173,
-          "delta_mae_candidate_minus_persistence": 0.04129970997629367,
+          "delta_mae_candidate_minus_persistence": -0.1975431284338732,
           "ci95": [
-            -0.19347530803971555,
-            0.2794355986865957
+            -0.2898819285646228,
+            -0.0997920671524692
           ],
-          "pass": false
+          "pass": true
         },
-        "direction_accuracy": 0.4668192219679634,
-        "delta_correlation": 0.293844800456329,
-        "point_transfer_pass": false,
-        "failure_reasons": [
-          "does_not_beat_persistence_patient",
-          "does_not_beat_persistence_careunit",
-          "does_not_beat_persistence_forward_time"
-        ]
+        "direction_accuracy": 0.3302822273073989,
+        "delta_correlation": 0.3472806988638362,
+        "point_transfer_pass": true,
+        "failure_reasons": []
       },
-      "external_pass": false
+      "external_pass": true
     },
     {
       "cell": "glucose@12h",
@@ -1085,7 +1090,7 @@
       "target": "bun",
       "horizon_hours": 24,
       "uniform_head_format": "shared_context+belief+target_future+organ+base_point+measurement_pure_state",
-      "selected_head_family": "ridge",
+      "selected_head_family": "robust_tree",
       "eicu_support": {
         "original_rows": 201700,
         "sampled_rows": 15005,
@@ -1101,18 +1106,18 @@
         "quality_filter": "exact_or_near_when_available"
       },
       "selection": {
-        "family": "ridge",
-        "alpha": 10.0,
-        "shrinkage": 0.75,
-        "abstention_quantile": 0.5,
-        "normalized_abstention_threshold": 0.20743720985750685,
-        "eicu_move_fraction": 0.5000333222259247,
-        "candidate_patient_equal_mae": 8.022538335544079,
+        "family": "robust_tree",
+        "shrinkage": 1.0,
+        "abstention_quantile": 0.25,
+        "normalized_abstention_threshold": 0.047412468401269205,
+        "eicu_move_fraction": 0.7500166611129624,
+        "candidate_patient_equal_mae": 7.988780636402006,
         "persistence_patient_equal_mae": 8.675222517091036,
-        "delta": -0.6526841815469577,
-        "hospital_equal_delta": -0.7014839833826966,
-        "careunit_equal_delta": -0.4997922799037353,
-        "robust_objective": -0.4997922799037353,
+        "delta": -0.6864418806890304,
+        "hospital_equal_delta": -0.736253100248144,
+        "careunit_equal_delta": -0.4843810806214013,
+        "robust_objective": -0.4843810806214013,
+        "feature_normalization": "quantile",
         "selection_fold_group": "hospitalid",
         "eicu_selection_pass": true
       },
@@ -1121,37 +1126,37 @@
         "rows": 4824,
         "subjects": 2437,
         "careunits": 13,
-        "candidate_mae": 8.587292650297506,
+        "candidate_mae": 6.647762733088714,
         "persistence_mae": 6.784618573797678,
         "patient_gate": {
           "groups": 2437,
-          "delta_mae_candidate_minus_persistence": 2.0420032597438347,
+          "delta_mae_candidate_minus_persistence": -0.04110766476376459,
           "ci95": [
-            1.7812720566332843,
-            2.291294936263452
+            -0.1661766844695953,
+            0.08379865168487144
           ],
           "pass": false
         },
         "careunit_gate": {
           "groups": 13,
-          "delta_mae_candidate_minus_persistence": 2.4687832580448625,
+          "delta_mae_candidate_minus_persistence": -0.09501572538846295,
           "ci95": [
-            1.654365018575022,
-            3.4420331758531693
+            -0.2782014936587823,
+            0.09659039927565365
           ],
           "pass": false
         },
         "forward_time_gate": {
           "groups": 468,
-          "delta_mae_candidate_minus_persistence": 1.530984429800449,
+          "delta_mae_candidate_minus_persistence": -0.2024906149506164,
           "ci95": [
-            0.93721838242977,
-            2.1198971118823944
+            -0.5148392542389568,
+            0.08887969931231725
           ],
           "pass": false
         },
-        "direction_accuracy": 0.43161913316865036,
-        "delta_correlation": 0.28345479921551126,
+        "direction_accuracy": 0.4318437008758141,
+        "delta_correlation": 0.360396050810492,
         "point_transfer_pass": false,
         "failure_reasons": [
           "does_not_beat_persistence_patient",
@@ -1308,7 +1313,7 @@
       "target": "sodium",
       "horizon_hours": 24,
       "uniform_head_format": "shared_context+belief+target_future+organ+base_point+measurement_pure_state",
-      "selected_head_family": "ridge",
+      "selected_head_family": "robust_tree",
       "eicu_support": {
         "original_rows": 212102,
         "sampled_rows": 15003,
@@ -1324,18 +1329,18 @@
         "quality_filter": "exact_or_near_when_available"
       },
       "selection": {
-        "family": "ridge",
-        "alpha": 100.0,
+        "family": "robust_tree",
         "shrinkage": 0.75,
         "abstention_quantile": 0.25,
-        "normalized_abstention_threshold": 0.08891216654647757,
+        "normalized_abstention_threshold": 0.056083435974315685,
         "eicu_move_fraction": 0.7499833366660001,
-        "candidate_patient_equal_mae": 2.504753040161208,
+        "candidate_patient_equal_mae": 2.529203522478723,
         "persistence_patient_equal_mae": 2.703638613779281,
-        "delta": -0.1988855736180728,
-        "hospital_equal_delta": -0.239146797750558,
-        "careunit_equal_delta": -0.1471884440983282,
-        "robust_objective": -0.1471884440983282,
+        "delta": -0.17443509130055812,
+        "hospital_equal_delta": -0.20114300482677955,
+        "careunit_equal_delta": -0.13235471393614323,
+        "robust_objective": -0.13235471393614323,
+        "feature_normalization": "quantile",
         "selection_fold_group": "hospitalid",
         "eicu_selection_pass": true
       },
@@ -1344,44 +1349,41 @@
         "rows": 5806,
         "subjects": 2566,
         "careunits": 13,
-        "candidate_mae": 2.8875179906118094,
+        "candidate_mae": 2.8518339484797623,
         "persistence_mae": 3.000172235618326,
         "patient_gate": {
           "groups": 2566,
-          "delta_mae_candidate_minus_persistence": -0.08103670747320446,
+          "delta_mae_candidate_minus_persistence": -0.12540157902298674,
           "ci95": [
-            -0.12003401128893125,
-            -0.04103701918710938
+            -0.14930729014815614,
+            -0.10327442569235191
           ],
           "pass": true
         },
         "careunit_gate": {
           "groups": 13,
-          "delta_mae_candidate_minus_persistence": 0.04636793068648464,
+          "delta_mae_candidate_minus_persistence": -0.12306419747873476,
           "ci95": [
-            -0.1333069506493946,
-            0.2652546222649723
+            -0.17706211129054267,
+            -0.06934150270375751
           ],
-          "pass": false
+          "pass": true
         },
         "forward_time_gate": {
           "groups": 498,
-          "delta_mae_candidate_minus_persistence": -0.08533699054960336,
+          "delta_mae_candidate_minus_persistence": -0.15097032786285458,
           "ci95": [
-            -0.18212874404748156,
-            0.014311328834525145
+            -0.20308283711661423,
+            -0.09704739062060849
           ],
-          "pass": false
+          "pass": true
         },
-        "direction_accuracy": 0.5158264947245017,
-        "delta_correlation": 0.315889151530764,
-        "point_transfer_pass": false,
-        "failure_reasons": [
-          "does_not_beat_persistence_careunit",
-          "does_not_beat_persistence_forward_time"
-        ]
+        "direction_accuracy": 0.49316139116842517,
+        "delta_correlation": 0.3513522632449709,
+        "point_transfer_pass": true,
+        "failure_reasons": []
       },
-      "external_pass": false
+      "external_pass": true
     },
     {
       "cell": "glucose@48h",
@@ -1407,14 +1409,15 @@
         "family": "robust_tree",
         "shrinkage": 1.0,
         "abstention_quantile": 0.0,
-        "normalized_abstention_threshold": 8.434148099402796e-05,
+        "normalized_abstention_threshold": 1.5749041432082985e-05,
         "eicu_move_fraction": 1.0,
-        "candidate_patient_equal_mae": 36.68673960254421,
+        "candidate_patient_equal_mae": 36.68116650848224,
         "persistence_patient_equal_mae": 44.500992471329056,
-        "delta": -7.814252868784848,
-        "hospital_equal_delta": -8.803940173972967,
-        "careunit_equal_delta": -7.477409777400444,
-        "robust_objective": -7.477409777400444,
+        "delta": -7.819825962846814,
+        "hospital_equal_delta": -8.930657842772975,
+        "careunit_equal_delta": -7.463318683120891,
+        "robust_objective": -7.463318683120891,
+        "feature_normalization": "quantile",
         "selection_fold_group": "hospitalid",
         "eicu_selection_pass": true
       },
@@ -1423,37 +1426,37 @@
         "rows": 6247,
         "subjects": 2667,
         "careunits": 14,
-        "candidate_mae": 32.6339535968949,
+        "candidate_mae": 32.78177769616169,
         "persistence_mae": 39.552745317752525,
         "patient_gate": {
           "groups": 2667,
-          "delta_mae_candidate_minus_persistence": -7.588027305400339,
+          "delta_mae_candidate_minus_persistence": -7.194295600421717,
           "ci95": [
-            -8.64836466826857,
-            -6.612284430523503
+            -8.194653673437852,
+            -6.256751649666793
           ],
           "pass": true
         },
         "careunit_gate": {
           "groups": 14,
-          "delta_mae_candidate_minus_persistence": -10.045544650174493,
+          "delta_mae_candidate_minus_persistence": -8.319975680907143,
           "ci95": [
-            -31.094382645927592,
-            3.003657900564325
+            -26.43592285913995,
+            3.3668787863618195
           ],
           "pass": false
         },
         "forward_time_gate": {
           "groups": 536,
-          "delta_mae_candidate_minus_persistence": -7.204996375830694,
+          "delta_mae_candidate_minus_persistence": -6.937877050047633,
           "ci95": [
-            -9.329245018977362,
-            -5.046541376765982
+            -8.96515465101305,
+            -4.934681801860322
           ],
           "pass": true
         },
-        "direction_accuracy": 0.6753078418664938,
-        "delta_correlation": 0.5803560200042208,
+        "direction_accuracy": 0.6733635774465327,
+        "delta_correlation": 0.5791435939104549,
         "point_transfer_pass": false,
         "failure_reasons": [
           "does_not_beat_persistence_careunit"
