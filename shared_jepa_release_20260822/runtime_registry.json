@@ -1,0 +1,1644 @@
+{
+  "schema": "unified_shared_jepa_runtime_registry.v1",
+  "training_label_database": "eICU",
+  "external_validation_database": "MIMIC-IV",
+  "catalog_cells": 41,
+  "externally_validated_point_cells": 25,
+  "shared_base_cells": 16,
+  "shared_target_head_cells": 9,
+  "fallback_cells": 16,
+  "point_forecast_registry_allowed": true,
+  "causal_claim_allowed": false,
+  "clinical_promotion_allowed": false,
+  "cells": [
+    {
+      "cell": "glucose@1h",
+      "target": "glucose",
+      "horizon_hours": 1,
+      "target_unit": null,
+      "measurement_contract_revision": 1,
+      "source_model": "frozen_whole_body_jepa",
+      "source_report": "artifacts/eicu_to_mimic_frozen_jepa/eicu_to_mimic_frozen_jepa_41_cell_audit_20260818.json",
+      "residual_shrinkage": null,
+      "unsupervised_target_database_adaptation": "none",
+      "candidate_mae": 30.47228742387392,
+      "persistence_mae": 32.22196280174119,
+      "patient_gate": {
+        "groups": 15103,
+        "delta_mae_candidate_minus_persistence": -2.1002502798868274,
+        "ci95": [
+          -2.3242838849520355,
+          -1.8837997663771004
+        ],
+        "pass": true
+      },
+      "careunit_gate": {
+        "groups": 15,
+        "delta_mae_candidate_minus_persistence": -4.051340342106282,
+        "ci95": [
+          -8.519093412500487,
+          -0.9482752057721323
+        ],
+        "pass": true
+      },
+      "forward_time_gate": {
+        "groups": 2898,
+        "delta_mae_candidate_minus_persistence": -1.7448686396652127,
+        "ci95": [
+          -2.225579528113481,
+          -1.2453544904531537
+        ],
+        "pass": true
+      },
+      "direction_accuracy": 0.6411492867189069,
+      "delta_correlation": 0.32262921091022034,
+      "can_move": true,
+      "fallback_reason": null,
+      "runtime_personalization_format": "shared_whole_body_jepa"
+    },
+    {
+      "cell": "hypoxemia_event@1h",
+      "target": "hypoxemia_event",
+      "horizon_hours": 1,
+      "target_unit": null,
+      "measurement_contract_revision": 1,
+      "source_model": "frozen_whole_body_jepa",
+      "source_report": "artifacts/eicu_to_mimic_frozen_jepa/eicu_to_mimic_frozen_jepa_41_cell_audit_20260818.json",
+      "residual_shrinkage": null,
+      "unsupervised_target_database_adaptation": "none",
+      "candidate_mae": null,
+      "persistence_mae": null,
+      "patient_gate": {
+        "groups": 63990,
+        "delta_mae_candidate_minus_persistence": -0.01708982048848639,
+        "ci95": [
+          -0.017894726003986176,
+          -0.01630585420311052
+        ],
+        "pass": true
+      },
+      "careunit_gate": {
+        "groups": 17,
+        "delta_mae_candidate_minus_persistence": -0.022416524122213604,
+        "ci95": [
+          -0.04726249149525746,
+          -0.007100847845623538
+        ],
+        "pass": true
+      },
+      "forward_time_gate": {
+        "groups": 12189,
+        "delta_mae_candidate_minus_persistence": -0.01697208755454524,
+        "ci95": [
+          -0.018839775087209985,
+          -0.01511876864302187
+        ],
+        "pass": true
+      },
+      "direction_accuracy": null,
+      "delta_correlation": null,
+      "can_move": true,
+      "fallback_reason": null,
+      "runtime_personalization_format": "shared_whole_body_jepa"
+    },
+    {
+      "cell": "map@1h",
+      "target": "map",
+      "horizon_hours": 1,
+      "target_unit": null,
+      "measurement_contract_revision": 1,
+      "source_model": "frozen_whole_body_jepa",
+      "source_report": "artifacts/eicu_to_mimic_frozen_jepa/eicu_to_mimic_frozen_jepa_41_cell_audit_20260818.json",
+      "residual_shrinkage": null,
+      "unsupervised_target_database_adaptation": "none",
+      "candidate_mae": 8.559915232196019,
+      "persistence_mae": 8.869331182164858,
+      "patient_gate": {
+        "groups": 63424,
+        "delta_mae_candidate_minus_persistence": -0.35956354375580235,
+        "ci95": [
+          -0.3758317457060611,
+          -0.34325397262441876
+        ],
+        "pass": true
+      },
+      "careunit_gate": {
+        "groups": 17,
+        "delta_mae_candidate_minus_persistence": -0.38891468375882554,
+        "ci95": [
+          -0.6335119110661938,
+          -0.140281418108557
+        ],
+        "pass": true
+      },
+      "forward_time_gate": {
+        "groups": 12053,
+        "delta_mae_candidate_minus_persistence": -0.36896380758227615,
+        "ci95": [
+          -0.40784784985820516,
+          -0.332222565518545
+        ],
+        "pass": true
+      },
+      "direction_accuracy": 0.6157062545123575,
+      "delta_correlation": 0.3935748460497685,
+      "can_move": true,
+      "fallback_reason": null,
+      "runtime_personalization_format": "shared_whole_body_jepa"
+    },
+    {
+      "cell": "platelets@1h",
+      "target": "platelets",
+      "horizon_hours": 1,
+      "source_model": "patient_persistence_anchor",
+      "can_move": false,
+      "fallback_reason": "shared_jepa_head_not_external_validated",
+      "runtime_personalization_format": "persistence"
+    },
+    {
+      "cell": "urine_output@1h",
+      "target": "urine_output",
+      "horizon_hours": 1,
+      "target_unit": "mL/hour",
+      "measurement_contract_revision": 2,
+      "source_model": "unified_shared_jepa_target_head",
+      "source_report": "artifacts/unified_shared_jepa_heads/unified_shared_jepa_head_audit.json",
+      "residual_shrinkage": 1.0,
+      "unsupervised_target_database_adaptation": "none",
+      "candidate_mae": 59.12442771775981,
+      "persistence_mae": 66.76482703459308,
+      "patient_gate": {
+        "groups": 2117,
+        "delta_mae_candidate_minus_persistence": -10.648290937921551,
+        "ci95": [
+          -12.58790652237286,
+          -8.865493620809751
+        ],
+        "pass": true
+      },
+      "careunit_gate": {
+        "groups": 13,
+        "delta_mae_candidate_minus_persistence": -11.28010920226487,
+        "ci95": [
+          -15.54027294935858,
+          -7.538988568660908
+        ],
+        "pass": true
+      },
+      "forward_time_gate": {
+        "groups": 451,
+        "delta_mae_candidate_minus_persistence": -10.980550315721034,
+        "ci95": [
+          -15.439990076941786,
+          -7.049626373204587
+        ],
+        "pass": true
+      },
+      "direction_accuracy": 0.6487391104997707,
+      "delta_correlation": 0.5240424848605277,
+      "can_move": true,
+      "fallback_reason": null,
+      "runtime_personalization_format": "shared_whole_body_jepa"
+    },
+    {
+      "cell": "glucose@3h",
+      "target": "glucose",
+      "horizon_hours": 3,
+      "target_unit": null,
+      "measurement_contract_revision": 1,
+      "source_model": "unified_shared_jepa_target_head",
+      "source_report": "artifacts/unified_shared_jepa_heads/unified_shared_jepa_head_audit.json",
+      "residual_shrinkage": 1.0,
+      "unsupervised_target_database_adaptation": "none",
+      "candidate_mae": 30.466475045466783,
+      "persistence_mae": 34.283392101071435,
+      "patient_gate": {
+        "groups": 28799,
+        "delta_mae_candidate_minus_persistence": -3.784962001478312,
+        "ci95": [
+          -3.9968339479240655,
+          -3.5898234292874487
+        ],
+        "pass": true
+      },
+      "careunit_gate": {
+        "groups": 15,
+        "delta_mae_candidate_minus_persistence": -4.5380857985067165,
+        "ci95": [
+          -6.135893343449258,
+          -3.2482154304924973
+        ],
+        "pass": true
+      },
+      "forward_time_gate": {
+        "groups": 5555,
+        "delta_mae_candidate_minus_persistence": -3.926019441869859,
+        "ci95": [
+          -4.4009357131782725,
+          -3.484295404671493
+        ],
+        "pass": true
+      },
+      "direction_accuracy": 0.6410812753078401,
+      "delta_correlation": 0.5097494801613149,
+      "can_move": true,
+      "fallback_reason": null,
+      "runtime_personalization_format": "shared_whole_body_jepa"
+    },
+    {
+      "cell": "heart_rate@3h",
+      "target": "heart_rate",
+      "horizon_hours": 3,
+      "target_unit": null,
+      "measurement_contract_revision": 1,
+      "source_model": "patient_persistence_anchor",
+      "source_report": "artifacts/eicu_to_mimic_target_specific_rescue/eicu_to_mimic_target_specific_rescue_20260819.json",
+      "residual_shrinkage": 0.75,
+      "unsupervised_target_database_adaptation": "none",
+      "candidate_mae": 7.4663068869551115,
+      "persistence_mae": 7.646322473331259,
+      "patient_gate": {
+        "groups": 64118,
+        "delta_mae_candidate_minus_persistence": -0.18498136049068784,
+        "ci95": [
+          -0.19703624388906416,
+          -0.1726401396515991
+        ],
+        "pass": true
+      },
+      "careunit_gate": {
+        "groups": 17,
+        "delta_mae_candidate_minus_persistence": -0.200741242463975,
+        "ci95": [
+          -0.40740194048190925,
+          -0.027031801373918526
+        ],
+        "pass": true
+      },
+      "forward_time_gate": {
+        "groups": 12207,
+        "delta_mae_candidate_minus_persistence": -0.18133445165658216,
+        "ci95": [
+          -0.20973728212867337,
+          -0.15258078966172484
+        ],
+        "pass": true
+      },
+      "direction_accuracy": 0.6007593457943925,
+      "delta_correlation": 0.36282835755925774,
+      "can_move": false,
+      "fallback_reason": "shared_jepa_head_not_external_validated",
+      "runtime_personalization_format": "persistence"
+    },
+    {
+      "cell": "hematocrit@3h",
+      "target": "hematocrit",
+      "horizon_hours": 3,
+      "target_unit": null,
+      "measurement_contract_revision": 1,
+      "source_model": "patient_persistence_anchor",
+      "source_report": "artifacts/eicu_to_mimic_target_specific_rescue/eicu_to_mimic_target_specific_rescue_importance_weighted_boosting_20260820.json",
+      "residual_shrinkage": 0.5,
+      "unsupervised_target_database_adaptation": "unlabeled_target_database_importance_weighting",
+      "candidate_mae": 2.056205306068004,
+      "persistence_mae": 2.20469970069837,
+      "patient_gate": {
+        "groups": 29196,
+        "delta_mae_candidate_minus_persistence": -0.16842056541935904,
+        "ci95": [
+          -0.17765265847098669,
+          -0.15978647145900057
+        ],
+        "pass": true
+      },
+      "careunit_gate": {
+        "groups": 15,
+        "delta_mae_candidate_minus_persistence": -0.13749765727531066,
+        "ci95": [
+          -0.2776957662273842,
+          -0.009137430710707767
+        ],
+        "pass": true
+      },
+      "forward_time_gate": {
+        "groups": 5609,
+        "delta_mae_candidate_minus_persistence": -0.16735912501827477,
+        "ci95": [
+          -0.1859595462270719,
+          -0.14802452157951512
+        ],
+        "pass": true
+      },
+      "direction_accuracy": 0.6342969026187693,
+      "delta_correlation": 0.39835815397506036,
+      "can_move": false,
+      "fallback_reason": "shared_jepa_head_not_external_validated",
+      "runtime_personalization_format": "persistence"
+    },
+    {
+      "cell": "hemoglobin@3h",
+      "target": "hemoglobin",
+      "horizon_hours": 3,
+      "target_unit": null,
+      "measurement_contract_revision": 1,
+      "source_model": "patient_persistence_anchor",
+      "source_report": "artifacts/eicu_to_mimic_target_specific_rescue/eicu_to_mimic_target_specific_rescue_importance_weighted_boosting_20260820.json",
+      "residual_shrinkage": 1.0,
+      "unsupervised_target_database_adaptation": "unlabeled_target_database_importance_weighting",
+      "candidate_mae": 0.7018877002213655,
+      "persistence_mae": 0.7419257867543447,
+      "patient_gate": {
+        "groups": 22200,
+        "delta_mae_candidate_minus_persistence": -0.046265523657368066,
+        "ci95": [
+          -0.048613893560484296,
+          -0.043863304322529266
+        ],
+        "pass": true
+      },
+      "careunit_gate": {
+        "groups": 15,
+        "delta_mae_candidate_minus_persistence": -0.06900452988378612,
+        "ci95": [
+          -0.11638969974180935,
+          -0.037911767962829156
+        ],
+        "pass": true
+      },
+      "forward_time_gate": {
+        "groups": 4245,
+        "delta_mae_candidate_minus_persistence": -0.04482566231511944,
+        "ci95": [
+          -0.050033857462878945,
+          -0.03939123465733647
+        ],
+        "pass": true
+      },
+      "direction_accuracy": 0.6361391068796558,
+      "delta_correlation": 0.3944361121779054,
+      "can_move": false,
+      "fallback_reason": "shared_jepa_head_not_external_validated",
+      "runtime_personalization_format": "persistence"
+    },
+    {
+      "cell": "hypoxemia_event@3h",
+      "target": "hypoxemia_event",
+      "horizon_hours": 3,
+      "target_unit": null,
+      "measurement_contract_revision": 1,
+      "source_model": "frozen_whole_body_jepa",
+      "source_report": "artifacts/eicu_to_mimic_frozen_jepa/eicu_to_mimic_frozen_jepa_41_cell_audit_20260818.json",
+      "residual_shrinkage": null,
+      "unsupervised_target_database_adaptation": "none",
+      "candidate_mae": null,
+      "persistence_mae": null,
+      "patient_gate": {
+        "groups": 63974,
+        "delta_mae_candidate_minus_persistence": -0.022581238686419633,
+        "ci95": [
+          -0.02338037349777377,
+          -0.02174398756254795
+        ],
+        "pass": true
+      },
+      "careunit_gate": {
+        "groups": 17,
+        "delta_mae_candidate_minus_persistence": -0.03126204924765825,
+        "ci95": [
+          -0.05682630386060451,
+          -0.013562308743969208
+        ],
+        "pass": true
+      },
+      "forward_time_gate": {
+        "groups": 12187,
+        "delta_mae_candidate_minus_persistence": -0.023097207224237054,
+        "ci95": [
+          -0.024937226268665867,
+          -0.02129631833289967
+        ],
+        "pass": true
+      },
+      "direction_accuracy": null,
+      "delta_correlation": null,
+      "can_move": true,
+      "fallback_reason": null,
+      "runtime_personalization_format": "shared_whole_body_jepa"
+    },
+    {
+      "cell": "map@3h",
+      "target": "map",
+      "horizon_hours": 3,
+      "target_unit": null,
+      "measurement_contract_revision": 1,
+      "source_model": "frozen_whole_body_jepa",
+      "source_report": "artifacts/eicu_to_mimic_frozen_jepa/eicu_to_mimic_frozen_jepa_41_cell_audit_20260818.json",
+      "residual_shrinkage": null,
+      "unsupervised_target_database_adaptation": "none",
+      "candidate_mae": 9.279650297381886,
+      "persistence_mae": 9.901486386223494,
+      "patient_gate": {
+        "groups": 63642,
+        "delta_mae_candidate_minus_persistence": -0.6544676949514726,
+        "ci95": [
+          -0.6719140694451751,
+          -0.6373027585522151
+        ],
+        "pass": true
+      },
+      "careunit_gate": {
+        "groups": 17,
+        "delta_mae_candidate_minus_persistence": -0.5179255436927764,
+        "ci95": [
+          -0.742596077846646,
+          -0.23018434515790842
+        ],
+        "pass": true
+      },
+      "forward_time_gate": {
+        "groups": 12086,
+        "delta_mae_candidate_minus_persistence": -0.6835930482715726,
+        "ci95": [
+          -0.723031606073868,
+          -0.6437315422064419
+        ],
+        "pass": true
+      },
+      "direction_accuracy": 0.6325964923099893,
+      "delta_correlation": 0.41391991786851634,
+      "can_move": true,
+      "fallback_reason": null,
+      "runtime_personalization_format": "shared_whole_body_jepa"
+    },
+    {
+      "cell": "platelets@3h",
+      "target": "platelets",
+      "horizon_hours": 3,
+      "source_model": "patient_persistence_anchor",
+      "can_move": false,
+      "fallback_reason": "shared_jepa_head_not_external_validated",
+      "runtime_personalization_format": "persistence"
+    },
+    {
+      "cell": "respiratory_rate@3h",
+      "target": "respiratory_rate",
+      "horizon_hours": 3,
+      "target_unit": null,
+      "measurement_contract_revision": 1,
+      "source_model": "patient_persistence_anchor",
+      "source_report": "artifacts/eicu_to_mimic_target_specific_rescue/eicu_to_mimic_target_specific_rescue_20260819.json",
+      "residual_shrinkage": 0.75,
+      "unsupervised_target_database_adaptation": "none",
+      "candidate_mae": 3.5112171279011344,
+      "persistence_mae": 3.868529478681612,
+      "patient_gate": {
+        "groups": 63976,
+        "delta_mae_candidate_minus_persistence": -0.35721339583822004,
+        "ci95": [
+          -0.3627374097307385,
+          -0.3513865739199231
+        ],
+        "pass": true
+      },
+      "careunit_gate": {
+        "groups": 17,
+        "delta_mae_candidate_minus_persistence": -0.334502929358609,
+        "ci95": [
+          -0.49114340057986106,
+          -0.20330983167970237
+        ],
+        "pass": true
+      },
+      "forward_time_gate": {
+        "groups": 12168,
+        "delta_mae_candidate_minus_persistence": -0.36248300470892475,
+        "ci95": [
+          -0.3751017794718095,
+          -0.3497682363030758
+        ],
+        "pass": true
+      },
+      "direction_accuracy": 0.679563908257173,
+      "delta_correlation": 0.5398341346686992,
+      "can_move": false,
+      "fallback_reason": "shared_jepa_head_not_external_validated",
+      "runtime_personalization_format": "persistence"
+    },
+    {
+      "cell": "urine_output@3h",
+      "target": "urine_output",
+      "horizon_hours": 3,
+      "target_unit": "mL/hour",
+      "measurement_contract_revision": 2,
+      "source_model": "unified_shared_jepa_target_head",
+      "source_report": "artifacts/unified_shared_jepa_heads/unified_shared_jepa_head_audit.json",
+      "residual_shrinkage": 1.0,
+      "unsupervised_target_database_adaptation": "none",
+      "candidate_mae": 54.52489217302693,
+      "persistence_mae": 63.0001853587991,
+      "patient_gate": {
+        "groups": 2571,
+        "delta_mae_candidate_minus_persistence": -8.276884019334785,
+        "ci95": [
+          -9.023262625192391,
+          -7.567101996278404
+        ],
+        "pass": true
+      },
+      "careunit_gate": {
+        "groups": 13,
+        "delta_mae_candidate_minus_persistence": -11.260992303559554,
+        "ci95": [
+          -19.864358848984956,
+          -6.063775009934233
+        ],
+        "pass": true
+      },
+      "forward_time_gate": {
+        "groups": 514,
+        "delta_mae_candidate_minus_persistence": -8.521785907021744,
+        "ci95": [
+          -10.527565416336163,
+          -6.724492688945877
+        ],
+        "pass": true
+      },
+      "direction_accuracy": 0.6247631983414949,
+      "delta_correlation": 0.6431654129204087,
+      "can_move": true,
+      "fallback_reason": null,
+      "runtime_personalization_format": "shared_whole_body_jepa"
+    },
+    {
+      "cell": "creatinine@6h",
+      "target": "creatinine",
+      "horizon_hours": 6,
+      "source_model": "patient_persistence_anchor",
+      "can_move": false,
+      "fallback_reason": "shared_jepa_head_not_external_validated",
+      "runtime_personalization_format": "persistence"
+    },
+    {
+      "cell": "glucose@6h",
+      "target": "glucose",
+      "horizon_hours": 6,
+      "target_unit": null,
+      "measurement_contract_revision": 1,
+      "source_model": "unified_shared_jepa_target_head",
+      "source_report": "artifacts/unified_shared_jepa_heads/unified_shared_jepa_head_audit.json",
+      "residual_shrinkage": 1.0,
+      "unsupervised_target_database_adaptation": "none",
+      "candidate_mae": 32.17113521724108,
+      "persistence_mae": 36.790188313262746,
+      "patient_gate": {
+        "groups": 33686,
+        "delta_mae_candidate_minus_persistence": -3.9379704075628696,
+        "ci95": [
+          -4.169245169323106,
+          -3.707167615881113
+        ],
+        "pass": true
+      },
+      "careunit_gate": {
+        "groups": 15,
+        "delta_mae_candidate_minus_persistence": -3.390295821778146,
+        "ci95": [
+          -5.327252515519552,
+          -1.227647207214705
+        ],
+        "pass": true
+      },
+      "forward_time_gate": {
+        "groups": 6405,
+        "delta_mae_candidate_minus_persistence": -4.365252784462653,
+        "ci95": [
+          -4.903593839598766,
+          -3.8076362868067513
+        ],
+        "pass": true
+      },
+      "direction_accuracy": 0.6448500491642084,
+      "delta_correlation": 0.5464075078422101,
+      "can_move": true,
+      "fallback_reason": null,
+      "runtime_personalization_format": "shared_whole_body_jepa"
+    },
+    {
+      "cell": "heart_rate@6h",
+      "target": "heart_rate",
+      "horizon_hours": 6,
+      "target_unit": null,
+      "measurement_contract_revision": 1,
+      "source_model": "frozen_whole_body_jepa",
+      "source_report": "artifacts/eicu_to_mimic_frozen_jepa/eicu_to_mimic_frozen_jepa_41_cell_audit_20260818.json",
+      "residual_shrinkage": null,
+      "unsupervised_target_database_adaptation": "none",
+      "candidate_mae": 8.72750823141882,
+      "persistence_mae": 8.99083908606293,
+      "patient_gate": {
+        "groups": 63199,
+        "delta_mae_candidate_minus_persistence": -0.3249221312741733,
+        "ci95": [
+          -0.33791367216058943,
+          -0.31174746146257476
+        ],
+        "pass": true
+      },
+      "careunit_gate": {
+        "groups": 17,
+        "delta_mae_candidate_minus_persistence": -0.5269626692124302,
+        "ci95": [
+          -0.8949195803640422,
+          -0.23199618261129734
+        ],
+        "pass": true
+      },
+      "forward_time_gate": {
+        "groups": 12024,
+        "delta_mae_candidate_minus_persistence": -0.3224187209242911,
+        "ci95": [
+          -0.3542285791268336,
+          -0.2899600898520355
+        ],
+        "pass": true
+      },
+      "direction_accuracy": 0.6029136944305059,
+      "delta_correlation": 0.34312986637627285,
+      "can_move": true,
+      "fallback_reason": null,
+      "runtime_personalization_format": "shared_whole_body_jepa"
+    },
+    {
+      "cell": "hematocrit@6h",
+      "target": "hematocrit",
+      "horizon_hours": 6,
+      "source_model": "patient_persistence_anchor",
+      "can_move": false,
+      "fallback_reason": "shared_jepa_head_not_external_validated",
+      "runtime_personalization_format": "persistence"
+    },
+    {
+      "cell": "hemoglobin@6h",
+      "target": "hemoglobin",
+      "horizon_hours": 6,
+      "target_unit": null,
+      "measurement_contract_revision": 1,
+      "source_model": "patient_persistence_anchor",
+      "source_report": "artifacts/eicu_to_mimic_target_specific_rescue/eicu_to_mimic_target_specific_rescue_absolute_error_boosting_20260820.json",
+      "residual_shrinkage": 0.75,
+      "unsupervised_target_database_adaptation": "none",
+      "candidate_mae": 0.7035788863653487,
+      "persistence_mae": 0.7880787997243979,
+      "patient_gate": {
+        "groups": 26528,
+        "delta_mae_candidate_minus_persistence": -0.08634959260055103,
+        "ci95": [
+          -0.09143799433298423,
+          -0.0815776140582384
+        ],
+        "pass": true
+      },
+      "careunit_gate": {
+        "groups": 15,
+        "delta_mae_candidate_minus_persistence": -0.05412048576115585,
+        "ci95": [
+          -0.08682113110134183,
+          -0.011122118602432647
+        ],
+        "pass": true
+      },
+      "forward_time_gate": {
+        "groups": 5138,
+        "delta_mae_candidate_minus_persistence": -0.08948557626767203,
+        "ci95": [
+          -0.10033810757015997,
+          -0.07867554599160624
+        ],
+        "pass": true
+      },
+      "direction_accuracy": 0.6656016566821981,
+      "delta_correlation": 0.47159335996631707,
+      "can_move": false,
+      "fallback_reason": "shared_jepa_head_not_external_validated",
+      "runtime_personalization_format": "persistence"
+    },
+    {
+      "cell": "map@6h",
+      "target": "map",
+      "horizon_hours": 6,
+      "target_unit": null,
+      "measurement_contract_revision": 1,
+      "source_model": "frozen_whole_body_jepa",
+      "source_report": "artifacts/eicu_to_mimic_frozen_jepa/eicu_to_mimic_frozen_jepa_41_cell_audit_20260818.json",
+      "residual_shrinkage": null,
+      "unsupervised_target_database_adaptation": "none",
+      "candidate_mae": 9.825593425549314,
+      "persistence_mae": 10.575110631338339,
+      "patient_gate": {
+        "groups": 62672,
+        "delta_mae_candidate_minus_persistence": -0.7754509046754825,
+        "ci95": [
+          -0.7968540917074948,
+          -0.7556256934593671
+        ],
+        "pass": true
+      },
+      "careunit_gate": {
+        "groups": 17,
+        "delta_mae_candidate_minus_persistence": -0.9282835131974264,
+        "ci95": [
+          -1.3092237653834586,
+          -0.521495235928534
+        ],
+        "pass": true
+      },
+      "forward_time_gate": {
+        "groups": 11891,
+        "delta_mae_candidate_minus_persistence": -0.8005600332448245,
+        "ci95": [
+          -0.845528240155323,
+          -0.7558461536563054
+        ],
+        "pass": true
+      },
+      "direction_accuracy": 0.6393541849670635,
+      "delta_correlation": 0.4287753267292235,
+      "can_move": true,
+      "fallback_reason": null,
+      "runtime_personalization_format": "shared_whole_body_jepa"
+    },
+    {
+      "cell": "respiratory_rate@6h",
+      "target": "respiratory_rate",
+      "horizon_hours": 6,
+      "target_unit": null,
+      "measurement_contract_revision": 1,
+      "source_model": "frozen_whole_body_jepa",
+      "source_report": "artifacts/eicu_to_mimic_frozen_jepa/eicu_to_mimic_frozen_jepa_41_cell_audit_20260818.json",
+      "residual_shrinkage": null,
+      "unsupervised_target_database_adaptation": "none",
+      "candidate_mae": 3.866681359950147,
+      "persistence_mae": 4.125905952177138,
+      "patient_gate": {
+        "groups": 63049,
+        "delta_mae_candidate_minus_persistence": -0.29629638398430935,
+        "ci95": [
+          -0.3046620614405763,
+          -0.28775580633258285
+        ],
+        "pass": true
+      },
+      "careunit_gate": {
+        "groups": 17,
+        "delta_mae_candidate_minus_persistence": -0.19006768873409596,
+        "ci95": [
+          -0.41060127785912975,
+          -0.003094437932858577
+        ],
+        "pass": true
+      },
+      "forward_time_gate": {
+        "groups": 11985,
+        "delta_mae_candidate_minus_persistence": -0.2937272717334736,
+        "ci95": [
+          -0.31259907373807827,
+          -0.2745586620725635
+        ],
+        "pass": true
+      },
+      "direction_accuracy": 0.6635686551423058,
+      "delta_correlation": 0.4722828508955551,
+      "can_move": true,
+      "fallback_reason": null,
+      "runtime_personalization_format": "shared_whole_body_jepa"
+    },
+    {
+      "cell": "bicarbonate@12h",
+      "target": "bicarbonate",
+      "horizon_hours": 12,
+      "target_unit": null,
+      "measurement_contract_revision": 1,
+      "source_model": "patient_persistence_anchor",
+      "source_report": "artifacts/eicu_to_mimic_target_specific_rescue/eicu_to_mimic_target_specific_rescue_forced_domain_normalized_20260819.json",
+      "residual_shrinkage": 0.5,
+      "unsupervised_target_database_adaptation": "unlabeled_target_database_anchor_normalization",
+      "candidate_mae": 2.0746260134461716,
+      "persistence_mae": 2.200729201193238,
+      "patient_gate": {
+        "groups": 27607,
+        "delta_mae_candidate_minus_persistence": -0.1048730360023249,
+        "ci95": [
+          -0.11282055645316853,
+          -0.0971394166194197
+        ],
+        "pass": true
+      },
+      "careunit_gate": {
+        "groups": 16,
+        "delta_mae_candidate_minus_persistence": -0.10549811960941266,
+        "ci95": [
+          -0.19453129771408678,
+          -0.020487520560819327
+        ],
+        "pass": true
+      },
+      "forward_time_gate": {
+        "groups": 5245,
+        "delta_mae_candidate_minus_persistence": -0.11236465287231362,
+        "ci95": [
+          -0.1301021516595842,
+          -0.09543224405298471
+        ],
+        "pass": true
+      },
+      "direction_accuracy": 0.631850729826494,
+      "delta_correlation": 0.3861846263985101,
+      "can_move": false,
+      "fallback_reason": "shared_jepa_head_not_external_validated",
+      "runtime_personalization_format": "persistence"
+    },
+    {
+      "cell": "chloride@12h",
+      "target": "chloride",
+      "horizon_hours": 12,
+      "target_unit": null,
+      "measurement_contract_revision": 1,
+      "source_model": "patient_persistence_anchor",
+      "source_report": "artifacts/eicu_to_mimic_target_specific_rescue/eicu_to_mimic_target_specific_rescue_forced_domain_normalized_20260819.json",
+      "residual_shrinkage": 0.25,
+      "unsupervised_target_database_adaptation": "unlabeled_target_database_anchor_normalization",
+      "candidate_mae": 2.7128117223245036,
+      "persistence_mae": 2.779709520975523,
+      "patient_gate": {
+        "groups": 29635,
+        "delta_mae_candidate_minus_persistence": -0.07361681512679831,
+        "ci95": [
+          -0.07800885835406408,
+          -0.06914469177034811
+        ],
+        "pass": true
+      },
+      "careunit_gate": {
+        "groups": 16,
+        "delta_mae_candidate_minus_persistence": -0.1549872300937417,
+        "ci95": [
+          -0.31792148036082374,
+          -0.032652174693673305
+        ],
+        "pass": true
+      },
+      "forward_time_gate": {
+        "groups": 5651,
+        "delta_mae_candidate_minus_persistence": -0.07009354114531424,
+        "ci95": [
+          -0.0807459809753874,
+          -0.05959961730829941
+        ],
+        "pass": true
+      },
+      "direction_accuracy": 0.6049895746759401,
+      "delta_correlation": 0.38091711380418103,
+      "can_move": false,
+      "fallback_reason": "shared_jepa_head_not_external_validated",
+      "runtime_personalization_format": "persistence"
+    },
+    {
+      "cell": "creatinine@12h",
+      "target": "creatinine",
+      "horizon_hours": 12,
+      "source_model": "patient_persistence_anchor",
+      "can_move": false,
+      "fallback_reason": "shared_jepa_head_not_external_validated",
+      "runtime_personalization_format": "persistence"
+    },
+    {
+      "cell": "glucose@12h",
+      "target": "glucose",
+      "horizon_hours": 12,
+      "target_unit": null,
+      "measurement_contract_revision": 1,
+      "source_model": "unified_shared_jepa_target_head",
+      "source_report": "artifacts/unified_shared_jepa_heads/unified_shared_jepa_head_audit.json",
+      "residual_shrinkage": 0.75,
+      "unsupervised_target_database_adaptation": "unlabeled_target_database_anchor_normalization",
+      "candidate_mae": 34.78372299523308,
+      "persistence_mae": 40.603990772509576,
+      "patient_gate": {
+        "groups": 30045,
+        "delta_mae_candidate_minus_persistence": -5.167815474855913,
+        "ci95": [
+          -5.4221676477795695,
+          -4.915180877208223
+        ],
+        "pass": true
+      },
+      "careunit_gate": {
+        "groups": 16,
+        "delta_mae_candidate_minus_persistence": -3.1423282809657107,
+        "ci95": [
+          -5.2141933159979335,
+          -0.8197641075885638
+        ],
+        "pass": true
+      },
+      "forward_time_gate": {
+        "groups": 5787,
+        "delta_mae_candidate_minus_persistence": -5.443873247515431,
+        "ci95": [
+          -5.998318474699765,
+          -4.906020094545935
+        ],
+        "pass": true
+      },
+      "direction_accuracy": 0.6555938874465033,
+      "delta_correlation": 0.5658490616318473,
+      "can_move": true,
+      "fallback_reason": null,
+      "runtime_personalization_format": "shared_whole_body_jepa"
+    },
+    {
+      "cell": "heart_rate@12h",
+      "target": "heart_rate",
+      "horizon_hours": 12,
+      "target_unit": null,
+      "measurement_contract_revision": 1,
+      "source_model": "frozen_whole_body_jepa",
+      "source_report": "artifacts/eicu_to_mimic_frozen_jepa/eicu_to_mimic_frozen_jepa_41_cell_audit_20260818.json",
+      "residual_shrinkage": null,
+      "unsupervised_target_database_adaptation": "none",
+      "candidate_mae": 9.990835767806418,
+      "persistence_mae": 10.57224979328983,
+      "patient_gate": {
+        "groups": 59693,
+        "delta_mae_candidate_minus_persistence": -0.6931719524276396,
+        "ci95": [
+          -0.7139787970058,
+          -0.6726424369935531
+        ],
+        "pass": true
+      },
+      "careunit_gate": {
+        "groups": 17,
+        "delta_mae_candidate_minus_persistence": -0.7665210770396689,
+        "ci95": [
+          -1.1741222784981677,
+          -0.43785612274009655
+        ],
+        "pass": true
+      },
+      "forward_time_gate": {
+        "groups": 11373,
+        "delta_mae_candidate_minus_persistence": -0.6656202942891639,
+        "ci95": [
+          -0.7140105252603237,
+          -0.6204226851734942
+        ],
+        "pass": true
+      },
+      "direction_accuracy": 0.6281025825292911,
+      "delta_correlation": 0.3992855908715643,
+      "can_move": true,
+      "fallback_reason": null,
+      "runtime_personalization_format": "shared_whole_body_jepa"
+    },
+    {
+      "cell": "hematocrit@12h",
+      "target": "hematocrit",
+      "horizon_hours": 12,
+      "target_unit": null,
+      "measurement_contract_revision": 1,
+      "source_model": "unified_shared_jepa_target_head",
+      "source_report": "artifacts/unified_shared_jepa_heads/unified_shared_jepa_head_audit.json",
+      "residual_shrinkage": 0.5,
+      "unsupervised_target_database_adaptation": "none",
+      "candidate_mae": 2.3445620723992278,
+      "persistence_mae": 2.672463460866963,
+      "patient_gate": {
+        "groups": 28004,
+        "delta_mae_candidate_minus_persistence": -0.35333999542380756,
+        "ci95": [
+          -0.3674055077248845,
+          -0.3385544141449589
+        ],
+        "pass": true
+      },
+      "careunit_gate": {
+        "groups": 16,
+        "delta_mae_candidate_minus_persistence": -0.46255816591141924,
+        "ci95": [
+          -1.0348914750007288,
+          -0.1327995978922857
+        ],
+        "pass": true
+      },
+      "forward_time_gate": {
+        "groups": 5429,
+        "delta_mae_candidate_minus_persistence": -0.34846950556942735,
+        "ci95": [
+          -0.37996062307384826,
+          -0.31714435704663524
+        ],
+        "pass": true
+      },
+      "direction_accuracy": 0.6798940793391361,
+      "delta_correlation": 0.5111633689801471,
+      "can_move": true,
+      "fallback_reason": null,
+      "runtime_personalization_format": "shared_whole_body_jepa"
+    },
+    {
+      "cell": "hemoglobin@12h",
+      "target": "hemoglobin",
+      "horizon_hours": 12,
+      "target_unit": null,
+      "measurement_contract_revision": 1,
+      "source_model": "unified_shared_jepa_target_head",
+      "source_report": "artifacts/unified_shared_jepa_heads/unified_shared_jepa_head_audit.json",
+      "residual_shrinkage": 0.5,
+      "unsupervised_target_database_adaptation": "none",
+      "candidate_mae": 0.790819341103128,
+      "persistence_mae": 0.9021032842727682,
+      "patient_gate": {
+        "groups": 24559,
+        "delta_mae_candidate_minus_persistence": -0.12573662654153528,
+        "ci95": [
+          -0.13080539706243652,
+          -0.12093873249657297
+        ],
+        "pass": true
+      },
+      "careunit_gate": {
+        "groups": 16,
+        "delta_mae_candidate_minus_persistence": -0.1569648108875508,
+        "ci95": [
+          -0.3612188434375579,
+          -0.015320796128504361
+        ],
+        "pass": true
+      },
+      "forward_time_gate": {
+        "groups": 4731,
+        "delta_mae_candidate_minus_persistence": -0.11917872984727747,
+        "ci95": [
+          -0.13004037926870413,
+          -0.10814580742736536
+        ],
+        "pass": true
+      },
+      "direction_accuracy": 0.6819196241295411,
+      "delta_correlation": 0.501756812455283,
+      "can_move": true,
+      "fallback_reason": null,
+      "runtime_personalization_format": "shared_whole_body_jepa"
+    },
+    {
+      "cell": "map@12h",
+      "target": "map",
+      "horizon_hours": 12,
+      "target_unit": null,
+      "measurement_contract_revision": 1,
+      "source_model": "frozen_whole_body_jepa",
+      "source_report": "artifacts/eicu_to_mimic_frozen_jepa/eicu_to_mimic_frozen_jepa_41_cell_audit_20260818.json",
+      "residual_shrinkage": null,
+      "unsupervised_target_database_adaptation": "none",
+      "candidate_mae": 10.540228065851476,
+      "persistence_mae": 11.327701366692184,
+      "patient_gate": {
+        "groups": 59027,
+        "delta_mae_candidate_minus_persistence": -0.8313446862699706,
+        "ci95": [
+          -0.8575536994834505,
+          -0.8048751894168652
+        ],
+        "pass": true
+      },
+      "careunit_gate": {
+        "groups": 17,
+        "delta_mae_candidate_minus_persistence": -0.9962979808211154,
+        "ci95": [
+          -1.3583402950164183,
+          -0.6697162849199049
+        ],
+        "pass": true
+      },
+      "forward_time_gate": {
+        "groups": 11218,
+        "delta_mae_candidate_minus_persistence": -0.8699801474478123,
+        "ci95": [
+          -0.9328545063576436,
+          -0.8093413947738893
+        ],
+        "pass": true
+      },
+      "direction_accuracy": 0.6429602793310756,
+      "delta_correlation": 0.4424614871851677,
+      "can_move": true,
+      "fallback_reason": null,
+      "runtime_personalization_format": "shared_whole_body_jepa"
+    },
+    {
+      "cell": "o2sat@12h",
+      "target": "o2sat",
+      "horizon_hours": 12,
+      "target_unit": null,
+      "measurement_contract_revision": 1,
+      "source_model": "frozen_whole_body_jepa",
+      "source_report": "artifacts/eicu_to_mimic_frozen_jepa/eicu_to_mimic_frozen_jepa_41_cell_audit_20260818.json",
+      "residual_shrinkage": null,
+      "unsupervised_target_database_adaptation": "none",
+      "candidate_mae": 2.068019039137966,
+      "persistence_mae": 2.2615208377059384,
+      "patient_gate": {
+        "groups": 59478,
+        "delta_mae_candidate_minus_persistence": -0.2399871966659725,
+        "ci95": [
+          -0.24502562076281864,
+          -0.23510285303635797
+        ],
+        "pass": true
+      },
+      "careunit_gate": {
+        "groups": 17,
+        "delta_mae_candidate_minus_persistence": -0.24080870973672372,
+        "ci95": [
+          -0.3553956093411096,
+          -0.15754905248130233
+        ],
+        "pass": true
+      },
+      "forward_time_gate": {
+        "groups": 11338,
+        "delta_mae_candidate_minus_persistence": -0.24039205316844106,
+        "ci95": [
+          -0.25223746562056315,
+          -0.2289450911999024
+        ],
+        "pass": true
+      },
+      "direction_accuracy": 0.7218781347086008,
+      "delta_correlation": 0.5123526324308866,
+      "can_move": true,
+      "fallback_reason": null,
+      "runtime_personalization_format": "shared_whole_body_jepa"
+    },
+    {
+      "cell": "potassium@12h",
+      "target": "potassium",
+      "horizon_hours": 12,
+      "target_unit": null,
+      "measurement_contract_revision": 1,
+      "source_model": "frozen_whole_body_jepa",
+      "source_report": "artifacts/eicu_to_mimic_frozen_jepa/eicu_to_mimic_frozen_jepa_41_cell_audit_20260818.json",
+      "residual_shrinkage": null,
+      "unsupervised_target_database_adaptation": "none",
+      "candidate_mae": 0.4075560134516697,
+      "persistence_mae": 0.46155087712219184,
+      "patient_gate": {
+        "groups": 32141,
+        "delta_mae_candidate_minus_persistence": -0.05858073240020333,
+        "ci95": [
+          -0.060293291635738294,
+          -0.0569215229541991
+        ],
+        "pass": true
+      },
+      "careunit_gate": {
+        "groups": 16,
+        "delta_mae_candidate_minus_persistence": -0.05016034695062827,
+        "ci95": [
+          -0.08064226693508623,
+          -0.009592878367689437
+        ],
+        "pass": true
+      },
+      "forward_time_gate": {
+        "groups": 6167,
+        "delta_mae_candidate_minus_persistence": -0.058864581688966,
+        "ci95": [
+          -0.06255332704050649,
+          -0.05490671048829257
+        ],
+        "pass": true
+      },
+      "direction_accuracy": 0.6902913047293148,
+      "delta_correlation": 0.49013350086085683,
+      "can_move": true,
+      "fallback_reason": null,
+      "runtime_personalization_format": "shared_whole_body_jepa"
+    },
+    {
+      "cell": "respiratory_rate@12h",
+      "target": "respiratory_rate",
+      "horizon_hours": 12,
+      "target_unit": null,
+      "measurement_contract_revision": 1,
+      "source_model": "frozen_whole_body_jepa",
+      "source_report": "artifacts/eicu_to_mimic_frozen_jepa/eicu_to_mimic_frozen_jepa_41_cell_audit_20260818.json",
+      "residual_shrinkage": null,
+      "unsupervised_target_database_adaptation": "none",
+      "candidate_mae": 4.035177196808746,
+      "persistence_mae": 4.428455770685942,
+      "patient_gate": {
+        "groups": 59487,
+        "delta_mae_candidate_minus_persistence": -0.44405898166893965,
+        "ci95": [
+          -0.4542145135177371,
+          -0.43414835330898255
+        ],
+        "pass": true
+      },
+      "careunit_gate": {
+        "groups": 17,
+        "delta_mae_candidate_minus_persistence": -0.4270052602898969,
+        "ci95": [
+          -0.840815249191062,
+          -0.13196123362296056
+        ],
+        "pass": true
+      },
+      "forward_time_gate": {
+        "groups": 11323,
+        "delta_mae_candidate_minus_persistence": -0.4418371516500241,
+        "ci95": [
+          -0.46442310399981435,
+          -0.4198002601116016
+        ],
+        "pass": true
+      },
+      "direction_accuracy": 0.6775105632684182,
+      "delta_correlation": 0.4944851928959597,
+      "can_move": true,
+      "fallback_reason": null,
+      "runtime_personalization_format": "shared_whole_body_jepa"
+    },
+    {
+      "cell": "bicarbonate@24h",
+      "target": "bicarbonate",
+      "horizon_hours": 24,
+      "source_model": "patient_persistence_anchor",
+      "can_move": false,
+      "fallback_reason": "shared_jepa_head_not_external_validated",
+      "runtime_personalization_format": "persistence"
+    },
+    {
+      "cell": "bun@24h",
+      "target": "bun",
+      "horizon_hours": 24,
+      "target_unit": null,
+      "measurement_contract_revision": 1,
+      "source_model": "patient_persistence_anchor",
+      "source_report": "artifacts/eicu_to_mimic_target_specific_rescue/eicu_to_mimic_target_specific_rescue_100k_20260819.json",
+      "residual_shrinkage": 1.0,
+      "unsupervised_target_database_adaptation": "none",
+      "candidate_mae": 6.097428161290792,
+      "persistence_mae": 6.894727213880641,
+      "patient_gate": {
+        "groups": 29388,
+        "delta_mae_candidate_minus_persistence": -0.49288003432077776,
+        "ci95": [
+          -0.5264836208146021,
+          -0.46051508649981066
+        ],
+        "pass": true
+      },
+      "careunit_gate": {
+        "groups": 15,
+        "delta_mae_candidate_minus_persistence": -0.4467944994087414,
+        "ci95": [
+          -0.7885324802436628,
+          -0.10164163693200207
+        ],
+        "pass": true
+      },
+      "forward_time_gate": {
+        "groups": 5694,
+        "delta_mae_candidate_minus_persistence": -0.5139971557077013,
+        "ci95": [
+          -0.590154323303435,
+          -0.44045496484151775
+        ],
+        "pass": true
+      },
+      "direction_accuracy": 0.6410684981462347,
+      "delta_correlation": 0.5280379044494263,
+      "can_move": false,
+      "fallback_reason": "shared_jepa_head_not_external_validated",
+      "runtime_personalization_format": "persistence"
+    },
+    {
+      "cell": "heart_rate@24h",
+      "target": "heart_rate",
+      "horizon_hours": 24,
+      "target_unit": null,
+      "measurement_contract_revision": 1,
+      "source_model": "unified_shared_jepa_target_head",
+      "source_report": "artifacts/unified_shared_jepa_heads/unified_shared_jepa_head_audit.json",
+      "residual_shrinkage": 0.75,
+      "unsupervised_target_database_adaptation": "none",
+      "candidate_mae": 10.899342130942582,
+      "persistence_mae": 11.765438751325458,
+      "patient_gate": {
+        "groups": 47707,
+        "delta_mae_candidate_minus_persistence": -0.8645907888633603,
+        "ci95": [
+          -0.8956300268161215,
+          -0.8349904108712162
+        ],
+        "pass": true
+      },
+      "careunit_gate": {
+        "groups": 17,
+        "delta_mae_candidate_minus_persistence": -0.8979563217811029,
+        "ci95": [
+          -1.5263739554760283,
+          -0.05857248843826874
+        ],
+        "pass": true
+      },
+      "forward_time_gate": {
+        "groups": 9170,
+        "delta_mae_candidate_minus_persistence": -0.8676031090483334,
+        "ci95": [
+          -0.9311363608382227,
+          -0.7997276291230083
+        ],
+        "pass": true
+      },
+      "direction_accuracy": 0.6394750473312418,
+      "delta_correlation": 0.4861935620374255,
+      "can_move": true,
+      "fallback_reason": null,
+      "runtime_personalization_format": "shared_whole_body_jepa"
+    },
+    {
+      "cell": "map@24h",
+      "target": "map",
+      "horizon_hours": 24,
+      "target_unit": null,
+      "measurement_contract_revision": 1,
+      "source_model": "unified_shared_jepa_target_head",
+      "source_report": "artifacts/unified_shared_jepa_heads/unified_shared_jepa_head_audit.json",
+      "residual_shrinkage": 0.75,
+      "unsupervised_target_database_adaptation": "none",
+      "candidate_mae": 10.228808089973235,
+      "persistence_mae": 11.8789375696464,
+      "patient_gate": {
+        "groups": 47078,
+        "delta_mae_candidate_minus_persistence": -1.6968446590139208,
+        "ci95": [
+          -1.726604653222609,
+          -1.6688800862857287
+        ],
+        "pass": true
+      },
+      "careunit_gate": {
+        "groups": 17,
+        "delta_mae_candidate_minus_persistence": -1.5217821368108928,
+        "ci95": [
+          -2.4965752096590945,
+          -0.1523961293771333
+        ],
+        "pass": true
+      },
+      "forward_time_gate": {
+        "groups": 9022,
+        "delta_mae_candidate_minus_persistence": -1.7089444931958944,
+        "ci95": [
+          -1.773868258446254,
+          -1.6465028116049765
+        ],
+        "pass": true
+      },
+      "direction_accuracy": 0.6796921753441053,
+      "delta_correlation": 0.5354315336137503,
+      "can_move": true,
+      "fallback_reason": null,
+      "runtime_personalization_format": "shared_whole_body_jepa"
+    },
+    {
+      "cell": "potassium@24h",
+      "target": "potassium",
+      "horizon_hours": 24,
+      "target_unit": null,
+      "measurement_contract_revision": 1,
+      "source_model": "frozen_whole_body_jepa",
+      "source_report": "artifacts/eicu_to_mimic_frozen_jepa/eicu_to_mimic_frozen_jepa_41_cell_audit_20260818.json",
+      "residual_shrinkage": null,
+      "unsupervised_target_database_adaptation": "none",
+      "candidate_mae": 0.41524584425940264,
+      "persistence_mae": 0.4817128553355752,
+      "patient_gate": {
+        "groups": 31534,
+        "delta_mae_candidate_minus_persistence": -0.06452199109552259,
+        "ci95": [
+          -0.06642987318051599,
+          -0.06271402162981621
+        ],
+        "pass": true
+      },
+      "careunit_gate": {
+        "groups": 15,
+        "delta_mae_candidate_minus_persistence": -0.08817778526576596,
+        "ci95": [
+          -0.13252266843405952,
+          -0.059101461669166314
+        ],
+        "pass": true
+      },
+      "forward_time_gate": {
+        "groups": 6111,
+        "delta_mae_candidate_minus_persistence": -0.06539697751401623,
+        "ci95": [
+          -0.06933916578644565,
+          -0.06128434766023133
+        ],
+        "pass": true
+      },
+      "direction_accuracy": 0.710639444307786,
+      "delta_correlation": 0.5200101873291417,
+      "can_move": true,
+      "fallback_reason": null,
+      "runtime_personalization_format": "shared_whole_body_jepa"
+    },
+    {
+      "cell": "respiratory_rate@24h",
+      "target": "respiratory_rate",
+      "horizon_hours": 24,
+      "target_unit": null,
+      "measurement_contract_revision": 1,
+      "source_model": "frozen_whole_body_jepa",
+      "source_report": "artifacts/eicu_to_mimic_frozen_jepa/eicu_to_mimic_frozen_jepa_41_cell_audit_20260818.json",
+      "residual_shrinkage": null,
+      "unsupervised_target_database_adaptation": "none",
+      "candidate_mae": 4.19798328021802,
+      "persistence_mae": 4.65769479275037,
+      "patient_gate": {
+        "groups": 47498,
+        "delta_mae_candidate_minus_persistence": -0.516584820403325,
+        "ci95": [
+          -0.5288389255433483,
+          -0.5040505252105058
+        ],
+        "pass": true
+      },
+      "careunit_gate": {
+        "groups": 17,
+        "delta_mae_candidate_minus_persistence": -0.721349007367653,
+        "ci95": [
+          -1.3295373002664146,
+          -0.2621567914122555
+        ],
+        "pass": true
+      },
+      "forward_time_gate": {
+        "groups": 9128,
+        "delta_mae_candidate_minus_persistence": -0.5201690094305911,
+        "ci95": [
+          -0.5474634685359941,
+          -0.49197797174252006
+        ],
+        "pass": true
+      },
+      "direction_accuracy": 0.682365792303463,
+      "delta_correlation": 0.5026521266164273,
+      "can_move": true,
+      "fallback_reason": null,
+      "runtime_personalization_format": "shared_whole_body_jepa"
+    },
+    {
+      "cell": "sodium@24h",
+      "target": "sodium",
+      "horizon_hours": 24,
+      "target_unit": null,
+      "measurement_contract_revision": 1,
+      "source_model": "patient_persistence_anchor",
+      "source_report": "artifacts/eicu_to_mimic_target_specific_rescue/eicu_to_mimic_target_specific_rescue_20260819.json",
+      "residual_shrinkage": 1.0,
+      "unsupervised_target_database_adaptation": "none",
+      "candidate_mae": 2.808755797501139,
+      "persistence_mae": 3.0170323768605187,
+      "patient_gate": {
+        "groups": 30627,
+        "delta_mae_candidate_minus_persistence": -0.17151040894217337,
+        "ci95": [
+          -0.18324209145848144,
+          -0.15947768826233144
+        ],
+        "pass": true
+      },
+      "careunit_gate": {
+        "groups": 15,
+        "delta_mae_candidate_minus_persistence": -0.29094096209357395,
+        "ci95": [
+          -0.4691124169311486,
+          -0.1388975150621838
+        ],
+        "pass": true
+      },
+      "forward_time_gate": {
+        "groups": 5900,
+        "delta_mae_candidate_minus_persistence": -0.168181291332223,
+        "ci95": [
+          -0.19535250248729333,
+          -0.1392214449203216
+        ],
+        "pass": true
+      },
+      "direction_accuracy": 0.6260945474080043,
+      "delta_correlation": 0.4030033644765715,
+      "can_move": false,
+      "fallback_reason": "shared_jepa_head_not_external_validated",
+      "runtime_personalization_format": "persistence"
+    },
+    {
+      "cell": "glucose@48h",
+      "target": "glucose",
+      "horizon_hours": 48,
+      "target_unit": null,
+      "measurement_contract_revision": 1,
+      "source_model": "patient_persistence_anchor",
+      "source_report": "artifacts/eicu_to_mimic_target_specific_rescue/eicu_to_mimic_target_specific_rescue_20260819.json",
+      "residual_shrinkage": 1.0,
+      "unsupervised_target_database_adaptation": "none",
+      "candidate_mae": 33.24424073063886,
+      "persistence_mae": 41.74746046706461,
+      "patient_gate": {
+        "groups": 20941,
+        "delta_mae_candidate_minus_persistence": -8.006367727868348,
+        "ci95": [
+          -8.318719965808576,
+          -7.686998688576245
+        ],
+        "pass": true
+      },
+      "careunit_gate": {
+        "groups": 15,
+        "delta_mae_candidate_minus_persistence": -6.534592949522323,
+        "ci95": [
+          -9.592293787134919,
+          -3.3294760280803817
+        ],
+        "pass": true
+      },
+      "forward_time_gate": {
+        "groups": 4084,
+        "delta_mae_candidate_minus_persistence": -8.311121163368577,
+        "ci95": [
+          -9.05696580360319,
+          -7.5559808590517825
+        ],
+        "pass": true
+      },
+      "direction_accuracy": 0.6928658439701287,
+      "delta_correlation": 0.6020390758071836,
+      "can_move": false,
+      "fallback_reason": "shared_jepa_head_not_external_validated",
+      "runtime_personalization_format": "persistence"
+    },
+    {
+      "cell": "heart_rate@48h",
+      "target": "heart_rate",
+      "horizon_hours": 48,
+      "target_unit": null,
+      "measurement_contract_revision": 1,
+      "source_model": "frozen_whole_body_jepa",
+      "source_report": "artifacts/eicu_to_mimic_frozen_jepa/eicu_to_mimic_frozen_jepa_41_cell_audit_20260818.json",
+      "residual_shrinkage": null,
+      "unsupervised_target_database_adaptation": "none",
+      "candidate_mae": 12.240999186935921,
+      "persistence_mae": 13.59247868164377,
+      "patient_gate": {
+        "groups": 31727,
+        "delta_mae_candidate_minus_persistence": -1.4624355136580094,
+        "ci95": [
+          -1.5064860872587806,
+          -1.4186135616440771
+        ],
+        "pass": true
+      },
+      "careunit_gate": {
+        "groups": 16,
+        "delta_mae_candidate_minus_persistence": -1.7881884404929411,
+        "ci95": [
+          -2.1525684615516845,
+          -1.468522255469855
+        ],
+        "pass": true
+      },
+      "forward_time_gate": {
+        "groups": 6132,
+        "delta_mae_candidate_minus_persistence": -1.4660803609606428,
+        "ci95": [
+          -1.5686654601596086,
+          -1.3659956640978412
+        ],
+        "pass": true
+      },
+      "direction_accuracy": 0.665147153696772,
+      "delta_correlation": 0.4800664481683493,
+      "can_move": true,
+      "fallback_reason": null,
+      "runtime_personalization_format": "shared_whole_body_jepa"
+    }
+  ]
+}
