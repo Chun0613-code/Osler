@@ -2,7 +2,7 @@
 
 This adapter is deliberately observational-only.  It maps credentialed
 MIMIC-IV v3.1 labs, vitals, and urine output into the same ``*_t`` /
-``*_tp6`` contract used by the eICU whole-body observation audits.  With
+``*_tp{horizon}`` contract used by the eICU whole-body observation audits.  With
 ``--include-treatment-context`` it also adds factual observed-treatment
 ``hist_*`` and ``act_*`` context from inputevents, emar, and procedureevents.
 
@@ -23,6 +23,15 @@ import pandas as pd
 
 from eicu_body_system_configs import BODY_SYSTEM_CONFIGS
 from eicu_sepsis_transition_extract import PLAUSIBLE
+from osler_jepa.treatment_units import (
+    ACTION_DOSE_DIMENSIONS,
+    ACTION_RATE_DIMENSIONS,
+    PRECISE_ACTIONS,
+    canonical_dose,
+    canonical_rate,
+    route_category,
+)
+from osler_jepa.urine_output import derive_timestamped_urine_rate
 
 
 MIMIC_DIR = Path(os.environ.get("MIMIC_DIR", "/Users/chunyouchang/Downloads/mimic-iv-3.1"))
@@ -76,7 +85,11 @@ LAB_ITEMIDS: dict[str, tuple[int, ...]] = {
     "myoglobin": (51695,),
     "serum_osmolality": (50964, 51701, 52031),
     "serum_ketones": (51567,),
+    "pth": (50965,),
+    "tpo_antibody": (50992,),
     "tsh": (50993,),
+    "total_t4": (50994,),
+    "free_t4": (50995,),
     "cortisol": (50909,),
     "crp": (50889,),
     "esr": (51288,),
@@ -104,6 +117,12 @@ EXTRA_PLAUSIBLE = {
     "fio2": (20.0, 100.0),
     "peep": (0.0, 40.0),
     "minute_volume": (0.1, 40.0),
+    "cortisol": (0.0, 300.0),
+    "free_t4": (0.0, 20.0),
+    "pth": (0.0, 3000.0),
+    "total_t4": (0.0, 30.0),
+    "tpo_antibody": (0.0, 5000.0),
+    "tsh": (0.0, 100.0),
 }
 
 
@@ -128,7 +147,15 @@ ACTION_EVIDENCE_COLUMNS = (
     "source",
     "dose_observed",
     "amount_like",
+    "amount_unit",
     "rate_like",
+    "rate_unit",
+    "routeadmin",
+    "canonical_dose_value",
+    "canonical_dose_dimension",
+    "canonical_rate_value",
+    "canonical_rate_dimension",
+    "route_category",
     "original_label",
 )
 
@@ -143,6 +170,12 @@ def con():
 
 def csv_expr(path: Path) -> str:
     return f"read_csv_auto('{path}', all_varchar=false)"
+
+
+def csv_text_expr(path: Path) -> str:
+    """Read schema-drifting administration fields as text before try_cast."""
+
+    return f"read_csv_auto('{path}', all_varchar=true)"
 
 
 def hosp_path(mimic_dir: Path, name: str) -> Path:
@@ -267,12 +300,42 @@ def pull_measurements(c, mimic_dir: Path) -> pd.DataFrame:
         GROUP BY 1,2,3
     """).df()
     if not urine.empty:
-        urine["var"] = "urine_output"
+        subject_by_stay = urine[["stay_id", "subject_id"]].drop_duplicates(
+            "stay_id"
+        )
+        urine = derive_timestamped_urine_rate(
+            urine,
+            id_column="stay_id",
+            time_column="charttime",
+            value_column="valuenum",
+        ).merge(subject_by_stay, on="stay_id", how="left", validate="many_to_one")
+    else:
+        urine = pd.DataFrame(
+            columns=(
+                "subject_id",
+                "stay_id",
+                "charttime",
+                "var",
+                "valuenum",
+                "collection_interval_hr",
+                "quality",
+            )
+        )
     frame = pd.concat(
         [
             labs[["subject_id", "stay_id", "charttime", "var", "valuenum"]],
             vitals[["subject_id", "stay_id", "charttime", "var", "valuenum"]],
-            urine[["subject_id", "stay_id", "charttime", "var", "valuenum"]],
+            urine[
+                [
+                    "subject_id",
+                    "stay_id",
+                    "charttime",
+                    "var",
+                    "valuenum",
+                    "collection_interval_hr",
+                    "quality",
+                ]
+            ],
         ],
         ignore_index=True,
     )
@@ -287,12 +350,18 @@ def _finite_numeric(value: object) -> float:
     return number if np.isfinite(number) else float("nan")
 
 
-def _evidence_rows_from_records(records: list[dict[str, object]], source: str) -> pd.DataFrame:
+def _evidence_rows_from_records(
+    records: list[dict[str, object]],
+    source: str,
+    actions: set[str] | None = None,
+) -> pd.DataFrame:
     rows = []
     for record in records:
         label = str(record.get("label") or "")
-        actions = classify_treatment_label(label)
-        if not actions:
+        matched_actions = classify_treatment_label(label)
+        if actions is not None:
+            matched_actions = tuple(action for action in matched_actions if action in actions)
+        if not matched_actions:
             continue
         start = pd.to_datetime(record.get("starttime"), errors="coerce")
         if pd.isna(start):
@@ -302,8 +371,25 @@ def _evidence_rows_from_records(records: list[dict[str, object]], source: str) -
             end = start + pd.Timedelta(hours=1)
         amount = _finite_numeric(record.get("amount_like"))
         rate = _finite_numeric(record.get("rate_like"))
+        canonical_dose_value, canonical_dose_dimension = canonical_dose(
+            amount, record.get("amount_unit")
+        )
+        canonical_rate_value, canonical_rate_dimension = canonical_rate(
+            rate, record.get("rate_unit")
+        )
         dose_observed = bool((np.isfinite(amount) and amount > 0.0) or (np.isfinite(rate) and rate > 0.0))
-        for action in actions:
+        for action in matched_actions:
+            # Medication labels often include their saline carrier. Do not
+            # call a drug infusion a fluid exposure when its numeric fields
+            # are drug mass/rate rather than volume.
+            if (
+                action == "fluids"
+                and len(matched_actions) > 1
+                and canonical_dose_dimension != "volume_ml"
+                and canonical_rate_dimension
+                not in {"volume_ml_per_hour", "volume_ml_per_kg_hour"}
+            ):
+                continue
             rows.append({
                 "stay_id": int(record["stay_id"]),
                 "starttime": start,
@@ -312,14 +398,31 @@ def _evidence_rows_from_records(records: list[dict[str, object]], source: str) -
                 "source": source,
                 "dose_observed": dose_observed,
                 "amount_like": amount,
+                "amount_unit": record.get("amount_unit"),
                 "rate_like": rate,
+                "rate_unit": record.get("rate_unit"),
+                "routeadmin": record.get("routeadmin"),
+                "canonical_dose_value": canonical_dose_value,
+                "canonical_dose_dimension": canonical_dose_dimension,
+                "canonical_rate_value": canonical_rate_value,
+                "canonical_rate_dimension": canonical_rate_dimension,
+                "route_category": route_category(record.get("routeadmin"), source),
                 "original_label": label,
             })
     return pd.DataFrame(rows, columns=ACTION_EVIDENCE_COLUMNS) if rows else empty_treatment_evidence()
 
 
-def pull_inputevent_evidence(c, mimic_dir: Path) -> pd.DataFrame:
-    terms = tuple(term for values in MIMIC_ACTION_TERMS.values() for term in values)
+def pull_inputevent_evidence(
+    c,
+    mimic_dir: Path,
+    actions: set[str] | None = None,
+) -> pd.DataFrame:
+    selected = MIMIC_ACTION_TERMS if actions is None else {
+        action: MIMIC_ACTION_TERMS[action]
+        for action in sorted(actions)
+        if action in MIMIC_ACTION_TERMS
+    }
+    terms = tuple(term for values in selected.values() for term in values)
     text_filter = sql_text_match_expr(
         (
             "di.label",
@@ -337,28 +440,73 @@ def pull_inputevent_evidence(c, mimic_dir: Path) -> pd.DataFrame:
                concat_ws(' ', di.label, ie.ordercategoryname, ie.secondaryordercategoryname,
                          ie.ordercomponenttypedescription, ie.ordercategorydescription) AS label,
                ie.amount AS amount_like,
-               ie.rate AS rate_like
+               ie.amountuom AS amount_unit,
+               ie.rate AS rate_like,
+               ie.rateuom AS rate_unit,
+               NULL AS routeadmin
         FROM {csv_expr(icu_path(mimic_dir, 'inputevents'))} ie
         JOIN {csv_expr(icu_path(mimic_dir, 'd_items'))} di ON ie.itemid = di.itemid
         JOIN target_stays ts ON ie.stay_id = ts.stay_id
         WHERE ie.starttime IS NOT NULL
           AND {text_filter}
     """).df()
-    return _evidence_rows_from_records(frame.to_dict("records"), "mimic_inputevents")
+    return _evidence_rows_from_records(
+        frame.to_dict("records"), "mimic_inputevents", actions
+    )
 
 
-def pull_emar_evidence(c, mimic_dir: Path) -> pd.DataFrame:
-    terms = tuple(term for values in MIMIC_ACTION_TERMS.values() for term in values)
+def pull_emar_evidence(
+    c,
+    mimic_dir: Path,
+    actions: set[str] | None = None,
+) -> pd.DataFrame:
+    selected = MIMIC_ACTION_TERMS if actions is None else {
+        action: MIMIC_ACTION_TERMS[action]
+        for action in sorted(actions)
+        if action in MIMIC_ACTION_TERMS
+    }
+    terms = tuple(term for values in selected.values() for term in values)
     text_filter = sql_text_match_expr(("emar.medication", "emar.event_txt"), terms)
     frame = c.execute(f"""
+        WITH emar_dose AS (
+            SELECT subject_id,
+                   emar_id,
+                   emar_seq,
+                   max(try_cast(dose_given AS DOUBLE)) AS dose_given,
+                   sum(try_cast(product_amount_given AS DOUBLE)) AS product_amount_given,
+                   CASE
+                       WHEN max(try_cast(dose_given AS DOUBLE)) IS NOT NULL
+                       THEN max(dose_given_unit)
+                       WHEN count(DISTINCT product_unit) FILTER (
+                           WHERE try_cast(product_amount_given AS DOUBLE) IS NOT NULL
+                       ) = 1
+                       THEN max(product_unit) FILTER (
+                           WHERE try_cast(product_amount_given AS DOUBLE) IS NOT NULL
+                       )
+                   END AS amount_unit,
+                   max(try_cast(infusion_rate AS DOUBLE)) AS infusion_rate,
+                   max(try_cast(infusion_rate_adjustment_amount AS DOUBLE)) AS adjusted_rate,
+                   max(try_cast(prior_infusion_rate AS DOUBLE)) AS prior_rate,
+                   max(infusion_rate_unit) AS rate_unit,
+                   max(route) AS routeadmin
+            FROM {csv_text_expr(hosp_path(mimic_dir, 'emar_detail'))}
+            GROUP BY subject_id, emar_id, emar_seq
+        )
         SELECT ie.stay_id,
                emar.charttime AS starttime,
                emar.charttime + INTERVAL '1 hour' AS endtime,
                concat_ws(' ', emar.medication, emar.event_txt) AS label,
-               NULL AS amount_like,
-               NULL AS rate_like,
+               coalesce(dose.dose_given, dose.product_amount_given) AS amount_like,
+               dose.amount_unit,
+               coalesce(dose.infusion_rate, dose.adjusted_rate, dose.prior_rate) AS rate_like,
+               dose.rate_unit,
+               dose.routeadmin,
                lower(coalesce(emar.event_txt, '')) AS event_text
         FROM {csv_expr(hosp_path(mimic_dir, 'emar'))} emar
+        LEFT JOIN emar_dose dose
+          ON emar.subject_id = dose.subject_id
+         AND emar.emar_id = dose.emar_id
+         AND emar.emar_seq = dose.emar_seq
         JOIN {csv_expr(icu_path(mimic_dir, 'icustays'))} ie
           ON emar.hadm_id = ie.hadm_id
          AND emar.charttime BETWEEN ie.intime AND ie.outtime
@@ -376,11 +524,20 @@ def pull_emar_evidence(c, mimic_dir: Path) -> pd.DataFrame:
             | frame["event_text"].str.contains("cancelled", regex=False, na=False)
         )
         frame = frame.loc[~blocked].copy()
-    return _evidence_rows_from_records(frame.to_dict("records"), "mimic_emar")
+    return _evidence_rows_from_records(frame.to_dict("records"), "mimic_emar", actions)
 
 
-def pull_procedure_evidence(c, mimic_dir: Path) -> pd.DataFrame:
-    terms = tuple(term for values in MIMIC_ACTION_TERMS.values() for term in values)
+def pull_procedure_evidence(
+    c,
+    mimic_dir: Path,
+    actions: set[str] | None = None,
+) -> pd.DataFrame:
+    selected = MIMIC_ACTION_TERMS if actions is None else {
+        action: MIMIC_ACTION_TERMS[action]
+        for action in sorted(actions)
+        if action in MIMIC_ACTION_TERMS
+    }
+    terms = tuple(term for values in selected.values() for term in values)
     text_filter = sql_text_match_expr(("di.label", "pe.ordercategoryname"), terms)
     frame = c.execute(f"""
         SELECT pe.stay_id,
@@ -388,21 +545,30 @@ def pull_procedure_evidence(c, mimic_dir: Path) -> pd.DataFrame:
                pe.endtime,
                concat_ws(' ', di.label, pe.ordercategoryname) AS label,
                pe.value AS amount_like,
-               NULL AS rate_like
+               pe.valueuom AS amount_unit,
+               NULL AS rate_like,
+               NULL AS rate_unit,
+               NULL AS routeadmin
         FROM {csv_expr(icu_path(mimic_dir, 'procedureevents'))} pe
         JOIN {csv_expr(icu_path(mimic_dir, 'd_items'))} di ON pe.itemid = di.itemid
         JOIN target_stays ts ON pe.stay_id = ts.stay_id
         WHERE pe.starttime IS NOT NULL
           AND {text_filter}
     """).df()
-    return _evidence_rows_from_records(frame.to_dict("records"), "mimic_procedureevents")
+    return _evidence_rows_from_records(
+        frame.to_dict("records"), "mimic_procedureevents", actions
+    )
 
 
-def pull_treatment_evidence(c, mimic_dir: Path) -> pd.DataFrame:
+def pull_treatment_evidence(
+    c,
+    mimic_dir: Path,
+    actions: set[str] | None = None,
+) -> pd.DataFrame:
     frames = [
-        pull_inputevent_evidence(c, mimic_dir),
-        pull_emar_evidence(c, mimic_dir),
-        pull_procedure_evidence(c, mimic_dir),
+        pull_inputevent_evidence(c, mimic_dir, actions),
+        pull_emar_evidence(c, mimic_dir, actions),
+        pull_procedure_evidence(c, mimic_dir, actions),
     ]
     frames = [frame for frame in frames if not frame.empty]
     if not frames:
@@ -493,9 +659,19 @@ def prepare_treatment_lookup(evidence: pd.DataFrame) -> dict[int, dict[str, dict
         lookup.setdefault(int(stay_id), {})[str(action)] = {
             "starts": group["start_hr"].to_numpy(dtype=np.float64),
             "ends": group["end_hr"].to_numpy(dtype=np.float64),
+            "sources": group["source"].astype(str).to_numpy(dtype=object),
             "dose_observed": group["dose_observed"].fillna(False).to_numpy(dtype=bool),
             "amount_like": pd.to_numeric(group["amount_like"], errors="coerce").to_numpy(dtype=np.float64),
             "rate_like": pd.to_numeric(group["rate_like"], errors="coerce").to_numpy(dtype=np.float64),
+            "dose_values": pd.to_numeric(
+                group["canonical_dose_value"], errors="coerce"
+            ).to_numpy(dtype=np.float64),
+            "dose_dimensions": group["canonical_dose_dimension"].fillna("").astype(str).to_numpy(dtype=object),
+            "rate_values": pd.to_numeric(
+                group["canonical_rate_value"], errors="coerce"
+            ).to_numpy(dtype=np.float64),
+            "rate_dimensions": group["canonical_rate_dimension"].fillna("").astype(str).to_numpy(dtype=object),
+            "routes": group["route_category"].fillna("other").astype(str).to_numpy(dtype=object),
         }
     return lookup
 
@@ -506,10 +682,23 @@ def _positive_sum(values: np.ndarray) -> float:
     return float(values[mask].sum()) if mask.any() else 0.0
 
 
-def _positive_mean(values: np.ndarray) -> float:
-    values = np.asarray(values, dtype=np.float64)
-    mask = np.isfinite(values) & (values > 0.0)
-    return float(values[mask].mean()) if mask.any() else 0.0
+def _precise_history_zeros(action: str) -> dict[str, float | int]:
+    output: dict[str, float | int] = {}
+    if action not in PRECISE_ACTIONS:
+        return output
+    for source in ("inputevents", "emar", "procedureevents"):
+        output[f"hist_{action}_source_{source}_count"] = 0
+    for route in ("iv", "sc", "oral", "other"):
+        output[f"hist_{action}_route_{route}_count"] = 0
+    for dimension in ACTION_DOSE_DIMENSIONS.get(action, ()):
+        output[f"hist_{action}_dose_{dimension}_sum"] = 0.0
+    for dimension in ACTION_RATE_DIMENSIONS.get(action, ()):
+        output[f"hist_{action}_rate_{dimension}_time_weighted_mean"] = 0.0
+        output[f"hist_{action}_current_rate_{dimension}"] = 0.0
+        if dimension.endswith("_per_hour"):
+            delivered = dimension.removesuffix("_per_hour")
+            output[f"hist_{action}_delivered_{delivered}_sum"] = 0.0
+    return output
 
 
 def treatment_window_summary(
@@ -529,24 +718,92 @@ def treatment_window_summary(
             output[f"act_{action}_evidence_count"] = 0
             output[f"hist_{action}_dose_observed"] = 0
             output[f"act_{action}_dose_observed"] = 0
-            output[f"hist_{action}_amount_like_sum"] = 0.0
-            output[f"act_{action}_amount_like_sum"] = 0.0
-            output[f"hist_{action}_rate_like_mean"] = 0.0
-            output[f"act_{action}_rate_like_mean"] = 0.0
+            output.update(_precise_history_zeros(action))
             continue
         starts = payload["starts"]
         ends = payload["ends"]
+        sources = np.asarray(
+            payload.get(
+                "sources",
+                np.full(len(starts), "mimic_inputevents", dtype=object),
+            ),
+            dtype=object,
+        )
         dose_observed = payload["dose_observed"]
-        amount = payload["amount_like"]
-        rate = payload["rate_like"]
+        dose_values = payload["dose_values"]
+        dose_dimensions = payload["dose_dimensions"]
+        rate_values = payload["rate_values"]
+        rate_dimensions = payload["rate_dimensions"]
+        routes = payload["routes"]
         hist_mask = (ends >= history_start) & (starts < anchor_hour)
         act_mask = (ends >= anchor_hour) & (starts < future_end)
+        # An inputevent can remain open beyond the anchor. Its final total
+        # amount includes future delivery and therefore is not an as-of input.
+        # For those rows retain the current rate only. eMAR/procedure entries
+        # are point administrations at starttime, so their dose is available
+        # once their start is in the history window.
+        hist_point = (starts >= history_start) & (starts < anchor_hour)
+        hist_amount_mask = hist_point & (
+            (sources != "mimic_inputevents") | (ends <= anchor_hour)
+        )
         for prefix, mask in (("hist", hist_mask), ("act", act_mask)):
+            amount_mask = hist_amount_mask if prefix == "hist" else mask
             output[f"{prefix}_{action}"] = int(mask.any())
             output[f"{prefix}_{action}_evidence_count"] = int(mask.sum())
-            output[f"{prefix}_{action}_dose_observed"] = int(dose_observed[mask].any() if mask.any() else False)
-            output[f"{prefix}_{action}_amount_like_sum"] = round(_positive_sum(amount[mask]), 6)
-            output[f"{prefix}_{action}_rate_like_mean"] = round(_positive_mean(rate[mask]), 6)
+            output[f"{prefix}_{action}_dose_observed"] = int(
+                dose_observed[amount_mask | mask].any()
+                if (amount_mask | mask).any()
+                else False
+            )
+        output.update(_precise_history_zeros(action))
+        if action not in PRECISE_ACTIONS or not hist_mask.any():
+            continue
+        for source, source_name in (
+            ("mimic_inputevents", "inputevents"),
+            ("mimic_emar", "emar"),
+            ("mimic_procedureevents", "procedureevents"),
+        ):
+            output[f"hist_{action}_source_{source_name}_count"] = int(
+                (hist_mask & (sources == source)).sum()
+            )
+        for route in ("iv", "sc", "oral", "other"):
+            output[f"hist_{action}_route_{route}_count"] = int(
+                (hist_mask & (routes == route)).sum()
+            )
+        for dimension in ACTION_DOSE_DIMENSIONS.get(action, ()):
+            mask = hist_amount_mask & (dose_dimensions == dimension)
+            output[f"hist_{action}_dose_{dimension}_sum"] = round(
+                _positive_sum(dose_values[mask]), 6
+            )
+        overlap_hours = np.maximum(
+            0.0,
+            np.minimum(ends, anchor_hour) - np.maximum(starts, history_start),
+        )
+        inputevent_mask = sources == "mimic_inputevents"
+        current_mask = inputevent_mask & (starts < anchor_hour) & (ends >= anchor_hour)
+        for dimension in ACTION_RATE_DIMENSIONS.get(action, ()):
+            dimension_mask = hist_mask & (rate_dimensions == dimension)
+            valid = dimension_mask & np.isfinite(rate_values) & (rate_values > 0.0)
+            duration = overlap_hours[valid]
+            weighted = (
+                float(np.sum(rate_values[valid] * duration) / np.sum(duration))
+                if valid.any() and np.sum(duration) > 0.0
+                else 0.0
+            )
+            output[f"hist_{action}_rate_{dimension}_time_weighted_mean"] = round(
+                weighted, 6
+            )
+            current = current_mask & (rate_dimensions == dimension)
+            output[f"hist_{action}_current_rate_{dimension}"] = round(
+                _positive_sum(rate_values[current]), 6
+            )
+            if dimension.endswith("_per_hour"):
+                delivered = dimension.removesuffix("_per_hour")
+                delivered_mask = valid & inputevent_mask
+                output[f"hist_{action}_delivered_{delivered}_sum"] = round(
+                    float(np.sum(rate_values[delivered_mask] * overlap_hours[delivered_mask])),
+                    6,
+                )
     return output
 
 
@@ -567,11 +824,11 @@ def assemble_treatment_context(
     return pd.DataFrame(rows, index=anchors.index)
 
 
-def pair_counts(frame: pd.DataFrame) -> dict[str, int]:
+def pair_counts(frame: pd.DataFrame, future_suffix: str) -> dict[str, int]:
     counts = {}
     for var in STATE_VARS:
         current = f"{var}_t"
-        future = f"{var}_tp6"
+        future = f"{var}{future_suffix}"
         if current in frame and future in frame:
             counts[var] = int((frame[current].notna() & frame[future].notna()).sum())
     return dict(sorted(counts.items(), key=lambda item: (-item[1], item[0])))
@@ -602,6 +859,24 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--report", type=Path, default=Path("mimiciv_observation_transition_report.json"))
     parser.add_argument("--max-stays", type=int, default=-1)
     parser.add_argument(
+        "--horizon-hours",
+        type=float,
+        default=6.0,
+        help="future observation horizon; default preserves the original 6h contract",
+    )
+    parser.add_argument(
+        "--anchor-step-hours",
+        type=float,
+        default=None,
+        help="anchor spacing; defaults to the horizon",
+    )
+    parser.add_argument(
+        "--target-tolerance-hours",
+        type=float,
+        default=None,
+        help="future measurement tolerance; defaults to min(2h, horizon/2)",
+    )
+    parser.add_argument(
         "--include-treatment-context",
         action="store_true",
         help=(
@@ -614,7 +889,22 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
+    global DELTA_H, ANCHOR_STEP_H, TARGET_TOL_H
     args = parse_args()
+    if args.horizon_hours <= 0:
+        raise ValueError("--horizon-hours must be positive")
+    DELTA_H = float(args.horizon_hours)
+    ANCHOR_STEP_H = float(args.anchor_step_hours or args.horizon_hours)
+    if ANCHOR_STEP_H <= 0:
+        raise ValueError("--anchor-step-hours must be positive")
+    TARGET_TOL_H = float(
+        args.target_tolerance_hours
+        if args.target_tolerance_hours is not None
+        else min(2.0, args.horizon_hours / 2.0)
+    )
+    if TARGET_TOL_H <= 0:
+        raise ValueError("--target-tolerance-hours must be positive")
+    future_suffix = f"_tp{int(DELTA_H)}" if DELTA_H.is_integer() else f"_tp{DELTA_H:g}"
     max_stays = None if args.max_stays < 0 else int(args.max_stays)
     c = con()
     meta = pull_stay_meta(c, args.mimic_dir, max_stays)
@@ -625,7 +915,7 @@ def main() -> None:
     anchors = build_anchors(meta)
     print(f"Candidate anchors: {len(anchors):,}")
     state_t = assemble_state(anchors, measurements, "_t", "t", "backward", LOOKBACK_H)
-    state_f = assemble_state(anchors, measurements, "_tp6", "t_plus", "nearest", TARGET_TOL_H)
+    state_f = assemble_state(anchors, measurements, future_suffix, "t_plus", "nearest", TARGET_TOL_H)
     treatment_evidence = empty_treatment_evidence()
     treatment_context = pd.DataFrame(index=anchors.index)
     if args.include_treatment_context:
@@ -647,15 +937,16 @@ def main() -> None:
     )
     has_pair = np.zeros(len(frame), dtype=bool)
     for var in STATE_VARS:
-        has_pair |= frame[f"{var}_t"].notna().to_numpy() & frame[f"{var}_tp6"].notna().to_numpy()
+        has_pair |= frame[f"{var}_t"].notna().to_numpy() & frame[f"{var}{future_suffix}"].notna().to_numpy()
     frame = frame.loc[has_pair].reset_index(drop=True)
     frame.to_parquet(args.output, index=False)
-    counts = pair_counts(frame)
+    counts = pair_counts(frame, future_suffix)
     report = {
         "artifact": "MIMIC-IV v3.1 whole-ICU observation transition cohort",
         "mimic_dir": str(args.mimic_dir),
         "output": str(args.output.resolve()),
         "delta_h": DELTA_H,
+        "future_suffix": future_suffix.lstrip("_"),
         "anchor_step_h": ANCHOR_STEP_H,
         "lookback_h": LOOKBACK_H,
         "target_tolerance_h": TARGET_TOL_H,

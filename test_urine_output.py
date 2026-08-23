@@ -2,7 +2,10 @@ import unittest
 
 import pandas as pd
 
-from osler_jepa.urine_output import derive_interval_urine_rate
+from osler_jepa.urine_output import (
+    derive_interval_urine_rate,
+    derive_timestamped_urine_rate,
+)
 
 
 class UrineOutputTests(unittest.TestCase):
@@ -48,6 +51,34 @@ class UrineOutputTests(unittest.TestCase):
             frame, id_column="patientunitstayid", maximum_interval_hours=24.0
         )
         self.assertTrue(result.empty)
+
+    def test_timestamped_mimic_volume_becomes_rate_and_zero_is_observed(self):
+        frame = pd.DataFrame(
+            {
+                "stay_id": [1, 1, 1, 2],
+                "charttime": pd.to_datetime(
+                    [
+                        "2026-01-01 00:00",
+                        "2026-01-01 02:00",
+                        "2026-01-01 03:00",
+                        "2026-01-01 00:00",
+                    ]
+                ),
+                "volume_ml": [100.0, 200.0, 0.0, 700.0],
+            }
+        )
+
+        result = derive_timestamped_urine_rate(
+            frame,
+            id_column="stay_id",
+            time_column="charttime",
+            value_column="volume_ml",
+        )
+
+        self.assertEqual(result["stay_id"].tolist(), [1, 1])
+        self.assertEqual(result["valuenum"].tolist(), [100.0, 0.0])
+        self.assertEqual(result["collection_interval_hr"].tolist(), [2.0, 1.0])
+        self.assertTrue(result["quality"].eq("derived_interval_rate").all())
 
 
 if __name__ == "__main__":

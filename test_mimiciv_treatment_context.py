@@ -24,9 +24,13 @@ class MimicIVTreatmentContextTests(unittest.TestCase):
             "insulin": {
                 "starts": pd.Series([-2.0, 1.0]).to_numpy(dtype="float64"),
                 "ends": pd.Series([-1.0, 2.0]).to_numpy(dtype="float64"),
+                "sources": pd.Series(["mimic_emar", "mimic_emar"]).to_numpy(dtype=object),
                 "dose_observed": pd.Series([True, True]).to_numpy(dtype=bool),
-                "amount_like": pd.Series([3.0, 5.0]).to_numpy(dtype="float64"),
-                "rate_like": pd.Series([1.0, 2.0]).to_numpy(dtype="float64"),
+                "dose_values": pd.Series([3.0, 5.0]).to_numpy(dtype="float64"),
+                "dose_dimensions": pd.Series(["drug_units", "drug_units"]).to_numpy(dtype=object),
+                "rate_values": pd.Series([1.0, 2.0]).to_numpy(dtype="float64"),
+                "rate_dimensions": pd.Series(["drug_units_per_hour", "drug_units_per_hour"]).to_numpy(dtype=object),
+                "routes": pd.Series(["sc", "sc"]).to_numpy(dtype=object),
             }
         }
 
@@ -37,8 +41,11 @@ class MimicIVTreatmentContextTests(unittest.TestCase):
         self.assertEqual(summary["hist_insulin_evidence_count"], 1)
         self.assertEqual(summary["act_insulin_evidence_count"], 1)
         self.assertEqual(summary["act_insulin_dose_observed"], 1)
-        self.assertAlmostEqual(summary["act_insulin_amount_like_sum"], 5.0)
-        self.assertAlmostEqual(summary["act_insulin_rate_like_mean"], 2.0)
+        self.assertAlmostEqual(summary["hist_insulin_dose_drug_units_sum"], 3.0)
+        self.assertAlmostEqual(
+            summary["hist_insulin_rate_drug_units_per_hour_time_weighted_mean"],
+            1.0,
+        )
         self.assertIn("vasopressor", ACTION_KEYS)
         self.assertEqual(summary["act_vasopressor"], 0)
 
@@ -64,7 +71,56 @@ class MimicIVTreatmentContextTests(unittest.TestCase):
 
         self.assertEqual(int(context.loc[0, "act_vasopressor"]), 1)
         self.assertEqual(int(context.loc[0, "hist_vasopressor"]), 0)
-        self.assertAlmostEqual(float(context.loc[0, "act_vasopressor_amount_like_sum"]), 10.0)
+        self.assertEqual(int(context.loc[0, "act_vasopressor_dose_observed"]), 1)
+
+    def test_open_inputevent_keeps_rate_but_not_future_total_amount(self):
+        lookup = {
+            "vasopressor": {
+                "starts": pd.Series([-1.0]).to_numpy(dtype="float64"),
+                "ends": pd.Series([2.0]).to_numpy(dtype="float64"),
+                "sources": pd.Series(["mimic_inputevents"]).to_numpy(dtype=object),
+                "dose_observed": pd.Series([True]).to_numpy(dtype=bool),
+                "dose_values": pd.Series([12.0]).to_numpy(dtype="float64"),
+                "dose_dimensions": pd.Series(["mass_mg"]).to_numpy(dtype=object),
+                "rate_values": pd.Series([1.5]).to_numpy(dtype="float64"),
+                "rate_dimensions": pd.Series(["mass_mcg_per_kg_min"]).to_numpy(dtype=object),
+                "routes": pd.Series(["iv"]).to_numpy(dtype=object),
+            }
+        }
+
+        summary = treatment_window_summary(lookup, anchor_hour=0.0, horizon_hours=6.0)
+
+        self.assertEqual(summary["hist_vasopressor"], 1)
+        self.assertEqual(summary["hist_vasopressor_dose_mass_mg_sum"], 0.0)
+        self.assertAlmostEqual(
+            summary["hist_vasopressor_rate_mass_mcg_per_kg_min_time_weighted_mean"],
+            1.5,
+        )
+        self.assertAlmostEqual(
+            summary["hist_vasopressor_current_rate_mass_mcg_per_kg_min"],
+            1.5,
+        )
+
+    def test_open_fluid_infusion_tracks_only_pre_anchor_delivered_volume(self):
+        lookup = {
+            "fluids": {
+                "starts": pd.Series([-2.0]).to_numpy(dtype="float64"),
+                "ends": pd.Series([2.0]).to_numpy(dtype="float64"),
+                "sources": pd.Series(["mimic_inputevents"]).to_numpy(dtype=object),
+                "dose_observed": pd.Series([True]).to_numpy(dtype=bool),
+                "dose_values": pd.Series([400.0]).to_numpy(dtype="float64"),
+                "dose_dimensions": pd.Series(["volume_ml"]).to_numpy(dtype=object),
+                "rate_values": pd.Series([100.0]).to_numpy(dtype="float64"),
+                "rate_dimensions": pd.Series(["volume_ml_per_hour"]).to_numpy(dtype=object),
+                "routes": pd.Series(["iv"]).to_numpy(dtype=object),
+            }
+        }
+
+        summary = treatment_window_summary(lookup, anchor_hour=0.0, horizon_hours=6.0)
+
+        self.assertEqual(summary["hist_fluids_dose_volume_ml_sum"], 0.0)
+        self.assertAlmostEqual(summary["hist_fluids_delivered_volume_ml_sum"], 200.0)
+        self.assertAlmostEqual(summary["hist_fluids_current_rate_volume_ml_per_hour"], 100.0)
 
 
 if __name__ == "__main__":

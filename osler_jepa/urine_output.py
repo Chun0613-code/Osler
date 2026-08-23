@@ -17,6 +17,76 @@ URINE_LABEL_PATTERN = r"urine|foley|urinary|void"
 NON_VOLUME_LABEL_PATTERN = r"count|occurrence|unmeasured|mixed"
 
 
+def derive_timestamped_urine_rate(
+    frame: pd.DataFrame,
+    *,
+    id_column: str,
+    time_column: str,
+    value_column: str,
+    maximum_interval_hours: float = 24.0,
+) -> pd.DataFrame:
+    """Normalize timestamped urine volumes to an interval rate in mL/hour.
+
+    MIMIC outputevents records a volume at chart time, not an instantaneous
+    rate. The preceding timestamp is therefore part of the measurement. The
+    first event is excluded because its collection start is unknown.
+    """
+
+    output_columns = (
+        id_column,
+        time_column,
+        "valuenum",
+        "collection_interval_hr",
+        "var",
+        "quality",
+    )
+    if frame.empty:
+        return pd.DataFrame(columns=output_columns)
+    if maximum_interval_hours <= 0:
+        raise ValueError("maximum_interval_hours must be positive")
+
+    selected = frame[[id_column, time_column, value_column]].copy()
+    selected[time_column] = pd.to_datetime(selected[time_column], errors="coerce")
+    selected["volume_ml"] = pd.to_numeric(
+        selected[value_column], errors="coerce"
+    )
+    selected = selected[
+        selected[time_column].notna()
+        & np.isfinite(selected["volume_ml"])
+        & selected["volume_ml"].ge(0.0)
+    ]
+    if selected.empty:
+        return pd.DataFrame(columns=output_columns)
+
+    grouped = (
+        selected.groupby([id_column, time_column], sort=False)["volume_ml"]
+        .sum()
+        .reset_index()
+        .sort_values([id_column, time_column], kind="stable")
+    )
+    grouped["collection_interval_hr"] = (
+        grouped.groupby(id_column, sort=False)[time_column]
+        .diff()
+        .dt.total_seconds()
+        / 3600.0
+    )
+    interval = grouped["collection_interval_hr"]
+    grouped = grouped[
+        interval.gt(0.0) & interval.le(float(maximum_interval_hours))
+    ].copy()
+    if grouped.empty:
+        return pd.DataFrame(columns=output_columns)
+
+    grouped["valuenum"] = grouped["volume_ml"] / grouped["collection_interval_hr"]
+    grouped = grouped[
+        np.isfinite(grouped["valuenum"])
+        & grouped["valuenum"].between(0.0, 2000.0, inclusive="both")
+    ].copy()
+    grouped["var"] = "urine_output"
+    grouped["quality"] = "derived_interval_rate"
+    return grouped[list(output_columns)].reset_index(drop=True)
+
+
 def derive_interval_urine_rate(
     frame: pd.DataFrame,
     *,
